@@ -103,6 +103,21 @@
    "name": "store"
   },
   {
+   "stamp": "breeder_yard_blackfen",
+   "kind": "civic",
+   "x": -45,
+   "z": 948,
+   "ground_y": 69,
+   "rotation": 270,
+   "footprint": 196,
+   "foundation": 2,
+   "door": [
+    -44,
+    948
+   ],
+   "name": "breeder's post"
+  },
+  {
    "stamp": "mirelight_stilt_house_5100",
    "kind": "shore",
    "x": -47,
@@ -163,7 +178,7 @@
    "name": "stilt_house_big"
   },
   {
-   "stamp": "mirelight_house_51100_t2_moss",
+   "stamp": "mirelight_house_51510_t1_moss",
    "kind": "house",
    "x": -83,
    "z": 858,
@@ -178,7 +193,7 @@
    "roof": "moss"
   },
   {
-   "stamp": "mirelight_house_51952_t2_moss",
+   "stamp": "mirelight_house_51959_t2_moss",
    "kind": "house",
    "x": -8,
    "z": 887,
@@ -193,85 +208,57 @@
    "roof": "moss"
   },
   {
-   "stamp": "mirelight_house_51749_t2_mangrove",
+   "stamp": "mirelight_house_51250_t2_mangrove",
    "kind": "house",
-   "x": -124,
-   "z": 874,
+   "x": -125,
+   "z": 873,
    "ground_y": 69,
    "rotation": 0,
-   "footprint": 14,
+   "footprint": 17,
    "foundation": 1,
    "door": [
-    -121,
-    885
+    -122,
+    884
    ],
    "roof": "mangrove"
   },
   {
-   "stamp": "mirelight_house_52055_t2_mud",
+   "stamp": "mirelight_house_52052_t2_mud",
    "kind": "house",
-   "x": -114,
-   "z": 901,
-   "ground_y": 69,
-   "rotation": 180,
-   "footprint": 16,
-   "foundation": 1,
+   "x": -18,
+   "z": 869,
+   "ground_y": 70,
+   "rotation": 0,
+   "footprint": 17,
+   "foundation": 3,
    "door": [
-    -118,
-    890
+    -15,
+    882
    ],
    "roof": "mud"
   },
   {
-   "stamp": "mirelight_barn_52067",
+   "stamp": "mirelight_barn_51435",
    "kind": "barn",
-   "x": -4,
-   "z": 919,
-   "ground_y": 70,
-   "rotation": 180,
-   "footprint": 88,
-   "foundation": 2,
-   "door": [
-    -8,
-    909
-   ]
-  },
-  {
-   "stamp": "mirelight_barn_51774",
-   "kind": "barn",
-   "x": -15,
-   "z": 866,
-   "ground_y": 70,
+   "x": -13,
+   "z": 916,
+   "ground_y": 69,
    "rotation": 90,
-   "footprint": 88,
-   "foundation": 3,
+   "footprint": 106,
+   "foundation": 2,
    "door": [
     -25,
-    870
+    920
    ]
   },
   {
-   "stamp": "mirelight_barn_52068",
-   "kind": "barn",
-   "x": -43,
-   "z": 951,
-   "ground_y": 69,
-   "rotation": 180,
-   "footprint": 106,
-   "foundation": 2,
-   "door": [
-    -47,
-    939
-   ]
-  },
-  {
-   "stamp": "mirelight_barn_52059",
+   "stamp": "mirelight_barn_52052",
    "kind": "barn",
    "x": -67,
-   "z": 962,
+   "z": 960,
    "ground_y": 68,
    "rotation": 180,
-   "footprint": 106,
+   "footprint": 88,
    "foundation": 1,
    "door": [
     -71,
@@ -279,49 +266,35 @@
    ]
   },
   {
-   "stamp": "tg_windmill_1586",
+   "stamp": "tg_windmill_fen_1593",
    "kind": "windmill",
-   "x": -59,
-   "z": 950,
-   "ground_y": 68,
+   "x": -24,
+   "z": 863,
+   "ground_y": 69,
    "rotation": 90,
-   "footprint": 77,
-   "foundation": 1,
-   "door": [
-    -63,
-    950
-   ]
-  },
-  {
-   "stamp": "tg_windmill_1593",
-   "kind": "windmill",
-   "x": -34,
-   "z": 848,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 77,
-   "foundation": 3,
-   "door": [
-    -34,
-    852
-   ]
-  },
-  {
-   "stamp": "tg_windmill_1582",
-   "kind": "windmill",
-   "x": -104,
-   "z": 919,
-   "ground_y": 68,
-   "rotation": 270,
    "footprint": 77,
    "foundation": 2,
    "door": [
-    -100,
-    919
+    -28,
+    863
    ]
   },
   {
-   "stamp": "tg_cross_51",
+   "stamp": "tg_windmill_fen_1582",
+   "kind": "windmill",
+   "x": -110,
+   "z": 912,
+   "ground_y": 69,
+   "rotation": 270,
+   "footprint": 77,
+   "foundation": 1,
+   "door": [
+    -106,
+    912
+   ]
+  },
+  {
+   "stamp": "tg_well_51",
    "kind": "square",
    "x": -60,
    "z": 900,
@@ -332,46 +305,55 @@
   {
    "stamp": "market_stall_51",
    "kind": "stall",
-   "x": -59,
+   "x": -65,
+   "z": 902,
+   "ground_y": 67,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_52",
+   "kind": "stall",
+   "x": -62,
    "z": 895,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_52",
+   "stamp": "market_stall_53",
    "kind": "stall",
-   "x": -55,
-   "z": 900,
+   "x": -56,
+   "z": 896,
    "ground_y": 67,
    "rotation": 90,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_53",
+   "stamp": "market_stall_54",
    "kind": "stall",
-   "x": -60,
+   "x": -55,
+   "z": 902,
+   "ground_y": 67,
+   "rotation": 90,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_55",
+   "kind": "stall",
+   "x": -61,
    "z": 905,
    "ground_y": 67,
    "rotation": 180,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_54",
-   "kind": "stall",
+   "stamp": "lamp_post_fen_arm",
+   "kind": "lamp",
    "x": -65,
-   "z": 901,
-   "ground_y": 67,
+   "z": 903,
+   "ground_y": 66,
    "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_55",
-   "kind": "stall",
-   "x": -63,
-   "z": 895,
-   "ground_y": 67,
-   "rotation": 0,
    "footprint": 0
   },
   {
@@ -408,15 +390,6 @@
    "z": 907,
    "ground_y": 67,
    "rotation": 180,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen_arm",
-   "kind": "lamp",
-   "x": -65,
-   "z": 903,
-   "ground_y": 66,
-   "rotation": 270,
    "footprint": 0
   },
   {
@@ -532,15 +505,15 @@
    "kind": "lamp",
    "x": -22,
    "z": 880,
-   "ground_y": 66,
+   "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -16,
-   "z": 886,
+   "x": -17,
+   "z": 885,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
@@ -640,6 +613,15 @@
    "kind": "lamp",
    "x": -4,
    "z": 909,
+   "ground_y": 70,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -4,
+   "z": 916,
    "ground_y": 70,
    "rotation": 0,
    "footprint": 0
@@ -773,9 +755,9 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -27,
-   "z": 915,
-   "ground_y": 67,
+   "x": -28,
+   "z": 916,
+   "ground_y": 66,
    "rotation": 0,
    "footprint": 0
   },
@@ -854,9 +836,9 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -36,
+   "x": -42,
    "z": 941,
-   "ground_y": 69,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -980,8 +962,8 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -68,
-   "z": 940,
+   "x": -65,
+   "z": 943,
    "ground_y": 66,
    "rotation": 0,
    "footprint": 0
@@ -1007,27 +989,9 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -82,
-   "z": 948,
+   "x": -83,
+   "z": 946,
    "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -66,
-   "z": 950,
-   "ground_y": 68,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -97,
-   "z": 918,
-   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -1046,15 +1010,6 @@
    "x": -72,
    "z": 946,
    "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -43,
-   "z": 937,
-   "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
