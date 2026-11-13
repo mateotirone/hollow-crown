@@ -14,6 +14,8 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
+  "undertow: a chunk built under the low roof has it taken away and the high roof built",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
   "after: Deep: the halls are open where players and the Host stand, with floor under them",
   "trains: routes: the planned railway has no mistakes, and no works stand in a train's way",
@@ -22,6 +24,7 @@ export const OFFLINE_ONLY = new Set([
   "warwrit-route: with no bridge in reach they swim after all",
   "warwrit-route: walls are never climbed: they go through the gate",
   "hollow arenas: the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear",
+  "hollow arenas: the Court's water stays in its channels: every water block is closed on four sides and below (it once ran over the floor)",
   "hollow arenas: the Court never writes the gate's cells (the seal and openCourtGate own them)",
   "hollow arenas: the Seat: disc and ring floors, Morvane's spot clear, everything that falls inside the dropped band",
   "hollow arenas: the cliff before the Seat is ragged, and the story path still reaches its edge",
@@ -44,6 +47,7 @@ export const OFFLINE_ONLY = new Set([
   "undertow: thin places: each cave shows exactly Fennick's features for it",
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
   "undertow: thin places: every cave is walkable from the mouth down to its chamber, one step at a time",
+  "undertow: thin places: nothing the planner builds stands in front of a cave mouth",
   "undertow: thin places: no two caves are the same, and the land covers every one",
   "undertow: the seep: veins are connected, reach out from the mouth, and growing never moves them",
   "undertow: thin places: low, wide hills, never taller than they are wide",

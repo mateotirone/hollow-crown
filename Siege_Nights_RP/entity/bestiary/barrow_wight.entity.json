@@ -21,7 +21,8 @@
     "aim": "animation.siege_b.barrow_wight.aim",
     "ready": "controller.animation.siege_b.barrow_wight.ready",
     "hurt": "animation.siege_b.barrow_wight.hurt",
-    "flinch": "controller.animation.siege_b.barrow_wight.flinch"
+    "flinch": "controller.animation.siege_b.barrow_wight.flinch",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
@@ -30,7 +31,10 @@
      "walk",
      "swing",
      "ready",
-     "flinch"
+     "flinch",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [

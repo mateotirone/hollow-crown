@@ -9,6 +9,7 @@ import { bestiaryStore } from "./bossCore.js";
 import { warlordBody } from "./bosses.js";
 import { heroOf, pickOne } from "./util.js";
 import { MOBS } from "./data.js";
+import { shareFor } from "./gentle.js";
 const MOBS_HAVE = (id) => !!MOBS[id];
 
 export const SPAWN_SETTINGS = {
@@ -171,6 +172,7 @@ function hollowTick() {
       const hero = heroOf(p);
       const kind = hollowFor({ undertow, marked: hero.path === "marked", resonance: hero.resonance ?? 0, awake: bestiaryStore.data.hollowAwake, roll: Math.random() });
       if (!kind) continue;
+      if (kind === "night" && Math.random() >= shareFor(p)) continue; // a new player's first nights are left alone (gentle.js)
       if (dim.getEntities({ families: ["hollow"], location: p.location, maxDistance: 48 }).length >= SPAWN_SETTINGS.hollowNearbyCap) continue;
       const a = Math.random() * Math.PI * 2, d = 18 + Math.random() * 10;
       const x = Math.floor(p.location.x + Math.cos(a) * d), z = Math.floor(p.location.z + Math.sin(a) * d);

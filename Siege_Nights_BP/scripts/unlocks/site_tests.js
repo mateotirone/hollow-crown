@@ -3,7 +3,8 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, approachWave, approachCount, APPROACH_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
 import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, inIceEdge, ICE_EDGE, inDrownedWater, inAshSand, ASH_SAND, mirelightPlan } from "./plans.js";
 import { socketAnswer } from "./site.js";
-import { stampOps } from "./landmarks.js";
+import { stampOps, LANDMARKS } from "./landmarks.js";
+import { treeClearBoxes, CLEAR_MARGIN, CLEAR_ABOVE } from "../core/clearing.js";
 import { inShaft, stairSpotsBelow, stairSteps, WELL as WELL2 } from "./well_plan.js";
 import { inChamber } from "./reeve.js";
 
@@ -15,6 +16,19 @@ const key = (o) => `${o.dx},${o.dy},${o.dz}`;
 const span = (ops, k) => { const v = ops.map((o) => o[k]); return Math.max(...v) - Math.min(...v) + 1; };
 
 addTests("unlocks: sites", {
+  "tree clearing covers a build, its margin and the air above, in fills the game accepts": () => {
+    const b = { x0: -40, y0: 60, z0: -25, x1: 52, y1: 95, z1: 31 };
+    const fills = treeClearBoxes(b);
+    let cells = 0;
+    for (const { from, to } of fills) {
+      const v = (to.x - from.x + 1) * (to.y - from.y + 1) * (to.z - from.z + 1);
+      assert(v <= 32768, `a fill of ${v}`); cells += (to.x - from.x + 1) * (to.z - from.z + 1);
+      assert(from.y <= b.y0 && to.y === b.y1 + CLEAR_ABOVE, "full height");
+    }
+    assertEqual(cells, (b.x1 - b.x0 + 1 + 2 * CLEAR_MARGIN) * (b.z1 - b.z0 + 1 + 2 * CLEAR_MARGIN));
+    assert(LANDMARKS.mirelight?.clear === false && LANDMARKS.reeve?.clear === false, "town squares keep their trees");
+    assert(LANDMARKS.mother?.clear !== false, "the Cradle area clears");
+  },
   "the hunt: same world same rhyme, every beast once, only the rhyme's order wins": () => {
     assertEqual(makeHunt(99), makeHunt(99));
     const firsts = new Set();

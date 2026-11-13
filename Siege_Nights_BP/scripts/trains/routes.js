@@ -11,13 +11,9 @@ export const ROUTE = {
   basePrice: 160, // Regals for any stretch
   perBlock: 1, // and this much per block of it
   homeRange: 140, // a settlement's home stop is the nearest stop this close to its banner
-  layPerTick: 12, // track pieces (each grading its own bed) laid every other tick while a stretch goes down
+  layPerTick: 6, // track pieces (each grading its own bed and banks, rail_bed.js) laid every other tick
   missedLooks: 2000, // pieces checked every two seconds for ground that has loaded since
-  clearUp: 6, // air cleared above the track, 3 wide (6 so tree trunks and low leaves don't hang over it)
-  fillDepth: 6, // ground further down than this (or water) gets a bridge deck instead of an embankment
-  pierEvery: 4, // a bridge pier under every 4th piece
-  pierDepth: 48,
-  worksPerTick: 40, // earthwork columns (from the map's works list) set every other tick
+  worksPerTick: 30, // earthwork columns (from the map's works list) set every other tick
 };
 
 export const priceOf = (seg) => ROUTE.basePrice + Math.ceil(ROUTE.perBlock * (seg.length ?? seg.blocks.length));

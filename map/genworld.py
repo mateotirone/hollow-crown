@@ -318,22 +318,62 @@ def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hyp
 # valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
 # only say which stops each line serves and in what order; railroute places the stations and routes the track.
 import railroute
-SEQ = {}
-for lname, pts in L["roads"].items():
-    P = np.asarray(pts, float)
-    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
 _foot = {}                                         # how far out each stamped town's blocks reach
+FIXED_ST = {}; FIXED_Y = {}                        # stations a town plan already stamped (<town>-plan.json beside it)
 for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
     d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
     _foot[d_["town"]] = b_
+    pf_ = fn_.replace("-blocks.json", "-plan.json")
+    if os.path.exists(pf_):
+        for e_ in json.load(open(pf_)).get("buildings", []):
+            if e_.get("kind") == "station":          # track along the stamp's local x at z 0, one above its ground
+                FIXED_ST[slug(d_["town"])] = (int(e_["x"]), int(e_["z"]), "x" if int(e_.get("rotation", 0)) % 180 == 0 else "z")
+                FIXED_Y[slug(d_["town"])] = int(e_["ground_y"]) + 1
+log("rail: stations stamped by town plans", FIXED_ST)
+SEQ = {}                                           # a stop is on a line if its old spot or its stamped station is
+for lname, pts in L["roads"].items():              # near the line's lines.json road
+    P = np.asarray(pts, float); on_ = []
+    for sid, st in STOPS.items():
+        spots_ = [(st["x"], st["z"])] + ([FIXED_ST[sid][:2]] if sid in FIXED_ST else [])
+        dd_ = [np.hypot(P[:, 0] - sx_, P[:, 1] - sz_) for sx_, sz_ in spots_]
+        k_ = min(range(len(dd_)), key=lambda j: dd_[j].min())
+        if dd_[k_].min() < 30: on_.append((int(np.argmin(dd_[k_])), sid))
+    SEQ[lname] = [sid for _, sid in sorted(on_)]
+for sid_, (x_, z_, _) in FIXED_ST.items(): STOPS[sid_].update({"x": x_, "z": z_})
+log("rail: line stops", SEQ)
 R_TOWNS = []
 for n_, x_, z_, r_, _ in TOWNS:
     if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
+# a station road (towns thread 2026-11-13): a village station the map placed itself gets a 5-wide road from the
+# platform's town side to the town's nearest street end (a paved groundwork cell of its plan). Stamped stations
+# (FIXED_ST) already come with their own street.
+_paved = ("slab", "path", "gravel", "cobblestone", "stone_bricks", "sandstone")
+for n_, tx_, tz_, _r, _ in TOWNS:
+    sid_ = slug(n_)
+    if sid_ in FIXED_ST or sid_ not in STATION_POS: continue
+    fn_ = next((f for f in filter(None, os.environ.get("GW_BLOCKS", "").split(":")) if json.load(open(f)).get("town") == n_), None)
+    if not fn_: continue
+    d_ = json.load(open(fn_)); pal_ = d_["palette"]; gw_ = d_["groundwork_blocks"]
+    sx_, sz_, ax_ = STATION_POS[sid_]; ax_ = ax_[-1]
+    px_, pz_ = (0, 1) if ax_ == "x" else (1, 0)                    # across the track, toward the town
+    if (tx_ - sx_) * px_ + (tz_ - sz_) * pz_ < 0: px_, pz_ = -px_, -pz_
+    fx_, fz_ = sx_ + px_ * 4, sz_ + pz_ * 4
+    top_ = {}
+    for x_, y_, z_, i_ in d_["blocks"][:gw_]:                  # the top solid block (air entries only dig out)
+        if "air" not in pal_[i_]["name"] and y_ >= top_.get((x_, z_), (-999, ""))[0]: top_[(x_, z_)] = (y_, pal_[i_]["name"])
+    ends_ = [(math.hypot(x_ - fx_, z_ - fz_), x_, z_) for (x_, z_), (_, nm_) in top_.items()
+             if any(w_ in nm_ for w_ in _paved) and "wall" not in nm_ and (x_ - sx_) * px_ + (z_ - sz_) * pz_ > 4]
+    if not ends_: continue
+    _, ex_, ez_ = min(ends_)
+    rd_ = raster([[(fx_, fz_), (ex_, ez_)]], lambda f: 5) & land & ~isriver
+    isroad |= rd_; istrail &= ~rd_
+    log("station road", n_, (fx_, fz_), "->", (ex_, ez_), int(rd_.sum()), "cells")
 for lname in SEQ:
     pts = LINE_PTS[lname]
     on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
@@ -461,6 +501,10 @@ for d_ in GW_FILES:
     log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
 railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
 railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
+# the planned lines keep trees off even with no bed in the world (playtest 2026-11-12: trees stood on the lines, and
+# the track the game lays went round their roots and branches): no trunk within 8 of a line, no crown over its bed
+# and graded sides (the game grades 5 out, rail_bed.js)
+railkeep = rail_d <= 6.5
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks
@@ -472,6 +516,12 @@ try:
     import railworks
 except ImportError:
     railworks = None
+# one height for track two lines share (playtest 2026-11-12: Millbrook's Oakmere branch ran its shared platform a
+# block above the North line's, so buying it stacked a second track on the first): the first line keeps its heights
+import railshare
+_ln = list(RAILLINES)
+for n_, ys_h in zip(_ln, railshare.harmonise([([tuple(map(int, c)) for c in RAILLINES[n_][0]], RAILLINES[n_][1]) for n_ in _ln])):
+    RAILLINES[n_] = ([tuple(map(int, c)) for c in RAILLINES[n_][0]], ys_h, RAILLINES[n_][2])
 segs = []
 for lname, (cells, ys, stops_on) in RAILLINES.items():
     path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
@@ -811,16 +861,48 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
+def _key(x, y, z): return (np.asarray(x, np.int64) + 4096) * 1_000_000_000 + (np.asarray(y, np.int64) + 512) * 100_000 + (np.asarray(z, np.int64) + 4096)
+_trk = []                                          # the train's body along every planned line: track cell and one each
+for cells_, ys_, _ in RAILLINES.values():          # side, 4 high. A town plan or road bridge block left standing in it
+    c_ = np.array(cells_, np.int64); y_ = np.asarray(ys_, np.int64)   # would block the bed the game lays on purchase
+    for dx_ in (-1, 0, 1):
+        for dz_ in (-1, 0, 1):
+            for k_ in range(4): _trk.append(_key(c_[:, 0] + dx_, y_ + k_, c_[:, 1] + dz_))
+_trk = np.unique(np.concatenate(_trk)) if _trk else np.zeros(0, np.int64)
 for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
+    off_ = np.isin(_key(b_[:, 0], b_[:, 1], b_[:, 2]), _trk) & (pid_[b_[:, 3]] >= 0)
+    if off_.any():
+        log("town plan", d_["town"], "keeps", int(off_.sum()), "blocks off the track:", sorted({d_["palette"][i]["name"].split(":")[-1] for i in b_[off_, 3]})[:8])
+        b_ = b_[~off_]
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
     log("town plan", d_["town"], len(b_), "blocks")
 if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)
+    _off = np.isin(_key(_bb[:, 0], _bb[:, 1], _bb[:, 2]), _trk) & (_bi >= 0)     # a road bridge the line crosses: its
+    if _off.any():                                                               # parapets and lamps stay off the track
+        log("road bridges keep", int(_off.sum()), "blocks off the track")
+        _bb, _bi = _bb[~_off], _bi[~_off]
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
+# no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
+# air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
+# no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.
+stampcol = np.zeros((SIZE, SIZE), bool)
+for sx_, sy_, sz_, sid_, ss_ in STAMPED:
+    i_ = sx_ - X0; k_ = sz_ - Z0; m_ = (i_ >= 0) & (i_ < SIZE) & (k_ >= 0) & (k_ < SIZE)
+    stampcol[i_[m_], k_[m_]] = True
+stampnear = box(stampcol.astype(np.float32), 2) > 0           # crowns (custom trees, through hard_t below)
+if True:                                                       # simple trees: trunks 8 out from a planned line
+    far_ = rail_d[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] > 8
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off the planned lines:", int((~far_).sum()), "removed")
+if stampcol.any():
+    far_ = box(stampcol.astype(np.float32), 7)[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] == 0   # simple trees: trunks 7 out
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off stamped builds:", int((~far_).sum()), "removed")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
@@ -854,7 +936,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear | railzone                    # crowns stay off the line (trains need the air above the bed)
+    hard_t = keepclear | railzone | railkeep | stampnear   # crowns stay off the line (trains need the air above the bed) and off builds
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)
