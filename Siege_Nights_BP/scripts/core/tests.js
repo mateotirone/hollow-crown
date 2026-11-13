@@ -16,6 +16,8 @@ const tests = [];
 export const OFFLINE_ONLY = new Set([
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",
   "undertow: the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof",
+  "undertow: the arrival: you can walk from the ledge down to the valley a block at a time, and every step is a stair block",
+  "undertow: the arrival: an old world has the first box and ramp taken away",
   "undertow: the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds",
   "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
   "undertow: a chunk built under the low roof has it taken away and the high roof built",

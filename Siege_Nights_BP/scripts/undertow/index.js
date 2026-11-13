@@ -46,7 +46,8 @@ import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
 import { oreChance, roofAt, ROOF, ROOF_V3, planRoofSwap, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
-import { planWound, woundAir, WOUND } from "./wound.js";
+import { planWound, planArrival, planArrivalClear, woundAir, WOUND } from "./wound.js";
+import { ARRIVAL, walkCells, kerbAt } from "./arrival.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
@@ -635,7 +636,9 @@ addTests("undertow", {
     let air = 0;
     for (const [k, b] of cells) {
       if (b !== "minecraft:air") continue;
-      const [x, y, z] = k.split(",").map(Number); air++;
+      const [x, y, z] = k.split(",").map(Number);
+      if (z > WOUND.mouthZ) continue; // the stair outside has its own test
+      air++;
       for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, -1]]) assert(cells.has(`${x + dx},${y + dy},${z + dz}`) || solid(x + dx, y + dy, z + dz), `the cave is open to nothing at ${x + dx},${y + dy},${z + dz}`);
     }
     assert(air > 1500, `only ${air} blocks of air`);
@@ -654,6 +657,41 @@ addTests("undertow", {
     const veil = [...cells].filter(([, b]) => b === VEIL).map(([k]) => +k.split(",")[1]);
     assert(Math.min(...veil) === F && Math.max(...veil) >= F + WOUND.h - 2, "the tear does not run from the floor to the roof");
     for (let y = F; y < F + WOUND.h; y++) assert(woundAir(0, y, WOUND.wallZ + 1) || woundAir(1, y, WOUND.wallZ + 1) || woundAir(-1, y, WOUND.wallZ + 1), `rock in front of the tear at y ${y}`);
+  },
+  // Mateo 2026-11-13, of the first ledge and ramp: "use stairs whenever applicable instead of just straight blocks ... it looks temporary"
+  "the arrival: you can walk from the ledge down to the valley a block at a time, and every step is a stair block": () => {
+    const seen = new Set(["0,14"]), q = [[0, 14]];
+    let out = false;
+    while (q.length) {
+      const [x, z] = q.pop(), h = heightAt(x, z);
+      if (z >= ARRIVAL.z1) { out = true; break; }
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`, nh = heightAt(nx, nz);
+        if (seen.has(k) || nh === null || Math.abs(nh - h) > 1 || Math.abs(nx) > ARRIVAL.x1 || nz < ARRIVAL.z0 || kerbAt(nx, nz) !== null) continue;
+        seen.add(k); q.push([nx, nz]);
+      }
+    }
+    assert(heightAt(0, 14) === ARRIVAL.top && out, "no way down from the ledge");
+    const top = new Map();
+    for (const o of planArrival()) top.set(`${o.a[0]},${o.b[1]},${o.a[2]}`, o);
+    let steps = 0;
+    for (const [k, c] of walkCells()) {
+      const [x, z] = k.split(",").map(Number);
+      assert(heightAt(x, z) === c.h, `the land at ${k} is not the stair's height`);
+      if (c.kind !== "stair") continue;
+      const o = top.get(`${x},${c.h},${z}`);
+      assert(o && o.block.endsWith("_stairs") && o.states && o.states.upside_down_bit === false, `the step at ${k} is not a stair block`);
+      steps++;
+    }
+    assert(steps > 200, "too few steps");
+  },
+  "the arrival: an old world has the first box and ramp taken away": () => {
+    let n = 0;
+    for (let cx = -5; cx <= 4; cx++) for (let cz = -1; cz <= 4; cz++) for (const o of planArrivalClear(cx, cz)) {
+      assert(o.block === "minecraft:air" && o.a[1] > heightAt(o.a[0], o.a[2]), "the clearing cuts the land");
+      n++;
+    }
+    assert(n > 500, "nothing cleared");
   },
   "the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds": () => {
     const cells = new Set();

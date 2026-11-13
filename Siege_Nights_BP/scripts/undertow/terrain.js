@@ -20,6 +20,7 @@ import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, R
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { HOLLOW_BRIDGES } from "./bridges_data.js";
+import { arrivalAt, walkAt, ARRIVAL } from "./arrival.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -154,9 +155,10 @@ function rimWall(x, z) {
 function spine(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd || inHeart(x, z)) return null; // the final arena floats in the fog; built separately
 
-  // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
-  if (z < 40) {
-    if (z < -10 && first) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null; // the first back wall: a slab, the void either side
+  // The Wound as it was first built: a ledge at y 100 with a wall behind it and a ramp down along the path. Kept so
+  // an old world knows what stands there (wound.js clears what the new arrival no longer has).
+  if (z < 40 && first) {
+    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null; // the first back wall: a slab, the void either side
     if (Math.abs(x) <= 14 && z <= 10) return L.woundLedgeY;
     if (Math.abs(x) <= 3 && z > 10) {
       const foot = spine(pathX(40), 40); // ramp lands exactly on the valley floor
@@ -187,8 +189,15 @@ function spine(x, z, first = false) {
 
   const edge = rimAt(x, z) - Math.abs(x);
   if (edge < 22) h += Math.round(((22 - edge) * 1.8 + fbm(x / 7, z / 7, 3) * 6) * rimWall(x, z));
+  // The arrival (arrival.js): the ledge, the stair and its court stand exactly so; the crag round them stands at
+  // least so high over the valley's own ground.
+  if (!first) { const a = arrivalAt(x, z); if (a) h = a.exact ? a.h : Math.max(h, a.h); }
   return Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, h));
 }
+// No tree stands on the arrival or within its canopy's reach of it.
+const arrivalNear = (x, z) => { if (z > ARRIVAL.z1 + 6 || Math.abs(x) > ARRIVAL.x1 + 6) return false; for (let dx = -6; dx <= 6; dx += 3) for (let dz = -6; dz <= 6; dz += 3) if (arrivalAt(x + dx, z + dz)) return true; return false; };
+// The land as the first Wound had it (before the back cliff and the crag): what an old world has standing.
+export function firstHeightAt(x, z) { const n = natural(x, z, true); return n === null ? null : Math.round(n.h); }
 
 // The cliff at the Hollow's near end, behind the Wound (Mateo 2026-11-12, of a screenshot of the first one: "This
 // definitely needs a lot of work"). It was a flat slab 49 wide with the void on both sides and above it, so the sky
@@ -461,7 +470,7 @@ function planLand(cx, cz) {
       const n = h(i + di, j + dj);
       drop = Math.max(drop, n === null ? 99 : top - n);
     }
-    const wound = spineCol && z < 40;
+    const wound = spineCol && (z < 40 || (z <= ARRIVAL.z1 && !!arrivalAt(x, z))); // the arrival's crag and court count as the Wound: no plants, spires or trees on them
     // A faint glow over the land (invisible light blocks), so under the roof it is dark but never
     // pitch black. Pushed first in the column so anything built here later takes its place.
     if (top + 2 > SEA && ambientLightAt(x, z)) ops.push({ a: [x, top + 2, z], b: [x, top + 2, z], block: AMBIENT.block, optional: true, ifAir: true });
@@ -475,6 +484,23 @@ function planLand(cx, cz) {
         const b = y <= upTo ? backRock(x, y, z) : null;
         if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
       }
+      continue;
+    }
+    if (drop >= 3 && z >= BACK.z && arrivalAt(x, z)) {
+      // the crag under the arrival: the same beds of rock as the back cliff wherever a face shows, veilmoss over its ledges
+      const from = Math.max(start, top - Math.min(drop, 60) - 2);
+      fill(x, start, z, x, from - 1, z, B.rock);
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= top; y++) {
+        const b = y < top ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      set(x, top, z, groundAt(x, z, "wound", drop, c.river));
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj], side) => {
+        const n = h(i + di, j + dj);
+        if (n === null || i + di < 0 || i + di > 15 || j + dj < 0 || j + dj > 15 || walkAt(x, z) || walkAt(x + di, z + dj)) return;
+        const len = hash(x * 3 + side, z, 207) < 0.22 ? strandsAt(x, z, side, top - n, "fen") : 0; // a curtain here and there, not a pelt
+        if (len) fill(x + di, top - len + 1, z + dj, x + di, top, z + dj, B.strands);
+      });
       continue;
     }
     if (drop >= 3 && !wound && !onWater) {
@@ -580,7 +606,7 @@ function planLand(cx, cz) {
 
   // One landmark per chunk at most, kept inside the chunk.
   const cxm = X0 + 8, czm = Z0 + 8, mid = col(8, 8);
-  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
+  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || arrivalNear(cxm, czm) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
   const roll = hash(cx, cz, 101), kind = mid.region;
   // Nudge each landmark off the chunk's middle so they don't line up in a grid (still inside the chunk).
   const nudge = (max, salt) => Math.round((hash(cx, cz, salt) - 0.5) * 2 * max);
@@ -870,7 +896,7 @@ function extraTrees(ops, cx, cz, col) {
     const c = col(i, j);
     if (!c || c.h < SEA + 1 || c.road !== undefined || c.site || c.river < RIVER_HALF_WIDTH + 6 || c.under !== undefined) continue;
     const x = cx * 16 + i, z = cz * 16 + j;
-    if (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8))) continue;
+    if (arrivalNear(x, z) || (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8)))) continue;
     if (siteAt(x, z)) continue;
     const k = treeKind(x, z, c.region), n = EXTRA[k] ?? 0;
     if (hash(cx, cz, salt + 20) * 3 >= n) continue;

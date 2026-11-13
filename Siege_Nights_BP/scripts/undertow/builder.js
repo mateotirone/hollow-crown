@@ -6,7 +6,8 @@ import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
 import { planChunk, planRoofSwap, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF, BACK } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
-import { planWound, WOUND } from "./wound.js";
+import { planWound, planArrivalClear, WOUND } from "./wound.js";
+import { ARRIVAL } from "./arrival.js";
 import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES, signposts } from "./roads.js";
 import { hash } from "./noise.js";
@@ -277,7 +278,8 @@ export function buildTick(players) {
     if (next) {
       const swap = lowRoof(next[0], next[1]), redo = toRedo(next[0], next[1]);
       // planned again: the old low roof (if it is still there) is taken away first, then the whole chunk is planned over the land that stands
-      const ops = redo ? [...(swap ? planRoofSwap(next[0], next[1]).filter((o) => o.block === "minecraft:air") : []), ...planChunk(next[0], next[1])]
+      // (and at the arrival, the first ledge's box and ramp and the trees that stood where the stair is now)
+      const ops = redo ? [...(swap ? planRoofSwap(next[0], next[1]).filter((o) => o.block === "minecraft:air") : []), ...planArrivalClear(next[0], next[1]), ...planChunk(next[0], next[1])]
         : swap ? planRoofSwap(next[0], next[1]) : planChunk(next[0], next[1]);
       if (!swap && builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
       job = { cx: next[0], cz: next[1], ops, i: 0 };
@@ -390,8 +392,13 @@ export function piecesTick() {
   // and the cave cut into it.
   const woundV = p.woundV ?? (p.wound ? 1 : 0);
   if (woundV < WOUND.v) {
-    if (woundV === 1 && !p.woundRedo) { planAgain(-BACK.reach, L.zStart, BACK.reach, BACK.z); p.woundRedo = true; changed = true; }
-    else if (!woundQueued && chunksBuilt(...WOUND.box)) {
+    if (!p.arrivalRedo) {
+      // land built before the cave (v1) or before the stair (v1, v2) is planned again; a new world has none built yet
+      if (woundV === 1 && !p.woundRedo) planAgain(-BACK.reach, L.zStart, BACK.reach, BACK.z);
+      planAgain(ARRIVAL.x0 - 6, ARRIVAL.z0, ARRIVAL.x1 + 6, ARRIVAL.z1 + 6);
+      p.waystones = p.waystones.filter((i) => i !== 0); // the first waystone stood on the old ramp: it is set again on the ledge
+      p.woundRedo = true; p.arrivalRedo = true; changed = true;
+    } else if (!woundQueued && chunksBuilt(...WOUND.box)) {
       woundQueued = true;
       extra.push({ ops: planWound(), i: 0, fail: () => { woundQueued = false; }, done: () => { const q = pieces(); q.wound = true; q.woundV = WOUND.v; savePieces(q); woundQueued = false; } });
     }

@@ -12,11 +12,12 @@
 
 import { hash, fbm } from "./noise.js";
 import { UNDERTOW_LAYOUT as L } from "./layout.js";
-import { B, backRock, backFace, heightAt } from "./terrain.js";
+import { B, backRock, backFace, heightAt, firstHeightAt, roofAt } from "./terrain.js";
+import { ARRIVAL, arrivalAt, walkCells, kerbCells, walkAt, kerbAt, onLedge } from "./arrival.js";
 import { planCrack } from "./rift.js";
 
 // v: raise it when the design changes, and every world rebuilds the Wound (builder.js piecesTick).
-export const WOUND = { v: 2, mouthZ: -10, cz: -21, rx: 8, rz: 7, h: 15, wallZ: -29, box: [-48, -48, 47, -1] };
+export const WOUND = { v: 3, mouthZ: -10, cz: -21, rx: 8, rz: 7, h: 15, wallZ: -29, box: [-48, -48, 47, 66] };
 
 const key = (x, y, z) => `${x},${y},${z}`;
 
@@ -127,5 +128,96 @@ export function planWound() {
     }
   }
   for (const c of late) if (!cells.has(key(c.x, c.y, c.z)) || cells.get(key(c.x, c.y, c.z)).block === "minecraft:air") ops.push({ a: [c.x, c.y, c.z], b: [c.x, c.y, c.z], block: c.block, optional: true });
+  return [...ops, ...planArrival()];
+}
+
+// Pure: for a world that built the first arrival (a box of rock and a ramp), what must go from one chunk before
+// the land is planned again over it (builder.js): the old rock that stood higher than the land does now, and the
+// trees and plants that stood where the crag, the stair and the court are.
+export function planArrivalClear(cx, cz) {
+  const ops = [], A = ARRIVAL;
+  for (let x = Math.max(cx * 16, A.x0 - 6); x <= Math.min(cx * 16 + 15, A.x1 + 6); x++) for (let z = Math.max(cz * 16, A.z0); z <= Math.min(cz * 16 + 15, A.z1 + 6); z++) {
+    const now = heightAt(x, z), was = firstHeightAt(x, z);
+    if (now === null || was === null) continue;
+    let near = false;
+    if (was === now) { if (z <= 14) continue; for (let dx = -6; dx <= 6 && !near; dx += 3) for (let dz = -6; dz <= 6; dz += 3) if (arrivalAt(x + dx, z + dz)) { near = true; break; } }
+    if (was !== now || near) ops.push({ a: [x, now + 1, z], b: [x, Math.min(Math.max(now, was) + 16, roofAt(x, z).bottom - 1), z], block: "minecraft:air" });
+  }
+  return ops;
+}
+
+// ---- the arrival: the stair down from the ledge (arrival.js has its shape) ------------------------------
+const STAIR = { n: 3, s: 2, e: 0, w: 1 }; // Bedrock weirdo_direction for a stair you face this way going up
+const mix = (list, r) => { let t = 0; for (const [w, b] of list) { t += w; if (r < t) return b; } return list[list.length - 1][1]; };
+const TREAD = [[0.62, "minecraft:cobbled_deepslate_stairs"], [0.26, "minecraft:polished_blackstone_brick_stairs"], [0.12, "minecraft:deepslate_brick_stairs"]];
+const STONE = [[0.7, B.deck], [0.16, B.deckCracked], [0.14, "minecraft:polished_blackstone_bricks"]]; // regions/hollow.md "stone"
+const WAY = [[0.55, "minecraft:cobbled_deepslate"], [0.25, "minecraft:polished_blackstone_bricks"], [0.2, "minecraft:tuff"]]; // the road mix, as full blocks
+const POSTS = [[3, 15], [3, 22], [10, 29], [4, 29], [10, 22], [25, 25], [25, 33], [20, 33], [25, 45], [20, 45], [13, 41], [13, 45], [20, 25]]; // lanterns: both sides (x and -x)
+
+// Pure: the blocks of the stair, its walls, lanterns, the terrace wall and the court, as ops in placing order.
+export function planArrival() {
+  const ops = [], A = ARRIVAL;
+  const one = (x, y, z, block, states) => ops.push(states ? { a: [x, y, z], b: [x, y, z], block, states } : { a: [x, y, z], b: [x, y, z], block });
+  const fill = (x, y1, y2, z, block) => { if (y2 >= y1) ops.push({ a: [x, y1, z], b: [x, y2, z], block }); };
+  // 1. the worn way across the ledge, from the cave mouth to the head of the stair
+  for (let z = WOUND.mouthZ + 1; z <= 14; z++) {
+    const mid = Math.round((fbm(z / 6, 0.4, 211) - 0.5) * 2), half = 2 + (hash(z, 1, 212) < 0.3 ? 1 : 0);
+    for (let x = -5; x <= 5; x++) {
+      if (!onLedge(x, z)) continue;
+      if (x >= mid - half && x <= mid + half) one(x, A.top, z, mix(WAY, hash(x, z, 214)));
+      else if (z > 10) one(x, A.top, z, hash(x, z, 213) < 0.5 ? "minecraft:deepslate" : B.rock); // no loose road surface left beside the paving
+    }
+  }
+  // 2. kerbs and their low walls; the wall is left off where the rock beside it already stands higher
+  for (const [k, h] of kerbCells()) {
+    const [x, z] = k.split(",").map(Number);
+    one(x, h, z, hash(x, z, 215) < 0.75 ? "minecraft:polished_blackstone_bricks" : B.deck);
+    const open = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => !walkAt(x + dx, z + dz) && kerbAt(x + dx, z + dz) === null && (heightAt(x + dx, z + dz) ?? -999) <= h);
+    if (open) one(x, h + 1, z, B.parapet);
+  }
+  // 3. what you walk on: stair blocks on every step, brick on the landings, worn paving in the court
+  for (const [k, c] of walkCells()) {
+    const [x, z] = k.split(",").map(Number);
+    if (c.kind === "stair") { one(x, c.h - 1, z, B.deck); one(x, c.h, z, mix(TREAD, hash(x, z, 216)), { weirdo_direction: STAIR[c.climb], upside_down_bit: false }); }
+    else if (c.kind === "landing") one(x, c.h, z, mix(STONE, hash(x, z, 217)));
+    else { const m = fbm(x / 5, z / 5, 218); one(x, c.h, z, m > 0.66 ? B.mossDeep : m > 0.6 ? B.moss : hash(x, z, 219) < 0.5 ? mix(WAY, hash(x, z, 220)) : mix(STONE, hash(x, z, 221))); }
+  }
+  // 4. the terrace wall: never one flat face (Mateo's rule for every wall here). Three tall arched bays set two
+  // blocks back between four pilasters; the pilasters are two deep at the foot with a sloped offset and a sloped
+  // base; a course of upside-down stairs carries the kerb; a lantern hangs in each side bay and a small shrine
+  // light stands in the middle one, where the path meets the wall.
+  const T = A.top - 8, C = A.court, zf = 29;
+  const face = (x, y, z) => { const r = hash(x * 3 + y, y * 5 - x + z, 222); return r < 0.05 ? B.deckCracked : r < 0.3 ? "minecraft:polished_blackstone_bricks" : y % 7 === 3 ? "minecraft:polished_blackstone_bricks" : B.deck; };
+  for (let x = -10; x <= 10; x++) {
+    for (let y = C + 1; y <= T - 1; y++) one(x, y, zf, face(x, y, zf));
+    one(x, T - 1, zf + 1, mix(TREAD, hash(x, 7, 223)), { weirdo_direction: STAIR.n, upside_down_bit: true });
+  }
+  for (const [a, b, top, rise] of [[-9, -5, T - 8, 1], [-3, 3, T - 5, 2], [5, 9, T - 8, 1]]) {
+    for (let x = a; x <= b; x++) for (const z of [zf - 1, zf]) {
+      one(x, C, z, mix(WAY, hash(x, z, 224)));
+      for (let y = C + 1; y <= top; y++) {
+        const i = y - (top - rise + 1); // which row of the arch head this is (negative: the open bay below it)
+        if (i < 0 || (x > a + i && x < b - i)) one(x, y, z, "minecraft:air");
+        else if (x === a + i || x === b - i) one(x, y, z, "minecraft:polished_blackstone_brick_stairs", { weirdo_direction: x === a + i ? STAIR.w : STAIR.e, upside_down_bit: true });
+      }
+    }
+    for (let x = a; x <= b; x++) for (let y = C + 1; y <= top; y++) one(x, y, zf - 2, hash(x + y * 3, y - x, 225) < 0.7 ? "minecraft:polished_blackstone_bricks" : "minecraft:deepslate_bricks");
+    const mid = (a + b) / 2;
+    if (mid !== 0) one(mid, top, zf - 1, B.lantern, { hanging: true });
+  }
+  one(0, C + 1, zf - 1, "minecraft:chiseled_polished_blackstone"); one(0, C + 2, zf - 1, B.lantern);
+  one(-1, C + 1, zf - 1, B.glint); one(1, C + 1, zf - 1, B.glint);
+  for (const x of [-10, -4, 4, 10]) {
+    for (let y = C + 1; y <= T - 1; y++) one(x, y, zf + 1, y === C + 14 ? "minecraft:chiseled_polished_blackstone" : "minecraft:polished_blackstone_bricks");
+    for (let y = C + 1; y <= C + 7; y++) one(x, y, zf + 2, "minecraft:polished_blackstone_bricks");
+    one(x, C + 8, zf + 2, "minecraft:polished_blackstone_brick_stairs", { weirdo_direction: STAIR.n, upside_down_bit: false });
+    one(x, C + 1, zf + 3, "minecraft:polished_blackstone_brick_stairs", { weirdo_direction: STAIR.n, upside_down_bit: false });
+  }
+  // 5. soul lanterns on the wall at every turn, both sides
+  for (const [ax, z] of POSTS) for (const x of [ax, -ax]) {
+    const h = kerbAt(x, z);
+    if (h === null) continue;
+    one(x, h + 1, z, B.parapet); one(x, h + 2, z, B.lantern);
+  }
   return ops;
 }

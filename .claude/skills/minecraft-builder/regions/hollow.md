@@ -113,6 +113,27 @@ into the floor, walled and floored all round; never water standing on the floor 
   roof, at least three thick, leaning inward as it climbs until it is the roof (`chasm.js` `inWall`,
   `vaultFrom`). No void is visible from the Seat. The wall stays more than 15 blocks clear of the Seat's rock.
 
+## Stairs, ledges and the way down from them (Mateo, 2026-11-13)
+
+Mateo, of the first arrival ledge (a box of one block 29 by 21 and 34 high, with a strip of rock down its front
+for a ramp): "use stairs whenever applicable instead of just straight blocks. I mean, it looks temporary here ...
+It's one of the most important parts of the map." The rules that came out of it (`undertow/arrival.js`,
+`wound.js` `planArrival`, self-tests "the arrival: ..."):
+
+- **Every step a player climbs is a stair block.** A change of one block in a built way is a stair, facing the
+  way you climb, on a solid block. Full blocks stepping down a block (or two) at a time read as unfinished.
+  Slopes of natural ground are the only exception.
+- **A long way down is flights and landings, never one ramp.** Eight to eleven steps, then a landing, and a turn
+  at the landing. The first flight is the widest (five); the rest are three.
+- **Every open side of a stair or landing has a kerb and a low wall**, left off only where rock already stands
+  higher beside it. Soul lanterns stand on the wall at every turn.
+- **A ledge is never a box.** Its edge is rounded and wobbles, and the rock under it falls away in short faces
+  and benches of the cliff's own beds (`cragDrop`), never one sheer side and never a smooth slope.
+- **A retaining wall is built like a wall of a building:** bays set back between pilasters, arch heads of
+  upside-down stairs, a corbel course under the kerb, something in each bay (a hanging lantern, a shrine light).
+- **No trees or landmarks within six blocks of a built way down**, and an old world has the first version's rock
+  cleared before the new land is planned over it (`planArrivalClear`).
+
 ## The Wound and any wall that closes the world (Mateo, 2026-11-12)
 
 Mateo, of a screenshot of the first Wound: "This definitely needs a lot of work." It was a crack pasted on a flat
