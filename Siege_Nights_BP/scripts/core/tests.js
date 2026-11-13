@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
   "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",
   "undertow: the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof",
