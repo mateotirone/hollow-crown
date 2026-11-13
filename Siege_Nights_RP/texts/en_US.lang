@@ -485,6 +485,7 @@ entity.siege:spell_satchel.name=Sorcerer's Satchel
 item.siege:plan_book.name=Plan Book
 item.siege:plan_scroll.name=Plan Scroll
 entity.siege:townsfolk.name=Townsperson
+entity.siege:arena_crowd.name=Arena crowd
 action.interact.siege.talk=Talk
 
 ## Regional player armour (studio/art/build_regional_armor.py)
