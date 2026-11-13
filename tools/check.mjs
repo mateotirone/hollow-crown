@@ -551,6 +551,15 @@ step("Thin place land");
   else console.log((r.stdout || "").trim());
 }
 
+// ---------- 2c2. wall-hung blocks in the baked world files ----------
+// Item frames, ladders, buttons and wall signs need a wall behind them, or they drop off (tools/hung-check.mjs).
+step("Wall-hung blocks have a wall");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "hung-check.mjs")], { encoding: "utf8" });
+  for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 20)) fail(`hung on nothing: ${line}`);
+  if (r.status === 0) console.log("every item frame, ladder, button and wall sign has a wall");
+}
+
 // ---------- 2d. build catalog ----------
 // Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
 step("Build catalog");
