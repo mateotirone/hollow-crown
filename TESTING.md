@@ -767,3 +767,12 @@ On the map world (map mode), in Creative:
 3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
 4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
 5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.
+
+## Boss fights, offline
+
+`node tools/sim-bosses.mjs` plays every boss fight from start to finish in a fake world (the regional bosses, the
+Warlord King, Ulfa, the Choir, all seven of Morvane's stages with wipes, every Pretender claim and power; Survival,
+Creative, four players, rank V) and must end with `SIM OK`. Add `--quiet` for one line per fight, `--seed=N` for
+another roll of the dice, or a boss id (`morvane`, `bride`) to play only that one. Run it after any change to a
+fight. It checks the logic (phases, shields, warnings, loot, leftovers, errors the game would swallow), not how a
+fight looks, sounds or paths in the real game. The Storm (the fight for the throne) is not in it.
