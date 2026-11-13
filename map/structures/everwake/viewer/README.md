@@ -10,4 +10,10 @@ station https://claude.ai/artifact/FMsPEnYSySaimmZz7YaU1X.
     python3 combine_st.py <dir holding st/airboat_station_*>   # both station versions side by side -> st/both.json
     python3 mkpage.py st/both.json <textures/blocks> viewer.tpl.html station.html "Air Boat Station" "blurb" station_views.json
 
+The station on its real ground at Wren Water (https://claude.ai/artifact/AwC7x86Vqgv8mz2ou6YWyr):
+
+    python3 ../site.py OUT/airboat_station_restored/scene.json <map terrain.npz> site   # terraform pad, lane, trees
+    python3 site_backdrop.py <map terrain.npz> <textures/blocks> site_bd.json -11 243 512 80 site/ground.npz
+    python3 mkpage.py site/site.json <textures/blocks> viewer.tpl.html site.html "Air Boat Station at Wren Water" "blurb" site_views.json site_bd.json
+
 Textures: Mojang/bedrock-samples resource_pack/textures/blocks. The page loads three@0.170.0 from jsDelivr.

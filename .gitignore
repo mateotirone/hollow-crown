@@ -20,3 +20,4 @@ sounds-inbox/*
 
 # Live asset viewer downloads and builds (node tools/asset-viewer/serve.mjs)
 .asset-viewer/
+map/structures/wonders/out/

@@ -11,13 +11,16 @@ Rows are run-length coded along x: [y, z, x0, count, paletteIndex].
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import settle_halls as H
+sys.path.insert(0, os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts"))
+import lighting  # every build is lit at night (Mateo 2026-11-13): the engine's light stage
 
 ARCH = {"vale": "vale", "frostmarch": "frost", "saltreach": "salt", "emberwaste": "ember", "blackfen": "fen"}
 KEEP = ("facing", "axis", "half", "upper", "hinge", "open", "hanging", "conn", "post", "head")
 # limits from the plot: the level-5 hall must stay within 15 blocks each side and 42 deep (settle/rules.js)
 SIDE, DEEP, FRONT = 15, 42, -2
 
-def export(bp):
+def export(bp, light=True):
+    if light: lighting.light_blueprint(bp)
     dx, dy, dz = bp.markers["door"]
     to = lambda x, y, z: (x - dx, y, dz - z + 1)
     pal, idx, cells = [], {}, {}
