@@ -34,6 +34,7 @@ import { bakedFor, bakedState } from "./baked.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
 import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const KEY = "siege:stopped_clock_key";
 export const CLOCK_BLOCK = "siege:stopped_clock";
@@ -206,6 +207,8 @@ function keeperOf(entity) {
   return t === undefined ? undefined : Number(t.slice(KEEPER_TAG.length + 1));
 }
 
+addNpcLook((e) => { const i = keeperOf(e); return i === undefined ? undefined : `clock_${i}`; });
+
 function placeKeepers(dim) {
   const spots = store.data.keepers;
   if (!spots?.length) return;
@@ -225,7 +228,8 @@ function placeKeepers(dim) {
       e.addTag(`${KEEPER_TAG}_${i}`);
       e.nameTag = k.name;
       const npc = e.getComponent("minecraft:npc");
-      if (npc) { npc.name = k.name; npc.skinIndex = 10 + i * 3; }
+      if (npc) npc.name = k.name;
+      dressNpc(e, `clock_${i}`);
     } catch { /* not loaded: next time */ }
   });
 }

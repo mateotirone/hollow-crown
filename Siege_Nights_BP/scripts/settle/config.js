@@ -15,7 +15,7 @@ export const SETTLE = {
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
-  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14,
+  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, smithy: 12, stable: 14,
     house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16 },
 };
 
@@ -109,7 +109,8 @@ export const MASON_LINES = {
 // old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
-  smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+  smithy: 2, stable: 2, inn: 2, barracks: 2, watchtower: 3,
+  // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
   ironworks: 0,
 };
 
@@ -119,7 +120,7 @@ export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
-  stable: "ML", storehouse: "ML", library: "ML",
+  stable: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
   ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
@@ -127,7 +128,7 @@ export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
   farmhouse: ["ML"],
   house: ["ML"],
-  library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
+  library: ["L"], stable: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
 export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
@@ -151,7 +152,7 @@ export const PLOT_TAGS = {
 export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
 export const HOMES = ["cottage", "house", "townhouse"];
-export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
+export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1", "storehouse_2", "storehouse_3", "storehouse_4", "farmhouse", "mint", "inn", "barracks"];
 
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now).
 // Siege wins still decide the tier; a charter that isn't met holds the town at its tier until it is.
@@ -217,8 +218,7 @@ export const SETTLERS = {
   lordRange: 96, // a Rival Lord's town looks after its townsfolk while a player is this close (as their crews build)
   lordCatchUp: 3, // most newcomers a lord's town takes at once after nobody has been near for days
   waryDays: 3, // townsfolk are wary this many days after their town changes hands
-  skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
-  workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
+  workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", storehouse_1: "Storekeeper", storehouse_2: "Storekeeper", storehouse_3: "Storekeeper", storehouse_4: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
   names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
 };
 // What a settler says when you talk to them (hand-written; {town} is the settlement's name)
@@ -292,7 +292,7 @@ export const SETTLER_LINES = {
 //   noPlan: charter buildings raised from their own block item, which need no plan.
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
-  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["storehouse", "watchtower"] },
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["watchtower"] },
   noPlan: ["barracks"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade

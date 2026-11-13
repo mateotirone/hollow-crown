@@ -182,6 +182,10 @@ built on:
 **Round the foundation:** clumps of azalea and flowering azalea under the ground-floor windows and at some corners, never a
 strip round the house (the skill's `bushes`, on by default).
 
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is plaster and timber on a stone ground storey, a dark shingle gable along the depth, Mateo's big plank cart door; inside, `stone_bricks` pillars and beams round the chest bays. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
+
 ## Building it with the skill
 
 - **Presets:**
