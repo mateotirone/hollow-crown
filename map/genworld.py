@@ -516,6 +516,10 @@ try:
     import railworks
 except ImportError:
     railworks = None
+try:
+    import railcross              # level crossings where roads and trails cross a line (Mateo 2026-11-13)
+except ImportError:
+    railcross = None
 # one height for track two lines share (playtest 2026-11-12: Millbrook's Oakmere branch ran its shared platform a
 # block above the North line's, so buying it stacked a second track on the first): the first line keeps its heights
 import railshare
@@ -523,6 +527,14 @@ _ln = list(RAILLINES)
 for n_, ys_h in zip(_ln, railshare.harmonise([([tuple(map(int, c)) for c in RAILLINES[n_][0]], RAILLINES[n_][1]) for n_ in _ln])):
     RAILLINES[n_] = ([tuple(map(int, c)) for c in RAILLINES[n_][0]], ys_h, RAILLINES[n_][2])
 segs = []
+_alltrack = {tuple(map(int, c)) for cells_, _, _ in RAILLINES.values() for c in cells_}
+_plotstops = [(st_["x"], st_["z"]) for st_ in STOPS.values() if st_["kind"] == "plot" and "x" in st_]
+def _pathw(x, z):
+    i, j = _cl(x - X0), _cl(z - Z0)
+    return 5 if isroad[i, j] else 3 if istrail[i, j] else 0
+def _hutfree(x, z):
+    i, j = _cl(x - X0), _cl(z - Z0)
+    return bool(land[i, j] and not (isriver[i, j] or isroad[i, j] or istrail[i, j] or townzone[i, j] or plotzone[i, j]))
 for lname, (cells, ys, stops_on) in RAILLINES.items():
     path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
     blocks = None
@@ -537,6 +549,12 @@ for lname, (cells, ys, stops_on) in RAILLINES.items():
                 w_, wp_, cu_ = railworks.segment_works([(b[0], b[2]) for b in part], [b[1] for b in part], ground_at, water_at, region_at, log=log)
                 if w_: seg_.update(works=w_, works_palette=wp_, custom=cu_)
             except Exception as e_: log("rail works failed", seg_["id"], e_)
+        if railcross and blocks:
+            try:
+                xs_ = railcross.segment_crossings([(b[0], b[2]) for b in part], [b[1] for b in part], _pathw, region_at, log=log,
+                                                  custom=seg_.get("custom", []), side_free=_hutfree, lines=_alltrack, stations=_plotstops)
+                if xs_: seg_["crossings"] = xs_
+            except Exception as e_: log("rail crossings failed", seg_["id"], e_)
         segs.append(seg_)
     for sid, i in stops_on:
         x, y, z = path[i]; STOPS[sid].update({"x": x, "y": y, "z": z})

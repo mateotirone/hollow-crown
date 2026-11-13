@@ -6,6 +6,7 @@ import "./core/selftest.js";
 import "./core/clickable.js";
 import "./core/gamerules.js";
 import "./core/noraids.js";
+import "./core/nomonsters.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -64,6 +65,7 @@ import "./townsfolk/index.js";
 import "./weather/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
+import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

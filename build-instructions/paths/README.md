@@ -137,3 +137,19 @@ so these rules are strict:
 Test any change on the real map before shipping: export the corridor with `tools/export_rail_corridor.py`
 (amulet) and run `node tools/rail_lay_test.mjs corridor.json`, which lays all 7 lines and must print ALL OK
 (no gaps, no trench walls, nothing in the way, no bare dirt, nothing floating).
+
+### Level crossings (Mateo, 2026-11-13)
+
+Where a road or trail crosses a line, the stretch lays a level crossing straight after its bed (`map/railcross.py`
+plans it, `rail_bed.js` `layCrossing` lays it), in the region's style:
+
+- **Boards** in the ballast under the road and one block each side (Vale spruce, Frostmarch dark oak, Saltreach
+  birch, Blackfen mangrove, Emberwaste smooth sandstone), so the road runs level over the rails.
+- **Setts** for 5 blocks each side of the track, on the graded ground; the road keeps its own surface beyond.
+- **Lamp posts** at each corner of the road, 3 from the track: a stone base, two posts, a lantern (froglight in the
+  Blackfen). A 3-block **line fence** runs from each post along the line. Posts and fences keep 2 off any other
+  line and out of the train's body.
+- **Keeper's hut** on roads with room: 5 by 5, one storey, built by the skill's `house` part with its interior, door
+  toward the road, on the highest block of its footprint with a stone plinth to the ground, 4 or more off every line.
+- Never inside a plot's station site (32 round a plot stop: the station, its platform and passing loop go there) or
+  on a bridge or in a tunnel.

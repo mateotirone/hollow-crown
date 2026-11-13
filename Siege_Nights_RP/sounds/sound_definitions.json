@@ -629,6 +629,336 @@
     }
    ],
    "max_distance": 64
+  },
+  "siege.voice.morvane.first_dusk": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/first_dusk",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.journal_done": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/journal_done",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.siege_first": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/siege_first",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.siege_held": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/siege_held",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.ember": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/ember",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.warlord": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/warlord",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_reeve": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_reeve",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_huntsman": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_huntsman",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_bride": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_bride",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_seneschal": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_seneschal",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_mother": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_mother",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_1": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_1",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_2": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_2",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_3": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_3",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_4": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_4",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_5": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_5",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_6": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_6",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_7": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_7",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_8": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_8",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.rift_open": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/rift_open",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.hollow_first": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/hollow_first",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.choir_silenced": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/choir_silenced",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.seat": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/seat",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.stage_sky": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/stage_sky",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.stage_sky_out": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/stage_sky_out",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_1": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_2": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_3": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_4": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_4",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_5": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_5",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_6": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_6",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.look_up": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/look_up",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.last": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/last",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
   }
  }
 }

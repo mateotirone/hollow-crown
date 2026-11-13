@@ -42,6 +42,41 @@ Then type `/scriptevent siege:showcase siege` to make it night and start a siege
 
 Walk around, click things, and tell me what looks wrong or does nothing. The list below is the same things done by hand, if you want to check a step on its own.
 
+## 4b. The full-castle battle test (scripts/battletest/)
+
+One command builds a Castle-tier settlement (the Crown Wall with towers, gatehouse and portcullis, nine buildings, an Iron Strongroom, a Barracks and four ballistas), puts an army on each side and runs the siege. Use a **flat Creative world** and stand where the castle's middle should be: it clears about 145 x 145 blocks round you and a field 135 blocks south to the attackers' camp. Building takes a minute or two. It moves your Keep Banner (like the showcase); `clear` puts it back.
+
+- `/scriptevent siege:battle_test attack` You attack the Test Castle. You start at the camp on a horse with 23 soldiers of every kind (Knights, Men-at-Arms, Pikemen, Shieldbearers, Crossbowmen, Archers, two Trebuchet crews, a Ram crew, two Sappers). War is declared for you; ride north to the castle and they follow. Nightfall comes in about 3 minutes. You get Vault Breakers, Breaching Charges, a Trebuchet and a Battering Ram.
+  - `attack manual` leaves the declaring to you: click the Test Castle's Keep Banner, Declare war, slide the army to 100%.
+  - `attack unjust` (or `defend unjust`) declares with no grounds: triple fee, the defence twice as strong, the attacker an Oathbreaker.
+- `/scriptevent siege:battle_test defend` The Test Warband (same 23, led by a named Warlord on a horse) attacks your castle, defended by your 22 soldiers. You start inside the gate. Nightfall in about 100 seconds.
+- `/scriptevent siege:battle_test raid` A Siege Night on your castle: blow the War Horn you are given. As a Castle you get the Grand Siege of the Warlord King, with rams and sappers from the first wave and a wingman dragon over the keep.
+- `/scriptevent siege:battle_test status` who is left on each side, the writ's phase, the vault and wall. `watch` repeats the list below. `clear` ends the siege, removes the soldiers and stand-ins, and puts your keep, wall and vault records back (the castle's blocks stay).
+
+Skip the wait for nightfall with `/scriptevent siege:writ_night`. To see a fallen leader, switch to Survival during the assault and `/kill @s`.
+
+**Attack, check that:**
+1. ✅ Your soldiers mount up and ride behind you two abreast; about 40 blocks from the castle's land they get off their horses (Knights stay mounted).
+2. ✅ Both Trebuchet crews walk out about 40 blocks from the wall and unfold their trebuchets before nightfall.
+3. ✅ The castle gate is barred from the declaration until dawn; at nightfall the action bar counts down to dawn.
+4. ✅ The Ram crew rams the gate every few seconds; Sappers plant charges well away from the gate; each trebuchet keeps hitting one spot until the hole is 3 wide and 2 high, and holds fire when your soldiers are at the wall there.
+5. ✅ Shieldbearers walk in front of the crews; Crossbowmen and Archers hang back in a line and shoot; the rest go for the gate, then through the breach.
+6. ✅ Their Pikemen and Shieldbearers brace across the gate (and the breach); their bowmen hold the wall posts; their Men-at-Arms come out of the Barracks.
+7. ✅ You are Wanted on their land and their soldiers come for you. Walls crack, chunks fall and leave rubble.
+8. ✅ A soldier you kill pays you a bounty; the fallen on both sides wait to retrain until the siege is over.
+9. ✅ Break the vault lock (stairs go down east of the keep) with a Vault Breaker: you win and the vault stays open until dawn. Or die (Survival): the assault collapses and they win.
+
+**Defend, check that:**
+1. ✅ "The Test Warband has declared war": your gate shuts; their crews set up while it is still day.
+2. ✅ At nightfall your Men-at-Arms leave the Barracks even though no attacking player is online, and your bowmen hold the wall.
+3. ✅ Your Pikemen and Shieldbearers brace across the gate and the breach; their Knights ride at your archers first.
+4. ✅ Their soldiers can be hurt (they used to be untouchable while their lord was offline).
+5. ✅ Kill the Warlord (the named Knight): the attack collapses and you win. Or hold until dawn.
+
+**Raid, check that:** the Grand Siege title, three assaults from two sides, a ravager ram and sappers, the Keep Heart and the sidebar, ballistas shooting raiders, the wingman dragon burning them, the Warlord King in the last wave, and "Siege Broken" with pay when it ends. For the Hollow's nights first set the Reach (`/scriptevent siege:reach_stage 4`, `reach_night <kind>`, see the Siege nights section).
+
+**Not in this test:** ballistas and the wingman only shoot monsters, so they sit out a War Writ (raid mode shows them); an army with no player can't crack a vault (only a Vault Breaker in a player's hands can); Rival Lords' sieges and marches need a lord settled on the real map (`/scriptevent siege:rivals deed march <id>`, see Rival Lords); the Crown's Storm has its own test (`siege:crown_showcase`).
+
 ## 5. Test list by hand
 
 Type the commands in chat (`/` opens it).
@@ -226,6 +261,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 0. Use the Old King's Journal. **Expect:** a cover page, then 12 entries; after the last, "Ledger updated: The Old King's Journal". In a brand new world you should get the journal by yourself about 5 seconds after first joining, with the message "There is an old journal in your pack." Show it to Sister Wren ("I have an old journal").
 0c. Run `/scriptevent siege:hum`. **Expect:** a low held note for about 7 seconds (placeholder sound). Then stand in the Hollow, or wait for a third night, or spawn a Returned with `/scriptevent siege:returned_spawn` and stand next to it: the same note, quietly, with no gaps. `/scriptevent siege:hum off` should silence it for you only.
 0d. Run `/scriptevent siege:journal_last_page`, then read the journal to the end. **Expect:** "The old journal in your pack is heavier than it was", and a 13th page in another hand, signed.
+0e. Morvane's voice: `/scriptevent siege:morvane_voice first_dusk` (or any line id; `siege:morvane_voice` alone lists them). **Expect:** a quiet, filtered man's voice and the words in dark grey italics, no name. `siege:morvane_voice list` shows what you have heard; `siege:morvane_voice forget` makes every line new again. In a fresh world you should hear him once at your first dusk, again when you finish the journal, at your first siege night and when you hold it, when the Ember falls, after each boss. Tell me about: a line you hear twice, a line that talks over another, or one too loud or too quiet next to the game.
 0e. Hidden Returned: `/scriptevent siege:lore_case harl` then ring a bell within 16 blocks. **Expect:** Harl Dunn stops and walks off, and talking to Nessa afterwards gets her "after" scene. `siege:lore_case bram` and a bell: nothing happens (he is himself). Ring a bell beside Hesper (not the showcase one): she speaks, walks off and is gone.
 0f. Talk to Brother Cael ("The portraits you burned"), Sigrun ("Why did the Grey Host come?", "Is it still being rung?", "Say it outdoors, then.") and Old Mag ("The day they took the king."). Then talk to Archivist Pell. **Expect:** he opens with three "cards" and will not say the name.
 0g. Local books: `/scriptevent siege:local_lore harrowford`. **Expect:** what stood at Harrowford, a builder note, and three books in your pack; reading two of them opens the Ledger page "The Field Without Bones", which accepts 3:17. On a real plot, picking it at the welcome hall should tell you its past after a few seconds, and the Library should have one book on its bottom shelf.
@@ -233,6 +269,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 0i. Ravens: `/scriptevent siege:ravens`. **Expect:** one grey line about ravens on your wall. In play it appears by itself at dusk on a raid day.
 0j. Moon door: in creative, build a 2 by 3 wall of any blocks, look at its bottom-left block and run `/scriptevent siege:moon_door full`, then `/scriptevent siege:moon_door test`. **Expect:** the six blocks vanish for 30 seconds and come back exactly as they were. `/time set midnight` on a new-moon day should open it too, and dawn should close it. Walk up to it: a line says which moon is carved there.
 0k. Corvin: `/scriptevent siege:corvin` plays his first three lines. As a Sorcerer with a skill learned and the flag set, a remark about that art follows within ten seconds. `/scriptevent siege:lore_npc corvin`: as a Knight you get only "the pool is singing"; as a Sorcerer he talks.
+0l. Story places on the map (on `hollow-crown-full-map.mcworld`, in Survival): walk into Gull's Rest. **Expect:** the Lighthouse Keeper is inside the lighthouse, Harbourmistress Holt inside the harbour office, Tilly (with Pip, a villager, nearby) on the lowest street, and several Dusty Tomes lie on the street (the Lighthouse Letters among them). Same for Sigrun (longhouse) and Jorund (net sheds) with Bram in the street in Rimehold, Isolde (warden's office) in Sunscar, Nessa (bakery) and Harl in Millbrook, Hesper (last house before the lanterns stop) and Odo in Mirelight. Sister Wren is at the altar end of Millbrook's chapel, not on a porch. `/scriptevent siege:story_places` lists what is placed and what waits; `/scriptevent siege:story_places tp elias` goes to a spot. Grow a hall to Stone Hall: **Expect:** Archivist Pell standing in it. Win a first siege: **Expect:** Sir Aldous waiting by your keep by day, gone after a day; he is also beside Brother Cael at the chapterhouse. In the Hollow, Corvin's voice is in the water by the Wound landing. Walk to the Cinder Roost on the north edge of the mesa at 882 310 (`/tp 882 110 300`; first visit after this update rebuilds it once) and the graves between Old Mag's hut and Nell's raft, then `/scriptevent siege:role_mark list`: **Expect:** one Span and three graves, and from the Span you can see a drop of about seven blocks under every stone. Click the Dusty Tome for Notebook IX: The Overthrow (corv_09) at Crownhold before three regional bosses are down: **Expect:** "sealed with old wax", no tome.
 0b. Use The Fourteen Arts (given in the showcase; in play, Old Mag hands it over once you are a Sorcerer and she believes you). **Expect:** a cover, 14 pages and a last page. A page for a power you have sworn ends with an extra purple line. Reading a Field Note, finishing the First Slip, asking Sigrun "Why did the Grey Host come?", and naming the thin place should each show "Something you did not understand before makes sense now."
 1. Use a tome. **Expect:** a book screen with Next page, and on the last page "Ledger updated".
 2. Hold a tome and click the empty shelf. **Expect:** the tome leaves your hand and a spine appears on the shelf front. Six fill a shelf.

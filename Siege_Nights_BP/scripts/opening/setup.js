@@ -10,7 +10,7 @@
 //   kingsrest    the Kingsrest square (its gold block, or the ground there) becomes the "start without a home" spot
 //   hall         build the welcome hall in the sky over Gull Bay (spread over ticks)
 //   plot:<name>  a Plot Stone on each plot's gold block (or on the ground at the planned spot)
-//   millbrook    Sister Wren's porch on the Millbrook square, with Wren standing in it (millbrook.js)
+//   millbrook    Sister Wren at the altar of Millbrook's chapel, or in front of it until it stands (millbrook.js)
 // Anything a builder already did by hand (hall built, Plot Stones placed) is kept and skipped.
 //
 // Builder commands (Creative):

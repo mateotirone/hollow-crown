@@ -168,7 +168,7 @@ export const THREADS = [
     id: "where_was_i", name: "Where Was I?", need: 2,
     intro: "For nine heartbeats you were somewhere else.",
     clues: {
-      slip_first: "In Sister Wren's house, the house went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
+      slip_first: "In Sister Wren's chapel, the chapel went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
       undertow_named: "Quill: the mage warned of \"the Hollow beneath, which he said lay under Aldmere as cold water lies under ice, and was no part of our world at all.\"",
       undertow_mirror: "Corvin: \"It is not a copy of ours. Its streets are black water and its towers lean. Its people stand facing the walls. I call it the Hollow.\"",
       lost_face_walls: "Corvin: a returned shape \"turns and faces the wall, toward wherever the Hollow is seeping in nearest.\"",
@@ -460,7 +460,7 @@ export const THREADS = [
     kind: "text",
     question: "Who was Morvane, before the Hollow gave him that name?",
     accept: ["oswin", "kingoswin", "oswinthelast", "kingoswinthelast", "thelastking", "theoverthrownking", "oswinsonofaldric"],
-    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his.",
+    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his, and so were the five who kept the Gate: he sent them up to kill you, and when they could not, every shard you took from them became his key.",
     sp: 5,
   },
   {
