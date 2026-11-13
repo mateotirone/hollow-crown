@@ -59,7 +59,11 @@ await imp("main.js"); // registers everything (the Works machines, block builds)
 mock.endEarly();
 
 const { townFor, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, TIER_NAMES } = await imp("settle/towns.js");
-const { BUILDINGS, BUILDING, WORKS, drawBuilding, styleFor } = await imp("settle/buildings.js");
+const { BUILDINGS, BUILDING, WORKS, drawBuilding: drawPlotBuilding, styleFor } = await imp("settle/buildings.js");
+// the Barracks is raised from its own block (settle/blockdesigns.js guardhouse), not from a plot design
+const { BLOCK_BUILDS } = await imp("settle/blockdesigns.js");
+const drawBuilding = (id, st) => (id === "barracks" ? BLOCK_BUILDS["siege:barracks"].draw(st) : drawPlotBuilding(id, st));
+const NAMES = { barracks: "Barracks" };
 const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townhall/halls.js");
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
@@ -72,6 +76,8 @@ const { plotPrice } = await imp("settle/plotmarker.js");
 const { pickBaseSlot, roadLine, gradeLine, gateDir, roadEnd } = await imp("settle/basedata.js");
 const { STAGES, STAGE_NAMES, TIER_STAGE, stationPlan, lineBlocks, loopBlocks, STATION } = await imp("trains/stations.js");
 const { ROUTES } = await imp("trains/routes_data.js");
+// the dead end at a terminus (game branch claude/terminus-buffer-stops; a through station on code without it)
+const { deadEndAt = () => 0 } = await imp("trains/routes.js");
 const { PLOT_PLAN: PLOTS } = await imp("plots/config.js");
 const { takenAt } = await imp("settle/hallmove.js");
 
@@ -171,7 +177,7 @@ function planOps(plan, style, origin, forward, { clearBox, extraColumns = [], re
 const designs = {};
 function designFor(id, forward) {
   const fk = `${forward.x},${forward.z}`;
-  const d = (designs[id] ??= { id, name: BUILDING[id]?.name ?? id, faces: {} });
+  const d = (designs[id] ??= { id, name: BUILDING[id]?.name ?? NAMES[id] ?? id, faces: {} });
   if (d.faces[fk]) return d;
   const plan = drawBuilding(id, STYLE), style = styleFor(STYLE), frame = frameFor(forward);
   const b = plan.bounds();
@@ -337,7 +343,7 @@ function markerOps(tier) {
 }
 
 // --- the plot buildings: where each design sits on each plot (plotmarker.js seatInWorld / choicesFor)
-const offerIds = [...BUILDINGS.map((b) => b.id), ...WORKS.map((w) => w.id)];
+const offerIds = [...new Set([...BUILDINGS.map((b) => b.id), ...WORKS.map((w) => w.id), "barracks"])];
 function seatFor(slot, id) {
   const plan = drawBuilding(id, STYLE);
   const seat = seatOnSlot(slot, plan.bounds());
@@ -351,7 +357,8 @@ function seatFor(slot, id) {
 const slotOut = slots.map((s) => {
   const offers = [];
   for (const id of offerIds) {
-    const rule = plotFit(id, s, allClasses);
+    // offered wherever it could ever go, a fallback size too (the page checks plotFit again with the plots free then)
+    const rule = plotFit(id, s, new Set());
     if (!rule.ok && !rule.tagged) continue;
     const seat = seatFor(s, id);
     if (!seat) continue;
@@ -395,12 +402,13 @@ if (stop) {
   const at = near ? { x: near.t[0] + CX, y: near.t[1], z: near.t[2] + CZ, dir: near.t[4] } : { x: stop.x, y: stop.y, z: stop.z, dir: 0 };
   const forward = at.dir === 2 ? { x: 0, z: Math.sign(CZ - at.z) || 1 } : { x: Math.sign(CX - at.x) || 1, z: 0 };
   station = { origin: { x: at.x, y: at.y, z: at.z }, forward };
+  station.end = deadEndAt(ROUTES, station.origin, forward);
 }
 const TRACK_PID = (kind, dir) => pid("siege:track", { "siege:kind": kind, "siege:dir": dir });
 function stationOps(stage, prevStage) {
-  const plan = stationPlan(STYLE, stage), style = plan.style ?? styleFor(STYLE);
+  const plan = stationPlan(STYLE, stage, station.end), style = plan.style ?? styleFor(STYLE);
   const removeFirst = prevStage ? (() => {
-    const old = stationPlan(STYLE, prevStage), fr = frameFor(station.forward), out = [];
+    const old = stationPlan(STYLE, prevStage, station.end), fr = frameFor(station.forward), out = [];
     for (const c of old.cells.values()) if (c.role !== "air") out.push(toWorld(fr, station.origin, c.x, c.y, c.z));
     for (const col of old.columns.values()) for (let y = 1; y <= col.top; y++) out.push(toWorld(fr, station.origin, col.x, y, col.z));
     return out;
@@ -552,7 +560,7 @@ const soft = pal.map(([id]) => (SOFT.test(id) || id === "siege:plot_marker" ? 1 
 const out = {
   plot: tw.name, region: plotCfg?.region, style: STYLE, layout: layout.label, layoutIndex: Number(LAYOUT), center: [CX, CZ], base: BASE, half: HALF,
   gate: gateDirName, tierNames: TIER_NAMES, walls: tw.walls, wallLevelNames: WALL_LEVELS.map((l) => l?.name ?? null), tierCap: WALLS.tierCap,
-  hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])),
+  hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
   designs, trees, rules, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
