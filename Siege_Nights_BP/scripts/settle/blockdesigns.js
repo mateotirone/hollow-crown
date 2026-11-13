@@ -2,6 +2,9 @@
 // Same local frame as every settlement building: the block at (0, 1, 0) just outside the front, +z runs inside.
 //   guardhouse   the Barracks: a stone guardhouse with arrow-slit windows, bunks, a weapons corner and a roof walk
 //   armoury      the Quartermaster's Desk: an open shop front, the desk as its counter, stores behind
+//   dragon stable  the Dragon Roost: the Emberwaste's kasbah stable, stalls and a loft, with the nursery of Hatching
+//                Braziers joined on the east (map/structures/dragon_stable_skill.py). Dragons are the Emberwaste's, so it
+//                is built in the Emberwaste's way wherever it stands (an ally elsewhere raising one gets the same).
 // The Stables barn and the Breeder's yard live with the horses (horses/barndesign.js).
 
 import { Plan } from "../townhall/halls.js";
@@ -21,6 +24,10 @@ function designed(key, styleId, plain) {
 
 export const drawGuardhouse = (styleId) => designed("barracks", styleId, plainGuardhouse);
 export const drawArmoury = (styleId) => designed("quartermaster", styleId, plainArmoury);
+export const drawDragonStable = (styleId) => {
+  const d = BARN_DESIGNS.emberwaste?.dragon_stable;
+  return d ? drawDesigned(new Plan(styleFor(styleId)), d, "bn:emberwaste:dragon_stable") : plainArmoury(styleId);
+};
 
 export function plainGuardhouse(styleId) {
   const p = new Plan(styleFor(styleId));
@@ -60,4 +67,5 @@ export function plainArmoury(styleId) {
 export const BLOCK_BUILDS = {
   "siege:barracks": { name: "guardhouse", draw: drawGuardhouse },
   "siege:quartermaster_desk": { name: "armoury", draw: drawArmoury },
+  "siege:dragon_roost": { name: "dragon stable", draw: drawDragonStable },
 };
