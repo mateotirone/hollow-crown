@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**108 builds:** 1 not started, 26 designed, 15 in viewer, 66 in game.
+**109 builds:** 1 not started, 26 designed, 16 in viewer, 66 in game.
 
 Statuses:
 
@@ -171,4 +171,5 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 |---|---|---|---|---|---|---|
 | Everwake: the city on its cloud | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. Style guide .claude/skills/minecraft-builder/regions/everwake.md. |
 | Everwake with the Needle and the cloud sea | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. |
+| Everwake air boat (blimp and gondola) | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/airboat.py` | Mateo OK 2026-11-13. cells(ring_at, heading) places it at a mooring; MOORING gives the deck, bow gate and side door from the nose ring. |
 | Everwake sky model (floating entity seen from the ground) | Everwake, the city in the sky | not started |  | Design the Cloud City and flight |  | An entity model, not a block build. |

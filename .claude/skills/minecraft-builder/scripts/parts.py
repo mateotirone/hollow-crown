@@ -13,6 +13,7 @@ Conventions: rect = [x0, z0, x1, z1] inclusive block indices; sides n (z0), s (z
 "at" along a wall = offset from the wall's centre block, positive to the right as seen from outside.
 Logical facing as in map/structures/bp.py: stairs face their tall side; trapdoors/doors Java-style.
 """
+import math
 from materials import h3
 
 DIRS = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
@@ -2089,6 +2090,95 @@ def bridge(ctx, s):
 
 
 PARTS["bridge"] = bridge
+
+
+# ---- sideways bodies of revolution (air boat envelopes, barrels on their side, hulls of airships) ----
+# The shape fitter reads up/down surfaces as a height field, which suits domes but leaves a body lying on its
+# side jagged and full of holes. A body along a horizontal axis is fitted ring by ring instead: each slice
+# across the axis is a circle of full blocks, upright stairs on the top half, upside-down stairs underneath and
+# slabs at the crown and keel, with radii held to half blocks so rings run in clean bands (air boat, 2026-11-13).
+HEADING = {   # nose direction -> (x, z) of local (u along the axis, w across, +w = starboard), and local facing map
+    "e": (lambda u, w: (u, w), {"e": "e", "w": "w", "s": "s", "n": "n"}),
+    "w": (lambda u, w: (-u, -w), {"e": "w", "w": "e", "s": "n", "n": "s"}),
+    "s": (lambda u, w: (-w, u), {"e": "s", "w": "n", "s": "w", "n": "e"}),
+    "n": (lambda u, w: (w, -u), {"e": "n", "w": "s", "s": "e", "n": "w"}),
+}
+
+
+def turn_cell(cell, at, heading):
+    """A local cell [u, y, w, block, {states}] (u east = toward the nose) placed at `at` facing `heading`."""
+    u, y, w, b = cell[:4]
+    st = dict(cell[4]) if len(cell) > 4 else {}
+    xz, fm = HEADING[heading]
+    dx, dz = xz(u, w)
+    if "facing" in st: st["facing"] = fm[st["facing"]]
+    if st.get("axis") in ("x", "z") and heading in ("n", "s"): st["axis"] = "z" if st["axis"] == "x" else "x"
+    return [at[0] + dx, at[1] + y, at[2] + dz, b] + ([st] if st else [])
+
+
+def profile_r(profile, u):
+    if u <= profile[0][0]: return profile[0][1]
+    for (u0, r0), (u1, r1) in zip(profile, profile[1:]):
+        if u0 <= u <= u1: return r0 + (r1 - r0) * (u - u0) / (u1 - u0)
+    return 0.0
+
+
+def ring_fit(R, q=4):
+    """One circular slice of radius R round the centre of block (0, 0): {(y, w): (kind, facing, half)}."""
+    out, n = {}, int(R) + 2
+    opts = [("full", None, None, lambda i, j: True), ("slab", None, "bottom", lambda i, j: i < q // 2),
+            ("slab", None, "top", lambda i, j: i >= q // 2),
+            ("stairs", "n", "bottom", lambda i, j: i < q // 2 or j < q // 2), ("stairs", "s", "bottom", lambda i, j: i < q // 2 or j >= q // 2),
+            ("stairs", "n", "top", lambda i, j: i >= q // 2 or j < q // 2), ("stairs", "s", "top", lambda i, j: i >= q // 2 or j >= q // 2)]
+    rank = {"air": 0, "full": 0, "stairs": 1, "slab": 2}
+    for y in range(-n, n + 1):
+        for w in range(-n, n + 1):
+            m = [[(w - .5 + (j + .5) / q) ** 2 + (y - .5 + (i + .5) / q) ** 2 <= R * R for j in range(q)] for i in range(q)]
+            tot = sum(map(sum, m))
+            if tot == 0: continue
+            if tot == q * q: out[(y, w)] = ("full", None, None); continue
+            mis = lambda f: sum(1 for i in range(q) for j in range(q) if f(i, j) != m[i][j])
+            best = min([("air", None, None, lambda i, j: False)] + opts, key=lambda o: (mis(o[3]), rank[o[0]]))
+            if best[0] != "air": out[(y, w)] = best[:3]
+    return out
+
+
+def envelope_cells(profile, belly="light_gray_wool", top="white_wool", rib=None, rib_every=8, cap=None, cap_len=(2, 4),
+                   belly_rows=5, shell=1):
+    """Local cells [u, y, w, block, {states}] of a body of revolution along u (tail u 0, nose at the last profile u),
+    axis through the centre of block row y 0. profile [[u, r], ...]. Two-row dithered seam from belly to top
+    `belly_rows` under the axis; `rib` rings every `rib_every`; `cap` on the last cap_len[1] / first cap_len[0] slices."""
+    L = int(profile[-1][0])
+    rings = {u: ring_fit(max(0.8, math.floor(profile_r(profile, u) * 2 + .5) / 2)) for u in range(0, L + 1)}
+    solid = lambda u, y, w: rings.get(u, {}).get((y, w), ("",))[0] == "full"
+    out = []
+    for u, cells in rings.items():
+        for (y, w), (kind, f, h) in cells.items():
+            if kind == "full" and shell and all(solid(*p) for p in ((u + 1, y, w), (u - 1, y, w), (u, y + 1, w), (u, y - 1, w), (u, y, w + 1), (u, y, w - 1))):
+                continue
+            if cap and (u > L - cap_len[1] or u < cap_len[0]): b = cap
+            elif rib and u % rib_every == 0 and rib_every <= u <= L - cap_len[1]: b = rib
+            else:
+                t = y + belly_rows
+                b = belly if t < 0 or (t < 2 and (u + w + t) % 2 == 0) else top
+            if kind == "full": out.append([u, y, w, b])
+            elif kind == "slab": out.append([u, y, w, b + "_slab", {"half": h}])
+            else: out.append([u, y, w, b + "_stairs", {"facing": f, "half": h}])
+    return out
+
+
+def envelope(ctx, s):
+    """Part "envelope": a body of revolution lying along a horizontal axis, fitted ring by ring (see ring_fit).
+    at [x, y, z] = the tail-end centre block of the axis, heading e/w/n/s = the way the nose points, profile
+    [[u, r], ...] from the tail (u 0) to the nose, belly / top / rib / cap blocks (with _stairs and _slab forms),
+    rib_every, belly_rows (rows under the axis where the belly colour gives way to the top)."""
+    for c in envelope_cells(s["profile"], s.get("belly", "light_gray_wool"), s.get("top", "white_wool"), s.get("rib"),
+                            s.get("rib_every", 8), s.get("cap"), tuple(s.get("cap_len", (2, 4))), s.get("belly_rows", 5)):
+        x, y, z, b, *st = turn_cell(c, s["at"], s.get("heading", "e"))
+        ctx.set(x, y, z, "frame", raw=b, **(st[0] if st else {}))
+
+
+PARTS["envelope"] = envelope
 
 
 def run(ctx, pt):
