@@ -150,9 +150,12 @@ def jointed_geometry():
     bones += limb("leftArm", "body", [5, 22, 0], [4, 12, -2], [32, 48], "leftSleeve", [48, 48])
     bones += limb("rightLeg", "root", [-1.9, 12, 0], [-3.9, 0, -2], [0, 16], "rightPants", [0, 32])
     bones += limb("leftLeg", "root", [1.9, 12, 0], [-0.1, 0, -2], [16, 48], "leftPants", [0, 48])
-    # held items ride the forearm so they follow a bent elbow
-    bones.append({"name": "rightItem", "parent": "rightForearm", "pivot": [-6, 15, 1], "locators": {"lead_hold": [-6, 15, 1]}})
-    bones.append({"name": "leftItem", "parent": "leftForearm", "pivot": [6, 15, 1]})
+    # Held items hang on the UPPER arm, exactly like vanilla (root>waist>body>rightArm>rightItem). Bedrock only
+    # attaches held items when a second player geometry keeps the default bone path to rightItem; with the
+    # item bone under the forearm every held item floated at the chest or face (playtest 1.2.1116). The
+    # animations fold the elbow bend into the shoulder while that hand holds something (build_player_anims.py).
+    bones.append({"name": "rightItem", "parent": "rightArm", "pivot": [-6, 15, 1], "locators": {"lead_hold": [-6, 15, 1]}})
+    bones.append({"name": "leftItem", "parent": "leftArm", "pivot": [6, 15, 1]})
     return {
         "format_version": "1.12.0",
         "minecraft:geometry": [{
