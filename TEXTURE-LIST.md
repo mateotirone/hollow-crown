@@ -587,6 +587,17 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
 | Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
 
+## Faceless statues, 3D (2026-11-13, thread "Make the Faceless statues 3D figures"; `studio/statues/build_statues.py`)
+
+The forty statues of King Oswin are one entity (`siege:faceless_statue`) with a model and skin per age. The skins are painted
+from the models by the script: rerun it whenever a model changes (it rewrites the models, skins, entity files and
+`scripts/statues/model_data.js`). To repaint by hand, keep each file's size and its face layout (the script prints them).
+
+| Asset | File | Status |
+|---|---|---|
+| Faceless statue skins ×5 (weathered sandstone robe with folds and chips, blank smooth pale-quartz face in the hood's shadow, pale quartz hands, cut red sandstone crown ring, staff, sword and bowl; per-face UVs, opaque) | `textures/entity/statues/faceless_statue_<age>.png` for boy (128×128), youth, young_king, king, old_king (256×128) | First pass, awaiting your review |
+| Faceless statue models ×5 (Blockbench format; bones root, legs, body, head, crown, arm_r, stub, arms_folded/staff/sword/bowl, rubble) | `models/entity/statues/faceless_statue_<age>.geo.json` | First pass, awaiting your review |
+
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |
 |---|---|---|

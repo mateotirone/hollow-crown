@@ -1,0 +1,10 @@
+[
+{"id": "gate_1", "x": 857, "z": 611, "face": "w", "age": "old_king", "hold": "staff", "wear": "whole", "size": 7.3, "plinth": 4},
+{"id": "gate_2", "x": 843, "z": 611, "face": "e", "age": "old_king", "hold": "folded", "wear": "whole", "size": 7.3, "plinth": 4},
+{"id": "gate_3", "x": 857, "z": 619, "face": "w", "age": "old_king", "hold": "bowl", "wear": "whole", "size": 7.3, "plinth": 4},
+{"id": "gate_4", "x": 843, "z": 619, "face": "e", "age": "old_king", "hold": "folded", "wear": "headless", "size": 7.3, "plinth": 4},
+{"id": "gate_fallen_1", "x": 865, "z": 584, "face": "s", "age": "old_king", "hold": "folded", "wear": "fallen", "size": 7.3, "plinth": 0},
+{"id": "gate_fallen_2", "x": 835, "z": 584, "face": "s", "age": "old_king", "hold": "staff", "wear": "fallen", "size": 7.3, "plinth": 0},
+{"id": "gate_fallen_3", "x": 865, "z": 623, "face": "s", "age": "old_king", "hold": "bowl", "wear": "fallen", "size": 7.3, "plinth": 0},
+{"id": "gate_fallen_4", "x": 835, "z": 623, "face": "s", "age": "old_king", "hold": "folded", "wear": "fallen", "size": 7.3, "plinth": 0}
+]

@@ -183,6 +183,8 @@ export function talk(player, title, body, buttons = ["Thank you."]) {
 
 // ---------- sites ----------
 const sites = new Map();
+// Has this unlock site been built in this world yet? (the Faceless statues wait for the Gate's precinct: statues/index.js)
+export const siteBuilt = (id) => !!sites.get(id)?.data?.built;
 const blockHandlers = new Map(); // block type -> (player, block) => void
 world.afterEvents.playerInteractWithBlock.subscribe(({ player, block }) => {
   const fn = blockHandlers.get(block.typeId);

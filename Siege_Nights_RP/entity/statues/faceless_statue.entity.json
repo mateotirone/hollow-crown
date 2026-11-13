@@ -1,0 +1,37 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:faceless_statue",
+      "materials": {
+        "default": "entity"
+      },
+      "textures": {
+        "t0": "textures/entity/statues/faceless_statue_boy",
+        "t1": "textures/entity/statues/faceless_statue_youth",
+        "t2": "textures/entity/statues/faceless_statue_young_king",
+        "t3": "textures/entity/statues/faceless_statue_king",
+        "t4": "textures/entity/statues/faceless_statue_old_king"
+      },
+      "geometry": {
+        "g0": "geometry.siege_faceless_statue_boy",
+        "g1": "geometry.siege_faceless_statue_youth",
+        "g2": "geometry.siege_faceless_statue_young_king",
+        "g3": "geometry.siege_faceless_statue_king",
+        "g4": "geometry.siege_faceless_statue_old_king"
+      },
+      "animations": {
+        "pose": "animation.siege_faceless_statue.pose"
+      },
+      "scripts": {
+        "animate": [
+          "pose"
+        ]
+      },
+      "enable_attachables": false,
+      "render_controllers": [
+        "controller.render.siege_faceless_statue"
+      ]
+    }
+  }
+}
