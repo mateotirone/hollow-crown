@@ -108,7 +108,11 @@ async function census(owner, arrivals) {
       const beds = bedsCounted(t);
       if (beds !== st.beds) changed = true;
       st.beds = beds;
-      st.bedSpots = t.beds.slice(0, beds);
+      // the founder's own bed (basebuilds.js) is theirs: never a settler's
+      const box = worldBox(town, s), floorY = floorOf(town, s, st);
+      const head = st.ownerHead ?? (st.ownerBed && st.forward && { x: st.ownerBed.x + st.forward.x, y: st.ownerBed.y, z: st.ownerBed.z + st.forward.z });
+      const mine = (b) => head && b.x + box.x0 === head.x && b.y + floorY === head.y && b.z + box.z0 === head.z;
+      st.bedSpots = t.beds.filter((b) => !mine(b)).slice(0, beds);
     }
     if (st.hand) {
       const ok = matches(t).find((m) => m.id === st.building)?.ok ?? false;
