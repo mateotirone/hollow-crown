@@ -172,7 +172,8 @@ async function howItWorks(player) {
   await showWhenFree(player, new ActionFormData().title(Title()).body(body).button("Got it"));
 }
 
-export async function mainMenu(player) {
+// kind: "king" or "mob" for a board that goes straight to that kind of battle
+export async function mainMenu(player, kind) {
   if (!store.data.seen[player.id]) await howItWorks(player);
   if (match) {
     const f = match.fighters[player.id];
@@ -183,6 +184,8 @@ export async function mainMenu(player) {
       .body(`A fight ${what} is on: ${who}.\n\nFind a seat in the stands and watch. The arena is free again when it ends.`)
       .button("Close"));
   }
+  if (kind === "king") return battleKings(player);
+  if (kind === "mob") return battleMob(player);
   const r = await showWhenFree(player, new ActionFormData().title(Title())
     .body("What will it be?")
     .button("Battle a King\n§8fight other players")
@@ -643,6 +646,8 @@ function isArenaBlock(block) {
   const a = layout();
   if (block.dimension.id !== a.dim) return undefined;
   const l = block.location;
+  const board = (a.signs ?? []).find((sg) => same(l, sg));
+  if (board) return { sign: true, kind: board.kind };
   if (same(l, a.sign)) return { sign: true };
   const room = a.rooms.findIndex((r) => same(l, r.board));
   return room >= 0 ? { room } : undefined;
@@ -657,7 +662,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   const player = e.player;
   system.run(() => {
     if (!isReady()) return;
-    if (hit.sign) return mainMenu(player);
+    if (hit.sign) return mainMenu(player, hit.kind);
     if (match?.fighters[player.id]) return roomMenu(player);
     say(player, `§7This is the ${roomLabel(hit.room)}§7 room. Start a battle at the board in the entrance hall.`);
   });
@@ -666,7 +671,11 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
 addMenuLabel({
   block: "minecraft:lectern", name: "Arena", hint: "Click",
   where: (b) => !!isArenaBlock(b),
-  text: (b) => (isArenaBlock(b)?.sign ? `§6${Title()}\n§7Click: start a battle` : "§6Your room\n§7Click: pick your kit, Start Battle"),
+  text: (b) => {
+    const hit = isArenaBlock(b);
+    if (!hit?.sign) return "§6Your room\n§7Click: pick your kit, Start Battle";
+    return `§6${Title()}\n§7Click: ${hit.kind === "king" ? "battle a King" : hit.kind === "mob" ? "battle a beast" : "start a battle"}`;
+  },
 });
 
 world.afterEvents.entitySpawn.subscribe(({ entity }) => {

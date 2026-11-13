@@ -28,6 +28,19 @@ addTests("arena", {
       assert(inBox(g, r.gate.from, r.gate.to), "gate centre is in its box");
     }
   },
+  "the real arena: gates 3x4 between room and floor, boards and ways out where they should be": () => {
+    const a = ARENA;
+    assert(a.seats.length >= 60, "enough seats for a full crowd");
+    for (const r of a.rooms) {
+      const rows = gateRows(r.gate);
+      assertEqual(rows.length, 4, `${r.color} gate is 4 high`);
+      assertEqual(rows[0].length, 3, `${r.color} gate is 3 wide`);
+      const g = rows[1][1];
+      assert(flat(g, a.center) < flat(r.spawn, a.center), `${r.color} gate faces the floor`);
+      assert(flat(r.out, a.center) < flat(g, a.center), `${r.color} way out is on the floor side`);
+      assert(!hasLeft(r.out, a, r, 6) && !hasLeft(r.spawn, a, r, 6) && !hasLeft(r.board, a, r, 6), `${r.color} room and way out count as in`);
+    }
+  },
   "rooms spread round the ring": () => {
     assertEqual(spreadRooms(2), [0, 6]);
     assertEqual(spreadRooms(3), [0, 4, 8]);

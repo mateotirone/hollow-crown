@@ -2,6 +2,8 @@
 // real coordinates into ARENA below, generated from its build, in exactly this shape. Until then ARENA is a
 // placeholder ring at Kingsrest, and `/scriptevent siege:arena_test` can put a rough test arena anywhere
 // (it saves its own centre and ringLayout() below describes it).
+
+import { ARENA_DATA } from "./layout_data.js";
 //
 //   name        the arena's name, used in every sign and message (Mateo is picking it; "the Arena" until then)
 //   dim         dimension id
@@ -16,6 +18,7 @@
 //     out       a floor spot just past the gate
 //   seats       standing spots on the tiers; the crowd uses a share of them, only while a fight is on
 //   sign        the "Start a battle" block in the entrance hall (a lectern, or any clickable block)
+//   signs       optional: [{ kind: "king" | "mob", x, y, z }], boards that go straight to one kind of battle
 
 export const ROOM_COLORS = ["red", "orange", "yellow", "lime", "green", "cyan", "light_blue", "blue", "purple", "magenta", "pink", "white"];
 
@@ -75,6 +78,6 @@ export function ringLayout(center, name = "the Arena", dim = "minecraft:overworl
   };
 }
 
-// The live arena. PLACEHOLDER until the build thread's PR replaces this with the real build's numbers:
-// a ring at the south-west of Kingsrest's plaza.
-export const ARENA = ringLayout({ x: -150, y: 70, z: -60 }, "the Arena");
+// The live arena: the real build at Kingsrest (layout_data.js, copied from the build's map/arena-layout.json).
+// Its name stays "the Arena" until Mateo picks one: set it in ARENA_DATA.name (or here).
+export const ARENA = { ...ARENA_DATA, name: ARENA_DATA.name ?? "the Arena" };
