@@ -49,6 +49,42 @@ export const BREEDS = {
 export const REGIONAL_BREEDS = ["courser", "destrier", "runner", "sandstrider", "mirepony"];
 export const CROSSBRED_PROP = 6;
 
+// ---------- The starter cob ----------
+// Mateo 2026-11-13: every new player gets a starter horse once, slow, a poor jumper, in a coat that fits where they
+// start. A working cob from the player's region (props 7..11, coats painted by studio/art/build_steeds.py).
+// Its stats are fixed below level 1 (entity groups siege:speed_0 / siege:jump_0): it can't be trained, bred, shod,
+// fitted with saddle kits, learn perks or take a rite, and it earns no XP. It doesn't take a stall from your roster.
+// It always answers its Horse Whistle, from anywhere, and if it falls it limps home after a day.
+export const COB = {
+  speed: 0.15, jump: 0.4, // must match COB_SPEED / COB_JUMP in studio/build_horses.py
+  bps: 6.3, jumpBlocks: 1.1, // what those mean, for the sheet
+  stats: { speed: 0, jump: 0, health: 1, stamina: 1 },
+  recoverTicks: 24000, // a fallen cob is back on its feet after one in-game day
+};
+export const STARTER_COBS = {
+  vale: { name: "Vale Plough-Cob", prop: 7, region: "Aldmere Vale" },
+  frostmarch: { name: "Frostmarch Sledge-Cob", prop: 8, region: "Frostmarch" },
+  saltreach: { name: "Saltreach Cart-Cob", prop: 9, region: "Saltreach" },
+  emberwaste: { name: "Emberwaste Pack-Cob", prop: 10, region: "Emberwaste" },
+  blackfen: { name: "Blackfen Peat-Cob", prop: 11, region: "Blackfen" },
+};
+const COB_NAMES = ["Biscuit", "Turnip", "Old Tom", "Dobbin", "Nettle", "Plodder", "Mudlark", "Sixpence", "Burdock", "Patch",
+  "Crumpet", "Haystack", "Tuppence", "Puddle", "Bumble"];
+export const isCob = (rec) => !!rec?.starter;
+// A fallen cob is on its feet again once a day has passed (it stays "fallen" until it is whistled for or led out)
+export const cobBack = (rec, now) => isCob(rec) && rec.status === "fallen" && now >= (rec.fallenAt ?? 0) + COB.recoverTicks;
+
+// A starter cob's record for this player and region key ("vale" ... "blackfen"; anything else is the Vale)
+export function newCob({ uid, owner, ownerName, region, rand = Math.random }) {
+  const key = STARTER_COBS[region] ? region : "vale";
+  const cob = STARTER_COBS[key];
+  const rec = newRecord({ uid, owner, ownerName, name: COB_NAMES[Math.floor(rand() * COB_NAMES.length)] });
+  return Object.assign(rec, {
+    starter: true, region: key, breed: "cob", breedName: cob.name, prop: cob.prop,
+    stats: { ...COB.stats }, gearSaddle: true, fallenAt: 0,
+  });
+}
+
 export const TRAITS = {
   roadborn: { name: "Roadborn", desc: "Faster on roads: path, gravel, cobblestone and stone brick." },
   snowbreaker: { name: "Snowbreaker", desc: "Faster on snow and ice, and never freezes in powder snow." },
@@ -140,6 +176,8 @@ export const STABLES_LEVELS = [
   { level: 2, roster: 5, trainCap: 4, cost: [{ item: "minecraft:hay_block", count: 32 }, { item: "minecraft:iron_ingot", count: 16 }, { item: "minecraft:leather", count: 8 }], unlocks: "Reviving fallen horses" },
   { level: 3, roster: 8, trainCap: 5, cost: [{ item: "minecraft:diamond", count: 8 }, { item: "minecraft:golden_carrot", count: 32 }, { item: "minecraft:gold_block", count: 4 }], unlocks: "The Warhorse and Glimstrider rites" },
 ];
+// Horses that take a stall: everyone's starter cob rides free
+export const countsToRoster = (rec) => !isCob(rec);
 export const rosterCap = (stablesLevel) => (stablesLevel > 0 ? STABLES_LEVELS[Math.min(3, stablesLevel)].roster : 1);
 export const trainCap = (stablesLevel) => (stablesLevel > 0 ? STABLES_LEVELS[Math.min(3, stablesLevel)].trainCap : 0);
 
@@ -149,7 +187,8 @@ export const xpToNext = (level) => 150 + 60 * level;
 // Adds XP to a record; returns { levels, perks } gained
 export function addXp(rec, amount) {
   const out = { levels: 0, perks: 0 };
-  if (rec.level >= HORSE_SETTINGS.maxLevel) return out;
+  if (rec.level >= HORSE_SETTINGS.maxLevel || isCob(rec)) return out; // a cob never gets better
+
   rec.xp += amount;
   while (rec.level < HORSE_SETTINGS.maxLevel && rec.xp >= xpToNext(rec.level)) {
     rec.xp -= xpToNext(rec.level);
@@ -180,6 +219,7 @@ export function bonusesOf(rec) {
 }
 
 export function effectiveStats(rec) {
+  if (isCob(rec)) return { ...COB.stats }; // fixed: no gear, perk or training changes a cob
   const b = bonusesOf(rec);
   const out = {};
   for (const s of STATS) out[s] = Math.max(1, Math.min(MAX_EFFECTIVE[s], rec.stats[s] + b[s]));

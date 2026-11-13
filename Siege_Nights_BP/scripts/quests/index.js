@@ -29,6 +29,7 @@ import { hasCartsong, carterStation, stationSpot } from "../undertow/story.js";
 import { WARDS } from "../plots/config.js";
 import { firstFacts } from "../newplayer/firstnights.js";
 import { farmerFacts } from "../economy/api.js";
+import { cobFacts } from "../horses/starter.js";
 import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import { markTalk, talkSpot, forget } from "./marks.js";
 import "./tests.js";
@@ -99,6 +100,7 @@ function factsOf(player) {
     morvane: !!reach.source || !!prog.morvane,
     first: (() => { try { return firstFacts(player); } catch { return undefined; } })(),
     farmer: (() => { try { return farmerFacts(player); } catch { return undefined; } })(),
+    cob: (() => { try { return cobFacts(player); } catch { return undefined; } })(),
   };
 }
 

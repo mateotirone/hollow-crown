@@ -796,6 +796,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
 | `mob.enderdragon.flap` | 2 | codex, roletrials |
 | `mob.evocation_illager.cast_spell` | 2 | bestiary, codex |
+| `mob.horse.idle` | 2 | horses (2) |
 | `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
@@ -817,7 +818,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
-| `mob.horse.idle` | 1 | horses |
 | `mob.phantom.swoop` | 1 | bestiary |
 | `mob.ravager.stun` | 1 | bestiary |
 | `mob.villager.death` | 1 | bestiary |

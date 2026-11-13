@@ -123,12 +123,15 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //   dim, pos: where the player is                                        site: the named source site { id, name, x, z }
 //   rift: the Rift, once open { x, z, name }                             hollow: { cartsong, choir, carter: { x, z } }
 //   morvane: Morvane has fallen (world or player)                      farmer: { at?: { x, z }, sold, tag } once you have a settlement
+//   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
 // }
 export function questsFor(f) {
   const out = [];
   // Until the first siege is held, getting ready for it comes first (newplayer/firstnights.js)
   const first = f.dim !== UNDERTOW && !f.morvane ? firstStep(f.first) : undefined;
   if (first) out.push(first);
+  const ride = cobQuest(f);
+  if (ride) out.push(ride);
   const farm = farmerQuest(f);
   if (farm) out.push(farm);
   const main = mainQuest(f);
@@ -136,6 +139,17 @@ export function questsFor(f) {
   const side = first ? undefined : sideQuest(f, main);
   if (side) out.push(side);
   return out;
+}
+
+// The starter horse (horses/starter.js): shown from the moment the cob is given until it is first ridden
+export function cobQuest(f) {
+  if (f.dim === UNDERTOW || !f.cob) return undefined;
+  const there = f.cob.at && (f.cob.dim ?? OVERWORLD) === f.dim;
+  return {
+    id: "cob", title: `Ride ${f.cob.name}, your horse`,
+    hint: "A slow old cob, but quicker than walking. Lost it? Blow your Horse Whistle and it comes from anywhere.",
+    target: there ? at(f.cob.name, f.cob.at.x, f.cob.at.z, f.dim) : undefined,
+  };
 }
 
 // Your first Regals (Mateo 2026-11-13): sell wheat to the Farmer in your own Hamlet (economy/hamlet.js). Shows from
