@@ -264,7 +264,7 @@ pot on top.
 | `spire` | `rect` (the tower), `y` (`"top"` default), `rows` (3), `kind` (`stepped` / `broach`), `overhang`, `roof`, `trim`, `finial` (`spire_block` default / `rod` / `tall` / `short` / `none`) | sits on the walls of whatever is built in `rect` and replaces its roof: an eave ring over the overhang with upside-down trim under it, the tower's width one row, then rings stepping in one block every `rows` rows (stairs stacked on stairs, full corners), then the add-on's spire top block `siege:spire_roof` on the full top block (or a wall-post finial with a lightning rod). **Never a slab under a spire top** (Mateo 2026-11-12: it floats): the engine swaps any slab under `siege:spire_roof` for the full block, in every build, `place` cells included. `broach` leaves the corners off the upper rings so it turns octagonal (06 steep roofs) |
 | `belfry` | `rect`, `y` (`"top"` on a tower, `"roof"` on a ridge, or a number), `h` (4), `pier`, `deck`, `trim`, `louvres`, `bell` (true), `cap` (`hip` / `spire` / `none`), `roof`, `finial`, `base` | an open bell storey: deck (built up from the roof on a ridge), corner piers (walls when 3 wide), a round-angle head on every face 5 or more wide, a beam ring, a beam across with a hanging bell, louvres of open trapdoors flush to each face, then a spire cap (rows 1 = a hip cap) |
 | `clock_face` | `rect` + `side` + `y` (+ `along`) or `at` + `side`; `size` (3 / 5), `time` ("3:00"), `face` (calcite), `hand` (polished_blackstone), `hub` (button), `frame` | a face flush in the wall, hands from the hub (minute on the 12 for whole hours, both snapped to the nearest eighth), a button hub; a window's sill, shutters or lantern in front go. Keep it clear of the eave row |
-| `interior` | `use`, `levels` [{`rect` (inside the walls), `floor_y`, `height`}], `region`, `rooms`, `stairs`, `furnish`, `lights` | stage 8 for shells the `house` part did not make: stairs or ladders between the levels, rooms by use, a one-block walkway, lanterns (08-interiors). The `house` part runs the same stage itself from its `interior` key (default `home`; `false` for none; `attic` adds a room under the roof) |
+| `interior` | `use`, `levels` [{`rect` (inside the walls), `floor_y`, `height`}], `region`, `rooms`, `stairs`, `furnish`, `lights` | stage 8 for shells the `house` part did not make: stairs or ladders between the levels, rooms by use, a one-block walkway, lanterns (08-interiors). The `house` part runs the same stage itself from its `interior` key (default `home`; `false` for none; `attic` adds a room under the roof; `hatch` adds a ladder from the top storey to a trapdoor hatch in a flat roof, kept by a belfry built on top) |
 | `wheel` | `at` (axle centre), `axis` (axle direction x / z), `r` (3-5), `width` (1-2), `wood`, `paddles`, `axle` | a waterwheel: plank rim, fence spokes, a paddle at every eighth, a stripped log axle into the wall |
 
 ## Round towers, leaning towers, galleries, boardwalks and curved roofs (2026-11-12)
@@ -298,3 +298,13 @@ Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses 
 wings joined to gable roofs at odd angles, and hand-made interiors beyond the interior stage's rooms. Each is described with its exact block pattern in `build-instructions/`
 (02-frame, 05, 06, 07 and reference/shapes.md): write the cells with `place`, or add the part to `parts.py`
 and this table. A square tower is a narrow house with `"roof": {"type": "hip", "pitch": 2}`.
+
+## Ruins (2026-11-13)
+
+`"ruin": {"seed": 13, "holes": 0.07, "cap": [[x0, z0, x1, z1, top, jag], ...]}` on a spec turns the finished
+build into its ruin (`engine.ruin`, run after the blocks are resolved): everything in each cap box above `top`
+(plus up to `jag` of blocky noise) falls; clumps of wall are knocked out (`holes`); glass, doors, lanterns,
+bells and furniture go; timber and cloth mostly rot away; stone ages to mossy and cracked; copper oxidizes;
+anything left with no path to the ground is dropped (nothing floats); rubble lies at the foot of the walls.
+Design the restored building once and make the ruin from the same spec (the air boat station,
+`map/structures/everwake/station.py`).

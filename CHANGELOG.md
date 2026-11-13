@@ -140,6 +140,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Vanilla hostile mobs (zombies, skeletons, creepers, spiders, endermen, witches, slimes, pillagers, drowned, husks, strays, bogged) no longer spawn on their own: only the game's own creatures do. Mobs no longer break blocks and phantoms are off, set once per world when the first player spawns (an admin can turn them back on).
 
 ### Fixed
+- Held items sit in your hand again when you wear a Looking Glass look. Books, swords and everything else floated in front of your chest or face (since the elbows and knees update); now they hang from the hand like vanilla. A hand that holds something keeps its elbow straight in the custom moves, and an empty hand still bends.
+- Archive Shelves no longer refuse a Lore Tome by saying your Library already has it when it isn't on your shelves. Only shelves standing on your own land count now (the full shelves the showcase puts down no longer do), a shelf that was rebuilt or knocked down stops holding phantom tomes, and when a tome really is already shelved the message names it and says which shelf it is on.
 - The great seated figure behind the Faceless Gate is no longer a lumpy block sculpture: the stamp keeps only its stepped plinth, and the 3D seated statue stands on it.
 - Plot Markers no longer offer the Barracks on Medium plots it never fit; it needs a Large plot 15 wide and 17 deep, and Rival Lords and the charter plot-keeping now know that too.
 - Kingsrest no longer pays more by train than a town shop charges. Bread, coal, charcoal and wheat could be bought from a trader and shipped to Kingsrest at a profit, over and over; now anything a trader sells is bought at no more than four fifths of the cheapest shop price.
