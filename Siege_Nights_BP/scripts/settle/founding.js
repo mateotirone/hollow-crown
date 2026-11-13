@@ -15,10 +15,10 @@
 //   charterOf(owner) -> charterCheck result for the tier the town is at (charters.js)
 // Charters: siege wins decide the tier, but a town only grows past a tier once that tier's charter
 // (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
-// Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter)]
+// Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter) | road (lay the road out again)]
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
+import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
 import { REGION_TO_STYLE, CONTENTS } from "./config.js";
@@ -29,7 +29,9 @@ import { charterCheck, charterText, charterKeeps } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
-import { ROAD_BLOCKS, WEAK_ROAD, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
+import { ROAD_BLOCKS, WEAK_ROAD, ROAD_JOIN_PATHY, gateDir, roadEnd, roadLine, joinRoute, routeSides, gradeRoute, joinSurface } from "./basedata.js";
+import { ROAD_JOINS } from "./roadjoin_data.js";
+import { PLOT_PLAN } from "../plots/config.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
@@ -147,7 +149,7 @@ function* layOutJob(owner, tier, done) {
   }
   yield;
   yield* blendGround(dim, town, layout, tier);
-  if (tier === 0) yield* joinRoad(dim, town, layout);
+  if (tier === 0) yield* joinRoad(dim, town, layout, 0);
   for (const f of fixturesOf(layout, tier)) {
     try { placeFixture(owner, town, f); } catch (e) { console.warn(`[Hollow Crown] town fixture ${f.kind}: ${e}`); }
     yield;
@@ -225,33 +227,55 @@ function* blendGround(dim, town, layout, tier) {
   }
 }
 
-// ---------- joining the gate road to the map's roads (Mateo's playtest 2026-11-12) ----------
-// The settlement's road runs out through the gate and then stops; the map's own roads go past somewhere near. From
-// the end of the gate road, look out ahead (a widening fan, up to ROAD_REACH blocks) for the nearest map road, then
-// lay a 3-wide road to it at an even grade, the way the map's roads are cut: natural ground above it is cut away,
-// air below it filled, built things left alone, and the land either side stepped down to it by at most 1.
+// ---------- joining the gate road to the map's roads (Mateo's playtests 2026-11-12 and 2026-11-13) ----------
+// The settlement's road runs out through the gate and then must carry on to the map's own roads. Each map plot's
+// route is worked out on the map itself (tools/export_road_joins.mjs -> roadjoin_data.js): straight out along the
+// gate line to the edge of the settlement land, then round water and steep ground to the nearest road. Before that
+// the game only looked 48 blocks straight ahead, and at four plots no road is that close, so the road stopped dead
+// in the grass ("My path just ends"). A plot with no route (a test town) still looks ahead for a road as before.
+// The road is 5 wide like the gate road, graded to the ground at most 1 a block, in the map roads' own block mix:
+// natural ground above it is cut away, air and water below it filled, built things left alone, and the land either
+// side stepped to it by at most 1. Only ground the town has already laid out is kept off; the later tiers' gate road
+// lies on the route's straight part and is laid over it when the town grows (the old joiner kept off that too, which
+// left a gap of ten or more blocks between the town and the road). The far end of the route is held loaded with a
+// ticking area while it is worked, so it gets laid even with nobody standing out there.
+// Towns founded before (or whose road never joined) get their road on the next start: settle_roadjoin below.
 const ROAD_REACH = 48;
-const PATHY = /grass_path|dirt_path|gravel|cobble|sandstone|planks|_slab|brick|coarse_dirt|packed_mud|mud_bricks/;
+const JOIN_VERSION = 2; // towns whose road was joined by an older joiner get it again
+const JOIN_AREA = "hc_road_join";
+const JOIN_PIECE = 40; // route cells worked under one ticking area (well inside the ticking area size limit)
+const JOIN_HALF = 2; // 5 wide
 
-function* joinRoad(dim, town, layout) {
-  if (town.roadJoined) return;
-  const tw = townFor(town.plot);
-  if (!tw) return;
-  const dir = gateDir(tw.gate);
+function* holdLoaded(dim, cells, town) {
+  const xs = cells.map((c) => town.x + c.x), zs = cells.map((c) => town.z + c.z);
+  const x0 = Math.min(...xs) - 8, x1 = Math.max(...xs) + 8, z0 = Math.min(...zs) - 8, z1 = Math.max(...zs) + 8;
+  try { dim.runCommand(`tickingarea remove ${JOIN_AREA}`); } catch { /* none yet */ }
+  try { dim.runCommand(`tickingarea add ${x0} 0 ${z0} ${x1} 0 ${z1} ${JOIN_AREA} true`); } catch { /* the area may be held by players anyway */ }
+  const probe = [[x0 + 8, z0 + 8], [x1 - 8, z1 - 8], [x0 + 8, z1 - 8], [x1 - 8, z0 + 8]];
+  for (let t = 0; t < 600; t += 10) {
+    if (probe.every(([x, z]) => { try { return !!dim.getBlock({ x, y: town.y, z }); } catch { return false; } })) return true;
+    for (let i = 0; i < 10; i++) yield;
+  }
+  return false;
+}
+const dropLoaded = (dim) => { try { dim.runCommand(`tickingarea remove ${JOIN_AREA}`); } catch { /* gone */ } };
+
+// The laid-out ground of the town (tiers 0..upTo) and the Hamlet gate road's end
+function townPaths(layout, upTo) {
   const member = new Set(), tops = new Map();
-  for (let t = 0; t <= 3; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+  for (let t = 0; t <= upTo; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
     member.add(`${dx},${dz}`);
     if (t !== 0) continue;
     const id = layout.pal[p]?.[0] ?? "";
     const k = `${dx},${dz}`;
     if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id });
   }
-  const paths = [...tops.values()].filter((c) => PATHY.test(c.id));
-  const end = roadEnd(paths, dir);
-  if (!end) return;
+  return { member, paths: [...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)) };
+}
+
+// No worked-out route (a town on a plot the map doesn't have): the nearest map road ahead, as before
+function* lookAhead(dim, town, end, dir, member, h0) {
   const get = (x, y, z) => look(dim, x, y, z);
-  const h0 = town.y + end.dy;
-  // the nearest map road ahead: a road block with at least two road blocks beside it (one stray gravel is not a road)
   let found, best = Infinity;
   const side = { x: -dir.z, z: dir.x };
   for (let r = 3; r <= ROAD_REACH && r < best; r++) {
@@ -267,66 +291,143 @@ function* joinRoad(dim, town, layout) {
       const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([ax, az]) => ROAD_BLOCKS.test(get(x + ax, y, z + az)?.typeId ?? "")).length;
       if (near < 2) continue;
       const d = Math.hypot(r, s) + (WEAK_ROAD.test(b.typeId) ? 12 : 0);
-      if (d < best) { best = d; found = { x: lx, z: lz, y, perm: b.permutation }; }
+      if (d < best) { best = d; found = { x: lx, z: lz }; }
     }
   }
-  if (!found) { town.roadJoined = "none"; save(); return; }
-  const line = roadLine({ x: end.x, z: end.z }, found);
-  const heights = gradeLine(h0, found.y, line.length - 1);
-  const air = perm("minecraft:air"), dirt = perm("minecraft:dirt"), grass = perm("minecraft:grass_block");
-  const surface = found.perm;
-  const laid = new Set();
-  for (let i = 1; i < line.length; i++) {
-    const { x: lx, z: lz } = line[i], y = heights[i];
-    for (let w = -1; w <= 1; w++) {
-      const cx = lx + side.x * w, cz = lz + side.z * w;
-      if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) continue;
-      laid.add(`${cx},${cz}`);
+  return found;
+}
+
+function* joinRoad(dim, town, layout, upTo = 0) {
+  const tw = townFor(town.plot);
+  if (!tw) return;
+  const dir = gateDir(tw.gate);
+  const { member, paths } = townPaths(layout, upTo);
+  const end = roadEnd(paths, dir);
+  if (!end) return;
+  const h0 = town.y + end.dy;
+  const region = PLOT_PLAN.find((p) => p.name.toLowerCase() === town.plot)?.region;
+  const join = ROAD_JOINS[town.plot];
+  let cells;
+  if (join) cells = joinRoute(join, { x: end.x, z: end.z });
+  else {
+    const found = yield* lookAhead(dim, town, end, dir, member, h0);
+    if (!found) { town.roadJoined = { v: JOIN_VERSION, none: true }; save(); return; }
+    cells = roadLine({ x: end.x, z: end.z }, found);
+  }
+  const get = (x, y, z) => look(dim, x, y, z);
+  const pieces = [];
+  for (let i = 0; i < cells.length; i += JOIN_PIECE) pieces.push([i, Math.min(cells.length, i + JOIN_PIECE + 1)]);
+  // 1. the ground along the route, and the map road's own height where it ends
+  const ground = new Array(cells.length).fill(undefined);
+  let h1, lost = false;
+  for (const [a, b] of pieces) {
+    if (!(yield* holdLoaded(dim, cells.slice(a, b), town))) { lost = true; break; }
+    for (let i = a; i < b; i++) {
       if (tired()) yield;
-      const x = town.x + cx, z = town.z + cz;
-      const here = get(x, y, z);
-      if (!here || (!NATURAL.test(here.typeId) && !here.isAir && !SOFT.test(here.typeId) && !ROAD_BLOCKS.test(here.typeId))) continue; // built: leave it
-      // cut natural ground (and plants) above the road, 4 high, so it stays open to the sky
-      let open = true;
-      for (let k = 1; k <= 4; k++) {
-        const b = get(x, y + k, z);
-        if (!b || b.isAir) continue;
-        if (!NATURAL.test(b.typeId) && !SOFT.test(b.typeId)) { open = false; break; }
+      ground[i] = groundTop(dim, town.x + cells[i].x, town.z + cells[i].z);
+    }
+  }
+  if (!lost) {
+    const last = cells[cells.length - 1];
+    for (let r = 0; r <= 3 && h1 === undefined; r++) for (let ox = -r; ox <= r && h1 === undefined; ox++) for (let oz = -r; oz <= r; oz++) {
+      const x = town.x + last.x + ox, z = town.z + last.z + oz, y = groundTop(dim, x, z);
+      if (y !== undefined && ROAD_BLOCKS.test(get(x, y, z)?.typeId ?? "")) { h1 = y; break; }
+    }
+  }
+  if (lost) {
+    dropLoaded(dim);
+    town.roadJoined = { v: JOIN_VERSION, tries: (town.roadJoined?.tries ?? 0) + 1, waiting: true };
+    save();
+    return;
+  }
+  const heights = gradeRoute(ground, h0, h1 ?? ground[ground.length - 1]);
+  // 2. the road, a piece at a time
+  const air = perm("minecraft:air"), dirt = perm("minecraft:dirt"), grass = perm("minecraft:grass_block");
+  const laid = new Set();
+  for (const [a, b] of pieces) {
+    if (!(yield* holdLoaded(dim, cells.slice(a, b), town))) { lost = true; break; }
+    for (let i = Math.max(1, a); i < b; i++) {
+      const { x: lx, z: lz } = cells[i], y = heights[i];
+      const side = routeSides(cells, i);
+      for (let w = -JOIN_HALF; w <= JOIN_HALF; w++) {
+        const cx = lx + side.x * w, cz = lz + side.z * w;
+        if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) continue;
+        laid.add(`${cx},${cz}`);
+        if (tired()) yield;
+        const x = town.x + cx, z = town.z + cz;
+        const here = get(x, y, z);
+        if (!here || (!NATURAL.test(here.typeId) && !here.isAir && !SOFT.test(here.typeId) && !ROAD_BLOCKS.test(here.typeId))) continue; // built: leave it
+        // cut natural ground (and plants) above the road, 4 high, so it stays open to the sky
+        let open = true;
+        for (let k = 1; k <= 4; k++) {
+          const bl = get(x, y + k, z);
+          if (!bl || bl.isAir) continue;
+          if (!NATURAL.test(bl.typeId) && !SOFT.test(bl.typeId)) { open = false; break; }
+        }
+        if (!open) continue;
+        for (let k = 1; k <= 6; k++) { const bl = get(x, y + k, z); if (bl && !bl.isAir && (NATURAL.test(bl.typeId) || SOFT.test(bl.typeId))) bl.setPermutation(air); }
+        // fill below, so nothing floats
+        for (let k = 1; k <= 12; k++) {
+          const bl = get(x, y - k, z);
+          if (!bl || !/air|water|short_grass|tall_grass|fern|flower|snow_layer|leaves/.test(bl.typeId)) break;
+          bl.setPermutation(dirt);
+        }
+        const surface = perm(joinSurface(region, x, z));
+        if (surface) here.setPermutation(surface);
       }
-      if (!open) continue;
-      for (let k = 1; k <= 6; k++) { const b = get(x, y + k, z); if (b && !b.isAir && (NATURAL.test(b.typeId) || SOFT.test(b.typeId))) b.setPermutation(air); }
-      // fill below, so nothing floats
-      for (let k = 1; k <= 12; k++) {
-        const b = get(x, y - k, z);
-        if (!b || !/air|water|short_grass|tall_grass|fern|flower|snow_layer|leaves/.test(b.typeId)) break;
-        b.setPermutation(dirt);
-      }
-      here.setPermutation(surface);
     }
     // the land either side steps down or up to the road by at most 1 a block
-    for (const sgn of [-1, 1]) for (let k = 2; k <= 4; k++) {
-      const cx = lx + side.x * sgn * k, cz = lz + side.z * sgn * k;
-      if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) break;
-      if (tired()) yield;
-      const x = town.x + cx, z = town.z + cz;
-      const top = topAt(dim, x, z, y + 12);
-      if (top === undefined) break;
-      const lim = k - 1;
-      if (top > y + lim) {
-        let natural = true;
-        for (let yy = top; yy > y + lim; yy--) { const b = get(x, yy, z); if (!b || (!NATURAL.test(b.typeId) && !b.isAir)) { natural = false; break; } }
-        if (!natural) break;
-        for (let yy = top; yy > y + lim; yy--) get(x, yy, z)?.setPermutation(air);
-        const b = get(x, y + lim, z);
-        if (b && /dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(b.typeId)) b.setPermutation(grass);
-      } else if (top < y - lim) {
-        for (let yy = top + 1; yy <= y - lim; yy++) get(x, yy, z)?.setPermutation(yy === y - lim ? grass : dirt);
-      } else break;
+    for (let i = Math.max(1, a); i < b; i++) {
+      const { x: lx, z: lz } = cells[i], y = heights[i];
+      const side = routeSides(cells, i);
+      for (const sgn of [-1, 1]) for (let k = JOIN_HALF + 1; k <= JOIN_HALF + 3; k++) {
+        const cx = lx + side.x * sgn * k, cz = lz + side.z * sgn * k;
+        if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) break;
+        if (tired()) yield;
+        const x = town.x + cx, z = town.z + cz;
+        const top = topAt(dim, x, z, y + 12);
+        if (top === undefined) break;
+        const lim = k - JOIN_HALF;
+        if (top > y + lim) {
+          let natural = true;
+          for (let yy = top; yy > y + lim; yy--) { const bl = get(x, yy, z); if (!bl || (!NATURAL.test(bl.typeId) && !bl.isAir)) { natural = false; break; } }
+          if (!natural) break;
+          for (let yy = top; yy > y + lim; yy--) get(x, yy, z)?.setPermutation(air);
+          const bl = get(x, y + lim, z);
+          if (bl && /dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(bl.typeId)) bl.setPermutation(grass);
+        } else if (top < y - lim) {
+          for (let yy = top + 1; yy <= y - lim; yy++) get(x, yy, z)?.setPermutation(yy === y - lim ? grass : dirt);
+        } else break;
+      }
     }
   }
-  town.roadJoined = { x: town.x + found.x, z: town.z + found.z, length: line.length };
+  dropLoaded(dim);
+  const last = cells[cells.length - 1];
+  town.roadJoined = lost
+    ? { v: JOIN_VERSION, tries: (town.roadJoined?.tries ?? 0) + 1, waiting: true }
+    : { v: JOIN_VERSION, x: town.x + last.x, z: town.z + last.z, length: cells.length };
   save();
 }
+
+// Towns laid out before this joiner (or whose road could not be worked yet) get their road: one town at a time,
+// never during a siege, a few tries each.
+export const needsRoad = (town) => !!town?.laid?.[0] && !(town.roadJoined?.v === JOIN_VERSION && !town.roadJoined.waiting) && (town.roadJoined?.tries ?? 0) < 5;
+let joining = false;
+onTick("settle_roadjoin", 200, () => {
+  if (joining || !isReady() || getState().active) return;
+  const owner = Object.keys(store.data.towns).find((k) => needsRoad(store.data.towns[k]) && !running.get(k));
+  if (!owner) return;
+  const town = store.data.towns[owner], layout = layoutOf(town);
+  if (!layout) return;
+  joining = true;
+  running.set(owner, true);
+  const upTo = Math.max(0, town.laid.lastIndexOf(true));
+  system.runJob((function* () {
+    try { yield* joinRoad(world.getDimension(OVERWORLD), town, layout, upTo); } catch (e) { console.warn(`[Hollow Crown] road join ${town.plot}: ${e}`); town.roadJoined = { v: JOIN_VERSION, tries: (town.roadJoined?.tries ?? 0) + 1, waiting: true }; save(); }
+    running.delete(owner);
+    joining = false;
+  })());
+});
 
 function setAt(dim, at, id, states) {
   const p = perm(id, states);
@@ -658,9 +759,15 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     for (const line of lines) player.sendMessage(`  ${line}`);
     return;
   }
+  if (cmd === "road") { // lay the road out to the map's roads again (the next start of settle_roadjoin, within 10 s)
+    if (!town) return player.sendMessage("§7You have no town layout.");
+    delete town.roadJoined;
+    save();
+    return player.sendMessage(`§6The road out of ${townFor(town.plot).name} will be laid again in a few seconds.`);
+  }
   if (cmd === "tier") {
     const result = growTown(player.id, Number(arg ?? (town?.tier ?? 0) + 1), { force: true });
     return player.sendMessage(result === true ? `§6The town grows to ${tierName(townOf(player.id).tier)}.` : `§7${result}`);
   }
-  player.sendMessage("§7/scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3>]");
+  player.sendMessage("§7/scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> | road]");
 });

@@ -805,7 +805,10 @@ addTests("settle plans", {
 });
 
 import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
-import { pickBaseSlot, bedSpot, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
+import { pickBaseSlot, bedSpot, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
+import { ROAD_JOINS } from "./roadjoin_data.js";
+import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
+import { needsRoad } from "./founding.js";
 import { MASON_DESIGNS } from "./mason_data.js";
 
 
@@ -857,6 +860,46 @@ addTests("settle base", {
     const h = gradeLine(70, 64, 11);
     for (let i = 1; i < h.length; i++) assert(Math.abs(h[i] - h[i - 1]) <= 1, "never more than 1 a block");
     assertEqual(h[0], 70); assertEqual(h[11], 64);
+  },
+  "the worked-out road out: corner to corner along sides, graded to the ground at most 1 a block, in the map's road blocks"() {
+    const join = { from: [0, -49], path: [[0, -49], [0, -72], [-20, -80]] };
+    const cells = joinRoute(join, { x: 0, z: -49 });
+    assertEqual(JSON.stringify(cells[0]), JSON.stringify({ x: 0, z: -49 }));
+    assertEqual(JSON.stringify(cells[cells.length - 1]), JSON.stringify({ x: -20, z: -80 }));
+    for (let i = 1; i < cells.length; i++) assertEqual(Math.abs(cells[i].x - cells[i - 1].x) + Math.abs(cells[i].z - cells[i - 1].z), 1, "each step joins along a side");
+    const moved = joinRoute(join, { x: 2, z: -47 });
+    assertEqual(JSON.stringify(moved[0]), JSON.stringify({ x: 2, z: -47 }), "a gate road ending elsewhere is led to the route first");
+    assertEqual(JSON.stringify(routeSides(cells, 5)), JSON.stringify({ x: 1, z: 0 }), "across a road running north is east-west");
+    const ground = [70, 70, 75, 76, 74, 66, 65, 65, 64, 64, 64, 64];
+    const g = gradeRoute(ground, 70, 64);
+    assertEqual(g[0], 70); assertEqual(g[g.length - 1], 64);
+    for (let i = 1; i < g.length; i++) assert(Math.abs(g[i] - g[i - 1]) <= 1, "never more than 1 a block");
+    for (const region of ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", undefined]) for (let x = 0; x < 30; x++) {
+      assert(JOIN_ROAD_BLOCKS.test(joinSurface(region, x, x * 7)), `${region} road block ${joinSurface(region, x, x * 7)} is one the joiner knows as road`);
+    }
+    assert(needsRoad({ laid: [true], roadJoined: "none" }), "a town whose road never joined gets it");
+    assert(needsRoad({ laid: [true], roadJoined: { x: 1, z: 2, length: 30 } }), "a road joined the old way (with its gap) is laid again");
+    assert(!needsRoad({ laid: [false] }), "not before the Hamlet is laid out");
+  },
+  "every map plot has a road out from its gate to the map's roads, starting where each layout's gate road ends"() {
+    for (const plot of JOIN_PLOTS) {
+      const key = plot.name.toLowerCase(), join = ROAD_JOINS[key], tw = townByName(key);
+      assert(join, `${plot.name} has a road out`);
+      const dir = gateDir(tw.gate);
+      for (const v of tw.variants) {
+        const tops = new Map();
+        for (const [dx, dy, dz, p] of groundwork(v, 0)) { const id = v.pal[p]?.[0] ?? "", k = `${dx},${dz}`; if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id }); }
+        const end = roadEnd([...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), dir);
+        assertEqual(`${end.x},${end.z}`, join.from.join(), `${plot.name} ${v.label}: the route starts at the gate road's end`);
+      }
+      const cells = joinRoute(join);
+      const far = cells[cells.length - 1];
+      assert(Math.hypot(far.x, far.z) >= JOIN_SETTLEMENT.landRadius - 4, `${plot.name}: the road reaches past the settlement land (${far.x},${far.z})`);
+      assert(join.wet === 0, `${plot.name}: the road keeps out of water`);
+      // straight out along the gate line first, so the later tiers' gate road lies on it
+      const side = { x: -dir.z, z: dir.x };
+      for (const c of cells) if (Math.hypot(c.x, c.z) < JOIN_SETTLEMENT.landRadius - 2) assert(Math.abs(c.x * side.x + c.z * side.z) <= 2, `${plot.name}: inside the settlement land the road keeps to the gate line`);
+    }
   },
 });
 
