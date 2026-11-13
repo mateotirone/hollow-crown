@@ -33,7 +33,7 @@ export function benchFallback(owner) {
   } catch { /* not loaded */ }
 }
 
-function raiseBase(owner, id, slot, extra = {}) {
+export function raiseBase(owner, id, slot, extra = {}) {
   const town = townOf(owner);
   const seat = seatInWorld(owner, slot, id);
   if (!seat) return false;

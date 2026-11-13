@@ -156,6 +156,10 @@ spruces (tall spruce, grey fir).
 **Round the foundation:** clumps of spruce leaves under the ground-floor windows and at some corners, never a
 strip round the house (the skill's `bushes`, on by default).
 
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is plank rows in a dark log frame on a deepslate ground storey, the steep pitch 2 gable with dragon heads and snow; inside, `deepslate_bricks` pillars with `polished_deepslate` beams. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
+
 ## Building it with the skill
 
 - **Presets:**
