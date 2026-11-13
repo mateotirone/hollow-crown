@@ -298,7 +298,7 @@ class Town:
                     # the map road on out past the edge (Mateo 2026-11-12: paths run to the plot's edge, and
                     # through the wall, where the gate goes)
                     run = pts[t:] if ins[t - 1] else pts[t - 1::-1]
-                    out = [(int(round(a)), int(round(b))) for a, b in run[:40]]
+                    out = [(int(round(a)), int(round(b))) for a, b in run[:120]]
                     self.gate_out[g[:2]] = [c for k, c in enumerate(out) if k == 0 or c != out[k - 1]]
         merged = []
         for g in gates:
@@ -366,16 +366,37 @@ class Town:
         if not out:
             dx, dz = gx - self.C[0], gz - self.C[1]; d = math.hypot(dx, dz) or 1
             out = [(int(round(gx + dx / d * t)), int(round(gz + dz / d * t))) for t in range(0, 16)]
+        # Mateo 2026-11-13 (Kingsrest playtest): a street runs right out to the end of the town's ward (the map
+        # plot, plots/config.js WARDS), where the map's road picks it up; stopping at the town circle left a grass gap
+        ward = self.ward()
+        def out_of_ward(c):
+            if ward: return math.hypot(c[0] - ward[0], c[1] - ward[1]) > ward[2] + 2 and not self.inside(c[0], c[1], -4)
+            return not self.inside(c[0], c[1], -4)
+        if out and not out_of_ward(out[-1]):        # the map road's run stops short of the ward edge: carry on straight
+            (ax, az), (bx, bz) = out[max(0, len(out) - 6)], out[-1]; d = math.hypot(bx - ax, bz - az) or 1
+            out = out + [(int(round(bx + (bx - ax) / d * t)), int(round(bz + (bz - az) / d * t))) for t in range(1, 80)]
         cells = [(gx, gz)]
         for c in out:
-            if c == (gx, gz): continue
+            if c == (gx, gz) or c == cells[-1]: continue
             if not self.ok(*c) or self.at(self.WET, *c): break
             cells.append(c)
-            if not self.inside(c[0], c[1], -4): break
+            if out_of_ward(c): break
         if len(cells) < 3 or self.inside(cells[-1][0], cells[-1][1], -2): print("no way out from gate", gate, len(cells)); return None
         k0 = int(self.at(self.K, gx, gz)) if self.at(self.K, gx, gz) >= 0 else None
-        rd = self.lay(cells, kind, k_start=k0, beyond=6)
+        reach = max(6, int(max(math.hypot(c[0] - self.C[0], c[1] - self.C[1]) for c in cells) - self.R) + 3)
+        rd = self.lay(cells, kind, k_start=k0, beyond=reach)
         return rd
+
+    _WARDS = None
+    def ward(self):
+        """(x, z, r) of this town's ward in plots/config.js WARDS, or None."""
+        if Town._WARDS is None:
+            import re
+            try: src = open(os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "plots", "config.js"), encoding="utf8").read()
+            except OSError: src = ""
+            Town._WARDS = {m[0]: (int(m[1]), int(m[2]), int(m[3])) for m in
+                           re.findall(r'\{ name: "([^"]+)", x: (-?\d+), z: (-?\d+), r: (\d+)', src)}
+        return Town._WARDS.get(self.name)
 
     def ring_lane(self):
         rr = self.R * (0.5 if self.big else 0.46)
@@ -490,7 +511,11 @@ class Town:
             for x, z in extra:
                 i, j = self.ij(x + ox, z + oz)
                 if not self.inside(x + ox, z + oz, 2) or self.K[i, j] >= 0 or self.WET[i, j] or self.TAKEN[i, j]: return None
-        hs = np.array([self.at(self.G, x, z) for x, z in G])
+        # Mateo 2026-11-13 (the capital hall's garden stood a block above the street): the floor is the highest
+        # ground under the building itself; open ground in the stamp (gardens, yards, paddocks) follows the land
+        opn = {(x + ox, z + oz) for x, z in (rot_xz(a, b, deg) for a, b in self.open_cols(bp))}
+        Gc = [c for c in G if c not in opn] or G
+        hs = np.array([self.at(self.G, x, z) for x, z in Gc])
         if hs.max() - hs.min() > max_relief: return None
         # paths first (Mateo 2026-11-11): the floor is graded to the paths round the plot, never left
         # a block or more above or below them
@@ -548,6 +573,10 @@ class Town:
             if self.WET[i, j]: return None
             if self.K[i, j] >= 0: continue                     # a street beside the landing keeps its own height
             if self.TAKEN[i, j] >= 2 or not (yf - self.LANDING_FILL <= self.G[i, j] <= yf + 1): return None
+        # open ground: down to the land (or the street beside it), at most OPEN_DROP, a block a step at most
+        per = self.open_levels(opn & set(G), set(G), yf) if opn else {}
+        if any(v < yf for v in per.values()):
+            bp = self.dropped(bp, deg, ox, oz, {c: yf - v for c, v in per.items() if v < yf})
         # commit
         for x, z in land:
             i, j = self.ij(x, z)
@@ -571,28 +600,82 @@ class Town:
         e = {"stamp": bp.name, "kind": kind, "x": ox, "z": oz, "ground_y": yf, "rotation": deg, "footprint": len(G), "foundation": int(yf - hs.min()),
              "door": [door_xz[0], door_xz[1]]}
         self.plan.append(e); self.designs[bp.name] = bp
-        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None)
+        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None, per=per)
         if need_walk: self.walkway(cells, yf, k_road, ROT[deg])
         return e
 
-    def foundation(self, G, yf, extra=None):
+    OPEN_DROP = 3
+    OPEN_NAMES = ("leaves", "wall", "fence", "lantern", "grass", "flower", "tulip", "poppy", "dandelion", "cornflower",
+                  "daisy", "allium", "bluet", "lily_of", "rose_bush", "lilac", "peony", "fern", "sapling", "hay_block",
+                  "cauldron", "torch", "gravel", "path", "carpet", "air", "keep")
+    def open_cols(self, bp):
+        """Local columns of a stamp that are open ground: nothing above the ground but garden things (beds, hedges,
+        low walls and fences, lamps, trees, troughs). Cached on the blueprint."""
+        if getattr(bp, "_open_cols", None) is not None: return bp._open_cols
+        cols = {}
+        for (x, y, z), (n, p) in bp.cells.items():
+            if y < 1: cols.setdefault((x, z), True); continue
+            ok = any(t in n for t in self.OPEN_NAMES) or (n.endswith("_log") and not n.startswith("stripped") and y >= 1)
+            cols[(x, z)] = cols.get((x, z), True) and ok
+        opn = {c for c, ok in cols.items() if ok}
+        # a stamp that is all open ground (a landing proxy, keep_floor) has no building to stand on: leave it whole
+        bp._open_cols = opn if len(opn) < len(cols) and not any(n.startswith("keep_") for n, _ in bp.cells.values()) else set()
+        return bp._open_cols
+
+    def open_levels(self, opn, cells, yf):
+        """Ground level for each open column: the land, or a street beside it, never more than OPEN_DROP below the
+        floor, and a block a step at most from its neighbours (the building's own cells stay at the floor)."""
+        t = {}
+        for x, z in opn:
+            i, j = self.ij(x, z)
+            h = int(self.G[i, j])
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c = (x + dx, z + dz)
+                if c not in cells and self.ok(*c) and self.at(self.K, *c) >= 0: h = (int(self.at(self.K, *c)) - 1) // 2
+            t[(x, z)] = int(np.clip(h, yf - self.OPEN_DROP, yf))
+        for _ in range(2 * self.OPEN_DROP + 2):
+            ch = False
+            for (x, z), v in t.items():
+                m = v
+                for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    c = (x + dx, z + dz)
+                    if c in t: m = max(m, t[c] - 1)
+                    elif c in cells: m = max(m, yf - 1)
+                if m != v: t[(x, z)] = m; ch = True
+            if not ch: break
+        return t
+
+    def dropped(self, bp, deg, ox, oz, drop):
+        """A copy of bp for this one placement with its open columns lowered (drop: world cell -> blocks down)."""
+        out = Blueprint(f"{bp.name}_d{ox}_{oz}"); out.notes = list(getattr(bp, "notes", []))
+        out.kind = getattr(bp, "kind", None); out.markers = dict(bp.markers)
+        for (x, y, z), v in bp.cells.items():
+            a, b = rot_xz(x, z, deg); d = drop.get((a + ox, b + oz), 0)
+            out.cells[(x, y - d, z)] = v
+        for k in ("levels",):
+            if hasattr(bp, k): setattr(out, k, getattr(bp, k))
+        return out
+
+    def foundation(self, G, yf, extra=None, per=None):
         """Cut the plot level with the floor, build a stone foundation down to the ground on the low
-        side, and ease the ground round the building to the floor level."""
-        cells = set(G) | set(extra or [])
+        side, and ease the ground round the building to the floor level (open ground: to its own level)."""
+        cells = set(G) | set(extra or []); per = per or {}
         for x, z in cells:
             i, j = self.ij(x, z)
-            g0 = int(self.G[i, j])
-            if g0 < yf:                                            # foundation shows above the slope: dressed stone
-                for y in range(g0 + 1, yf): self.works[(x, y, z)] = VALE["plinth"](x, y, z)
-            for y in range(yf, max(g0, yf) + 1): self.works.setdefault((x, y, z), ("air", {}))
-            self.G[i, j] = yf; self.FIX[i, j] = True
+            g0 = int(self.G[i, j]); yc = per.get((x, z), yf)
+            if g0 < yc:                                            # foundation shows above the slope: dressed stone
+                for y in range(g0 + 1, yc): self.works[(x, y, z)] = VALE["plinth"](x, y, z)
+            for y in range(yc, max(g0, yc) + 1): self.works.setdefault((x, y, z), ("air", {}))
+            self.G[i, j] = yc; self.FIX[i, j] = True
         # apron and banks round it
         ring = set()
         for x, z in cells:
             for d in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
                 c = (x + d[0], z + d[1])
                 if c not in cells and self.ok(*c): ring.add(c)
-        cur = {c: yf for c in ring}
+        cur = {c: min([per.get(n, yf) for n in ((c[0] + 1, c[1]), (c[0] - 1, c[1]), (c[0], c[1] + 1), (c[0], c[1] - 1),
+                                                    (c[0] + 1, c[1] + 1), (c[0] - 1, c[1] - 1), (c[0] + 1, c[1] - 1), (c[0] - 1, c[1] + 1)) if n in cells] or [yf])
+               for c in ring}
         for step in range(4):
             nxt = {}
             for (x, z), h in cur.items():
@@ -1603,7 +1686,9 @@ class Town:
                     s.cells[(X, Y, Z)] = v
                     if (X, Z) not in low or Y < low[(X, Z)]: low[(X, Z)] = Y
                 for (X, Z), y0 in low.items():
-                    if not self.ok(X, Z): continue
+                    # foundation only under what stands on the ground: a column whose lowest block is a roof or an
+                    # arch (the train shed over the line, Mateo 2026-11-13) stays open underneath
+                    if not self.ok(X, Z) or y0 > e["ground_y"] + 1: continue
                     g = int(self.at(self.G, X, Z))
                     for y in range(g + 1, y0): s.cells[(X, y, Z)] = VALE["plinth"](X, y, Z)
                 s.cells = {(int(x), int(y), int(z)): v for (x, y, z), v in s.cells.items()}
