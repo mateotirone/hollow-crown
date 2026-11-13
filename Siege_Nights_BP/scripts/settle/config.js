@@ -123,6 +123,7 @@ export const PLOT_SIZE = {
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
+  farmhouse: ["ML"],
   barracks: ["ML"],
   library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
@@ -141,9 +142,9 @@ export const PLOT_TAGS = {
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall5: "on ground the hall will need at level 5" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5" };
 
-export const HOMES = ["cottage"];
+export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
 
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now).

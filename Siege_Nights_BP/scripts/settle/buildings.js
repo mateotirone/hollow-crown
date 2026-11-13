@@ -273,17 +273,14 @@ export const BUILDINGS = [
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
   { id: "house", name: "House", blurb: "One storey and a tall attic under a steep gable, with a chimney. About four beds.", draw: house },
   { id: "townhouse", name: "Townhouse", blurb: "A taller house: stone below, a jettied floor over the road, a high attic. About six beds.", draw: townhouse },
-];
-// Drawn and exported, but not offered yet: with them in play the charters need more plots than some layouts open
-// in time (the Farmhouse at Town in lanternbog Market Street, the Mint at Town in dunehold Crossroads, the Inn at
-// City in dunehold Twin Rings). They join BUILDINGS once the layouts or the charters make room.
-export const WAITING = [
   { id: "farmhouse", name: "Farmhouse", blurb: "A long low farmhouse with an open lean-to behind for hay and the woodpile.", draw: farmhouse },
   { id: "inn", name: "Inn", blurb: "A tap room with the bar, tables and a hearth, and bedrooms above for travellers.", draw: inn },
   { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
 ];
+// Nothing waiting now: the farmhouse, inn and mint joined BUILDINGS when the 2026-11-13 layouts made room for them.
+export const WAITING = [];
 // Raised by the game itself, never offered on a plot or in the Plan Book: the Mason's Yard every new base gets
-// (masonyard.js; Mateo's playtest 2026-11-12). Designed on the building skill (map/structures/export_mason.py).
+// (basebuilds.js; Mateo's playtest 2026-11-12). Designed on the building skill (map/structures/export_mason.py).
 export const FIXED_BUILDINGS = [
   { id: "mason_yard", name: "Mason's Yard", blurb: "The mason's workshop, with a yard in front where he cuts and sells blocks.", draw: (p) => floor(p, -4, 4, 1, 9), designs: MASON_DESIGNS },
 ];
