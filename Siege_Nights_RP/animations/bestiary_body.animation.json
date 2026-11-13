@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.siege_b.body.fall": {
+  "animation.siege_b.body.fall_back": {
    "loop": "hold_on_last_frame",
    "animation_length": 0.7,
    "bones": {
@@ -13,19 +13,19 @@
        0
       ],
       "0.15": [
-       -12,
+       -11.700000000000001,
        0,
        2
       ],
       "0.45": [
-       -94,
+       -93.60000000000001,
        0,
-       4
+       4.12
       ],
       "0.55": [
-       -86,
+       -86.39999999999999,
        0,
-       3
+       2.88
       ],
       "0.7": [
        -90,
@@ -41,24 +41,24 @@
       ],
       "0.45": [
        0,
-       1,
+       "query.property('siege:lift')*query.property('siege:size')",
        0
       ],
       "0.55": [
        0,
-       2.5,
+       "query.property('siege:lift')*query.property('siege:size')+1.5",
        0
       ],
       "0.7": [
        0,
-       1,
+       "query.property('siege:lift')*query.property('siege:size')",
        0
       ]
      }
     }
    }
   },
-  "animation.siege_b.body.down": {
+  "animation.siege_b.body.down_back": {
    "loop": true,
    "bones": {
     "root": {
@@ -66,6 +66,324 @@
       -90,
       0,
       3
+     ]
+    }
+   }
+  },
+  "animation.siege_b.body.fall_side": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.7,
+   "bones": {
+    "root": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       0.39,
+       0,
+       11.700000000000001
+      ],
+      "0.45": [
+       3.12,
+       0,
+       93.60000000000001
+      ],
+      "0.55": [
+       2.88,
+       0,
+       86.39999999999999
+      ],
+      "0.7": [
+       3,
+       0,
+       90
+      ]
+     },
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.45": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')",
+       0
+      ],
+      "0.55": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')+1.5",
+       0
+      ],
+      "0.7": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')",
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.body.down_side": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      3,
+      0,
+      90
+     ]
+    }
+   }
+  },
+  "animation.siege_b.body.fall_flat": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.7,
+   "bones": {
+    "root": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       6,
+       0,
+       -3
+      ],
+      "0.6": [
+       0,
+       0,
+       4
+      ]
+     },
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')+1.5",
+       0
+      ],
+      "0.6": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')",
+       0
+      ]
+     }
+    },
+    "wing_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       8
+      ]
+     }
+    },
+    "wing_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       -8
+      ]
+     }
+    },
+    "tip_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       10
+      ]
+     }
+    },
+    "tip_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       -10
+      ]
+     }
+    },
+    "tail": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       12,
+       0
+      ]
+     }
+    },
+    "tail2": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       -18,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.body.down_flat": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      4
+     ]
+    },
+    "wing_r": {
+     "rotation": [
+      0,
+      0,
+      8
+     ]
+    },
+    "wing_l": {
+     "rotation": [
+      0,
+      0,
+      -8
+     ]
+    },
+    "tip_r": {
+     "rotation": [
+      0,
+      0,
+      10
+     ]
+    },
+    "tip_l": {
+     "rotation": [
+      0,
+      0,
+      -10
+     ]
+    },
+    "tail": {
+     "rotation": [
+      0,
+      12,
+      0
+     ]
+    },
+    "tail2": {
+     "rotation": [
+      0,
+      -18,
+      0
+     ]
+    }
+   }
+  },
+  "animation.siege_b.body.fall_belly_up": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.7,
+   "bones": {
+    "root": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       0.0,
+       0,
+       23.400000000000002
+      ],
+      "0.45": [
+       0.0,
+       0,
+       180.0
+      ],
+      "0.55": [
+       0.0,
+       0,
+       172.79999999999998
+      ],
+      "0.7": [
+       0,
+       0,
+       180
+      ]
+     },
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.45": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')",
+       0
+      ],
+      "0.55": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')+1.5",
+       0
+      ],
+      "0.7": [
+       0,
+       "query.property('siege:lift')*query.property('siege:size')",
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.body.down_belly_up": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      0,
+      0,
+      180
      ]
     }
    }
@@ -78,12 +396,12 @@
      "position": {
       "0.0": [
        0,
-       1,
+       "query.property('siege:lift')*query.property('siege:size')",
        0
       ],
       "5.0": [
        0,
-       -9,
+       "query.property('siege:lift')*query.property('siege:size')-10*query.property('siege:size')",
        0
       ]
      },
@@ -107,6 +425,14 @@
    "bones": {
     "root": {
      "scale": "query.property('siege:size')"
+    }
+   }
+  },
+  "animation.siege_b.dead_hide": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "scale": 0
     }
    }
   }

@@ -5,6 +5,7 @@
 import "./core/selftest.js";
 import "./core/clickable.js";
 import "./core/gamerules.js";
+import "./core/noraids.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 

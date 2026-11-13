@@ -103,11 +103,37 @@ def compute(spec, edition=None, pal=None):
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
+    check_water(blocks, log)
     emit.connect(blocks)
     return blocks, stage_of, log
 
 
 SPIRE_TOPS = ("siege:spire_roof",)
+WATERS = ("water", "minecraft:water", "flowing_water", "minecraft:flowing_water")
+
+
+def spilling_water(blocks):
+    """Water that will run out of its basin in game: a water block with air, or nothing at all, beside it
+    (n, s, e, w) or under it. A source block there flows up to 7 blocks across the floor (the Drowned Court's
+    channels, 2026-11-12: water put at the walking row ran over the whole hall). Returns the cells."""
+    out = []
+    for (x, y, z), (n, _q) in blocks.items():
+        if n not in WATERS: continue
+        for dx, dy, dz in ((1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), (0, -1, 0)):
+            b = blocks.get((x + dx, y + dy, z + dz))
+            if b is None or b[0] in ("air", "minecraft:air"):
+                out.append((x, y, z)); break
+    return out
+
+
+def check_water(blocks, log=None):
+    """Warn about every water block that would spill (see spilling_water). Water sits a row below the floor
+    it runs through, walled on four sides and floored, never at the row players stand on."""
+    bad = spilling_water(blocks)
+    if bad and log is not None:
+        log.append(f"{len(bad)} water block(s) would spill out of their basin, first at {bad[0]}: "
+                   "sink water a row into the floor and close every side and the bottom")
+    return bad
 
 
 def seat_spire_tops(blocks, pal, log=None):
