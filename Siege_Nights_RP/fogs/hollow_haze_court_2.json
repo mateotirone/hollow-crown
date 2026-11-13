@@ -1,0 +1,28 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:hollow_haze_court_2"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 0.08,
+        "fog_end": 0.72,
+        "fog_color": "#232a46",
+        "render_distance_type": "render"
+      },
+      "water": {
+        "fog_start": 0,
+        "fog_end": 18,
+        "fog_color": "#2a3f7a",
+        "render_distance_type": "fixed"
+      },
+      "weather": {
+        "fog_start": 0.08,
+        "fog_end": 0.72,
+        "fog_color": "#232a46",
+        "render_distance_type": "render"
+      }
+    }
+  }
+}
