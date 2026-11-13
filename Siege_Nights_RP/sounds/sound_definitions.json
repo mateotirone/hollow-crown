@@ -2920,6 +2920,67 @@
      "load_on_low_memory": true
     }
    ]
+  },
+  "siege.sig.first_glimpse": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/first_glimpse",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.rift_open": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/rift_open",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ],
+   "max_distance": 64
+  },
+  "siege.sig.gate_open": {
+   "category": "block",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/gate_open",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.gate_close": {
+   "category": "block",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/gate_close",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.portcullis_open": {
+   "category": "block",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/portcullis_open",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.portcullis_close": {
+   "category": "block",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/portcullis_close",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
   }
  }
 }
