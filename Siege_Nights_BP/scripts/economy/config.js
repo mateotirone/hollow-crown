@@ -64,6 +64,11 @@ export const GUARD_PRICES = { helmet: 50, chestplate: 90, leggings: 70, boots: 5
 const GUARD_KEY = { "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen" };
 const REGIONAL_GUARD = REGIONS.flatMap((region) => Object.entries(GUARD_PRICES).map(([piece, price]) =>
   g(`siege:guard_${GUARD_KEY[region]}_${piece}`, 1, price, { region, flat: true })));
+// Starter clothes and weapons (starter/index.js; Mateo 2026-11-13): every new player is given their region's, and the
+// Hunter (clothes) and Smith (weapon) of that region sell spares, cheap, at a flat price.
+export const STARTER_PRICES = { helmet: 4, chestplate: 8, leggings: 6, boots: 4, weapon: 10 };
+const STARTER = (pieces) => REGIONS.flatMap((region) => pieces.map((piece) =>
+  g(`siege:starter_${GUARD_KEY[region]}_${piece}`, 1, STARTER_PRICES[piece], { region, flat: true })));
 const LOGS = ["oak_log", "spruce_log", "birch_log", "dark_oak_log", "acacia_log", "mangrove_log", "jungle_log", "cherry_log"];
 
 // buys: what the NPC pays you for. sells: what it charges you for.
@@ -91,7 +96,7 @@ export const JOBS = {
     buys: [g("coal", 16, 8), g("raw_copper", 16, 6), g("copper_ingot", 16, 8), g("raw_gold", 4, 16), g("gold_ingot", 1, 5, { want: 16, step: 8 }),
       g("redstone", 16, 6), g("lapis_lazuli", 16, 8)],
     sells: [g("coal", 16, 14), g("iron_pickaxe", 1, 34), g("iron_axe", 1, 34), g("iron_shovel", 1, 14), g("iron_sword", 1, 24),
-      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320), ...REGIONAL_GUARD],
+      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320), ...REGIONAL_GUARD, ...STARTER(["weapon"])],
   },
   fisher: {
     name: "Fisher", home: [S], scarce: [E, F],
@@ -105,7 +110,7 @@ export const JOBS = {
       // trophies from the bestiary: a few a day, they are meant for crafting first
       ...[["siege:rime_pelt", 6], ["siege:pale_antler", 10], ["siege:brine_scale", 4], ["siege:wyrm_scale", 8], ["siege:toad_venom", 4],
         ["siege:wight_dust", 5], ["siege:gloamquill", 8]].map(([id, price]) => g(id, 1, price, { want: 8, step: 4 }))],
-    sells: [g("arrow", 16, 16), g("lead", 2, 8), g("cooked_beef", 8, 10)],
+    sells: [g("arrow", 16, 16), g("lead", 2, 8), g("cooked_beef", 8, 10), ...STARTER(["helmet", "chestplate", "leggings", "boots"])],
   },
   herbalist: {
     name: "Herbalist", home: [B], scarce: [F, E],
