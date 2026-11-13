@@ -36,7 +36,7 @@ dragon cries at night. It is grand and dangerous rather than gloomy.
 | Light | harsh white-gold sun, deep shadows under awnings and arcades; warm lanterns and campfires in courtyards at night |
 | Feel | dust, heat, red rock, shade as a luxury |
 
-Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. Walls are thick with
+Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. On a house part's flat roof pass `"beams": "stripped_acacia_log"`: the default spruce beams read as black stripes from above (Cinder Roost, 2026-11-13). Walls are thick with
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
 drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
 
