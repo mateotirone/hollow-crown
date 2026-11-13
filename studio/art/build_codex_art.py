@@ -185,14 +185,15 @@ def extra_px(S, kind, f, x, y, w, h):
             if d > r - 0.6 and w > 3 and (x in (0, w - 1) and y in (0, h - 1)): return glow[1]
             return glow[5] if d < 0.6 else glow[4 if x + y <= w - 1 else 3] if d < r * 0.5 else glow[2]
         return glow[2]
+    if kind == 'glowhorn': return glow[4 if (f == 'top' or (side and y == 0)) else 3 if f != 'bottom' else 1]      # bone horns (the set's 'glow' ramp is bone)
     if kind == 'fin': return (trim[4] if y == 0 else metal[3 + (x % 2)]) if f in ('right', 'left') else metal[2]
     return metal[3]
 
 
-def build_set(name, S):
-    part = flat(name, S); B = base(); E = extras(name); out = {}
+def build_set(name, S, pieces=PIECES, E=None):
+    part = flat(name, S); B = base(); E = E or extras(name); out = {}
     os.makedirs(T + 'models/siege_armor', exist_ok=True); os.makedirs(RP + 'models/entity/armor', exist_ok=True)
-    for piece in PIECES:
+    for piece in pieces:
         im = part[piece].copy(); px = im.load(); painted = set()
         for cs in E[piece].values():
             for c in cs:
@@ -311,4 +312,5 @@ def main():
     os.makedirs(ROOT + 'art', exist_ok=True); sh.save(ROOT + 'art/codex-regional-gear.png'); print('codex art:', len(icons), 'icons,', len(SETS) * 4, 'worn pieces')
 
 
-main()
+if __name__ == '__main__':
+    main()
