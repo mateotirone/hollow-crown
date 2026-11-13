@@ -18,6 +18,7 @@ import { isReady, isNight, onTick, on, emit, moduleStore, keepOf } from "../sieg
 import { SETTLERS, HOMES } from "./config.js";
 import { lineFor } from "./folk.js";
 import { applyFilter } from "../core/events.js";
+import { withArticle } from "../core/grammar.js";
 import { townOf, layoutOf, saveTowns, allTowns } from "./founding.js";
 import { slotsOf, townFor } from "./towns.js";
 import { countNow } from "./register.js";
@@ -189,7 +190,7 @@ function dawn(owner, arrivals = SETTLERS.perDawn, exact = false) {
     list.push(s);
     spawn(owner, s, dayPlace(owner, s));
     emit("settlerArrived", { owner, name, role: s.role });
-    tell(owner, `§6${name}${s.role !== "Settler" ? `, a ${s.role.toLowerCase()},` : ""} has moved into your settlement.`);
+    tell(owner, `§6${name}${s.role !== "Settler" ? `, ${withArticle(s.role.toLowerCase())},` : ""} has moved into your settlement.`);
   }
   saveTowns();
   moveAll(owner, false);
