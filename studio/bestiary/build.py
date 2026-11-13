@@ -107,6 +107,8 @@ def sensor_for(m):
 
 def entity_bp(m):
     mid = m["id"]; fam = "boss" if m.get("boss") else m["family"]
+    if not m.get("boss") and m.get("dmg", 0) > roster.MAX_MOB_MELEE:
+        raise SystemExit(f"{mid}: dmg {m['dmg']} would kill a full-health player in one bite on Hard (cap {roster.MAX_MOB_MELEE}, see roster.MAX_MOB_MELEE)")
     families = list(FAMILIES[fam])
     if m.get("raider"): families.append("siege_raider")
     if mid in SCRIPTED: families.append("siege_scripted")
@@ -179,7 +181,7 @@ def entity_bp(m):
     elif mid == "crow_mage" or m.get("hollow_bolts"):
         fight.update(roster.ranged("siege:hollow_bolt", interval=(2.5, 4), radius=16)); fight["minecraft:attack"] = {"damage": m["dmg"]}
     else:
-        fight.update(roster.melee(m["dmg"], 1.25, m.get("effect")))
+        fight.update(roster.melee(m["dmg"], 1.25, m.get("effect"), m.get("melee_cooldown")))
     if m.get("flees"):
         c["minecraft:behavior.avoid_mob_type"] = {"priority": 2, "entity_types": [{"filters": roster.any_of(roster.fam("player"), roster.fam("siege_guard")), "max_dist": 7, "walk_speed_multiplier": 1.2, "sprint_speed_multiplier": 1.4}]}
         c["minecraft:attack"] = {"damage": m["dmg"]}
