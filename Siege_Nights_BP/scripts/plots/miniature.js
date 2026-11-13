@@ -14,6 +14,7 @@
 
 import { MINIATURE as M } from "./miniature_data.js";
 import { addTests, assert, assertEqual } from "../core/tests.js";
+import { signToward } from "../core/signs.js";
 
 const ALPHA = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
 export const MINI = { half: M.half, cells: M.cells, scale: M.scale, quay: M.quay };
@@ -117,6 +118,9 @@ const inQuay = (dx, dz) => Math.abs(dx - M.quay.dx) <= M.quay.half && Math.abs(d
 export const waystoneSpot = () => ({ dx: M.quay.dx, dz: M.quay.dz, dy: M.quay.h + 2 });
 /** Where a newcomer is set down: on the quay, west of the Waystone, looking east over the map. */
 export const arrivalOffset = () => ({ dx: M.quay.dx - 2, dz: M.quay.dz, dy: M.quay.h + 1 });
+/** The Waystone's two signs (north and south of it) face west, toward the arrival spot: ground_sign_direction 4
+ * (0 south, 4 west, 8 north, 12 east). They faced north and south before and showed newcomers their edges. */
+export const WAYSTONE_SIGN_ROT = 4;
 
 /**
  * Every block of the miniature (about 60,000), a few columns per step, for system.runJob. put(x, y, z, id, states) places
@@ -198,6 +202,11 @@ export function* miniatureBlocks(put, o, markers = [], clear) {
 }
 
 addTests("miniature", {
+  "the Waystone signs face the newcomer, not edge-on": () => {
+    const a = arrivalOffset();
+    const w = waystoneSpot();
+    assertEqual(WAYSTONE_SIGN_ROT, signToward({ x: w.dx, z: w.dz }, { x: a.dx, z: a.dz }));
+  },
   "the miniature's grid is odd-sized and every row is whole": () => {
     assertEqual(M.cells % 2, 1);
     assertEqual(M.cells, M.half * 2 + 1);
