@@ -64,10 +64,11 @@ const pad2 = (n) => String(n).padStart(2, "0");
 // The pin: three letters, column, row and kind. The view is the 3 x 3 tiles round the player's tile (tx, tz).
 // A target inside the view gets its own cell. One further away is held on the view's rim, where the line from the
 // player to it leaves the map, and drawn as an edge pin. pin = { x, z, kind: "goal" | "talk" } or undefined.
-export function pinCode(x, z, tx, tz, pin) {
+// origin: the world x/z where tile 0 starts on this map's grid (another dimension's map passes its own).
+export function pinCode(x, z, tx, tz, pin, origin = { x: ORIGIN, z: ORIGIN }) {
   if (!pin || !Number.isFinite(pin.x) || !Number.isFinite(pin.z)) return NO_PIN;
   const cell = TILE / PIN_CELLS, n = PIN_COLS.length;
-  const x0 = ORIGIN + (tx - 1) * TILE, z0 = ORIGIN + (tz - 1) * TILE, size = 3 * TILE;
+  const x0 = origin.x + (tx - 1) * TILE, z0 = origin.z + (tz - 1) * TILE, size = 3 * TILE;
   let px = pin.x, pz = pin.z, kind = pin.kind === "talk" ? PIN.talk : PIN.goal;
   const inside = px >= x0 && px < x0 + size && pz >= z0 && pz < z0 + size;
   if (!inside) {

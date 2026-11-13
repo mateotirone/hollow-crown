@@ -71,6 +71,10 @@ addTests("minimap", {
       assert(c[0] === "a" || c[0] === "i" || c[1] === "j" || c[1] === "r", `on the rim: ${c}`);
     }
   },
+  "another map's grid passes its own origin": () => {
+    const o = { x: -704, z: -64 };
+    assertEqual(pinCode(o.x + 96, o.z + 96, 1, 1, { x: o.x + 1, z: o.z + 1 }, o), "a" + "j" + PIN.goal);
+  },
   "pin letters never clash with the HUD's cutting": () => {
     for (const ch of PIN_COLS) assert(!PIN_ROWS.includes(ch), ch);
     assertEqual(readHud(hudString({ x: 0, z: 0, yaw: 0, off: true, pin: { x: 5, z: 5 } })).tile, "off___");
