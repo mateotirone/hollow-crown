@@ -14,15 +14,23 @@
 // Builder command:  /scriptevent siege:starter_kit [vale|frostmarch|saltreach|emberwaste|blackfen]
 //   gives a kit again (the given region, or the one you are standing in), whether or not you had one.
 // Saves: player property "hc:starter_kit" (the region key of the kit they were given).
+//
+// Starting purse (Mateo 2026-11-13: "we should give the player a starting amount of regals"): every player gets
+// START_REGALS once, on their first join (or their next join, on a world from before this). Enough for seeds and
+// bread from the Farmer, planks from the Woodcutter, or one guard, not enough to skip the first days.
+// Saves: player property "hc:starting_purse".
 
 import { system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { on, addTests, assert, assertEqual } from "../siege/api.js";
 import { mapMode, hallBuilt } from "../plots/api.js";
 import { regionAt } from "../economy/shops.js";
 import { REGION_KEY } from "../economy/regional_armor.js";
+import { pay, coins } from "../economy/api.js";
 
 export const STARTER_REGIONS = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
 const GIVEN = "hc:starter_kit";
+export const START_REGALS = 50;
+const PURSE = "hc:starting_purse";
 const SLOTS = [["helmet", EquipmentSlot.Head], ["chestplate", EquipmentSlot.Chest], ["leggings", EquipmentSlot.Legs], ["boots", EquipmentSlot.Feet]];
 const WORDS = {
   vale: { folk: "a Vale farmhand", weapon: "billhook" },
@@ -89,7 +97,17 @@ const later = (player, region, ticks = 40) => system.runTimeout(() => giveKit(pl
 
 on("plotChosen", ({ player, plot }) => later(player, plot?.region));
 on("startedHomeless", ({ player }) => later(player, "vale"));
+// The starting purse, once per player, a moment after they join
+export function givePurse(player) {
+  if (!valid(player) || player.getDynamicProperty(PURSE) !== undefined) return false;
+  player.setDynamicProperty(PURSE, START_REGALS);
+  pay(player, START_REGALS, "starting purse");
+  player.sendMessage(`§6You start with ${coins(START_REGALS)}.§7 Sell wheat to your Farmer for more, or take iron to the Moneyer in Kingsrest.`);
+  return true;
+}
+
 on("joined", ({ player, first }) => {
+  system.runTimeout(() => { try { givePurse(player); } catch (e) { console.warn(`[Hollow Crown] starting purse: ${e}`); } }, 60);
   if (!first) return;
   let hall = false;
   try {
@@ -111,6 +129,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 addTests("starter", {
+  "the starting purse buys a first useful thing but not a whole defence": () => {
+    assert(START_REGALS >= 40 && START_REGALS < 80, `${START_REGALS}`);
+  },
   "every region's kit is four clothes and a weapon, named for the region": () => {
     for (const r of STARTER_REGIONS) {
       const kit = kitFor(r);

@@ -19,6 +19,7 @@ import { progressOf, saveProgress, contextOf, grantTome, learnClues, learnLeads,
 import { libraryCount } from "./library.js";
 import { sfx } from "../core/sfx.js";
 import { NPC_VOICES } from "./data/npc_voices.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const NPC_TYPE = "minecraft:npc";
 const NPC = Object.fromEntries(NPCS.map((n) => [n.id, n]));
@@ -159,11 +160,14 @@ export function spawnNpc(dimension, location, id) {
   try {
     const component = entity.getComponent("minecraft:npc");
     component.name = NPC[id].name;
-    component.skinIndex = NPCS.indexOf(NPC[id]) * 5;
     component.defaultScene = sceneTag(id, NPC[id].start[NPC[id].start.length - 1][1]);
   } catch {}
+  dressNpc(entity, `lore_${id}`);
   return entity;
 }
+
+// Story people placed before they carried a skin tag wear theirs by their lore tag
+addNpcLook((e) => { const id = npcIdOf(e); return id && NPC[id] ? `lore_${id}` : undefined; });
 
 // Clicking a story NPC opens the right scene for this player
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {

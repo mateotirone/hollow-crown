@@ -21,6 +21,7 @@ import { heightAt } from "./terrain.js";
 import { load, save, say } from "./data.js";
 import { shove } from "../bestiary/util.js";
 import { fightOf } from "../bestiary/bossCore.js";
+import { dressNpc } from "../core/npc_skins.js";
 
 const K_STORY = "hc:hollow_story"; // { cartsong: {playerId: true}, spared: {playerId: true}, reached: {beat: true} }
 const K_PROGRESS = "hc:undertow_progress"; // shared with index.js and choir.js
@@ -101,6 +102,7 @@ function placeCarter() {
     npc.addTag(CARTER_TAG);
     npc.nameTag = CARTER_NAME;
     try { npc.getComponent("minecraft:npc").name = CARTER_NAME; } catch { /* cosmetic */ }
+    dressNpc(npc, "lore_carter");
   } catch { /* chunk not loaded */ }
 }
 

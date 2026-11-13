@@ -19,6 +19,7 @@ import { clearTrees } from "../core/clearing.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { bakedFor, bakedState } from "./baked.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const overworld = () => world.getDimension(OVERWORLD);
 export const say = (player, text) => { try { player.sendMessage(text); } catch { /* gone */ } };
@@ -157,8 +158,11 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   event.cancel = true;
   system.run(() => { try { npcHandlers.get(tag)(player, target); } catch (e) { console.warn(`[Hollow Crown] unlock npc: ${e}`); } });
 });
-/** Keep one NPC with this tag at `spot` (spawn if missing, bring back if moved). */
+/** Keep one NPC with this tag at `spot` (spawn if missing, bring back if moved). skin: a key from core/npc_skins_data.js */
+const skinOfTag = new Map(); // npc tag -> skin key, so NPCs from before skin tags get theirs back
+addNpcLook((e) => { for (const t of e.getTags()) if (skinOfTag.has(t)) return skinOfTag.get(t); return undefined; });
 export function keepNpc(dim, { tag, name, skin, spot }) {
+  skinOfTag.set(tag, skin);
   let found;
   try { found = dim.getEntities({ type: "minecraft:npc", tags: [tag], location: spot, maxDistance: 48 }); } catch { return; }
   for (const extra of found.slice(1)) extra.remove();
@@ -171,7 +175,8 @@ export function keepNpc(dim, { tag, name, skin, spot }) {
     e.addTag(tag);
     e.nameTag = name;
     const npc = e.getComponent("minecraft:npc");
-    if (npc) { npc.name = name; npc.skinIndex = skin; }
+    if (npc) npc.name = name;
+    dressNpc(e, skin);
   } catch { /* not loaded */ }
 }
 export function removeNpc(dim, tag, near) {

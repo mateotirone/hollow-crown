@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { ARENA, ringLayout, ROOM_COLORS } from "./layout.js";
-import { ARENA_MOBS, DIFFICULTIES, KIT } from "./config.js";
+import { ARENA_MOBS, DIFFICULTIES, kitFor, KIT_REGIONS } from "./config.js";
 import { spreadRooms, assignRooms, verdict, mobReward, hasLeft, gateRows, inBox, flat } from "./rules.js";
 import { pickSeats } from "./crowd.js";
 import { MONSTERS } from "../core/nomonsters.js";
@@ -73,10 +73,17 @@ addTests("arena", {
   "arena mobs are all our own creatures, never vanilla monsters": () => {
     for (const m of ARENA_MOBS) assert(m.type.startsWith("siege:") && !MONSTERS.has(m.type), m.type);
   },
-  "the kit is vanilla iron only": () => {
-    for (const id of [...Object.values(KIT.armor), ...KIT.items.map((i) => i[0])]) {
-      assert(!/diamond|netherite|elytra|gold_(helmet|chestplate|leggings|boots|sword)/.test(id), id);
+  "the kit is the game's own gear, iron strength, in every region's look": () => {
+    for (const r of KIT_REGIONS) {
+      const kit = kitFor(r);
+      assertEqual(kit.region, r);
+      for (const id of [...Object.values(kit.armor), ...kit.items.map((i) => i[0])]) {
+        assert(id.startsWith("siege:"), `${id} is one of ours`);
+        assert(!/diamond|netherite|choirsteel|elytra/.test(id), id);
+      }
+      assert(Object.values(kit.armor).every((id) => id.startsWith(`siege:iron_${r}_`)), `${r} armour is regional iron`);
     }
+    assertEqual(kitFor("nowhere").region, "vale");
   },
   "crowd seats spread out": () => {
     const seats = Array.from({ length: 300 }, (_, i) => ({ x: i, y: 0, z: 0 }));
