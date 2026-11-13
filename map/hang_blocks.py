@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn or drop wall-hung blocks in baked world files that would hang on nothing.
+"""Turn or drop wall-hung blocks (and vines) in baked world files that would hang on nothing.
 
 An item frame, ladder, button or wall sign needs a solid block behind it, or it pops off the first time a block
 next to it changes (tools/hung-check.mjs finds them). For each one that hangs on air, this turns it to face away
@@ -12,6 +12,7 @@ import json, re, sys
 
 BEHIND = {2: (0, 0, 1), 3: (0, 0, -1), 4: (1, 0, 0), 5: (-1, 0, 0)}
 SOFT = re.compile(r"(^|:)air$|vine|ladder|lantern|button|sign|frame|torch|carpet|glass_pane|iron_bars|fence|chain|trapdoor|door|slab|stairs|_wall$|structure_void|flower|grass$|fern|bush|sapling|candle|banner|rail|snow_layer")
+VINE = {1: (0, 1), 2: (-1, 0), 4: (0, -1), 8: (1, 0)}   # vine_direction_bits: the side it clings to (s w n e)
 HUNG = re.compile(r"(^|:)(glow_)?frame$|(^|:)ladder$|_button$|wall_sign$")
 
 
@@ -35,6 +36,20 @@ def fix(path):
     turned = dropped = 0; drop = set()
     for cell, i in at.items():
         e = pal[blocks[i][3]]
+        if e["name"].endswith(":vine") and "vine_direction_bits" in (e.get("states") or {}):
+            bits = e["states"]["vine_direction_bits"]
+            solid = lambda o: (lambda j: j is not None and j not in drop and not SOFT.search(pal[blocks[j][3]]["name"]))(
+                at.get((cell[0] + o[0], cell[1], cell[2] + o[1])))
+            good = [k for k, o in VINE.items() if solid(o)]
+            if any(bits & k for k in good): continue
+            above = at.get((cell[0], cell[1] + 1, cell[2]))
+            if not good and above is not None and pal[blocks[above][3]]["name"].endswith(":vine"): continue   # hangs from the vine above
+            if good:
+                blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**e["states"], "vine_direction_bits": good[0]}}), *blocks[i][4:]]
+                turned += 1
+            else:
+                drop.add(i); dropped += 1
+            continue
         if not HUNG.search(e["name"]): continue
         f = (e.get("states") or {}).get("facing_direction")
         wall = lambda fd: (lambda j: pal[blocks[j][3]] if j is not None and j not in drop else None)(
