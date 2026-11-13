@@ -72,6 +72,14 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - A settlement's road meets the map's roads (Mateo, 2026-11-12): the gate road is carried on to the nearest map road
   and joins it at that road's own height and surface, graded evenly, with the land either side stepped to it by at
   most 1 a block. The game does it when a settlement is founded (`settle/founding.js` `joinRoad`).
+- That road is worked out on the map, never guessed in game (Mateo's playtest 2026-11-13, "My path just ends": at four
+  plots the nearest road was 55 to 77 blocks off and the old 48-block look-ahead gave up). `tools/export_road_joins.mjs`
+  writes each plot's route to `settle/roadjoin_data.js`: straight out along the gate line to the edge of the settlement
+  land (where the later tiers' gate road runs, so it is laid over it as the town grows), then round water and steep
+  ground to the nearest map road (a trail only where no road is near). It is 5 wide like the gate road, in the map
+  roads' own block mix, and it leaves no gap: only ground the town has already laid out is kept off. Re-run the export
+  whenever the map's roads, the plots or the Hamlet layouts change; the self-test fails when a layout's gate road no
+  longer starts the route.
 
 ## Bridges and fords
 

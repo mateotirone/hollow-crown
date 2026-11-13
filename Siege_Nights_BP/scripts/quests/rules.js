@@ -122,13 +122,16 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //   keep: has a Keep Banner raised                                       items: { item id: count } of what matters
 //   dim, pos: where the player is                                        site: the named source site { id, name, x, z }
 //   rift: the Rift, once open { x, z, name }                             hollow: { cartsong, choir, carter: { x, z } }
-//   morvane: Morvane has fallen (world or player)                        station: your railway station (stationQuest)
+//   morvane: Morvane has fallen (world or player)                      farmer: { at?: { x, z }, sold, tag } once you have a settlement
+//                                                                       station: your railway station (stationQuest)
 // }
 export function questsFor(f) {
   const out = [];
   // Until the first siege is held, getting ready for it comes first (newplayer/firstnights.js)
   const first = f.dim !== UNDERTOW && !f.morvane ? firstStep(f.first) : undefined;
   if (first) out.push(first);
+  const farm = farmerQuest(f);
+  if (farm) out.push(farm);
   const main = mainQuest(f);
   if (main) out.push(main);
   // your own railway station: shown until you have stood on its platform, even in the first nights (playtest
@@ -136,6 +139,21 @@ export function questsFor(f) {
   const side = first ? stationQuest(f) : sideQuest(f, main);
   if (side) out.push(side);
   return out;
+}
+
+// Your first Regals (Mateo 2026-11-13): sell wheat to the Farmer in your own Hamlet (economy/hamlet.js). Shows from
+// the day the settlement is founded until WHEAT_GOAL wheat has been sold to any Farmer.
+export const WHEAT_GOAL = 16;
+export function farmerQuest(f) {
+  if (f.dim === UNDERTOW || f.morvane || !f.farmer || (f.farmer.sold ?? 0) >= WHEAT_GOAL) return undefined;
+  const sold = f.farmer.sold ?? 0;
+  return {
+    id: "farmer", title: `Sell ${WHEAT_GOAL} wheat to the Farmer`,
+    hint: "Your first Regals. Your Farmer sells seeds and buys wheat: plant the field by the houses and bring him the harvest.",
+    target: f.farmer.at ? at("Your Farmer", f.farmer.at.x, f.farmer.at.z) : undefined,
+    note: sold ? `${sold} of ${WHEAT_GOAL} sold.` : "",
+    npc: f.farmer.tag ? { tag: f.farmer.tag, name: "your Farmer" } : undefined,
+  };
 }
 
 function mainQuest(f) {

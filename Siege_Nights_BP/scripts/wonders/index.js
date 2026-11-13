@@ -30,6 +30,7 @@ import {
 } from "./rules.js";
 import "./tests.js";
 import { insideActions } from "./inside.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -279,6 +280,12 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   if (w) system.run(() => keeperMenu(player, w));
 });
 
+addNpcLook((e) => {
+  const t = e.getTags().find((x) => x.startsWith(`${KEEPER}_`));
+  const w = t && WONDER_BY_ID?.[t.slice(KEEPER.length + 1)];
+  return t ? { key: `keeper_${t.slice(KEEPER.length + 1)}`, name: w ? `${w.keeper}\n§7${w.name}` : undefined } : undefined;
+});
+
 onTick("wonders_keepers", 100, () => {
   if (!mapMode()) return;
   const dim = world.getDimension(OVERWORLD);
@@ -294,6 +301,7 @@ onTick("wonders_keepers", 100, () => {
       e.addTag(`${KEEPER}_${w.id}`);
       e.nameTag = `${w.keeper}\n§7${w.name}`;
       try { e.getComponent("minecraft:npc").name = w.keeper; } catch { /* older versions */ }
+      dressNpc(e, `keeper_${w.id}`);
     } catch {
       // not loaded here yet
     }

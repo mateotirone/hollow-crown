@@ -13,6 +13,7 @@ import { worth, coins } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
 import { applyFilter } from "../core/events.js";
 import { ROLE_DEEDS } from "./roles.js";
+import { withArticle } from "../core/grammar.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
 export const BOUND_EMBER = "siege:bound_ember"; // the Marked player's focus
@@ -209,7 +210,7 @@ export function learn(player, skill, hallLevel, paid = false) {
   const after = rankOf(hero.path, hero.skills)?.name;
   if (after && after !== before) {
     api.title(player, `§6${after}`, hero.path === "knight" ? "§7The Order raises your rank" : "§7The Ember sinks deeper");
-    world.sendMessage(`§6${player.name} is now ${/^[AEIOU]/.test(after) ? "an" : "a"} ${after}.`);
+    world.sendMessage(`§6${player.name} is now ${withArticle(after)}.`);
     api.emit("rankUp", { player, path: hero.path, rank: after });
   }
   return true;

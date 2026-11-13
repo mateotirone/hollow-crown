@@ -100,12 +100,13 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 10
+    "damage": 7
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,
     "speed_multiplier": 1.25,
-    "track_target": true
+    "track_target": true,
+    "cooldown_time": 1.5
    },
    "minecraft:despawn": {
     "despawn_from_distance": {}

@@ -31,6 +31,7 @@ import { load } from "../undertow/data.js";
 import { hasCartsong, carterStation, stationSpot } from "../undertow/story.js";
 import { WARDS } from "../plots/config.js";
 import { firstFacts } from "../newplayer/firstnights.js";
+import { farmerFacts } from "../economy/api.js";
 import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import { markTalk, talkSpot, forget } from "./marks.js";
 import "./tests.js";
@@ -110,6 +111,7 @@ function factsOf(player) {
     morvane: !!reach.source || !!prog.morvane,
     first: (() => { try { return firstFacts(player); } catch { return undefined; } })(),
     station: (() => { try { return stationFacts(player); } catch { return undefined; } })(),
+    farmer: (() => { try { return farmerFacts(player); } catch { return undefined; } })(),
   };
 }
 
@@ -160,7 +162,7 @@ export function questPin(player) {
 
 // Something in the story moved: work the steps out again at once, not at the next look.
 const refresh = (player) => { if (player?.id) steps.delete(player.id); };
-for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward"]) on(name, (d) => refresh(d?.player));
+for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward", "goodsSold"]) on(name, (d) => refresh(d?.player));
 on("minimapToggled", ({ player }) => { if (player) { lastSent.delete(player.id); try { send(player, true); } catch { /* left */ } } });
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => lastSent.delete(player.id));
