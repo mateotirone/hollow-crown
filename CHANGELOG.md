@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The starter village now keeps a 15 by 15 piece of ground free beside the Mason's Yard for the Storehouse, so it never lands on the Barracks plot or a later building.
 - Every player settlement now has its own Farmer, standing outside the second house of your Hamlet. He sells seeds and buys your wheat, so you can earn your first Regals at home. Settlements founded before this get their Farmer the next time you go home.
 - A new step on the quest tracker, "Sell 16 wheat to the Farmer", points you to your Farmer with a pin on the minimap and a gold mark over his head until you've sold him 16 wheat.
 - Starter clothes never wear out now.

@@ -63,7 +63,7 @@ export function groundwork(layout, tier) {
 
 export const fixturesOf = (layout, tier) => (layout?.fix ?? []).filter((f) => f[3] === tier)
   .map(([kind, x, z, t, dy, a, b, c]) => ({ kind, x, z, tier: t, dy,
-    ...(kind === "tree" ? { species: a, size: b, rotation: c } : kind === "mason_yard" ? { rotation: a } : { stamp: a, rotation: b }) }));
+    ...(kind === "tree" ? { species: a, size: b, rotation: c } : kind === "mason_yard" || kind === "storehouse" ? { rotation: a } : { stamp: a, rotation: b }) }));
 
 // The hall's reserved box at a hall level (1..5)
 export const hallBox = (layout, level) => {
