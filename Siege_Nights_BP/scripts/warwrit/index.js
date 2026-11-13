@@ -56,6 +56,8 @@ addFilter("openToAttack", (open, { owner }) => open || phaseOf(S().writs[owner])
 addFilter("gatesBarred", (barred, { owner }) => barred || !!S().writs[owner]);
 // fallen soldiers of either side wait in the Barracks until the assault is over
 addFilter("guardRetrainHeld", (held, { owner }) => held || Object.entries(S().writs).some(([d, w]) => phaseOf(w) === "assault" && (sideOf(d, owner) || sideOf(w.attacker, owner))));
+// in the assault the defenders' Men-at-Arms come out of the Barracks whether or not an attacker is online
+addFilter("underAttack", (under, { owner }) => under || phaseOf(S().writs[owner]) === "assault");
 addFilter("bannerShielded", (shielded, { owner }) => shielded || !!S().writs[owner]);
 // An unjust war (no grounds): the defender's walls, vault, Keep and guards are twice as strong for it
 // (not on top of the away keeper's doubling, vault/index.js)
@@ -127,20 +129,49 @@ async function declareMenu(player, defender) {
   if (cantDeclare({ attacker, defender, hasKeep: true, targetKeep: keepOf(defender), peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now() })) return;
   if (freeSlot(s.writs) === undefined) return;
   if (!charge(player, fee, "warWrit")) return say(player, `§cThis War Writ costs ${coins(fee)}.`);
-  s.writs[defender] = { attacker, day, grounds: grounds ?? "none", unjust: !grounds, at: now(), slot, share };
+  const n = declareWrit(attacker, defender, { grounds: grounds ?? "none", share, day, by: player.name });
+  if (share > 0 && typeof n === "number") say(player, n ? `§6${n} soldiers mount up and ride with you. They follow you until the siege ends.` : "§7None of your soldiers are near enough to ride with you.");
+}
+
+// Issue a writ (the menu above, once paid; also the battle test, battletest/). grounds: a GROUNDS_TEXT key or "none"
+// (unjust). share: % of the attacker's soldiers who march. dismounted: they start on foot where they stand and walk to
+// the gate (an army with no leader on the road). by: the declarer's name for the announcement.
+// Returns how many soldiers march, or a reason it can't be issued.
+export function declareWrit(attacker, defender, { grounds = "none", share = 0, day, by, dismounted = false } = {}) {
+  const s = S();
+  if (s.writs[defender]) return "A War Writ is already out against them.";
+  const slot = freeSlot(s.writs);
+  if (slot === undefined) return "Too many wars are being fought at once.";
+  const c = clock();
+  day ??= assaultDay(c.day, c.tod);
+  const unjust = !GROUNDS_TEXT[grounds];
+  const when = day === c.day ? "tonight at nightfall" : "at nightfall tomorrow";
+  const who = by ?? nameOf(attacker);
+  s.writs[defender] = { attacker, day, grounds: unjust ? "none" : grounds, unjust, at: now(), slot, share };
   delete s.feuds[`${attacker}>${defender}`];
-  if (!grounds) { s.oaths ??= {}; s.oaths[attacker] = now() + WRIT.oathMs; }
+  if (unjust) { s.oaths ??= {}; s.oaths[attacker] = now() + WRIT.oathMs; }
   store.save();
   barGates(defender);
-  announce(grounds
-    ? `§4§l${player.name} has declared war on ${nameOf(defender)}§r§4 (${why}). The assault comes ${when}.`
-    : `§4§l${player.name} has declared an unjust war on ${nameOf(defender)}!§r§4 The assault comes ${when}. ${player.name} is an Oathbreaker for three days: anyone may declare war on them.`);
-  emit("baseAttacked", { owner: defender, kind: "warWrit", text: `${player.name} has declared war on you. The assault comes ${when}; your gates are shut.`, by: attacker });
-  if (share > 0) {
-    const n = startMarch(s.writs[defender], defender, share);
-    say(player, n ? `§6${n} soldiers mount up and ride with you. They follow you until the siege ends.` : "§7None of your soldiers are near enough to ride with you.");
-  }
-  emit("writDeclared", { attacker, defender, grounds, day, share });
+  announce(!unjust
+    ? `§4§l${who} has declared war on ${nameOf(defender)}§r§4 (${GROUNDS_TEXT[grounds]}). The assault comes ${when}.`
+    : `§4§l${who} has declared an unjust war on ${nameOf(defender)}!§r§4 The assault comes ${when}. ${who} is an Oathbreaker for three days: anyone may declare war on them.`);
+  emit("baseAttacked", { owner: defender, kind: "warWrit", text: `${who} has declared war on you. The assault comes ${when}; your gates are shut.`, by: attacker });
+  const n = share > 0 ? startMarch(s.writs[defender], defender, share, { dismounted }) : 0;
+  emit("writDeclared", { attacker, defender, grounds: unjust ? undefined : grounds, day, share });
+  return n;
+}
+
+// End a writ now (the battle test's stand-in leader falling, or clearing the test). how: "dawn" | "leader"
+export function endWritFor(defender, how = "dawn") {
+  const w = S().writs[defender];
+  if (w) endWrit(defender, w, how);
+  return !!w;
+}
+
+// The writ an owner is in, as attacker or defender: { defender, writ, phase } or undefined
+export function writOf(owner) {
+  const e = Object.entries(S().writs).find(([d, w]) => d === owner || w.attacker === owner);
+  return e && { defender: e[0], writ: e[1], phase: phaseOf(e[1]) };
 }
 
 // ---------- demands ----------
