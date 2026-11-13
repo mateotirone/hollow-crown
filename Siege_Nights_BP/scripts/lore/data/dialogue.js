@@ -880,7 +880,7 @@ export const NPCS = [
         ],
       },
       fragments: {
-        text: "My father was warden before me. He used to say a careful man scatters things where he can find them again.\n\nA brow under the old cistern. A jaw in the east tower. An eye where the caravans water. I don't know the rest, and I don't know that, either, officially.",
+        text: "My father was warden before me. He used to say the statues remember better than people do. Every one of them has a line cut under it, about when it was carved: the boy, the crowning, the war, and on to an old man.\n\nPut his life in order and turn them that way, youngest first. That's the whole secret. I don't know that, either, officially.",
         opts: [["Back.", "hub2", ["lead:faceless_vault"]]],
       },
       seneschal: {
@@ -888,7 +888,7 @@ export const NPCS = [
         opts: [["Back.", "hub2"]],
       },
       riddle: {
-        text: "There's a heraldry riddle on the vault door under the fortress. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's instructions.",
+        text: "There's a heraldry riddle on the vault door out in the dunes. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's him. The king on all those statues, before they took his face off.",
         opts: [["Back.", "hub2", ["lead:faceless_vault"]]],
       },
       after: {
