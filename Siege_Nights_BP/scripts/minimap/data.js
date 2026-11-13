@@ -4,6 +4,7 @@
 
 import { PLOT_PLAN, WARDS } from "../plots/config.js";
 import { REGION_CELL, REGION_ROWS } from "./regions.js";
+import { WONDERS } from "../wonders/data.js";
 
 export const KEY = "hcm:";        // hidden titles that start with this feed the HUD map
 export const ORIGIN = -1280;      // world x/z where tile 0 starts
@@ -15,11 +16,12 @@ const LETTERS = "abcdefghijklmnop";   // arrow spot
 const DIRS = "qrstuvwy";               // arrow direction, north then clockwise
 const REGION_NAMES = ["Aldmere Vale", "Frostmarch", "Saltreach", "Blackfen", "Emberwaste"];
 
-// Places worth a name on the map: the twelve plots and the towns. Caves and sinks stay unnamed (they
+// Places worth a name on the map: the twelve plots, the towns and the six wonders. Caves and sinks stay unnamed (they
 // are for finding), and so does the sealed pass.
 export const PLACES = [
   ...PLOT_PLAN.map((p) => ({ name: p.name, x: p.x, z: p.z, r: NEAR })),
   ...WARDS.filter((w) => !w.thin && w.name !== "the Shut Pass").map((w) => ({ name: w.name, x: w.x, z: w.z, r: Math.max(NEAR, w.r + 30) })),
+  ...WONDERS.map((w) => ({ name: w.name, x: w.site.x, z: w.site.z, r: 90 })),
 ];
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);

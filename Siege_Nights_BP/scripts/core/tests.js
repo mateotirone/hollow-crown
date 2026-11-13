@@ -14,6 +14,9 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "wonders: each stage draws into a build plan, every block with a known role",
+  "wonders: every wonder has a design, cut into six stages that hold every block",
+  "landmarks: tomes laid in designs are real tomes, each laid once, each on something solid",
   "plot caves: a plot cave: each tier opens more, all of it reached from the shaft, ore only on open faces, a door at Castle",
   "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
   "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",

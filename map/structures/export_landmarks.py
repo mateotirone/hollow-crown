@@ -136,7 +136,7 @@ def export(d, q=0, name=None):
         x, z = turn_cell(v[0], v[2], q)
         return [x, v[1], z] + list(v[3:])
 
-    for k in ("signs", "spawns", "npcs", "roleMarks"): m[k] = [tp(v) for v in m.get(k, [])]
+    for k in ("signs", "spawns", "npcs", "roleMarks", "tomes", "life"): m[k] = [tp(v) for v in m.get(k, [])]
     if "mark" in m: m["mark"] = tp(m["mark"])
     if "fillRects" in m:   # [x0, z0, x1, z1] columns that may be filled under (the rest are left open)
         m["fillRects"] = [[min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])]
@@ -144,7 +144,7 @@ def export(d, q=0, name=None):
     for k in ("fill", "top"):
         if k in m: m[k] = None if m[k] is None else -2 if m[k] == "keep" else index(m[k], {})
     if "piles" in m: m["piles"] = [index(b, {"axis": "y"}) for b in m["piles"]]
-    out.update({k: v for k, v in m.items() if not (k in ("signs", "spawns", "npcs", "roleMarks") and not v)})
+    out.update({k: v for k, v in m.items() if not (k in ("signs", "spawns", "npcs", "roleMarks", "tomes", "life") and not v)})
     out["palette"] = pal
     return out
 
