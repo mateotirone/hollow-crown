@@ -211,7 +211,7 @@ def blocks(h, T, wall, sites, region="vale", x0=0, z0=0, fixed=None):
                 for y in range(max(t - SOIL, t - (g - t)), t): out[(x, y, z)] = (R["sub"], {})
             top = R["top"]
             pn, every = R["patch"]
-            if _h(x // 2, z // 2, 3) * every < 1: top = pn
+            if _h(x // 2, z // 2, 3) * every < 1 and lowest[i, j] == t: top = pn   # patches on level ground, never down a slope
             out[(x, t, z)] = (top, {})
             if wall[i, j]:
                 lo = int(lowest[i, j])

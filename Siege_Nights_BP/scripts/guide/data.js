@@ -69,11 +69,11 @@ export const ENTRIES = [
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
-      + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement and makes the land around it yours.\n"
-      + "3. §fCraft a Siege Workshop§r at a crafting table and put it on your land. Nearly everything in this book is made there.\n"
-      + "4. §fBuild walls and a shelter before your first siege night.§r Click your Keep Banner to see when it is due.\n"
-      + "5. §fHold the night.§r Each siege you survive is a win, and wins grow your settlement.\n\n"
-      + "After that, the land is yours to read. People in the towns talk, and books lie where you would not expect them.",
+      + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
+      + "3. §fOpen your founder's chest§r in your house: logs, saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out in the world can't be felled, so plant the saplings.\n"
+      + "4. §fUse the Siege Workshop§r in the Mason's Yard (sneak-click it for its book). Build a §fBarracks§r there from stone bricks, planks and a barrel, then train guards in it (40 Regals each).\n"
+      + "5. §fHold the night.§r The first siege comes on the fifth night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"
+      + "The top-right tracker shows your next step until then. Iron lies under your land: dig down with a pickaxe. Nothing is charged for upkeep until you have held your first siege.",
     when: ["event:keepFounded"],
   },
   {
@@ -98,7 +98,8 @@ export const ENTRIES = [
   {
     id: "workshop", ch: "start", title: "The Siege Workshop",
     tip: "The Siege Workshop is a crafting table for castle things. Open it and check its recipe book: most of this world's items are made here.",
-    page: "Craft it at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
+    page: "Every new settlement has one in its Mason's Yard. More can be crafted at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
+      + "§fSneak-click§r a Workshop for its book: the main things it makes, what each does and what it takes.\n\n"
       + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Barracks, the Hall Cornerstone, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
       + "Siege blocks can only be placed inside your own settlement.",
     when: ["place:siege:workshop", "carry:siege:workshop"],
@@ -144,7 +145,7 @@ export const ENTRIES = [
     id: "keep_heart", ch: "siege", title: "Holding the keep",
     tip: "Raiders go for your Keep Banner. Its health floats above it: if it reaches zero, your banner falls.",
     page: "Raiders head for your Keep Banner and its health floats over it. Kill them before they get there.\n\n"
-      + "If the banner falls it is destroyed, and you will have to raise a new one to found your settlement again. On the Aldmere map your plot is held for you for 3 days.\n\n"
+      + "If the banner falls it drops to the ground and the raiders leave. Pick it up and raise it again: your buildings and walls are untouched, you keep your tier, and only one win is lost. On the Aldmere map your plot is held for you for 3 days.\n\n"
       + "Another player can also carry off your Keep Banner while you are online, which topples your settlement. Guard it.",
     when: ["event:siegeStart"],
   },
@@ -264,7 +265,7 @@ export const ENTRIES = [
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Click your Barracks and choose Train soldiers.",
-    page: "Build a §fBarracks§r and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
+    page: "Craft a §fBarracks§r at the Siege Workshop (3 stone bricks over planks, a barrel and planks), place it on your land and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them. Men-at-Arms stroll round the Barracks yard and sometimes the town by day, sleep inside the Barracks at night, and turn out at once when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders. The Barracks §fArmoury§r upgrades a whole type at once (the same materials for each soldier), and those trained later wear it too.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
@@ -283,8 +284,8 @@ export const ENTRIES = [
   },
   {
     id: "quartermaster", ch: "keep", title: "The Quartermaster",
-    tip: "Bring an unemployed villager to your Quartermaster's Desk and they take the job.",
-    page: "Place a §fQuartermaster's Desk§r on your land and bring an unemployed villager to it: they become your Quartermaster.\n\n"
+    tip: "Place a Quartermaster's Desk on your land and a quartermaster takes the post.",
+    page: "Place a §fQuartermaster's Desk§r on your land and a quartermaster soon takes the post (an unemployed villager standing by it takes the job first).\n\n"
       + "He sells siege gear, weapons, armour and finery for Regals, and more stock opens up the more you trade with him: diamonds from his second level, and netherite scrap and the netherite upgrade template once he is a veteran. Netherite is meant to take a long time.",
     when: ["carry:siege:quartermaster_desk", "click:siege:quartermaster_desk"],
   },
@@ -299,7 +300,7 @@ export const ENTRIES = [
   {
     id: "old_trees", ch: "keep", title: "The old trees",
     tip: "The old trees of Aldmere can't be felled. Plant your own, or build a Forester's Lodge.",
-    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Plant saplings of your own for wood, or build a Forester's Lodge on your land for a grove that regrows by itself.",
+    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Your founder's chest holds logs and saplings to start with; Woodcutters in the towns sell more saplings and planks. Plant saplings of your own for wood, or build a Forester's Lodge on your land for a grove that regrows by itself.",
     when: ["hit:siege:old_*"],
     needs: "siege:old_oak_log",
   },
@@ -327,7 +328,7 @@ export const ENTRIES = [
     id: "upkeep", ch: "coin", title: "Upkeep",
     tip: "Upkeep is paid at dawn: a sum for your town's size, a little for each building and a wage for each guard.",
     page: "A settlement costs Regals to keep. Each §fdawn§r you are in the world for, your upkeep is taken from your Regals and the screen says how much: §fUpkeep paid: 46 Regals§r.\n\n"
-      + "It is a sum for your town's size (nothing for a Hamlet, 8 for a Town, 24 for a City, 48 for a Castle), 2 for every building that stands and 3 for every guard. A new settlement pays nothing for its first three days, and days you are away are never charged.\n\n"
+      + "It is a sum for your town's size (nothing for a Hamlet, 8 for a Town, 24 for a City, 48 for a Castle), 2 for every building that stands and 3 for every guard. A new settlement pays nothing until it has held its first siege (and never in its first three days), and days you are away are never charged.\n\n"
       + "If you can't pay it all, what you have is taken and the rest is forgiven. Nothing is ever knocked down. But until a dawn is paid in full, guards who fall are §fnot retrained§r: they wait at the Barracks.\n\n"
       + "The Regals leave the kingdom. If another player wears the Crown, a fifth of what you pay goes to them.",
     when: ["event:upkeepPaid"],
