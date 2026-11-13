@@ -45,22 +45,27 @@ AREAS = [
     ("building",  "Library",          (-9, -8),           "r+", {"design": "library", "slot": (-23, -9, -14, -2)}),   # a long Medium, 13 x 15
     ("building",  "House",            (5, -23),           "r-", {"design": "house", "slot": (5, 19, -28, -18)}),
     ("building",  "House",            (-5, -23),          "r+", {"design": "house", "slot": (-19, -5, -28, -18)}),
-    # the open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
-    ("slot",      "Empty plot",       (-27, -11, 0, 14),  "r+", {"size": "L"}),
-    ("field",     "Common field",     (-23, -11, 16, 26), "r+", {}),
-    ("woodyard",  "Woodyard",         (11, 21, -1, 9),    "r-", {}),
-    ("pen",       "Pen",              (11, 19, 13, 23),   "r-", {}),
-    ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),
+    # Behind the square the town hall grows (HALL_REACH): everything back there stands outside the ground its
+    # level-5 hall takes, so nothing is ever knocked down for it.
+    # The open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
+    ("slot",      "Empty plot",       (-38, -22, 1, 15),  "r+", {"size": "L"}),
+    ("pen",       "Pen",              (-30, -22, 18, 26), "r+", {}),
+    ("woodyard",  "Woodyard",         (22, 32, 1, 11),    "r-", {}),
+    ("field",     "Common field",     (22, 34, 14, 24),   "r-", {}),
+    ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),   # the hall's own green: the hall grows over it
 ]
-# lanes: (kind, width, [(r, a), ...]) starting at the square; the main lane runs out through the gate
+# lanes: (kind, width, [(r, a), ...]) starting at the square; the main lane runs out through the gate.
+# The back lanes run either side of the hall's ground (r = +-19), so the hall never builds over them.
 LANES = [
-    ("lane", 3, [(-5, -4), (-9, 0), (-9, 25)]),
-    ("lane", 3, [(5, -4), (9, 0), (9, 25)]),
+    ("lane", 3, [(-5, -4), (-9, 0), (-19, 0), (-19, 27)]),
+    ("lane", 3, [(5, -4), (9, 0), (19, 0), (19, 27)]),
 ]
 WALKS = [  # 1-wide paths from a lane or the square to a door or gate
-    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)],
+    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 6), (22, 6)], [(20, 19), (22, 19)], [(-20, 22), (-22, 22)],
 ]
-WALL_BASE = 36                     # the Hamlet wall ring (outer face); Mateo picked rings 36/46/56/66 (2026-11-12)
+HALL_REACH = 21                    # the widest level-5 hall (Blackfen) with its 2 clear: r = -21 .. 21 behind the square
+WALL_BASE = 36                     # the Hamlet wall ring (outer face). Rings 36/54/60/66 (Mateo 2026-11-13: the Town ring moved
+                                   # out from 46 so the Town's plots fit round the village); each follows this outline
 WALL_KEEP = 5                      # the wall stays this far outside anything in the plan
 SLOPE = 0.4                        # graded ground: at most 1 block up per 2.5 across
 

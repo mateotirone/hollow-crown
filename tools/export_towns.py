@@ -125,7 +125,7 @@ def starter_hamlet(v, st):
     used = {(c[0], c[1]) for c in st["used"]}
     near = {(x + i, z + j) for x, z in used for i in (-2, -1, 0, 1, 2) for j in (-2, -1, 0, 1, 2)}   # the 3-block clearance
     in_box = lambda b: any((x, z) in near for x in range(b[0], b[2] + 1) for z in range(b[1], b[3] + 1))
-    hall5 = v["hall"][-1]["box"]
+    hall4, hall5 = v["hall"][-2]["box"], v["hall"][-1]["box"]
     # 1. the town layout's own Hamlet goes, and whatever of the later bands would land on the starter village
     v["slots"] = [s for s in v["slots"] if s["opensAt"] != "Hamlet" and not in_box(s["box"])]
     v["fixtures"] = [f for f in v["fixtures"] if f["tier"] != "Hamlet" and tuple(f["at"]) not in near]
@@ -133,8 +133,18 @@ def starter_hamlet(v, st):
     # 2. the starter village's ground and blocks (its palette goes on the end of the layout's)
     pal = v["groundwork"]["palette"]
     index = {(n, json.dumps(p, sort_keys=True)): i for i, (n, p) in enumerate(pal)}
+    # the Mason's yard is raised by the game (settle/basebuilds.js, the mason_yard design on the fixture below): of the
+    # starter's yard only its levelled ground stays
+    yard_n, yard = next(((n, a) for n, a in enumerate(st["areas"]) if a["kind"] == "yard"), (None, None))
+    R, A = st["frame"]["right"], st["frame"]["ahead"]
+    def world_box(b):
+        pts = [(r * R[0] + a * A[0], r * R[1] + a * A[1]) for r, a in ((b[0], b[2]), (b[1], b[3]))]
+        return [min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts)]
+    ybox = world_box(yard["box"]) if yard else None
     for x, y, z, n, p in st["blocks"]:
         if n in STARTER_SKIP or (x, z) == (0, 0):
+            continue
+        if ybox and ybox[0] <= x <= ybox[2] and ybox[1] <= z <= ybox[3] and y > yard["y"]:
             continue
         k = (n, json.dumps(p, sort_keys=True))
         if k not in index:
@@ -148,21 +158,25 @@ def starter_hamlet(v, st):
     for n, (ar, door) in enumerate(zip(st["areas"], st["doors"])):
         if ar["kind"] not in ("building", "slot"):
             continue
-        cells = [[ar["box"][0], ar["box"][2]], [ar["box"][1], ar["box"][3]]]
-        R, A = st["frame"]["right"], st["frame"]["ahead"]
-        pts = [(r * R[0] + a * A[0], r * R[1] + a * A[1]) for r, a in cells]
-        box = [min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts)]
+        box = world_box(ar["box"])
         wide = box[2] - box[0] + 1 if door["side"] in "ns" else box[3] - box[1] + 1
         deep = box[3] - box[1] + 1 if door["side"] in "ns" else box[2] - box[0] + 1
         design = ar.get("design")
         size = ar.get("size") or ("Small" if wide <= 9 else "Medium" if deep <= 15 and wide <= 13 else "Large")
         size = {"S": "Small", "M": "Medium", "L": "Large"}.get(size, size)
-        tags = ["starter"] + (["library", "square"] if design == "library" else []) + (["hall5"] if boxes_meet(box, hall5) else [])
+        hall = ["hall4"] if boxes_meet(box, hall4) else ["hall5"] if boxes_meet(box, hall5) else []   # ground the hall takes back
+        tags = ["starter"] + (["library", "square"] if design == "library" else []) + hall
+        if design == "house" and not any("founder" in q["tags"] for q in v["slots"]):
+            tags.append("founder")   # the founder's own house: their bed goes in it (settle/basebuilds.js)
         sx, sz = door["step"]
         v["slots"].append({"id": f"st{n}", "size": size, "box": box, "floor_y": ar["y"], "tags": tags, "long": size == "Medium" and wide == 13,
                            "door": {"side": door["side"], "step": [sx, sz], "walk": [[sx, sz, door["stepY"], "slab"]]},
                            "opensAt": "Hamlet", "start": design if design and design != "library" else None})
-    # 4. fixtures: the Hall Cornerstone and the Mason's Bench where the starter put them
+    # 4. fixtures: the Mason's yard (front middle, facing out), the Hall Cornerstone and the Mason's Bench (the bench
+    # only stands there if the yard can't be raised)
+    if yard:
+        door = st["doors"][yard_n]
+        v["fixtures"].append({"name": "mason_yard", "at": door["cell"], "ground_y": yard["y"], "side": door["side"], "tier": "Hamlet"})
     for f in st["fixtures"]:
         if f["kind"] in ("hall_cornerstone", "mason_bench"):
             x, y, z = f["at"]

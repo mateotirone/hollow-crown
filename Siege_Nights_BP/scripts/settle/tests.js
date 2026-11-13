@@ -303,11 +303,12 @@ addTests("settle towns", {
   "every building has a price on a town plot": () => {
     for (const b of BUILDINGS) assert(SETTLE.plotPrices[b.id] > 0, b.id);
   },
-  "every map plot has three town layouts, with walls at 36, 46, 56 and 66": () => {
+  "every map plot has three town layouts, with walls at 36, 54, 60 and 66 that follow its starter village's outline": () => {
     assertEqual(townNames().length, 12);
     for (const [key, town] of Object.entries(TOWNS)) {
       assertEqual(town.variants.length, 3, key);
-      assertEqual(town.walls.join(","), "36,46,56,66", key);
+      assertEqual(town.walls.join(","), "36,54,60,66", key); // the Town ring moved out so its plots fit round the village (Mateo 2026-11-13)
+      assert(town.outline?.radii?.length >= 48 && town.outline.radiiAt === 36, `${key} has the starter village's wall outline`);
       assertEqual(wallRadius(town, 0), 36);
       assertEqual(wallRadius(town, 9), 66);
       assertEqual(wallRadius(town, 3), WALLS.radius); // the Castle ring is the biggest wall the land is sized for
@@ -350,7 +351,8 @@ addTests("settle towns", {
         for (const s of slots) {
           assert(s.tier >= 0 && s.tier <= 3 && s.door, `${key} ${s.id}`);
           for (const [x, z] of [[s.box.x0, s.box.z0], [s.box.x1, s.box.z1], [s.box.x0, s.box.z1], [s.box.x1, s.box.z0]]) {
-            assert(Math.hypot(x, z) < wallRadius(town, s.tier), `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
+            const wall = town.outline ? radiusAt(town.outline, wallRadius(town, s.tier), Math.atan2(z, x)) : wallRadius(town, s.tier);
+            assert(Math.hypot(x, z) < wall, `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
           }
         }
       }
@@ -570,19 +572,22 @@ addTests("settle charters", {
     assert(total[4] > 0 && total[5] > 0, "some passing layouts have hall4 and hall5 plots");
   },
   "a plot that is the last one a charter need can use is kept for it, for players and lords alike"() {
-    const v = townByName("gullcliff").variants.find((x) => x.label === "Crossroads");
-    const slots = slotsOfLayout(v);
     const known = new Set(BUILDINGS.map((b) => b.id));
-    const m2 = slots.find((s) => s.id === "m2");
-    const free = slots.filter((s) => s.id !== "m1"); // the library stands on m1
-    const kept = charterKeeps(free, 0, { library: 1 }, known, m2, "house");
-    assert(kept, "a house on gullcliff's only other Medium at Hamlet would leave the Town charter without a plot");
-    assert(["Mint", "Farmhouse with its field"].includes(kept.what), `kept for ${kept?.what}`);
-    assert(kept.ids.length && kept.ids.every((id) => plotFit(id, m2).ok), "it names what may go there");
-    assert(!charterKeeps(free, 0, { library: 1 }, known, m2, kept.ids[0]), "the building it is kept for is allowed");
-    const s5 = slots.find((s) => s.id === "s5");
-    assert(!charterKeeps(free, 0, { library: 1 }, known, s5, "cottage"), "a cottage on a Small plot is fine");
-    assert(!charterKeeps(free, 0, { library: 1, cottage: 9, farmhouse: 1, mint: 1, market: 1, inn: 1, barracks: 1, smithy: 1 }, known, m2, "house"), "nothing is kept once the charters are met");
+    const v = townByName("gullcliff").variants.find((x) => x.charter !== false);
+    const slots = slotsOfLayout(v);
+    // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use
+    const used = new Set(slots.filter((s) => s.start || s.tags.includes("library")).map((s) => s.id)); // standing from the start
+    const take = (id) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
+    const farm = take("farmhouse"), mint = take("mint"), market = take("market"), homes = [take("cottage"), take("cottage"), take("cottage")];
+    assert(farm && mint && market && homes.every(Boolean), "gullcliff has a plot for each Town charter building");
+    const free = [farm, mint, market, ...homes];
+    const counts = { library: 1, house: 2 };
+    const kept = charterKeeps(free, 0, counts, known, mint, "house");
+    assert(kept, "a house on the Mint's only Medium would leave the Town charter without a plot");
+    assert(kept.ids.length && kept.ids.every((id) => plotFit(id, mint).ok), "it names what may go there");
+    assert(!charterKeeps(free, 0, counts, known, mint, kept.ids[0]), "the building it is kept for is allowed");
+    assert(!charterKeeps([...free, ...slots.filter((s) => s.size === "S" && !used.has(s.id))], 0, counts, known, homes[0], "cottage"), "a cottage on a Small plot is fine");
+    assert(!charterKeeps(free, 0, { ...counts, cottage: 9, farmhouse: 1, mint: 1, market: 1, inn: 1, barracks: 1, smithy: 1 }, known, mint, "house"), "nothing is kept once the charters are met");
   },
   "every passing layout reserves a Mason's yard by the forecourt"() {
     for (const name of allTownNames()) for (const v of townByName(name).variants) {

@@ -379,7 +379,8 @@ function raiseStart(owner, slot, id) {
   clearMarker(owner, slot);
   const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, id, town.style, slot.id, { quiet: true });
   if (!built) { placeMarker(owner, slot); return false; }
-  Object.assign(slotState(owner, slot.id), { building: id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0 });
+  const founder = !town.lord && (slot.tags ?? []).includes("founder"); // the founder's own house (basebuilds.js puts their bed in it)
+  Object.assign(slotState(owner, slot.id), { building: id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0, ...(founder ? { founderHome: true, base: true } : {}) });
   saveTowns();
   return true;
 }

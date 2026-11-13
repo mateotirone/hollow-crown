@@ -282,9 +282,15 @@ class Settlement(Town):
         self.main_rd = self.roads[-1]
         self.gates = [[*self.rel(*self.polar(0, w)), TIERS[t]] for t, w in enumerate(WALL_R)]
         # ring lanes on old wall lines
-        for r, a0, a1 in self.tpl["rings"]:
+        rings = self.tpl["rings"]
+        if getattr(self, "starter", None):   # a ring lane right round the village on the old Hamlet wall line: every street meets it
+            rings = [(WALL_R[0] - 1, -179, 179)] + [q for q in rings if q[0] != WALL_R[0]]
+        for r, a0, a1 in rings:
             n = int(abs(a1 - a0) * math.pi / 180 * r)
             pts = [self.polar(a0 + (a1 - a0) * s / n, r) for s in range(n + 1)]
+            if getattr(self, "starter", None):   # an old wall line follows the starter's outline like the wall did
+                out = self.starter["wall"]["radiiAt"]
+                pts = [self.polar(a0 + (a1 - a0) * s / n, r + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - out) for s, p in enumerate(pts)]
             arc = []
             for p in pts + [None]:
                 bad = p is None or self.at(self.TAKEN, int(round(p[0])), int(round(p[1]))) >= 2
@@ -293,14 +299,15 @@ class Settlement(Town):
                     c0 = (int(round(arc[0][0])), int(round(arc[0][1]))); c1 = (int(round(arc[-1][0])), int(round(arc[-1][1])))
                     rd = self.lay(arc, "lane", k_start=self.k_at(*c0) if self.at(self.K, *c0) >= 0 else None,
                                   k_end=self.k_at(*c1) if self.at(self.K, *c1) >= 0 else None)
-                    if rd: rd["ring"] = r; self.RINGS.append(rd)
+                    if rd: rd["ring"] = min(WALL_R, key=lambda w: abs(w - r)); self.RINGS.append(rd)
                 arc = []
         # radial streets
         for theta, r0, r1 in self.tpl["radials"]:
             end = self.polar(theta, r1); end = (int(round(end[0])), int(round(end[1])))
-            if r0 <= 12 and getattr(self, "starter", None):   # from the nearest of the village's lanes
-                lanes = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere(self.STARTER & (self.K >= 0) & (self.KIND >= PRIO["lane"]))]
-                start = min(lanes, key=lambda c: math.hypot(c[0] - end[0], c[1] - end[1]))
+            if r0 <= 12 and getattr(self, "starter", None):   # from the ring lane round the village (the old Hamlet wall line)
+                p = self.polar(theta, WALL_R[0])
+                s = self.polar(theta, WALL_R[0] - 1 + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
+                start = (int(round(s[0])), int(round(s[1])))
             elif r0 <= 12:
                 ring = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere(self.KIND == PRIO["square"])]
                 start = min(ring, key=lambda c: math.hypot(c[0] - end[0], c[1] - end[1]))
@@ -491,13 +498,11 @@ class Settlement(Town):
         return out
 
     def box_tier(self, G):
-        st = getattr(self, "starter", None)
-        def d(x, z):
-            px, pz = x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)
-            r = math.hypot(px, pz)
-            return r - (float(self.outline(math.atan2(pz, px))) - st["wall"]["radiiAt"]) if st else r
-        t = tier_of_radius(max(d(x, z) for x, z in G))
-        return None if t is None else max(t, 1) if st else t   # the starter village is the whole Hamlet
+        if getattr(self, "starter", None):   # self.D is already measured against the starter's wall outline
+            t = tier_of_radius(max(float(self.D[self.ij(x, z)]) for x, z in G) + 0.7)
+            return None if t is None else max(t, 1)   # the starter village is the whole Hamlet
+        dmax = max(math.hypot(x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)) for x, z in G)
+        return tier_of_radius(dmax)
 
     def try_slot(self, size, cand, max_tier=3, long_only=False, square_only=False, accept=None):
         door, deg, rid = cand
@@ -808,7 +813,7 @@ class Settlement(Town):
             if getattr(self, "starter", None):   # the starter village's library plot and its open deep Large (its houses stand already)
                 sup["ML"] += 1; sup["LD"] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
-            needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
+            needs.sort(key=lambda n: (len(n[1]), n[1] != ("LD",)))   # strictest first (the Barracks' deep Large before the inn's Large), each into its smallest class
             for name, classes in needs:
                 if "ML" in classes or "MF" in classes: classes = classes + ("MLF",)   # a long Medium by crops serves either
                 if "L" in classes: classes = classes + ("LD",)                        # a deep Large is a Large too
