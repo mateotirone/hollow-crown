@@ -3,6 +3,9 @@
 // it by tools/build_lore.py. This file picks which scene a player sees and applies what a
 // conversation gives: tomes, clues, leads, skill points.
 //
+// Where they stand on a generated map, without any command: Wren opening/millbrook.js; Mag, Cael, Kesh, Ulla, Nell the
+// landmark designs; the Carter undertow/story.js; everyone else places.js (towns, town halls, the chapterhouse, the Hollow).
+//
 // Builder commands (creative / operators):
 //   /scriptevent siege:lore_npc <id>     spawn that character where you stand (wren, aldous, mag, elias, sage, cael, sigrun, isolde)
 //   /scriptevent siege:lore_npc list     list the characters and where each belongs

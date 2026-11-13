@@ -128,7 +128,7 @@ export const TOMES_C = [
   {
     id: "test_02", col: "testimony", n: 2,
     title: "What Happened to Tobin", author: "Wren Ashby, aged nine (now Sister Wren)",
-    where: "Millbrook, Sister Wren's house, in a child's box under the stairs. Wren gives it if you ask about Tobin twice.",
+    where: "Millbrook, Sister Wren's chapel, in a child's box under the stairs to her room. Wren gives it if you ask about Tobin twice.",
     hint: "A child's account. The healer of Millbrook was that child.",
     pages: [
       "My brother Tobin went out to the well on the third night and did not come back till morning. Mam said he was just tired.",
