@@ -436,7 +436,10 @@ function roadOps() { // founding.js joinRoad, to the station's platform end inst
   const line = roadLine({ x: end.x, z: end.z }, target);
   const h0 = BASE + end.dy, h1 = station.origin.y - 1;
   const heights = gradeLine(h0, h1, line.length - 1);
-  const side = { x: -dir.z, z: dir.x }, ops = [], laid = new Set(), surface = pid("minecraft:grass_path");
+  // the road is laid in the town street's own full blocks (joinRoad copies the map road it meets; here that is the street)
+  const STREET = ["minecraft:cobblestone", "minecraft:mossy_cobblestone", "minecraft:andesite", "minecraft:gravel", "minecraft:cobblestone"].map((id) => pid(id));
+  const side = { x: -dir.z, z: dir.x }, ops = [], laid = new Set();
+  const surfaceAt = (x, z) => STREET[(((x * 73856093) ^ (z * 19349663)) >>> 0) % STREET.length];
   for (let i = 1; i < line.length; i++) {
     const { x: lx, z: lz } = line[i], y = heights[i];
     for (let w = -1; w <= 1; w++) {
@@ -446,7 +449,26 @@ function roadOps() { // founding.js joinRoad, to the station's platform end inst
       const x = CX + cx, z = CZ + cz;
       for (let k = 1; k <= 6; k++) if (get(x, y + k, z) !== 0 && NATURAL.test(idOf(get(x, y + k, z)))) set(ops, x, y + k, z, 0);
       for (let k = 1; k <= 12; k++) { if (get(x, y - k, z) !== 0) break; set(ops, x, y - k, z, P.dirt); }
-      set(ops, x, y, z, surface);
+      set(ops, x, y, z, surfaceAt(x, z));
+    }
+  }
+  // joinRoad: the land either side steps down or up to the road by at most 1 a block (a second pass, so the
+  // whole road is down before its banks are shaped)
+  for (let i = 1; i < line.length; i++) {
+    const { x: lx, z: lz } = line[i], y = heights[i];
+    for (const sgn of [-1, 1]) for (let k = 2; k <= 4; k++) {
+      const cx = lx + side.x * sgn * k, cz = lz + side.z * sgn * k;
+      if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) break;
+      const x = CX + cx, z = CZ + cz, top = topY(x, z, /(air)/), lim = k - 1;
+      if (top > y + lim) {
+        let nat = true;
+        for (let yy = top; yy > y + lim; yy--) { const b = idOf(get(x, yy, z)); if (!NATURAL.test(b) && b !== "minecraft:air") { nat = false; break; } }
+        if (!nat) break;
+        for (let yy = top; yy > y + lim; yy--) set(ops, x, yy, z, 0);
+        if (/dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(idOf(get(x, y + lim, z)))) set(ops, x, y + lim, z, P.grass);
+      } else if (top < y - lim) {
+        for (let yy = top + 1; yy <= y - lim; yy++) set(ops, x, yy, z, yy === y - lim ? P.grass : P.dirt);
+      } else break;
     }
   }
   return ops;

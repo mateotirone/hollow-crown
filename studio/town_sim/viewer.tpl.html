@@ -726,7 +726,7 @@ function refresh() {
 function refreshPlots() {
   for (const s of D.slots) {
     const st = T.slots[s.id], v = s.view;
-    const visible = T.founded && !st.closed && (s.tier <= T.tier || s.tier === T.tier + 1);
+    const visible = T.founded && !st.closed && s.tier <= T.tier; // a plot shows once its tier opens it
     v.line.visible = v.plane.visible = visible && !(st.building && !st.rising);
     const c = st.rising ? COL.rising : s.tier > T.tier ? COL.later : COL.open;
     v.line.material.color.setHex(c); v.plane.material.color.setHex(c);
@@ -855,5 +855,5 @@ function frame(now) {
 }
 function dist(c) { const x = X0 + c.cx * CS + 8 - controls.target.x, z = Z0 + c.cz * CS + 8 - controls.target.z; return x * x + z * z; }
 requestAnimationFrame(frame);
-window.__sim = { T, openPlot, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
+window.__sim = { T, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
 </script>
