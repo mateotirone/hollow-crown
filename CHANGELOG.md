@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - The seven thin places are now whole places on the map: a long barrow in a wet ditch with standing stones, a mine escarpment with spoil heaps and a casting pit, an ice-veined gorge, a chalk headland with a flooded sinkhole and a stair cut down the cliff, a flooded hollow with a boardwalk, a salt pan with crystal columns, and a stepped quarry pit with a flooded end. Each cave is built into that land. (Needs the next full map build; older worlds keep the old outcrops.)
+- The Hollow Choir now leaves a confession when its Conductor falls: The Conductor's Last Measure, the eighth of The Fallen. It tells you who gave the Choir its song, without naming him. The Library now counts 75 tomes.
 - The Hollow Choir now drops its own relic the first time it falls: The Last Note, a small violet bell. Hold it in your offhand and things from the Hollow near you falter, slowed and weakened (never a boss).
 - The Ash Seneschal tells you at the start that he is watching how you fight, and when he falls the faceless statues in the antechamber grind round to face the vault door again.
 - After Morvane falls, a line tells you the Deep Door under the Court will open now.

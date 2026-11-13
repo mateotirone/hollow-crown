@@ -42,9 +42,9 @@ export const COLLECTIONS = [
     reward: { sp: 2, renown: 40, flag: "col_testimony", text: "Wrong hand. Faces the wall. Fears a bell. You know how to tell the Returned now, and so do your guards: Lost Villagers and Changelings near your keep are marked for you." },
   },
   {
-    id: "fallen", name: "The Fallen", color: "§4", count: 7,
+    id: "fallen", name: "The Fallen", color: "§4", count: 8,
     blurb: "The last words of the great enemies of the land, taken from them when they fell.",
-    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Seven enemies, seven confessions. Not one of them chose to be what they became. Remember that at the throne." },
+    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Eight enemies, eight confessions. Not one of them chose to be what they became. Remember that at the throne." },
   },
 ];
 
@@ -55,7 +55,7 @@ export const MILESTONES = [
   { at: 25, name: "Library", items: ["siege:mirror_glass"], sp: 2, text: "Twenty-five tomes. A sliver of Tide Glass falls out of a binding. Carry it and the Hollow's right-to-left writing reads plainly." },
   { at: 40, name: "Archive", items: [], sp: 2, text: "Forty tomes. Scholars would cross the kingdom for this, if there were any scholars left." },
   { at: 60, name: "Great Archive", items: [], sp: 3, text: "Sixty tomes. The Order's own archive holds fewer." },
-  { at: 74, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
+  { at: 75, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
 ];
 
 // ---------- Places the lore points at ----------
@@ -456,6 +456,7 @@ export const THREADS = [
       named_by_them: "Sigrun: those below have no names. If there is a name down there, they made it for somebody who came to them having lost his own.",
       walked_in: "Old Mag, who was there: \"She didn't throw him. He asked them to cut the rope, and he walked in. Upright. No scream. No fall.\"",
       leader_is_oswin: "\"I was the only one of yours who had ever kept his word to them, so they made me their voice.\"",
+      conductor_chair_sent_five: "The Choir's Conductor: \"The one in the Chair sent five up the long stair to kill you. Every one of them carried a piece of a key, and he let you take them.\"",
     },
     kind: "text",
     question: "Who was Morvane, before the Hollow gave him that name?",
