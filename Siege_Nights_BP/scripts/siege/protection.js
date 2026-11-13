@@ -5,7 +5,7 @@ import { world, system, MolangVariableMap } from "@minecraft/server";
 import { CHARGE, COLORS, DYE_RGB, KEEP_BANNER } from "./constants.js";
 import { keepFallen } from "./keep.js";
 import { saveState, state } from "./state.js";
-import { foreignSettlement, settlementAt, tierOf, landRadius } from "./territory.js";
+import { foreignSettlement, settlementAt, landRadius } from "./territory.js";
 import { isOnline, title, attackable } from "./util.js";
 import { applyFilter } from "../core/events.js";
 
@@ -22,11 +22,8 @@ export function borderTick() {
     const before = lastLand.get(player.id) ?? null;
     if (here !== before) {
       lastLand.set(player.id, here);
-      if (here) {
-        const keep = state.keeps[here];
-        const whose = here === player.id ? "your" : `${keep.name}'s`;
-        player.onScreenDisplay.setActionBar(`§6Entering ${whose} ${tierOf(keep).name}`);
-      } else if (before && state.keeps[before]) {
+      // Walking in gets the "You are entering ..." card (entering/index.js); walking out gets this line.
+      if (!here && before && state.keeps[before]) {
         player.onScreenDisplay.setActionBar("§7Entering the wilds");
       }
     }
