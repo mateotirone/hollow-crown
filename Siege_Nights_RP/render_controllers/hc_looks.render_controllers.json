@@ -156,6 +156,22 @@
           ]
         }
       }
+    },
+    "controller.render.hc_look.item_carrier": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.default"
+      ],
+      "part_visibility": [
+        {
+          "*": false
+        }
+      ]
     }
   }
 }
