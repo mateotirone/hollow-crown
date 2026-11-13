@@ -3,8 +3,8 @@
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf, DX, DZ } from "./track.js";
-import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
-import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
+import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z, BUFFER } from "./stations.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural, deadEndAt } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { layBed, trackFits, fellTree, rise, BED, layCrossing } from "./rail_bed.js";
 import { railRefused } from "./no_hollow.js";
@@ -363,6 +363,34 @@ addTests("trains", {
     assert(stationPlan("nowhere", "grand") === stationPlan("vale", "grand"), "unknown regions build the Vale station");
     assertEqual(STAGES.length, 4);
   },
+  "stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line": () => {
+    const ends = ["oakmere", "wolfcairn", "frosthelm"];
+    for (const stop of ROUTES.stops) {
+      const at = stopSite(ROUTES, stop, 1);
+      if (!at) continue;
+      const end = deadEndAt(ROUTES, at.origin, at.forward);
+      if (!ends.includes(stop.id)) { assertEqual(end, 0, `${stop.name} is a through station`); continue; }
+      assert(end === 1 || end === -1, `${stop.name} is the end of its line`);
+      // the one stretch there leaves from the other side of the platform
+      const seg = ROUTES.segments.find((s) => s.from === stop.id || s.to === stop.id);
+      const r = rightOf(at.forward), side = (b) => Math.sign((b[0] - at.origin.x) * r.x + (b[2] - at.origin.z) * r.z);
+      const far = seg.blocks.filter((b) => Math.hypot(b[0] - stop.x, b[2] - stop.z) > 30);
+      assert(far.length && far.every((b) => side(b) === -end), `${stop.name}: the line runs out the open end`);
+    }
+    for (const stage of STAGES) {
+      for (const end of [1, -1]) {
+        const open = stationPlan("vale", stage), plan = stationPlan("vale", stage, end);
+        assert(plan !== open && stationPlan("vale", stage, end) === plan, "its own plan, made once");
+        const xe = end > 0 ? plan.line.x1 : plan.line.x0;
+        const beam = plan.get(xe + end * BUFFER.beamAt, 1, 0), wall = plan.get(xe + end * BUFFER.wallAt, 1, 0);
+        assert(beam && beam.role === "sd:buffer:beam", `${stage}: a buffer beam just past the last rail`);
+        assert(wall && wall.role === "wallLow", `${stage}: an end wall behind it`);
+        // nothing of the station itself is moved or covered
+        for (const [k, c] of open.cells) assert(plan.cells.get(k)?.role === c.role, `${stage}: the station is unchanged at ${k}`);
+      }
+    }
+  },
+
   "stations: line up with straight track near the post, or put the line behind it": () => {
     const { get, lay } = yard();
     for (let x = -12; x <= 12; x++) lay(x, 64, 0, -90); // an east-west line
