@@ -7,8 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **32 signature sounds** are meant to be real recordings made with an AI sound generator. 29 of 32 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
-- **27 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 27 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 29 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -58,37 +57,14 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 26 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | recording (4 s) |
 | 27 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | recording (9.98 s) |
 | 28 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | recording (6.97 s) |
-| 29 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 30 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
-| 31 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 32 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | synthesized stand-in |
-| 1 | The 3:17 toll | `toll_317` | 14 s | one-shot, stereo | vanilla stand-in |
-| 2 | The siege horn | `siege_horn` | 9 s | one-shot, stereo | vanilla stand-in |
-| 3 | The choir hum (the singing) | `choir_hum` | 15 s | loop, mono | placeholder made in code |
-| 4 | The Rift opening | `rift_open` | 8 s | one-shot, mono | vanilla stand-in |
-| 5 | The Hollow's ambience | `hollow_ambience` | 30 s | loop, stereo | vanilla stand-in |
-| 6 | A storm tide of the endless siege | `storm_tide` | 15 s | one-shot, stereo | vanilla stand-in |
-| 7 | Morvane | `boss_morvane` | 12 s | one-shot, stereo | vanilla stand-in |
-| 8 | The Choir | `boss_choir` | 12 s | one-shot, stereo | vanilla stand-in |
-| 9 | The Clockwork Reeve | `boss_reeve` | 8 s | one-shot, stereo | vanilla stand-in |
-| 10 | The Pale Huntsman | `boss_huntsman` | 10 s | one-shot, stereo | vanilla stand-in |
-| 11 | The Drowned Bride | `boss_bride` | 10 s | one-shot, stereo | vanilla stand-in |
-| 12 | The Ash Seneschal | `boss_seneschal` | 9 s | one-shot, stereo | vanilla stand-in |
-| 13 | The Mother of Changelings | `boss_mother` | 10 s | one-shot, stereo | vanilla stand-in |
-| 14 | The Warlord King | `boss_warlord_king` | 10 s | one-shot, stereo | vanilla stand-in |
-| 15 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | vanilla stand-in |
-| 16 | The Forgemaster's bell-tongue | `bell_tongue` | 6 s | one-shot, stereo | vanilla stand-in |
-| 17 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | vanilla stand-in |
-| 18 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | vanilla stand-in |
-| 19 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | vanilla stand-in |
-| 20 | The castle gate opens | `gate_open` | 3 s | one-shot, mono | vanilla stand-in |
-| 21 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | vanilla stand-in |
-| 22 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | vanilla stand-in |
-| 23 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | vanilla stand-in |
-| 24 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 25 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 26 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 27 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 29 | The castle gate opens | `gate_open` | 3 s | one-shot, mono | vanilla stand-in |
+| 30 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | vanilla stand-in |
+| 31 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | vanilla stand-in |
+| 32 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | vanilla stand-in |
+| 33 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
+| 34 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
+| 35 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
+| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | synthesized stand-in |
 
 ### 1. The 3:17 toll
 
@@ -429,8 +405,7 @@ Prompt:
 
 > A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence.
 
-### 29. Cinderwing: roar
-### 20. The castle gate opens
+### 29. The castle gate opens
 
 - **File name:** `gate_open` (installs as `sounds/siege/sig/gate_open.ogg`, sound id `siege.sig.gate_open`)
 - **Length:** about 3 seconds, one-shot, mono
@@ -442,7 +417,7 @@ Prompt:
 
 > A massive medieval oak castle gate, iron-banded, swinging open on huge iron hinges: a deep slow groaning creak of old timber and rusted iron pivots, a heavy wooden thud as the bar lifts at the start, and the low scrape of the gate's foot over stone. Close-miked, outdoor stone courtyard, slight echo. No music, no voices.
 
-### 21. The castle gate shuts
+### 30. The castle gate shuts
 
 - **File name:** `gate_close` (installs as `sounds/siege/sig/gate_close.ogg`, sound id `siege.sig.gate_close`)
 - **Length:** about 3 seconds, one-shot, mono
@@ -454,7 +429,7 @@ Prompt:
 
 > A massive iron-banded oak castle gate swinging shut: a short groaning hinge creak, then a deep heavy boom as it meets the stone frame, a rattle of iron fittings, and a heavy wooden bar dropping into its brackets with a solid thunk. Outdoor stone courtyard, short echo. No music, no voices.
 
-### 22. The portcullis rises
+### 31. The portcullis rises
 
 - **File name:** `portcullis_open` (installs as `sounds/siege/sig/portcullis_open.ogg`, sound id `siege.sig.portcullis_open`)
 - **Length:** about 4 seconds, one-shot, mono
@@ -466,7 +441,7 @@ Prompt:
 
 > A heavy iron portcullis being winched up into a stone gatehouse: a wooden ratchet winch clacking steadily, thick iron chain rattling and grinding over a wheel, the iron grille scraping up stone grooves, ending with the click of the pawl catching. Medieval, heavy, mechanical, stone-room echo. No music, no voices.
 
-### 23. The portcullis drops
+### 32. The portcullis drops
 
 - **File name:** `portcullis_close` (installs as `sounds/siege/sig/portcullis_close.ogg`, sound id `siege.sig.portcullis_close`)
 - **Length:** about 3 seconds, one-shot, mono
@@ -478,7 +453,7 @@ Prompt:
 
 > A heavy iron portcullis released and dropping down stone grooves: a fast rush of chain running out over a wheel, iron scraping stone, then a deep heavy iron-on-stone slam as its spikes hit the ground, with a short ringing rattle after. Medieval gatehouse, stone echo. No music, no voices.
 
-### 24. Cinderwing: roar
+### 33. Cinderwing: roar
 
 - **File name:** `cinderwing_roar` (installs as `sounds/siege/dragon/cinderwing_roar.ogg`, sound id `siege.dragon.cinderwing.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -489,8 +464,7 @@ Prompt:
 
 > The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 30. Ashen Wyvern: roar
-### 25. Ashen Wyvern: roar
+### 34. Ashen Wyvern: roar
 
 - **File name:** `wyvern_roar` (installs as `sounds/siege/dragon/wyvern_roar.ogg`, sound id `siege.dragon.wyvern.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -501,8 +475,7 @@ Prompt:
 
 > The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 31. Dune Drake: roar
-### 26. Dune Drake: roar
+### 35. Dune Drake: roar
 
 - **File name:** `drake_roar` (installs as `sounds/siege/dragon/drake_roar.ogg`, sound id `siege.dragon.drake.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -513,8 +486,7 @@ Prompt:
 
 > The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 32. Glass Wyrm: roar
-### 27. Glass Wyrm: roar
+### 36. Glass Wyrm: roar
 
 - **File name:** `wyrm_roar` (installs as `sounds/siege/dragon/wyrm_roar.ogg`, sound id `siege.dragon.wyrm.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
