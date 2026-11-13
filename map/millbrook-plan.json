@@ -103,7 +103,22 @@
    "name": "order waystation"
   },
   {
-   "stamp": "tg_cottage_11693",
+   "stamp": "breeder_yard_vale",
+   "kind": "civic",
+   "x": -49,
+   "z": -433,
+   "ground_y": 80,
+   "rotation": 180,
+   "footprint": 196,
+   "foundation": 2,
+   "door": [
+    -49,
+    -434
+   ],
+   "name": "breeder's post"
+  },
+  {
+   "stamp": "tg_cottage_11700",
    "kind": "house",
    "x": -54,
    "z": -443,
@@ -118,7 +133,7 @@
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_11487_mangrove",
+   "stamp": "tg_cottage_11494_mangrove",
    "kind": "house",
    "x": -43,
    "z": -460,
@@ -133,7 +148,7 @@
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_11733_mangrove",
+   "stamp": "tg_cottage_11740_mangrove",
    "kind": "house",
    "x": -27,
    "z": -441,
@@ -148,7 +163,7 @@
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_11317_dark_oak",
+   "stamp": "tg_cottage_11324_dark_oak",
    "kind": "house",
    "x": -22,
    "z": -431,
@@ -163,7 +178,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11956_dark_oak",
+   "stamp": "tg_cottage_11963_dark_oak",
    "kind": "house",
    "x": -12,
    "z": -477,
@@ -178,7 +193,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_barn_12032",
+   "stamp": "tg_barn_12039",
    "kind": "barn",
    "x": 4,
    "z": -476,
@@ -192,7 +207,7 @@
    ]
   },
   {
-   "stamp": "tg_cottage_11330",
+   "stamp": "tg_cottage_11337",
    "kind": "house",
    "x": -18,
    "z": -504,
@@ -207,7 +222,7 @@
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_11617",
+   "stamp": "tg_cottage_11624",
    "kind": "house",
    "x": -97,
    "z": -517,
@@ -222,7 +237,7 @@
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_11846_dark_oak",
+   "stamp": "tg_cottage_11853_dark_oak",
    "kind": "house",
    "x": -106,
    "z": -497,
@@ -237,7 +252,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11353_mangrove",
+   "stamp": "tg_cottage_11360_mangrove",
    "kind": "house",
    "x": -98,
    "z": -465,
@@ -252,7 +267,7 @@
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_11358_dark_oak",
+   "stamp": "tg_cottage_11365_dark_oak",
    "kind": "house",
    "x": -128,
    "z": -478,
@@ -267,7 +282,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11537_dark_oak",
+   "stamp": "tg_cottage_11544_dark_oak",
    "kind": "house",
    "x": -30,
    "z": -499,
@@ -282,7 +297,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11901",
+   "stamp": "tg_cottage_11908",
    "kind": "house",
    "x": -68,
    "z": -486,
@@ -297,7 +312,7 @@
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_12118_dark_oak",
+   "stamp": "tg_cottage_12125_dark_oak",
    "kind": "house",
    "x": -103,
    "z": -444,
@@ -312,7 +327,7 @@
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_windmill_342",
+   "stamp": "tg_windmill_vale_342",
    "kind": "windmill",
    "x": -100,
    "z": -457,
@@ -326,21 +341,21 @@
    ]
   },
   {
-   "stamp": "tg_windmill_348",
+   "stamp": "tg_windmill_vale_348",
    "kind": "windmill",
-   "x": -49,
-   "z": -420,
-   "ground_y": 80,
-   "rotation": 270,
+   "x": -57,
+   "z": -413,
+   "ground_y": 79,
+   "rotation": 180,
    "footprint": 77,
-   "foundation": 1,
+   "foundation": 2,
    "door": [
-    -45,
-    -420
+    -57,
+    -417
    ]
   },
   {
-   "stamp": "tg_windmill_355",
+   "stamp": "tg_windmill_vale_355",
    "kind": "windmill",
    "x": -23,
    "z": -511,
@@ -354,7 +369,7 @@
    ]
   },
   {
-   "stamp": "tg_cross_11",
+   "stamp": "tg_well_11",
    "kind": "square",
    "x": -60,
    "z": -470,
@@ -365,52 +380,70 @@
   {
    "stamp": "market_stall_11",
    "kind": "stall",
-   "x": -66,
-   "z": -468,
-   "ground_y": 79,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_12",
-   "kind": "stall",
-   "x": -64,
-   "z": -476,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_13",
-   "kind": "stall",
-   "x": -58,
-   "z": -476,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_14",
-   "kind": "stall",
-   "x": -54,
-   "z": -469,
-   "ground_y": 79,
-   "rotation": 90,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_15",
-   "kind": "stall",
-   "x": -59,
-   "z": -464,
+   "x": -55,
+   "z": -465,
    "ground_y": 79,
    "rotation": 180,
    "footprint": 0
   },
   {
+   "stamp": "market_stall_12",
+   "kind": "stall",
+   "x": -62,
+   "z": -465,
+   "ground_y": 79,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_13",
+   "kind": "stall",
+   "x": -66,
+   "z": -471,
+   "ground_y": 79,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_14",
+   "kind": "stall",
+   "x": -62,
+   "z": -476,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_15",
+   "kind": "stall",
+   "x": -54,
+   "z": -473,
+   "ground_y": 79,
+   "rotation": 90,
+   "footprint": 0
+  },
+  {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -55,
+   "x": -67,
+   "z": -471,
+   "ground_y": 78,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -62,
+   "z": -477,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -56,
    "z": -475,
    "ground_y": 78,
    "rotation": 0,
@@ -419,16 +452,16 @@
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -52,
-   "z": -467,
-   "ground_y": 80,
+   "x": -53,
+   "z": -469,
+   "ground_y": 78,
    "rotation": 90,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -59,
+   "x": -58,
    "z": -463,
    "ground_y": 78,
    "rotation": 180,
@@ -437,36 +470,18 @@
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -65,
+   "x": -64,
    "z": -465,
    "ground_y": 78,
    "rotation": 180,
    "footprint": 0
   },
   {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -67,
-   "z": -472,
-   "ground_y": 78,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -61,
-   "z": -477,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
    "x": -51,
-   "z": -460,
-   "ground_y": 79,
+   "z": -462,
+   "ground_y": 80,
    "rotation": 0,
    "footprint": 0
   },
@@ -547,15 +562,6 @@
    "kind": "lamp",
    "x": -43,
    "z": -518,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -36,
-   "z": -525,
    "ground_y": 76,
    "rotation": 0,
    "footprint": 0
@@ -788,6 +794,15 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
+   "x": -71,
+   "z": -464,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
    "x": -92,
    "z": -483,
    "ground_y": 78,
@@ -863,6 +878,15 @@
    "x": -28,
    "z": -522,
    "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -36,
+   "z": -524,
+   "ground_y": 77,
    "rotation": 0,
    "footprint": 0
   },
@@ -1031,9 +1055,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -41,
-   "z": -420,
-   "ground_y": 81,
+   "x": -58,
+   "z": -421,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
@@ -1185,16 +1209,6 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_ash__vale_ash_sapling_0",
-   "db_stamp": "vale_ash/vale_ash_sapling_0",
-   "kind": "tree",
-   "x": -71,
-   "z": -466,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "vale_great_oak__vale_great_oak_sapling_0",
    "db_stamp": "vale_great_oak/vale_great_oak_sapling_0",
    "kind": "tree",
@@ -1320,6 +1334,16 @@
    "kind": "tree",
    "x": -10,
    "z": -463,
+   "ground_y": 81,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_hawthorn__vale_hawthorn_sapling_0",
+   "db_stamp": "vale_hawthorn/vale_hawthorn_sapling_0",
+   "kind": "tree",
+   "x": -18,
+   "z": -461,
    "ground_y": 81,
    "rotation": 0,
    "footprint": 0

@@ -45,10 +45,12 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
   (orange, terracotta, red, yellow, brown, light grey) about 20 high, an uneven rim and ledges partway down, scree
   heaped at the foot, red sand with a little red sandstone and coarse dirt on top, and a cut path up the side
   facing the town. The worked example is the Cinder Roost in `map/structures/story_areas.py`.
-- **Statues** (Mateo, 2026-11-12: the old avenue statues "read like posts"): figures at least 20 blocks tall on
-  a stepped plinth, robed and hooded, with a blank smooth-quartz face (never a carved face). Each holds something
-  different (a staff, a bowl, folded hands), they are worn and chipped, and some have fallen. Use
-  `map/structures/faceless_statues.py`.
+- **Statues** (Mateo, 2026-11-12: the old avenue statues "read like posts"; 2026-11-13: "3D entities of the statues
+  instead of built blocks"): robed, hooded figures with a blank smooth-quartz face (never a carved face), worn and
+  chipped, some broken or fallen, each holding something different (a staff, a sword, a bowl, folded hands). The
+  figure is the 3D entity `siege:faceless_statue`; only its stepped sandstone plinth is blocks. Bake the plinths with
+  `map/structures/faceless_statues.py` and write each figure into a statue-spot list (`write_spots`, format in that
+  file's docstring); the game stands the figures. Never build a statue figure out of blocks.
 
 ## Towns and paths
 

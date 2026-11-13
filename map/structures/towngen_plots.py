@@ -150,7 +150,7 @@ class TownPlots(Town):
         self.streets(); self.relax(); self.grade_verges()
         self.level_civic()
         self.portions()
-        self.houses(); self.relax()
+        self.houses(); self.relax(); self.terraform()
         self.field_paths(); self.fences(); self.fields()
         self.dress()
         self.path_blocks(); self.ground_blocks(); self.banks(); self.outline(); self.finish_bridges()

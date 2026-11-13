@@ -528,6 +528,13 @@ Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py
 | Worn 3D armour x100 (texture + geometry per piece) | `textures/models/siege_armor/<material>_<region>_<piece>.png`, `models/entity/armor/<material>_<region>_<piece>.geo.json` | **awaiting your review** |
 | Icons x100 (regional guard shapes in each material, region surcoat) | `textures/items/siege_<material>_<region>_<piece>.png` | **awaiting your review** |
 | Sheet | `art/regional-player-armor.png` | |
+## Starter clothes and weapons (2026-11-13, Mateo: "cheap starter armor that looks like clothes ... and a starter weapon")
+Made by `studio/art/build_starter_clothes.py` (then `tools/build_player_joints.py`). Five regional sets of working clothes, items `siege:starter_<region>_<helmet/chestplate/leggings/boots>` (leather-weak), and a starter weapon each, `siege:starter_<region>_weapon` (flat icon, held like a vanilla sword). Vale farmhand (straw hat, jerkin, breeches, field shoes; billhook), Frostmarch trapper (fur-trimmed hood, quilted coat, wrapped trousers, fur boots; hatchet), Saltreach deckhand (knit cap, striped smock, canvas trousers, rope sandals; cutlass), Emberwaste caravaneer (sun wrap, sand tunic, loose trousers, wrapped sandals; sickle-sword), Blackfen fen-walker (oilskin hat, oilskin coat, patched trousers, waders; reed spear). 64x32 vanilla-layout sheets with 3D parts (brims, fur, cap cuff, neck cloth, coat skirts). 3D preview: `studio/starter_clothes/build_preview.py`. Untested in game.
+| Asset | Files | Status |
+|---|---|---|
+| Worn 3D clothes x20 (texture + geometry per piece) | `textures/models/siege_armor/starter_<region>_<piece>.png`, `models/entity/armor/starter_<region>_<piece>.geo.json` | **awaiting your review** |
+| Icons x25 (20 clothes, 5 weapons) | `textures/items/siege_starter_<region>_<piece|weapon>.png` | **awaiting your review** |
+| Sheet | `art/starter-clothes.png` | |
 
 ## Depth pass from the Studio review (2026-11-11, Mateo)
 | What | Files | Made by | Status |
@@ -586,6 +593,17 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Root Cradle, sides (woven roots) | `siege_root_cradle_side.png` | Placeholder |
 | Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
 | Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
+
+## Faceless statues, 3D (2026-11-13, thread "Make the Faceless statues 3D figures"; `studio/statues/build_statues.py`)
+
+The forty statues of King Oswin are one entity (`siege:faceless_statue`) with a model and skin per age. The skins are painted
+from the models by the script: rerun it whenever a model changes (it rewrites the models, skins, entity files and
+`scripts/statues/model_data.js`). To repaint by hand, keep each file's size and its face layout (the script prints them).
+
+| Asset | File | Status |
+|---|---|---|
+| Faceless statue skins ×5 (weathered sandstone robe with folds and chips, blank smooth pale-quartz face in the hood's shadow, pale quartz hands, cut red sandstone crown ring, staff, sword and bowl; per-face UVs, opaque) | `textures/entity/statues/faceless_statue_<age>.png` for boy (128×128), youth, young_king, king, old_king (256×128) | First pass, awaiting your review |
+| Faceless statue models ×5 (Blockbench format; bones root, legs, body, head, crown, arm_r, stub, arms_folded/staff/sword/bowl, rubble) | `models/entity/statues/faceless_statue_<age>.geo.json` | First pass, awaiting your review |
 
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |

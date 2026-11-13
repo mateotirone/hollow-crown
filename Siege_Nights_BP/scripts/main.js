@@ -58,6 +58,7 @@ import "./vault/index.js";
 import "./warwrit/index.js";
 import "./army/index.js";
 import "./creative/index.js";
+import "./starter/index.js";
 import "./dispatch/index.js";
 import "./letters/index.js";
 import "./news/index.js";
@@ -67,6 +68,7 @@ import "./weather/index.js";
 import "./music/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
+import "./statues/index.js";
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work

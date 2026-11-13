@@ -49,6 +49,24 @@ export function stopSite(data, c, range = ROUTE.homeRange) {
   return { stop, origin: { x: stop.x, y: stop.y, z: stop.z }, forward };
 }
 
+// Which end of a station's platform is the end of the line. The station stands on `origin` with its building toward
+// `forward`; if the stop there is reached by only one stretch, the answer is the side (local x, +1 or -1, x running to
+// the right of `forward`) away from that stretch, where the track stops. 0 for a through station or no stop near.
+export function deadEndAt(data, origin, forward, range = 12) {
+  const stop = nearestStop(data, origin.x, origin.z, range);
+  if (!stop) return 0;
+  const segs = data.segments.filter((s) => s.from === stop.id || s.to === stop.id);
+  if (segs.length !== 1) return 0;
+  const blocks = segs[0].blocks;
+  if (blocks.length < 2) return 0;
+  // the stop's end of the stretch, and a block a little way along it
+  const d0 = Math.hypot(blocks[0][0] - stop.x, blocks[0][2] - stop.z), d1 = Math.hypot(blocks.at(-1)[0] - stop.x, blocks.at(-1)[2] - stop.z);
+  const k = Math.min(4, blocks.length - 1), along = d0 <= d1 ? blocks[k] : blocks[blocks.length - 1 - k];
+  const rx = -Math.sign(forward.z), rz = Math.sign(forward.x);
+  const side = Math.sign((along[0] - origin.x) * rx + (along[2] - origin.z) * rz);
+  return -side;
+}
+
 // Ground and growing things the rail bed may dig through or fill over. Anything else (planks, bricks, glass,
 // cobblestone, our own blocks...) is somebody's building: the bed leaves it standing and the buyer is warned.
 const NATURAL = new RegExp("^(?!.*stripped_)(minecraft:(stone|granite|diorite|andesite|deepslate|tuff|calcite|dripstone_block|pointed_dripstone|dirt|coarse_dirt|rooted_dirt|dirt_with_roots|grass_block|grass|podzol|mycelium|mud|clay|sand|red_sand|sandstone|red_sandstone|gravel|snow|snow_layer|powder_snow|ice|packed_ice|blue_ice|water|flowing_water|lava|flowing_lava|bedrock|moss_block|moss_carpet|cactus|sugar_cane|reeds|pumpkin|melon_block|bamboo|sculk|(\\w+_)?terracotta|hardened_clay|stained_hardened_clay|\\w+_ore|amethyst_block|smooth_basalt|basalt|magma|netherrack|glow_lichen|hanging_roots|mangrove_roots|muddy_mangrove_roots|brown_mushroom_block|red_mushroom_block|mushroom_stem|large_fern|tall_grass|short_grass|fern|vine|deadbush|dead_bush|waterlily|lily_pad|kelp|seagrass|sweet_berry_bush|sapling|\\w+_sapling|\\w+_flower|dandelion|poppy|\\w+_tulip|blue_orchid|allium|azure_bluet|oxeye_daisy|cornflower|lily_of_the_valley|sunflower|lilac|rose_bush|peony|torchflower|pitcher_plant|spore_blossom|azalea|flowering_azalea|big_dripleaf|small_dripleaf_block|cave_vines\\w*)|[a-z_]+:\\w*(_log|_wood|_leaves|_leaves_flowered|_stem|_hyphae|_roots))$");
