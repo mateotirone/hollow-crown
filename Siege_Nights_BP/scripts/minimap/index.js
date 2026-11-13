@@ -10,6 +10,9 @@ import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@min
 import { onTick } from "../core/loop.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
 import { hudString } from "./data.js";
+import { hollowHud } from "./hollow.js";
+import { UNDERTOW_ID } from "../undertow/layout.js";
+import { isSlipping } from "../undertow/slips.js";
 import { emit } from "../core/events.js";
 import { questPin } from "../quests/index.js";
 import "./tests.js";
@@ -30,10 +33,14 @@ function send(player, force = false) {
   const now = system.currentTick;
   if (titleBusy(player)) return;
   const loc = player.location;
-  const text = hudString({
-    x: loc.x, z: loc.z, yaw: player.getRotation().y,
-    charted: player.dimension.id === OVERWORLD, off: isOff(player), pin: questPin(player),
-  });
+  // Down in the Hollow its own map (hollow.js); none during a Slip, when they shouldn't know where they are.
+  const pin = questPin(player);
+  const text = player.dimension.id === UNDERTOW_ID && !isOff(player)
+    ? hollowHud({ x: loc.x, z: loc.z, yaw: player.getRotation().y, hidden: isSlipping(player), pin })
+    : hudString({
+      x: loc.x, z: loc.z, yaw: player.getRotation().y,
+      charted: player.dimension.id === OVERWORLD, off: isOff(player), pin,
+    });
   const last = lastSent.get(player.id);
   if (!force && last && last.text === text && now - last.at < RESEND) return;
   sendHidden(player, text);

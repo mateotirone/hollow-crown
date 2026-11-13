@@ -3,7 +3,8 @@
 // the ground (the build engine's column stage does the filling, so it rises with the rest of the animation).
 // With { terraform: true } (Mateo 2026-11-13, the one terraform pass, terraform.js) the floor balances cutting in
 // against building up, at most 3 under the highest block, and a Groundwork stage cuts the pad and blends the land
-// round it (a soft slope out to 6 blocks, a retaining wall where it can't meet) before the footings go in.
+// round it (a soft slope out to 6 blocks, a retaining wall where it can't meet) before the footings go in, and holds
+// a landing 4 out and 3 wide in front of the door level with the floor.
 //
 //   levelSite(dim, plan, origin, forward, opts?) -> { origin, lift }   origin moved to the floor (lift = blocks up)
 //   foundationColumns(plan) -> columns to add to a build job (every footprint column, filled down to ground)
@@ -57,6 +58,7 @@ export const foundationColumns = (plan) => [...footprint(plan)].map(([x, z]) => 
 
 // ---------- the terraform stage ----------
 const REACH = 9; // skirt (6) + feathering (3): how far round the footprint the land may move
+const LANDING = 4; // flat blocks in front of the door, level with the floor (house rules: the door landing)
 const permCache = new Map();
 function perm(id) {
   if (!permCache.has(id)) {
@@ -86,6 +88,15 @@ export class Groundwork {
     this.h = Array.from({ length: this.W }, () => new Array(this.H).fill(this.floor));
     this.fixed = Array.from({ length: this.W }, () => new Array(this.H).fill(false));
     this.cursor = 0; this.todo = null; this.keep = { x: origin.x, z: origin.z };
+    // the door landing (Mateo 2026-11-13, "make sure every building generates like this"): the door is at plan x = 0
+    // facing -z, the stone just in front of it at z = 0; 4 blocks out from there, 3 wide, the ground is held level with
+    // the floor so the door never opens onto a drop, and the skirt blends the land to it like the rest of the pad
+    const inPad = new Set(this.pad.map(([x, z]) => `${x},${z}`));
+    this.landing = [];
+    for (let z = -1; z >= -LANDING; z--) for (let x = -1; x <= 1; x++) {
+      const at = toWorld(frame, origin, x, 0, z);
+      if (!inPad.has(`${at.x},${at.z}`)) this.landing.push([at.x, at.z]);
+    }
   }
 
   survey(dim, budget) {
@@ -106,8 +117,14 @@ export class Groundwork {
   plan() {
     const pad = new Map();
     for (const [x, z] of this.pad) { const i = x - this.x0, j = z - this.z0; pad.set(`${i},${j}`, this.floor); this.fixed[i][j] = false; }
-    const sites = [site({ pad, carve: 0 })];
+    const connectors = new Map();
+    for (const [x, z] of this.landing) {
+      const i = x - this.x0, j = z - this.z0;
+      if (!this.fixed[i][j]) connectors.set(`${i},${j}`, this.floor);   // a path or a wall already there stays
+    }
+    const sites = [site({ pad, connectors, carve: 0 })];
     const { T, wall } = solve(this.h, sites, this.fixed);
+    this.T = T;
     // the pad's own columns: only the cut (air above the floor); the footings fill under it
     this.todo = blocks(this.h, T, wall, sites, this.region, this.x0, this.z0, this.fixed)
       .filter((b) => !(b.x === this.keep.x && b.z === this.keep.z && b.y >= this.floor - 1))

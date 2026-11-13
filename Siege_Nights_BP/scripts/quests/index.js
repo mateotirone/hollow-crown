@@ -13,6 +13,7 @@
 // Test: /scriptevent siege:quests show          says your current steps in chat
 //       /scriptevent siege:quests flag <flag>   gives you a story flag (wren_met, fell_reeve ... fell_mother), then says your steps
 
+import { SHARD_IDS } from "../bestiary/shards.js";
 import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
 import { on } from "../core/events.js";
@@ -39,7 +40,7 @@ const RESEND = 200; // ticks: send the same text again now and then, in case the
 
 const steps = new Map(); // player id -> { quests, at }
 const lastSent = new Map(); // player id -> { text, at }
-const ITEMS = [...new Set([...Object.values(BOSS_STEPS).map((s) => s.key), "siege:tuning_fork", "siege:choir_shard"])];
+const ITEMS = [...new Set([...Object.values(BOSS_STEPS).map((s) => s.key), "siege:tuning_fork", ...SHARD_IDS])];
 
 const isOff = (player) => player.getDynamicProperty(OFF) === true;
 

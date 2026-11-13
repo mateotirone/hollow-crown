@@ -10,6 +10,7 @@
 // and a boss's ground is reached through its region's town, with a hint for the last stretch.
 // Nothing here names the Hollow: the steps beyond the Rift only show to someone who is already there.
 
+import { shardsStatus, listShards } from "../bestiary/shards.js";
 import { PLOT_REGION, REGION_BOSS, REGIONAL_BOSSES } from "../lore/data/spine.js";
 import { WARDS } from "../plots/config.js";
 import { COURT, HEART } from "../undertow/layout.js";
@@ -88,10 +89,18 @@ export function nextBoss(f) {
   return left.slice().sort((a, b) => dist2(from, BOSS_STEPS[a].start) - dist2(from, BOSS_STEPS[b].start))[0];
 }
 
+// The Choir Shards: one from each regional boss, all five needed for the Tuning Fork (bestiary/shards.js)
+export function shardNote(f) {
+  const { have, missing } = shardsStatus(f.items);
+  const lost = missing.filter((s) => fell(f.flags, s.boss));
+  if (lost.length) return `Keep every boss's shard. Not in your pack: ${listShards(lost)} (beat it again for another).`;
+  return have.length ? `Keep their shards: ${have.length} of 5.` : "";
+}
+
 const bossQuest = (f, boss) => {
   const s = BOSS_STEPS[boss];
   const down = fallen(f.flags).length;
-  const tally = down ? `${down} of 5 fallen.` : "";
+  const tally = down ? `${down} of 5 fallen. ${shardNote(f)}`.trim() : "";
   if (f.items?.[s.key]) return { id: `boss_${boss}_key`, title: s.keyTitle, hint: s.keyHint, target: s.keyAt, note: tally };
   return { id: `boss_${boss}`, title: s.title, hint: s.hint, target: s.start, note: tally, npc: s.npc };
 };
@@ -148,8 +157,9 @@ function mainQuest(f) {
     }
     if (!f.solved.includes("source")) return notesQuest(f);
     if (!f.items?.["siege:tuning_fork"]) {
-      const shards = Math.min(SHARDS_FOR_FORK, f.items?.["siege:choir_shard"] ?? 0);
-      return { id: "fork", title: "Make the Tuning Fork", hint: "Five shards on an amethyst, at a Siege Workshop.", note: `${shards} of 5 shards in your pack.` };
+      const { have, missing } = shardsStatus(f.items);
+      return { id: "fork", title: "Make the Tuning Fork", hint: "One shard from each of the five bosses, with an amethyst shard, at a Siege Workshop.",
+        note: missing.length ? `${have.length} of ${SHARDS_FOR_FORK} shards. Still need ${listShards(missing)}.` : "All five shards in your pack." };
     }
     return { id: "strike", title: "Strike the fork", hint: "On the seam in the cave at the place you named.", target: siteTarget(f.site) };
   }

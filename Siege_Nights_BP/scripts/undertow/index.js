@@ -42,7 +42,8 @@ import { overworldStage } from "./finale.js";
 import { ItemStack } from "@minecraft/server";
 import { load, save, say, runCmd, upgradeSteps, DATA_VERSION, FACING } from "./data.js";
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
-import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
+import { slipSeconds, slipLanding, isSlipping, isFlickering } from "./slips.js";
+import { moodAt, moodFog, scaled, strengthAt, MOOD_PLACES, MOOD_LAYER, RIVER_GLOW } from "./mood.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
 import { oreChance, roofAt, ROOF, ROOF_V3, planRoofSwap, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
@@ -63,6 +64,7 @@ import { CRACK_HEIGHT, CRACK_DEPTH, OPENING } from "./rift.js";
 import "./story.js";
 import "./forge.js";
 import "./finds.js";
+import "./sounds.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -166,6 +168,9 @@ onTick("undertow:contact", 5, () => {
   }
 });
 
+const moodFogs = new Map(); // player id -> the mood fog pushed on MOOD_LAYER (lost on reload: pushed again)
+world.afterEvents.playerSpawn.subscribe((e) => { if (e.initialSpawn) { moodFogs.delete(e.player.id); runCmd(e.player, `fog @s remove ${MOOD_LAYER}`); } });
+
 // Every 2 seconds: fog on/off (catches deaths and any other teleport), beds, stage titles.
 onTick("undertow:fog", 40, () => {
   const players = load(K_PLAYERS, {});
@@ -179,7 +184,20 @@ onTick("undertow:fog", 40, () => {
       p.removeTag(IN_TAG);
       runCmd(p, `fog @s remove ${FOG_LAYER}`);
     }
-    if (!inside) continue;
+    if (!inside) {
+      if (moodFogs.has(p.id)) { runCmd(p, `fog @s remove ${MOOD_LAYER}`); moodFogs.delete(p.id); }
+      continue;
+    }
+    // The place's own haze over the plain Hollow fog (mood.js). Left alone during a Slip or a Flicker, whose
+    // fog sits on top and must stay there.
+    if (!isSlipping(p) && !isFlickering(p)) {
+      const want = moodFog(moodAt(p.location.x, p.location.z)), had = moodFogs.get(p.id) ?? null;
+      if (want !== had) {
+        if (had) runCmd(p, `fog @s remove ${MOOD_LAYER}`);
+        if (want) runCmd(p, `fog @s push ${want} ${MOOD_LAYER}`);
+        if (want) moodFogs.set(p.id, want); else moodFogs.delete(p.id);
+      }
+    }
     if (isSlipping(p)) continue; // no place names during a Slip: they shouldn't know where they are
     const st = stageAt(Math.floor(p.location.z));
     const rec = (players[p.id] ??= { lit: [], stage: "" });
@@ -234,8 +252,9 @@ onTick("undertow:sky", 20, () => {
   for (const p of world.getAllPlayers()) {
     if (!inUndertow(p)) continue;
     const l = p.location, d = p.dimension;
+    const mood = moodAt(l.x, l.z); // the place bends the numbers below (mood.js)
     // Blue energy motes drifting up from the land
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0, n = scaled(4, mood.motes); i < n; i++) {
       const x = l.x + (Math.random() - 0.5) * 40, z = l.z + (Math.random() - 0.5) * 40;
       const h = heightAt(Math.floor(x), Math.floor(z));
       if (h === null) continue;
@@ -243,13 +262,30 @@ onTick("undertow:sky", 20, () => {
     }
     // Floating white specks hanging in the air all round you, drifting slowly every way (Mateo, 2026-11-13:
     // "floating white particles"). Each puff is 7 specks living 9-15 s, so about 200 hang round a player.
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0, n = scaled(2, mood.specks); i < n; i++) {
       const ang = Math.random() * Math.PI * 2, r = Math.random() * 18;
       try { d.spawnParticle("siege:hollow_drift", { x: l.x + Math.cos(ang) * r, y: l.y + 0.5 + Math.random() * 5, z: l.z + Math.sin(ang) * r }); } catch {}
     }
+    // At the Seat the specks hang almost without moving.
+    for (let i = 0, n = scaled(1, mood.still); i < n; i++) {
+      const ang = Math.random() * Math.PI * 2, r = Math.random() * 16;
+      try { d.spawnParticle("siege:hollow_drift_still", { x: l.x + Math.cos(ang) * r, y: l.y + 0.5 + Math.random() * 4, z: l.z + Math.sin(ang) * r }); } catch {}
+    }
+    // Near a light river the water glows: soul wisps and motes rising off the surface.
+    if (riverDistance(Math.floor(l.x), Math.floor(l.z)) < RIVER_GLOW.near) {
+      for (let i = 0, n = scaled(RIVER_GLOW.extra, mood.glow); i < n; i++) {
+        for (let t = 0; t < 4; t++) { // a few tries to land on water
+          const x = l.x + (Math.random() - 0.5) * 2 * RIVER_GLOW.near, z = l.z + (Math.random() - 0.5) * 2 * RIVER_GLOW.near;
+          if (!isRiver(Math.floor(x), Math.floor(z))) continue;
+          const at = { x, y: L.seaY + 1.2 + Math.random() * 1.5, z };
+          try { d.spawnParticle(Math.random() < 0.5 ? "minecraft:soul_particle" : "siege:hollow_mote", at); } catch {}
+          break;
+        }
+      }
+    }
     // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
     // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0, n = scaled(5, mood.clouds); i < n; i++) {
       const ang = Math.random() * Math.PI * 2, r = 8 + Math.random() * 64;
       const x = l.x + Math.cos(ang) * r, z = l.z + Math.sin(ang) * r;
       const y = roofAt(Math.floor(x), Math.floor(z)).bottom - 5 - Math.random() * 26;
@@ -261,6 +297,7 @@ onTick("undertow:sky", 20, () => {
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
     if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
+    if (!mood.thunder) continue; // so is the Seat
     sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
     if (Math.random() < 0.6) { // under the high roof a bolt can be seen from far off, so strike wider
       const ang = Math.random() * Math.PI * 2, far = 30 + Math.random() * 60;
@@ -957,6 +994,25 @@ addTests("undertow", {
 // The roof, the ground, the light and the trees (Mateo, 2026-11-11: darker, no sun, boxed in; the roof
 // and the ground not one flat solid block; the tree update in the Hollow too).
 addTests("undertow", {
+  "each place bends the Hollow's mood: haze at the Wound and the Court, stillness at the Seat, plain elsewhere": () => {
+    const plain = moodAt(300, 800);
+    assert(plain.id === null && moodFog(plain) === null && plain.thunder, "open country keeps the plain Hollow");
+    assert(moodFog(moodAt(0, 0)) === "siege:hollow_haze_wound_2", "the Wound's haze is thickest where you arrive");
+    assert(moodFog(moodAt(COURT.center.x, COURT.center.z)) === "siege:hollow_haze_court_2");
+    assert(moodFog(moodAt(-165, 1465)) === "siege:hollow_haze_court_2", "the drowned towers share the Court's haze");
+    const seat = moodAt(HEART.center.x, HEART.center.z);
+    assert(seat.id === "seat" && !seat.thunder && seat.clouds === 0 && seat.still > 0, "the Seat is still and quiet");
+    for (const pl of MOOD_PLACES) {
+      const mid = (pl.core + pl.edge) / 2, v = strengthAt(pl, pl.x + mid, pl.z);
+      assert(v > 0 && v < 1, `${pl.id} fades between core and edge`);
+      assert(strengthAt(pl, pl.x + pl.edge + 1, pl.z) === 0, `${pl.id} ends at its edge`);
+    }
+    for (const id of ["wound", "court", "seat"]) for (const step of [1, 2]) {
+      const fog = moodFog({ id, step });
+      assert(fog === `siege:hollow_haze_${id}_${step}`, fog);
+    }
+    assert(scaled(2, 1.25, 0.4) === 3 && scaled(2, 1.25, 0.6) === 2 && scaled(4, 0, 0) === 0, "counts scale with the leftover rolled");
+  },
   "the roof covers the land everywhere, 30 or more blocks up, under its unbreakable shell": () => {
     for (let x = -680; x <= 680; x += 85) for (let z = -40; z <= 2440; z += 155) {
       const h = heightAt(x, z), r = roofAt(x, z);

@@ -26,7 +26,9 @@ addTests("quests", {
     assertEqual(nextBoss(f), "seneschal");
     const q = questsFor(f)[0];
     assertEqual(q.id, "boss_seneschal_key");
-    assertEqual(q.note, "1 of 5 fallen.");
+    assertEqual(q.note, "1 of 5 fallen. Keep every boss's shard. Not in your pack: the Reeve's (beat it again for another).");
+    const kept = questsFor({ ...f, items: { ...f.items, "siege:choir_shard_reeve": 1 } })[0];
+    assertEqual(kept.note, "1 of 5 fallen. Keep their shards: 1 of 5.");
   },
   "once the home boss is down, the nearest standing boss is next": () => {
     const f = base({ flags: ["wren_met", ...fellAll("reeve")], plot: "Harrowford", pos: { x: -800, z: 380 } });
@@ -45,8 +47,10 @@ addTests("quests", {
     const five = fellAll(...REGIONAL_BOSSES);
     assertEqual(ids(base({ flags: five })), ["field_notes"]);
     assertEqual(ids(base({ flags: five, got: NOTES })), ["name_place"]);
-    const named = base({ flags: five, solved: ["source"], items: { "siege:choir_shard": 3 } });
-    assertEqual(questsFor(named)[0].note, "3 of 5 shards in your pack.");
+    const named = base({ flags: five, solved: ["source"], items: { "siege:choir_shard_reeve": 1, "siege:choir_shard_bride": 2, "siege:choir_shard_mother": 1 } });
+    assertEqual(questsFor(named)[0].note, "3 of 5 shards. Still need the Huntsman's and the Seneschal's.");
+    const doubles = base({ flags: five, solved: ["source"], items: { "siege:choir_shard_reeve": 5 } });
+    assert(questsFor(doubles)[0].note.startsWith("1 of 5"), "five of the same shard is one of five");
     const site = { id: "kings_barrow", name: "The King's Barrow", x: 120, z: 520 };
     const strike = questsFor({ ...named, items: { "siege:tuning_fork": 1 }, site })[0];
     assertEqual(strike.id, "strike");

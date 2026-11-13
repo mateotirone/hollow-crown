@@ -24,7 +24,7 @@ class Capital(TG.Town):
     """Kingsrest with every current building: the capital hall, inn and civic buildings claim their ground
     round the square before the streets (so streets go round them), then are placed for real once the
     streets are down, so floors and paths meet."""
-    SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK")
+    SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK", "LANDK")
     def makers(self):
         m = [("capital hall", capital.medieval), ("inn", lambda: vale.coaching_inn(style="tudor"))] + list(self.site["civic"])
         return m
@@ -87,7 +87,8 @@ class Capital(TG.Town):
         for k, (name, mk, deg, door, _, _) in enumerate(self.claims):
             bp = mk(); bp.kind = "civic"
             if name == "capital hall":   # its claim was tested with these limits (capital_spot): use the same, or it is lost
-                e = TG.Town.try_place(self, bp, deg, door, "civic", gap=1, max_relief=12, need_walk=False) or self.capital_spot(bp)
+                e = (TG.Town.try_place(self, bp, deg, door, "civic", gap=1, max_relief=12, need_walk=False, yf_want=self.claim_y[name])   # the avenue was laid to this floor
+                     or TG.Town.try_place(self, bp, deg, door, "civic", gap=1, max_relief=12, need_walk=False) or self.capital_spot(bp))
             else: e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=10)
             if not e: e = self.search(bp, k, rmax=46 if name == "capital hall" else 24, relief=10)
             if not e: e = self.civic_on_street(bp, name)

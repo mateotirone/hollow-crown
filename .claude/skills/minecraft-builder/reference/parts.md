@@ -292,6 +292,22 @@ pot on top.
   every 4 and at the ends, fence rails on planks along both edges (`"rails"`: `both` / `one` / `none`,
   `"gaps"` for landings), and a lantern on a rail post at both ends and every 8 so it shows through fen mist.
 
+## `stands`: tiered seating round a floor (the Kingsrest arena, 2026-11-13)
+
+`{"part": "stands", "at": [0, 0], "chamfer": 18, "from": 32, "to": 56, "y": 7, "walk": [42, 43, 55, 56], "seat": "stone_bricks",
+"aisle": "polished_andesite", "aisle_every": 6, "band": {"every": 4, "material": "polished_andesite"}, "fill": "stone_bricks", "base": 0,
+"skip": [[-8, -50, 8, -41]]}`: one row per ring round `at` (`ring_norm`: an octagon with its corners cut `chamfer` in, or a
+square with no chamfer), each row one up and one out so every row sees over the one in front. Seats are stairs with the
+tall side away from the floor (people sit facing in); on the diagonal faces a bottom slab bench. `walk` rings stay level
+(a walkway between tiers, a promenade on top); `aisle_every` marks the ways up in the aisle stone; `band` lightens every
+few rows so the tiers read across the floor; everything under the seats is filled with `fill` down to `base` (carve rooms
+and corridors out of it with `place` air); `skip` leaves boxes out (a royal box, a stair hall). The layout gets
+`info["stands"]` (standing spots, every other seat) for crowds and `info["stand_rows"]` (each ring's seat row).
+
+**Round** (an amphitheatre; The Twelve Gates): `"round": true, "aisles": 24` makes every row a circle (ring =
+`round(hypot)`), every seat a stair facing its nearest axis, and the aisles `aisles` evenly spaced rays from the centre
+instead of `aisle_every`. `chamfer` is ignored.
+
 ## Not automated yet (build with shapes and `place`)
 
 Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses (spans of 15+), hip-roof

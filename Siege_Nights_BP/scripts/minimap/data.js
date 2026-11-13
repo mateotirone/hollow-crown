@@ -19,7 +19,7 @@ export const PIN_COLS = "abcdefghi";   // pin column, west to east
 export const PIN_ROWS = "jklmnopqr";   // pin row, north to south (its own letters, so the HUD can cut column from row)
 // pin kinds: the quest's target on the map, held at the map's edge when it is further, or the person to talk to
 export const PIN = { goal: "g", edge: "e", talk: "t", none: "_" };
-const NO_PIN = "aj" + PIN.none;
+export const NO_PIN = "aj" + PIN.none;
 const REGION_NAMES = ["Aldmere Vale", "Frostmarch", "Saltreach", "Blackfen", "Emberwaste"];
 
 // Places worth a name on the map: the twelve plots, the towns and the six wonders. Caves and sinks stay unnamed (they

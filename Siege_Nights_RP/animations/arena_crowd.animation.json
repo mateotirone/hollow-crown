@@ -1,0 +1,25 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.hc.arena_crowd.cheer": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "position": [0.0, "math.max(0.0, math.sin(query.life_time * (260.0 + variable.roar * 160.0) + variable.ph)) * (0.6 + variable.roar * 7.4)", 0.0]
+        },
+        "body": {
+          "rotation": ["math.sin(query.life_time * 130.0 + variable.ph) * 3.0", 0.0, "math.sin(query.life_time * 90.0 + variable.ph) * 3.0"]
+        },
+        "head": {
+          "rotation": ["-8.0 * variable.roar + math.sin(query.life_time * 200.0 + variable.ph) * 4.0", "math.sin(query.life_time * 40.0 + variable.ph) * 12.0", 0.0]
+        },
+        "rightArm": {
+          "rotation": ["-150.0 * variable.roar - 25.0 + math.sin(query.life_time * (300.0 + variable.roar * 200.0) + variable.ph) * (18.0 + variable.roar * 14.0)", 0.0, "8.0 + 10.0 * variable.roar"]
+        },
+        "leftArm": {
+          "rotation": ["-150.0 * variable.roar - 10.0 + math.sin(query.life_time * (300.0 + variable.roar * 200.0) + variable.ph + 120.0) * (12.0 + variable.roar * 14.0)", 0.0, "-8.0 - 10.0 * variable.roar"]
+        }
+      }
+    }
+  }
+}
