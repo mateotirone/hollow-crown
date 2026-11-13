@@ -389,7 +389,7 @@ addTests("settle towns", {
   },
 });
 
-import { levelSite, foundationColumns, MAX_LIFT } from "./ground.js";
+import { levelSite, foundationColumns, MAX_LIFT, Groundwork } from "./ground.js";
 
 addTests("settle ground", {
   "a building's floor goes on the highest ground under it, and every footprint column gets foundation": () => {
@@ -412,6 +412,31 @@ addTests("settle ground", {
     const b = plan.bounds();
     assertEqual(foundationColumns(plan).length, (b.x1 - b.x0 + 1) * (b.z1 - b.z0 + 1));
     assert(MAX_LIFT >= 4);
+  },
+  "terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it": () => {
+    // a 1 in 1 slope rising to the east
+    const ground = (x) => 64 + Math.max(-6, Math.min(12, x));
+    const set = new Map();
+    const fake = {
+      getBlock: ({ x, y, z }) => {
+        const k = `${x},${y},${z}`;
+        const typeId = set.has(k) ? set.get(k) : y <= ground(x) ? "minecraft:grass_block" : "minecraft:air";
+        return { typeId, location: { x, y, z }, permutation: null, below() { return fake.getBlock({ x, y: y - 1, z }); },
+          setPermutation(p) { set.set(k, String(p)); } };
+      },
+      getTopmostBlock: ({ x, z }) => fake.getBlock({ x, y: ground(x), z }),
+    };
+    const plan = drawBuilding("cottage", "vale");
+    const b = plan.bounds();
+    const { origin } = levelSite(fake, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 }, { terraform: true });
+    const high = Math.max(...[b.x0, b.x1].map((x) => ground(-x))); // forward +z: plan x runs to world -x
+    assert(origin.y - 1 <= high && origin.y - 1 >= high - 3, `floor ${origin.y - 1}, high ${high}`);
+    const g = new Groundwork(plan, origin, { x: 0, z: 1 }, "vale");
+    let r, n = 0;
+    while ((r = g.step(fake, 400)) !== "done" && n++ < 200) assert(r !== "wait");
+    assertEqual(r, "done");
+    assert(g.todo.length > 0, "nothing regraded on a slope");
+    assert(g.todo.every((t) => Math.abs(t.x) <= 20 && Math.abs(t.z) <= 20), "regraded too far out");
   },
   "the level 1 wall is a low log palisade, not a fence": () => {
     assertEqual(WALL_LEVELS[1].body, "log");

@@ -23,6 +23,7 @@ import { getRift, getSites, getSourceSite, SITE_NAMES } from "../undertow/source
 import { load } from "../undertow/data.js";
 import { hasCartsong, carterStation, stationSpot } from "../undertow/story.js";
 import { WARDS } from "../plots/config.js";
+import { firstFacts } from "../newplayer/firstnights.js";
 import { questsFor, panelText, hudString, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import "./tests.js";
 
@@ -90,6 +91,7 @@ function factsOf(player) {
     rift: rift?.open ? { x: rift.x, z: rift.z, name: SITE_NAMES[rift.site] ?? "the Rift" } : undefined,
     hollow: { choir: !!prog.choir || !!reach.choir, cartsong: inHollow && hasCartsong(player.id), carter },
     morvane: !!reach.source || !!prog.morvane,
+    first: (() => { try { return firstFacts(player); } catch { return undefined; } })(),
   };
 }
 
@@ -121,7 +123,7 @@ onTick("quests", POINT_EVERY, () => {
 
 // Something in the story moved: work the steps out again at once, not at the next look.
 const refresh = (player) => { if (player?.id) steps.delete(player.id); };
-for (const name of ["loreFlag", "loreThreadSolved", "keepFounded"]) on(name, (d) => refresh(d?.player));
+for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward"]) on(name, (d) => refresh(d?.player));
 on("minimapToggled", ({ player }) => { if (player) { lastSent.delete(player.id); try { send(player, true); } catch { /* left */ } } });
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => lastSent.delete(player.id));

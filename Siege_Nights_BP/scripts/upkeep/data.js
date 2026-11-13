@@ -8,6 +8,7 @@ export const UPKEEP = {
   perBuilding: 2, // for every building that stands (plot buildings, hand-built ones that count, Barracks...)
   perGuard: 3, // a day's wage for every guard and soldier
   graceDays: 3, // days after a settlement is first seen before the first bill
+  freeUntilFirstWin: true, // and nothing at all until it has held its first siege (new-player audit, Mateo 2026-11-13)
   crownShare: 0.2, // when a player wears the Crown, this share of everyone else's upkeep goes to them
 };
 

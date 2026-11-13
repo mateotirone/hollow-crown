@@ -539,6 +539,26 @@
   "seconds": 2.39,
   "source": "sigrun_hub_3.mp3"
  },
+ "tilly_hub_0": {
+  "text": "Have you thought?",
+  "seconds": 0.82,
+  "source": "tilly_hub_0.mp3"
+ },
+ "tilly_hub_1": {
+  "text": "I saved you a place on the wall. It's the dry bit.",
+  "seconds": 2.65,
+  "source": "tilly_hub_1.mp3"
+ },
+ "tilly_hub_2": {
+  "text": "He's down there again. Look. Right on the line.",
+  "seconds": 2.6,
+  "source": "tilly_hub_2.mp3"
+ },
+ "tilly_hub_3": {
+  "text": "Did you decide? You don't have to say. I can tell if you've decided.",
+  "seconds": 3.74,
+  "source": "tilly_hub_3.mp3"
+ },
  "ulla_haulwait_0": {
   "text": "Sixteen iron ingots and sixteen coal. I'll take them when you have them on you.",
   "seconds": 8.2,

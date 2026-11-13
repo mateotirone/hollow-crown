@@ -8,16 +8,16 @@
       "siege_workshop"
     ],
     "pattern": [
-      " S ",
-      "PHP",
+      "SSS",
+      "PBP",
       "PPP"
     ],
     "key": {
       "S": {
-        "item": "minecraft:iron_sword"
+        "item": "minecraft:stone_bricks"
       },
-      "H": {
-        "item": "minecraft:shield"
+      "B": {
+        "item": "minecraft:barrel"
       },
       "P": {
         "tag": "minecraft:planks"
