@@ -305,6 +305,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
+- Every building door in the towns now has a flat landing level with the floor and a path that climbs to the street half a block at a time (or by a stair), never a drop, a wall of grass or another building. Buildings you raise with a Foundation Stone or a raising block, and rival lords' outposts, get the same flat landing at the door and blended ground round them. (Town changes need the next map rebuild.)
 - Morvane's overhead blow, the one that lets you strike the Hollow Crown off, now only comes once he is down to his last stretch of health (12%), so knocking the Crown off is how you finish him.
 - The Barracks is crafted from 3 stone bricks, 5 planks and a barrel (it needed an iron sword and a shield). The Hall Cornerstone, Mason's Bench and Quartermaster's Desk take an iron ingot instead of an emerald.
 - Losing a siege costs one win and never your tier: the Keep Banner drops, the raiders leave, and when you raise it again your settlement keeps its record, colour and allies (it used to start again from no wins).

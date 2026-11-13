@@ -45,7 +45,7 @@ import { foundTown, townOf, layoutOf, growTown, slotClosed, builtCounts, saveTow
 import { townFor, slotsOf, seatOnSlot, seatedBox } from "../settle/towns.js";
 import { lordPick } from "../settle/charters.js";
 import { BUILDINGS } from "../settle/buildings.js";
-import { levelSite, foundationColumns } from "../settle/ground.js";
+import { levelSite, foundationColumns, Groundwork } from "../settle/ground.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
 import { sfx } from "../core/sfx.js";
@@ -197,12 +197,14 @@ function buildTick() {
     const style = styleOfLord(lord);
     lord.gateDir ??= gateDirFor(lord);
     if (piece.hall) {
+      let fresh = false;
       if (!lord.hallAt) {
         const spot = hallSpot(lord, lord.gateDir);
         const y = surface(dim, spot.x, spot.z, lord.y + 1);
         if (y === undefined) continue;
-        lord.hallAt = levelSite(dim, drawHall(piece.hall, STYLES[style]), { x: spot.x, y, z: spot.z }, spot.forward).origin; // never half buried
-        lord.hallF = spot.forward;
+        // the one terraform pass, like a player's building (ground.js): a pad cut in at most 3, the land blended round it
+        lord.hallAt = levelSite(dim, drawHall(piece.hall, STYLES[style]), { x: spot.x, y, z: spot.z }, spot.forward, { terraform: true }).origin;
+        lord.hallF = spot.forward; fresh = true;
       }
       const plan = drawHall(piece.hall, STYLES[style]);
       let remove;
@@ -213,6 +215,7 @@ function buildTick() {
       }
       startBuild({
         id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: lord.hallF, plan, style: STYLES[style], remove,
+        ...(fresh ? { ground: new Groundwork(plan, lord.hallAt, lord.hallF, style) } : {}),
         perTick: Math.max(8, Math.ceil(plan.cells.size / 1200)),
         onDone() { lord.built.hall = piece.hall; save(); },
       }).columns.unshift(...foundationColumns(plan));
@@ -221,14 +224,17 @@ function buildTick() {
       const plan = drawBuilding(piece.part.building, style);
       const pk = partKey(piece.tier, piece.i);
       lord.partY ??= {};
-      if (lord.partY[pk] === undefined) { // measured once, so a build picked up again keeps its height
+      let fresh = false;
+      if (lord.partY[pk] === undefined) { // measured once, so a build picked up again keeps its height (and isn't regraded)
         const y = surface(dim, spot.x, spot.z, lord.y + 1);
         if (y === undefined) continue;
-        lord.partY[pk] = levelSite(dim, plan, { x: spot.x, y, z: spot.z }, spot.forward).origin.y; // never half buried
-        save();
+        lord.partY[pk] = levelSite(dim, plan, { x: spot.x, y, z: spot.z }, spot.forward, { terraform: true }).origin.y; // terraformed pad
+        save(); fresh = true;
       }
+      const at = { x: spot.x, y: lord.partY[pk], z: spot.z };
       startBuild({
-        id, dimensionId: OVERWORLD, origin: { x: spot.x, y: lord.partY[pk], z: spot.z }, forward: spot.forward, plan, style: styleFor(style),
+        id, dimensionId: OVERWORLD, origin: at, forward: spot.forward, plan, style: styleFor(style),
+        ...(fresh ? { ground: new Groundwork(plan, at, spot.forward, style) } : {}),
         perTick: Math.max(4, Math.ceil(plan.cells.size / 200)),
         onDone() { lord.built.parts.push(pk); delete lord.partY[pk]; save(); },
       }).columns.unshift(...foundationColumns(plan));
