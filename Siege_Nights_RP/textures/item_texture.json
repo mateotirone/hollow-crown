@@ -1141,6 +1141,27 @@
   },
   "siege_starter_blackfen_weapon": {
    "textures": "textures/items/siege_starter_blackfen_weapon"
+  },
+  "siege_rimeforged_helmet": {
+   "textures": "textures/items/siege_rimeforged_helmet"
+  },
+  "siege_rimeforged_chestplate": {
+   "textures": "textures/items/siege_rimeforged_chestplate"
+  },
+  "siege_rimeforged_leggings": {
+   "textures": "textures/items/siege_rimeforged_leggings"
+  },
+  "siege_rimeforged_boots": {
+   "textures": "textures/items/siege_rimeforged_boots"
+  },
+  "siege_rime_axe": {
+   "textures": "textures/items/siege_rime_axe"
+  },
+  "siege_rime_spear": {
+   "textures": "textures/items/siege_rime_spear"
+  },
+  "siege_rime_steel": {
+   "textures": "textures/items/siege_rime_steel"
   }
  }
 }

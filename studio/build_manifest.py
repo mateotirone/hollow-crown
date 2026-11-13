@@ -163,6 +163,16 @@ for _n,(_t,_note,_w) in _CX.items():
     g("cx_"+_n,_t,"Armor",[{"label":"Worn (full set, 3D)","model":"armor3d","skin":'textures/entity/siege/man_at_arms_red.png',"geos":list(_gm),"geoMats":_gm,"mats":{"*":list(_gm.values())[-1]}},
         {"label":"Armour only","model":"armor3d","geos":list(_gm),"geoMats":_gm,"mats":{"*":list(_gm.values())[-1]}}]
         +[{"label":k.replace("_"," ").title(),"model":"item","mats":{"*":I+f'codex/{k}.png'}} for k in [f"{_n}_{p}" for p in ("helmet","chestplate","leggings","boots")]+_w],_note)
+def _rime_worn():
+    gm={}
+    for p in ["leggings","boots","chestplate","helmet"]:
+        d=json.load(open(RP+f'attachables/rimeforged_{p}.json'))['minecraft:attachable']['description']
+        gm[d['geometry']['default']]=d['textures']['default']+'.png'
+    sk='textures/entity/siege/man_at_arms_red.png'
+    return [{"label":"Worn (full set, 3D)","model":"armor3d","skin":sk,"geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}},
+            {"label":"Armour only","model":"armor3d","geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}}]
+if os.path.exists(RP+'attachables/rimeforged_helmet.json'):
+    g("rimeforged","Rimeforged gear","Armor",_rime_worn()+[{"label":n,"model":"item","mats":{"*":I+k+'.png'}} for n,k in (("Helm","siege_rimeforged_helmet"),("Hauberk","siege_rimeforged_chestplate"),("Greaves","siege_rimeforged_leggings"),("Boots","siege_rimeforged_boots"),("Rime Axe","siege_rime_axe"),("Rime Spear","siege_rime_spear"),("Rime Steel","siege_rime_steel"))],"Frostmarch, forged at the Rime Anvil. Dark iron rimed in pale blue, a fur collar, a dragon-head crest on the helm.")
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+_choir_worn(),"Dark violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
 g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
 g("ut_veilmoss_strands","Veilmoss Strands","The Hollow",[{"label":"Strands","model":"item","mats":{"*":B+'siege_veilmoss_strands.png'}}],"Hangs down cliff edges, one to three blocks long. Cross-shaped in game, shown flat here.")
