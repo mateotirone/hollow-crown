@@ -619,7 +619,8 @@ NAMES = ["stone", "grass_block", "dirt", "water", "sand", "gravel", "bedrock", "
          "coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
          "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore",
          "deepslate_lapis_ore", "deepslate_diamond_ore", "deepslate_emerald_ore", "sweet_berry_bush", "seagrass",
-         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block", "moss_carpet"]
+         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block", "moss_carpet",
+         "raw_iron_block", "raw_copper_block"]
 ID = {n: B(n) for n in NAMES}
 for lf in ["oak", "birch", "spruce", "mangrove", "dark_oak", "acacia"]: ID[lf + "_leaves"] = B(lf + "_leaves", LEAF)
 ID["snow_layer"] = B("snow_layer", {"height": IntTag(0), "covered_bit": ByteTag(0)})
@@ -1122,39 +1123,78 @@ if TREEDB:
 TREEM = 18 if TREEDB else 6                           # how far outside a tile a tree's trunk may stand and still reach in
 log("trees placed", tx.size)
 
-# ---------------------------------------------------------------- caves: winding tunnels, sealed under the ground
-crg = np.random.default_rng(123)
-area_cells = (SIZE // 48) ** 2
-worms = []
-for _ in range(int(area_cells * 5)):
-    x = X0 + crg.random() * SIZE; z = Z0 + crg.random() * SIZE; y = crg.uniform(-50, 60)
-    yaw = crg.random() * 6.28; pitch = crg.uniform(-0.3, 0.3); rad = crg.uniform(1.6, 3.2)
-    big = crg.random() < 0.08
-    pts = []
-    for s in range(int(crg.integers(60, 200))):
-        x += math.cos(yaw) * math.cos(pitch) * 1.4; z += math.sin(yaw) * math.cos(pitch) * 1.4; y += math.sin(pitch) * 1.2
-        yaw += crg.normal(0, 0.18); pitch = pitch * 0.85 + crg.normal(0, 0.12)
-        r = rad + math.sin(s * 0.21) * 0.7 + (2.5 if big and 20 < s < 50 else 0)
-        pts.append((x, y, z, r))
-    worms.append(np.array(pts, np.float32))
-caves = np.concatenate(worms) if worms else np.zeros((0, 4), np.float32)
-# never reach within 7 blocks of the surface, or under water within 10
-ci = np.clip(np.round(caves[:, 0] - X0).astype(int), 0, SIZE - 1); ck = np.clip(np.round(caves[:, 2] - Z0).astype(int), 0, SIZE - 1)
-ceiling = Y[ci, ck] - 7 - caves[:, 3] - np.where(wet[ci, ck], 4, 0)
-caves[:, 1] = np.minimum(caves[:, 1], ceiling); caves[:, 1] = np.maximum(caves[:, 1], -58)
-log("cave points", len(caves))
+# ---------------------------------------------------------------- caves (map/caves.py): vanilla's cave types
+# Mateo 2026-11-13: "generate all the caves correctly, same as the vanilla game". Cheese caverns, spaghetti and noodle
+# tunnels, carver caves, ravines, aquifers, lava at the bottom, lush and dripstone caves, big ore veins, and cave mouths
+# a player can walk into. Openings only in open country: never in towns, plots, roads, trails, rail, water, bridges,
+# boss sites, wards or the Rift's thin places. A starter mouth on a hillside near every plot and two near Kingsrest
+# (iron before the day-5 siege). Towns, wards, boss sites and thin places have no caves under them at all (the add-on
+# builds its own rooms there: the Millbrook well chamber, the Deep, the thin places' caves).
+import caves as CV
+CAVE_IDS = {}
+for k_, (n_, st_) in {"moss_block": ("moss_block", {}), "moss_carpet": ("moss_carpet", {}), "clay": ("clay", {}),
+                      "azalea": ("azalea", {}), "flowering_azalea": ("flowering_azalea", {}), "spore_blossom": ("spore_blossom", {}),
+                      "dirt_with_roots": ("dirt_with_roots", {}), "hanging_roots": ("hanging_roots", {}),
+                      "cave_vines": ("cave_vines", {"growing_plant_age": 25}),
+                      "cave_vines_body_with_berries": ("cave_vines_body_with_berries", {"growing_plant_age": 25}),
+                      "cave_vines_head_with_berries": ("cave_vines_head_with_berries", {"growing_plant_age": 25}),
+                      "dripstone_block": ("dripstone_block", {}),
+                      "glow_lichen_down": ("glow_lichen", {"multi_face_direction_bits": 1}),
+                      "glow_lichen_up": ("glow_lichen", {"multi_face_direction_bits": 2}),
+                      **{f"pd_{t_}_{h_}": ("pointed_dripstone", {"dripstone_thickness": t_, "hanging": h_ == "h"})
+                         for t_ in ("tip", "frustum", "middle", "base") for h_ in ("h", "u")}}.items():
+    try: CAVE_IDS[k_] = B_raw("minecraft:" + n_, st_)
+    except Exception as e_: log("cave block missing", n_, e_)
+ROCK_IDS = [ID[n_] for n_ in ("stone", "deepslate", "granite", "diorite", "andesite", "tuff", "calcite", "dirt", "sandstone",
+                              "red_sandstone", "hardened_clay", "orange_terracotta", "red_terracotta", "yellow_terracotta",
+                              "brown_terracotta", "white_terracotta", "light_gray_terracotta", "grass_block", "coarse_dirt",
+                              "podzol", "mud", "moss_block")]
+_boss = [(int(a_), int(b_)) for a_, b_ in re.findall(r"anchor: \{ x: (-?\d+), z: (-?\d+)", "".join(
+    open(f_).read() for f_ in __import__("glob").glob(os.path.join(os.path.dirname(os.path.abspath(CONFIG)), "..", "unlocks", "*.js"))))]
+_boss += [(x_, z_) for _, x_, z_, _, _ in LAKES[1:2]]                   # Hallowmere (the huntsman's lake)
+nocave = disc_mask([(n, x, z, r + 16) for n, x, z, r, _ in WARDS]) | disc_mask([("b", x, z, 85) for x, z in _boss]) | thin_shaped   # a baked site reaches 70-80 from its anchor
+_way = isroad | istrail | (rail_d <= 6.5) | stampcol | isriver | bank | wet
+_ckeep = keepclear | stampcol | disc_mask([("b", x, z, 90) for x, z in _boss])
+d_keep = chamfer_b(_ckeep, 40); d_way = chamfer_b(_way, 16); d_wet = chamfer_b(wet, 10)
+cave_cover = np.full((SIZE, SIZE), 4.0, np.float32)                  # blocks of ground every sealed cave keeps over it
+cave_cover = np.where(d_way < 12, np.maximum(cave_cover, 8 + (12 - d_way) / 3), cave_cover)
+cave_cover = np.where(d_keep < 30, np.maximum(cave_cover, 12 - np.maximum(d_keep - 10, 0) / 2.5), cave_cover)
+cave_cover = np.where(wet, 10.0, cave_cover)
+mouth_ok = land & ~wet & (d_keep >= 40) & (d_way >= 14) & (d_wet >= 8) & ~nocave & (Y > SEA + 2)
+_e = noise(170, 61) + noise(60, 62) * 0.4                            # entrance patches, more on hillsides
+_patch = mouth_ok & ((_e > 0.12) | ((_e > -0.02) & steep))
+cave_cover = np.where(_patch, np.clip((0.12 - _e) * 20, 0, 4) * (~steep), cave_cover).astype(np.float32)
+cave_cover = np.where(_patch & steep, 0.0, cave_cover).astype(np.float32)
+_starts = [(n, x, z, 1) for n, x, z in PLOTS] + [("Kingsrest", PLAZA["Kingsrest"][0], PLAZA["Kingsrest"][1], 2)] if "Kingsrest" in PLAZA else [(n, x, z, 1) for n, x, z in PLOTS]
+CAV = CV.Caves(Y, X0, Z0, cave_cover, nocave, reg, mouth_ok, _starts, sea=SEA, log=log, regions=(VALE, FROST, SALT, FEN, EMBER),
+               deep_only=plotzone)
+if os.environ.get("GW_CAVES_JSON"):                                    # mouths and near-plot tunnels for other threads
+    json.dump({"mouths": [dict(x=int(x_), y=int(y_), z=int(z_), kind=k_) for x_, y_, z_, k_ in CAV.mouths],
+               "starter_ore": [dict(x=round(float(x_), 1), y=round(float(y_), 1), z=round(float(z_), 1), kind=k_) for x_, y_, z_, k_ in CAV.ore_spots]},
+              open(os.environ["GW_CAVES_JSON"], "w"), indent=0)
 
-ORES = [  # name, deepslate twin, veins per 16x16 column, y low, y high, vein size
-    ("coal_ore", "deepslate_coal_ore", 14, 0, 140, 10), ("iron_ore", "deepslate_iron_ore", 9, -40, 80, 7),
-    ("copper_ore", "deepslate_copper_ore", 6, -10, 90, 8), ("gold_ore", "deepslate_gold_ore", 2.2, -60, 30, 6),
-    ("redstone_ore", "deepslate_redstone_ore", 3, -60, -20, 6), ("lapis_ore", "deepslate_lapis_ore", 1.6, -50, 30, 5),
-    ("diamond_ore", "deepslate_diamond_ore", 1.0, -60, -15, 4),
+ORES = [  # name, deepslate twin, veins per 16x16 column, y low, y peak, y high, vein size (vanilla 1.18+ spreads: triangles)
+    ("coal_ore", "deepslate_coal_ore", 16, 0, 96, 192, 12), ("coal_ore", "deepslate_coal_ore", 6, 136, 200, 320, 12),
+    ("iron_ore", "deepslate_iron_ore", 8, -24, None, 56, 7), ("iron_ore", "deepslate_iron_ore", 6, -64, 16, 72, 8),
+    ("iron_ore", "deepslate_iron_ore", 10, 80, 232, 384, 8), ("copper_ore", "deepslate_copper_ore", 10, -16, 48, 112, 9),
+    ("gold_ore", "deepslate_gold_ore", 3, -64, -16, 32, 8), ("redstone_ore", "deepslate_redstone_ore", 3, -64, None, 15, 7),
+    ("redstone_ore", "deepslate_redstone_ore", 5, -64, -64, -32, 7), ("lapis_ore", "deepslate_lapis_ore", 2, -32, 0, 32, 6),
+    ("lapis_ore", "deepslate_lapis_ore", 3, -64, None, 64, 6), ("diamond_ore", "deepslate_diamond_ore", 3.5, -64, -64, 16, 4),
 ]
 BLOBS = [("granite", 1.2, -20, 120, 3.5), ("diorite", 1.2, -20, 120, 3.5), ("andesite", 1.4, -20, 120, 3.5), ("gravel", 0.8, -40, 100, 2.5),
          ("dirt", 0.8, 0, 120, 2.5), ("tuff", 1.2, -60, 0, 3.5)]
 
 # ---------------------------------------------------------------- write tiles
 TOP = int(Y.max()) + 45; YR = TOP - YMIN
+# which columns a cave mouth opens, for the whole square first, so a tree is skipped whichever tile draws its crown
+OPENED = np.zeros((SIZE, SIZE), bool)
+_mayopen = (cave_cover < 0.5) | (box(mouth_ok.astype(np.float32), 1) > 0)
+for tx0 in range(0, SIZE, TILE):
+    for tz0 in range(0, SIZE, TILE):
+        if not _mayopen[tx0:tx0 + TILE, tz0:tz0 + TILE].any(): continue
+        OPENED[tx0:tx0 + TILE, tz0:tz0 + TILE] = CAV.opened(X0 + tx0, Z0 + tz0, Y[tx0:tx0 + TILE, tz0:tz0 + TILE], YR)
+OPENED &= ~wet
+log("cave mouths: open columns", int(OPENED.sum()))
 yy = np.arange(YMIN, TOP, dtype=np.int32)[None, :, None]
 pv = np.zeros((SIZE, SIZE), np.uint16)            # top block per column, for the preview
 nchunks = 0
@@ -1168,10 +1208,11 @@ for tx0 in range(0, SIZE, TILE):
         deep = yy < (noise_d := (np.random.default_rng(1000 + tx0 * 7 + tz0).integers(-3, 3, (W, 1, D))))
         vol[solid & ~deep] = ID["stone"]; vol[solid & deep] = ID["deepslate"]
         trg2 = np.random.default_rng(5000 + tx0 * 131 + tz0)
-        def blob_fill(name, n, ylo, yhi, rad, only=(ID["stone"], ID["deepslate"]), alt=None, size=None):
+        def blob_fill(name, n, ylo, yhi, rad, only=(ID["stone"], ID["deepslate"]), alt=None, size=None, peak=None):
             cnt = trg2.poisson(n * W * D / 256)
             if not cnt: return
-            bx = trg2.integers(0, W, cnt); bz = trg2.integers(0, D, cnt); by = trg2.integers(ylo, yhi, cnt) - YMIN
+            bx = trg2.integers(0, W, cnt); bz = trg2.integers(0, D, cnt)
+            by = (trg2.integers(ylo, yhi, cnt) if peak is None else np.round(trg2.triangular(ylo, peak, yhi, cnt)).astype(np.int64)) - YMIN
             r = int(math.ceil(rad)); off = np.array([(i, j, k) for i in range(-r, r + 1) for j in range(-r, r + 1) for k in range(-r, r + 1) if i * i + j * j + k * k <= rad * rad])
             keep_ = trg2.random((cnt, len(off))) < (0.75 if size is None else min(1.0, size / len(off)))
             px_ = (bx[:, None] + off[None, :, 0])[keep_]; py_ = (by[:, None] + off[None, :, 1])[keep_]; pz_ = (bz[:, None] + off[None, :, 2])[keep_]
@@ -1184,7 +1225,14 @@ for tx0 in range(0, SIZE, TILE):
                 m_ = cur == ID["stone"]; vol[px_[m_], py_[m_], pz_[m_]] = ID[name]
                 m_ = cur == ID["deepslate"]; vol[px_[m_], py_[m_], pz_[m_]] = ID[alt]
         for name, n, lo, hi, rad in BLOBS: blob_fill(name, n, lo, hi, rad, only=(ID["stone"],) if name != "tuff" else (ID["deepslate"],))
-        for name, alt, n, lo, hi, size in ORES: blob_fill(name, n, lo, hi, 1.5, alt=alt, size=size)
+        for name, alt, n, lo, pk, hi, size in ORES: blob_fill(name, n, lo, hi, 1.5, alt=alt, size=size, peak=pk)
+        # large ore veins (vanilla 1.18): copper in granite up high, iron in tuff down deep, with the odd raw block
+        v_cu, v_fe, v_raw, v_fill, _ = CAV.veins(X0 + a0, Z0 + b0, W, D, YR)
+        rock_ = (vol == ID["stone"]) | (vol == ID["deepslate"])
+        vol[v_fill & rock_ & (yy >= 0)] = ID["granite"]; vol[v_fill & rock_ & (yy < 0)] = ID["tuff"]
+        vol[v_cu & rock_] = ID["copper_ore"]; vol[v_fe & rock_] = ID["deepslate_iron_ore"]
+        vol[v_raw & rock_ & (yy >= 0)] = ID["raw_copper_block"]; vol[v_raw & rock_ & (yy < 0)] = ID["raw_iron_block"]
+        del v_cu, v_fe, v_raw, v_fill, rock_
         # emeralds in the northern mountains, more gold in the waste
         frost_t = (reg[a0:a1, b0:b1] == FROST).mean(); ember_t = (reg[a0:a1, b0:b1] == EMBER).mean()
         if frost_t > 0.05: blob_fill("emerald_ore", 3 * frost_t, 60, 200, 1.0, alt="deepslate_emerald_ore", size=1)
@@ -1217,18 +1265,6 @@ for tx0 in range(0, SIZE, TILE):
             vol[cm_ & flint] = ID["andesite"]
             sp_ = cm_ & splash; pick_s = crg.random(vol.shape, dtype=np.float32)
             vol[sp_ & (pick_s < 0.25)] = ID["mossy_cobblestone"]; vol[sp_ & (pick_s >= 0.25) & (pick_s < 0.4)] = ID["andesite"]; vol[sp_ & (pick_s >= 0.4) & (pick_s < 0.5)] = ID["stone"]
-        # caves
-        cm = (caves[:, 0] >= X0 + a0 - 6) & (caves[:, 0] < X0 + a1 + 6) & (caves[:, 2] >= Z0 + b0 - 6) & (caves[:, 2] < Z0 + b1 + 6)
-        for cx_, cy_, cz_, cr_ in caves[cm]:
-            lx_, ly_, lz_ = cx_ - X0 - a0, cy_ - YMIN, cz_ - Z0 - b0; ri = int(math.ceil(cr_))
-            i0, i1 = max(0, int(lx_) - ri), min(W, int(lx_) + ri + 2); j0, j1 = max(1, int(ly_) - ri), min(YR, int(ly_) + ri + 2); k0, k1 = max(0, int(lz_) - ri), min(D, int(lz_) + ri + 2)
-            if i0 >= i1 or k0 >= k1 or j0 >= j1: continue
-            ii, jj, kk = np.ogrid[i0:i1, j0:j1, k0:k1]
-            sm = (ii - lx_) ** 2 + ((jj - ly_) * 1.3) ** 2 + (kk - lz_) ** 2 <= cr_ * cr_
-            sub_ = vol[i0:i1, j0:j1, k0:k1]
-            sub_[sm & (sub_ != AIR)] = AIR
-        lava = (vol == AIR) & (yy < -54) & solid
-        vol[lava] = ID["lava"]
         # surface, water, ice
         ix, iz = np.indices((W, D))
         vol[ix, Yt - YMIN, iz] = surf[a0:a1, b0:b1]
@@ -1238,6 +1274,24 @@ for tx0 in range(0, SIZE, TILE):
         rt_ = reg[a0:a1, b0:b1]; wett = wet[a0:a1, b0:b1]
         icy = wett & (rt_ == FROST) & (wl > -999) & (land[a0:a1, b0:b1] | (box((land[a0:a1, b0:b1]).astype(np.float32), 10) > 0.3))
         vol[ix[icy], wl[icy] - YMIN, iz[icy]] = ID["ice"]
+        # caves (map/caves.py): carve, fill aquifers and lava, iron on the starter caves' walls, then dress them
+        cv_, aq_ = CAV.tile(X0 + a0, Z0 + b0, Yt, YR, None)
+        cv_ &= (vol != ID["water"]) & (vol != ID["ice"]) & (vol != ID["bedrock"])
+        vol[cv_] = AIR
+        cvy_ = np.broadcast_to(yy, vol.shape)
+        vol[cv_ & (cvy_ <= aq_[:, None, :]) & (aq_[:, None, :] > CV.LAVA_Y)] = ID["water"]      # aquifers
+        vol[cv_ & (cvy_ <= CV.LAVA_Y) & (aq_[:, None, :] <= CV.LAVA_Y)] = ID["lava"]            # lava at the bottom
+        for ox_, oy_, oz_, ok_ in CAV.ore_spots:
+            i_, j_, k_ = int(round(ox_)) - X0 - a0, int(round(oy_)) - YMIN, int(round(oz_)) - Z0 - b0
+            if not (1 <= i_ < W - 1 and 2 <= j_ < YR - 1 and 1 <= k_ < D - 1): continue
+            blk_ = vol[i_ - 1:i_ + 2, j_ - 1:j_ + 2, k_ - 1:k_ + 2]
+            pick_ = np.isin(blk_, ROCK_IDS) & (np.random.default_rng(i_ * 7 + j_ * 13 + k_).random(blk_.shape) < 0.55)
+            blk_[pick_] = ID[("deepslate_" if oy_ < 0 else "") + ok_ + "_ore"]
+        cave_stats_ = CAV.dress(vol, cv_, Yt, X0 + a0, Z0 + b0, reg[a0:a1, b0:b1], CAVE_IDS, AIR, ID["water"], ID["lava"], ROCK_IDS,
+                                np.random.default_rng(31000 + tx0 * 7 + tz0))
+        CV.no_falling(vol, AIR, [(ID["sand"], ID["sandstone"]), (ID["red_sand"], ID["red_sandstone"]), (ID["gravel"], ID["stone"])])
+        opened_ = OPENED[a0:a1, b0:b1]
+        del cv_, cvy_
         # rail tunnels (air 4 high over a gravel floor, the hill left above) and bridges (stone deck, low parapets,
         # piers every 8 blocks); road bridges a block over the river
         tf = tun_floor[a0:a1, b0:b1]; tm_ = tf > -999
@@ -1269,12 +1323,13 @@ for tx0 in range(0, SIZE, TILE):
         br = np.random.default_rng(9000 + tx0 + tz0 * 3).random((W, 4, D)) < np.array([0.8, 0.6, 0.4, 0.2])[None, :, None]
         vol[:, 1:5, :][br] = ID["bedrock"]
         # plants
-        p_ = plant[a0:a1, b0:b1]; pm = p_ > 0; vol[ix[pm], Yt[pm] + 1 - YMIN, iz[pm]] = p_[pm]
+        p_ = plant[a0:a1, b0:b1]; pm = (p_ > 0) & ~opened_; vol[ix[pm], Yt[pm] + 1 - YMIN, iz[pm]] = p_[pm]
         # trees whose base is in this tile or its margin
         tm = (tx >= X0 + a0 - TREEM) & (tx < X0 + a1 + TREEM) & (tz >= Z0 + b0 - TREEM) & (tz < Z0 + b1 + TREEM)
         for x_, z_, kk_, vv_ in zip(tx[tm], tz[tm], tkind[tm], tvar[tm]):
             off, ids, isleaf, isg = TEMPL[KLIST[kk_]][vv_]
             gy = Y[x_ - X0, z_ - Z0] + 1
+            if OPENED[x_ - X0, z_ - Z0]: continue                                  # a cave mouth took its ground
             px_ = x_ - X0 - a0 + off[:, 0]; py_ = gy - YMIN + off[:, 1]; pz_ = z_ - Z0 - b0 + off[:, 2]
             ok_ = (px_ >= 0) & (px_ < W) & (pz_ >= 0) & (pz_ < D) & (py_ > 0) & (py_ < YR)
             if isg.any():                                                      # ground cells follow each column's own surface
@@ -1320,7 +1375,7 @@ for tx0 in range(0, SIZE, TILE):
             topb = vol[ix, topi, iz]
             okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["moss_carpet"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
-        if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
+        if os.environ.get("GW_DUMP") and (not os.environ.get("GW_DUMP_TILES") or f"{tx0},{tz0}" in os.environ["GW_DUMP_TILES"].split(";")):   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"
             names_.update({int(i): k[:k.index("{")].split(":")[1] for k, i in _pal.items()})
             np.savez_compressed(f"{os.environ['GW_DUMP']}-{tx0}-{tz0}.npz", vol=vol[tx0 - a0:tx0 - a0 + min(TILE, SIZE - tx0), :, tz0 - b0:tz0 - b0 + min(TILE, SIZE - tz0)],
