@@ -1,17 +1,20 @@
 // Everwake Wings: the reward at the end of the Everwake storyline (design: everwake story doc, Mateo 2026-11-12).
 //
-// - Using the item binds the wings to you for good. They are not an armour piece and take no slot, so any armour
-//   (full Choirsteel included) is worn with them. They never break and are never dropped.
+// - Using the item puts the wings on. They are not an armour piece and take no slot, so any armour
+//   (full Choirsteel included) is worn with them. They never break and are never lost.
+// - Take them off at any Looking Glass (Mateo 2026-11-13: "I can't take the wings off"). They come back as the
+//   item, locked in your inventory and kept on death, so they still can't be dropped or lost. Use it to wear them again.
 // - They glide exactly like an elytra: jump, then press jump again in the air to open them; steer with your view.
-// - Press Use with an item in your hand while gliding, not looking at a block: a silent burst of speed.
-//   No sound, no particles, nothing used up. (An empty hand sends the game no Use, so it needs an item.)
+// - Press jump again while gliding, or Use with an item in your hand (not looking at a block): a silent burst of
+//   speed. No sound, no particles, nothing used up. Jump was added because the game sends no Use for most items
+//   in the air (playtest 1.2.1546, Mateo: "the boost doesn't work").
 // - In the Hollow they will not open, and say why (Mateo 2026-11-12). Third nights and sieges are fine.
 //
 // The player property siege:wings (0 none, 1 folded, 2 gliding, 3 boost, 4 landing) drives the resource pack's
 // wing model and animations (animation.siege.everwake_wings.*, Siege_Nights_RP/animations/everwake_wings.animation.json).
 // Test: /scriptevent siege:wings_give (creative) gives the item; /scriptevent siege:wings_unbind takes them back.
 
-import { world, system } from "@minecraft/server";
+import { world, system, ItemStack, ItemLockMode } from "@minecraft/server";
 import { onTick } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { glideStep, boostStep, settle, BOOST_TICKS, STATE } from "./flight.js";
@@ -32,12 +35,35 @@ function show(player, s) {
 export function bindWings(player) {
   player.setDynamicProperty(BOUND, true);
   show(player, STATE.folded);
-  player.sendMessage("§fThe wings settle across your back and are gone from your hands.§7 They are yours now, and will not leave you.");
-  player.onScreenDisplay?.setActionBar("§7Jump, then jump again in the air, to open them.");
+  player.sendMessage("§fThe wings settle across your back and are gone from your hands.§7 They are yours now. A Looking Glass will take them off again.");
+  player.onScreenDisplay?.setActionBar("§7Jump, then jump again in the air, to open them. Jump again while gliding for a burst of speed.");
+}
+
+/** The wings item as it comes off your back: locked in the inventory and kept on death, so it is never lost. */
+export function wingsItem() {
+  const it = new ItemStack(WINGS_ITEM, 1);
+  try { it.lockMode = ItemLockMode.inventory; } catch { /* older game: plain item */ }
+  try { it.keepOnDeath = true; } catch { /* */ }
+  return it;
+}
+
+/** Take the wings off: they go back into the inventory as the item. Returns false (and says why) if there's no room. */
+export function takeOffWings(player) {
+  if (!hasWings(player)) return false;
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  if (!inv || inv.emptySlotsCount < 1) { player.sendMessage("§7Make room in your pack first: the wings need a free slot."); return false; }
+  inv.addItem(wingsItem());
+  player.setDynamicProperty(BOUND, undefined);
+  fly.delete(player.id);
+  show(player, STATE.off);
+  player.sendMessage("§7You fold the wings and take them off. Use them to put them on again.");
+  return true;
 }
 
 const look = (p) => p.getViewDirection();
-const airborne = (p) => !p.isOnGround && !p.isInWater && !p.isSwimming && !(p.getComponent?.("minecraft:riding")?.entityRidingOn);
+// Creative flight counts as not airborne: gliding on top of it made the two fight and the player jitter
+// (playtest 1.2.1546, "glitchy"). In creative, step off a ledge and tap jump once while falling to open them.
+const airborne = (p) => !p.isOnGround && !p.isInWater && !p.isSwimming && !p.isFlying && !(p.getComponent?.("minecraft:riding")?.entityRidingOn);
 function groundBelow(p, depth) {
   const { x, y, z } = p.location;
   for (let d = 1; d <= depth; d++) {
@@ -67,7 +93,9 @@ function tickPlayer(p) {
       return;
     }
     const v0 = p.getVelocity();
-    f.gliding = true; f.v = { x: v0.x, y: v0.y, z: v0.z }; f.last = { ...p.location }; f.boost = 0;
+    f.gliding = true; f.v = { x: v0.x, y: v0.y, z: v0.z }; f.last = { ...p.location }; f.boost = 0; f.since = now;
+  } else if (pressed && now - (f.since ?? 0) > 5) {
+    f.boost = BOOST_TICKS; f.showBoost = 5;   // jump again while gliding: the silent burst
   }
 
   // stop: on the ground, in water, mounted, or carried into the Hollow
