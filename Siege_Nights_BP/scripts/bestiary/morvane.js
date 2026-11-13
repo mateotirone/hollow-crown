@@ -330,7 +330,7 @@ const SETUP = {
 
   4: (f) => {
     f.m.s.nextRaid = f.tick + 100;
-    speak(f, "Open air. Your own sky, gone the wrong colour. \"This was mine first.\"");
+    speak(f, "Open air. Your own sky, gone the wrong colour. \"This was mine first. And thanks to you, it is mine again.\"");
     voice(f, "stage_sky", 30);
   },
 

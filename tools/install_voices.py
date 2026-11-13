@@ -3,7 +3,8 @@
 
 The words are in studio/voices/morvane.json (hand-written). ElevenLabs reads them; Mateo picks a voice and
 takes on the listening page. This script gives each picked take the in-game treatment for where it is heard
-(far = a voice with no speaker, before the Rift; mid = in the Hollow; dry = in the fight), converts it to the
+(a second, lower throat under every line; then far = a voice with no speaker, before the
+Rift; mid = in the Hollow; dry = in the fight), converts it to the
 .ogg Minecraft wants, wires it into sound_definitions.json as siege.voice.morvane.<id>, and writes
 Siege_Nights_BP/scripts/lore/data/morvane_lines.js, which the game reads (lore/morvane_voice.js).
 
@@ -25,11 +26,16 @@ SOUND_DIR = "sounds/siege/voice/morvane"
 PREFIX = "siege.voice.morvane."
 
 TRIM = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
-        "silenceremove=start_periods=1:start_threshold=-45dB,areverse,apad=pad_dur=0.3,")
+        "silenceremove=start_periods=1:start_threshold=-45dB,areverse,apad=pad_dur=0.4")
+# Mateo 2026-11-13: "more monster/demony". A second throat under the voice: the same take about a fifth lower,
+# mixed in, the bass lifted and softly clipped. Then the treatment for where it is heard.
+DEMON = ("[0:a]aresample=44100," + TRIM + ",asplit=2[a][b];"
+         "[b]asetrate=44100*0.72,aresample=44100,atempo=1.3889,volume=0.75[lo];"
+         "[a][lo]amix=inputs=2:normalize=0,bass=g=5:f=110,asoftclip=type=tanh,")
 FX = {
-    "far": "highpass=f=140,lowpass=f=3800,aecho=0.8:0.7:60|130:0.35|0.2,loudnorm=I=-20:TP=-2",
-    "mid": "highpass=f=90,aecho=0.8:0.8:40|90:0.2|0.1,loudnorm=I=-18:TP=-2",
-    "dry": "loudnorm=I=-16:TP=-1.5",
+    "far": "highpass=f=90,lowpass=f=4200,aecho=0.8:0.7:70|150:0.35|0.22,loudnorm=I=-19:TP=-2",
+    "mid": "aecho=0.8:0.8:45|100:0.25|0.12,loudnorm=I=-17:TP=-2",
+    "dry": "aecho=0.8:0.9:30:0.12,loudnorm=I=-16:TP=-1.5",
 }
 VOLUME = {"far": 0.8, "mid": 0.9, "dry": 1.0}
 
@@ -53,7 +59,7 @@ def ogg_of(line_id):
 def install(line, src):
     dst = ogg_of(line["id"])
     os.makedirs(os.path.dirname(dst), exist_ok=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-af", TRIM + FX[line["fx"]],
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-filter_complex", DEMON + FX[line["fx"]],
                     "-ac", "1", "-ar", "44100", "-c:a", "libvorbis", "-q:a", "5", dst], check=True)
     print(f"  {line['id']:<16} {duration(dst):>5.2f} s  ({line['fx']})  from {os.path.basename(src)}")
 

@@ -3,54 +3,54 @@
  "voice": {
   "name": "",
   "voice_id": "",
-  "description": "A man who sounds about sixty but is far older, once a king, worn thin by centuries alone underground. Low, quiet, grave baritone with a little hoarseness, very calm and courteous, old-fashioned precise English with a received pronunciation accent softened by tiredness. Never raises his voice; speaks close and unhurried, as if from just behind you in the dark, with sorrow and patience under the authority."
+  "description": "A monstrous, demonic male voice: something that was once a man and has been hollowed out by centuries in the dark. Extremely deep, rasping, guttural bass with a growl under every word and a faint inhuman double tone, as if two throats speak at once. Slow, cold, deliberate and in total control, old-fashioned precise English. Breathy menace, never shouting; each word dragged up from deep in the chest."
  },
  "lines": [
   {
    "id": "first_dusk",
    "act": "Before you know him",
    "when": "Your first dusk in the world, once.",
-   "text": "You do not remember packing it. That is all right. Read it when you cannot sleep.",
+   "text": "You do not remember packing it. That is all right. You will need it. Keep it close.",
    "fx": "far",
-   "why": "Echoes the journal's first line. The last page ends: You did not pack this book. I did."
+   "why": "Echoes the journal's first line. The last page: You did not pack this book. I did."
   },
   {
    "id": "journal_done",
    "act": "Before you know him",
    "when": "The first time you finish the Old King's Journal.",
-   "text": "He wrote that last line for his son. His son listened. Nobody else did.",
+   "text": "His last line was for his son. Listen before you ring. Listen to me.",
    "fx": "far",
-   "why": "The last page: I did what his last line told me. I listened before I rang."
+   "why": "He twists Aldric's warning into: listen to him."
   },
   {
    "id": "siege_first",
    "act": "Before you know him",
    "when": "Dusk of your first siege night.",
-   "text": "Third night. Light your lamps; they come for the brightest. I am sorry. It was agreed long before you.",
+   "text": "Third night. They are coming for your walls. Hold them, and I will tell you who sent them.",
    "fx": "far",
-   "why": "He runs the sieges, and the truce gave the third night away."
+   "why": "He sent them."
   },
   {
    "id": "siege_held",
    "act": "Before you know him",
    "when": "The morning after your first siege is held.",
-   "text": "Well held. They will remember your walls now. So will I.",
+   "text": "Well held. You are stronger than the others were. That is why I chose you.",
    "fx": "far",
-   "why": "He taught the Hollow our walls."
+   "why": "He chose you as his key."
   },
   {
    "id": "ember",
    "act": "Before you know him",
    "when": "When the Ember falls near your keep.",
-   "text": "Careful with that. I held one once, and the hand never closed again.",
+   "text": "Pick it up. It fell for you. Keep it, and it will lead you to the rest.",
    "fx": "far",
-   "why": "He took the Crown's splinter in his right hand and fights left-handed."
+   "why": "The Ember is a splinter of his Crown, sent to mark you."
   },
   {
    "id": "warlord",
    "act": "Before you know him",
    "when": "The first time you bring down the Warlord King.",
-   "text": "Up you get, Vorlund. They are not finished with you. Neither am I.",
+   "text": "He will get up again. Strike at the ones who give him strength. There are five. I will show you the way.",
    "fx": "far",
    "why": "Vorlund's Ledger clue: I have never seen him. I know the voice."
   },
@@ -58,121 +58,123 @@
    "id": "fell_reeve",
    "act": "Before you know him",
    "when": "When the Clockwork Reeve falls.",
-   "text": "Seventeen minutes past three. I remember that minute too. Let it go now.",
+   "text": "Seventeen minutes past three, kept for three hundred years. Take what it carried. Keep it safe.",
    "fx": "far",
-   "why": "The Grey Host was taken at 3:17, under his truce."
+   "why": "Every boss carries a Choir Shard. Five make the Tuning Fork that opens the Rift."
   },
   {
    "id": "fell_huntsman",
    "act": "Before you know him",
    "when": "When the Pale Huntsman falls.",
-   "text": "He walked off the ice alone and never forgave it for letting him. I know the feeling.",
+   "text": "He walked off the ice alone, and now he will not walk at all. Take the shard. Keep it safe.",
    "fx": "far",
-   "why": "He walked into the Hollow alone, upright."
+   "why": "Same: the shards are his key."
   },
   {
    "id": "fell_bride",
    "act": "Before you know him",
    "when": "When the Drowned Bride falls.",
-   "text": "Someone up there still writes to her. Three hundred years, and nobody ever wrote to me.",
+   "text": "Her letters will stop now. Take the shard. Can you feel it humming? Good.",
    "fx": "far",
-   "why": "The Order erased him; no portrait, no grave."
+   "why": "Same."
   },
   {
    "id": "fell_seneschal",
    "act": "Before you know him",
    "when": "When the Ash Seneschal falls.",
-   "text": "He kept my keys a long time. Longer than I asked him to.",
+   "text": "He kept my keys a long time. Take the shard. Keep it safe for me.",
    "fx": "far",
-   "why": "A seneschal keeps his lord's keys. The statues show the king's life."
+   "why": "My keys: the Seneschal served him, and the shard is a key."
   },
   {
    "id": "fell_mother",
    "act": "Before you know him",
    "when": "When the Mother of Changelings falls.",
-   "text": "She would kill to keep her name. I should have liked the chance.",
+   "text": "She would have killed you to keep her name. Take the shard. Keep it safe.",
    "fx": "far",
-   "why": "His name was burned; the Hollow made him a new one."
+   "why": "Same."
   },
   {
    "id": "third_1",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "Every third night. Somebody has to knock.",
+   "text": "Every third night they knock. I can make it stop. Open the door, and it stops.",
    "fx": "far",
-   "why": "I knocked on it every third night for three hundred years."
+   "why": "The lie that gets the Rift opened."
   },
   {
    "id": "third_2",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "Your bells are louder than ours were. Ours were better made.",
+   "text": "Your bells are louder than ours were. It will not matter.",
    "fx": "far"
   },
   {
    "id": "third_3",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "Somebody up there is ringing too soon. Listen first.",
+   "text": "Somebody up there is ringing too soon. Listen to me instead.",
    "fx": "far",
-   "why": "Listen before you ring."
+   "why": "Listen before you ring, turned to his use."
   },
   {
    "id": "third_4",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "It was never the dark you ought to fear. It was the quiet after.",
+   "text": "I can hear your heart from here. It is louder than your walls.",
    "fx": "far"
   },
   {
    "id": "third_5",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "You sleep with your boots on now. Good.",
+   "text": "You sleep with your boots on now. Good. Keep them on.",
    "fx": "far"
   },
   {
    "id": "third_6",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "I used to count the nights. Then I counted the bells. Now I only listen.",
-   "fx": "far"
+   "text": "They will keep coming until the door is open. Then it ends. I promise.",
+   "fx": "far",
+   "why": "It does not end: the seep spreads forever while the Rift is open."
   },
   {
    "id": "third_7",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "Mind the wells. Water goes down, and it remembers the way.",
+   "text": "My father heard this too. He never once answered. You will.",
    "fx": "far",
-   "why": "Corvin's ashes went into running water, and water runs down."
+   "why": "Aldric's journal: singing under the floor every third night."
   },
   {
    "id": "third_8",
    "act": "Third nights (each once, now and then)",
    "when": "Faint, inside the singing on a third night.",
-   "text": "My father heard this too. He thought it was the wind.",
+   "text": "The ones I... the ones who hunt you are only the first. Find the five.",
    "fx": "far",
-   "why": "Aldric's journal: singing under the floor every third night."
+   "why": "A slip: the ones I sent."
   },
   {
    "id": "rift_open",
    "act": "The door opens",
    "when": "When you strike the Tuning Fork and the Rift opens.",
-   "text": "There. You found the door. I knocked on it for a very long time.",
-   "fx": "mid"
+   "text": "There. Thank you. I could not reach you through a closed door, so I sent them up, and you carried every shard to it for me.",
+   "fx": "mid",
+   "why": "The mask drops: the bosses were his, and the shards were his key."
   },
   {
    "id": "hollow_first",
    "act": "The door opens",
    "when": "Your first steps in the Hollow.",
-   "text": "Come down, then. Mind the light. It runs downhill here, like everything else.",
+   "text": "Come down. Mind the light. I have waited such a long time to meet you.",
    "fx": "mid"
   },
   {
    "id": "choir_silenced",
    "act": "The door opens",
    "when": "When the Choir is silenced.",
-   "text": "You stopped their singing. It is very quiet without it. Come up. I have kept the chair.",
+   "text": "You silenced my Choir. Good. Now there is nothing left between us. Come up.",
    "fx": "mid",
    "why": "Stage 6: There is only the one chair."
   },
@@ -187,7 +189,7 @@
    "id": "stage_sky",
    "act": "The fight",
    "when": "Stage 4, under your own sky gone the wrong colour.",
-   "text": "This was mine first.",
+   "text": "This was mine first. And thanks to you, it is mine again.",
    "fx": "dry"
   },
   {
@@ -208,28 +210,28 @@
    "id": "fall_2",
    "act": "The fight",
    "when": "Stage 6.",
-   "text": "I was a king. Yours. Your walls stand on my roads. Did nobody up there tell you there had been one?",
+   "text": "I was a king. Yours. They threw me down here, and I have been pulling at your world ever since.",
    "fx": "dry"
   },
   {
    "id": "fall_3",
    "act": "The fight",
    "when": "Stage 6.",
-   "text": "I made a peace, and I kept it. I am the only one on either side of that door who did.",
+   "text": "The Reeve, the Huntsman, the Bride, the Seneschal, the Mother. Mine, every one. I sent them up to kill you.",
    "fx": "dry"
   },
   {
    "id": "fall_4",
    "act": "The fight",
    "when": "Stage 6.",
-   "text": "There is no portrait of me left above. Forty-one, and she burned them all. You would not have known my face. You have known my nights.",
+   "text": "And when you kept winning, I let you. Every shard you took from them was a piece of my key.",
    "fx": "dry"
   },
   {
    "id": "fall_5",
    "act": "The fight",
    "when": "Stage 6.",
-   "text": "Tell my daughter the door was well made. Tell her I knocked every third night.",
+   "text": "I could not reach you through a closed door. So I made you open it. You did it so well.",
    "fx": "dry"
   },
   {
@@ -250,9 +252,9 @@
    "id": "last",
    "act": "The fight",
    "when": "New: as he falls for good.",
-   "text": "Listen before you ring.",
+   "text": "You opened the door. It does not close.",
    "fx": "dry",
-   "why": "The journal's last line, and the last line of his own page."
+   "why": "New: the seep keeps spreading while the Rift is open."
   }
  ]
 }
