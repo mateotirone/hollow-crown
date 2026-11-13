@@ -395,8 +395,7 @@ def armour_json(reg, piece):
             "minecraft:display_name": {"value": f"item.{ident}.name"},
             "minecraft:max_stack_size": 1,
             "minecraft:wearable": {"slot": SLOT[piece][0], "protection": ARMOUR['prot'][i]},
-            "minecraft:durability": {"max_durability": ARMOUR['dur'][i]},
-            "minecraft:repairable": {"repair_items": [{"items": ["minecraft:leather"], "repair_amount": "q.max_durability * 0.25"}]},
+            # no durability: starter clothes never wear out (Mateo 2026-11-13)
             "minecraft:enchantable": {"slot": SLOT[piece][1], "value": ARMOUR['ench']},
             "minecraft:tags": {"tags": ["minecraft:is_armor", "minecraft:trimmable_armors", "siege:starter_clothes"]}}}}
 
