@@ -1,0 +1,25 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:founders_slag",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_founders_slag",
+   "minecraft:display_name": {
+    "value": "item.siege:founders_slag.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:allow_off_hand": true,
+   "minecraft:glint": true,
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex"
+    ]
+   }
+  }
+ }
+}

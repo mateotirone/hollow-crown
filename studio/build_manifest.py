@@ -157,6 +157,7 @@ _CX={"watchward":("Watchward gear","The Vale. Steel-blue plate, green surcoat, g
      "tidewrought":("Tidewrought gear","Saltreach. Sea-green plate, pearl studs, a lit lighthouse lamp on the helm.",["lighthouse_harpoon","tidesteel_cutlass","tidesteel"]),
      "sunscale":("Sunscale gear","Emberwaste. Bronze scale over sand cloth, sun discs.",["sunbrand_sabre","sunscale_bow","sunsteel"]),
      "fenlight":("Fenlight gear","Blackfen. Dark moss leather and bogsilver, little lantern charms.",["wisp_bow","bogsilver_sickle","bogsilver"])}
+_CX["oathsworn"]=("Oathsworn gear","One piece from each regional boss. Old dented silver plate, faded royal gold, the crest broken off.",["oathsworn_sword"])
 for _n,(_t,_note,_w) in _CX.items():
     if not os.path.exists(RP+f'models/entity/armor/codex_{_n}_helmet.geo.json'): continue
     _gm={f"geometry.siege_codex_{_n}_{p}":f"textures/models/siege_armor/codex_{_n}_{p}.png" for p in ["leggings","boots","chestplate","helmet"]}
@@ -173,6 +174,12 @@ def _rime_worn():
             {"label":"Armour only","model":"armor3d","geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}}]
 if os.path.exists(RP+'attachables/rimeforged_helmet.json'):
     g("rimeforged","Rimeforged gear","Armor",_rime_worn()+[{"label":n,"model":"item","mats":{"*":I+k+'.png'}} for n,k in (("Helm","siege_rimeforged_helmet"),("Hauberk","siege_rimeforged_chestplate"),("Greaves","siege_rimeforged_leggings"),("Boots","siege_rimeforged_boots"),("Rime Axe","siege_rime_axe"),("Rime Spear","siege_rime_spear"),("Rime Steel","siege_rime_steel"))],"Frostmarch, forged at the Rime Anvil. Dark iron rimed in pale blue, a fur collar, a dragon-head crest on the helm.")
+if os.path.isdir(RP+'textures/items/codex'):
+    _used={f"{n}_{p}" for n in _CX for p in ("helmet","chestplate","leggings","boots")}|{w for v in _CX.values() for w in v[2]}
+    _rest=sorted(f[:-4] for f in os.listdir(RP+'textures/items/codex') if f.endswith('.png') and f[:-4] not in _used)
+    if _rest: g("cx_items","Codex items","Items",[{"label":k.replace("_"," ").title(),"model":"item","mats":{"*":I+f'codex/{k}.png'}} for k in _rest],"Boss and rival drops, the mythical weapons and tools, thin-place charms, Sun Gate caravan goods and the Codex itself.")
+    if os.path.exists(RP+'models/entity/armor/codex_cairn_helm.geo.json'):
+        g("cx_cairn","Cairn-Helm of the Thane","Armor",[{"label":"Worn","model":"armor3d","geos":["geometry.siege_codex_cairn_helm"],"geoMats":{"geometry.siege_codex_cairn_helm":"textures/models/siege_armor/codex_cairn_helm.png"},"mats":{"*":"textures/models/siege_armor/codex_cairn_helm.png"}}],"Grey stone-iron cap with two bone horns.")
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+_choir_worn(),"Dark violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
 g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
 g("ut_veilmoss_strands","Veilmoss Strands","The Hollow",[{"label":"Strands","model":"item","mats":{"*":B+'siege_veilmoss_strands.png'}}],"Hangs down cliff edges, one to three blocks long. Cross-shaped in game, shown flat here.")

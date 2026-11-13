@@ -1,0 +1,27 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:sandglass_of_nights",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_sandglass_of_nights",
+   "minecraft:display_name": {
+    "value": "item.siege:sandglass_of_nights.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:cooldown": {
+    "category": "siege_codex_use",
+    "duration": 0.5
+   },
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex"
+    ]
+   }
+  }
+ }
+}

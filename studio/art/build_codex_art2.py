@@ -121,6 +121,8 @@ ICONS = {
                   '....zBhBBBBz....', '....zBBPBBbz....', '.....zbbbbz.....', '......zzzz......'],
  'caravan_banner': ['...y............', '..yYy...........', '...WoFoFoFoO....', '...WFoFYFoFO....', '...WoFYyYFoO....', '...WFoFYFoFO....', '...WoFoFoFO.....',
                     '...WFoFoFO......', '...WoFoO........', '...W............', '...W............', '...w............', '...w............'],
+ 'caravan_rations': ['................', '.....cccccc.....', '....cAAAAAAc....', '...cAAaAAaAAc...', '...cccRcccccc...', '...cAAaRAaAAc...', '...cAAAaRAAAc...',
+                     '...cAaAARAaAc...', '....cAAAAAAc....', '.....cccccc.....'],                                                         # a waxed-cloth bundle, tied with red cord
  'codex': ['................', '...fffffffffff..', '..feeeeeeeeeefy.', '..feyyyyyyyeefA.', '..feyeeYeeyeefA.', '..feyeYeYeyeeyy.', '..feyeeYeeyeeyu.',
            '..feyeeeeeyeefA.', '..feyyyyyyyeefA.', '..feeeeeeeeeefA.', '..ffffffffffffA.', '...cAAAAAAAAAAc.'],
 }

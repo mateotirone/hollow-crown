@@ -1,0 +1,23 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:tidesteel",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_tidesteel",
+   "minecraft:display_name": {
+    "value": "item.siege:tidesteel.name"
+   },
+   "minecraft:max_stack_size": 64,
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex"
+    ]
+   }
+  }
+ }
+}

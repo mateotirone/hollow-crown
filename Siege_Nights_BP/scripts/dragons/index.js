@@ -168,7 +168,7 @@ async function roostMenu(player, block) {
   }
   if (rec.stage === "egg") {
     if (rec.status !== "warming") return say(player, "§7Hold your Dragon Egg and click the Roost to set it down.");
-    const left = rec.warmAt + S.hatchDays * DAY - now;
+    const left = rec.warmAt + hatchDaysOf(rec) * DAY - now;
     return say(player, left > 0 ? `§6The egg is warm. §7About ${days(left)} more day${plural(days(left))}.` : "§6Something moves inside the egg.");
   }
   rec.roost = { x: block.location.x, y: block.location.y, z: block.location.z };
@@ -512,12 +512,15 @@ function mindTick() {
 
 // ---------- Loops ----------
 
+// Days an egg takes to hatch: another feature may shorten it (the Codex's Hatching Brazier beside the Roost)
+const hatchDaysOf = (rec) => applyFilter("dragonHatchDays", S.hatchDays, { roost: rec.roost });
+
 function growthTick() {
   if (!isReady()) return;
   offerRider();
   const now = world.getAbsoluteTime();
   for (const rec of Object.values(store.data.dragons)) {
-    if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY) {
+    if (rec.status === "warming" && now >= rec.warmAt + hatchDaysOf(rec) * DAY) {
       try {
         const dim = world.getDimension("overworld");
         const block = dim.getBlock(rec.roost); // undefined until its Roost is loaded
