@@ -116,6 +116,9 @@
   "siege_b_mire_heart": {
    "textures": "textures/items/bestiary/mire_heart"
   },
+  "siege_b_last_note": {
+   "textures": "textures/items/bestiary/last_note"
+  },
   "siege_b_warlords_brand": {
    "textures": "textures/items/bestiary/warlords_brand"
   },

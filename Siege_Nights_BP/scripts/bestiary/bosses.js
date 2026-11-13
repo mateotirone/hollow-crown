@@ -312,7 +312,11 @@ registerBoss({
   id: "seneschal", type: "siege:ash_seneschal", name: "The Ash Seneschal", radius: 26, phases: [0.5],
   intro: "turns a face with nothing on it toward you.",
   phaseNames: ["", "The floor gives way"],
-  onStart: (f) => { f.data.hits = { melee: 0, ranged: 0 }; },
+  onStart: (f) => {
+    f.data.hits = { melee: 0, ranged: 0 };
+    // He opens with no stance on purpose: the first stretch is him learning you (boss walkthrough, Mateo 2026-11-13)
+    f.after(60, () => f.say("§6The Seneschal does not answer yet. He is watching how you fight."));
+  },
   onHurt: (f, event) => {
     const kind = event.damageSource.cause === "projectile" ? "ranged" : event.damageSource.cause === "entityAttack" ? "melee" : undefined;
     if (kind) f.data.hits[kind] += event.damage;
@@ -548,7 +552,7 @@ addTests("bestiary", {
       assert((def.attacks ?? []).length >= 2, `${def.id} needs at least two attacks`);
       for (const a of def.attacks ?? []) assert(a.every > (a.windup ?? 0), `${def.id}.${a.id}: windup longer than its cooldown`);
     }
-    for (const id of ["minute_hand", "rimefang_bow", "widows_veil", "seneschal_greatshield", "mire_heart", "warlords_brand", "oath_of_oswin", "crownless_mantle"]) {
+    for (const id of ["minute_hand", "rimefang_bow", "widows_veil", "seneschal_greatshield", "mire_heart", "last_note", "warlords_brand", "oath_of_oswin", "crownless_mantle"]) {
       assert(ITEMS[`siege:${id}`], `relic siege:${id} is missing`);
     }
   },
