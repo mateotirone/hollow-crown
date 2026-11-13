@@ -409,6 +409,84 @@ step("No vanilla monsters spawned");
   console.log(bad ? `${bad} vanilla monster spawn(s)` : "no script spawns a vanilla monster");
 }
 
+// ---------- 2b4. safe inside the walls ----------
+// Rule (Mateo 2026-11-13): hostile mobs never spawn inside a settlement's walls or a town, only out in the wild.
+// Natural spawns are caught by bestiary/sheltered.js, which knows the wild monsters from gentle.js WILD. So every
+// creature with a "monster" spawn rule must be in WILD, or it could spawn inside the walls unseen.
+step("Hostile mobs stay out of settlements");
+{
+  const gentle = readFileSync(join(SCRIPTS, "bestiary/gentle.js"), "utf8");
+  const wild = new Set([...(gentle.match(/export const WILD = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]));
+  const dir = join(BP, "spawn_rules");
+  let bad = 0, monsters = 0;
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+    let rule;
+    try { rule = parseJson(readFileSync(join(dir, f), "utf8"))["minecraft:spawn_rules"]; } catch { continue; } // step 1 reports it
+    const id = rule?.description?.identifier;
+    if (!id || id.startsWith("minecraft:") || !(rule.conditions ?? []).length) continue; // vanilla: core/nomonsters.js
+    if (rule.description.population_control !== "monster") continue;
+    monsters++;
+    if (!wild.has(id)) { bad++; fail(`spawn_rules/${f}: ${id} spawns as a monster but is not in bestiary/gentle.js WILD, so it could spawn inside a settlement's walls (bestiary/sheltered.js).`); }
+  }
+  for (const id of wild) if (!existsSync(join(dir, `bestiary_${id.replace(/^siege:/, "")}.json`))) { bad++; fail(`bestiary/gentle.js WILD lists ${id}, which has no spawn rule.`); }
+  if (!/shelteredAt\(at, dim\.id\)/.test(readFileSync(join(SCRIPTS, "bestiary/spawns.js"), "utf8"))) { bad++; fail("bestiary/spawns.js: Hollow things must ask shelteredAt() before they spawn."); }
+  console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
+}
+
+// ---------- 2b3. every NPC has its own skin ----------
+// Rule (Mateo 2026-11-13: "make sure everyone has a skin"): no NPC shows Bedrock's default skin. Our packs replace the
+// built-in NPC's skins with ours (core/npc_skins_data.js, painted by studio/art/build_npc_skins.py), every script that
+// spawns minecraft:npc dresses it with dressNpc(), nobody sets skinIndex by hand, and every NPC-family entity of our
+// own has its pictures.
+step("Every NPC has a skin");
+{
+  let bad = 0;
+  const no = (file, msg) => { bad++; file ? failIn(file, msg) : fail(msg); };
+  const dataFile = join(SCRIPTS, "core/npc_skins_data.js");
+  const keys = existsSync(dataFile)
+    ? [...readFileSync(dataFile, "utf8").split("NPC_SKINS = [")[1].split("];")[0].replace(/\/\/[^\n]*/g, "").matchAll(/"([a-z0-9_]+)"/g)].map((m) => m[1])
+    : [];
+  if (!keys.length) no(null, "core/npc_skins_data.js is missing or lists no NPC skins");
+  for (const k of keys) if (!existsSync(join(RP, `textures/entity/siege/npc_skins/${k}.png`))) no(null, `NPC skin "${k}" has no picture: run python3 studio/art/build_npc_skins.py`);
+  const read = (f) => (existsSync(f) ? parseJson(readFileSync(f, "utf8")) : undefined);
+  const ce = read(join(RP, "entity/npc.entity.json"))?.["minecraft:client_entity"]?.description;
+  const rc = read(join(RP, "render_controllers/siege_npc.render_controllers.json"))?.render_controllers?.["controller.render.siege_npc"];
+  const bp = read(join(BP, "entities/npc.json"))?.["minecraft:entity"];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  if (ce?.identifier !== "minecraft:npc" || !same(Object.keys(ce?.textures ?? {}), keys)) no(null, "Siege_Nights_RP/entity/npc.entity.json does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  if (!same(rc?.arrays?.textures?.["Array.skins"], keys.map((k) => `Texture.${k}`))) no(null, "the siege_npc render controller does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  const list = bp?.components?.["minecraft:npc"]?.npc_data?.skin_list ?? [];
+  if (bp?.description?.identifier !== "minecraft:npc" || !same(list.map((x) => x.variant), keys.map((_, i) => i))) no(null, "Siege_Nights_BP/entities/npc.json skin_list does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  // story people, wonder keepers: each has a key
+  try {
+    const { NPCS } = await import(pathToFileURL(join(SCRIPTS, "lore/data/dialogue.js")).href);
+    for (const n of NPCS) if (!keys.includes(`lore_${n.id}`)) no(null, `story NPC "${n.id}" has no skin: add "lore_${n.id}" to the end of core/npc_skins_data.js and a look in build_npc_skins.py`);
+    const { WONDERS } = await import(pathToFileURL(join(SCRIPTS, "wonders/data.js")).href);
+    for (const w of WONDERS ?? []) if (!keys.includes(`keeper_${w.id}`)) no(null, `wonder keeper "${w.id}" has no skin: add "keeper_${w.id}"`);
+  } catch (e) { no(null, `could not read the NPC lists for the skin check: ${e}`); }
+  for (const file of scripts) {
+    const src = readFileSync(file, "utf8");
+    const r = rel(file);
+    if (/\.skinIndex\s*=(?!=)/.test(src) && !r.endsWith("core/npc_skins.js")) no(file, `${r}: sets skinIndex by hand. Use dressNpc(entity, key) from core/npc_skins.js.`);
+    const consts = Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]]));
+    const spawnsNpc = [...src.matchAll(/spawnEntity\(\s*(["'`]minecraft:npc["'`]|([A-Za-z_]\w*))\s*,/g)].some((m) => !m[2] || consts[m[2]] === "minecraft:npc");
+    if (spawnsNpc && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
+  }
+  // our own NPC-family entities (job NPCs, townsfolk, ...) have a client entity with real pictures
+  const clients = new Map();
+  for (const f of walk(join(RP, "entity"), ".json")) { const d = read(f)?.["minecraft:client_entity"]?.description; if (d?.identifier) clients.set(d.identifier, d); }
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    const e = read(f)?.["minecraft:entity"];
+    const id = e?.description?.identifier;
+    if (!id || id.startsWith("minecraft:") || !(e.components?.["minecraft:type_family"]?.family ?? []).includes("npc")) continue;
+    const d = clients.get(id);
+    const tex = Object.values(d?.textures ?? {});
+    if (!tex.length) { no(null, `${id} is an NPC with no skin (no client entity textures)`); continue; }
+    for (const t of tex) if (/textures\/entity\/(npc|villager)/.test(t) || !["png", "tga"].some((x) => existsSync(join(RP, `${t}.${x}`)))) no(null, `${id}: skin ${t} is missing or a vanilla one`);
+  }
+  console.log(bad ? `${bad} NPC skin problem(s)` : `${keys.length} NPC skins; every NPC spawner dresses its NPCs`);
+}
+
 // ---------- 2c. sounds ----------
 // Every custom sound has its file, every installed recording is wired in, and scripts play sounds through sfx().
 step("Sounds");
