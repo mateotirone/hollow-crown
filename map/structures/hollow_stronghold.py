@@ -76,6 +76,7 @@ class HollowStronghold(Citadel):
         self.S = dict(self.S, roof_off=0)
         self.bp = Blueprint("hollow_stronghold")
         self.dout, self.din, self.reach = d_out, d_in, R_OUT
+        self.rooms = []
 
     # ---- needles ------------------------------------------------------------------------------------
     def tower(self, cx, cz, r, h, walks=(), door=None, roof=True, name="tower"):
@@ -139,6 +140,10 @@ class HollowStronghold(Citadel):
             ox, oz = off(a)
             if r >= 4: self.spiral(cx + ox, cz + oz, a if a == 1 else a + 1, b)
             else: self.col(cx + ox, cz + oz - (int(r) - 2), a, b - 1, "ladder", facing="s")
+        if r >= 4:                                          # every floor but the top is a room (furnish_rooms)
+            for f in floors[:-1]:
+                ox, oz = off(f + 1)
+                self.rooms.append({"x": cx + ox, "z": cz + oz, "r": r, "shape": shape, "y": f, "seed": len(self.rooms)})
         # the top: corbels, a parapet of jagged merlons, spiked pinnacles at the corners
         ox, oz = off(h + 1)
         top = h + 1
@@ -365,6 +370,53 @@ class HollowStronghold(Citadel):
                 z = round(math.sqrt(max(rz * rz - sx * sx, 0)))
                 self.set(sx, 2, z, self.S["light"])
 
+    # Every needle floor is a room (Mateo 2026-11-12: every building has an interior). What each holds turns
+    # with the room's number, so no two neighbours match: a guard room, a store, an armoury, a watch room.
+    ROOM_KINDS = {
+        "guard": ["bed", "chest", "barrel", "crafting_table"],
+        "store": ["barrel", "barrel", "chest", "barrel", "barrel"],
+        "armoury": ["smithing_table", "grindstone", "barrel", "chest"],
+        "watch": ["lectern", "cartography_table", "bookshelf", "bookshelf", "chest"],
+    }
+
+    def furnish_rooms(self):
+        """Furniture against the inner face of each needle room, clear of the spiral, the doors and the slits."""
+        bp, kinds = self.bp, list(self.ROOM_KINDS)
+        self.furnished = 0
+        for room in self.rooms:
+            cx, cz, r, y = room["x"], room["z"], room["r"], room["y"]
+            kind = kinds[(room["seed"] * 7 + int(h3(cx, y, cz, 51) * 4)) % len(kinds)]
+            spots = []
+            R = int(r) + 1
+            for dx in range(-R, R + 1):
+                for dz in range(-R, R + 1):
+                    m = metric(room["shape"], dx, dz)
+                    if not (r - 3 < m <= r - 2) or max(abs(dx), abs(dz)) < 3: continue
+                    x, z = cx + dx, cz + dz
+                    if bp.get(x, y, z)[0] in ("air", "keep") or any(bp.get(x, y + k, z)[0] not in ("air", "keep") for k in (1, 2, 3)): continue
+                    out = outward(dx, dz)
+                    ox, oz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}[out]
+                    if bp.get(x + ox, y + 1, z + oz)[0] in ("air", "keep", "iron_bars"): continue     # against solid wall only
+                    spots.append((h3(x, y, z, 53), x, z, out))
+            spots.sort()
+            used = set()
+            for item in self.ROOM_KINDS[kind]:
+                for _, x, z, out in spots:
+                    if (x, z) in used or any((x + a, z + b) in used for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): continue
+                    face = OPP[out]
+                    if item == "bed":
+                        fx, fz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}[face]
+                        if (bp.get(x + fx, y + 1, z + fz)[0] not in ("air", "keep") or bp.get(x + fx, y, z + fz)[0] in ("air", "keep")
+                                or max(abs(x + fx - cx), abs(z + fz - cz)) < 3): continue
+                        bp.set(x, y + 1, z, "bed", facing=out, head=True)
+                        bp.set(x + fx, y + 1, z + fz, "bed", facing=out, head=False)
+                        used |= {(x, z), (x + fx, z + fz)}
+                    else:
+                        bp.set(x, y + 1, z, item, facing=face)
+                        used.add((x, z))
+                    self.furnished += 1
+                    break
+
     def strands(self):
         """Veilmoss strands hanging down the outer face of the curtain from the parapet."""
         for x in range(-R_OUT - 1, R_OUT + 2):
@@ -393,6 +445,7 @@ class HollowStronghold(Citadel):
         self.lay_plots()
         self.beds()
         self.strands()
+        self.furnish_rooms()
         self.bp.finish()
         return self.bp
 
