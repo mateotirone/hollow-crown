@@ -7,7 +7,11 @@
 //
 //   /scriptevent siege:music            what you are hearing and why
 //   /scriptevent siege:music <track>    play one piece now (vale_theme, boss_bride ...)
-//   /scriptevent siege:music stop       stop it (the next piece comes after the usual quiet)
+//   /scriptevent siege:music stop       stop it (the next piece comes after the usual short breath)
+//
+// The music never stops for good: a piece ends, a few seconds pass, the next one starts. Cross into another region
+// and stay there a few seconds and its music takes over. Changing dimension cuts every sound in Bedrock, so the
+// music starts again right after (otherwise the script would think a piece was still playing).
 
 import { world, system } from "@minecraft/server";
 import { on, onTick } from "../siege/api.js";
@@ -16,12 +20,12 @@ import { regionAt } from "../minimap/data.js";
 import { activeFights } from "../bestiary/bossCore.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { INSTALLED_MUSIC } from "./installed.js";
-import { MUSIC, MAIN_THEME, soundId, poolFor, overrideFor, pickTrack, between } from "./data.js";
+import { MUSIC, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, between } from "./data.js";
 import "./tests.js";
 
 const SECOND = 20;
 const MAIN_HEARD = "siege:music_main";
-const listeners = new Map(); // player id -> { track, mode: "piece" | "loop" | "quiet", until (tick), last }
+const listeners = new Map(); // player id -> { track, mode: "piece" | "loop" | "quiet", until (tick), last, key, newKey, newSince }
 let siege = false;
 on("siegeStart", () => { siege = true; });
 on("siegeEnd", () => { siege = false; });
@@ -70,6 +74,17 @@ function listen(player) {
     return;
   }
   if (s.mode === "loop") { stop(player, s); return quiet(s, MUSIC.afterFight); }
+  // walked into another region (or the Hollow): once you have stayed a few seconds, its music takes over
+  const key = poolKey(where);
+  if (s.key === undefined) s.key = key;
+  if (key !== s.key) {
+    if (s.newKey !== key) { s.newKey = key; s.newSince = now; }
+    if (now - s.newSince >= MUSIC.regionSettle * SECOND) {
+      s.key = key; s.newKey = undefined;
+      if (s.mode === "piece" && s.track !== MAIN_THEME) { stop(player, s); return quiet(s, MUSIC.switchGap); }
+      if (s.mode === "quiet") s.until = Math.min(s.until, now + MUSIC.switchGap[1] * SECOND);
+    }
+  } else s.newKey = undefined;
   if (now < s.until) return;
   if (s.mode === "piece") { s.track = undefined; return quiet(s, MUSIC.gap); }
   const next = pickTrack(poolFor(where), s.last, INSTALLED_MUSIC, Math.random());
@@ -85,6 +100,16 @@ onTick("music", MUSIC.checkTicks, () => {
     try { listen(player); } catch (e) { console.warn(`[Music] ${e}`); }
   }
   for (const id of listeners.keys()) if (!here.has(id)) listeners.delete(id);
+});
+
+// A dimension change silences every sound the player hears, so start the music again instead of waiting out a piece
+// that is no longer playing.
+world.afterEvents.playerDimensionChange.subscribe(({ player }) => {
+  const s = listeners.get(player.id);
+  if (!s) return;
+  s.track = undefined;
+  s.key = undefined;
+  quiet(s, MUSIC.afterDimension);
 });
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {

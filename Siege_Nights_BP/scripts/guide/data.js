@@ -105,9 +105,9 @@ export const ENTRIES = [
     when: ["place:siege:workshop", "carry:siege:workshop"],
   },
   {
-    id: "no_elytra", ch: "start", title: "No wings, and the edge of the map",
-    tip: "Nobody flies in Aldmere. Elytra crumble and pay you 3 Gold Regals instead.",
-    page: "Aldmere is crossed by road, rail and horse. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
+    id: "no_elytra", ch: "start", title: "No elytra, and the edge of the map",
+    tip: "Elytra don't work in Aldmere. They crumble and pay you 3 Gold Regals instead.",
+    page: "Aldmere is crossed by road, rail and horse, and by dragon for those who earn one. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
       + "The map has an edge: you can't go more than 1,250 blocks from its centre.",
     when: ["carry:minecraft:elytra"],
   },
