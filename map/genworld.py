@@ -235,7 +235,7 @@ fenpool &= ~PG.water
 log("plot ground:", int(pgwater.sum()), "water columns")
 
 Y = np.round(Yf).astype(np.int32)
-Y[land & ~fenpool & ~islake & ~pgwater] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
+Y[land & ~fenpool & ~islake & ~pgwater] = np.maximum(Y[land & ~fenpool & ~islake & ~pgwater], SEA + 1)
 Y[~land] = np.minimum(Y[~land], SEA - 1)            # the sea bed stays under water (no grass specks at sea level)
 Y[isriver] -= 3; Y[bank] -= 1
 water_level = np.full((SIZE, SIZE), -999, np.int32)
@@ -1005,9 +1005,10 @@ if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
     _probe = {"seed": int.from_bytes(os.urandom(4), "little") & 0x7FFFFFFF, "sites": {}, "reeve_y": None}
     _gold = []
     for sid_, a_ in _anch["anchors"].items():
-        if sid_ == "reeve":
-            y_, _, gl_ = _column(a_["x"], a_["z"], reeve=True); _probe["reeve_y"] = y_
-            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in gl_]; continue
+        if sid_ == "reeve":   # the square's commonest floor round the middle (reeve.js squareFloor: FLOOR_RING)
+            _ys = [_column(a_["x"] + dx_, a_["z"] + dz_, reeve=True)[0] for dx_, dz_ in ((4, 0), (-4, 0), (0, 4), (0, -4), (3, 3), (-3, 3), (3, -3), (-3, -3))]
+            _probe["reeve_y"] = min(set(_ys), key=lambda v: (-_ys.count(v), v))
+            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in _column(a_["x"], a_["z"], reeve=True)[2]]; continue
         n_ = 2 * _R + 1; gr_, wa_ = [], []
         for x_ in range(a_["x"] - _R, a_["x"] + _R + 1):
             for z_ in range(a_["z"] - _R, a_["z"] + _R + 1):

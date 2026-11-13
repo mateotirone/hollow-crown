@@ -1,7 +1,7 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
 import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
-import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE, inHeldNight, HELD_NIGHT } from "./reeve.js";
+import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE, commonest, FLOOR_RING, inHeldNight, HELD_NIGHT } from "./reeve.js";
 import { CHAPEL } from "../opening/millbrook.js";
 import { bakedFor, bakedState } from "./baked.js";
 import { BAKED_SITES } from "./baked_sites.js";
@@ -158,5 +158,11 @@ addTests("unlocks", {
       assert(b.check.length >= 3, `${id} has check cells`);
     }
     assertEqual(bakedFor("reeve", MILLBROOK_SQUARE)?.anchor ?? MILLBROOK_SQUARE, MILLBROOK_SQUARE);
+  },
+  "the Millbrook square's floor is read round the middle, not off the town's well": () => {
+    assertEqual(commonest([78, 78, 78, 82, undefined, 78, 79, 78]), 78);
+    assertEqual(commonest([79, 78, 79, 78]), 78, "a tie takes the lower floor");
+    assertEqual(commonest([undefined, undefined]), undefined);
+    assert(FLOOR_RING.every(([dx, dz]) => Math.hypot(dx, dz) >= 3), "never the middle, where the well stands");
   },
 });
