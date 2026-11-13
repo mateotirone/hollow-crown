@@ -260,7 +260,7 @@ PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mu
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
+          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "deadbush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}
