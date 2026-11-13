@@ -218,7 +218,6 @@ export const SETTLERS = {
   lordRange: 96, // a Rival Lord's town looks after its townsfolk while a player is this close (as their crews build)
   lordCatchUp: 3, // most newcomers a lord's town takes at once after nobody has been near for days
   waryDays: 3, // townsfolk are wary this many days after their town changes hands
-  skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
   workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", storehouse_1: "Storekeeper", storehouse_2: "Storekeeper", storehouse_3: "Storekeeper", storehouse_4: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
   names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
 };

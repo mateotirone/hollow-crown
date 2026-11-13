@@ -30,6 +30,7 @@ import { onTick, moduleStore, emit, on, addFilter, addKeepMenuButtons, isNight, 
 import { bestiaryStore } from "../bestiary/bossCore.js";
 import { setRegentTemper, regentData } from "../undertow/regent.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 import { HOUSES, TABLE_SCENE, BOARD_INTRO } from "./data/houses.js";
 import { AFTER, HOUSE_IDS, houseOf, startStandings, seatOf, houseForPretender, afterFall, afterSat, afterSwitch, envoyHouse, freshLine, isThirdNight } from "./rules.js";
 
@@ -113,6 +114,12 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
 });
 
 // ---------- envoys ----------
+// each house sends its envoys in its own colours
+addNpcLook((e) => {
+  if (!e.hasTag(ENVOY_TAG)) return undefined;
+  const id = HOUSE_IDS.find((h) => e.hasTag(houseTag(h)));
+  return id ? `envoy_${id}` : undefined;
+});
 function spawnEnvoy(player, houseId) {
   const h = houseOf(houseId);
   const v = player.getViewDirection(), l = player.location;
@@ -120,6 +127,7 @@ function spawnEnvoy(player, houseId) {
   const e = player.dimension.spawnEntity(ENVOY_TYPE, at);
   e.addTag(ENVOY_TAG);
   e.addTag(houseTag(houseId));
+  dressNpc(e, `envoy_${houseId}`);
   const name = h.envoys[Math.floor(Math.random() * h.envoys.length)];
   e.nameTag = `${h.color}${name}\n§7${h.name}`;
   e.setDynamicProperty("siege:after_envoy", JSON.stringify({ house: houseId, name, day: today() }));

@@ -32,7 +32,7 @@ export const huntsmanSite = defineSite({
   *plan(dim, anchor, seed) {
     return yield* huntPlan((x, z) => column(dim, x, z), anchor, makeHunt(seed));
   },
-  npcs: (site) => [{ tag: WARDEN, name: "Old Sigga", skin: 32, spot: mid(site.data.center, site.data.info.warden) }],
+  npcs: (site) => [{ tag: WARDEN, name: "Old Sigga", skin: "warden_sigga", spot: mid(site.data.center, site.data.info.warden) }],
   onNpc: {
     [WARDEN]: (site, player) => void talk(player, "Old Sigga, the lodge warden",
       "§oShe doesn't get up. The fire's out and she hasn't noticed.§r\n\n\"You want the old rhyme. They all want the rhyme, at the end. He taught it to my grandmother's grandmother, and she taught it to me, and I've never once said it out on the ice.\"\n\n"
