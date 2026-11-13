@@ -18,19 +18,6 @@
         "slot": "slot.armor.feet",
         "protection": 1
       },
-      "minecraft:durability": {
-        "max_durability": 65
-      },
-      "minecraft:repairable": {
-        "repair_items": [
-          {
-            "items": [
-              "minecraft:leather"
-            ],
-            "repair_amount": "q.max_durability * 0.25"
-          }
-        ]
-      },
       "minecraft:enchantable": {
         "slot": "armor_feet",
         "value": 15

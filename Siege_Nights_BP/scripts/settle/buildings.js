@@ -9,6 +9,7 @@ import { STYLES } from "../townhall/styles.js";
 import { drawData } from "../townhall/designs.js";
 import { BUILDING_DESIGNS } from "./designs_data.js";
 import { MASON_DESIGNS } from "./mason_data.js";
+import { STOREHOUSE_DESIGNS } from "./storehouse_data.js";
 
 const W = (...ids) => ids.map((id) => `minecraft:${id}`);
 
@@ -265,7 +266,6 @@ export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
   { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
-  { id: "storehouse", name: "Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
@@ -283,8 +283,19 @@ export const WAITING = [];
 // (basebuilds.js; Mateo's playtest 2026-11-12). Designed on the building skill (map/structures/export_mason.py).
 export const FIXED_BUILDINGS = [
   { id: "mason_yard", name: "Mason's Yard", blurb: "The mason's workshop, with a yard in front where he cuts and sells blocks.", draw: (p) => floor(p, -4, 4, 1, 9), designs: MASON_DESIGNS },
+  // The Storehouse at its four levels, one per town tier (storehouse.js; Mateo 2026-11-13). Designed on the
+  // building skill (map/structures/storehouse_skill.py): walls of sideways chests in 3 x 3 bays between stone pillars.
+  ...[["Store Shed", 4, 9], ["Storehouse", 5, 11], ["Storehouse", 6, 13], ["Great Storehouse", 6, 13]].map(([name, half, deep], i) => ({
+    id: `storehouse_${i + 1}`, name, blurb: "The settlement's storage: chests in bays between stone pillars. It grows with the town.",
+    draw: (p) => floor(p, -half, half, 1, deep), designs: STOREHOUSE_DESIGNS,
+  })),
 ];
-export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS].map((b) => [b.id, b]));
+// No longer offered, kept so a settlement that raised one before still knows what stands on its plot: the old
+// Castle-tier plot Storehouse, replaced by the Storehouse every settlement gets with its Hamlet (2026-11-13)
+export const RETIRED_BUILDINGS = [
+  { id: "storehouse", name: "Old Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
+];
+export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS, ...RETIRED_BUILDINGS].map((b) => [b.id, b]));
 
 // The machines of the town's Works plots (the Ironworks; Mateo 2026-11-12: the town generator makes the plots, the
 // player picks one and the machine builds itself there). They are raised and knocked down like any plot building,

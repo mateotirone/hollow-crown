@@ -15,6 +15,7 @@ import { carried, banked, giveCoins, absorb, totals } from "./coins.js";
 import "./shops.js";
 import "./golems.js";
 import "./towns.js";
+import "./hamlet.js";
 import "./showcase.js";
 import "./hud.js";
 import "./tests.js";

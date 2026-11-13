@@ -88,7 +88,7 @@ def fixture(f, base):
     row = [f["name"], x, z, tier, dy]
     if f["name"] == "tree":
         row += [f.get("species"), f.get("size"), f.get("rotation", 0)]
-    elif f["name"] == "mason_yard":  # the Mason's yard: side = the way its front faces (n/s/e/w), read as rotation
+    elif f["name"] in ("mason_yard", "storehouse"):  # side = the way its front faces (n/s/e/w), read as rotation
         row += [f.get("side", f.get("rotation", "s"))]
     elif "rotation" in f:
         row += [f.get("stamp"), f.get("rotation", 0)]
@@ -177,6 +177,11 @@ def starter_hamlet(v, st):
     if yard:
         door = st["doors"][yard_n]
         v["fixtures"].append({"name": "mason_yard", "at": door["cell"], "ground_y": yard["y"], "side": door["side"], "tier": "Hamlet"})
+    # the Storehouse's 15 x 15 ground: front middle, the way its door faces (raised and rebuilt by the game)
+    for n, ar in enumerate(st["areas"]):
+        if ar["kind"] == "storehouse":
+            door = st["doors"][n]
+            v["fixtures"].append({"name": "storehouse", "at": door["cell"], "ground_y": ar["y"], "side": door["side"], "tier": "Hamlet"})
     for f in st["fixtures"]:
         if f["kind"] in ("hall_cornerstone", "mason_bench"):
             x, y, z = f["at"]
