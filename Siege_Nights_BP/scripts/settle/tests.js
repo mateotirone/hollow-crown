@@ -437,8 +437,12 @@ addTests("settle charters", {
     assertEqual(slotClass(ML), "ML");
     assert(plotFit("cottage", S).ok && !plotFit("cottage", M).ok, "cottage takes Small only");
     assert(plotFit("market", L).ok && plotFit("market", ML).ok && !plotFit("market", M).ok, "market: Large or long Medium");
-    assert(!plotFit("barracks", M, new Set(["L"])).ok, "barracks waits for the free Large");
-    assert(plotFit("barracks", M, new Set(["M", "S"])).ok, "barracks takes a plain Medium when no Large or long Medium is free");
+    assert(!plotFit("barracks", M, new Set(["M", "S"])).ok && !plotFit("barracks", ML).ok, "barracks: never a Medium (the guardhouse is 15 x 17)");
+    const deep = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 16 }, door: { x: 0, z: -1 } };
+    const flat = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 14 }, door: { x: 0, z: -1 } };
+    const side = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 16, z1: 14 }, door: { x: -1, z: 0 } };
+    assert(plotFit("barracks", deep).ok && plotFit("barracks", side).ok, "barracks on a 15 x 17 Large, either way round");
+    assert(!plotFit("barracks", flat).ok && plotFit("market", flat).ok, "a 15 x 15 Large is too shallow for the barracks only");
     assert(plotFit("library", ML).ok, "library on the long Medium");
   },
   "location tags: the watchtower needs the wall, good spots are marked"() {
