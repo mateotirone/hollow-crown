@@ -1,0 +1,682 @@
+{
+ "aldous_hub_0": {
+  "text": "Well met again. The roads are worse every month. What can I do for you?",
+  "seconds": 4.0,
+  "source": "aldous_hub_0.mp3"
+ },
+ "aldous_hub_1": {
+  "text": "You look tired. So do I. Nobody warns you about the paperwork.",
+  "seconds": 4.1,
+  "source": "aldous_hub_1.mp3"
+ },
+ "aldous_hub_2": {
+  "text": "Ah, good, a face that isn't asking me for a horse. Go on.",
+  "seconds": 3.78,
+  "source": "aldous_hub_2.mp3"
+ },
+ "aldous_hub_3": {
+  "text": "I have the watch in an hour. Until then I am yours.",
+  "seconds": 2.83,
+  "source": "aldous_hub_3.mp3"
+ },
+ "cael_hub_0": {
+  "text": "The reading room is open. The archive is not. I say this every day. Some days I even mean it.",
+  "seconds": 8.2,
+  "source": "cael_hub_0.mp3"
+ },
+ "cael_hub_1": {
+  "text": "Quietly, please. The books are used to it.",
+  "seconds": 2.52,
+  "source": "cael_hub_1.mp3"
+ },
+ "cael_hub_2": {
+  "text": "You came back. Most people need only one look at this room.",
+  "seconds": 3.32,
+  "source": "cael_hub_2.mp3"
+ },
+ "cael_hub_3": {
+  "text": "I have misfiled something on purpose today. It was very satisfying. Yes?",
+  "seconds": 5.1,
+  "source": "cael_hub_3.mp3"
+ },
+ "carter_hub_0": {
+  "text": "Ask what you like. If I don't know, I'll say. If I do know and I'm frightened to say it, I'll say that too.",
+  "seconds": 6.4,
+  "source": "carter_hub_0.mp3"
+ },
+ "carter_hub_1": {
+  "text": "You came back. People from the bright side mostly don't. Ask.",
+  "seconds": 4.6,
+  "source": "carter_hub_1.mp3"
+ },
+ "carter_hub_2": {
+  "text": "Keep your voice down near the rails. They carry.",
+  "seconds": 2.39,
+  "source": "carter_hub_2.mp3"
+ },
+ "carter_hub_3": {
+  "text": "The cart's out. I've got till it comes back. Ask me something.",
+  "seconds": 2.47,
+  "source": "carter_hub_3.mp3"
+ },
+ "carter_named_0": {
+  "text": "The Court's quiet. You can hear the river now. I never knew it made a noise.",
+  "seconds": 3.54,
+  "source": "carter_named_0.mp3"
+ },
+ "carter_named_1": {
+  "text": "Say it again. My name. I like hearing it.",
+  "seconds": 1.91,
+  "source": "carter_named_1.mp3"
+ },
+ "carter_named_2": {
+  "text": "The rail's quiet. I keep waking at dawn anyway.",
+  "seconds": 2.37,
+  "source": "carter_named_2.mp3"
+ },
+ "carter_named_3": {
+  "text": "He sleeps a lot, my brother. Smiles in it. No sound.",
+  "seconds": 2.87,
+  "source": "carter_named_3.mp3"
+ },
+ "corvin_hub_0": {
+  "text": "Ask. Quickly. Every word I say to you is a word I'm not singing, and they notice.",
+  "seconds": 6.1,
+  "source": "corvin_hub_0.mp3"
+ },
+ "corvin_hub_1": {
+  "text": "Stand still. The water carries better when you stand still.",
+  "seconds": 4.5,
+  "source": "corvin_hub_1.mp3"
+ },
+ "corvin_hub_2": {
+  "text": "You again. Good. I had half a sentence saved for you and I've lost it. Ask.",
+  "seconds": 6.4,
+  "source": "corvin_hub_2.mp3"
+ },
+ "corvin_hub_3": {
+  "text": "Speak low. I am borrowing this breath from a tune and it will be wanted back.",
+  "seconds": 5.9,
+  "source": "corvin_hub_3.mp3"
+ },
+ "elias_hub_0": {
+  "text": "Mind the lamp. Have you read them? Any of them? I'd like to know someone has.",
+  "seconds": 5.9,
+  "source": "elias_hub_0.mp3"
+ },
+ "elias_hub_1": {
+  "text": "Is that the tide or is that you? Come up, come up.",
+  "seconds": 4.4,
+  "source": "elias_hub_1.mp3"
+ },
+ "elias_hub_2": {
+  "text": "Careful on the stair. It has one more step than it used to.",
+  "seconds": 4.7,
+  "source": "elias_hub_2.mp3"
+ },
+ "elias_hub_3": {
+  "text": "I was just writing to her. It will keep. What can I tell you?",
+  "seconds": 4.7,
+  "source": "elias_hub_3.mp3"
+ },
+ "hesper_hub_0": {
+  "text": "Did you see him? Did you see how he looks at the house?",
+  "seconds": 2.88,
+  "source": "hesper_hub_0.mp3"
+ },
+ "hesper_hub_1": {
+  "text": "You're back. Good. I've kept the tea warm, I don't know why.",
+  "seconds": 3.09,
+  "source": "hesper_hub_1.mp3"
+ },
+ "hesper_hub_2": {
+  "text": "He's out with the reeds. He's always out with the reeds now.",
+  "seconds": 2.79,
+  "source": "hesper_hub_2.mp3"
+ },
+ "hesper_hub_3": {
+  "text": "Tell me what you saw. Take your time. I've nothing but time.",
+  "seconds": 2.83,
+  "source": "hesper_hub_3.mp3"
+ },
+ "isolde_hub_0": {
+  "text": "Water, shade, or statues?",
+  "seconds": 1.98,
+  "source": "isolde_hub_0.mp3"
+ },
+ "isolde_hub_1": {
+  "text": "Sunscar thanks you for your visit. I am required to say so. What do you want?",
+  "seconds": 4.6,
+  "source": "isolde_hub_1.mp3"
+ },
+ "isolde_hub_2": {
+  "text": "Mind the statues on your way out. They were here first.",
+  "seconds": 2.97,
+  "source": "isolde_hub_2.mp3"
+ },
+ "isolde_hub_3": {
+  "text": "I have a petition about a goat and then I have you. Go on.",
+  "seconds": 3.48,
+  "source": "isolde_hub_3.mp3"
+ },
+ "jorund_hub_0": {
+  "text": "Well? You've seen him. What is he?",
+  "seconds": 1.64,
+  "source": "jorund_hub_0.mp3"
+ },
+ "jorund_hub_1": {
+  "text": "Mind the nets. Well? I've not slept.",
+  "seconds": 2.25,
+  "source": "jorund_hub_1.mp3"
+ },
+ "jorund_hub_2": {
+  "text": "He asked after you this morning. By name. I don't know what to make of that.",
+  "seconds": 3.55,
+  "source": "jorund_hub_2.mp3"
+ },
+ "jorund_hub_3": {
+  "text": "Tell me you've watched him. Tell me something.",
+  "seconds": 2.01,
+  "source": "jorund_hub_3.mp3"
+ },
+ "kesh_hatchwait_0": {
+  "text": "It let you take one. Now set it on a Roost in your own keep and wait.",
+  "seconds": 4.3,
+  "source": "kesh_hatchwait_0.mp3"
+ },
+ "kesh_hatchwait_1": {
+  "text": "Is it warm? Keep it warm.",
+  "seconds": 1.77,
+  "source": "kesh_hatchwait_1.mp3"
+ },
+ "kesh_hatchwait_2": {
+  "text": "Don't hover over it. Eggs know when they're being watched.",
+  "seconds": 3.43,
+  "source": "kesh_hatchwait_2.mp3"
+ },
+ "kesh_hatchwait_3": {
+  "text": "You keep looking at the sky. It won't hatch faster for that.",
+  "seconds": 3.52,
+  "source": "kesh_hatchwait_3.mp3"
+ },
+ "kesh_hub_0": {
+  "text": "Something you wanted?",
+  "seconds": 0.74,
+  "source": "kesh_hub_0.mp3"
+ },
+ "kesh_hub_1": {
+  "text": "Back again. The view hasn't changed.",
+  "seconds": 2.42,
+  "source": "kesh_hub_1.mp3"
+ },
+ "kesh_hub_2": {
+  "text": "You're the one who reads the wall. Hello.",
+  "seconds": 2.37,
+  "source": "kesh_hub_2.mp3"
+ },
+ "kesh_hub_3": {
+  "text": "Mind the edge. I said that last time too.",
+  "seconds": 2.97,
+  "source": "kesh_hub_3.mp3"
+ },
+ "kesh_spanwait_0": {
+  "text": "Cadet. You haven't crossed yet.",
+  "seconds": 1.77,
+  "source": "kesh_spanwait_0.mp3"
+ },
+ "kesh_spanwait_1": {
+  "text": "Still on this side of the gorge, I see. The Span hasn't moved.",
+  "seconds": 3.62,
+  "source": "kesh_spanwait_1.mp3"
+ },
+ "kesh_spanwait_2": {
+  "text": "The wind's from the east today. Lean left.",
+  "seconds": 3.05,
+  "source": "kesh_spanwait_2.mp3"
+ },
+ "kesh_spanwait_3": {
+  "text": "You're welcome to stand here. The Span isn't going to cross itself.",
+  "seconds": 3.41,
+  "source": "kesh_spanwait_3.mp3"
+ },
+ "kesh_sworn_0": {
+  "text": "Rider. What do you need?",
+  "seconds": 1.46,
+  "source": "kesh_sworn_0.mp3"
+ },
+ "kesh_sworn_1": {
+  "text": "Rider. Your name's still off the roll. Let's keep it that way.",
+  "seconds": 4.0,
+  "source": "kesh_sworn_1.mp3"
+ },
+ "kesh_sworn_2": {
+  "text": "There's sand in your hair. Good. You've been up.",
+  "seconds": 3.55,
+  "source": "kesh_sworn_2.mp3"
+ },
+ "kesh_sworn_3": {
+  "text": "She's watching us from the ledge, you know. Wave.",
+  "seconds": 3.46,
+  "source": "kesh_sworn_3.mp3"
+ },
+ "mag_hub_0": {
+  "text": "Sit. Ask. Don't touch the jars.",
+  "seconds": 2.78,
+  "source": "mag_hub_0.mp3"
+ },
+ "mag_hub_1": {
+  "text": "You're letting the damp out. In or out.",
+  "seconds": 2.56,
+  "source": "mag_hub_1.mp3"
+ },
+ "mag_hub_2": {
+  "text": "Back, are you. The frogs said you would be.",
+  "seconds": 3.06,
+  "source": "mag_hub_2.mp3"
+ },
+ "mag_hub_3": {
+  "text": "I was asleep. I've been asleep since Tuesday. Which Tuesday, I couldn't say. Ask.",
+  "seconds": 8.8,
+  "source": "mag_hub_3.mp3"
+ },
+ "nell_cup_0": {
+  "text": "Your cup's waiting.",
+  "seconds": 0.89,
+  "source": "nell_cup_0.mp3"
+ },
+ "nell_cup_1": {
+  "text": "The cup's still here. So are you. One of you is going to have to make a move.",
+  "seconds": 3.71,
+  "source": "nell_cup_1.mp3"
+ },
+ "nell_cup_2": {
+  "text": "Come back for your tea? It's kept. I said it would.",
+  "seconds": 2.52,
+  "source": "nell_cup_2.mp3"
+ },
+ "nell_cup_3": {
+  "text": "Sit. The cup's on the side. Whenever you like.",
+  "seconds": 2.35,
+  "source": "nell_cup_3.mp3"
+ },
+ "nell_graveswait_0": {
+  "text": "Have you knelt at all three?",
+  "seconds": 1.11,
+  "source": "nell_graveswait_0.mp3"
+ },
+ "nell_graveswait_1": {
+  "text": "Three graves. Three villages. She got about, Goody.",
+  "seconds": 3.01,
+  "source": "nell_graveswait_1.mp3"
+ },
+ "nell_graveswait_2": {
+  "text": "Kneel. Leave something. Don't be fussy about what.",
+  "seconds": 2.67,
+  "source": "nell_graveswait_2.mp3"
+ },
+ "nell_graveswait_3": {
+  "text": "Feeling better? It passes. Mostly.",
+  "seconds": 2.17,
+  "source": "nell_graveswait_3.mp3"
+ },
+ "nell_hub_0": {
+  "text": "What can I do for you?",
+  "seconds": 0.85,
+  "source": "nell_hub_0.mp3"
+ },
+ "nell_hub_1": {
+  "text": "Back! Sit. Kettle's on.",
+  "seconds": 1.09,
+  "source": "nell_hub_1.mp3"
+ },
+ "nell_hub_2": {
+  "text": "The plank held. It's fond of you.",
+  "seconds": 1.69,
+  "source": "nell_hub_2.mp3"
+ },
+ "nell_hub_3": {
+  "text": "You again. Good. I was running out of people to talk to who aren't eels.",
+  "seconds": 3.55,
+  "source": "nell_hub_3.mp3"
+ },
+ "nell_motherwait_0": {
+  "text": "Goody Sedge has had her look. Now the fen wants one thing done.",
+  "seconds": 3.22,
+  "source": "nell_motherwait_0.mp3"
+ },
+ "nell_motherwait_1": {
+  "text": "She gave you something back. I knew she would. She always liked the polite ones.",
+  "seconds": 4.0,
+  "source": "nell_motherwait_1.mp3"
+ },
+ "nell_motherwait_2": {
+  "text": "The Mother of Changelings. Have you been to see her yet?",
+  "seconds": 2.79,
+  "source": "nell_motherwait_2.mp3"
+ },
+ "nell_motherwait_3": {
+  "text": "The fen's waiting on you. It isn't patient like the tea.",
+  "seconds": 2.6,
+  "source": "nell_motherwait_3.mp3"
+ },
+ "nell_sworn_0": {
+  "text": "What do you need?",
+  "seconds": 0.7,
+  "source": "nell_sworn_0.mp3"
+ },
+ "nell_sworn_1": {
+  "text": "Witch. Sit, the kettle's on. It's always on.",
+  "seconds": 2.0,
+  "source": "nell_sworn_1.mp3"
+ },
+ "nell_sworn_2": {
+  "text": "You've got that look. The fen's been talking to you. Tell me.",
+  "seconds": 2.95,
+  "source": "nell_sworn_2.mp3"
+ },
+ "nell_sworn_3": {
+  "text": "Mind the plank. Oh, you did. Good.",
+  "seconds": 1.9,
+  "source": "nell_sworn_3.mp3"
+ },
+ "nessa_hub_0": {
+  "text": "Well? Have you watched him?",
+  "seconds": 1.24,
+  "source": "nessa_hub_0.mp3"
+ },
+ "nessa_hub_1": {
+  "text": "Loaves are a penny. You're not here for loaves, are you.",
+  "seconds": 2.82,
+  "source": "nessa_hub_1.mp3"
+ },
+ "nessa_hub_2": {
+  "text": "Keep your voice down, he's only through there.",
+  "seconds": 2.14,
+  "source": "nessa_hub_2.mp3"
+ },
+ "nessa_hub_3": {
+  "text": "I've been counting how long he stands at the back door. Ask me how long.",
+  "seconds": 4.2,
+  "source": "nessa_hub_3.mp3"
+ },
+ "ottilie_articleswait_0": {
+  "text": "Thirty-two Regals for your share. I'll take it when you have it on you.",
+  "seconds": 3.32,
+  "source": "ottilie_articleswait_0.mp3"
+ },
+ "ottilie_articleswait_1": {
+  "text": "Thirty-two Regals. The book's open. The pen's wet.",
+  "seconds": 3.17,
+  "source": "ottilie_articleswait_1.mp3"
+ },
+ "ottilie_articleswait_2": {
+  "text": "Your line in the book is still blank. It's waiting.",
+  "seconds": 2.29,
+  "source": "ottilie_articleswait_2.mp3"
+ },
+ "ottilie_articleswait_3": {
+  "text": "Debt doesn't go away for being ignored. I'd know.",
+  "seconds": 2.84,
+  "source": "ottilie_articleswait_3.mp3"
+ },
+ "ottilie_bridewait_0": {
+  "text": "You have a crew. Now take them to the sunken chapel. The Bride is waiting.",
+  "seconds": 3.86,
+  "source": "ottilie_bridewait_0.mp3"
+ },
+ "ottilie_bridewait_1": {
+  "text": "Three hands. It's a crew if you say it loudly enough.",
+  "seconds": 2.55,
+  "source": "ottilie_bridewait_1.mp3"
+ },
+ "ottilie_bridewait_2": {
+  "text": "The chapel tower shows above the water when the moon's dark. That's your night.",
+  "seconds": 3.58,
+  "source": "ottilie_bridewait_2.mp3"
+ },
+ "ottilie_bridewait_3": {
+  "text": "She's still waiting. Somebody ought to stop her.",
+  "seconds": 2.29,
+  "source": "ottilie_bridewait_3.mp3"
+ },
+ "ottilie_crewwait_0": {
+  "text": "You're in the book. Now raise a crew: three guards sworn to your keep, and tell me when you have them.",
+  "seconds": 5.0,
+  "source": "ottilie_crewwait_0.mp3"
+ },
+ "ottilie_crewwait_1": {
+  "text": "No crew yet? A captain alone is a passenger with opinions.",
+  "seconds": 3.36,
+  "source": "ottilie_crewwait_1.mp3"
+ },
+ "ottilie_crewwait_2": {
+  "text": "Three hands, sworn to your keep. Then come and tell me.",
+  "seconds": 2.88,
+  "source": "ottilie_crewwait_2.mp3"
+ },
+ "ottilie_crewwait_3": {
+  "text": "You'll want ones who can swim. Not everyone thinks to ask.",
+  "seconds": 2.7,
+  "source": "ottilie_crewwait_3.mp3"
+ },
+ "ottilie_hub_0": {
+  "text": "What can I do for you?",
+  "seconds": 0.87,
+  "source": "ottilie_hub_0.mp3"
+ },
+ "ottilie_hub_1": {
+  "text": "Back. Still not in the book.",
+  "seconds": 1.3,
+  "source": "ottilie_hub_1.mp3"
+ },
+ "ottilie_hub_2": {
+  "text": "The tide's on the turn. You've got a minute.",
+  "seconds": 1.88,
+  "source": "ottilie_hub_2.mp3"
+ },
+ "ottilie_hub_3": {
+  "text": "Ink, rope or gossip? I've got all three.",
+  "seconds": 2.21,
+  "source": "ottilie_hub_3.mp3"
+ },
+ "ottilie_sworn_0": {
+  "text": "What do you need, Captain?",
+  "seconds": 0.95,
+  "source": "ottilie_sworn_0.mp3"
+ },
+ "ottilie_sworn_1": {
+  "text": "Captain. Your share's paid up this season. Mine isn't. Don't tell anyone.",
+  "seconds": 3.77,
+  "source": "ottilie_sworn_1.mp3"
+ },
+ "ottilie_sworn_2": {
+  "text": "Your crew drink in the Gull. They speak well of you. Mostly.",
+  "seconds": 2.8,
+  "source": "ottilie_sworn_2.mp3"
+ },
+ "ottilie_sworn_3": {
+  "text": "The book's open. It's always open. Sit.",
+  "seconds": 2.39,
+  "source": "ottilie_sworn_3.mp3"
+ },
+ "sage_hub_0": {
+  "text": "Catalogue's up to date. What are we puzzling over?",
+  "seconds": 3.09,
+  "source": "sage_hub_0.mp3"
+ },
+ "sage_hub_1": {
+  "text": "Don't move that pile, it's in an order. What have you found?",
+  "seconds": 3.03,
+  "source": "sage_hub_1.mp3"
+ },
+ "sage_hub_2": {
+  "text": "Oh, it's you! I was hoping it was you and not a draught.",
+  "seconds": 3.02,
+  "source": "sage_hub_2.mp3"
+ },
+ "sage_hub_3": {
+  "text": "Ink's wet, mind your sleeve. Go on, what's the question?",
+  "seconds": 3.15,
+  "source": "sage_hub_3.mp3"
+ },
+ "sigrun_hub_0": {
+  "text": "Door. Shut. What is it?",
+  "seconds": 1.55,
+  "source": "sigrun_hub_0.mp3"
+ },
+ "sigrun_hub_1": {
+  "text": "You'll want feeding. Southerners always do. Talk first.",
+  "seconds": 3.23,
+  "source": "sigrun_hub_1.mp3"
+ },
+ "sigrun_hub_2": {
+  "text": "Boots off or stay by the door. What now?",
+  "seconds": 2.05,
+  "source": "sigrun_hub_2.mp3"
+ },
+ "sigrun_hub_3": {
+  "text": "Lake's still there, if that's what you came to check.",
+  "seconds": 2.39,
+  "source": "sigrun_hub_3.mp3"
+ },
+ "tilly_hub_0": {
+  "text": "Have you thought?",
+  "seconds": 0.82,
+  "source": "tilly_hub_0.mp3"
+ },
+ "tilly_hub_1": {
+  "text": "I saved you a place on the wall. It's the dry bit.",
+  "seconds": 2.65,
+  "source": "tilly_hub_1.mp3"
+ },
+ "tilly_hub_2": {
+  "text": "He's down there again. Look. Right on the line.",
+  "seconds": 2.6,
+  "source": "tilly_hub_2.mp3"
+ },
+ "tilly_hub_3": {
+  "text": "Did you decide? You don't have to say. I can tell if you've decided.",
+  "seconds": 3.74,
+  "source": "tilly_hub_3.mp3"
+ },
+ "ulla_haulwait_0": {
+  "text": "Sixteen iron ingots and sixteen coal. I'll take them when you have them on you.",
+  "seconds": 8.2,
+  "source": "ulla_haulwait_0.mp3"
+ },
+ "ulla_haulwait_1": {
+  "text": "Iron? Coal? No? Then why are you letting the cold in?",
+  "seconds": 6.5,
+  "source": "ulla_haulwait_1.mp3"
+ },
+ "ulla_haulwait_2": {
+  "text": "Sixteen and sixteen. I'm not going to forget the number.",
+  "seconds": 6.7,
+  "source": "ulla_haulwait_2.mp3"
+ },
+ "ulla_haulwait_3": {
+  "text": "She's sulking. She knows the side-hearth's waiting.",
+  "seconds": 4.1,
+  "source": "ulla_haulwait_3.mp3"
+ },
+ "ulla_hub_0": {
+  "text": "Well?",
+  "seconds": 0.83,
+  "source": "ulla_hub_0.mp3"
+ },
+ "ulla_hub_1": {
+  "text": "Door. Shut. Thank you.",
+  "seconds": 2.31,
+  "source": "ulla_hub_1.mp3"
+ },
+ "ulla_hub_2": {
+  "text": "Back for the warmth? Everyone comes back for the warmth.",
+  "seconds": 6.0,
+  "source": "ulla_hub_2.mp3"
+ },
+ "ulla_hub_3": {
+  "text": "She's in a good mood today. Must be the coal.",
+  "seconds": 3.38,
+  "source": "ulla_hub_3.mp3"
+ },
+ "ulla_huntwait_0": {
+  "text": "He's up. Now he has to go back down.",
+  "seconds": 3.5,
+  "source": "ulla_huntwait_0.mp3"
+ },
+ "ulla_huntwait_1": {
+  "text": "You rang it. I felt the lake take the note, all the way up here.",
+  "seconds": 5.9,
+  "source": "ulla_huntwait_1.mp3"
+ },
+ "ulla_huntwait_2": {
+  "text": "He's up, then. Go and put him down.",
+  "seconds": 3.37,
+  "source": "ulla_huntwait_2.mp3"
+ },
+ "ulla_huntwait_3": {
+  "text": "There's frost on you. Lake frost. You've been close.",
+  "seconds": 4.6,
+  "source": "ulla_huntwait_3.mp3"
+ },
+ "ulla_ringwait_0": {
+  "text": "That's Hroda's hand-bell pattern. First one poured in thirty years, and it came out sweet.\n\nTake it to the lake at Rimehold. Set it down on the ice at night and ring it. Something out there still answers bells.",
+  "seconds": 15.5,
+  "source": "ulla_ringwait_0.mp3"
+ },
+ "ulla_ringwait_1": {
+  "text": "You've still got the bell. I can hear it in your pack, humming.",
+  "seconds": 5.2,
+  "source": "ulla_ringwait_1.mp3"
+ },
+ "ulla_ringwait_2": {
+  "text": "The lake. At night. On the ice. I said all three.",
+  "seconds": 4.6,
+  "source": "ulla_ringwait_2.mp3"
+ },
+ "ulla_ringwait_3": {
+  "text": "Don't ring it in here. She'll never forgive either of us.",
+  "seconds": 4.9,
+  "source": "ulla_ringwait_3.mp3"
+ },
+ "ulla_sworn_0": {
+  "text": "What do you need?",
+  "seconds": 1.52,
+  "source": "ulla_sworn_0.mp3"
+ },
+ "ulla_sworn_1": {
+  "text": "Smith. Shut the door. Good. You're learning.",
+  "seconds": 3.59,
+  "source": "ulla_sworn_1.mp3"
+ },
+ "ulla_sworn_2": {
+  "text": "She brightened when you came in. Don't let it go to your head.",
+  "seconds": 4.9,
+  "source": "ulla_sworn_2.mp3"
+ },
+ "ulla_sworn_3": {
+  "text": "Your hands have changed. They hold a hammer like it belongs to them now.",
+  "seconds": 7.1,
+  "source": "ulla_sworn_3.mp3"
+ },
+ "wren_hub_0": {
+  "text": "Still dark, still here. What do you need?",
+  "seconds": 2.61,
+  "source": "wren_hub_0.mp3"
+ },
+ "wren_hub_1": {
+  "text": "You again. Good. Wipe your feet, somebody has to pretend it's morning.",
+  "seconds": 4.8,
+  "source": "wren_hub_1.mp3"
+ },
+ "wren_hub_2": {
+  "text": "Hold this. No, the other end. Now. What is it?",
+  "seconds": 3.11,
+  "source": "wren_hub_2.mp3"
+ },
+ "wren_hub_3": {
+  "text": "I've a pot on and a boy with a fever. Talk while I work.",
+  "seconds": 3.84,
+  "source": "wren_hub_3.mp3"
+ }
+}

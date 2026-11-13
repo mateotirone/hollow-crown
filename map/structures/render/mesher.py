@@ -169,6 +169,9 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
+for _c in ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "cyan", "purple", "blue", "brown", "green", "red", "black"):
+    MAT[_c + "_stained_glass"] = "glass_" + _c                   # full stained glass blocks (the Everwake gate's portal stand-in)
+MAT["light_gray_stained_glass"] = "glass_silver"
 
 def base_material(n):
     for suf in ("_stairs", "_slab", "_wall", "_fence"):
@@ -214,6 +217,7 @@ def cube_tex(n, p):
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
               "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
               "barrel": {"top": "barrel_top", "bottom": "barrel_bottom", "side": "barrel_side"},
+              "stonecutter_block": {"top": "stonecutter2_top", "bottom": "stonecutter2_bottom", "side": "stonecutter2_side"},
               "crafting_table": {"top": "crafting_table_top", "side": "crafting_table_side", "bottom": "planks_oak"},
               "oak_leaves": {"side": "leaves_oak.tga#foliage"}, "spruce_leaves": {"side": "leaves_spruce.tga#spruce"},
               "dark_oak_leaves": {"side": "leaves_big_oak.tga#foliage"}, "birch_leaves": {"side": "leaves_birch.tga#birch"},
@@ -260,7 +264,7 @@ PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mu
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
+          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "deadbush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}

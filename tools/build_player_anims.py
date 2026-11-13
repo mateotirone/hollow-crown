@@ -313,7 +313,7 @@ PRE = [
     "variable.hc_shake = variable.hc_drawing ? math.clamp((query.life_time - variable.hc_draw_start - 1.5) / 3.0, 0.0, 1.0) : 0.0;",
     "variable.hc_release = (variable.hc_release_pow > 0.3 && variable.hc_bow) ? math.clamp(1.0 - (query.life_time - variable.hc_release_at) / 0.35, 0.0, 1.0) * variable.hc_release_pow : 0.0;",
     # in the air, landing after a fall, sprinting (all eased so nothing snaps)
-    "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding;",
+    "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding && (query.has_property('siege:wings') ? query.property('siege:wings') < 2 : 1);",  # Everwake Wings glide is scripted, not is_gliding
     "variable.hc_landed = !variable.hc_in_air && variable.hc_was_air && query.life_time - variable.hc_air_start > 0.35;",
     "variable.hc_land_pow = variable.hc_landed ? math.clamp((query.life_time - variable.hc_air_start) / 1.2, 0.35, 1.0) : variable.hc_land_pow;",
     "variable.hc_land_at = variable.hc_landed ? query.life_time : variable.hc_land_at;",

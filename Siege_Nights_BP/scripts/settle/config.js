@@ -110,24 +110,30 @@ export const MASON_LINES = {
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
   smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+  ironworks: 0,
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
-// G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+// G Great 21x21, W Works 27x17. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
   stable: "ML", storehouse: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
+  ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
-  barracks: ["ML"],
+  farmhouse: ["ML"],
+  house: ["ML"],
   library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
-export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
+export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
+// The smallest plot box a building stands on: [width along the door side, depth]. The guardhouse (every region,
+// barn_data.js) is 15 x 17, so only a deep Large holds it (the town generator gives every layout one by the City).
+export const PLOT_MIN_BOX = { barracks: [15, 17] };
 
 // Where on the map a building wants to be, from the plot's tags (wall, corner, square, gate, road_front,
 // field_edge, hall, library). needs: the plot must have one of them. prefer: listed first in the menu.
@@ -138,12 +144,13 @@ export const PLOT_TAGS = {
   garden: { prefer: ["field_edge"] },
   farmhouse: { prefer: ["field_edge"] },
   library: { prefer: ["library", "square"] },
+  ironworks: { prefer: ["water"] }, // its last stage turns a waterwheel
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall5: "on ground the hall will need at level 5" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
-export const HOMES = ["cottage"];
+export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
 
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now).

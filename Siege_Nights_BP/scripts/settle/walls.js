@@ -29,6 +29,13 @@ const walls = () => store.data.walls;
 const save = () => store.save();
 
 export const wallOf = (id) => walls()[id];
+// Put back (or forget, with no record) a settlement's wall record as it was (the battle test, battletest/). Blocks stay.
+export function setWallRecord(id, record) {
+  if (jobs.has(id)) return false;
+  if (record) walls()[id] = record; else delete walls()[id];
+  save();
+  return true;
+}
 export function wallRing(id) {
   const w = walls()[id];
   if (!w?.ground) return undefined;
@@ -411,6 +418,9 @@ on("ready", () => {
 // and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
 const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
 const guardOpened = new Set(); // wall ids whose gate a guard opened
+const gateGreeted = new Set(); // wall ids whose guard has already opened up for the friend standing there
+// Pure: what the guard does this step. He opens only on the step a friend arrives.
+export const gateGuardStep = ({ friendNear, greeted, opened, guards }) => (friendNear && !greeted && !opened && guards > 0 ? "open" : friendNear ? "wait" : opened ? "shut" : "idle");
 function findGateBlocks(id, w) {
   const key = `${id}|${w.level}`;
   if (gateBlocks.has(key)) return gateBlocks.get(key);
@@ -456,12 +466,16 @@ onTick("settle_gates", 10, () => {
     }
     const g = gateSpot(w, w.gate, w.ground, w.radius);
     const opened = guardOpened.has(id);
-    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
-    if (friendNear && !opened && guardCount(id) > 0) {
+    const greeted = gateGreeted.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened || greeted ? 6 : WALLS.gateGreet));
+    // The guard opens the gate once, as a friend arrives. After that the gate is the friend's to work: shut it by
+    // hand and it stays shut until they have walked away and come back (it used to swing open again at once).
+    if (gateGuardStep({ friendNear, greeted, opened, guards: guardCount(id) }) === "open") {
+      gateGreeted.add(id);
       if (setWallGate(id, w, true)) guardOpened.add(id);
-    } else if (!friendNear && opened) {
-      setWallGate(id, w, false);
-      guardOpened.delete(id);
+    } else if (!friendNear) {
+      gateGreeted.delete(id);
+      if (opened) { setWallGate(id, w, false); guardOpened.delete(id); }
     }
   }
 });

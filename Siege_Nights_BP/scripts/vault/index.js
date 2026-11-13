@@ -83,6 +83,19 @@ export function vaultOf(owner) {
   return { ...v, lock: worldOf(v, ...d.marks.lock) };
 }
 
+// Dig a vault for a settlement straight away, free (the battle test, battletest/): the stairs start at `at` and go
+// down the way `forward` points. Replaces any vault the owner had on record. false if one is already being dug.
+export function raiseVaultFor(owner, at, forward, tier = "iron") {
+  if (buildFor(jobId(owner)) || !TIERS.includes(tier)) return false;
+  const v = vaults()[owner] = { paid: true, x: at.x, y: at.y, z: at.z, fx: forward.x, fz: forward.z, layout: LAYOUT[tier] ?? "treasury" };
+  store.save();
+  start(owner, v, tier);
+  return true;
+}
+// An owner's vault record as saved, and putting one back (or forgetting it, with none). The blocks stay.
+export const vaultRecord = (owner) => vaults()[owner];
+export function setVaultRecord(owner, record) { if (record) vaults()[owner] = record; else delete vaults()[owner]; store.save(); }
+
 const plans = new Map();
 function planFor(tier, layout) {
   const key = `${tier}|${layout}`;

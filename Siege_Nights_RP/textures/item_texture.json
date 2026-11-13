@@ -116,6 +116,9 @@
   "siege_b_mire_heart": {
    "textures": "textures/items/bestiary/mire_heart"
   },
+  "siege_b_last_note": {
+   "textures": "textures/items/bestiary/last_note"
+  },
   "siege_b_warlords_brand": {
    "textures": "textures/items/bestiary/warlords_brand"
   },
@@ -1060,6 +1063,84 @@
   },
   "siege_summon_bell_wife": {
    "textures": "textures/items/creative/summon_bell_wife"
+  },
+  "siege_everwake_wings": {
+   "textures": "textures/items/everwake_wings"
+  },
+  "siege_starter_vale_helmet": {
+   "textures": "textures/items/siege_starter_vale_helmet"
+  },
+  "siege_starter_vale_chestplate": {
+   "textures": "textures/items/siege_starter_vale_chestplate"
+  },
+  "siege_starter_vale_leggings": {
+   "textures": "textures/items/siege_starter_vale_leggings"
+  },
+  "siege_starter_vale_boots": {
+   "textures": "textures/items/siege_starter_vale_boots"
+  },
+  "siege_starter_vale_weapon": {
+   "textures": "textures/items/siege_starter_vale_weapon"
+  },
+  "siege_starter_frostmarch_helmet": {
+   "textures": "textures/items/siege_starter_frostmarch_helmet"
+  },
+  "siege_starter_frostmarch_chestplate": {
+   "textures": "textures/items/siege_starter_frostmarch_chestplate"
+  },
+  "siege_starter_frostmarch_leggings": {
+   "textures": "textures/items/siege_starter_frostmarch_leggings"
+  },
+  "siege_starter_frostmarch_boots": {
+   "textures": "textures/items/siege_starter_frostmarch_boots"
+  },
+  "siege_starter_frostmarch_weapon": {
+   "textures": "textures/items/siege_starter_frostmarch_weapon"
+  },
+  "siege_starter_saltreach_helmet": {
+   "textures": "textures/items/siege_starter_saltreach_helmet"
+  },
+  "siege_starter_saltreach_chestplate": {
+   "textures": "textures/items/siege_starter_saltreach_chestplate"
+  },
+  "siege_starter_saltreach_leggings": {
+   "textures": "textures/items/siege_starter_saltreach_leggings"
+  },
+  "siege_starter_saltreach_boots": {
+   "textures": "textures/items/siege_starter_saltreach_boots"
+  },
+  "siege_starter_saltreach_weapon": {
+   "textures": "textures/items/siege_starter_saltreach_weapon"
+  },
+  "siege_starter_emberwaste_helmet": {
+   "textures": "textures/items/siege_starter_emberwaste_helmet"
+  },
+  "siege_starter_emberwaste_chestplate": {
+   "textures": "textures/items/siege_starter_emberwaste_chestplate"
+  },
+  "siege_starter_emberwaste_leggings": {
+   "textures": "textures/items/siege_starter_emberwaste_leggings"
+  },
+  "siege_starter_emberwaste_boots": {
+   "textures": "textures/items/siege_starter_emberwaste_boots"
+  },
+  "siege_starter_emberwaste_weapon": {
+   "textures": "textures/items/siege_starter_emberwaste_weapon"
+  },
+  "siege_starter_blackfen_helmet": {
+   "textures": "textures/items/siege_starter_blackfen_helmet"
+  },
+  "siege_starter_blackfen_chestplate": {
+   "textures": "textures/items/siege_starter_blackfen_chestplate"
+  },
+  "siege_starter_blackfen_leggings": {
+   "textures": "textures/items/siege_starter_blackfen_leggings"
+  },
+  "siege_starter_blackfen_boots": {
+   "textures": "textures/items/siege_starter_blackfen_boots"
+  },
+  "siege_starter_blackfen_weapon": {
+   "textures": "textures/items/siege_starter_blackfen_weapon"
   }
  }
 }
