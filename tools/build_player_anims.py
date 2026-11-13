@@ -313,7 +313,7 @@ PRE = [
     "variable.hc_shake = variable.hc_drawing ? math.clamp((query.life_time - variable.hc_draw_start - 1.5) / 3.0, 0.0, 1.0) : 0.0;",
     "variable.hc_release = (variable.hc_release_pow > 0.3 && variable.hc_bow) ? math.clamp(1.0 - (query.life_time - variable.hc_release_at) / 0.35, 0.0, 1.0) * variable.hc_release_pow : 0.0;",
     # in the air, landing after a fall, sprinting (all eased so nothing snaps)
-    "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding;",
+    "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding && (query.has_property('siege:wings') ? query.property('siege:wings') < 2 : 1);",  # Everwake Wings glide is scripted, not is_gliding
     "variable.hc_landed = !variable.hc_in_air && variable.hc_was_air && query.life_time - variable.hc_air_start > 0.35;",
     "variable.hc_land_pow = variable.hc_landed ? math.clamp((query.life_time - variable.hc_air_start) / 1.2, 0.35, 1.0) : variable.hc_land_pow;",
     "variable.hc_land_at = variable.hc_landed ? query.life_time : variable.hc_land_at;",
@@ -342,7 +342,33 @@ PRE = [
     # mounted on something with reins, and taking a hit
     f"variable.hc_mounted = query.is_riding && ({ACTOR} ? query.is_riding_any_entity_of_type('minecraft:horse', 'minecraft:donkey', 'minecraft:mule', 'minecraft:skeleton_horse', 'minecraft:zombie_horse', 'minecraft:camel', 'siege:steed', 'siege:dragon') : 0.0);",
     "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);",
+    # a hand that holds something keeps its elbow straight (see fold_elbows)
+    f"variable.hc_rbend = {ACTOR} ? !query.is_item_equipped(0) : 1.0;",
+    f"variable.hc_lbend = {ACTOR} ? !query.is_item_equipped(1) : 1.0;",
 ]
+
+# ---------- held items: no elbow bend in a hand that holds something ----------
+# The item bones hang on the upper arm (Bedrock floats held items if the bone path to rightItem differs from
+# vanilla), so a hand that holds something must not bend at the elbow, or the item would hang in the air
+# beside a bent forearm. While a hand holds an item, its forearm turn moves to the shoulder instead.
+BEND = {"right": "variable.hc_rbend", "left": "variable.hc_lbend"}
+
+def fold_elbows(anims):
+    for a in anims.values():
+        bones = a.get("bones", {})
+        for side, flag in BEND.items():
+            fore = bones.get(f"{side}forearm", {}).get("rotation")
+            if not fore:
+                continue
+            arm = bones.setdefault(f"{side}arm", {}).setdefault("rotation", r())
+            for i in range(3):
+                f = fore[i]
+                if f == 0.0:
+                    continue
+                arm[i] = f"({arm[i]}) + ({f}) * (1.0 - {flag})" if arm[i] != 0.0 else f"({f}) * (1.0 - {flag})"
+                fore[i] = f"({f}) * {flag}"
+
+fold_elbows(A)
 
 def dump(path, data):
     with open(path, "w") as f:

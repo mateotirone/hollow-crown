@@ -1,0 +1,104 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.siege.everwake_wings": {
+      "initial_state": "none",
+      "states": {
+        "none": {
+          "transitions": [
+            {
+              "folded": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) >= 1"
+            }
+          ]
+        },
+        "folded": {
+          "animations": [
+            "everwake_folded"
+          ],
+          "transitions": [
+            {
+              "none": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) < 1"
+            },
+            {
+              "open": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) >= 2"
+            }
+          ],
+          "blend_transition": 0.3
+        },
+        "open": {
+          "animations": [
+            "everwake_open"
+          ],
+          "transitions": [
+            {
+              "glide": "query.all_animations_finished"
+            }
+          ],
+          "blend_transition": 0.2
+        },
+        "glide": {
+          "animations": [
+            "everwake_glide"
+          ],
+          "transitions": [
+            {
+              "folded": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 1"
+            },
+            {
+              "boost": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 3"
+            },
+            {
+              "flare": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 4"
+            },
+            {
+              "dive": "query.target_x_rotation > 50"
+            }
+          ],
+          "blend_transition": 0.3
+        },
+        "boost": {
+          "animations": [
+            "everwake_boost"
+          ],
+          "transitions": [
+            {
+              "glide": "query.all_animations_finished"
+            }
+          ],
+          "blend_transition": 0.15
+        },
+        "dive": {
+          "animations": [
+            "everwake_dive"
+          ],
+          "transitions": [
+            {
+              "glide": "query.target_x_rotation < 40"
+            },
+            {
+              "boost": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 3"
+            },
+            {
+              "folded": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 1"
+            }
+          ],
+          "blend_transition": 0.4
+        },
+        "flare": {
+          "animations": [
+            "everwake_flare"
+          ],
+          "transitions": [
+            {
+              "folded": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 1"
+            },
+            {
+              "glide": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 2"
+            }
+          ],
+          "blend_transition": 0.4
+        }
+      }
+    }
+  }
+}

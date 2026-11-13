@@ -8,7 +8,7 @@ import { markWanted } from "./guards.js";
 import { keepBlock } from "./keep.js";
 import { placeBefore, placementAllowed } from "./protection.js";
 import { saveState, saveTracked, state, tracked } from "./state.js";
-import { MAX_RADIUS, freeColor, isAlly, settlementAt, tierOf, landRadius } from "./territory.js";
+import { MAX_RADIUS, freeColor, colorTaken, isAlly, settlementAt, tierOf, landRadius } from "./territory.js";
 import { overworld, title } from "./util.js";
 import { blockKey, damageMap, lightCharge, saveDamage } from "./walls.js";
 import { sfx } from "../core/sfx.js";
@@ -16,8 +16,8 @@ import { sfx } from "../core/sfx.js";
 // ---------- Placing blocks: settlements and building rights ----------
 
 export const PLACE_MESSAGES = {
-  [DESK]: "§7Quartermaster's desk set up. Bring an unemployed villager to it and they'll take the job.",
-  "siege:barracks": "§7Barracks built. Bring an unemployed villager here and click it with coins in hand (40 Regals) to recruit a Man-at-Arms (sneak + click for an Archer).",
+  [DESK]: "§7Quartermaster's desk set up. A quartermaster will take the post shortly.",
+  "siege:barracks": "§7Barracks built. Click it and choose Train soldiers: 40 Regals each, and your settlement can keep 4 while it is a Hamlet.",
 };
 
 // Undo a placement and hand the block back
@@ -50,9 +50,14 @@ export function foundSettlement(player, block) {
 
   const old = state.keeps[player.id];
   if (old && keepBlock(old)) overworld().runCommand(`setblock ${old.x} ${old.y} ${old.z} air destroy`);
-  const color = old?.color ?? freeColor(block.permutation.getState("siege:color"));
+  // a keep that fell in a siege comes back with its record, one win down (keep.js keepFallen)
+  const fell = !old ? state.fallenKeeps?.[player.id] : undefined;
+  if (fell) delete state.fallenKeeps[player.id];
+  const was = old ?? fell;
+  const color = was?.color !== undefined && (old || !colorTaken(was.color, player.id)) ? was.color : freeColor(block.permutation.getState("siege:color"));
   block.setPermutation(block.permutation.withState("siege:color", color));
-  state.keeps[player.id] = { x: loc.x, y: loc.y, z: loc.z, name: player.name, color, wins: old?.wins ?? 0, allies: old?.allies ?? [] };
+  state.keeps[player.id] = { x: loc.x, y: loc.y, z: loc.z, name: player.name, color, wins: was?.wins ?? 0, allies: was?.allies ?? [] };
+  if (fell) Object.assign(state.keeps[player.id], { warlordsSlain: fell.warlordsSlain, sieges: fell.sieges, ...(fell.sovereign ? { sovereign: true } : {}) });
   saveState();
   title(player, old ? "§6Settlement moved" : "§6Settlement founded",
     `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${landRadius(state.keeps[player.id], player.id)} blocks from your banner`);

@@ -20,6 +20,8 @@
 //   addFilter("settleReserves", (boxes, { owner }) => [...boxes, { x0, z0, x1, z1, label }])   reserve more ground
 //   drawBuilding(id, style), BUILDINGS, styleFor(style)   the designs, for the town hall build engine
 //   on("settleBuilt", ({ owner, player, building, style, origin, forward, box, slotId }))   slotId: the town slot, if any
+//   on("settleCleared", ({ owner, building, slotId }))   a plot's building was knocked down and the plot is clear
+//   addWorks({ id, name, blurb, coins, plan(styleId), dig?, taken?(owner) })   a machine for the Works plots (buildings.js)
 //   townOf(owner), townSlots(owner), growTown(owner, tier)   a town laid out from its layout
 //   on("townLaidOut", ({ owner, tier })), on("settleFixture", ({ owner, kind, species, size, rotation, at }))
 //   spawnMason(dimension, location)
@@ -35,6 +37,8 @@ import "./founding.js";
 import "./plotmarker.js";
 import "./register.js";
 import "./settlers.js";
+import "./lordfolk.js";
+import "./events.js";
 import "./hallmove.js";
 import "./planbook.js";
 import "./basebuilds.js";
@@ -43,7 +47,7 @@ import "./showcase.js";
 import "./tests.js";
 
 export { zoneAt, reservesOf, reserveAt, placeProblem, wildsClosed } from "./zones.js";
-export { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
+export { BUILDINGS, BUILDING, WORKS, addWorks, drawBuilding, styleFor } from "./buildings.js";
 export { spawnMason, openShop } from "./mason.js";
 export { wallOf, wallRing, wallCost, raiseWall } from "./walls.js";
 export { WALLS, WALL_LEVELS, MAX_WALL } from "./walldata.js";

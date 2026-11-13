@@ -164,7 +164,17 @@ export function seekSpot(anchor, seek, height, water = () => undefined) {
   return { x: best.x, z: best.z, face: faceOf(best.b) };
 }
 
+// How far round a piece's spot the ground is held loaded while it builds (index.js tickingarea): its whole box and
+// the eased edge, never under 44 and never over 72 (a ticking area holds at most 100 chunks: 2 x 72 = 144 blocks a
+// side is 10 chunks at worst). Crownhold's castle and the Cinder Roost's school are the big ones.
+export const REACH_MAX = 72;
+export function reachOf(d) {
+  const b = d.box ?? { x0: 0, x1: 0, z0: 0, z1: 0 };
+  return Math.min(REACH_MAX, Math.max(44, Math.max(-b.x0, b.x1, -b.z0, b.z1) + (d.ease ?? 3) + 3));
+}
+
 // The design to use for a piece: a plain id, or one id per facing ({ n, e, s, w }) for pieces that turn.
 export function designFor(piece, face) {
   return typeof piece.d === "string" ? piece.d : piece.d[face ?? "n"];
 }
+

@@ -84,6 +84,8 @@ A 50,000-block castle costs about the same tokens as a hut.
   walkway kept everywhere, lanterns, region flavour. `"attic": true` floors the roof space as a room.
   Rules and the use table: `build-instructions/08-interiors`. Check them cut open with
   `map/structures/build_interiors_viewer.py` (Roof off / per-floor buttons).
+- **Light** (Mateo 2026-11-13: every build is lit): the last stage, `light` (`scripts/lighting.py`), adds lanterns until every
+  room, door step and built yard is lit at night (house rules, "Every build is lit"). `"light": false` opts out.
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
 ## One engine for every build
@@ -92,6 +94,11 @@ Mateo (2026-11-12): every build in the project uses this skill. Map code calls `
 (`compute(spec)`, `into_blueprint(bp, spec, offset, upto=stage | only=stage)`) instead of placing blocks
 itself, so a rule fixed here reaches every build. New building rules go into `parts.py` and the
 reference files, not into a builder of their own.
+
+The ground under and round a placed build is the same for everything too (Mateo 2026-11-13): one terraform pass,
+`map/structures/terraform.py` (pad, door-landing connectors, a 4 to 6 block blend skirt, retaining walls only where
+the land can't meet). Give it a `Site` instead of levelling or banking by hand (house rules, "Every placed thing
+is terraformed").
 
 ## Commands
 

@@ -21,10 +21,11 @@ import { world, system, GameMode } from "@minecraft/server";
 import { onTick, moduleStore, addTests, assert, assertEqual, note, emit } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
-import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList, setHurtScale } from "./util.js";
+import { activeDimensions, alive, announce, blockKind, clearBetween, effect, flat, footingNear, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList, setHurtScale } from "./util.js";
 import { sfx, hasCue } from "../core/sfx.js";
 import { bossMove } from "./anim.js";
 import { MOVES } from "./moves.js";
+import { layBody } from "./bodies.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 const FOREVER = 20000000;
@@ -51,6 +52,8 @@ export const fightOf = (bossId) => activeFights().find((f) => f.def.id === bossI
 export function phaseFor(fraction, thresholds = []) {
   return thresholds.filter((t) => fraction <= t).length;
 }
+// The phases a boss enters going from phase `from` to phase `to`, in order
+export const phasesCrossed = (from, to) => Array.from({ length: Math.max(0, to - from) }, (_, i) => from + 1 + i);
 
 // Every boss is tuned to be beaten alone. Each extra player in the arena makes it half again as tough:
 // 1 player = its real health, 2 = 1.5x, 4 = 2.5x, capped at 10 players. Done by giving back a share of each hit.
@@ -91,7 +94,7 @@ function attach(entity, def, center, fresh) {
   }
   const f = {
     def, entity, dim: entity.dimension, id: entity.id,
-    center: saved?.center ?? { x: center.x, y: center.y, z: center.z },
+    center: saved?.center ?? floorUnder(entity.dimension, center, def.roaming),
     phase: 0, data: {}, tick: 0, timers: [], zones: [], damagers: new Set(saved?.damagers ?? []),
     busyUntil: 0, emptySince: undefined, lastLoc: entity.location, next: {}, paused: false,
     addTag: `siege_b_of_${entity.id}`.replace(/[^\w-]/g, "_"),
@@ -126,6 +129,38 @@ function attach(entity, def, center, fresh) {
   return f;
 }
 
+// The fight's floor: the ground under where the boss appeared. A boss that drops in from above (the Mother lowers
+// herself from the roots) would otherwise lay every marked circle out at the height she came in at, where none can hit.
+function floorUnder(dim, at, roaming) {
+  const c = { x: at.x, y: at.y, z: at.z };
+  if (roaming) return c;
+  const ground = footingNear(c, blockKind(dim), 1, 12);
+  return ground ? { x: c.x, y: ground.y, z: c.z } : c;
+}
+
+// A spot in the same room as `from`, with floor and headroom, between `min` and `max` blocks away. Fights are drawn as
+// circles round the boss, but they are fought in chapels, vaults and chambers: a spot inside a wall, out in the sea or
+// on the far side of a wall is no use to anyone (Mateo 2026-11-12 boss walkthrough: the Bride's bells all landed
+// outside her chapel). Tries random spots, then nearer ones; falls back to `from` itself.
+export function openSpot(dim, from, min, max, ok = () => true, tries = 16) {
+  const kind = blockKind(dim);
+  for (let i = 0; i < tries + 8; i++) {
+    const hi = i < tries ? max : min + (max - min) / 2;
+    const a = Math.random() * Math.PI * 2, d = min + Math.random() * Math.max(0, hi - min);
+    const at = { x: from.x + Math.cos(a) * d, y: from.y, z: from.z + Math.sin(a) * d };
+    const stand = footingNear(at, kind, 2, 4);
+    if (stand && ok(stand) && clearBetween(dim, from, stand)) return stand;
+  }
+  return { x: from.x, y: from.y, z: from.z };
+}
+
+// Several open spots kept at least `gap` apart (bells, pillars, lit tiles)
+export function openSpots(dim, from, n, min, max, gap = 3) {
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(openSpot(dim, from, min, max, (s) => out.every((o) => flat(o, s) >= gap)));
+  return out;
+}
+
 function nameBoss(f) {
   try {
     const tempers = tempersOf(f).map((t) => t.name).join(" & ");
@@ -152,6 +187,9 @@ export function rebind(f, entity) {
   saveFight(f);
 }
 
+// The warning of the attack that is winding up right now, as the first line of the action bar ("" when none is)
+export const warningLine = (f) => (f.warn && f.warn.until > f.tick ? `§c⚠ ${f.warn.text}§r\n` : "");
+
 function helpers(f) {
   return {
     hp: () => {
@@ -169,8 +207,17 @@ function helpers(f) {
     say: (text) => {
       for (const p of f.players(24)) p.sendMessage(text);
     },
+    // A line on the action bar for everyone. Many fights keep a status line up every second (the tide, a countdown,
+    // "Singers to silence"), and the action bar only holds one message: a warning used to be wiped by the status line
+    // in the same second it appeared. While an attack is winding up its warning now stays on top of whatever else
+    // is shown (boss review 2026-11-13).
     bar: (text) => {
-      for (const p of f.players()) p.onScreenDisplay.setActionBar(text);
+      const w = warningLine(f);
+      for (const p of f.players()) p.onScreenDisplay.setActionBar(w + text);
+    },
+    // The same for one player (their own status line: how many bells they have rung, that the river took them)
+    tell: (player, text) => {
+      try { player.onScreenDisplay.setActionBar(warningLine(f) + text); } catch { /* gone */ }
     },
     solo: () => f.players().length <= 1,
     // Move the whole fight somewhere else (another arena, even another dimension). The boss and the
@@ -204,10 +251,11 @@ function helpers(f) {
     // Spawn helpers around the boss (or around `at`). They are removed if the fight resets.
     summon: (type, count = 1, spread = 4, at = f.entity.location, tags = []) => {
       const made = [];
+      const from = footingNear(at, blockKind(f.dim), 1, 6) ?? at;
       for (let i = 0; i < count; i++) {
-        const a = Math.random() * Math.PI * 2, d = spread * (0.5 + Math.random() * 0.5);
+        const s = openSpot(f.dim, from, spread * 0.5, spread, undefined, 6); // on the floor, never in a wall
         try {
-          const e = f.dim.spawnEntity(type, { x: at.x + Math.cos(a) * d, y: at.y + 0.2, z: at.z + Math.sin(a) * d });
+          const e = f.dim.spawnEntity(type, { x: s.x, y: s.y + 0.2, z: s.z });
           e.addTag(f.addTag);
           for (const t of tags) e.addTag(t);
           made.push(e);
@@ -238,12 +286,14 @@ function helpers(f) {
       const ps = f.players();
       return ps.length ? ps[Math.floor(Math.random() * ps.length)] : undefined;
     },
-    // A random spot on the arena floor, between `min` and `max` blocks from the centre
+    // A random spot on the arena floor, between `min` and `max` blocks from the centre, in the same room
     spot: (min, max) => {
       const c = f.def.roaming ? f.entity.location : f.center;
-      const a = Math.random() * Math.PI * 2, d = min + Math.random() * (max - min);
-      return { x: c.x + Math.cos(a) * d, y: c.y, z: c.z + Math.sin(a) * d };
+      return openSpot(f.dim, c, min, max);
     },
+    spots: (n, min, max, gap) => openSpots(f.dim, f.def.roaming ? f.entity.location : f.center, n, min, max, gap),
+    // Where a marked circle goes under someone: the floor beneath them, even mid-jump or on a slope
+    floorOf: (loc) => footingNear(loc, blockKind(f.dim), 1, 6) ?? { x: loc.x, y: f.def.roaming ? loc.y : f.center.y, z: loc.z },
     stun: (ticks) => {
       effect(f.entity, "slowness", ticks, 255);
       effect(f.entity, "weakness", ticks, 255);
@@ -304,6 +354,7 @@ function bossTick() {
     // Phases
     const phase = phaseFor(f.hp(), f.def.phases);
     if (phase > f.phase && !f.paused) {
+      const from = f.phase;
       f.phase = phase;
       effect(f.entity, "resistance", 40, 4);
       bossMove(f.entity, "rage", "strike");
@@ -311,7 +362,8 @@ function bossTick() {
         p.onScreenDisplay.setTitle(`§c${f.def.name}`, { subtitle: `§7${f.def.phaseNames?.[phase] ?? `Phase ${phase + 1}`}`, fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
         sound(f.dim, "mob.wither.ambient", p.location, 0.6, 0.7);
       }
-      f.def.onPhase?.(f, phase);
+      // One huge blow past two lines still plays every phase it crossed, in order (the Reeve still splits into his Cogs)
+      for (const n of phasesCrossed(from, phase)) safely(f, () => f.def.onPhase?.(f, n));
     }
 
     // Timers and marked zones
@@ -341,7 +393,11 @@ function bossTick() {
       for (const a of (f.def.attacks ?? []).filter((x) => x.id === chosen)) {
         f.lastAttack = a.id;
         f.next[a.id] = Math.round(a.every * temperMul(f, "pace"));
-        if (a.warn) f.bar(`§c⚠ ${a.warn}`);
+        if (a.warn) {
+          f.warn = undefined;
+          f.bar(`§c⚠ ${a.warn}`);
+          f.warn = { text: a.warn, until: f.tick + Math.max(a.windup ?? 0, 30) }; // kept on top of status lines until it lands
+        }
         for (const p of players) {
           if (a.sound) sound(f.dim, a.sound, p.location, 0.5, 0.8);
           else sfx(p, "boss.warn");
@@ -357,6 +413,7 @@ function bossTick() {
       }
     }
     safely(f, () => creativeChase(f, players));
+    safely(f, () => helpersChase(f, players));
     for (const t of tempersOf(f)) if (t.act && !f.paused && f.tick % t.every < STEP) safely(f, () => temperAct(f, players, t));
     safely(f, () => f.def.tick?.(f, players));
   }
@@ -403,6 +460,38 @@ function creativeChase(f, players) {
   e.teleport(to, { facingLocation: p.location });
 }
 
+// The same for a boss's helpers (Mateo 2026-11-12 boss walkthrough: in Creative every "kill the helpers" phase stood
+// still, because Minecraft's AI ignores Creative players). Anything the fight summoned that walks or flies (not bells,
+// pillars, Singers or a frozen suit) closes in on the nearest Creative player and shows the hit it would have landed.
+// Stops as soon as anyone in Survival or Adventure is in the arena. Their own AI then does the work.
+const STILL_FAMILIES = ["boss", "boss_prop", "projectile"];
+export const HELPER_REACH = 2.2;
+export const helperChases = (family, speed, frozen) => !STILL_FAMILIES.includes(family) && speed > 0 && !frozen;
+function helpersChase(f, players) {
+  if (!players.length || !players.every(isCreative)) return;
+  for (const e of f.adds()) {
+    try {
+      const speed = e.getComponent("movement")?.currentValue ?? 0;
+      const frozen = (e.getEffect?.("slowness")?.amplifier ?? 0) >= 200;
+      if (!helperChases(MOBS[e.typeId]?.family, speed, frozen)) continue;
+      if (e.target?.isValid) continue; // it has someone real to fight (a guard)
+      const loc = e.location;
+      const p = players.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a));
+      if (flat(p.location, loc) <= HELPER_REACH && Math.abs(p.location.y - loc.y) < 3) {
+        if (f.tick % 20 < STEP) hurt(p, 4, "entityAttack", e);
+        continue;
+      }
+      const flying = !!e.getComponent("can_fly");
+      const to = chaseStep(loc, p.location, Math.min(speed, 0.3), HELPER_REACH - 0.4, flying);
+      if (!to) continue;
+      const stand = flying ? to : footingNear(to, blockKind(f.dim), 1, 3); // never through a wall or off a ledge
+      if (stand) e.teleport(stand, { facingLocation: p.location });
+    } catch {
+      // gone
+    }
+  }
+}
+
 // What a temper adds on top of the boss's own attacks
 function temperAct(f, players, temper) {
   if (temper.act === "ground") {
@@ -435,9 +524,11 @@ function safely(f, fn) {
   }
 }
 
-function clearAdds(f) {
+// `fell`: the boss has just died, so its helpers drop where they stand (and leave bodies) instead of vanishing.
+function clearAdds(f, fell = false) {
   for (const e of f.adds()) {
     try {
+      if (fell) layBody(e);
       e.remove();
     } catch {
       // already gone
@@ -447,7 +538,7 @@ function clearAdds(f) {
 
 function reset(f) {
   clearAdds(f);
-  f.phase = 0; f.timers = []; f.zones = []; f.data = {}; f.paused = false; f.busyUntil = 0;
+  f.phase = 0; f.timers = []; f.zones = []; f.data = {}; f.paused = false; f.busyUntil = 0; f.warn = undefined;
   f.damagers.clear();
   f.shield(false);
   try {
@@ -509,7 +600,7 @@ world.afterEvents.entityDie.subscribe((event) => {
 
 function finish(f, slayer) {
   fights.delete(f.id);
-  clearAdds(f);
+  clearAdds(f, true);
   const def = f.def, loc = f.lastLoc;
   const online = world.getPlayers();
   let players = online.filter((p) => f.damagers.has(p.id));
@@ -634,11 +725,46 @@ addTests("bestiary", {
       assert(MOVES[def.type]?.includes("rage"), `${def.type} has no rage animation`);
     }
   },
+  "fight spots stay in the room: never in a wall, the sea or past a wall (boss walkthrough 2026-11-12)": () => {
+    // A chapel nave like the Bride's: floor at y 63, open x -9..9, z -4..4, walls round it, the sea outside
+    const room = (x, z) => x >= -9 && x <= 9 && z >= -4 && z <= 4;
+    const block = (x, y, z) => (y <= 63 ? { isAir: false, isLiquid: false } : room(x, z) ? { isAir: true, isLiquid: false } : { isAir: false, isLiquid: true });
+    const dim = {
+      getBlock: ({ x, y, z }) => block(Math.floor(x), Math.floor(y), Math.floor(z)),
+      getBlockFromRay: (from, dir, { maxDistance }) => {
+        for (let t = 0; t <= maxDistance; t += 0.25) {
+          const b = block(Math.floor(from.x + dir.x * t), Math.floor(from.y + dir.y * t), Math.floor(from.z + dir.z * t));
+          if (!b.isAir && !b.isLiquid) return { block: b };
+          if (b.isLiquid) return { block: b };
+        }
+        return undefined;
+      },
+    };
+    const bride = { x: 6.5, y: 64, z: 0.5 }; // by the altar, 2.5 from the east wall
+    for (let i = 0; i < 40; i++) {
+      const s = openSpot(dim, bride, 4, 9);
+      assert(room(Math.floor(s.x), Math.floor(s.z)) && s.y === 64, `spot ${JSON.stringify(s)} is outside the nave`);
+    }
+    const bells = openSpots(dim, bride, 3, 4, 9, 4);
+    assertEqual(bells.length, 3);
+    for (const b of bells) assert(room(Math.floor(b.x), Math.floor(b.z)), "every bell is inside the chapel");
+    assertEqual(floorUnder(dim, { x: 0.5, y: 71, z: 0.5 }).y, 64, "a boss that drops in from above fights on the floor");
+  },
+  "boss helpers chase Creative playtesters, props stay put": () => {
+    assert(helperChases("wild_hostile", 0.3, false) && helperChases(undefined, 0.25, false), "wolves and vanilla mobs (the drowned, Echoes) chase");
+    assert(helperChases("champion", 0.3, false), "the old court's fighters chase");
+    assert(!helperChases("boss_prop", 0, false) && !helperChases("boss_prop", 0.3, false), "bells and pillars never move");
+    assert(!helperChases("raider", 0.3, true), "a frozen suit stays frozen");
+    assert(!helperChases("projectile", 0.5, false), "a thrown cog flies on its own");
+  },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);
     assertEqual(phaseFor(0.6, [0.6, 0.3]), 1);
     assertEqual(phaseFor(0.45, [0.6, 0.3]), 1);
     assertEqual(phaseFor(0.1, [0.6, 0.3]), 2);
     assertEqual(phaseFor(0.1, undefined), 0);
+    assertEqual(phasesCrossed(0, 2), [1, 2], "a blow past both lines plays both phases");
+    assertEqual(phasesCrossed(1, 2), [2]);
+    assertEqual(phasesCrossed(2, 2), []);
   },
 });

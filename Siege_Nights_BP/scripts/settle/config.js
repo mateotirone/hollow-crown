@@ -110,24 +110,30 @@ export const MASON_LINES = {
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
   smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+  ironworks: 0,
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
-// G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+// G Great 21x21, W Works 27x17. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
   stable: "ML", storehouse: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
+  ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
-  barracks: ["ML"],
+  farmhouse: ["ML"],
+  house: ["ML"],
   library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
-export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
+export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
+// The smallest plot box a building stands on: [width along the door side, depth]. The guardhouse (every region,
+// barn_data.js) is 15 x 17, so only a deep Large holds it (the town generator gives every layout one by the City).
+export const PLOT_MIN_BOX = { barracks: [15, 17] };
 
 // Where on the map a building wants to be, from the plot's tags (wall, corner, square, gate, road_front,
 // field_edge, hall, library). needs: the plot must have one of them. prefer: listed first in the menu.
@@ -138,12 +144,13 @@ export const PLOT_TAGS = {
   garden: { prefer: ["field_edge"] },
   farmhouse: { prefer: ["field_edge"] },
   library: { prefer: ["library", "square"] },
+  ironworks: { prefer: ["water"] }, // its last stage turns a waterwheel
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall5: "on ground the hall will need at level 5" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
-export const HOMES = ["cottage"];
+export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
 
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now).
@@ -207,6 +214,9 @@ export const FLOOR_PER_BED = 12;
 // worker first, then the homes fill up. They stand about by day and go to their bed at dusk.
 export const SETTLERS = {
   perDawn: 1,
+  lordRange: 96, // a Rival Lord's town looks after its townsfolk while a player is this close (as their crews build)
+  lordCatchUp: 3, // most newcomers a lord's town takes at once after nobody has been near for days
+  waryDays: 3, // townsfolk are wary this many days after their town changes hands
   skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
   workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
   names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
@@ -226,6 +236,49 @@ export const SETTLER_LINES = {
     "Don't stand out here long. It's colder than it ought to be.",
   ],
   idle: "My work's gone. Put it back up and I'll go back to it.",
+  // In a Rival Lord's town: how the lord's temper shows in their people
+  lord: {
+    proud: [
+      "His lordship doesn't care for strangers on the green. Say your piece and go.",
+      "Our walls were raised by a proper lord. Not everyone can say that.",
+      "Mind the banner. Folk have been fined for less.",
+    ],
+    grasping: [
+      "Everything here has a price, friend. Even the well, if he hears of it.",
+      "Taxed on bread, taxed on boots. We pay and we keep quiet.",
+      "If you've coin, the lord will want to meet you. If you haven't, he won't.",
+    ],
+    devout: [
+      "We keep the old prayers here. You're welcome to them.",
+      "The lord says grace before every meal, even the small ones.",
+      "Light a candle before you leave. It costs nothing.",
+    ],
+    wary: [
+      "We don't open the door after the second bell. Don't knock.",
+      "You came by the north road? Nobody comes by the north road.",
+      "Keep your voice down. Sound carries at night here.",
+    ],
+    bold: [
+      "Our lord's ridden out against worse than you. Twice.",
+      "We'll stand on that wall when the horn goes. Every one of us.",
+      "Fancy a wrestle on the green? No? Pity.",
+    ],
+    kind: [
+      "Hungry? There's bread by the hall door. The lord leaves it out.",
+      "You're welcome here. Most are.",
+      "Our lord knows every name in this town. Even the children's.",
+    ],
+    steady: [
+      "Quiet enough here, most days.",
+      "We keep our heads down and our roofs mended.",
+    ],
+  },
+  // For a few days after a player takes a lord's town
+  wary: [
+    "New banner on the hall. We'll see how it suits.",
+    "The old lord kept the well clean. I hope you will.",
+    "I'll work, same as before. Just don't ask me to cheer.",
+  ],
 };
 
 // ---------- The Plan Book (planbook.js, plandata.js) ----------

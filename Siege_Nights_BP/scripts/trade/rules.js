@@ -7,6 +7,7 @@
 // A ledger:  { [item id]: count }, what a crate holds (or, for an NPC, what it has spare)
 
 import { TRADE, GOODS, goodOf, COIN, GOLD_COIN, GOLD_WORTH, REGION_RATES_DEFAULT, DAY, SECOND } from "./data.js";
+import { JOBS, ECON } from "../economy/config.js"; // pure data
 
 // ---------- worth ----------
 
@@ -199,7 +200,20 @@ export function npcAnswer(npc, offer, rates) {
 }
 
 // Kingsrest buys any trade good for Regals at a set price (Mateo, 2026-11-12). The price for a load:
-export const capitalPrice = (load) => Math.floor(worthOf(load) * TRADE.capitalRate);
+// Never more than a town shop charges for the same thing (Mateo 2026-11-13: bread, coal, charcoal and wheat could
+// be bought in a shop and shipped here at a profit, for ever). A good some trader sells is bought at no more than
+// TRADE.capitalUnderShop of the cheapest shop price anywhere.
+export function shopFloor(id) {
+  let low = Infinity;
+  for (const job of Object.values(JOBS)) for (const g of job.sells) {
+    if (g.id !== id) continue;
+    const cheapest = g.flat || job.mint || !job.home?.length ? 1 : ECON.homeCharges;
+    low = Math.min(low, (g.price / g.lot) * cheapest);
+  }
+  return low;
+}
+export const capitalUnit = (id) => Math.min((goodOf(id)?.worth ?? 0) * TRADE.capitalRate, shopFloor(id) * TRADE.capitalUnderShop);
+export const capitalPrice = (load) => Math.floor(capitalUnit(load.id) * load.n + 1e-9);
 export function capitalAnswer(offer) {
   if (offer.get.id !== COIN) return { kind: "counter", give: { ...offer.give }, get: { id: COIN, n: Math.max(1, capitalPrice(offer.give)) } };
   if (goodOf(offer.give.id)?.money) return { kind: "reject", why: "The Exchequer doesn't buy money with money." };

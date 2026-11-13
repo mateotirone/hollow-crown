@@ -1,0 +1,30 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.siege_faceless_statue.pose": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [
+            "q.property('siege:wear') == 4 ? -90 : 0",
+            0,
+            0
+          ],
+          "scale": "q.property('siege:size')"
+        },
+        "body": {
+          "rotation": [
+            "q.property('siege:wear') == 4 ? 6 : 0",
+            0,
+            0
+          ],
+          "position": [
+            0,
+            "q.property('siege:wear') == 4 ? 2 : 0",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

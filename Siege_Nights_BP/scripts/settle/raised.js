@@ -16,7 +16,7 @@ import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
 import { siteProblem, styleOf } from "./plans.js";
 import { footprint } from "./rules.js";
-import { levelSite, foundationColumns, groundTop } from "./ground.js";
+import { levelSite, foundationColumns, groundTop, Groundwork } from "./ground.js";
 import { frameFor, toWorld } from "../townhall/halls.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
@@ -102,15 +102,18 @@ function start(key, job) {
   const plan = planFor(job.type, job.style);
   const at = locOf(key);
   const forward = { x: job.fx, z: job.fz };
-  // on the highest ground under it, never half buried (ground.js); measured once so a restart keeps the height.
+  // on a terraformed pad, never half buried (ground.js); measured once so a restart keeps the height (and skips
+  // the regrading, which was done the first time).
   // The block itself stays where it was placed and the building leaves it alone.
   const dim = world.getDimension(OVERWORLD);
-  if (!Number.isFinite(job.lift)) { job.lift = levelSite(dim, plan, at, forward).lift; store.save(); }
+  const fresh = !Number.isFinite(job.lift);
+  if (fresh) { job.lift = levelSite(dim, plan, at, forward, { terraform: true }).lift; store.save(); }
   const origin = { ...at, y: at.y + job.lift };
   const gaps = yardGaps(plan, origin, forward, job.lift, pathAt(dim, origin.y + 2));
   const b = startBuild({
     id: `raised:${key}`, dimensionId: OVERWORLD, origin: { ...at, y: at.y + job.lift }, forward,
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
+    ...(fresh ? { ground: new Groundwork(plan, origin, forward, job.style) } : {}),
     skip: (x, y, z) => (x === at.x && y === at.y && z === at.z) || gaps.cells.has(`${x},${y},${z}`),
     onDone() {
       colourCloth(dim, plan, origin, forward, job.owner);

@@ -1,5 +1,139 @@
 {
   "namespace": "hud",
+  "hc_quests": {
+    "type": "panel",
+    "controls": [
+      {
+        "hc_quests_box": {
+          "type": "panel",
+          "size": [
+            168,
+            200
+          ],
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
+          "offset": [
+            -4,
+            3
+          ],
+          "controls": [
+            {
+              "hc_quests_data": {
+                "type": "panel",
+                "size": [
+                  0,
+                  0
+                ],
+                "$update_string": "hcq:",
+                "property_bag": {
+                  "#preserved_text": ""
+                },
+                "bindings": [
+                  {
+                    "binding_name": "#hud_title_text_string"
+                  },
+                  {
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#preserved_text",
+                    "binding_condition": "visibility_changed"
+                  },
+                  {
+                    "binding_type": "view",
+                    "target_property_name": "#visible",
+                    "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_quests_below": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "shadow": true,
+                "layer": 5,
+                "font_scale_factor": 0.75,
+                "text_alignment": "right",
+                "localize": false,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  0,
+                  94
+                ],
+                "size": [
+                  168,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcq:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcq:')) = '_b'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcq:') - '_b') - '_t')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_quests_top": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "shadow": true,
+                "layer": 5,
+                "font_scale_factor": 0.75,
+                "text_alignment": "right",
+                "localize": false,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  0,
+                  0
+                ],
+                "size": [
+                  168,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcq:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcq:')) = '_t'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcq:') - '_b') - '_t')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "hc_minimap": {
     "type": "panel",
     "controls": [
@@ -720,6 +854,13 @@
         "value": {
           "hc_minimap@hud.hc_minimap": {}
         }
+      },
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": {
+          "hc_quests@hud.hc_quests": {}
+        }
       }
     ]
   },
@@ -732,7 +873,7 @@
       {
         "binding_type": "view",
         "target_property_name": "#visible",
-        "source_property_name": "((#hud_title_text_string - 'hcm:') = #hud_title_text_string)"
+        "source_property_name": "(((#hud_title_text_string - 'hcm:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcq:') = #hud_title_text_string))"
       }
     ]
   },

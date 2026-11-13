@@ -16,7 +16,7 @@ import { getRift } from "./source.js";
 import { FACING } from "./data.js";
 
 export { HEART as SEAT } from "./layout.js";
-export { rebuildHeart as rebuildSeat, dropHeartBand as dropSeatBand, ranksSpots } from "./builder.js";
+export { rebuildHeart as rebuildSeat, dropHeartBand as dropSeatBand, ranksSpots, ranksReady } from "./builder.js";
 export { POCKETS, FALL_SHAFTS, pocket, pocketReady, requestPockets, enterPocket, dressRoom, ROOM_LOOKS } from "./pockets.js";
 
 const hollow = () => world.getDimension(UNDERTOW_ID);
