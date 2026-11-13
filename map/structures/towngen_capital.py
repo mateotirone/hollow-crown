@@ -16,7 +16,9 @@ ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
 ap.add_argument("--routes", default=os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "trains", "routes_data.js"), help="track for the preview")
 a = ap.parse_args(); out = a.out; seed = a.seed
 
-HALL = (-100, -48)      # Mateo 2026-11-12: the hall faces the station across the market square
+HALL = (-123, -110)     # Mateo 2026-11-12: the hall faces the station across the market square
+RAIL_Z = -51            # the map thread's line (PR #195): east-west along z = -51, the town north of it
+RAIL_X = (-176, -70)    # straight platform track -146..-100 plus the curves away; z -60..-42 stays clear of buildings
 
 class Capital(TG.Town):
     """Kingsrest with every current building: the capital hall, inn and civic buildings claim their ground
@@ -40,7 +42,7 @@ class Capital(TG.Town):
         """The hall needs the flattest 85x39 the ward has (the slope south of the square): try doors on a grid
         there, every way round, and keep the one with the lowest foundation."""
         best = None
-        for deg in (180, 90, 270, 0):
+        for deg in (0, 90, 270, 180):
             for dx in range(-16, 17, 2):
                 for dz in range(-8, 9, 2):
                     snap = ({k: getattr(self, k).copy() for k in self.SNAP}, dict(self.works), len(self.plan), len(self.walks))
@@ -84,27 +86,35 @@ class Capital(TG.Town):
                         if self.ok(*c) and self.K[self.ij(*c)] < 0 and self.TAKEN[self.ij(*c)] == 2: self.TAKEN[self.ij(*c)] = 0
         for k, (name, mk, deg, door, _, _) in enumerate(self.claims):
             bp = mk(); bp.kind = "civic"
-            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=10)
+            if name == "capital hall":   # its claim was tested with these limits (capital_spot): use the same, or it is lost
+                e = TG.Town.try_place(self, bp, deg, door, "civic", gap=1, max_relief=12, need_walk=False) or self.capital_spot(bp)
+            else: e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=10)
             if not e: e = self.search(bp, k, rmax=46 if name == "capital hall" else 24, relief=10)
             if not e: e = self.civic_on_street(bp, name)
-            if e: e["name"] = name
+            if e:
+                e["name"] = name
+                if name == "capital hall":               # level buttons in the 3D view: the five town halls, then the capital
+                    import settle_halls as SH
+                    self.add_levels("town hall", e, [(f"Level {L}", getattr(SH, f"vale_{L}")()) for L in range(1, 6)] + [("Capital", self.designs[e["stamp"]])])
             else: print("no room for", name)
     # ------------------------------------------------------------------ the grand station
-    STOP = (-95, 80, -100)              # Kingsrest stop: every line starts here, running east and west along z = -100
+    STOP = (-123, 79, -51)              # Kingsrest stop (map thread, PR #195): the town's south edge, lines east and west
     def station(self):
-        """The Grand Station south of the hub, its platform on the line and its street doors onto the square;
+        """The Grand Station on the town's south edge, north of the line, its street doors north onto the square;
         its ground is levelled to the platform and an avenue runs from the street front to the square."""
         bp = stations.grand("vale"); bp.kind = "station"
         x, y, z = self.STOP
-        g, _ = self.footprint(bp, 180); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
-        self.stamp(bp, x, z, y, 180, "station"); self.plan[-1]["name"] = "grand station"; self.plan[-1]["footprint"] = len(cells)
+        g, _ = self.footprint(bp, 0); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
+        self.station_cells = set(cells)
+        self.stamp(bp, x, z, y, 0, "station"); self.plan[-1]["name"] = "grand station"; self.plan[-1]["footprint"] = len(cells)
+        self.add_levels("station", self.plan[-1], [(st.capitalize(), bp if st == "grand" else getattr(stations, st)("vale")) for st in stations.STAGES], align="origin")
         self.foundation(cells, y)
         for cx, cz in cells:
             for dx in (-1, 0, 1):
                 for dz in (-1, 0, 1):
                     if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
-        zmax = max(gz for _, gz in g)
-        self.station_front = ((x, z + zmax + 1), (0, 1), y)       # the street side faces south, onto the square
+        zmin = min(gz for _, gz in g)
+        self.station_front = ((x, z + zmin - 1), (0, -1), y)      # the street side faces north, onto the square
 
     def avenue(self, start, f, yf, kind="main"):
         """A street from a door (start, facing f) out of its own grounds to the nearest street or the square."""
@@ -158,6 +168,14 @@ class Capital(TG.Town):
         """A stone curtain wall on the town's edge: 2 thick, 6 high with a crenellated parapet, a tower every
         ~22 blocks, and a gatehouse arch wherever a street or the railway crosses it; open over water."""
         band = (self.E > self.R - 1.0) & (self.E <= self.R + 1.0) & ~self.WET
+        n0, n1 = band.shape
+        zz = np.arange(n1)[None, :] + self.Z0
+        band &= np.broadcast_to(zz < RAIL_Z - 11, band.shape)          # the ring stops short of the railway...
+        band |= np.broadcast_to((zz >= RAIL_Z - 13) & (zz <= RAIL_Z - 12), band.shape) & (self.E <= self.R) & ~self.WET   # ...and runs straight beside it
+        for cx, cz in getattr(self, "station_cells", ()):              # the Grand Station is the gatehouse
+            for dx in range(-1, 2):
+                for dz in range(-1, 2):
+                    if self.ok(cx + dx, cz + dz): band[self.ij(cx + dx, cz + dz)] = False
         self.rail_gates = set()
         gap = np.zeros_like(band); rail_y = {}
         for cx, cz in self.rail_cells:                      # the railway's opening: 5 wide round the line
@@ -173,19 +191,20 @@ class Capital(TG.Town):
         near_road = np.zeros_like(band)
         for di in range(-4, 5):
             for dj in range(-4, 5): near_road |= np.roll(np.roll(road, di, 0), dj, 1)
-        STONE = [("stone_bricks", 6), ("mossy_stone_bricks", 2), ("cracked_stone_bricks", 1), ("andesite", 1)]
+        self.wall_region = "vale"                          # Mateo 2026-11-12: the wall is built like the Grand Station
+        kit = self.wall_kit(); STONE = kit["stone"]; cap = kit["cap"]
         def stone(x, y, z):
-            r = TG.h3(x, y, z, 41) * 10
+            r = TG.h3(x, y, z, 41) * sum(w for _, w in STONE)
             for m, w in STONE:
                 r -= w
                 if r < 0: return (m, {})
-            return ("stone_bricks", {})
-        ii, jj = np.nonzero(band)
+            return (STONE[0][0], {})
+        ii, jj = np.nonzero(band); line = []
         ang = np.degrees(np.arctan2(jj + self.Z0 - self.C[1], ii + self.X0 - self.C[0])) % 360
         for i, j, a in zip(ii, jj, ang):
             x, z = int(i) + self.X0, int(j) + self.Z0
             g = int(self.G[i, j]); H = 6
-            tower = (a % 16) < 2.2                                  # a tower every ~22 blocks round a 90 ring
+            tower = False                                           # towers: the station's own (wall_towers)
             if gap[i, j] and (x, z) in rail_y:                     # the railway arch: tall enough for a train, and
                 ry = rail_y[(x, z)]; base = ry + 6                   # a rail gate that lifts for trains only (shown shut)
                 for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
@@ -201,15 +220,15 @@ class Capital(TG.Town):
                 for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
                 if (x + z) % 2 == 0: self.works[(x, base + 3, z)] = stone(x, base + 3, z)
                 continue
-            top = g + (H + 4 if (tower or near_road[i, j]) else H)
+            top = g + H
             for y in range(g + 1, top + 1): self.works[(x, y, z)] = stone(x, y, z)
-            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = ("stone_brick_wall", {})
-            if (tower or near_road[i, j]) and (x + z) % 7 == 0: self.works[(x, top, z)] = ("lantern", {})
-            self.TAKEN[i, j] = 2
+            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = (cap, {})
+            self.TAKEN[i, j] = 2; line.append((x, z))
+        self.wall_towers(line, H)
 
     def rails_in_view(self):
         """Track for the preview scene (genworld lays the real track): every Kingsrest line inside the slice."""
-        return [(x, y, z) for x, y, z in self.rail_blocks if self.ok(x, z) and self.E[self.ij(x, z)] <= self.R + 7]
+        return [(x, y, z) for x, y, z in self.rail_blocks if self.ok(x, z)]
 
     def run(self):
         self.square(); self.station(); self.claim()
@@ -221,18 +240,15 @@ class Capital(TG.Town):
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])
 
-site = dict(centre=(-100, -78), radius=88, size="town", square_at=(-100, -68), square_r=9, seed=seed, build_u=2.0, lanes=16,
+site = dict(centre=(-123, -125), radius=82, size="town", square_at=(-123, -96), square_r=9, seed=seed, build_u=2.0, lanes=16,
             roofs={"warm red": 5, "slate": 4, "dark shingle": 1}, accent="copper",
-            civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)])
+            civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
+                   ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))])
 T = np.load(a.slice); L = json.load(open(a.lines))
 if a.trees:
     TG.Town.tree_index = json.load(open(a.trees)); TG.Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); TG.Town.tree_src = os.path.abspath(a.trees_src)
 t = Capital("Kingsrest", site, T, L, seed)
-src = open(a.routes).read(); R = json.loads(src[src.index("{"):src.rindex("}") + 1])
-t.rail_shape = {}
-for sg in R["segments"]:
-    if "kingsrest" in (sg["from"], sg["to"]):
-        for bl in sg["blocks"]: t.rail_shape.setdefault((bl[0], bl[1], bl[2]), (bl[3], bl[4]))
+t.rail_shape = {(x, Capital.STOP[1], RAIL_Z): (0, 2) for x in range(t.X0, t.X0 + t.G0.shape[0])}   # preview: the straight through the station, out to both edges (Mateo: show the line arriving)
 t.rail_blocks = sorted(t.rail_shape)
 t.rail_cells = {(x, z) for x, _, z in t.rail_blocks}
 t.XCOST = np.zeros(t.G0.shape, np.float32)                 # streets cross the line, they never run along it
@@ -240,8 +256,9 @@ for x, z in t.rail_cells:
     for dx in range(-2, 3):
         for dz in range(-2, 3):
             if t.ok(x + dx, z + dz): t.XCOST[t.ij(x + dx, z + dz)] = 30.0
-for x, z in (json.load(open(a.reserve)) if a.reserve else []):          # the rail corridor stays clear
-    if t.ok(x, z): t.TAKEN[t.ij(x, z)] = max(int(t.TAKEN[t.ij(x, z)]), 1)
+for x in range(RAIL_X[0] - 30, RAIL_X[1] + 31):                      # the railway band stays clear (map thread)
+    for z in range(RAIL_Z - 9, RAIL_Z + 10):
+        if t.ok(x, z): t.TAKEN[t.ij(x, z)] = 2
 t.run()
 print(collections.Counter(e["kind"] for e in t.plan), [e.get("name") for e in t.plan if e["kind"] == "civic"])
 os.makedirs(out, exist_ok=True); t.write(out); t.picture(out)
