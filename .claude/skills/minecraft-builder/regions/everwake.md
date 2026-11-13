@@ -110,7 +110,12 @@ Every Everwake tower is built by the tower guide, with `tower()` in `spec.py`:
 
 ## Trees and greenery
 
-No trees. Azalea leaves in window boxes, and later small hanging gardens on the terraces.
+Mateo 2026-11-13 ("we need some trees", card: station and cloud city): a few small trees stand in the city's
+squares, courtyards and street corners, never a grove: young silver birch (the white bark suits the city) with
+some young hawthorn, from the tree database (`map/trees`), on open paving at least 3 blocks from any wall and
+11 apart (`map/structures/everwake/trees.py`). Azalea leaves in window boxes, and later small hanging gardens
+on the terraces. The air boat station in Aldmere has Vale trees round its grounds: old oaks and ash in a loose
+ring, an apple orchard by the hall, birches by the road in.
 
 ## Building it with the skill
 
@@ -150,5 +155,5 @@ nose pointing e/w/n/s; `MOORING` gives the deck (20 under the ring), the bow rai
 
 - Nothing above Y 319 (Everwake's own world has the same height limit).
 - No dark timber, no dark walls, no chimneys, no coloured concrete roofs.
-- No trees, no farms, no signs of daily life beyond the Bellkeepers.
+- No farms, no signs of daily life beyond the Bellkeepers; trees only as above (a few, small, in the open).
 - No vanilla particles on the city later: its glow and chimes are custom.

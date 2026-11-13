@@ -6,9 +6,12 @@ simply boarding the air boat.
     specs() -> {"airboat_station_restored": spec, "airboat_station_ruin": spec}
 
 Local y 0 is the ground the station stands on. x east, z south. The mast stands at (0, 0); the hall to the west;
-the boat lies east of the mast, its nose on the mast's mooring arm.
+the boat lies east of the mast, its nose ring against the spire tip (the air boat is airboat.py).
 """
-import math, random
+import math, os, random, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from airboat import cells as boat_cells, MOORING  # noqa: E402  (the air boat, PR #305)
 
 STONE = "vale_stone"
 COPPER = {"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}
@@ -19,8 +22,8 @@ MAST_ST = [6, 6, 6, 6, 6]  # five 6-high stages
 PLINTH = 2
 DECK = PLINTH + sum(MAST_ST) - 1          # the shaft's flat top, the mooring deck (31)
 HALL = [-33, -7, -13, 7]                  # the station hall, 21 x 15
-BOAT_Y = DECK + 13                        # the envelope's axis
-NOSE_X = 9
+RING = (4, DECK - MOORING["deck_y"], 0)   # the boat's nose ring, against the spire tip; its deck level with the mast deck
+GANG_END = RING[0] - MOORING["bow_gate"][0] - 1   # the gangway runs to the gap in the bow rail (the boat points west)
 
 
 def mast():
@@ -39,23 +42,10 @@ def mast():
     return parts, place
 
 
-def mooring_arm():
-    """A timber arm from the spire out to the boat's nose, braced back to the spire, with the mooring ring."""
-    y = BOAT_Y
-    pl = []
-    for x in range(2, NOSE_X):
-        pl.append([x, y, 0, "stripped_spruce_log", {"axis": "x"}])
-    for k, x in enumerate(range(3, 7)):                     # a raking brace under it, back to the spire
-        pl.append([x, y - 4 + k, 0, "spruce_fence"])
-    pl.append([NOSE_X - 1, y - 1, 0, "iron_chain"])
-    pl.append([NOSE_X - 1, y - 2, 0, "lantern", {"hanging": True}])
-    return pl
-
-
 def gangway():
     """From the belfry's east arch, across to the gondola, with the Gate standing at its head."""
     pl, parts = [], []
-    x0, x1 = MAST_W // 2 + 2, 19
+    x0, x1 = MAST_W // 2 + 2, GANG_END
     for x in range(x0, x1 + 1):
         for z in (-1, 0, 1):
             pl.append([x, DECK, z, "spruce_planks"])
@@ -80,36 +70,6 @@ def gangway():
     for z in (-2, 2):
         pl.append([gx - 1, DECK + 1, z, "lantern"])
     return pl, portal
-
-
-def boat():
-    """The air boat: a long canvas envelope with spruce ribs and four tail fins, a gondola hung under it on chains."""
-    cx = NOSE_X + 22
-    sh = [{"shape": "ellipsoid", "at": [cx, BOAT_Y, 0], "r": [22, 8.5, 8.5], "material": "canvas"}]
-    for x in range(cx - 15, cx + 16, 6):                     # ribs
-        sh.append({"op": "paint", "shape": "box", "min": [x, BOAT_Y - 9, -9], "max": [x, BOAT_Y + 9, 9], "material": "rib"})
-    for sd in (1, -1):                                       # tail fins, upright and level
-        sh.append({"shape": "box", "min": [cx + 15, BOAT_Y - 1 + sd * 7, 0], "max": [cx + 23, BOAT_Y + sd * 12, 0], "material": "fin"})
-        sh.append({"shape": "box", "min": [cx + 15, BOAT_Y, sd * 7], "max": [cx + 23, BOAT_Y, sd * 12], "material": "fin"})
-    gx0, gx1 = 20, 40
-    pl = []
-    for x in range(gx0, gx1 + 1):                            # the gondola: a hull with tapered ends
-        taper = 1 if x in (gx0, gx1) else 0
-        for z in range(-3 + taper, 4 - taper):
-            pl.append([x, DECK - 1, z, "spruce_planks"]); pl.append([x, DECK, z, "spruce_slab", {"type": "top"}] if False else [x, DECK, z, "spruce_planks"])
-        for z in (-3 + taper, 3 - taper):
-            pl.append([x, DECK - 2, z, "stripped_spruce_log", {"axis": "x"}])
-            pl.append([x, DECK + 1, z, "spruce_fence"])
-    for z in (-2, -1, 0, 1, 2):
-        pl.append([gx0 - 1, DECK, z, "spruce_planks"]); pl.append([gx0 - 1, DECK + 1, z, "spruce_fence"] if z not in (-1, 0, 1) else [gx0 - 1, DECK + 1, z, "air"])
-    for x in (gx0 + 2, gx0 + 10, gx1 - 2):                    # chains up to the envelope
-        for z in (-3, 3):
-            for y in range(DECK + 2, BOAT_Y - 6):
-                pl.append([x, y, z, "iron_chain"])
-    parts = [{"part": "house", "style": "vale_timber", "rect": [gx0 + 6, -2, gx0 + 16, 2], "y": DECK + 1, "plinth": 0,
-              "storeys": [4], "door": {"side": "w"}, "chimney": False, "interior": "hall", "roof": {"type": "gable"}, "shutters": 0}]
-    pl.append([gx1 + 1, DECK, 0, "spruce_planks"]); pl.append([gx1 + 2, DECK, 0, "spruce_fence"])
-    return sh, parts, pl
 
 
 def hall():
@@ -139,8 +99,7 @@ def yard(rng):
 
 
 def materials():
-    return {"canvas": {"ladder": ["light_gray_wool", "white_wool", "white_wool"], "axis": "y", "texture": False},
-            "rib": "spruce_planks", "fin": "spruce_planks", "ground": "grass_block"}
+    return {"ground": "grass_block"}
 
 
 def spec(restored, rng):
@@ -150,8 +109,7 @@ def spec(restored, rng):
     parts = mp + hall()
     shapes = list(ysh); place = ypl + mpl
     if restored:
-        bsh, bparts, bpl = boat()
-        shapes += bsh; parts += bparts; place += mooring_arm() + gpl + portal + bpl
+        place += gpl + portal + boat_cells(RING, "w")
     else:
         place += [c for c in gpl if c[0] <= MAST_W // 2 + 5]      # only the stub of the gangway and the broken Gate
     s = {"name": "airboat_station_" + ("restored" if restored else "ruin"), "edition": "bedrock",

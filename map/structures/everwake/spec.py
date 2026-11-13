@@ -5,7 +5,11 @@ Y 254 and the top of the Spire of the Held Note reaches Y 316 (local 61; nothing
 
 specs() -> {"everwake_city": spec, "everwake_needle": spec}
 """
-import math, random
+import math, os, random, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from airboat import cells as boat_cells, MOORING  # noqa: E402  (the air boat, PR #305)
+from parts import turn_cell  # noqa: E402  (airboat.py puts the skill's scripts on the path)
 
 WORLD_Y = 255            # world Y of local y = 0
 STYLE = "everwake_stone"
@@ -293,7 +297,7 @@ def sky_dock(rng):
     Aldmere is a portal). A stone pier runs on south from the gatehouse over the cloud, carried on corbel brackets,
     to a small mooring mast; the air boat lies along its east side, a gangway across to its gondola."""
     pl, parts, sh = [], [], []
-    z0, z1 = GATE_Z[1] + 1, GATE_Z[1] + 40
+    z0, z1 = GATE_Z[1] + 1, GATE_Z[1] + 46
     for z in range(z0, z1 + 1):
         for x in range(-3, 4):
             pl.append([x, -1, z, "polished_andesite" if abs(x) <= 1 else "polished_diorite"])
@@ -312,28 +316,11 @@ def sky_dock(rng):
     parts += p; pl += pll
     for z in range(z0 + 8, z1 - 4):                          # clear the parapet walk where the gangway leaves
         pass
-    bx, by = 14, 17                                          # the air boat, nose to the south
-    bz = (z0 + z1) // 2 + 4
-    sh.append({"shape": "ellipsoid", "at": [bx, by, bz], "r": [8.5, 8.5, 22], "material": "canvas"})
-    for z in range(bz - 15, bz + 16, 6):
-        sh.append({"op": "paint", "shape": "box", "min": [bx - 9, by - 9, z], "max": [bx + 9, by + 9, z], "material": "rib"})
-    for sd in (1, -1):
-        sh.append({"shape": "box", "min": [bx, by - 1 + sd * 7, bz - 23], "max": [bx, by + sd * 12, bz - 15], "material": "fin"})
-        sh.append({"shape": "box", "min": [bx + sd * 7, by, bz - 23], "max": [bx + sd * 12, by, bz - 15], "material": "fin"})
-    gz0, gz1 = bz - 10, bz + 10
-    for z in range(gz0, gz1 + 1):
-        t = 1 if z in (gz0, gz1) else 0
-        for x in range(bx - 3 + t, bx + 4 - t):
-            pl += [[x, -2, z, "spruce_planks"], [x, -1, z, "spruce_planks"]]
-        for x in (bx - 3 + t, bx + 3 - t):
-            pl += [[x, -3, z, "stripped_spruce_log", {"axis": "z"}], [x, 0, z, "spruce_fence"]]
-    for z in (gz0 + 2, bz, gz1 - 2):
-        for x in (bx - 3, bx + 3):
-            for y in range(1, by - 7): pl.append([x, y, z, "iron_chain"])
-    parts.append({"part": "house", "style": "vale_timber", "rect": [bx - 2, bz - 3, bx + 2, bz + 7], "y": 0, "plinth": 0, "storeys": [4],
-                  "door": {"side": "n"}, "chimney": False, "interior": "hall", "roof": {"type": "gable"}, "shutters": 0, "finials": "peaks"})
-    gw = bz - 6                                              # the gangway, pier to gondola
-    for x in range(5, bx - 3):
+    ring = (20, -1 - MOORING["deck_y"], GATE_Z[1] + 69)       # the air boat (airboat.py), nose to the south, deck level with the pier
+    pl += boat_cells(ring, "s")
+    door = turn_cell(list(MOORING["side_door"]) + ["x"], ring, "s")   # its starboard door faces the pier (west)
+    gw = door[2]
+    for x in range(5, door[0]):                                # the gangway, pier to the door
         for z in (gw - 1, gw, gw + 1): pl.append([x, -1, z, "spruce_planks"])
         pl += [[x, 0, gw - 2, "spruce_fence"], [x, 0, gw + 2, "spruce_fence"]]
     for z in (gw - 1, gw, gw + 1): pl.append([4, 0, z, "air"])
@@ -377,8 +364,7 @@ def city_spec(rng):
     return {
         "name": "everwake_city", "edition": "bedrock",
         "materials": {"plaza": PLAZA, "parapet": "smooth_quartz", "cloud": CLOUD, "rock": ROCK,
-                      "canvas": {"ladder": ["light_gray_wool", "white_wool", "white_wool"], "axis": "y", "texture": False},
-                      "rib": "spruce_planks", "fin": "spruce_planks"},
+},
         "shapes": underside_shapes(rng) + platform_shapes() + dsh,
         "parts": sp + tp + gp + house_parts(rng, roads) + dparts,
         "place": place,
