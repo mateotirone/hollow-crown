@@ -2182,6 +2182,70 @@ def envelope(ctx, s):
 PARTS["envelope"] = envelope
 
 
+
+def ring_norm(x, z, chamfer=None):
+    """Distance from the centre for ring builds (stands, arena walls): a square ring (chamfer None), or an
+    octagon whose diagonal faces are cut `chamfer` in from the corners (|x| + |z| - chamfer)."""
+    ax, az = abs(x), abs(z)
+    return max(ax, az) if chamfer is None else max(ax, az, ax + az - chamfer)
+
+
+def stands(ctx, s):
+    """Tiered seating round an open floor (an arena, a tilting ground, a moot): one row per ring of the
+    octagon (or square) round `at`, every row one block up and one block out, so each row sees over the
+    heads of the row in front (07 detailing: depth outward; the arena, 2026-11-13).
+
+    at [x, z] the floor centre, chamfer (the octagon's corner cut, None for a square), from / to (the first
+    and last row's ring), y (the first row's seat block), walk ([ring, ...]: level walkways a row wide that
+    do not rise, between tiers), seat (stairs material: each seat is a stair with its tall side away from the
+    floor, so people sit facing in; on the diagonal faces a bottom slab, a bench), aisle (material of the
+    stairs every `aisle_every` blocks along the straight faces, marking the ways up), band ({"every": 4,
+    "material": ...}: every few rows in a lighter stone, so the tiers read from across the floor), fill (what is under the
+    seats, down to `base`), skip ([[x0, z0, x1, z1], ...] world boxes to leave out, for
+    stair halls and boxes built into the stands), round (true: the rows are circles, d = round(hypot), for a
+    round amphitheatre; the aisles then run out along `aisles` evenly spaced rays instead of every few blocks,
+    and every seat is a stair facing its nearest axis). The seat spots (the air block a person stands in) go to the
+    layout as info["stands"]."""
+    cx, cz = s["at"]; ch = s.get("chamfer"); d0, d1 = s["from"], s["to"]; y0 = s["y"]
+    walk = set(s.get("walk", [])); seat = s.get("seat", "stone_bricks"); aisle = s.get("aisle", seat)
+    every = s.get("aisle_every", 0); fill = s.get("fill", seat); base = s.get("base", 0); skip = s.get("skip", [])
+    band = s.get("band") or {}                   # {"every": 4, "material": ...}: a lighter row every few, so the tiers read
+    rnd = s.get("round", False); n_ais = s.get("aisles", 0)
+    tops, y = {}, y0
+    for d in range(d0, d1 + 1):
+        if d in walk and d != d0: y -= 1
+        tops[d] = y; y += 1
+    spots = ctx.info.setdefault("stands", [])
+    for x in range(-d1, d1 + 1):
+        for z in range(-d1, d1 + 1):
+            d = int(round(math.hypot(x, z))) if rnd else ring_norm(x, z, ch)
+            if not d0 <= d <= d1: continue
+            if any(a <= x + cx <= c and b <= z + cz <= e for a, b, c, e in skip): continue
+            t = tops[d]
+            for yy in range(base, t): ctx.set(cx + x, yy, cz + z, "foundation", "full", fill)
+            ax, az = abs(x), abs(z)
+            diag = not rnd and ch is not None and ax + az - ch > max(ax, az)
+            if d in walk:
+                ctx.set(cx + x, t, cz + z, "floors", "full", fill); continue
+            if diag:
+                ctx.set(cx + x, t, cz + z, "floors", "slab", seat, half="bottom")
+            else:
+                face = ("s" if z > 0 else "n") if az >= ax else ("e" if x > 0 else "w")
+                along = x if face in "ns" else z
+                if rnd and n_ais:                        # on an aisle ray: within half a block of it, across
+                    a = math.atan2(x, -z) * n_ais / (2 * math.pi)
+                    on = abs(a - round(a)) * 2 * math.pi * math.hypot(x, z) / n_ais <= 0.5
+                else:
+                    on = every and along % every == 0
+                m = aisle if on else seat
+                if band and (d - d0) % band.get("every", 4) == band.get("every", 4) - 1: m = band.get("material", aisle)
+                ctx.set(cx + x, t, cz + z, "floors", "stairs", m, facing=face, half="bottom")
+                if (x + z) % 2 == 0: spots.append([cx + x, t + 1, cz + z])
+    ctx.info["stand_rows"] = tops
+
+
+PARTS["stands"] = stands
+
 def run(ctx, pt):
     k = pt.get("part")
     nm = pt.get("name")

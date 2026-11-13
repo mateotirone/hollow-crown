@@ -71,7 +71,22 @@ button .why { display: block; font-size: 0.78rem; opacity: 0.8; font-weight: 400
 .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }
 .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 #mini { display: none; }
+#siege { left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(70px + env(safe-area-inset-bottom, 0px)); width: min(330px, calc(100vw - 24px)); padding: 12px 14px; display: grid; gap: 8px; max-height: calc(100% - 330px); min-height: 180px; overflow: auto; z-index: 4; }
+#siege .ctl { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; font-size: 0.88rem; }
+#siege .ctl label { color: var(--muted); }
+#siege input[type=range] { accent-color: var(--bad); width: 100%; }
+#siege select { font: inherit; border-radius: 7px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 4px 6px; grid-column: 2 / 4; min-width: 0; }
+#siege .plan { font-size: 0.86rem; display: grid; gap: 4px; }
+#siege .plan b { font-weight: 700; }
+#siege .twist { color: var(--warn); }
+#siege .waves { display: grid; gap: 3px; font-size: 0.82rem; }
+#siege .wave { border-top: 1px solid var(--line); padding-top: 3px; }
+#siege .wave.now { color: var(--bad); font-weight: 600; }
+#siege .note { color: var(--muted); font-size: 0.8rem; }
+#siege .num { font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+button.horn { background: var(--bad); color: #fff8ec; border-color: var(--bad); font-weight: 700; }
 @media (max-width: 760px) {
+  #siege { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; max-height: 45vh; min-height: 0; z-index: 6; }
   #orders { top: auto; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: auto; max-height: 38vh; }
   #orders.folded > :not(.head) { display: none; }
   #ledger { width: auto; right: max(12px, env(safe-area-inset-right, 0px)); }
@@ -131,6 +146,20 @@ button .why { display: block; font-size: 0.78rem; opacity: 0.8; font-weight: 400
 </div>
 
 <section id="plotcard" class="card" hidden aria-label="Plot"></section>
+<section id="siege" class="card" hidden aria-label="Siege night">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2>Siege night</h2>
+    <button id="siege-close" type="button" aria-label="Close the siege night">✕</button>
+  </div>
+  <div class="ctl">
+    <label for="siege-n">Siege</label><input id="siege-n" type="range" min="1" max="12" step="1" value="1"><span class="num" id="siege-n-v">1st</span>
+    <label for="siege-def">Defences</label><select id="siege-def"></select>
+  </div>
+  <div class="plan" id="siege-plan"></div>
+  <div class="btns"><button id="siege-go" type="button" class="horn">Sound the horn<span class="why">Play the night: every wave where the game spawns it</span></button></div>
+  <div class="waves" id="siege-waves"></div>
+  <div class="note">Played by the game's own siege code for this town at its size and wall. Raiders come at the side with the fewest ballistas and archers, from just outside the wall. Every night is one real roll of the dice, the same each time you pick it.</div>
+</section>
 <div id="tip" hidden></div>
 
 <script type="importmap">
@@ -718,6 +747,7 @@ function refresh() {
     B.append(btn("Fill the open plots for me", pick ? `Next: ${nameOf(pick.id)} on ${pick.slot.id}, the way a Rival Lord picks` : "No open plot takes anything yet", () => fillPlots(), { disabled: !pick || story }));
     B.append(btn("Play the rest of the story", "Every level to the Castle", playStory, { disabled: story }));
   }
+  B.append(btn("Siege night", sg.open ? "Open below" : "Watch a siege come for this town: who comes, from where, wave by wave", openSiege, { disabled: sg.open }));
   const row = document.createElement("div"); row.className = "split";
   row.append(btn("Start over", "", reset), btn("Finish now", "", () => { speed = 64; $("speed").value = 8; showSpeed(); }));
   B.append(row);
@@ -815,6 +845,147 @@ $("mini").addEventListener("click", () => { const o = $("orders"); o.classList.t
 
 function reset() { location.reload(); }
 
+// ---------------- siege night (siege_night.mjs: the game's own siege code, one seeded night per choice) ----------------
+const SG = D.sieges, sg = { open: false, playing: false, units: [], t: 0, wave: -1, night: null };
+const ordinal = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+for (const p of SG.presets) $("siege-def").append(Object.assign(document.createElement("option"), { value: p.id, textContent: p.label }));
+const unitName = (t) => SG.names[t] ?? t;
+function surfaceY(x, z) {
+  for (let y = YMAX; y > YMIN; y--) { const b = get(x, y, z); if (b && !SOFT[b]) return y + 1; }
+  return D.base + 1;
+}
+// raiders as figures: a body and a head, coloured by what they are
+const UNIT_COL = { raider: 0xb23a2a, hollow: 0x5e6f86, sapper: 0xd9822b, ram: 0x7a4b25, warlord: 0x6b2d8f };
+const sgGroup = new THREE.Group(); sgGroup.position.y = -D.base; sgGroup.visible = false; scene.add(sgGroup);
+const bodyGeo = new THREE.BoxGeometry(0.8, 1.4, 0.6), headGeo = new THREE.BoxGeometry(0.62, 0.62, 0.62), ramGeo = new THREE.BoxGeometry(1.5, 1.4, 2.4);
+const MAXU = 400;
+const bodies = new THREE.InstancedMesh(bodyGeo, new THREE.MeshBasicMaterial(), MAXU), heads = new THREE.InstancedMesh(headGeo, new THREE.MeshBasicMaterial(), MAXU), rams = new THREE.InstancedMesh(ramGeo, new THREE.MeshBasicMaterial(), 16);
+for (const m of [bodies, heads, rams]) { m.count = 0; m.frustumCulled = false; sgGroup.add(m); }
+const heart = new THREE.Mesh(new THREE.OctahedronGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0xff4f6d }));
+sgGroup.add(heart);
+const ballistaGeo = new THREE.BoxGeometry(1.2, 0.9, 1.2), ballistaMesh = new THREE.InstancedMesh(ballistaGeo, new THREE.MeshBasicMaterial({ color: 0x6b4a2b }), 8);
+ballistaMesh.count = 0; ballistaMesh.frustumCulled = false; sgGroup.add(ballistaMesh);
+const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S1 = new THREE.Vector3(1, 1, 1), C1 = new THREE.Color();
+
+const sgTier = () => Math.max(0, T.tier);
+const nightKey = () => `${$("siege-n").value}|${sgTier()}|${$("siege-def").value}`;
+function siegeDefault() { // a town that has won its way to this size: Hamlet 1st siege, Town 4th, City 7th, Castle 11th
+  $("siege-n").value = [1, 4, 7, 11][sgTier()];
+}
+function countsOf(units) {
+  const c = new Map();
+  for (const u of units) { const k = u.kind === "raider" ? unitName(u.type) : u.kind === "ram" ? `Battering Ram (${unitName(u.type)})` : u.kind === "sapper" ? `Sapper (${unitName(u.type)})` : u.name ?? unitName(u.type); c.set(k, (c.get(k) ?? 0) + 1); }
+  return [...c].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(", ");
+}
+function showNight() {
+  const n = +$("siege-n").value; $("siege-n-v").textContent = ordinal(n);
+  const night = SG.nights[nightKey()];
+  const P = $("siege-plan"), W = $("siege-waves"); P.innerHTML = ""; W.innerHTML = "";
+  if (!night) { P.textContent = "No siege comes to this town."; return; }
+  const sideName = (a) => { const d = ((a - gateAngle) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI; return Math.abs(d) < 0.8 ? "the gate side" : Math.abs(d) > 2.4 ? "behind the town" : d > 0 ? "the left flank" : "the right flank"; };
+  const line = (html) => { const d = document.createElement("div"); d.innerHTML = html; P.append(d); };
+  line(`<b>${night.faction}</b> · threat ${night.budget}${night.grand ? " · <b>the Grand Siege</b>" : ""}`);
+  line(`They come from ${[...new Set(night.sides.map(sideName))].join(" and ")}.`);
+  for (const m of night.modifiers) line(`<span class="twist">${m.name}:</span> ${m.note}`);
+  if (night.warlord) line(`Led by <b>${night.warlord}</b> in the last wave.`);
+  if (night.counterNote) line(`<span class="note">${night.counterNote}</span>`);
+  night.waves.forEach((w, i) => { const d = document.createElement("div"); d.className = "wave" + (sg.playing && sg.night === night && sg.wave === i ? " now" : ""); d.textContent = `Wave ${i + 1}: ${w.length ? countsOf(w) : "none"}`; W.append(d); });
+  placeBallistas(); markSides(night);
+}
+// where they come from: a red band on the ground at the distance they appear
+const sideMat = new THREE.MeshBasicMaterial({ color: 0xe0503a, transparent: true, opacity: 0.25, depthTest: false, side: THREE.DoubleSide });
+const sideBands = [];
+function markSides(night) {
+  for (const m of sideBands) { sgGroup.remove(m); m.geometry.dispose(); }
+  sideBands.length = 0;
+  const all = night.waves.flat().filter((u) => u.kind === "raider");
+  if (!all.length) return;
+  const d = all.reduce((a, u) => a + Math.hypot(u.x, u.z), 0) / all.length;
+  for (const a of night.sides) {
+    const m = new THREE.Mesh(new THREE.RingGeometry(d - 4, d + 4, 24, 1, -(a + 0.42), 0.84), sideMat);
+    m.rotation.x = -Math.PI / 2; m.position.set(0.5, D.base + 1.3, 0.5); m.renderOrder = 5;
+    sgGroup.add(m); sideBands.push(m);
+  }
+}
+const gateAngle = Math.atan2(...(() => { const g = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0] }[D.gate] ?? [0, 1]; return [g[1], g[0]]; })());
+function placeBallistas() {
+  const id = $("siege-def").value, r = D.tiers[sgTier()].radius;
+  const sides = { none: [], some: [0, 0], full: [0, Math.PI / 2, Math.PI, -Math.PI / 2] }[id] ?? [];
+  ballistaMesh.count = sides.length;
+  sides.forEach((a0, i) => { const a = gateAngle + a0 + i * 0.15, x = Math.round(Math.cos(a) * (r - 3)), z = Math.round(Math.sin(a) * (r - 3)); M4.compose(V.set(x + 0.5, surfaceY(x, z) + 0.45, z + 0.5), Q.identity(), S1); ballistaMesh.setMatrixAt(i, M4); });
+  ballistaMesh.instanceMatrix.needsUpdate = true;
+}
+function openSiege() {
+  card.hidden = true; sg.open = true; $("siege").hidden = false; sgGroup.visible = true;
+  siegeDefault(); showNight();
+  heart.position.set(0.5, D.base + 2.2, 0.5);
+  flyTo = { pos: new THREE.Vector3(0, 95 + D.tiers[sgTier()].radius, 75 + D.tiers[sgTier()].radius), target: new THREE.Vector3(0, 0, 0) };
+}
+function closeSiege() { endNight(); sg.open = false; $("siege").hidden = true; sgGroup.visible = false; }
+function nightLight(on) {
+  for (const m of [solidMat, waterMat]) m.color.setHex(on ? 0x7482ac : 0xffffff);
+  if (on) { scene.background = new THREE.Color(0x1a2236); scene.fog = new THREE.Fog(0x1a2236, 200, 520); } else applySky();
+}
+function endNight() { sg.playing = false; sg.units = []; bodies.count = heads.count = rams.count = 0; nightLight(false); $("siege-go").innerHTML = `Sound the horn<span class="why">Play the night: every wave where the game spawns it</span>`; showNight(); }
+// game time: the first wave 5 s after the horn, then one every 30 s (siege/settings.js); raiders walk ~2.5 blocks a second
+const FIRST = 5, BETWEEN = 30, WALK = 2.5;
+function soundHorn() {
+  if (sg.playing) return endNight();
+  const night = SG.nights[nightKey()]; if (!night) return;
+  Object.assign(sg, { playing: true, night, units: [], t: 0, wave: -1 });
+  nightLight(true);
+  $("siege-go").innerHTML = `End the night<span class="why">Clear the field</span>`;
+  log(`Siege night: the ${night.faction} marches on ${D.plot}`);
+}
+function stepSiege(dt) {
+  if (!sg.playing) return;
+  sg.t += dt * Math.min(speed, 8);
+  const night = sg.night, r = T.wall > 0 ? D.tiers[T.ring].radius : 3;
+  while (sg.wave + 1 < night.waves.length && sg.t >= FIRST + (sg.wave + 1) * BETWEEN) {
+    sg.wave++;
+    for (const u of night.waves[sg.wave]) sg.units.push({ ...u, px: u.x + 0.5, pz: u.z + 0.5, born: sg.t, phase: Math.random() * 6 });
+    log(`Wave ${sg.wave + 1} of ${night.waves.length}: ${night.waves[sg.wave].length} raiders`);
+    showNight();
+  }
+  // march on the keep; stop at the wall (rams make for the gate) and press against it
+  let nb = 0, nr = 0;
+  for (const u of sg.units) {
+    // a ram walks in to just outside the wall, then round it to the gate
+    let tx = 0, tz = 0;
+    if (u.kind === "ram") {
+      const ring = r + 3, a = Math.atan2(u.pz, u.px), off = ((gateAngle - a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+      const na = Math.hypot(u.px, u.pz) > ring + 1 ? a : a + Math.sign(off) * Math.min(Math.abs(off), 0.25);
+      tx = Math.cos(na) * ring; tz = Math.sin(na) * ring;
+      if (Math.abs(off) < 0.05) { tx = Math.cos(gateAngle) * (r + 2); tz = Math.sin(gateAngle) * (r + 2); }
+    }
+    const dx = tx - u.px, dz = tz - u.pz, d = Math.hypot(dx, dz), fromKeep = Math.hypot(u.px, u.pz);
+    const stop = u.kind === "ram" ? 0.5 : fromKeep <= r + 1.5;
+    if (!(stop === true || (u.kind === "ram" && d <= 0.5))) { const step = Math.min(d, WALK * (u.kind === "ram" ? 0.6 : 1) * dt * Math.min(speed, 8)); u.px += (dx / d) * step; u.pz += (dz / d) * step; u.yaw = Math.atan2(dx, dz); }
+    const bx = Math.floor(u.px), bz = Math.floor(u.pz), y = surfaceY(bx, bz);
+    const bob = stop === true || d <= 0.5 ? Math.abs(Math.sin(sg.t * 4 + u.phase)) * 0.25 : 0;
+    const rise = Math.min(1, (sg.t - u.born) / 0.6);
+    Q.setFromAxisAngle(V.set(0, 1, 0), u.yaw ?? 0);
+    const hollow = u.type.startsWith("siege:") && u.kind === "raider";
+    C1.setHex(UNIT_COL[hollow ? "hollow" : u.kind] ?? UNIT_COL.raider);
+    const big = u.kind === "warlord" ? 1.5 : 1;
+    if (u.kind === "ram") {
+      if (nr >= 16) continue;
+      M4.compose(V.set(u.px, y + 0.7 + bob - (1 - rise) * 2, u.pz), Q, S1); rams.setMatrixAt(nr, M4); rams.setColorAt(nr, C1); nr++;
+    } else {
+      if (nb >= MAXU) continue;
+      M4.compose(V.set(u.px, y + 0.65 * big + bob - (1 - rise) * 2, u.pz), Q, V.clone().set(big, big, big)); bodies.setMatrixAt(nb, M4); bodies.setColorAt(nb, C1);
+      M4.compose(V.set(u.px, y + 1.6 * big + bob - (1 - rise) * 2, u.pz), Q, V.clone().set(big, big, big)); heads.setMatrixAt(nb, M4); heads.setColorAt(nb, C1.offsetHSL(0, 0, 0.12)); nb++;
+    }
+  }
+  bodies.count = heads.count = nb; rams.count = nr;
+  for (const m of [bodies, heads, rams]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+  heart.rotation.y += dt * 2;
+}
+$("siege-n").addEventListener("input", () => { if (sg.playing) endNight(); showNight(); });
+$("siege-def").addEventListener("change", () => { if (sg.playing) endNight(); showNight(); });
+$("siege-go").addEventListener("click", soundHorn);
+$("siege-close").addEventListener("click", closeSiege);
+
 // ---------------- loop ----------------
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
@@ -829,7 +1000,7 @@ let last = performance.now();
 const focusV = new THREE.Vector3();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (!paused) { clock += dt; stepJobs(dt); }
+  if (!paused) { clock += dt; stepJobs(dt); stepSiege(dt); }
   uTime.value = clock;
   // remesh dirty chunks, a few a frame (nearest the camera's target first)
   const dirty = chunks.filter((c) => c.dirty);
@@ -855,5 +1026,5 @@ function frame(now) {
 }
 function dist(c) { const x = X0 + c.cx * CS + 8 - controls.target.x, z = Z0 + c.cz * CS + 8 - controls.target.z; return x * x + z * z; }
 requestAnimationFrame(frame);
-window.__sim = { T, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
+window.__sim = { T, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, openSiege, soundHorn, sg, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
 </script>
