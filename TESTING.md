@@ -116,6 +116,15 @@ Type the commands in chat (`/` opens it).
 - Did guards hold their posts and fight?
 - Was the siege too easy, too hard, or about right?
 
+## The quest tracker (scripts/quests/)
+
+1. Join in Survival. In the top-right corner, under the minimap, you should see "Find Sister Wren" with how far Millbrook is and which way to turn; turn around and the heading should change within half a second.
+2. Without a Keep Banner raised there is a second line, "Found your settlement". Raise the banner: it goes away within two seconds.
+3. Type `/siege:minimap`: the tracker moves up into the map's place. Type `/siege:quests`: it hides; again, it comes back.
+4. Show a real title (`/title @s title Hello`): it shows normally and the tracker stays up and keeps its text.
+5. `/scriptevent siege:quests show` says your steps in chat. `/scriptevent siege:quests flag wren_met`, then `flag fell_reeve`, `flag fell_huntsman` and so on, should walk the tracker through the story (after three, Fennick's notes appear as a second line; after five, the notes, the fork and the Rift); carrying a boss key (`/scriptevent siege:unlock seneschal item`) should switch the step to that key's lock.
+6. With two players, check each sees their own step.
+
 ## The story opening on the real map (scripts/opening/)
 
 Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved in **Creative**, so switch the world (or the Realm) to **Survival** before anyone joins for the first time: Creative players count as builders and skip the hall. Time is stopped in the file; the setup starts the day/night cycle.

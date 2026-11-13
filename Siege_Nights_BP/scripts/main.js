@@ -39,6 +39,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./quests/index.js";
 import "./guide/index.js";
 import "./roletrials/index.js";
 import "./landmarks/index.js";
