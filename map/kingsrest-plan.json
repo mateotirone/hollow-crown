@@ -53,29 +53,29 @@
    "name": "grand station"
   },
   {
-   "stamp": "kingsrest_capital_medieval_copper",
+   "stamp": "kingsrest_capital_medieval_d-109_-134_copper",
    "kind": "civic",
-   "x": -113,
-   "z": -132,
-   "ground_y": 80,
+   "x": -109,
+   "z": -134,
+   "ground_y": 76,
    "rotation": 0,
    "footprint": 2268,
-   "foundation": 7,
+   "foundation": 3,
    "door": [
-    -113,
-    -116
+    -109,
+    -118
    ],
    "name": "capital hall"
   },
   {
-   "stamp": "kingsrest_inn_copper",
+   "stamp": "kingsrest_inn_d-95_-96_copper",
    "kind": "civic",
    "x": -95,
    "z": -96,
-   "ground_y": 79,
+   "ground_y": 78,
    "rotation": 90,
    "footprint": 549,
-   "foundation": 2,
+   "foundation": 1,
    "door": [
     -104,
     -87
@@ -87,10 +87,10 @@
    "kind": "civic",
    "x": -144,
    "z": -88,
-   "ground_y": 80,
+   "ground_y": 79,
    "rotation": 270,
    "footprint": 221,
-   "foundation": 1,
+   "foundation": 0,
    "door": [
     -136,
     -95
@@ -102,10 +102,10 @@
    "kind": "civic",
    "x": -166,
    "z": -74,
-   "ground_y": 80,
+   "ground_y": 79,
    "rotation": 270,
    "footprint": 351,
-   "foundation": 1,
+   "foundation": 0,
    "door": [
     -142,
     -79
@@ -115,20 +115,20 @@
   {
    "stamp": "breeder_yard_vale_copper",
    "kind": "civic",
-   "x": -151,
-   "z": -95,
-   "ground_y": 80,
+   "x": -147,
+   "z": -106,
+   "ground_y": 78,
    "rotation": 270,
    "footprint": 196,
-   "foundation": 3,
+   "foundation": 0,
    "door": [
-    -150,
-    -95
+    -146,
+    -106
    ],
    "name": "breeder's post"
   },
   {
-   "stamp": "vale_house_14030_stone_mangrove",
+   "stamp": "vale_house_13303_d-129_-76_mangrove",
    "kind": "house",
    "x": -129,
    "z": -76,
@@ -143,411 +143,441 @@
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_13077_mangrove",
+   "stamp": "tg_cottage_13062_mangrove",
    "kind": "house",
-   "x": -79,
-   "z": -88,
-   "ground_y": 79,
-   "rotation": 180,
-   "footprint": 49,
-   "foundation": 0,
-   "door": [
-    -81,
-    -93
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "vale_house_13294_mangrove",
-   "kind": "house",
-   "x": -64,
+   "x": -63,
    "z": -106,
    "ground_y": 79,
    "rotation": 90,
-   "footprint": 78,
+   "footprint": 63,
    "foundation": 0,
    "door": [
-    -73,
+    -70,
     -104
    ],
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_13395",
+   "stamp": "tg_cottage_13784",
    "kind": "house",
-   "x": -64,
-   "z": -116,
+   "x": -62,
+   "z": -117,
    "ground_y": 79,
+   "rotation": 90,
+   "footprint": 49,
+   "foundation": 0,
+   "door": [
+    -67,
+    -115
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_cottage_13869",
+   "kind": "house",
+   "x": -58,
+   "z": -127,
+   "ground_y": 78,
    "rotation": 90,
    "footprint": 63,
    "foundation": 0,
    "door": [
-    -69,
-    -113
+    -63,
+    -124
    ],
    "roof": "slate"
   },
   {
-   "stamp": "vale_house_13992",
+   "stamp": "vale_house_13650_stone_d-52_-134_mangrove",
    "kind": "house",
    "x": -52,
-   "z": -133,
-   "ground_y": 79,
+   "z": -134,
+   "ground_y": 78,
    "rotation": 90,
    "footprint": 77,
-   "foundation": 2,
+   "foundation": 1,
    "door": [
     -61,
-    -131
+    -132
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "vale_house_13950_d-48_-145",
+   "kind": "house",
+   "x": -48,
+   "z": -145,
+   "ground_y": 77,
+   "rotation": 90,
+   "footprint": 117,
+   "foundation": 2,
+   "door": [
+    -59,
+    -142
    ],
    "roof": "slate"
   },
   {
-   "stamp": "vale_house_13272_mangrove",
+   "stamp": "tg_cottage_13422_mangrove",
    "kind": "house",
-   "x": -51,
-   "z": -141,
-   "ground_y": 78,
+   "x": -50,
+   "z": -159,
+   "ground_y": 73,
    "rotation": 90,
+   "footprint": 49,
+   "foundation": 1,
+   "door": [
+    -55,
+    -157
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_13822_d-74_-151_mangrove",
+   "kind": "house",
+   "x": -74,
+   "z": -151,
+   "ground_y": 74,
+   "rotation": 270,
+   "footprint": 49,
+   "foundation": 2,
+   "door": [
+    -69,
+    -153
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "vale_house_13814_mangrove",
+   "kind": "house",
+   "x": -76,
+   "z": -86,
+   "ground_y": 79,
+   "rotation": 180,
+   "footprint": 77,
+   "foundation": 0,
+   "door": [
+    -78,
+    -95
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_14013_d-91_-156",
+   "kind": "house",
+   "x": -91,
+   "z": -156,
+   "ground_y": 73,
+   "rotation": 0,
+   "footprint": 63,
+   "foundation": 2,
+   "door": [
+    -88,
+    -151
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_cottage_13726",
+   "kind": "house",
+   "x": -164,
+   "z": -169,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 63,
+   "foundation": -1,
+   "door": [
+    -161,
+    -164
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_cottage_13189",
+   "kind": "house",
+   "x": -173,
+   "z": -170,
+   "ground_y": 73,
+   "rotation": 0,
+   "footprint": 49,
+   "foundation": -1,
+   "door": [
+    -171,
+    -165
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_cottage_14008_mangrove",
+   "kind": "house",
+   "x": -178,
+   "z": -178,
+   "ground_y": 77,
+   "rotation": 0,
+   "footprint": 49,
+   "foundation": 0,
+   "door": [
+    -176,
+    -173
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "vale_house_14083_stone_d-174_-139_mangrove",
+   "kind": "house",
+   "x": -174,
+   "z": -139,
+   "ground_y": 73,
+   "rotation": 270,
    "footprint": 77,
    "foundation": 1,
    "door": [
-    -60,
-    -139
+    -165,
+    -141
    ],
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_13265_mangrove",
+   "stamp": "tg_cottage_13889_d-181_-157",
    "kind": "house",
-   "x": -51,
-   "z": -158,
-   "ground_y": 74,
-   "rotation": 90,
-   "footprint": 49,
-   "foundation": 1,
-   "door": [
-    -56,
-    -156
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_13424_dark_oak",
-   "kind": "house",
-   "x": -76,
-   "z": -148,
-   "ground_y": 75,
-   "rotation": 270,
-   "footprint": 49,
-   "foundation": 2,
-   "door": [
-    -71,
-    -150
-   ],
-   "roof": "dark shingle"
-  },
-  {
-   "stamp": "tg_cottage_13361_dark_oak",
-   "kind": "house",
-   "x": -86,
-   "z": -155,
-   "ground_y": 74,
-   "rotation": 0,
-   "footprint": 63,
-   "foundation": 3,
-   "door": [
-    -83,
-    -150
-   ],
-   "roof": "dark shingle"
-  },
-  {
-   "stamp": "tg_cottage_13175",
-   "kind": "house",
-   "x": -96,
-   "z": -154,
-   "ground_y": 73,
-   "rotation": 0,
-   "footprint": 63,
-   "foundation": 2,
-   "door": [
-    -93,
-    -149
-   ],
-   "roof": "slate"
-  },
-  {
-   "stamp": "tg_cottage_13992_dark_oak",
-   "kind": "house",
-   "x": -176,
-   "z": -176,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 63,
-   "foundation": 2,
-   "door": [
-    -173,
-    -171
-   ],
-   "roof": "dark shingle"
-  },
-  {
-   "stamp": "tg_cottage_13406_mangrove",
-   "kind": "house",
-   "x": -167,
-   "z": -140,
-   "ground_y": 73,
-   "rotation": 270,
-   "footprint": 49,
-   "foundation": 1,
-   "door": [
-    -162,
-    -142
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_13865",
-   "kind": "house",
-   "x": -183,
+   "x": -181,
    "z": -157,
-   "ground_y": 74,
+   "ground_y": 75,
    "rotation": 180,
-   "footprint": 49,
-   "foundation": 1,
+   "footprint": 63,
+   "foundation": 2,
    "door": [
-    -185,
+    -184,
     -162
    ],
    "roof": "slate"
   },
   {
-   "stamp": "vale_house_13185",
+   "stamp": "tg_cottage_14017_d-98_-155_dark_oak",
    "kind": "house",
-   "x": -179,
-   "z": -133,
-   "ground_y": 75,
-   "rotation": 270,
-   "footprint": 77,
+   "x": -98,
+   "z": -155,
+   "ground_y": 73,
+   "rotation": 0,
+   "footprint": 49,
    "foundation": 2,
    "door": [
-    -170,
-    -135
+    -96,
+    -150
    ],
-   "roof": "slate"
+   "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_13418_mangrove",
+   "stamp": "vale_house_13833_stone_d-177_-131",
    "kind": "house",
-   "x": -185,
-   "z": -129,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 134,
-   "foundation": 3,
-   "door": [
-    -178,
-    -122
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_13864",
-   "kind": "house",
-   "x": -192,
-   "z": -105,
-   "ground_y": 78,
+   "x": -177,
+   "z": -131,
+   "ground_y": 74,
    "rotation": 270,
-   "footprint": 81,
-   "foundation": 2,
-   "door": [
-    -185,
-    -108
-   ],
-   "roof": "slate"
-  },
-  {
-   "stamp": "tg_cottage_13931_mangrove",
-   "kind": "house",
-   "x": -189,
-   "z": -97,
-   "ground_y": 79,
-   "rotation": 270,
-   "footprint": 49,
-   "foundation": 1,
-   "door": [
-    -184,
-    -99
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_13835_mangrove",
-   "kind": "house",
-   "x": -167,
-   "z": -112,
-   "ground_y": 77,
-   "rotation": 90,
-   "footprint": 49,
-   "foundation": 0,
-   "door": [
-    -172,
-    -110
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "vale_house_14115_brick_mangrove",
-   "kind": "house",
-   "x": -68,
-   "z": -81,
-   "ground_y": 79,
-   "rotation": 180,
-   "footprint": 77,
-   "foundation": 0,
-   "door": [
-    -70,
-    -90
-   ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_13340",
-   "kind": "house",
-   "x": -56,
-   "z": -84,
-   "ground_y": 79,
-   "rotation": 180,
-   "footprint": 99,
-   "foundation": 0,
-   "door": [
-    -60,
-    -91
-   ],
-   "roof": "slate"
-  },
-  {
-   "stamp": "vale_house_13808_mangrove",
-   "kind": "house",
-   "x": -59,
-   "z": -112,
-   "ground_y": 80,
-   "rotation": 0,
    "footprint": 78,
    "foundation": 1,
    "door": [
-    -57,
-    -103
+    -168,
+    -133
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "vale_house_14009_d-190_-121_mangrove",
+   "kind": "house",
+   "x": -190,
+   "z": -121,
+   "ground_y": 76,
+   "rotation": 270,
+   "footprint": 78,
+   "foundation": 2,
+   "door": [
+    -181,
+    -123
    ],
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_13912",
+   "stamp": "tg_cottage_13499_mangrove",
    "kind": "house",
-   "x": -85,
-   "z": -62,
-   "ground_y": 79,
-   "rotation": 180,
+   "x": -192,
+   "z": -99,
+   "ground_y": 78,
+   "rotation": 270,
+   "footprint": 49,
+   "foundation": 0,
+   "door": [
+    -187,
+    -101
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_13897_d-164_-117_mangrove",
+   "kind": "house",
+   "x": -164,
+   "z": -117,
+   "ground_y": 77,
+   "rotation": 90,
    "footprint": 63,
    "foundation": 1,
    "door": [
-    -88,
-    -67
+    -171,
+    -115
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_13606",
+   "kind": "house",
+   "x": -168,
+   "z": -110,
+   "ground_y": 77,
+   "rotation": 90,
+   "footprint": 63,
+   "foundation": 0,
+   "door": [
+    -173,
+    -107
    ],
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_13743",
+   "stamp": "vale_house_13235_d-164_-100_dark_oak",
    "kind": "house",
-   "x": -154,
-   "z": -104,
+   "x": -164,
+   "z": -100,
+   "ground_y": 78,
+   "rotation": 90,
+   "footprint": 99,
+   "foundation": 1,
+   "door": [
+    -173,
+    -97
+   ],
+   "roof": "dark shingle"
+  },
+  {
+   "stamp": "tg_cottage_13461_dark_oak",
+   "kind": "house",
+   "x": -60,
+   "z": -84,
    "ground_y": 79,
    "rotation": 180,
-   "footprint": 49,
-   "foundation": 1,
+   "footprint": 81,
+   "foundation": 0,
    "door": [
-    -156,
-    -109
+    -63,
+    -91
    ],
-   "roof": "slate"
+   "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_13669",
+   "stamp": "tg_cottage_14135_mangrove",
    "kind": "house",
-   "x": -83,
-   "z": -78,
+   "x": -60,
+   "z": -109,
    "ground_y": 79,
-   "rotation": 270,
+   "rotation": 0,
    "footprint": 49,
-   "foundation": 1,
+   "foundation": 0,
    "door": [
-    -78,
+    -58,
+    -104
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "vale_house_13795_stone",
+   "kind": "house",
+   "x": -74,
+   "z": -82,
+   "ground_y": 78,
+   "rotation": 90,
+   "footprint": 77,
+   "foundation": 0,
+   "door": [
+    -83,
     -80
    ],
    "roof": "slate"
   },
   {
-   "stamp": "vale_house_13812_stone_mangrove",
+   "stamp": "vale_house_13863_d-73_-73_mangrove",
    "kind": "house",
-   "x": -63,
-   "z": -77,
+   "x": -73,
+   "z": -73,
    "ground_y": 79,
    "rotation": 90,
-   "footprint": 77,
+   "footprint": 143,
    "foundation": 1,
    "door": [
-    -72,
-    -75
+    -84,
+    -69
    ],
    "roof": "warm red"
   },
   {
-   "stamp": "tg_cottage_13549",
+   "stamp": "tg_cottage_13467_mangrove",
    "kind": "house",
-   "x": -148,
-   "z": -181,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 120,
-   "foundation": 4,
+   "x": -61,
+   "z": -80,
+   "ground_y": 79,
+   "rotation": 90,
+   "footprint": 49,
+   "foundation": 0,
    "door": [
-    -146,
-    -174
+    -66,
+    -78
+   ],
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_13745",
+   "kind": "house",
+   "x": -188,
+   "z": -88,
+   "ground_y": 78,
+   "rotation": 270,
+   "footprint": 63,
+   "foundation": 0,
+   "door": [
+    -183,
+    -91
    ],
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_13848_mangrove",
+   "stamp": "tg_cottage_14209_d-196_-112",
    "kind": "house",
-   "x": -161,
-   "z": -176,
+   "x": -196,
+   "z": -112,
    "ground_y": 77,
-   "rotation": 0,
+   "rotation": 270,
    "footprint": 49,
-   "foundation": 3,
+   "foundation": 2,
    "door": [
-    -159,
-    -171
+    -191,
+    -114
    ],
-   "roof": "warm red"
+   "roof": "slate"
   },
   {
-   "stamp": "tg_windmill_vale_406",
+   "stamp": "tg_windmill_vale_407_d-149_-181",
    "kind": "windmill",
-   "x": -143,
-   "z": -190,
-   "ground_y": 77,
+   "x": -149,
+   "z": -181,
+   "ground_y": 76,
    "rotation": 0,
    "footprint": 77,
-   "foundation": 3,
+   "foundation": 2,
    "door": [
-    -143,
-    -186
+    -149,
+    -177
    ]
   },
   {
-   "stamp": "tg_cross_13",
+   "stamp": "tg_well_13",
    "kind": "square",
    "x": -123,
    "z": -96,
@@ -568,7 +598,7 @@
    "stamp": "market_stall_14",
    "kind": "stall",
    "x": -115,
-   "z": -98,
+   "z": -96,
    "ground_y": 79,
    "rotation": 90,
    "footprint": 0
@@ -576,7 +606,7 @@
   {
    "stamp": "market_stall_15",
    "kind": "stall",
-   "x": -120,
+   "x": -121,
    "z": -88,
    "ground_y": 79,
    "rotation": 180,
@@ -585,8 +615,8 @@
   {
    "stamp": "market_stall_16",
    "kind": "stall",
-   "x": -130,
-   "z": -90,
+   "x": -131,
+   "z": -92,
    "ground_y": 79,
    "rotation": 270,
    "footprint": 0
@@ -594,35 +624,8 @@
   {
    "stamp": "market_stall_17",
    "kind": "stall",
-   "x": -129,
-   "z": -103,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -117,
-   "z": -88,
-   "ground_y": 79,
-   "rotation": 180,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -124,
-   "z": -87,
-   "ground_y": 78,
-   "rotation": 180,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -132,
-   "z": -89,
+   "x": -130,
+   "z": -99,
    "ground_y": 79,
    "rotation": 270,
    "footprint": 0
@@ -630,8 +633,8 @@
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -130,
-   "z": -105,
+   "x": -127,
+   "z": -106,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
@@ -639,19 +642,55 @@
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -112,
-   "z": -95,
+   "x": -119,
+   "z": -106,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -115,
+   "z": -99,
+   "ground_y": 78,
+   "rotation": 90,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -113,
+   "z": -92,
    "ground_y": 79,
    "rotation": 90,
    "footprint": 0
   },
   {
-   "stamp": "lamp_post_vale",
+   "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -110,
-   "z": -104,
+   "x": -119,
+   "z": -87,
    "ground_y": 79,
-   "rotation": 0,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -127,
+   "z": -87,
+   "ground_y": 79,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -132,
+   "z": -100,
+   "ground_y": 79,
+   "rotation": 270,
    "footprint": 0
   },
   {
@@ -675,8 +714,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -87,
-   "z": -105,
+   "x": -83,
+   "z": -99,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
@@ -685,7 +724,16 @@
    "stamp": "lamp_post_vale",
    "kind": "lamp",
    "x": -75,
-   "z": -102,
+   "z": -109,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -70,
+   "z": -114,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
@@ -694,16 +742,7 @@
    "stamp": "lamp_post_vale",
    "kind": "lamp",
    "x": -74,
-   "z": -112,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -72,
-   "z": -127,
+   "z": -122,
    "ground_y": 78,
    "rotation": 0,
    "footprint": 0
@@ -711,8 +750,26 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -72,
-   "z": -137,
+   "x": -64,
+   "z": -126,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -62,
+   "z": -135,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -62,
+   "z": -143,
    "ground_y": 77,
    "rotation": 0,
    "footprint": 0
@@ -720,17 +777,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -63,
-   "z": -142,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
    "x": -64,
-   "z": -152,
+   "z": -151,
    "ground_y": 74,
    "rotation": 0,
    "footprint": 0
@@ -738,80 +786,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -57,
-   "z": -157,
-   "ground_y": 74,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -88,
-   "z": -98,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -78,
-   "z": -123,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -70,
-   "z": -146,
-   "ground_y": 75,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -83,
-   "z": -140,
-   "ground_y": 80,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -91,
-   "z": -148,
-   "ground_y": 73,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -101,
-   "z": -142,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -110,
-   "z": -148,
-   "ground_y": 73,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -119,
-   "z": -148,
+   "x": -62,
+   "z": -162,
    "ground_y": 72,
    "rotation": 0,
    "footprint": 0
@@ -819,26 +795,62 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -130,
-   "z": -147,
-   "ground_y": 71,
+   "x": -106,
+   "z": -96,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -137,
-   "z": -146,
-   "ground_y": 71,
+   "x": -82,
+   "z": -107,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -157,
+   "x": -71,
+   "z": -129,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -70,
    "z": -141,
+   "ground_y": 77,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -76,
+   "z": -150,
+   "ground_y": 74,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -83,
+   "z": -150,
+   "ground_y": 74,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -91,
+   "z": -150,
    "ground_y": 73,
    "rotation": 0,
    "footprint": 0
@@ -846,8 +858,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -162,
-   "z": -146,
+   "x": -100,
+   "z": -150,
    "ground_y": 73,
    "rotation": 0,
    "footprint": 0
@@ -855,7 +867,61 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -167,
+   "x": -109,
+   "z": -150,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -118,
+   "z": -150,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -126,
+   "z": -144,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -133,
+   "z": -148,
+   "ground_y": 71,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -145,
+   "z": -139,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -161,
+   "z": -145,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -166,
    "z": -164,
    "ground_y": 73,
    "rotation": 0,
@@ -864,8 +930,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -178,
-   "z": -159,
+   "x": -177,
+   "z": -158,
    "ground_y": 74,
    "rotation": 0,
    "footprint": 0
@@ -873,17 +939,17 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -179,
-   "z": -170,
-   "ground_y": 77,
+   "x": -183,
+   "z": -164,
+   "ground_y": 75,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -191,
-   "z": -173,
+   "x": -190,
+   "z": -171,
    "ground_y": 77,
    "rotation": 0,
    "footprint": 0
@@ -900,9 +966,36 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -126,
-   "z": -141,
-   "ground_y": 79,
+   "x": -77,
+   "z": -142,
+   "ground_y": 75,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -85,
+   "z": -142,
+   "ground_y": 75,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -93,
+   "z": -142,
+   "ground_y": 75,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -152,
+   "z": -136,
+   "ground_y": 76,
    "rotation": 0,
    "footprint": 0
   },
@@ -911,7 +1004,223 @@
    "kind": "lamp",
    "x": -163,
    "z": -136,
-   "ground_y": 74,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -169,
+   "z": -129,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -169,
+   "z": -119,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -180,
+   "z": -114,
+   "ground_y": 77,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -174,
+   "z": -105,
+   "ground_y": 77,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -180,
+   "z": -98,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -176,
+   "z": -89,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -184,
+   "z": -79,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -180,
+   "z": -68,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -67,
+   "z": -99,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -60,
+   "z": -98,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -52,
+   "z": -98,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -52,
+   "z": -89,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -84,
+   "z": -89,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -88,
+   "z": -78,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -88,
+   "z": -67,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -152,
+   "z": -64,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -162,
+   "z": -65,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -175,
+   "z": -63,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -176,
+   "z": -74,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -176,
+   "z": -82,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -167,
+   "z": -87,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -157,
+   "z": -118,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -146,
+   "z": -118,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -155,
+   "z": -125,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
@@ -927,188 +1236,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -175,
-   "z": -123,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -180,
-   "z": -113,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -180,
-   "z": -104,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -176,
-   "z": -93,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -184,
-   "z": -87,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -176,
-   "z": -78,
-   "ground_y": 80,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -183,
-   "z": -73,
-   "ground_y": 80,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -69,
-   "z": -92,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -61,
-   "z": -98,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -53,
-   "z": -92,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -88,
-   "z": -89,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -88,
-   "z": -78,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -91,
-   "z": -71,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -170,
-   "z": -118,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -161,
-   "z": -112,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -153,
-   "z": -122,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -158,
-   "z": -130,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -84,
-   "z": -72,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -65,
-   "z": -125,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -80,
-   "z": -97,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
    "x": -72,
-   "z": -79,
+   "z": -93,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
@@ -1116,8 +1245,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -77,
-   "z": -70,
+   "x": -68,
+   "z": -84,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
@@ -1125,81 +1254,45 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -66,
-   "z": -118,
-   "ground_y": 79,
+   "x": -70,
+   "z": -72,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -54,
-   "z": -118,
-   "ground_y": 79,
+   "x": -186,
+   "z": -102,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -46,
-   "z": -115,
-   "ground_y": 79,
+   "x": -191,
+   "z": -107,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -46,
-   "z": -104,
-   "ground_y": 80,
+   "x": -185,
+   "z": -119,
+   "ground_y": 76,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -172,
+   "x": -112,
    "z": -106,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -64,
-   "z": -132,
    "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -141,
-   "z": -140,
-   "ground_y": 80,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -148,
-   "z": -140,
-   "ground_y": 71,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -151,
-   "z": -168,
-   "ground_y": 73,
    "rotation": 0,
    "footprint": 0
   },
@@ -1215,8 +1308,26 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -144,
-   "z": -183,
+   "x": -150,
+   "z": -174,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -154,
+   "z": -163,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -183,
+   "z": -174,
    "ground_y": 77,
    "rotation": 0,
    "footprint": 0
@@ -1224,17 +1335,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -152,
-   "z": -175,
-   "ground_y": 75,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -174,
-   "z": -165,
+   "x": -175,
+   "z": -166,
    "ground_y": 74,
    "rotation": 0,
    "footprint": 0
@@ -1242,9 +1344,19 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -160,
-   "z": -164,
-   "ground_y": 73,
+   "x": -138,
+   "z": -142,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_hawthorn__vale_hawthorn_young_1",
+   "db_stamp": "vale_hawthorn/vale_hawthorn_young_1",
+   "kind": "tree",
+   "x": -50,
+   "z": -121,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1269,6 +1381,16 @@
    "footprint": 0
   },
   {
+   "stamp": "vale_ash__vale_ash_sapling_0",
+   "db_stamp": "vale_ash/vale_ash_sapling_0",
+   "kind": "tree",
+   "x": -151,
+   "z": -96,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
    "stamp": "vale_silver_birch__vale_silver_birch_mature_1",
    "db_stamp": "vale_silver_birch/vale_silver_birch_mature_1",
    "kind": "tree",
@@ -1279,32 +1401,12 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_ash__vale_ash_young_1",
-   "db_stamp": "vale_ash/vale_ash_young_1",
-   "kind": "tree",
-   "x": -162,
-   "z": -125,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "vale_apple__vale_apple_young_1",
    "db_stamp": "vale_apple/vale_apple_young_1",
    "kind": "tree",
    "x": -81,
    "z": -180,
    "ground_y": 73,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_apple__vale_apple_young_1",
-   "db_stamp": "vale_apple/vale_apple_young_1",
-   "kind": "tree",
-   "x": -150,
-   "z": -65,
-   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1329,16 +1431,6 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_silver_birch__vale_silver_birch_sapling_0",
-   "db_stamp": "vale_silver_birch/vale_silver_birch_sapling_0",
-   "kind": "tree",
-   "x": -152,
-   "z": -124,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "vale_apple__vale_apple_young_0",
    "db_stamp": "vale_apple/vale_apple_young_0",
    "kind": "tree",
@@ -1349,12 +1441,42 @@
    "footprint": 0
   },
   {
+   "stamp": "vale_apple__vale_apple_young_1",
+   "db_stamp": "vale_apple/vale_apple_young_1",
+   "kind": "tree",
+   "x": -183,
+   "z": -131,
+   "ground_y": 75,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_great_oak__vale_great_oak_sapling_1",
+   "db_stamp": "vale_great_oak/vale_great_oak_sapling_1",
+   "kind": "tree",
+   "x": -46,
+   "z": -116,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
    "stamp": "vale_great_oak__vale_great_oak_sapling_1",
    "db_stamp": "vale_great_oak/vale_great_oak_sapling_1",
    "kind": "tree",
    "x": -153,
    "z": -68,
    "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_hawthorn__vale_hawthorn_sapling_0",
+   "db_stamp": "vale_hawthorn/vale_hawthorn_sapling_0",
+   "kind": "tree",
+   "x": -53,
+   "z": -120,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1379,26 +1501,6 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_great_oak__vale_great_oak_sapling_1",
-   "db_stamp": "vale_great_oak/vale_great_oak_sapling_1",
-   "kind": "tree",
-   "x": -54,
-   "z": -148,
-   "ground_y": 75,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_great_oak__vale_great_oak_sapling_0",
-   "db_stamp": "vale_great_oak/vale_great_oak_sapling_0",
-   "kind": "tree",
-   "x": -78,
-   "z": -72,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "vale_great_oak__vale_great_oak_sapling_0",
    "db_stamp": "vale_great_oak/vale_great_oak_sapling_0",
    "kind": "tree",
@@ -1419,22 +1521,12 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_silver_birch__vale_silver_birch_sapling_1",
-   "db_stamp": "vale_silver_birch/vale_silver_birch_sapling_1",
+   "stamp": "vale_apple__vale_apple_mature_1",
+   "db_stamp": "vale_apple/vale_apple_mature_1",
    "kind": "tree",
-   "x": -149,
-   "z": -118,
+   "x": -156,
+   "z": -93,
    "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_apple__vale_apple_young_0",
-   "db_stamp": "vale_apple/vale_apple_young_0",
-   "kind": "tree",
-   "x": -66,
-   "z": -154,
-   "ground_y": 74,
    "rotation": 0,
    "footprint": 0
   },
@@ -1445,36 +1537,6 @@
    "x": -110,
    "z": -173,
    "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_apple__vale_apple_mature_0",
-   "db_stamp": "vale_apple/vale_apple_mature_0",
-   "kind": "tree",
-   "x": -192,
-   "z": -128,
-   "ground_y": 74,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_apple__vale_apple_young_1",
-   "db_stamp": "vale_apple/vale_apple_young_1",
-   "kind": "tree",
-   "x": -169,
-   "z": -100,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "vale_hawthorn__vale_hawthorn_sapling_0",
-   "db_stamp": "vale_hawthorn/vale_hawthorn_sapling_0",
-   "kind": "tree",
-   "x": -78,
-   "z": -65,
-   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1509,32 +1571,22 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_ash__vale_ash_sapling_1",
-   "db_stamp": "vale_ash/vale_ash_sapling_1",
-   "kind": "tree",
-   "x": -187,
-   "z": -91,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "vale_ash__vale_ash_sapling_0",
    "db_stamp": "vale_ash/vale_ash_sapling_0",
    "kind": "tree",
-   "x": -162,
-   "z": -64,
-   "ground_y": 79,
+   "x": -183,
+   "z": -136,
+   "ground_y": 74,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "vale_hawthorn__vale_hawthorn_young_0",
-   "db_stamp": "vale_hawthorn/vale_hawthorn_young_0",
+   "stamp": "vale_silver_birch__vale_silver_birch_sapling_1",
+   "db_stamp": "vale_silver_birch/vale_silver_birch_sapling_1",
    "kind": "tree",
-   "x": -174,
-   "z": -68,
-   "ground_y": 80,
+   "x": -148,
+   "z": -96,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1559,12 +1611,32 @@
    "footprint": 0
   },
   {
-   "stamp": "vale_great_oak__vale_great_oak_sapling_0",
-   "db_stamp": "vale_great_oak/vale_great_oak_sapling_0",
+   "stamp": "vale_silver_birch__vale_silver_birch_young_0",
+   "db_stamp": "vale_silver_birch/vale_silver_birch_young_0",
    "kind": "tree",
-   "x": -162,
-   "z": -121,
+   "x": -181,
+   "z": -112,
    "ground_y": 77,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_ash__vale_ash_sapling_1",
+   "db_stamp": "vale_ash/vale_ash_sapling_1",
+   "kind": "tree",
+   "x": -54,
+   "z": -100,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_great_oak__vale_great_oak_sapling_1",
+   "db_stamp": "vale_great_oak/vale_great_oak_sapling_1",
+   "kind": "tree",
+   "x": -179,
+   "z": -141,
+   "ground_y": 75,
    "rotation": 0,
    "footprint": 0
   },
@@ -1575,6 +1647,16 @@
    "x": -120,
    "z": -152,
    "ground_y": 70,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_ash__vale_ash_sapling_0",
+   "db_stamp": "vale_ash/vale_ash_sapling_0",
+   "kind": "tree",
+   "x": -55,
+   "z": -89,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1599,6 +1681,26 @@
    "footprint": 0
   },
   {
+   "stamp": "vale_ash__vale_ash_sapling_1",
+   "db_stamp": "vale_ash/vale_ash_sapling_1",
+   "kind": "tree",
+   "x": -89,
+   "z": -65,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "vale_silver_birch__vale_silver_birch_young_1",
+   "db_stamp": "vale_silver_birch/vale_silver_birch_young_1",
+   "kind": "tree",
+   "x": -169,
+   "z": -66,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
    "x": -197,
@@ -1611,9 +1713,9 @@
   {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
-   "x": -52,
-   "z": -81,
-   "ground_y": 79,
+   "x": -45,
+   "z": -100,
+   "ground_y": 80,
    "rotation": 0,
    "footprint": 0,
    "name": "wall tower"
@@ -1621,9 +1723,9 @@
   {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
-   "x": -44,
-   "z": -99,
-   "ground_y": 80,
+   "x": -52,
+   "z": -81,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0,
    "name": "wall tower"
@@ -1751,7 +1853,7 @@
   {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
-   "x": -95,
+   "x": -93,
    "z": -64,
    "ground_y": 79,
    "rotation": 0,
@@ -1761,17 +1863,7 @@
   {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
-   "x": -154,
-   "z": -63,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0,
-   "name": "wall tower"
-  },
-  {
-   "stamp": "wall_tower_13_vale",
-   "kind": "civic",
-   "x": -195,
+   "x": -196,
    "z": -97,
    "ground_y": 79,
    "rotation": 0,
@@ -1781,7 +1873,7 @@
   {
    "stamp": "wall_tower_13_vale",
    "kind": "civic",
-   "x": -202,
+   "x": -203,
    "z": -118,
    "ground_y": 75,
    "rotation": 0,

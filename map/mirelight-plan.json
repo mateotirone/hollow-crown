@@ -45,50 +45,50 @@
   {
    "stamp": "hall_blackfen_5",
    "kind": "civic",
-   "x": -73,
-   "z": 897,
-   "ground_y": 70,
+   "x": -71,
+   "z": 902,
+   "ground_y": 67,
    "rotation": 270,
    "footprint": 714,
-   "foundation": 3,
+   "foundation": 1,
    "door": [
-    -70,
-    897
+    -68,
+    902
    ],
    "name": "town hall"
   },
   {
-   "stamp": "mirelight_inn",
+   "stamp": "mirelight_inn_d-44_946",
    "kind": "civic",
-   "x": -25,
-   "z": 929,
-   "ground_y": 69,
-   "rotation": 90,
+   "x": -44,
+   "z": 946,
+   "ground_y": 67,
+   "rotation": 180,
    "footprint": 187,
-   "foundation": 2,
+   "foundation": 1,
    "door": [
-    -34,
-    936
+    -51,
+    937
    ],
    "name": "inn"
   },
   {
    "stamp": "mirelight_smithy",
    "kind": "civic",
-   "x": -105,
-   "z": 869,
-   "ground_y": 70,
-   "rotation": 0,
+   "x": -20,
+   "z": 917,
+   "ground_y": 66,
+   "rotation": 90,
    "footprint": 166,
-   "foundation": 1,
+   "foundation": 0,
    "door": [
-    -102,
-    878
+    -29,
+    920
    ],
    "name": "smithy"
   },
   {
-   "stamp": "mirelight_general_store_25",
+   "stamp": "mirelight_general_store_25_d-65_876",
    "kind": "civic",
    "x": -65,
    "z": 876,
@@ -103,194 +103,236 @@
    "name": "store"
   },
   {
-   "stamp": "breeder_yard_blackfen",
+   "stamp": "breeder_yard_blackfen_d-34_864",
    "kind": "civic",
-   "x": -45,
-   "z": 948,
-   "ground_y": 69,
-   "rotation": 270,
+   "x": -34,
+   "z": 864,
+   "ground_y": 66,
+   "rotation": 0,
    "footprint": 196,
-   "foundation": 2,
+   "foundation": -1,
    "door": [
-    -44,
-    948
+    -34,
+    865
    ],
    "name": "breeder's post"
   },
   {
    "stamp": "mirelight_stilt_house_5100",
    "kind": "shore",
-   "x": -47,
-   "z": 861,
-   "ground_y": 67,
-   "rotation": 270,
+   "x": -62,
+   "z": 839,
+   "ground_y": 66,
+   "rotation": 90,
    "footprint": 68,
    "foundation": 2,
    "door": [
-    -31,
-    858
+    -78,
+    842
    ],
    "name": "stilt_house"
   },
   {
-   "stamp": "mirelight_stilt_house_5101",
-   "kind": "shore",
-   "x": -89,
-   "z": 931,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 95,
-   "foundation": 2,
-   "door": [
-    -85,
-    949
-   ],
-   "name": "stilt_house_big"
-  },
-  {
    "stamp": "mirelight_stilt_house_5102",
    "kind": "shore",
-   "x": -52,
-   "z": 917,
+   "x": -50,
+   "z": 851,
    "ground_y": 67,
-   "rotation": 180,
+   "rotation": 270,
    "footprint": 50,
-   "foundation": 3,
+   "foundation": 2,
    "door": [
-    -55,
-    905
+    -38,
+    848
    ],
    "name": "stilt_house"
   },
   {
    "stamp": "mirelight_stilt_house_5103",
    "kind": "shore",
-   "x": -62,
-   "z": 837,
-   "ground_y": 67,
-   "rotation": 90,
+   "x": -56,
+   "z": 921,
+   "ground_y": 66,
+   "rotation": 180,
    "footprint": 86,
-   "foundation": 3,
+   "foundation": 2,
    "door": [
-    -78,
-    841
+    -60,
+    905
    ],
    "name": "stilt_house_big"
   },
   {
-   "stamp": "mirelight_house_51510_t1_moss",
-   "kind": "house",
-   "x": -83,
-   "z": 858,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 16,
-   "foundation": 2,
-   "door": [
-    -79,
-    869
-   ],
-   "roof": "moss"
-  },
-  {
-   "stamp": "mirelight_house_51959_t2_moss",
-   "kind": "house",
-   "x": -8,
-   "z": 887,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 17,
-   "foundation": 1,
-   "door": [
-    -4,
-    898
-   ],
-   "roof": "moss"
-  },
-  {
-   "stamp": "mirelight_house_51250_t2_mangrove",
-   "kind": "house",
-   "x": -125,
-   "z": 873,
-   "ground_y": 69,
-   "rotation": 0,
-   "footprint": 17,
-   "foundation": 1,
-   "door": [
-    -122,
-    884
-   ],
-   "roof": "mangrove"
-  },
-  {
-   "stamp": "mirelight_house_52052_t2_mud",
-   "kind": "house",
-   "x": -18,
-   "z": 869,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 17,
-   "foundation": 3,
-   "door": [
-    -15,
-    882
-   ],
-   "roof": "mud"
-  },
-  {
-   "stamp": "mirelight_barn_51435",
-   "kind": "barn",
-   "x": -13,
-   "z": 916,
-   "ground_y": 69,
+   "stamp": "mirelight_stilt_house_5108",
+   "kind": "shore",
+   "x": -42,
+   "z": 903,
+   "ground_y": 66,
    "rotation": 90,
-   "footprint": 106,
+   "footprint": 59,
    "foundation": 2,
    "door": [
-    -25,
-    920
+    -56,
+    906
+   ],
+   "name": "stilt_house"
+  },
+  {
+   "stamp": "mirelight_house_51936_t2_moss",
+   "kind": "house",
+   "x": -1,
+   "z": 884,
+   "ground_y": 67,
+   "rotation": 90,
+   "footprint": 15,
+   "foundation": -1,
+   "door": [
+    -14,
+    887
+   ],
+   "roof": "moss"
+  },
+  {
+   "stamp": "mirelight_barn_51131_d-111_872",
+   "kind": "barn",
+   "x": -111,
+   "z": 872,
+   "ground_y": 70,
+   "rotation": 0,
+   "footprint": 106,
+   "foundation": 1,
+   "door": [
+    -107,
+    884
    ]
   },
   {
-   "stamp": "mirelight_barn_52052",
+   "stamp": "mirelight_house_51926_t2_moss",
+   "kind": "house",
+   "x": -90,
+   "z": 882,
+   "ground_y": 70,
+   "rotation": 180,
+   "footprint": 16,
+   "foundation": 0,
+   "door": [
+    -93,
+    871
+   ],
+   "roof": "moss"
+  },
+  {
+   "stamp": "mirelight_barn_51580_d-35_962",
    "kind": "barn",
-   "x": -67,
-   "z": 960,
-   "ground_y": 68,
+   "x": -35,
+   "z": 962,
+   "ground_y": 69,
    "rotation": 180,
    "footprint": 88,
    "foundation": 1,
    "door": [
-    -71,
-    950
+    -39,
+    952
    ]
   },
   {
-   "stamp": "tg_windmill_fen_1593",
-   "kind": "windmill",
-   "x": -24,
-   "z": 863,
+   "stamp": "mirelight_house_51480_t2_mangrove",
+   "kind": "house",
+   "x": -25,
+   "z": 944,
    "ground_y": 69,
    "rotation": 90,
-   "footprint": 77,
-   "foundation": 2,
+   "footprint": 15,
+   "foundation": 0,
    "door": [
-    -28,
-    863
+    -36,
+    947
+   ],
+   "roof": "mangrove"
+  },
+  {
+   "stamp": "mirelight_house_52079_t2_mud",
+   "kind": "house",
+   "x": -83,
+   "z": 864,
+   "ground_y": 68,
+   "rotation": 270,
+   "footprint": 12,
+   "foundation": 0,
+   "door": [
+    -72,
+    861
+   ],
+   "roof": "mud"
+  },
+  {
+   "stamp": "tg_windmill_fen_1585_d-69_950",
+   "kind": "windmill",
+   "x": -69,
+   "z": 950,
+   "ground_y": 67,
+   "rotation": 180,
+   "footprint": 77,
+   "foundation": 0,
+   "door": [
+    -69,
+    946
+   ]
+  },
+  {
+   "stamp": "tg_windmill_fen_1593_d-22_864",
+   "kind": "windmill",
+   "x": -22,
+   "z": 864,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 77,
+   "foundation": 1,
+   "door": [
+    -22,
+    868
+   ]
+  },
+  {
+   "stamp": "tg_windmill_fen_1597",
+   "kind": "windmill",
+   "x": -13,
+   "z": 914,
+   "ground_y": 68,
+   "rotation": 180,
+   "footprint": 77,
+   "foundation": 0,
+   "door": [
+    -13,
+    910
    ]
   },
   {
    "stamp": "tg_windmill_fen_1582",
    "kind": "windmill",
    "x": -110,
-   "z": 912,
-   "ground_y": 69,
+   "z": 914,
+   "ground_y": 68,
+   "rotation": 180,
+   "footprint": 77,
+   "foundation": 0,
+   "door": [
+    -110,
+    910
+   ]
+  },
+  {
+   "stamp": "tg_windmill_fen_1584_d-80_851",
+   "kind": "windmill",
+   "x": -80,
+   "z": 851,
+   "ground_y": 68,
    "rotation": 270,
    "footprint": 77,
    "foundation": 1,
    "door": [
-    -106,
-    912
+    -76,
+    851
    ]
   },
   {
@@ -305,32 +347,41 @@
   {
    "stamp": "market_stall_51",
    "kind": "stall",
-   "x": -65,
-   "z": 902,
+   "x": -62,
+   "z": 905,
    "ground_y": 67,
-   "rotation": 270,
+   "rotation": 180,
    "footprint": 0
   },
   {
    "stamp": "market_stall_52",
    "kind": "stall",
-   "x": -62,
+   "x": -65,
+   "z": 900,
+   "ground_y": 67,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_53",
+   "kind": "stall",
+   "x": -61,
    "z": 895,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_53",
+   "stamp": "market_stall_54",
    "kind": "stall",
-   "x": -56,
-   "z": 896,
+   "x": -55,
+   "z": 898,
    "ground_y": 67,
    "rotation": 90,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_54",
+   "stamp": "market_stall_55",
    "kind": "stall",
    "x": -55,
    "z": 902,
@@ -339,46 +390,10 @@
    "footprint": 0
   },
   {
-   "stamp": "market_stall_55",
-   "kind": "stall",
-   "x": -61,
-   "z": 905,
-   "ground_y": 67,
-   "rotation": 180,
-   "footprint": 0
-  },
-  {
    "stamp": "lamp_post_fen_arm",
    "kind": "lamp",
-   "x": -65,
-   "z": 903,
-   "ground_y": 66,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen_arm",
-   "kind": "lamp",
-   "x": -64,
-   "z": 896,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen_arm",
-   "kind": "lamp",
-   "x": -57,
-   "z": 895,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen_arm",
-   "kind": "lamp",
-   "x": -52,
-   "z": 901,
+   "x": -53,
+   "z": 898,
    "ground_y": 67,
    "rotation": 90,
    "footprint": 0
@@ -386,17 +401,44 @@
   {
    "stamp": "lamp_post_fen_arm",
    "kind": "lamp",
-   "x": -59,
-   "z": 907,
-   "ground_y": 67,
+   "x": -57,
+   "z": 905,
+   "ground_y": 66,
    "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen_arm",
+   "kind": "lamp",
+   "x": -64,
+   "z": 905,
+   "ground_y": 66,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen_arm",
+   "kind": "lamp",
+   "x": -67,
+   "z": 898,
+   "ground_y": 67,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen_arm",
+   "kind": "lamp",
+   "x": -60,
+   "z": 894,
+   "ground_y": 66,
+   "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
    "x": -69,
-   "z": 889,
+   "z": 883,
    "ground_y": 68,
    "rotation": 0,
    "footprint": 0
@@ -404,7 +446,7 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -67,
+   "x": -80,
    "z": 882,
    "ground_y": 68,
    "rotation": 0,
@@ -413,25 +455,16 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -73,
-   "z": 876,
-   "ground_y": 69,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -80,
+   "x": -82,
    "z": 870,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -87,
+   "x": -88,
    "z": 864,
    "ground_y": 70,
    "rotation": 0,
@@ -440,16 +473,7 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -93,
-   "z": 857,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -104,
+   "x": -94,
    "z": 858,
    "ground_y": 70,
    "rotation": 0,
@@ -458,9 +482,18 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -109,
-   "z": 852,
-   "ground_y": 69,
+   "x": -106,
+   "z": 856,
+   "ground_y": 70,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -104,
+   "z": 847,
+   "ground_y": 70,
    "rotation": 0,
    "footprint": 0
   },
@@ -478,7 +511,7 @@
    "kind": "lamp",
    "x": -52,
    "z": 878,
-   "ground_y": 65,
+   "ground_y": 66,
    "rotation": 0,
    "footprint": 0
   },
@@ -505,15 +538,15 @@
    "kind": "lamp",
    "x": -22,
    "z": 880,
-   "ground_y": 67,
+   "ground_y": 66,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -17,
-   "z": 885,
+   "x": -16,
+   "z": 886,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
@@ -550,32 +583,32 @@
    "kind": "lamp",
    "x": 4,
    "z": 913,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -104,
-   "z": 884,
-   "ground_y": 70,
+   "x": -76,
+   "z": 888,
+   "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -111,
-   "z": 878,
-   "ground_y": 69,
+   "x": -93,
+   "z": 888,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -120,
+   "x": -105,
    "z": 890,
    "ground_y": 69,
    "rotation": 0,
@@ -584,9 +617,27 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -130,
-   "z": 886,
+   "x": -116,
+   "z": 885,
    "ground_y": 69,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -127,
+   "z": 890,
+   "ground_y": 69,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -52,
+   "z": 885,
+   "ground_y": 66,
    "rotation": 0,
    "footprint": 0
   },
@@ -603,7 +654,7 @@
    "stamp": "lamp_post_fen",
    "kind": "lamp",
    "x": -11,
-   "z": 902,
+   "z": 900,
    "ground_y": 69,
    "rotation": 0,
    "footprint": 0
@@ -613,7 +664,7 @@
    "kind": "lamp",
    "x": -4,
    "z": 909,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -622,7 +673,7 @@
    "kind": "lamp",
    "x": -4,
    "z": 916,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -631,7 +682,7 @@
    "kind": "lamp",
    "x": -4,
    "z": 926,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -640,7 +691,7 @@
    "kind": "lamp",
    "x": -14,
    "z": 931,
-   "ground_y": 70,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -667,7 +718,16 @@
    "kind": "lamp",
    "x": -56,
    "z": 931,
-   "ground_y": 65,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -46,
+   "z": 932,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -676,7 +736,7 @@
    "kind": "lamp",
    "x": -32,
    "z": 910,
-   "ground_y": 66,
+   "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
@@ -685,24 +745,15 @@
    "kind": "lamp",
    "x": -20,
    "z": 906,
-   "ground_y": 67,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -67,
-   "z": 910,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -75,
-   "z": 918,
+   "x": -69,
+   "z": 919,
    "ground_y": 65,
    "rotation": 0,
    "footprint": 0
@@ -710,27 +761,27 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -81,
-   "z": 910,
-   "ground_y": 67,
+   "x": -75,
+   "z": 877,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -73,
-   "z": 864,
-   "ground_y": 69,
+   "x": -72,
+   "z": 867,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -62,
-   "z": 870,
-   "ground_y": 67,
+   "x": -64,
+   "z": 868,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -739,7 +790,7 @@
    "kind": "lamp",
    "x": -55,
    "z": 871,
-   "ground_y": 65,
+   "ground_y": 66,
    "rotation": 0,
    "footprint": 0
   },
@@ -755,9 +806,9 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -28,
-   "z": 916,
-   "ground_y": 66,
+   "x": -27,
+   "z": 915,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -775,15 +826,6 @@
    "kind": "lamp",
    "x": -41,
    "z": 921,
-   "ground_y": 65,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -49,
-   "z": 927,
    "ground_y": 66,
    "rotation": 0,
    "footprint": 0
@@ -827,9 +869,27 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -40,
-   "z": 929,
-   "ground_y": 66,
+   "x": -87,
+   "z": 876,
+   "ground_y": 69,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -94,
+   "z": 870,
+   "ground_y": 70,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -38,
+   "z": 934,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -847,7 +907,7 @@
    "kind": "lamp",
    "x": -34,
    "z": 949,
-   "ground_y": 69,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -863,8 +923,8 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -96,
-   "z": 864,
+   "x": -101,
+   "z": 867,
    "ground_y": 70,
    "rotation": 0,
    "footprint": 0
@@ -872,62 +932,8 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -88,
-   "z": 873,
-   "ground_y": 71,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -111,
-   "z": 885,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -111,
-   "z": 894,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -66,
-   "z": 863,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -68,
-   "z": 852,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -79,
-   "z": 847,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -87,
-   "z": 844,
+   "x": -64,
+   "z": 857,
    "ground_y": 68,
    "rotation": 0,
    "footprint": 0
@@ -935,53 +941,53 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -94,
+   "x": -68,
+   "z": 848,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -74,
+   "z": 860,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -77,
+   "z": 845,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_fen",
+   "kind": "lamp",
+   "x": -42,
    "z": 850,
-   "ground_y": 70,
+   "ground_y": 67,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -56,
-   "z": 887,
-   "ground_y": 66,
+   "x": -42,
+   "z": 862,
+   "ground_y": 65,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -56,
-   "z": 938,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -65,
+   "x": -68,
    "z": 943,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -76,
-   "z": 940,
-   "ground_y": 65,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_fen",
-   "kind": "lamp",
-   "x": -34,
-   "z": 859,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
@@ -989,87 +995,27 @@
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -83,
-   "z": 946,
-   "ground_y": 66,
+   "x": -22,
+   "z": 870,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -94,
-   "z": 883,
-   "ground_y": 70,
+   "x": -11,
+   "z": 907,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_fen",
    "kind": "lamp",
-   "x": -72,
-   "z": 946,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
-   "kind": "tree",
-   "x": -65,
-   "z": 910,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_bald_cypress__fen_bald_cypress_sapling_0",
-   "db_stamp": "fen_bald_cypress/fen_bald_cypress_sapling_0",
-   "kind": "tree",
-   "x": -88,
-   "z": 856,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_mature_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_mature_0",
-   "kind": "tree",
-   "x": -65,
-   "z": 915,
-   "ground_y": 65,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_0",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_0",
-   "kind": "tree",
-   "x": -76,
-   "z": 871,
-   "ground_y": 69,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_0",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_0",
-   "kind": "tree",
-   "x": -106,
-   "z": 888,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_young_1",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_1",
-   "kind": "tree",
-   "x": -91,
-   "z": 858,
-   "ground_y": 70,
+   "x": -112,
+   "z": 907,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -1079,17 +1025,17 @@
    "kind": "tree",
    "x": -59,
    "z": 872,
-   "ground_y": 66,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "stamp": "fen_bald_cypress__fen_bald_cypress_sapling_0",
+   "db_stamp": "fen_bald_cypress/fen_bald_cypress_sapling_0",
    "kind": "tree",
-   "x": -87,
-   "z": 853,
-   "ground_y": 69,
+   "x": -69,
+   "z": 868,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -1099,7 +1045,7 @@
    "kind": "tree",
    "x": -73,
    "z": 872,
-   "ground_y": 69,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -1114,16 +1060,6 @@
    "footprint": 0
   },
   {
-   "stamp": "fen_bald_cypress__fen_bald_cypress_sapling_0",
-   "db_stamp": "fen_bald_cypress/fen_bald_cypress_sapling_0",
-   "kind": "tree",
-   "x": -107,
-   "z": 885,
-   "ground_y": 70,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "fen_black_alder__fen_black_alder_young_0",
    "db_stamp": "fen_black_alder/fen_black_alder_young_0",
    "kind": "tree",
@@ -1134,51 +1070,11 @@
    "footprint": 0
   },
   {
-   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
    "kind": "tree",
-   "x": -82,
-   "z": 853,
-   "ground_y": 69,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_young_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
-   "kind": "tree",
-   "x": -79,
-   "z": 852,
-   "ground_y": 68,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_young_1",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_1",
-   "kind": "tree",
-   "x": -47,
-   "z": 905,
-   "ground_y": 65,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_sapling_1",
-   "db_stamp": "fen_black_alder/fen_black_alder_sapling_1",
-   "kind": "tree",
-   "x": -76,
-   "z": 852,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_young_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
-   "kind": "tree",
-   "x": -81,
-   "z": 849,
+   "x": -69,
+   "z": 880,
    "ground_y": 68,
    "rotation": 0,
    "footprint": 0
@@ -1187,19 +1083,9 @@
    "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
    "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
    "kind": "tree",
-   "x": -75,
-   "z": 912,
-   "ground_y": 66,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_young_1",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_1",
-   "kind": "tree",
-   "x": -47,
-   "z": 909,
-   "ground_y": 64,
+   "x": -25,
+   "z": 892,
+   "ground_y": 65,
    "rotation": 0,
    "footprint": 0
   },
@@ -1209,17 +1095,7 @@
    "kind": "tree",
    "x": -65,
    "z": 870,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_young_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
-   "kind": "tree",
-   "x": -26,
-   "z": 894,
-   "ground_y": 65,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
@@ -1234,31 +1110,31 @@
    "footprint": 0
   },
   {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_young_0",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_0",
+   "stamp": "fen_black_alder__fen_black_alder_young_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
    "kind": "tree",
-   "x": -88,
-   "z": 859,
-   "ground_y": 70,
+   "x": -72,
+   "z": 878,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "fen_black_alder__fen_black_alder_young_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
+   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
    "kind": "tree",
-   "x": -42,
-   "z": 900,
-   "ground_y": 65,
+   "x": -84,
+   "z": 881,
+   "ground_y": 68,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "fen_black_alder__fen_black_alder_young_0",
-   "db_stamp": "fen_black_alder/fen_black_alder_young_0",
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
    "kind": "tree",
-   "x": -50,
-   "z": 905,
+   "x": -27,
+   "z": 895,
    "ground_y": 65,
    "rotation": 0,
    "footprint": 0
@@ -1270,6 +1146,106 @@
    "x": -52,
    "z": 880,
    "ground_y": 66,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_young_1",
+   "db_stamp": "fen_black_alder/fen_black_alder_young_1",
+   "kind": "tree",
+   "x": -70,
+   "z": 872,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_young_0",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_0",
+   "kind": "tree",
+   "x": -73,
+   "z": 875,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_young_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_1",
+   "kind": "tree",
+   "x": -42,
+   "z": 897,
+   "ground_y": 67,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_sapling_1",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_1",
+   "kind": "tree",
+   "x": -52,
+   "z": 876,
+   "ground_y": 66,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
+   "kind": "tree",
+   "x": -51,
+   "z": 913,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "kind": "tree",
+   "x": -28,
+   "z": 890,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_young_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_1",
+   "kind": "tree",
+   "x": -44,
+   "z": 889,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "kind": "tree",
+   "x": -73,
+   "z": 869,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_0",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_0",
+   "kind": "tree",
+   "x": -62,
+   "z": 872,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "kind": "tree",
+   "x": -27,
+   "z": 899,
+   "ground_y": 65,
    "rotation": 0,
    "footprint": 0
   }
