@@ -26,85 +26,189 @@ def roost():
     TOP = 118                                    # the mesa top: about 21 over the desert floor (96-97 here)
     G = Ground(ax, az, TOP)
     d = D("area_cinder_roost", seed=811)
-    R0, R = 70, 86
+    R0, R = 98, 112
+    SUN = (-32, 140, 72)                         # Sunscar's plot (850, 450) r 80, in local offsets: keep out of its middle
 
     def n2(x, z, s_):
         return math.sin(x * 0.11 + s_) * math.cos(z * 0.09 + 2 * s_) + 0.5 * math.sin((x + z) * 0.23 + 3 * s_)
 
-    # the plateau: a lobed superellipse south of the rim; the rim is straight and sheer where the Span leaves it
-    HARM = [(k, 0.05 + 0.1 * d.r(k, 3, 1) / (1 + 0.25 * k), d.r(k, 4, 1) * math.tau) for k in range(2, 9)]
+    # the plateau (Mateo 2026-11-13, "we got to fix the terraforming": the first mesa was a box). rim_t is roughly the
+    # distance outside the rim, negative inside: a squared-off superellipse round the school, lobed, with gullies
+    # biting in; the north rim stays on z 0 by the Span and wanders a little elsewhere; a bay in the south cliffs for
+    # the climb. Off the rim the face comes down the way a real mesa's does: a sheer caprock, a ledge here and there
+    # (wide in places, gone in others), a second cliff, then a talus slope of fallen rock down to the desert.
+    HARM = [(k, 0.02 + 0.05 * d.r(k, 3, 1) / (1 + 0.25 * k), d.r(k, 4, 1) * math.tau) for k in range(2, 9)]
+    GUL = [(d.r(k, 5, 1) * math.tau, 0.05 + 0.05 * d.r(k, 6, 1), 4 + 6 * d.r(k, 7, 1)) for k in range(9)]
 
-    def rim(th):                                                       # the plateau's radius round (0, 24)
-        return 30 * (1 + sum(a * math.cos(k * th + ph) for k, a, ph in HARM))
+    def sdbox(x, z, x0, z0, x1, z1):
+        dx, dz = max(x0 - x, 0, x - x1), max(z0 - z, 0, z - z1)
+        if dx or dz: return math.hypot(dx, dz)
+        return -min(x - x0, x1 - x, z - z0, z1 - z)
+
+    def rim_t(x, z):
+        rn = 0 if abs(x) <= 9 else -round(1.2 + 1.2 * math.sin(x * 0.21 + 1.3) + 0.6 * math.sin(x * 0.53))
+        tn = rn - z
+        th = math.atan2(z - 24, x)
+        wob = 1 + sum(a * math.cos(k * th + ph) for k, a, ph in HARM)
+        bz = 42 if z > 24 else 60
+        e = ((abs(x) / 58) ** 6 + (abs(z - 24) / bz) ** 6) ** (1 / 6)
+        tb = (e / wob - 1) * 46 + 1.8 * n2(x * 0.9, z * 0.9, 0.4)
+        for ph, w, dep in GUL:
+            dth = abs((th - ph + math.pi) % math.tau - math.pi)
+            if dth < w: tb += dep * (1 - dth / w)
+        t = min(max(tn, tb), sdbox(x, z, -41, 0, 41, 62))               # the school always has rock under it
+        bay = sdbox(x, z, -5 + round(1.5 * n2(z, 3, 1.1)), 61 + round(n2(x, 7, 2.2)), 29 + round(1.5 * n2(z, 5, 3.3)), 140)
+        return max(t, -bay)
 
     def inside(x, z):
-        if abs(x) <= 11 and 0 <= z <= 16: return 1.0                 # the yard and gatehouse, and the rock under them
-        if z < 0 and not (abs(x) > 14): return -1.0
-        th = math.atan2(z - 24, x * 1.25); r = math.hypot(x / 1.25, z - 24)
-        return 1.0 - (r + 1.6 * n2(x * 2.1, z * 2.1, 0.4)) / rim(th)
+        return -rim_t(x, z)
 
-    def bench(x, z):                                                   # a ledge partway down the face, here and there
-        return n2(x * 0.6, z * 0.6, 2.7) > 0.35
+    def face(x, z, t, real):                                           # the height of the face, t blocks off the rim
+        n_a = 0.5 + 0.5 * n2(x * 0.31, z * 0.31, 1.3); n_b = 0.5 + 0.5 * n2(x * 0.23, z * 0.27, 2.9)
+        n_c = 0.5 + 0.5 * n2(x * 0.41, z * 0.37, 4.7)
+        cap = 5 + round(4 * n_a)                                       # the caprock: sheer
+        if t <= 1.2: return -cap
+        wb = max(0.0, 5.5 * n_b - 1.2)                                 # the ledge: wide here, gone there
+        if t <= 1.2 + wb: return -cap - (1 if d.r(x, 2, z, 6) < 0.3 else 0)
+        t2 = t - 1.2 - wb
+        c2 = 4 + round(4 * n_c)                                        # the second cliff
+        if t2 <= 1.2: return -cap - c2
+        h = -cap - c2 - 1.15 * (t2 - 1.2) + 1.6 * n2(x * 1.3, z * 1.3, 3.1)   # the talus, lumpy
+        return max(round(h), real)
+
     BUTTE = (0, -21)                                                  # the perch's own rock (perch walls G-14..G)
 
     def butte_r(y):                                                   # radius of the butte at height y (relative)
         return 4.6 + max(0, (-14 - y)) * 0.32
+    # the terrace houses down the north cliff (landmarks_story.cinder_roost): the rock under each stops at its floor
+    TERR = [((11, -9, 25, -1), -7), ((26, -9, 27, -1), -7), ((19, -17, 33, -9), -13), ((34, -15, 35, -7), -13),
+            ((-25, -9, -11, -1), -7), ((-27, -9, -26, -1), -7)]
 
-    edge = next(z for z in range(20, 90) if inside(0, z) < 0)       # the south rim on the centre line
-    ZA, ZB = edge - 20, edge + 24
-
-    def way(x, z):
-        if abs(x) > 2 or not ZA <= z <= ZB: return None
-        return -((z - ZA) // 2)
+    # ---- the climb from Sunscar (Mateo 2026-11-13: "the staircase needs work"; regions/hollow.md "Stairs, ledges and
+    # the way down from them", which holds for every region): five wide, every step a stair block, three flights of
+    # seven with a five-square landing at each turn, a kerb and a low wall on every open side, lanterns at the turns,
+    # the whole stair carried on a dressed retaining wall of cut red sandstone with pilasters. From the south gate
+    # (z 57): down south to the first landing, then east along the foot of the cliffs, out of Sunscar's plot.
+    STEP = {}                                                          # (x, z) -> (level, stair facing or None)
+    for x in range(-2, 3):
+        for z in range(58, 61): STEP[(x, z)] = (0, None)               # the apron before the gate
+    for i in range(1, 8):                                              # flight one, south
+        for x in range(-2, 3): STEP[(x, 60 + i)] = (-i, "n")
+    for x in range(-2, 3):
+        for z in range(68, 73): STEP[(x, z)] = (-7, None)              # the first landing
+    for i in range(1, 8):                                              # flight two, east
+        for z in range(68, 73): STEP[(2 + i, z)] = (-7 - i, "w")
+    for x in range(10, 15):
+        for z in range(68, 73): STEP[(x, z)] = (-14, None)             # the second landing
+    for i in range(1, 8):                                              # flight three, east
+        for z in range(68, 73): STEP[(14 + i, z)] = (-14 - i, "w")
+    for x in range(22, 27):
+        for z in range(68, 73): STEP[(x, z)] = (-21, None)             # the foot
+    LAND_AT = [(-2, 68, 2, 72, -7), (10, 68, 14, 72, -14), (22, 68, 26, 72, -21)]
 
     def target(x, z, real):
-        w = way(x, z)
-        if w is not None:
-            return max(w, real) if abs(x) <= 1 else max(w + 1, real) if inside(x, z) < 0 else max(w + 3, min(0, w + 4))
-        k = inside(x, z)
-        if k >= 0:
-            if abs(x) <= 13 and -1 <= z <= 18: return 0                 # the yard stays flat (rigid mode's median)
-            lip = -1 if (k < 0.06 and d.r(x, 0, z, 4) < 0.4) else 0
-            return lip + round(max(0, 2.2 * n2(x * 0.5, z * 0.5, 4.1) - 0.6) * min(1, k * 4))   # low hummocks on the top
-        if k > -0.12 and bench(x, z) and not (abs(x) <= 6 and z < 0): return -8 - round(2 * d.r(x, 1, z, 6))
+        if math.hypot(x - SUN[0], z - SUN[1]) < SUN[2]: return real    # Sunscar's town: the talus may reach its edge, no further
+        if (x, z) in STEP: return min(real, STEP[(x, z)][0] - 1)       # the stair is built; the land keeps under it
+        for (x0, z0, x1, z1), fy in TERR:
+            if x0 - 1 <= x <= x1 + 1 and z0 - 1 <= z <= z1 + 1: return min(fy, max(real, fy - 2)) if x0 <= x <= x1 and z0 <= z <= z1 else min(fy, real + 4)
+        if abs(x) <= 6 and -17 <= z < 0: return real                  # under the Span: the drop stays clear
+        t = rim_t(x, z)
+        if t <= 0:
+            if abs(x) <= 38 and -1 <= z <= 60: return 0                 # the school stands level (rigid mode's median)
+            lip = -1 if (t > -1.5 and d.r(x, 0, z, 4) < 0.4) else 0
+            return lip + round(max(0, 2.2 * n2(x * 0.5, z * 0.5, 4.1) - 0.6) * min(1, -t / 4))   # low hummocks on the top
         bd = math.hypot(x - BUTTE[0], z - BUTTE[1])
         if bd <= butte_r(real): return -14 if bd <= 5.5 else round(-14 - (bd - 4.6) / 0.32)
-        # off the mesa: scree heaped at the foot of the cliffs, fading out over ten blocks
-        dist = 99
-        for r_ in range(1, 12):
-            if any(inside(x + dx * r_, z + dz * r_) >= 0 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))): dist = r_; break
-        if abs(x) <= 6 and -17 <= z < 0: return real                  # under the Span: the drop stays clear
-        return real + max(0, round(6 - 0.9 * dist + 2.5 * n2(x * 1.7, z * 1.7, 2.1)))
+        h = face(x, z, t, real)
+        if any((x + a_, z + b_) in STEP for a_ in range(-2, 3) for b_ in range(-2, 3)):
+            h = min(h, max(real, min(STEP.get((x + a_, z + b_), (99,))[0] for a_ in range(-2, 3) for b_ in range(-2, 3)) - 1))
+        return h
+
+    BANDS2 = [b_ for k, b_ in enumerate(BANDS) for _ in range(1 + int(d.r(k, 8, 1) * 3))]   # beds of different thickness
 
     def band(x, y, z):
-        i = int((y + TOP) + 0.8 * math.sin(x * 0.07 + z * 0.05)) % len(BANDS)
-        return BANDS[i]
-    TOPB = lambda x, y, z: (band(x, y, z) if y < -2 else
-                            d.pick(x, y, z, [("red_sand", 7), ("red_sandstone", 2), ("coarse_dirt", 1), ("sand", 1)], 5))
+        if y >= -2: return d.pick(x, y, z, [("red_sandstone", 3), ("smooth_red_sandstone", 1), ("cut_red_sandstone", 1)], 7)   # the caprock
+        f = (y + TOP) + 1.4 * math.sin(x * 0.045 + z * 0.03) + 0.025 * x + 0.7 * n2(x * 0.2, z * 0.2, 5.0)   # gently tilted, wavy
+        i = int(f) + (1 if d.r(x, y, z, 9) < 0.12 else 0)
+        return BANDS2[i % len(BANDS2)]
+    def TOPB(x, y, z):                     # the top block: red sand on the mesa and its scree, fading to the desert's sand
+        if y > -3: return d.pick(x, y, z, [("red_sand", 7), ("red_sandstone", 2), ("coarse_dirt", 1), ("sand", 1)], 5)
+        f = (math.hypot(x, z - 27) - 62) / 26 + 0.35 * n2(x * 0.6, z * 0.6, 6.1)   # the red sand runs out in tongues
+        if f < 0.5: return "red_sand" if d.r(x, y, z, 6) < 0.9 else ("red_sandstone" if d.r(x, y, z, 7) < 0.5 else "terracotta")
+        return "sand" if f > 0.75 or d.r(x, y, z, 6) < 0.5 else "red_sand"
     SUB = lambda x, y, z: band(x, y, z)
     T = shape(d, G, R0, R, target, TOPB, SUB, depth=4)
 
-    # the cliff faces: banded all the way down (shape() tops raised columns with the top block; the face below is
-    # the sub band), with spurs and fallen blocks at the foot
-    for k in range(18):
-        a = d.r(k, 1, 7) * math.tau; rr = 40 + 10 * d.r(k, 2, 7)
-        x, z = round(math.sin(a) * rr * 0.95), round(24 + math.cos(a) * rr * 0.7)
-        if z < -2 or inside(x, z) >= 0: continue
-        g = T.get((x, z), G.real(x, z))
-        for (dx, dz) in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            if d.r(x + dx, 0, z + dz, 8) < 0.7: d.put(x + dx, g + 1, z + dz, d.pick(x + dx, g, z + dz, [("red_sandstone", 2), ("orange_terracotta", 1), ("hardened_clay", 1)], 9))
-    # dead bushes and a few red-sand drifts on the top
+    # boulders fallen from the cliffs, out on the talus (never on the stair or in Sunscar)
     for (x, z), y in T.items():
-        if inside(x, z) < 0.1 or (abs(x) <= 11 and -1 <= z <= 16): continue
-        t = d.r(x, y, z, 12)
-        if t < 0.008: d.put(x, y + 1, z, "deadbush")
-    # the riders' way up: a cut climbing the south face toward Sunscar, open to the sky, one up in two
+        t = rim_t(x, z)
+        if not 4 <= t <= 22 or d.r(x, 3, z, 31) > 0.018 or z < -18: continue
+        if any((x + p, z + q) in STEP for p in range(-3, 4) for q in range(-3, 4)) or math.hypot(x - SUN[0], z - SUN[1]) < SUN[2] + 4: continue
+        big = d.r(x, 4, z, 31) < 0.35
+        for dx in range(0, 2 + big):
+            for dz in range(0, 2 + big):
+                if d.r(x + dx, 5, z + dz, 31) < 0.8:
+                    gy = T.get((x + dx, z + dz), y)
+                    for k in range(1, 2 + big - (dx + dz > 2)):
+                        d.put(x + dx, gy + k, z + dz, d.pick(x + dx, gy + k, z + dz, [("red_sandstone", 3), ("orange_terracotta", 1), ("terracotta", 1), ("smooth_red_sandstone", 1)], 32))
+    # dead bushes on the top, outside the walls
     for (x, z), y in T.items():
-        if way(x, z) is not None and abs(x) <= 1:
-            d.put(x, y, z, "smooth_red_sandstone" if (z % 2 == 0) else "red_sandstone_slab", **({} if z % 2 == 0 else {"half": "top"}))
+        if inside(x, z) < 2 or (abs(x) <= 38 and -1 <= z <= 60): continue
+        if d.r(x, y, z, 12) < 0.01: d.put(x, y + 1, z, "deadbush")
+
+    # ---- build the stair: treads, the retaining wall under it down to the land, kerbs and walls, lanterns
+    def foot(x, z):
+        return T.get((x, z), G.real(x, z))
+    for (x, z), (lv, face) in STEP.items():
+        for y in range(foot(x, z) - 1, lv):
+            d.put(x, y, z, "red_sandstone" if d.r(x, y, z, 21) < 0.5 else "cut_red_sandstone")
+        if face: d.put(x, lv, z, "red_sandstone_stairs", facing=face)
+        else: d.put(x, lv, z, "cut_red_sandstone" if (x + z) % 2 else "smooth_red_sandstone")
+        for y in range(lv + 1, lv + 5): d.air(x, y, z)
+    edge, out = {}, {}
+    for (x, z), (lv, face) in STEP.items():
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            c = (x + dx, z + dz)
+            if c in STEP or (z + dz) <= 57: continue
+            if (abs(c[0]) <= 2 and c[1] in (58, 59, 60)): continue
+            edge[c] = max(edge.get(c, -99), lv); out[c] = (dx, dz)
+    for (x, z), lv in edge.items():
+        # the kerb: a dressed wall from the land up to one above the highest tread beside it, a wall block on top
+        for y in range(foot(x, z) - 1, lv + 1):
+            d.put(x, y, z, "cut_red_sandstone" if y == lv else ("red_sandstone" if d.r(x, y, z, 22) < 0.6 else "smooth_red_sandstone"))
+        d.put(x, lv + 1, z, "red_sandstone_wall")
+    # the retaining wall's face: a pilaster every fourth block standing one out, and between them a blind arch,
+    # recessed a block, its head two stairs and a keystone (regions/hollow.md: retaining walls get bays and arch heads)
+    for (x, z), lv in edge.items():
+        dx, dz = out[(x, z)]
+        run = z if dx else x
+        g = foot(x, z)
+        if lv - g < 5: continue
+        k = run % 4
+        if k == 0:
+            px, pz = x + dx, z + dz
+            if (px, pz) in STEP or (px, pz) in edge: continue
+            for y in range(foot(px, pz) - 1, lv): d.put(px, y, pz, "cut_red_sandstone")
+            d.put(px, lv, pz, "chiseled_red_sandstone")
+        else:
+            top = lv - 3
+            for y in range(g + 1, top): d.air(x, y, z)
+            for y in range(g + 1, top): d.put(x - dx, y, z - dz, "smooth_red_sandstone")
+            if k == 2: d.put(x, top, z, "chiseled_red_sandstone")
+            else:
+                along = ("e" if k == 1 else "w") if dx == 0 else ("s" if k == 1 else "n")
+                d.put(x, top - 1, z, "red_sandstone_stairs", facing=along, half="top"); d.put(x, top, z, "cut_red_sandstone")
+    for (x0, z0, x1, z1, lv) in LAND_AT:                               # lanterns on the corner posts of each landing
+        for (x, z) in ((x0 - 1, z0 - 1), (x1 + 1, z0 - 1), (x0 - 1, z1 + 1), (x1 + 1, z1 + 1)):
+            if (x, z) in edge:
+                d.put(x, edge[(x, z)] + 1, z, "cut_red_sandstone"); d.put(x, edge[(x, z)] + 2, z, "lantern")
+    for (x, z) in ((-3, 58), (3, 58), (-3, 60), (3, 60)):
+        if (x, z) in edge: d.put(x, edge[(x, z)] + 2, z, "lantern")
     # the story piece itself, as it builds (rigid at G = 0 here)
     piece = LS.cinder_roost()
     for c, v in piece.cells.items(): d.cells[c] = v
+    d.parts = getattr(piece, "parts", [])
+    d.materials = piece.materials
     d.meta["y0"] = TOP
     d.meta["anchor"] = [ax, TOP, az]
     return d
