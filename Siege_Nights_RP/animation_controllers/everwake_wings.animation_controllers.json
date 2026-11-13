@@ -20,7 +20,7 @@
               "none": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) < 1"
             },
             {
-              "open": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) >= 2"
+              "open": "(query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 2 || (query.has_property('siege:wings') ? query.property('siege:wings') : 0) == 3"
             }
           ],
           "blend_transition": 0.3
