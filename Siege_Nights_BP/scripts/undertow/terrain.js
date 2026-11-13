@@ -18,6 +18,7 @@ import { hash, fbm, smooth } from "./noise.js";
 import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
+import { STRONGHOLD } from "./stronghold.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { HOLLOW_BRIDGES } from "./bridges_data.js";
 import { arrivalAt, walkAt, ARRIVAL } from "./arrival.js";
@@ -728,6 +729,7 @@ function tallThings() {
   for (const s of SITES) if (SITE_DESIGNS[s.id] && s.y !== undefined) tall.push({ x: s.x, z: s.z, r: s.r, y: s.y + top(SITE_DESIGNS[s.id]) });
   const towers = Object.values(TOWER_DESIGNS).reduce((m, d) => Math.max(m, top(d)), 0);
   tall.push({ x: -165, z: 1465, r: 60, y: 68 + towers }); // Hallowmere's drowned city (drowned.js DROWNED_AREA)
+  tall.push({ x: STRONGHOLD.x, z: STRONGHOLD.z, r: STRONGHOLD.r, y: STRONGHOLD.top }); // the Needlehold (stronghold.js)
   return tall;
 }
 // Base height of the roof's underside at a grid node: the highest land near it, plus the clearance.
@@ -780,8 +782,9 @@ function planRoof(ops, cx, cz, col) {
   // What hangs from it, kept inside the chunk and well above the land.
   for (const [x, z, rf] of R) {
     const i = x - X0, j = z - Z0;
-    const ground = col(i, j)?.h ?? L.floorY;
-    const room = rf.bottom - ground - 14; // never hang lower than 14 blocks over the land
+    let ground = col(i, j)?.h ?? L.floorY;
+    if (Math.hypot(x - STRONGHOLD.x, z - STRONGHOLD.z) <= STRONGHOLD.r + 6) ground = Math.max(ground, STRONGHOLD.top); // nothing hangs into the Needlehold
+    const room = rf.bottom - ground - 14; // never hang lower than 14 blocks over the land (or the Needlehold's needles)
     const r = hash(x, z, 621);
     if (i >= 2 && i <= 13 && j >= 2 && j <= 13 && r < 0.012 && room > 4) {
       // Hanging rock: a cone, three wide at the root, tapering to a point, often tipped with amethyst.

@@ -6,6 +6,7 @@
 import { pathX } from "./layout.js";
 import { value } from "./noise.js";
 import { RIVER_NODES, riverDistance } from "./rivers.js";
+import { STRONGHOLD } from "./stronghold.js";
 
 // Ground flattened to y inside the radius, with trees, spires and plants kept out.
 // A site with no y only keeps features out (the ground stays as generated).
@@ -31,6 +32,8 @@ export const SITES = [
   // the Seams, with no road up. The only place a Choirsteel Upgrade template can be found (forge.js).
   { id: "cold_forge", name: "The Cold Forge", x: 592, z: 1080, y: 119, r: 14 },
   { id: "vault_stair", name: "Vault Stair", x: pathX(2312) + 5, z: 2312, r: 4 },
+  // The Needlehold, the crooked city's stronghold, in the wood country west of the Long Climb (stronghold.js).
+  { id: STRONGHOLD.id, name: STRONGHOLD.name, x: STRONGHOLD.x, z: STRONGHOLD.z, y: STRONGHOLD.y, r: STRONGHOLD.r },
 ];
 export const SITE_SKIRT = 14; // blocks over which a flattened site eases back into the land
 
@@ -69,6 +72,8 @@ export const ROADS = [
   { id: "wood_road", from: site("lattice_gate"), to: site("lowseam"), wander: 14 },
   { id: "drift_path", leaveZ: 820, to: site("drift_foot"), wander: 4, narrow: true },
   { id: "seam_rail", from: site("cartmeet"), to: site("the_seams"), wander: 4 },
+  // To the Needlehold's gate on its south side, where its own avenue starts (stronghold.js).
+  { id: "needlehold", leaveZ: 2290, to: { id: "needlehold_gate", name: STRONGHOLD.name, x: STRONGHOLD.x, z: STRONGHOLD.z + STRONGHOLD.r }, stop: 0, wander: 10 },
 ];
 export const ROAD_HALF_WIDTH = 2; // about 4 wide (narrow tracks: 1)
 export const ROAD_SHOULDER = 8; // the land eases to the road over this distance
