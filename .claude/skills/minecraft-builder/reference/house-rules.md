@@ -80,3 +80,11 @@ never to do. Index: `regions/README.md`.
 - [ ] Curved shapes read smooth from 30 blocks (preview) and from close (hifi render).
 - [ ] The summary has no surprising warnings (substituted partial blocks, even footprints).
 - [ ] Rail beds graded 1 in 2 beside the ballast, open to the sky, trees felled whole (build-instructions/paths/README.md, Rail beds).
+
+## Streets reach the ward edge; open ground follows the land (Mateo, 2026-11-13)
+
+- Every street that leaves a town runs on along the map road to the edge of the town's ward
+  (`plots/config.js` WARDS), so it meets the country road. It never stops at the town circle.
+- A building's floor is the highest ground under its own walls. The open ground in its stamp (gardens, yards,
+  paddocks, forecourts) drops to the land or to the street beside it, at most 3 blocks, one block per step
+  (towngen `open_cols` / `open_levels`).
