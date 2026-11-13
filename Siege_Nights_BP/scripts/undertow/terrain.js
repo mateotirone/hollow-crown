@@ -20,6 +20,7 @@ import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, R
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { HOLLOW_BRIDGES } from "./bridges_data.js";
+import { arrivalAt, walkAt, ARRIVAL } from "./arrival.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -151,12 +152,13 @@ function rimWall(x, z) {
   if (z < 60 || (z > 1500 && z < 1700) || margin(side * (L.halfWidth + 45), z) < 0) return 1;
   return smooth(clamp01((fbm(z / 70, side * 3.3, 61) - 0.4) / 0.14));
 }
-function spine(x, z) {
+function spine(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd || inHeart(x, z)) return null; // the final arena floats in the fog; built separately
 
-  // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
-  if (z < 40) {
-    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null;
+  // The Wound as it was first built: a ledge at y 100 with a wall behind it and a ramp down along the path. Kept so
+  // an old world knows what stands there (wound.js clears what the new arrival no longer has).
+  if (z < 40 && first) {
+    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null; // the first back wall: a slab, the void either side
     if (Math.abs(x) <= 14 && z <= 10) return L.woundLedgeY;
     if (Math.abs(x) <= 3 && z > 10) {
       const foot = spine(pathX(40), 40); // ramp lands exactly on the valley floor
@@ -187,22 +189,58 @@ function spine(x, z) {
 
   const edge = rimAt(x, z) - Math.abs(x);
   if (edge < 22) h += Math.round(((22 - edge) * 1.8 + fbm(x / 7, z / 7, 3) * 6) * rimWall(x, z));
+  // The arrival (arrival.js): the ledge, the stair and its court stand exactly so; the crag round them stands at
+  // least so high over the valley's own ground.
+  if (!first) { const a = arrivalAt(x, z); if (a) h = a.exact ? a.h : Math.max(h, a.h); }
   return Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, h));
 }
+// No tree stands on the arrival or within its canopy's reach of it.
+const arrivalNear = (x, z) => { if (z > ARRIVAL.z1 + 6 || Math.abs(x) > ARRIVAL.x1 + 6) return false; for (let dx = -6; dx <= 6; dx += 3) for (let dz = -6; dz <= 6; dz += 3) if (arrivalAt(x + dx, z + dz)) return true; return false; };
+// The land as the first Wound had it (before the back cliff and the crag): what an old world has standing.
+export function firstHeightAt(x, z) { const n = natural(x, z, true); return n === null ? null : Math.round(n.h); }
 
-// The land before the rivers cut into it: { h, region } or null for void.
-function natural(x, z) {
+// The cliff at the Hollow's near end, behind the Wound (Mateo 2026-11-12, of a screenshot of the first one: "This
+// definitely needs a lot of work"). It was a flat slab 49 wide with the void on both sides and above it, so the sky
+// showed round it. Now it is a cliff right across the valley and out past both rims: its foot wanders, its top
+// steps back in broken ledges, it is laid in beds of mixed rock (backRock), and its last rows are built up into
+// the roof so nothing shows behind it. The Wound's cave is cut into it (wound.js).
+export const BACK = { z: -10, reach: L.halfWidth + 45, seal: -44 };
+export const backFace = (x) => { const ax = Math.abs(x); return ax <= 26 ? BACK.z : BACK.z - Math.round(fbm(x / 21, 0.5, 171) * 9 * smooth(clamp01((ax - 26) / 12))); };
+function backWall(x, z) {
+  if (z >= BACK.z || z < L.zStart || Math.abs(x) > BACK.reach) return null;
+  const d = backFace(x) - z; // blocks in behind the face
+  if (d <= 0) return null; // in front of it: the valley's own ground
+  let h = 136 + fbm(x / 23, z / 23, 5) * 26 + Math.min(d, 30) * 0.7 - 14 * Math.max(0, 1 - d / 5) * fbm(x / 9, 3.3, 172);
+  h = Math.max(h, natural(x, z, true)?.h ?? 0); // never lower than the land that stood here first, so an old world only gains rock
+  return Math.round(Math.min(L.ceilingY - 30, h));
+}
+const BACK_ROCK = ["minecraft:blackstone", "minecraft:deepslate", "siege:veinstone", "minecraft:deepslate", "minecraft:basalt", "minecraft:tuff", "minecraft:cobbled_deepslate", "minecraft:blackstone"];
+// The rock of the back cliff at a cell: beds three blocks thick that rise and dip along the face. Pure.
+export function backRock(x, y, z) {
+  const r = hash(x + y * 7, z - y * 3, 175);
+  if (r < 0.012) return "minecraft:crying_obsidian";
+  if (r < 0.07) return "siege:veinstone";
+  return BACK_ROCK[Math.floor((y + fbm(x / 17, z / 17, 173) * 12) / 3 + 400 + hash(Math.floor(x / 4), Math.floor(z / 4), 174) * 1.4) % BACK_ROCK.length];
+}
+// The land the roof is hung over. Behind the Wound it is still the first wall, so the roof stays exactly where
+// every world already built it.
+const roofLand = (x, z) => natural(x, z, true)?.h ?? null;
+
+// The land before the rivers cut into it: { h, region } or null for void. first: as it was before the back cliff.
+function natural(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd) return null;
+  const back = first ? null : backWall(x, z);
+  if (back !== null) return { h: back, region: "wound" };
   const ax = Math.abs(x);
   const rimX = ax <= L.halfWidth + 45 ? rimAt(x, z) : L.halfWidth;
   if (ax <= rimX) {
-    const h = spine(x, z);
+    const h = spine(x, z, first);
     return h === null ? null : { h, region: stageAt(z)?.id ?? "wound" };
   }
   const w = wild(x, z);
   if (w === null) return null;
   if (ax < rimX + 40) { // the outer foot of the rim eases into the open country
-    const rim = spine(x < 0 ? -rimX : rimX, z);
+    const rim = spine(x < 0 ? -rimX : rimX, z, first);
     if (rim !== null) w.h = rim + (w.h - rim) * smooth((ax - rimX) / 40);
   }
   w.h = Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, w.h));
@@ -432,10 +470,39 @@ function planLand(cx, cz) {
       const n = h(i + di, j + dj);
       drop = Math.max(drop, n === null ? 99 : top - n);
     }
-    const wound = spineCol && z < 40;
+    const wound = spineCol && (z < 40 || (z <= ARRIVAL.z1 && !!arrivalAt(x, z))); // the arrival's crag and court count as the Wound: no plants, spires or trees on them
     // A faint glow over the land (invisible light blocks), so under the roof it is dark but never
     // pitch black. Pushed first in the column so anything built here later takes its place.
     if (top + 2 > SEA && ambientLightAt(x, z)) ops.push({ a: [x, top + 2, z], b: [x, top + 2, z], block: AMBIENT.block, optional: true, ifAir: true });
+    const backCol = kind === "wound" && z < BACK.z && Math.abs(x) <= BACK.reach && top > L.woundLedgeY;
+    if (backCol) {
+      // the back cliff: beds of mixed rock wherever the face shows, plain rock inside
+      const from = drop >= 3 ? Math.max(start, top - Math.min(drop, 110) - 2) : top - 1;
+      fill(x, start, z, x, from - 1, z, B.rock);
+      const upTo = z <= BACK.seal ? ROOF.shell - 1 : top; // the last rows are built up into the roof: nothing shows behind the cliff
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= upTo + 1; y++) {
+        const b = y <= upTo ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      continue;
+    }
+    if (drop >= 3 && z >= BACK.z && arrivalAt(x, z)) {
+      // the crag under the arrival: the same beds of rock as the back cliff wherever a face shows, veilmoss over its ledges
+      const from = Math.max(start, top - Math.min(drop, 60) - 2);
+      fill(x, start, z, x, from - 1, z, B.rock);
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= top; y++) {
+        const b = y < top ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      set(x, top, z, groundAt(x, z, "wound", drop, c.river));
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj], side) => {
+        const n = h(i + di, j + dj);
+        if (n === null || i + di < 0 || i + di > 15 || j + dj < 0 || j + dj > 15 || walkAt(x, z) || walkAt(x + di, z + dj)) return;
+        const len = hash(x * 3 + side, z, 207) < 0.22 ? strandsAt(x, z, side, top - n, "fen") : 0; // a curtain here and there, not a pelt
+        if (len) fill(x + di, top - len + 1, z + dj, x + di, top, z + dj, B.strands);
+      });
+      continue;
+    }
     if (drop >= 3 && !wound && !onWater) {
       fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
@@ -539,7 +606,7 @@ function planLand(cx, cz) {
 
   // One landmark per chunk at most, kept inside the chunk.
   const cxm = X0 + 8, czm = Z0 + 8, mid = col(8, 8);
-  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
+  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || arrivalNear(cxm, czm) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
   const roll = hash(cx, cz, 101), kind = mid.region;
   // Nudge each landmark off the chunk's middle so they don't line up in a grid (still inside the chunk).
   const nudge = (max, salt) => Math.round((hash(cx, cz, salt) - 0.5) * 2 * max);
@@ -671,8 +738,8 @@ function roofNode(gx, gz) {
   const x0 = gx * RP.cell, z0 = gz * RP.cell, W = RP.window;
   let m = -Infinity;
   for (let dx = -W; dx <= W; dx += RP.step) for (let dz = -W; dz <= W; dz += RP.step) {
-    const n = natural(x0 + dx, z0 + dz);
-    if (n !== null) m = Math.max(m, n.h);
+    const n = roofLand(x0 + dx, z0 + dz);
+    if (n !== null) m = Math.max(m, n);
   }
   if (z0 + W >= HEART.center.z - HEART.outerRadius - 40) m = Math.max(m, RP.heartFloor);
   for (const t of tallThings()) if (Math.hypot(x0 - t.x, z0 - t.z) <= t.r + W) m = Math.max(m, t.y - 20);
@@ -829,7 +896,7 @@ function extraTrees(ops, cx, cz, col) {
     const c = col(i, j);
     if (!c || c.h < SEA + 1 || c.road !== undefined || c.site || c.river < RIVER_HALF_WIDTH + 6 || c.under !== undefined) continue;
     const x = cx * 16 + i, z = cz * 16 + j;
-    if (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8))) continue;
+    if (arrivalNear(x, z) || (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8)))) continue;
     if (siteAt(x, z)) continue;
     const k = treeKind(x, z, c.region), n = EXTRA[k] ?? 0;
     if (hash(cx, cz, salt + 20) * 3 >= n) continue;

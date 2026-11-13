@@ -235,6 +235,25 @@ water_level[fenpool] = SEA
 water_level[islake] = lakelevel[islake]
 wet = water_level > Y
 
+# ---------------------------------------------------------------- the seven thin places: designed land
+# (Mateo 2026-11-12: "it's designing the actual map itself".) Each thin place gets its own land from
+# map/thinplaces/shape.mjs, the one approved in the 3D view: a long barrow in a wet ditch, a mine escarpment, a
+# gorge, a chalk headland with a flooded sinkhole, a flooded hollow, a salt pan, a stepped quarry pit. Fully shaped
+# out to ~62 blocks, blended back into the plan by 96. Roads and rivers keep their ground; trails ride the new land.
+# The add-on builds each cave into this land (undertow/thinplaces.js reads thin_land.js to know it is there).
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "thinplaces"))
+from land import shape_sites, write_js
+_riv = (isriver | bank).astype(np.float32)
+_keep = np.maximum.reduce([np.clip(box(isroad.astype(np.float32), 8) * 6, 0, 1), np.clip(box(_riv, 30) * 8, 0, 1), _riv])
+thin_shaped, THIN_BLOCKS, THIN_FACTS = shape_sites(Y, water_level, X0, Z0, _keep, log=log, pools=fenpool, paths=isroad | istrail)
+if thin_shaped.any():
+    Yf = np.where(thin_shaped, Y, Yf).astype(np.float32)     # slopes and steep faces are read from Yf further down
+    wet = water_level > Y
+    fenpool &= wet & ~thin_shaped                             # pools filled in near a place are gone; a place's own water is not a fen pool
+    isroad &= ~(thin_shaped & wet); istrail &= ~(thin_shaped & wet)
+    keepclear |= thin_shaped                                  # no map trees, plants or cave mouths on designed land
+    if os.environ.get("GW_THIN_JS"): write_js(THIN_FACTS, os.environ["GW_THIN_JS"])   # refresh the add-on's copy (full map only)
+
 # ---------------------------------------------------------------- road and trail bridges (the one bridge engine:
 # .claude/skills/minecraft-builder/scripts/bridges.py). Mateo 2026-11-12: a bridge never runs into a field; each
 # carries a paved approach onto land and is joined to its path. Rail bridges are built in game with the stretch
@@ -897,6 +916,14 @@ for d_ in GW_FILES:
         b_ = b_[~off_]
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
     log("town plan", d_["town"], len(b_), "blocks")
+if THIN_BLOCKS:   # the thin places' own ground, faces and set pieces: first, so towns and bridges win over them
+    _tb = np.array([(x, y, z) for x, y, z, _, _ in THIN_BLOCKS], np.int64); _tk = {}
+    for _, _, _, n, st in THIN_BLOCKS:
+        k_ = n + json.dumps(st, sort_keys=True)
+        if k_ not in _tk: _tk[k_] = B_raw(n, st) if n != "minecraft:air" else -1
+    _ti = np.array([_tk[n + json.dumps(st, sort_keys=True)] for _, _, _, n, st in THIN_BLOCKS], np.int64)
+    STAMPED.insert(0, (_tb[:, 0], _tb[:, 1], _tb[:, 2], _ti, np.zeros(len(_ti), bool)))
+    log("thin places", len(_ti), "blocks")
 if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)

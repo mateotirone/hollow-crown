@@ -14,6 +14,11 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",
+  "undertow: the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof",
+  "undertow: the arrival: you can walk from the ledge down to the valley a block at a time, and every step is a stair block",
+  "undertow: the arrival: an old world has the first box and ramp taken away",
+  "undertow: the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds",
   "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
   "undertow: a chunk built under the low roof has it taken away and the high roof built",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
@@ -48,6 +53,7 @@ export const OFFLINE_ONLY = new Set([
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
   "undertow: thin places: every cave is walkable from the mouth down to its chamber, one step at a time",
   "undertow: thin places: nothing the planner builds stands in front of a cave mouth",
+  "undertow: thin places: standing water beside a cave is walled off, never left against open air",
   "undertow: thin places: no two caves are the same, and the land covers every one",
   "undertow: the seep: veins are connected, reach out from the mouth, and growing never moves them",
   "undertow: thin places: low, wide hills, never taller than they are wide",
