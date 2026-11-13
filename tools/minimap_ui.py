@@ -90,21 +90,16 @@ for i, letter in enumerate(letters):
         view(f"({ON} and ({P} = '{letter}'))", "#visible"),
         view(f"('{TEX}a' + {D})", "#texture"),
     ])})
-# the quest pin (scripts/minimap/data.js pinCode): a column panel per letter, each holding a pin per row
-pin_cols = []
+# the quest pin (scripts/minimap/data.js pinCode): one pin per cell, each a direct sibling of hc_minimap_data.
+# Not nested in column panels: a view binding's source_control_name is only found among siblings, so pins one
+# level down could not read the data, stayed visible and drew 81 missing-texture squares (playtest 1.2.1519).
 for ci, col in enumerate("abcdefghi"):
-    rows = []
     for ri, row in enumerate("jklmnopqr"):
-        off = [CELL * ci + (CELL - PIN_SIZE) / 2, CELL * ri + (CELL - PIN_SIZE) / 2]
-        rows.append({f"hc_minimap_pin_{col}{row}": image("#texture", [PIN_SIZE, PIN_SIZE], off, 3, [
-            view(f"({ROW} = '{row}')", "#visible"),
+        off = [RIM + CELL * ci + (CELL - PIN_SIZE) / 2, RIM + CELL * ri + (CELL - PIN_SIZE) / 2]
+        box.append({f"hc_minimap_pin_{col}{row}": image("#texture", [PIN_SIZE, PIN_SIZE], off, 3, [
+            view(f"({ON} and (not ({K} = '_')) and ({C} = '{col}') and ({ROW} = '{row}'))", "#visible"),
             view(f"('{TEX}p' + {K})", "#texture"),
         ])})
-    pin_cols.append({f"hc_minimap_pins_{col}": {
-        "type": "panel", "size": [MAP, MAP], "offset": [RIM, RIM], "layer": 3,
-        "anchor_from": "top_left", "anchor_to": "top_left", "controls": rows,
-        "bindings": [view(f"({ON} and (not ({K} = '_')) and ({C} = '{col}'))", "#visible")]}})
-box.extend(pin_cols)
 box.append({"hc_minimap_north": {
     "type": "label", "text": "N", "color": [0.93, 0.78, 0.42], "shadow": True, "layer": 5,
     "font_scale_factor": 0.75, "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 0],
