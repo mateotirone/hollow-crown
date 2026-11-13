@@ -1,5 +1,5 @@
-// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow and
-// the name of the place they are in. No Beta features: the map pictures are pre-painted from the
+// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow, the
+// name of the place they are in, and a pin for their quest (quests/index.js questPin). No Beta features: the map pictures are pre-painted from the
 // generated world (tools/minimap_tiles.py) and the HUD (Siege_Nights_RP/ui/hud_screen.json, made by
 // tools/minimap_ui.py) is told what to show through a hidden title that starts with "hcm:".
 //
@@ -11,6 +11,7 @@ import { onTick } from "../core/loop.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
 import { hudString } from "./data.js";
 import { emit } from "../core/events.js";
+import { questPin } from "../quests/index.js";
 import "./tests.js";
 
 const OFF = "siege:minimap_off";
@@ -31,7 +32,7 @@ function send(player, force = false) {
   const loc = player.location;
   const text = hudString({
     x: loc.x, z: loc.z, yaw: player.getRotation().y,
-    charted: player.dimension.id === OVERWORLD, off: isOff(player),
+    charted: player.dimension.id === OVERWORLD, off: isOff(player), pin: questPin(player),
   });
   const last = lastSent.get(player.id);
   if (!force && last && last.text === text && now - last.at < RESEND) return;
