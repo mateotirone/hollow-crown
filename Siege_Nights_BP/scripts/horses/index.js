@@ -17,6 +17,7 @@ import "./tests.js";
 import "./showcase.js";
 import { useStablesLevel } from "./barn.js";
 import { sfx } from "../core/sfx.js";
+import { regionAt } from "../economy/shops.js";
 
 export { stallMenu } from "./menus.js"; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";
@@ -172,6 +173,9 @@ world.afterEvents.itemUse.subscribe((event) => {
 
 // ---------- Stables and Breeder's Posts ----------
 
+// The regional breed bred in a region ("Frostmarch" -> "destrier"), or undefined off the map
+export const regionBreed = (region) => REGIONAL_BREEDS.find((b) => BREEDS[b].region === region);
+
 async function breederSetup(player, key) {
   const res = await new ModalFormData().title("Breeder's Post")
     .dropdown("Which breed is sold here?", REGIONAL_BREEDS.map((b) => `${BREEDS[b].name} (${BREEDS[b].region})`)).show(player);
@@ -184,11 +188,11 @@ async function breederSetup(player, key) {
 
 async function breederMenu(player, block) {
   const key = posKey(block.location);
-  const breed = meta.data.posts[key];
-  if (!breed || (isBuilder(player) && player.isSneaking)) {
-    if (isBuilder(player)) return breederSetup(player, key);
-    return say(player, "§7Nobody is selling horses here yet.");
-  }
+  // A post the map itself placed (a town's breeder's yard) was never set up by a builder: it sells the breed of
+  // the region it stands in. A builder can still sneak-click it to choose another.
+  const breed = meta.data.posts[key] ?? regionBreed(regionAt(block.location));
+  if (isBuilder(player) && (player.isSneaking || !breed)) return breederSetup(player, key);
+  if (!breed) return say(player, "§7Nobody is selling horses here yet.");
   const info = BREEDS[breed];
   const cost = [{ item: "coins", count: S.breederPostPrice }];
   const boughtKey = `${key}|${player.id}`;

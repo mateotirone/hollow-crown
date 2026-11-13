@@ -308,6 +308,16 @@ export const ENTRIES = [
   },
 
   {
+    id: "upkeep", ch: "coin", title: "Upkeep",
+    tip: "Upkeep is paid at dawn: a sum for your town's size, a little for each building and a wage for each guard.",
+    page: "A settlement costs Regals to keep. Each §fdawn§r you are in the world for, your upkeep is taken from your Regals and the screen says how much: §fUpkeep paid: 46 Regals§r.\n\n"
+      + "It is a sum for your town's size (nothing for a Hamlet, 8 for a Town, 24 for a City, 48 for a Castle), 2 for every building that stands and 3 for every guard. A new settlement pays nothing for its first three days, and days you are away are never charged.\n\n"
+      + "If you can't pay it all, what you have is taken and the rest is forgiven. Nothing is ever knocked down. But until a dawn is paid in full, guards who fall are §fnot retrained§r: they wait at the Barracks.\n\n"
+      + "The Regals leave the kingdom. If another player wears the Crown, a fifth of what you pay goes to them.",
+    when: ["event:upkeepPaid"],
+  },
+
+  {
     id: "regional_armour", ch: "coin", title: "Regional armour",
     tip: "This armour is cut in a region's style. Any Smith can reforge your armour in his own region's look.",
     page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
@@ -340,7 +350,7 @@ export const ENTRIES = [
   {
     id: "breeder", ch: "travel", title: "Breeder's Posts",
     tip: "A Breeder's Post sells foals of its region's breed.",
-    page: "Breeder's Posts stand in the towns. Each sells foals of its own region's breed, and every region's horses are good at something different. A foal is yours from the start; ride it to raise it.",
+    page: "Breeder's Posts stand in the towns, at the breeder's yard. Each sells foals of its own region's breed (192 Regals, one every three days), and every region's horses are good at something different. A foal is yours from the start and grows up in a day; ride it to raise it.\n\nOr go without Regals: tame a wild horse and use a §fHalter§r on it.",
     when: ["click:hc:breeder_post"],
   },
   {
