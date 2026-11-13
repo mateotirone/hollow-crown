@@ -47,11 +47,10 @@ def land(npz):
     return np.round(Y).astype(int), lake, road, lvl
 
 
-def main(scene, npz, out):
-    os.makedirs(out, exist_ok=True)
-    h, lake, road, lvl = land(npz)
+def solve_site(cells, h, lake, road):
+    """The station on a patch of land (arrays [i, j] = local (x + R, z + R)): returns the cells in the station's frame
+    (local y = world y - off) and how the land was solved."""
     I = lambda x, z: (x + R, z + R)
-    cells = T_.load(scene)
     # the station's own ground (station.yard's grass rise, its lane and lamps) gives way to the real land
     keep = {}
     for (x, y, z), b in cells.items():
@@ -97,6 +96,30 @@ def main(scene, npz, out):
         if lake[win].any() or busy[win].any() or road[win].any(): continue
         planted += T_.plant(cells, (x, z), sp, size, k % 5, int(G[c]) - off)
     cells = {(int(x), int(y), int(z)): b for (x, y, z), b in cells.items()}
+    return dict(cells=cells, G=G, off=off, works=works, wall=wall, busy=busy, lane=lane, x_end=x_end, pad_y=pad_y, site=site, planted=planted)
+
+
+def world_blocks(scene, h, lake, road):
+    """For map/genworld.py: the station and all the land it changes, in world coordinates and placing order (the
+    solved ground first, then the station, its lane, lamps and trees). h, lake, road: the map's own top block heights,
+    water and paths over the patch, [i, j] = local (x + R, z + R). Returns ([(x, y, z, name, props)], pad_y)."""
+    r = solve_site(T_.load(scene), h, lake, road)
+    off, out = r["off"], []
+    w = lambda x, y, z: (CX - z, y, CZ + x)                # station frame -> world (local +x is world +z)
+    for (x, y, z), b in r["works"].items():
+        if (x, y - off, z) in r["cells"]: continue
+        out.append((*w(x, y, z), b[0], b[1]))
+    for (x, y, z), b in r["cells"].items():
+        out.append((*w(x, y + off, z), b[0], b[1]))
+    return out, r["pad_y"]
+
+
+def main(scene, npz, out):
+    os.makedirs(out, exist_ok=True)
+    h, lake, road, lvl = land(npz)
+    I = lambda x, z: (x + R, z + R)
+    r = solve_site(T_.load(scene), h, lake, road)
+    cells, G, off, wall, busy, lane, x_end, pad_y, site, planted = (r[k] for k in ("cells", "G", "off", "wall", "busy", "lane", "x_end", "pad_y", "site", "planted"))
     T_.save(cells, os.path.join(out, "site.json"))
     notrees = busy.copy()
     for (x, y, z) in cells:
