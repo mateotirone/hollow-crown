@@ -1,14 +1,15 @@
 // The Library: Archive Shelves on your settlement hold Lore Tomes and fill up visibly.
-// Click a shelf holding a tome to shelve it. Click with anything else to open the catalog.
+// Click a shelf holding a tome to shelve it. Click with an empty hand (or most other things) to open the catalog;
+// another kind of book in hand gets a short note instead, so the click never looks ignored.
 
-import { world, system, ItemStack } from "@minecraft/server";
+import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { emit, keepOf, isAlly, isReady, onTick, settlementAt } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, MILESTONES, PLACES, SITE_IDS, THREADS } from "./data/world.js";
 import {
-  tomeIdOf, makeTome, progressOf, saveProgress, sourceSite, giveItem, awardPoints, setFlag, landOwnerAt, ensureLedger,
+  TOME_ITEM, tomeIdOf, makeTome, progressOf, saveProgress, sourceSite, giveItem, awardPoints, setFlag, landOwnerAt, ensureLedger,
 } from "./player.js";
 import { readTome } from "./reader.js";
 import { sfx } from "../core/sfx.js";
@@ -84,14 +85,15 @@ function checkShelf(dimension, owner, key) {
 }
 
 // ---------- Shelving ----------
-function shelve(player, block, owner, id) {
+// fromHand: true takes the held tome; false means the caller has already taken a blank one (shelveBlank)
+function shelve(player, block, owner, id, fromHand = true) {
   const lib = libOf(owner);
   const key = keyOf(block.location);
   const tome = TOME[id];
   if (!tome) return;
   const container = player.getComponent("minecraft:inventory").container;
   const slot = player.selectedSlotIndex;
-  if (tomeIdOf(container.getItem(slot)) !== id) return; // the tome already left their hand
+  if (fromHand && tomeIdOf(container.getItem(slot)) !== id) return; // the tome already left their hand
   // Only a copy on a shelf that is really still there counts as "already shelved"
   const holder = shelvesOf(owner).find(([k, ids]) => ids.includes(id) && checkShelf(block.dimension, owner, k));
   if (holder) {
@@ -101,7 +103,7 @@ function shelve(player, block, owner, id) {
   const here = lib[key] ?? [];
   if (here.length >= SHELF_SIZE) return player.onScreenDisplay.setActionBar("§eThis shelf is full. Build another Archive Shelf.");
 
-  container.setItem(slot, undefined);
+  if (fromHand) container.setItem(slot, undefined);
   lib[key] = here;
   here.push(id);
   saveLib(owner);
@@ -191,6 +193,37 @@ export function stockShelf(block, owner, ids) {
   showFill(block, here.length);
 }
 
+// Books that are not Lore Tomes: clicking a shelf with one says so instead of opening the catalog
+const OTHER_BOOKS = new Set([
+  "minecraft:book", "minecraft:writable_book", "minecraft:written_book", "minecraft:enchanted_book",
+  "siege:codex", "siege:ledger", "siege:kings_journal", "siege:plan_book",
+]);
+
+// A blank tome (the creative-menu copy has no pages). In Creative it becomes the first tome this Library
+// is missing and goes straight on the shelf, so a builder can stock a Library for testing; in Survival it says why.
+function shelveBlank(player, block, owner) {
+  if (player.getGameMode() !== GameMode.Creative) {
+    return player.onScreenDisplay.setActionBar("§eThis tome is blank. Lore Tomes with pages are found out in the world.");
+  }
+  const have = shelvedIn(owner);
+  const next = TOMES.find((t) => !isLocal(t.id) && !have.includes(t.id));
+  if (!next) return player.onScreenDisplay.setActionBar("§eThis Library already holds every tome.");
+  const container = player.getComponent("minecraft:inventory").container;
+  const slot = player.selectedSlotIndex;
+  const item = container.getItem(slot);
+  if (item?.typeId !== TOME_ITEM || tomeIdOf(item)) return; // the blank tome already left their hand
+  if ((libOf(owner)[keyOf(block.location)] ?? []).length >= SHELF_SIZE) {
+    return player.onScreenDisplay.setActionBar("§eThis shelf is full. Build another Archive Shelf.");
+  }
+  if (item.amount > 1) {
+    item.amount -= 1;
+    container.setItem(slot, item);
+  } else {
+    container.setItem(slot, undefined);
+  }
+  shelve(player, block, owner, next.id, false);
+}
+
 // ---------- Clicking a shelf ----------
 const lastClick = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
@@ -201,16 +234,24 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const now = system.currentTick;
   if (now - (lastClick.get(player.id) ?? -100) < 6) return;
   lastClick.set(player.id, now);
-  const heldId = tomeIdOf(event.itemStack);
+  const held = event.itemStack;
+  const heldId = tomeIdOf(held);
+  const blank = held?.typeId === TOME_ITEM && !heldId; // a tome from the creative menu: no pages yet
+  const heldType = held?.typeId;
   system.run(() => {
     try {
       const owner = landOwnerAt(block);
       if (!owner) return player.onScreenDisplay.setActionBar("§eAn Archive Shelf only works on settlement land.");
       const mine = owner === player.id || isAlly(owner, player.id);
       if (libOf(owner)[keyOf(block.location)]) checkShelf(block.dimension, owner, keyOf(block.location)); // redraw a shelf a rebuild emptied
-      if (heldId) {
+      if (heldId || blank) {
         if (!mine) return player.onScreenDisplay.setActionBar("§eOnly the owner and their allies can shelve tomes here.");
-        return shelve(player, block, owner, heldId);
+        if (heldId) return shelve(player, block, owner, heldId);
+        return shelveBlank(player, block, owner);
+      }
+      // Another book in hand would otherwise just open the catalog, which looks like the shelf ignoring it
+      if (OTHER_BOOKS.has(heldType)) {
+        return player.onScreenDisplay.setActionBar("§eOnly Lore Tomes go on an Archive Shelf. Click with an empty hand for the catalog.");
       }
       catalog(player, block, owner, mine).catch((e) => console.warn(`[Lore] catalog: ${e}`));
     } catch (e) {

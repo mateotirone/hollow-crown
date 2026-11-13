@@ -805,7 +805,7 @@ addTests("settle plans", {
 });
 
 import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
-import { pickBaseSlot, bedSpot, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
+import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
 import { MASON_DESIGNS } from "./mason_data.js";
 
 
@@ -833,8 +833,12 @@ addTests("settle base", {
   },
   "the founder's cottage has room for a bed indoors"() {
     for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
-      const at = bedSpot(drawBuilding("cottage", region));
-      assert(at && at.z >= 2, `${region} cottage has a bed spot away from the door`);
+      for (const id of ["cottage", "house", "townhouse", "farmhouse"]) {
+        const at = bedSpot(drawBuilding(id, region));
+        assert(at && at.z >= 2, `${region} ${id} has a bed spot away from the door`);
+        const all = bedSpots(drawBuilding(id, region));
+        assert(all.length >= 2 && all[0].x === at.x && all[0].z === at.z, `${region} ${id} has a second spot for when the first is taken`);
+      }
     }
   },
   "the base buildings take the nearest free Small plot, never the library's"() {
