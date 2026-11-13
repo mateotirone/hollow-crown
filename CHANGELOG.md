@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Stations at the end of a line (Oakmere, Wolfcairn and Frosthelm) now end the track at a timber buffer beam with a lantern on it and a low stone wall behind, instead of rails stopping in the grass. Stations already standing get it when the settlement next grows (Mateo's town simulator screenshot).
 - Town streets now run right out to the edge of the town's ward, along the map road, so they meet the country roads instead of stopping in the grass (Mateo's Kingsrest playtest).
 - Gardens, yards and paddocks follow the land: a building still stands on the highest ground under its walls, but its open ground steps down to the street beside it (the capital hall's garden stood a block above the street).
 - The forty Faceless statues of King Oswin are now carved 3D figures instead of block shapes: robed and hooded, faceless, with the same pale hands on every one. They line Sunscar's road to the Faceless Gate in pairs, from a boy to an old king, crowned from the young king on, holding a staff, a sword or a bowl or with hands folded, and some broken. The Gate's eight are taller, and four of them have fallen. They stand on their stone plinths when you come near, and nothing can knock them over. (Needs the next map restamp of Sunscar and the Faceless Gate. Until then the old block statues stay where they are.)
