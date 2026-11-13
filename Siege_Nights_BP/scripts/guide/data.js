@@ -58,6 +58,14 @@ export const ENTRIES = [
     when: ["carry:minecraft:bread", "carry:minecraft:cooked_beef", "carry:minecraft:cooked_cod", "carry:minecraft:cooked_porkchop", "carry:minecraft:cooked_chicken", "carry:minecraft:cooked_mutton", "carry:minecraft:baked_potato"],
   },
   {
+    id: "starter_clothes", ch: "start", title: "Your starting clothes",
+    tip: "These are your region's working clothes and tool. They keep the weather off, not a sword: a Smith sells real armour.",
+    page: "Everyone starts out dressed in the working clothes of the region they arrive in, with that region's tool for a weapon: a straw hat, jerkin and §fbillhook§r in the Vale, a fur-trimmed hood, quilted coat and §fhatchet§r in Frostmarch, a knit cap, striped smock and §fcutlass§r in Saltreach, a sun wrap, sand tunic and §fsickle-sword§r in the Emberwaste, an oilskin hat, coat, waders and §freed spear§r in Blackfen. Start in Kingsrest and you get the Vale's.\n\n"
+      + "They protect about as well as leather and wear out as fast, and the weapon hits like a wooden sword. Mend the clothes with leather and the weapon with iron nuggets at an anvil, or buy spares cheaply: each region's §fHunter§r sells its clothes and its §fSmith§r its weapon.\n\n"
+      + "Your first real armour is a big step up. Any Smith sells his region's Castle Guard armour.",
+    when: ["carry:siege:starter_*"],
+  },
+  {
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
