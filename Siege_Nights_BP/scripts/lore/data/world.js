@@ -460,7 +460,7 @@ export const THREADS = [
     kind: "text",
     question: "Who was Morvane, before the Hollow gave him that name?",
     accept: ["oswin", "kingoswin", "oswinthelast", "kingoswinthelast", "thelastking", "theoverthrownking", "oswinsonofaldric"],
-    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his.",
+    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his, and so were the five who kept the Gate: he sent them up to kill you, and when they could not, every shard you took from them became his key.",
     sp: 5,
   },
   {
