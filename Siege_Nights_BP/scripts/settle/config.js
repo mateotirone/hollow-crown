@@ -214,6 +214,9 @@ export const FLOOR_PER_BED = 12;
 // worker first, then the homes fill up. They stand about by day and go to their bed at dusk.
 export const SETTLERS = {
   perDawn: 1,
+  lordRange: 96, // a Rival Lord's town looks after its townsfolk while a player is this close (as their crews build)
+  lordCatchUp: 3, // most newcomers a lord's town takes at once after nobody has been near for days
+  waryDays: 3, // townsfolk are wary this many days after their town changes hands
   skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
   workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
   names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
@@ -233,6 +236,49 @@ export const SETTLER_LINES = {
     "Don't stand out here long. It's colder than it ought to be.",
   ],
   idle: "My work's gone. Put it back up and I'll go back to it.",
+  // In a Rival Lord's town: how the lord's temper shows in their people
+  lord: {
+    proud: [
+      "His lordship doesn't care for strangers on the green. Say your piece and go.",
+      "Our walls were raised by a proper lord. Not everyone can say that.",
+      "Mind the banner. Folk have been fined for less.",
+    ],
+    grasping: [
+      "Everything here has a price, friend. Even the well, if he hears of it.",
+      "Taxed on bread, taxed on boots. We pay and we keep quiet.",
+      "If you've coin, the lord will want to meet you. If you haven't, he won't.",
+    ],
+    devout: [
+      "We keep the old prayers here. You're welcome to them.",
+      "The lord says grace before every meal, even the small ones.",
+      "Light a candle before you leave. It costs nothing.",
+    ],
+    wary: [
+      "We don't open the door after the second bell. Don't knock.",
+      "You came by the north road? Nobody comes by the north road.",
+      "Keep your voice down. Sound carries at night here.",
+    ],
+    bold: [
+      "Our lord's ridden out against worse than you. Twice.",
+      "We'll stand on that wall when the horn goes. Every one of us.",
+      "Fancy a wrestle on the green? No? Pity.",
+    ],
+    kind: [
+      "Hungry? There's bread by the hall door. The lord leaves it out.",
+      "You're welcome here. Most are.",
+      "Our lord knows every name in this town. Even the children's.",
+    ],
+    steady: [
+      "Quiet enough here, most days.",
+      "We keep our heads down and our roofs mended.",
+    ],
+  },
+  // For a few days after a player takes a lord's town
+  wary: [
+    "New banner on the hall. We'll see how it suits.",
+    "The old lord kept the well clean. I hope you will.",
+    "I'll work, same as before. Just don't ask me to cheer.",
+  ],
 };
 
 // ---------- The Plan Book (planbook.js, plandata.js) ----------

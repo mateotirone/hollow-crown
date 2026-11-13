@@ -132,5 +132,7 @@ Every interior is checked in a cut-away 3D view before it is shown:
 
 - [ ] Every storey reached by a stair or ladder, the well guarded; a walked-on roof reached through a hatch.
 - [ ] A one-block walkway from the door to every room, stair end, bed, chest and work block.
-- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window.
+- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window. In a hand-drawn design
+      the floor block is y 0, so furniture starts at y 1: check one column of the room before placing anything.
+- [ ] Every ladder hangs on a solid block behind it (check the cell its facing points away from), right under its hatch.
 - [ ] Region woods, rugs and lights; nothing sits on a stair, a well or in a doorway.

@@ -23,6 +23,7 @@ import argparse, json, math, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import export_landmarks as X  # noqa: E402  (the skill's compute)
 from landmarks import D  # noqa: E402
+import emit, lighting  # noqa: E402  (the skill: connections, the light stage)
 
 VEIN = [("siege:veinstone_bricks", 74), ("siege:cracked_veinstone_bricks", 14), ("polished_blackstone_bricks", 12)]
 FLOOR = [("siege:veinstone_bricks", 6), ("siege:cracked_veinstone_bricks", 2), ("polished_blackstone_bricks", 2)]
@@ -239,8 +240,10 @@ def ranks(d, walk):
 
 
 def export(d):
-    blocks = X.compute(d.spec())
-    for c in d.airs(): blocks.pop(c, None)   # it hangs in the void: air is already there, so none is written
+    spec = dict(d.spec()); spec["light"] = False
+    blocks = X.compute(spec)
+    for c in d.airs(): blocks.pop(c, None)
+    lighting.light(blocks, kind="hollow", posts=False); emit.connect(blocks)   # every build lit (Mateo 2026-11-13)   # it hangs in the void: air is already there, so none is written
     pal, idx, cells = [], {}, {}
     for c, (n, p) in blocks.items():
         if n == "air": continue
