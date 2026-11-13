@@ -12,7 +12,7 @@ addTests("quests", {
   "a new settlement's first Regals: sell wheat to your own Farmer, until 16 are sold": () => {
     const farmer = { at: { x: 23, z: 2 }, sold: 0, tag: "siege_hamlet_farmer_me" };
     const f = base({ farmer, first: { keep: true, days: 4 } });
-    assertEqual(ids(f).slice(0, 3).join(","), "first_tools,farmer,wren");
+    assertEqual(ids(f).slice(0, 3).join(","), "first_barracks,farmer,wren");
     const q = questsFor(f).find((x) => x.id === "farmer");
     assertEqual(q.target.name, "Your Farmer");
     assertEqual(talkOf(questsFor(f)).tag, "siege_hamlet_farmer_me", "the Farmer gets the gold mark");

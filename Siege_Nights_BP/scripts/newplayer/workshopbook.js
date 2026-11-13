@@ -46,10 +46,9 @@ world.afterEvents.playerInteractWithBlock.subscribe(({ player, block }) => {
 });
 
 addTests("newplayer workshop book", {
-  "the Workshop book lists the Barracks with stone bricks and planks, and every entry says what it takes": () => {
+  "the Workshop book no longer lists the Barracks (it comes from a Plot Marker), and every entry says what it takes": () => {
     const all = WORKSHOP_BOOK.flatMap((c) => c.items);
-    const b = all.find((i) => i.id === "siege:barracks");
-    assert(b && /stone bricks/.test(b.needs) && /planks/.test(b.needs), "Barracks from stone bricks and planks");
+    assert(!all.some((i) => i.id === "siege:barracks"), "the Barracks is raised on a plot, not crafted");
     for (const i of all) assert(i.needs && i.what && i.name, `${i.id} is complete`);
   },
 });

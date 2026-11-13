@@ -9,7 +9,6 @@ OUT = os.path.join(BP, "scripts", "newplayer", "workshop_book_data.js")
 # [category, [(result id, what it does)]]
 BOOK = [
     ("Army and defence", [
-        ("siege:barracks", "Raises a guardhouse. Click it to train guards (40 Regals each)."),
         ("siege:ballista", "Shoots monsters within 16 blocks by itself, even through Arrow Slits."),
         ("siege:quartermaster_desk", "A quartermaster takes the post and sells siege gear."),
         ("siege:guard_helmet", "Castle Guard armour, in your banner colour."),
