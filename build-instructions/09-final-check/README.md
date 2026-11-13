@@ -43,6 +43,7 @@ playing so it has to be perfect." Be harder on it than he would be.
 **Base and frame**
 
 - [ ] Attached blocks (doors, lanterns, signs, ladders) placed last; both door halves whole.
+- [ ] Every item frame, ladder, button and wall sign has a full block behind it, facing out from that wall (a frame with no facing hangs from the block above and drops off). `node tools/hung-check.mjs` checks the baked map files.
 - [ ] Groundwork filled underneath; edges step at most 1 per 2 out; the road meets the map road.
 - [ ] Nothing floats on the low side; plinth visible; steps match the floor height and the doorway width.
 - [ ] Posts line up storey to storey; beams at every floor line; jetties bracketed.

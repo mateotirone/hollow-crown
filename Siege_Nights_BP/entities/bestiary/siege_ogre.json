@@ -112,12 +112,13 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 14
+    "damage": 11
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,
     "speed_multiplier": 1.25,
-    "track_target": true
+    "track_target": true,
+    "cooldown_time": 1.5
    },
    "minecraft:rideable": {
     "seat_count": 1,

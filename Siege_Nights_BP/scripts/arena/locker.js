@@ -16,7 +16,7 @@
 // mid-fight still gets everything back the next time they're in.
 
 import { ItemStack, EquipmentSlot } from "@minecraft/server";
-import { KIT, KIT_LORE } from "./config.js";
+import { kitFor, KIT_LORE } from "./config.js";
 import { LOCKER_SLOTS, armorLockerSlot } from "./rules.js";
 
 export const LOCKER = "siege:grave_keeper";
@@ -90,13 +90,13 @@ const kitStack = (id, count = 1) => {
   return s;
 };
 
-// Dress the player in the arena kit (their own things must be in the locker first).
-export function giveKit(player) {
+// Dress the player in the arena kit, in `region`'s look (their own things must be in the locker first).
+export function giveKit(player, region) {
+  const kit = kitFor(region);
   const inv = player.getComponent("minecraft:inventory").container;
   const eq = player.getComponent("minecraft:equippable");
-  for (const [slot, id] of Object.entries(KIT.armor)) eq?.setEquipment(EquipmentSlot[slot], kitStack(id));
-  if (KIT.offhand) eq?.setEquipment(EquipmentSlot.Offhand, kitStack(KIT.offhand));
-  for (const [id, count] of KIT.items) inv.addItem(kitStack(id, count));
+  for (const [slot, id] of Object.entries(kit.armor)) eq?.setEquipment(EquipmentSlot[slot], kitStack(id));
+  for (const [id, count] of kit.items) inv.addItem(kitStack(id, count));
 }
 
 // Take every arena kit piece off the player (inventory, armour, off hand). Returns how many.

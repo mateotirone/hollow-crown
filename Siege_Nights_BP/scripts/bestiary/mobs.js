@@ -129,8 +129,11 @@ const TRICKS = {
   },
 
   // Feels your footsteps. Keep moving and it erupts under you; stand still (or sneak) and it loses you.
+  // Fair by design (Mateo 2026-11-13, "one shooting people"): two seconds of rumble and a closing ring before it
+  // comes up, a hit that hurts but never kills from full, and it surfaces dazed beside the spot, so it can't bite
+  // in the same breath and you get a window to hit back.
   "siege:dune_wyrm": (e, dim, players) => {
-    if (!every(240, e)) return;
+    if (!every(240, e) || wyrmStrikes.some((s) => s.wyrm === e)) return;
     const prey = players.find((p) => {
       const d = flat(p.location, e.location);
       const v = p.getVelocity();
@@ -138,8 +141,9 @@ const TRICKS = {
     });
     if (!prey) return;
     const at = { ...prey.location };
-    prey.onScreenDisplay.setActionBar("§6The sand is moving under you...");
-    wyrmStrikes.push({ wyrm: e, dim, at, when: clock + 30 });
+    prey.onScreenDisplay.setActionBar("§6The sand is moving under you... §7stand still or get clear!");
+    sound(dim, "mob.ravager.stun", at, 0.7, 0.5);
+    wyrmStrikes.push({ wyrm: e, dim, at, prey, when: clock + WYRM.windup });
   },
 
   // Lays a hex on the nearest player
@@ -170,6 +174,23 @@ const TRICKS = {
 const RULER_TAG = "siege_hollow_ruler"; // set on whoever rules the Hollow (that feature is not built yet)
 const HOLLOW_TRICKS = ["siege:lost_villager", "siege:changeling", "siege:wrongling", "siege:stone_vigil", "siege:echo_hound", "siege:tolling_shade"];
 const wyrmStrikes = [];
+// The Dune Wyrm's eruption. Its bite is data (roster.py: dmg 7, a 1.5 s swing); these are the scripted parts.
+export const WYRM = {
+  windup: 40, // ticks of rumble and closing ring before it comes up (was 30)
+  radius: 3.2, // how close to the marked spot you get hit
+  damage: 5, // the eruption itself (was 8, and its bite landed in the same moment: 8 + 15 on Hard killed from full)
+  dazed: 40, // ticks it lies stunned beside the hole: no bite, barely moving
+  aside: 2.5, // blocks from the marked spot it surfaces, so it isn't standing in you
+};
+// Where the wyrm comes up: beside the marked spot, on the side it came from (so the player sees it), never on top of them.
+export function wyrmSurface(at, from, aside = WYRM.aside) {
+  const dx = from.x - at.x, dz = from.z - at.z, d = Math.hypot(dx, dz);
+  if (d < 0.01) return { x: at.x + aside, y: at.y, z: at.z };
+  return { x: at.x + (dx / d) * aside, y: at.y, z: at.z + (dz / d) * aside };
+}
+// The worst a full-health player can take from one eruption plus the bite after it, on Hard (melee x1.5).
+// The daze outlasts the bite's swing, so the two never land together; this checks even if they did.
+export const wyrmWorstBurst = (bite = 7) => WYRM.damage + bite * 1.5;
 
 function canSee(player) {
   try {
@@ -231,15 +252,26 @@ function mobTick() {
       }
     }
   }
-  // Wyrm eruptions that were telegraphed 1.5 seconds ago
+  // Wyrm eruptions: a closing ring and a rumble while they wind up, then up it comes
   for (const s of wyrmStrikes.splice(0)) {
-    if (s.when > clock) { wyrmStrikes.push(s); ring(s.dim, s.at, 3, "minecraft:basic_smoke_particle"); continue; }
     if (!alive(s.wyrm)) continue;
+    if (s.when > clock) {
+      wyrmStrikes.push(s);
+      const left = (s.when - clock) / WYRM.windup; // 1 -> 0: the ring shrinks onto the spot
+      try {
+        ring(s.dim, s.at, 0.8 + WYRM.radius * left, "minecraft:basic_smoke_particle");
+        sound(s.dim, "dig.sand", s.at, 1, 0.5);
+      } catch { /* spot unloaded */ }
+      continue;
+    }
     try {
-      s.wyrm.teleport(s.at);
+      s.wyrm.teleport(wyrmSurface(s.at, s.wyrm.location));
+      effect(s.wyrm, "slowness", WYRM.dazed, 6, true);
+      effect(s.wyrm, "weakness", WYRM.dazed, 255); // can't bite while it shakes the sand off
       particle(s.dim, "minecraft:large_explosion", s.at);
       sound(s.dim, "mob.ravager.roar", s.at, 0.6);
-      for (const p of s.dim.getPlayers({ location: s.at, maxDistance: 3.2 })) { hurt(p, 8, "entityAttack", s.wyrm); shove(p, 0, 0, 0, 0.9); }
+      for (const p of s.dim.getPlayers({ location: s.at, maxDistance: WYRM.radius })) { hurt(p, WYRM.damage, "entityAttack", s.wyrm); shove(p, 0, 0, 0, 0.9); }
+      try { if (flat(s.prey.location, s.at) < 16) s.prey.onScreenDisplay.setActionBar("§eThe wyrm is dazed. §7Hit it now!"); } catch { /* left */ }
     } catch {
       // spot unloaded
     }
@@ -345,6 +377,15 @@ addTests("bestiary", {
     assert(far >= 9 && far <= 21, "10 to 20 blocks away");
     assert(castAwaySpot({ x: 0, y: 64, z: 0 }, () => false, [0.1, 0.9, 0.6, 0.2]) === undefined, "open void: stay put");
     assert(castAwaySpot({ x: 0, y: 64, z: 0 }, () => true, [0.1, 0.9]) === undefined, "solid rock: stay put");
+  },
+  "a Dune Wyrm can't kill a full-health player in one go": () => {
+    assert(wyrmWorstBurst() < 20, `eruption + Hard bite = ${wyrmWorstBurst()}, must stay under 20`);
+    assert(WYRM.windup >= 40, "two seconds of warning at least");
+    assert(WYRM.dazed > 30, "the daze outlasts its 1.5 s swing, so the bite can't land with the eruption");
+    const up = wyrmSurface({ x: 0, y: 64, z: 0 }, { x: 10, y: 64, z: 0 });
+    assert(up.x > 2 && up.x < 3 && up.z === 0, "comes up beside the spot, on the side it came from");
+    const still = wyrmSurface({ x: 0, y: 64, z: 0 }, { x: 0, y: 64, z: 0 });
+    assert(Math.hypot(still.x, still.z) > 2, "never on top of the spot");
   },
   "bosses and fight props don't count as bestiary kills": () => {
     assert(countsForBestiary("siege:wrongling") && countsForBestiary("siege:frost_stag"));

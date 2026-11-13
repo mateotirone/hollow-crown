@@ -167,7 +167,7 @@ export function spawnNpc(dimension, location, id) {
 }
 
 // Story people placed before they carried a skin tag wear theirs by their lore tag
-addNpcLook((e) => { const id = npcIdOf(e); return id && NPC[id] ? `lore_${id}` : undefined; });
+addNpcLook((e) => { const id = npcIdOf(e); return id && NPC[id] ? { key: `lore_${id}`, name: NPC[id].name } : undefined; });
 
 // Clicking a story NPC opens the right scene for this player
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
