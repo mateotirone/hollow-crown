@@ -323,6 +323,19 @@ export const TOMES_C = [
     leads: [],
   },
   {
+    id: "fall_08", col: "fallen", n: 8, boss: "choir",
+    title: "The Conductor's Last Measure", author: "The Conductor of the Court, who leads the Choir",
+    where: "Dropped by the Choir when its Conductor falls, in the Court.",
+    hint: "Carried by whoever leads the singing in the Court below.",
+    pages: [
+      "They take one child a year from Glimwade and Lowseam and Tollrest and Highcut to hold the note. A held note keeps a door open a crack. Every third night we sang, and something up there marched on a keep. We never chose the song. It came down to us from the Chair.",
+      "The one in the Chair sent five up the long stair to kill you, and he grieved for none of them. When the clock-man stopped, he smiled. When the drowned girl went quiet, he hummed along. Every one of them carried a piece of a key, and you took every piece, and he let you. We sang you all the way down. I am sorry. It was the song.",
+      "When I stop, the Singers will get up and walk home with no voices. Let them go. Tell their mothers at the Tally they were good at it. And when you go on to the Chair, do not listen to the kind voice. It is the same voice that taught us the song.",
+    ],
+    clues: ["conductor_chair_sent_five"],
+    leads: [],
+  },
+  {
     id: "fall_07", col: "fallen", n: 7, boss: "morvane",
     title: "The Last Testament", author: "Morvane, the Voice Below, who was Oswin, last King of Aldmere",
     where: "Dropped by the leader of the Hollow (the final boss before the throne).",

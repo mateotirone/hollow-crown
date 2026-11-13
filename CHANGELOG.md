@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - Morvane's tome, The Last Testament, now tells the same story as his voice and the last fight: he sent the five bosses to kill you, and when they failed, he let you take their shards and talked you into opening the Rift for him.
+- The Hollow Choir now leaves a confession when its Conductor falls: The Conductor's Last Measure, the eighth of The Fallen. It tells you who gave the Choir its song, without naming him. The Library now counts 75 tomes.
 - The Hollow Choir now drops its own relic the first time it falls: The Last Note, a small violet bell. Hold it in your offhand and things from the Hollow near you falter, slowed and weakened (never a boss).
 - The Ash Seneschal tells you at the start that he is watching how you fight, and when he falls the faceless statues in the antechamber grind round to face the vault door again.
 - After Morvane falls, a line tells you the Deep Door under the Court will open now.

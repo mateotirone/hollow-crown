@@ -94,7 +94,7 @@ Settled 2026-11-10 with the novel thread. At the truce Oswin took the splinter o
 
 ## Twelve settlements, twelve ways in
 
-Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game is playable differently 12 times". Each plot has a past, three local books (the Papers of that place), a local Ledger mystery, three prior leaders whose portraits hang in its Library, and a first lead that differs from every other plot. Data: `scripts/lore/data/plots.js` and `data/portraits.js`. The first book is on the Library's bottom shelf on arrival, the second turns up at Town, the third at City. Local books never count toward the 74 or the 16 mysteries.
+Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game is playable differently 12 times". Each plot has a past, three local books (the Papers of that place), a local Ledger mystery, three prior leaders whose portraits hang in its Library, and a first lead that differs from every other plot. Data: `scripts/lore/data/plots.js` and `data/portraits.js`. The first book is on the Library's bottom shelf on arrival, the second turns up at Town, the third at City. Local books never count toward the 75 or the 16 mysteries.
 
 | Plot | What stood there | The door it opens | Its mystery (answer) | Prior leaders |
 |---|---|---|---|---|
@@ -187,7 +187,7 @@ The mysteries "The Missing King", "The Broken Truce" and "Who Is Morvane?" each 
 | Elias Marrow | The Lighthouse Letters (8) | Honest and wrong: he doesn't know he's an echo, or that his lamp guides things ashore. Written in cipher |
 | The Choir | The Sung Verses (8) | True from the Hollow's side: they are the wronged party in their own telling. Written right to left (needs Tide Glass) |
 | Ordinary people | Testimonies of the Lost Days (10) | Mixed. Officials lie, children and old women don't, and one is written by a changeling |
-| The bosses | The Fallen (7) | True. Each boss tome is a confession |
+| The bosses | The Fallen (8) | True. Each boss tome is a confession |
 | King Aldric | The Old King's Journal | Truthful and understands none of it |
 
 ### Deliberate contradictions players can catch
