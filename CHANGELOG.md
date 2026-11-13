@@ -173,6 +173,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The Vault is now an add-on to your town hall: buy it from the Town Hall menu and it is dug out by itself, with the stairs going down through the hall's own floor. You no longer pick a spot with the Vault Key (the key still opens the door). When the hall grows the stairs stay where they are if they still fit; if the bigger hall has something there, the vault moves to a spot that fits and your relics on their stands move with it (barrels come back empty). Vaults already dug by hand stay where they are.
 
 ### Fixed
+- The faraway voice no longer speaks to a newcomer still on the welcome hall's quay. Finishing the journal up there now saves his line for when they land, and the siege and Warlord King lines are heard only by the players whose own keep was attacked, not by everyone online.
 - Signs now face you instead of standing edge-on: the two by the Waystone at spawn turn toward where you arrive, every building signpost round a new settlement faces the keep, and the house signs round Mirelight's lantern square face the middle of the square. Signs already in your world turn round by themselves.
 - Held items now move with your arm when you wear a Looking Glass look. Swords, books and the rest stayed still in the air while your hand swung or walked.
 - The minimap no longer shows a grid of pink and black squares over the map: the quest pin's squares were drawn even with no pin.
