@@ -1,0 +1,423 @@
+<title>Held Items Viewer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #ece8e1; --panel: #f6f3ee; --ink: #24212a; --muted: #6c6672; --line: #d5cfc6; --accent: #7a2a26; --stage: #cfc8bd; --stage2: #b9b1a5;
+  --display: "Cinzel", Georgia, serif; --body: "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17151b; --panel: #201d25; --ink: #ebe6ee; --muted: #9d96a3; --line: #34303b; --accent: #d5776e; --stage: #2a2630; --stage2: #1d1a22; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #17151b; --panel: #201d25; --ink: #ebe6ee; --muted: #9d96a3; --line: #34303b; --accent: #d5776e; --stage: #2a2630; --stage2: #1d1a22; color-scheme: dark }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+.wrap { display: grid; grid-template-columns: minmax(270px, 350px) 1fr; gap: 16px; height: 100%; box-sizing: border-box;
+  padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+aside { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; min-width: 0; }
+h1 { font-family: var(--display); font-size: 1.45rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; line-height: 1.45; }
+.lab { font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+button { font: inherit; font-size: .88rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); font-weight: 600; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
+.grid button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 2px; font-size: .64rem; line-height: 1.15; text-align: center; min-height: 64px; }
+.grid img, .grid canvas { width: 32px; height: 32px; image-rendering: pixelated; }
+.info { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; line-height: 1.45; font-size: .9rem; }
+.info b { font-family: var(--display); font-size: 1rem; }
+.info p { margin: 4px 0 0; color: var(--muted); }
+main { position: relative; min-width: 0; min-height: 360px; border-radius: 10px; overflow: hidden; background: linear-gradient(var(--stage), var(--stage2)); }
+canvas#c { display: block; width: 100%; height: 100%; touch-action: none; }
+.hint { position: absolute; left: 12px; bottom: 10px; font-size: .75rem; color: var(--muted); }
+.names { position: absolute; inset: 0; font-family: var(--display); font-size: .74rem; pointer-events: none; }
+.names span { position: absolute; width: 96px; margin-left: -48px; text-align: center; line-height: 1.2; }
+@media (max-width: 760px) { .wrap { grid-template-columns: 1fr; height: auto; } main { height: 70vh; } aside { overflow: visible; } }
+</style>
+<div class="wrap">
+  <aside>
+    <div>
+      <h1>Held Items</h1>
+      <p class="sub">A player in a Looking Glass look, holding things the way the fix in PR #250 hangs them: from the hand bone on the upper arm, like vanilla. Poses come from the game's own animation file. Drag to turn, scroll to zoom.</p>
+    </div>
+    <div><div class="lab">Show</div><div class="row" id="views"></div></div>
+    <div class="sel"><div class="lab">Main hand</div><div class="grid" id="main"></div></div>
+    <div class="sel"><div class="lab">Off hand</div><div class="grid" id="off"></div></div>
+    <div><div class="lab">Doing</div><div class="row" id="poses"></div></div>
+    <div><div class="lab">Look</div><div class="row" id="looks"></div></div>
+    <div class="info" id="info"></div>
+    <div class="info"><b>What changed</b><p>Held items used to hang on the forearm, and Bedrock then drew them floating at the chest or face. Now they hang on the upper arm. A hand that holds something keeps its elbow straight in the custom moves (the bend goes to the shoulder). An empty hand still bends. Shields go in the off-hand bone, so the Seneschal's Greatshield and the vanilla shield are covered by the same fix.</p></div>
+    <p class="sub" style="font-size:.78rem">Where exactly an item sits inside the hand is drawn close to vanilla, but the game decides the last few pixels. Your own skin uses the same bone layout, so it holds things the same way.</p>
+  </aside>
+  <main><canvas id="c"></canvas><div class="names" id="names"></div><div class="hint">Drag to turn · scroll or pinch to zoom</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DATA = __DATA__;
+const $ = (id) => document.getElementById(id);
+const D2R = Math.PI / 180;
+const texCache = {};
+function tex(uri) {
+  if (texCache[uri]) return texCache[uri];
+  const t = new THREE.TextureLoader().load(uri);
+  t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.flipY = false;
+  return (texCache[uri] = t);
+}
+function cubeMesh(c, tw, th, mat) {
+  const inf = c.inflate || 0;
+  const [sx, sy, sz] = c.size, [ox, oy, oz] = c.origin;
+  const x0 = -(ox + sx) - inf, x1 = -ox + inf, y0 = oy - inf, y1 = oy + sy + inf, z0 = oz - inf, z1 = oz + sz + inf;
+  const [u, v] = Array.isArray(c.uv) ? c.uv : [0, 0], w = sx, h = sy, d = sz;
+  const W = Math.floor(w) === w ? w : Math.ceil(w), H = Math.ceil(h), Dd = Math.ceil(d);
+  let F = {
+    north: [[x1, y1, z0], [x0, y1, z0], [x0, y0, z0], [x1, y0, z0]], uvN: [u + Dd, v + Dd, u + Dd + W, v + Dd + H],
+    south: [[x0, y1, z1], [x1, y1, z1], [x1, y0, z1], [x0, y0, z1]], uvS: [u + 2 * Dd + W, v + Dd, u + 2 * Dd + 2 * W, v + Dd + H],
+    east: [[x1, y1, z1], [x1, y1, z0], [x1, y0, z0], [x1, y0, z1]], uvE: [u, v + Dd, u + Dd, v + Dd + H],
+    west: [[x0, y1, z0], [x0, y1, z1], [x0, y0, z1], [x0, y0, z0]], uvW: [u + Dd + W, v + Dd, u + 2 * Dd + W, v + Dd + H],
+    up: [[x1, y1, z1], [x0, y1, z1], [x0, y1, z0], [x1, y1, z0]], uvU: [u + Dd, v, u + Dd + W, v + Dd],
+    down: [[x1, y0, z0], [x0, y0, z0], [x0, y0, z1], [x1, y0, z1]], uvD: [u + Dd + W, v, u + Dd + 2 * W, v + Dd],
+  };
+  if (!Array.isArray(c.uv)) {
+    const pf = (k) => { const e = c.uv[k]; return e ? [e.uv[0], e.uv[1], e.uv[0] + e.uv_size[0], e.uv[1] + e.uv_size[1]] : [0, 0, 0, 0]; };
+    F.uvN = pf("north"); F.uvS = pf("south"); F.uvE = pf("east"); F.uvW = pf("west"); F.uvU = pf("up"); F.uvD = pf("down");
+  }
+  if (c.mirror) { const t = F.uvE; F.uvE = F.uvW; F.uvW = t; for (const k of ["uvN", "uvS", "uvE", "uvW", "uvU", "uvD"]) F[k] = [F[k][2], F[k][1], F[k][0], F[k][3]]; }
+  const pos = [], uvs = [], idx = [];
+  for (const [f, k] of [["north", "uvN"], ["south", "uvS"], ["east", "uvE"], ["west", "uvW"], ["up", "uvU"], ["down", "uvD"]]) {
+    const q = F[f], r = F[k], b = pos.length / 3;
+    if (r[0] === r[2] || r[1] === r[3]) continue;
+    q.forEach((p) => pos.push(...p));
+    uvs.push(r[0] / tw, r[1] / th, r[2] / tw, r[1] / th, r[2] / tw, r[3] / th, r[0] / tw, r[3] / th);
+    idx.push(b, b + 2, b + 1, b, b + 3, b + 2);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat);
+  if (c.rotation) {
+    const p = c.pivot || [0, 0, 0], grp = new THREE.Group();
+    grp.position.set(-p[0], p[1], p[2]); grp.rotation.order = "ZYX";
+    grp.rotation.set(-c.rotation[0] * D2R, -c.rotation[1] * D2R, c.rotation[2] * D2R);
+    m.position.set(p[0], -p[1], -p[2]); grp.add(m); return grp;
+  }
+  return m;
+}
+// Build a geometry; returns {root, bones: {lowercase name: group}}
+function buildGeo(geo, texUri, skip) {
+  const tw = geo.description.texture_width, th = geo.description.texture_height;
+  const mat = new THREE.MeshLambertMaterial({ map: tex(texUri), alphaTest: 0.5, side: THREE.DoubleSide });
+  const root = new THREE.Group(), map = {};
+  for (const b of geo.bones) {
+    const g = new THREE.Group(); const p = b.pivot || [0, 0, 0];
+    g.userData = { pivot: [-p[0], p[1], p[2]] };
+    g.rotation.order = "ZYX";
+    if (!(skip && skip(b))) for (const c of b.cubes || []) { const m = cubeMesh(c, tw, th, mat); m.position.x -= -p[0]; m.position.y -= p[1]; m.position.z -= p[2]; g.add(m); }
+    map[b.name] = g;
+  }
+  const bones = {};
+  for (const b of geo.bones) {
+    const g = map[b.name], par = b.parent && map[b.parent];
+    const pp = par ? par.userData.pivot : [0, 0, 0];
+    g.position.set(g.userData.pivot[0] - pp[0], g.userData.pivot[1] - pp[1], g.userData.pivot[2] - pp[2]);
+    g.userData.rest = g.position.clone();
+    (par || root).add(g);
+    bones[b.name.toLowerCase()] = g;
+  }
+  return { root, bones };
+}
+
+// ---------- MoLang (only what the player action animations use) ----------
+const M = {
+  sin: (d) => Math.sin(d * D2R), cos: (d) => Math.cos(d * D2R), abs: Math.abs, min: Math.min, max: Math.max, sqrt: Math.sqrt,
+  floor: Math.floor, mod: (a, b) => a % b, clamp: (x, a, b) => Math.min(b, Math.max(a, x)), pow: Math.pow,
+};
+function compile(e) {
+  if (typeof e === "number") return () => e;
+  const s = e.replace(/variable\./g, "V.").replace(/query\./g, "Q.").replace(/math\./g, "M.").replace(/\bthis\b/g, "TH");
+  const f = new Function("V", "Q", "M", "TH", "return (" + s + ");");
+  return (V, Q, TH) => { const r = f(V, Q, M, TH); return Number.isFinite(r) ? r : 0; };
+}
+const ANIM = {};
+for (const [name, bones] of Object.entries(DATA.anims)) {
+  ANIM[name] = Object.entries(bones).map(([bone, ch]) => ({
+    bone, rot: ch.rotation ? ch.rotation.map(compile) : null, pos: ch.position ? ch.position.map(compile) : null,
+  }));
+}
+
+// ---------- held item models ----------
+function iconPixels(img) {
+  const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+  const x = c.getContext("2d"); x.drawImage(img, 0, 0);
+  return { w: img.width, h: img.height, d: x.getImageData(0, 0, img.width, img.height).data };
+}
+function paintTorch() {
+  const c = document.createElement("canvas"); c.width = c.height = 16; const x = c.getContext("2d");
+  const px = (cx, cy, col) => { x.fillStyle = col; x.fillRect(cx, cy, 1, 1); };
+  for (let i = 0; i < 9; i++) { px(7, 6 + i, i % 3 ? "#6b4a2c" : "#8a6239"); px(8, 6 + i, "#5a3d22"); }
+  for (const [a, b, col] of [[7, 3, "#fff3a0"], [8, 3, "#ffd34d"], [7, 4, "#ffd34d"], [8, 4, "#ff9c2a"], [7, 5, "#ff9c2a"], [8, 5, "#e8621c"], [7, 2, "#fffbe0"], [8, 2, "#fff3a0"]]) px(a, b, col);
+  return c;
+}
+// A flat item is one pixel thick, built from its icon (like vanilla's held sprites).
+function spriteMesh(pix, size) {
+  const pos = [], col = [], idx = [];
+  const s = size / pix.w;
+  const quad = (a, b, c, d, r, g, bl) => { const k = pos.length / 3; pos.push(...a, ...b, ...c, ...d); for (let i = 0; i < 4; i++) col.push(r, g, bl); idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
+  const on = (u, v) => u >= 0 && v >= 0 && u < pix.w && v < pix.h && pix.d[(v * pix.w + u) * 4 + 3] > 100;
+  for (let v = 0; v < pix.h; v++) for (let u = 0; u < pix.w; u++) {
+    if (!on(u, v)) continue;
+    const i = (v * pix.w + u) * 4, r = pix.d[i] / 255, g = pix.d[i + 1] / 255, b = pix.d[i + 2] / 255;
+    // sprite plane: x = thickness, icon right -> -z, icon up -> +y
+    const z0 = -u * s, z1 = -(u + 1) * s, y1 = (pix.h - v) * s, y0 = (pix.h - v - 1) * s, xa = -s / 2, xb = s / 2;
+    quad([xb, y1, z0], [xb, y1, z1], [xb, y0, z1], [xb, y0, z0], r, g, b);
+    quad([xa, y1, z1], [xa, y1, z0], [xa, y0, z0], [xa, y0, z1], r, g, b);
+    const dk = 0.78;
+    if (!on(u, v - 1)) quad([xa, y1, z0], [xa, y1, z1], [xb, y1, z1], [xb, y1, z0], r * dk, g * dk, b * dk);
+    if (!on(u, v + 1)) quad([xa, y0, z1], [xa, y0, z0], [xb, y0, z0], [xb, y0, z1], r * dk, g * dk, b * dk);
+    if (!on(u - 1, v)) quad([xa, y1, z0], [xb, y1, z0], [xb, y0, z0], [xa, y0, z0], r * dk, g * dk, b * dk);
+    if (!on(u + 1, v)) quad([xb, y1, z1], [xa, y1, z1], [xa, y0, z1], [xb, y0, z1], r * dk, g * dk, b * dk);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(idx); geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+}
+const PIX = {};
+const ITEM = Object.fromEntries(DATA.items.map((i) => [i.id, i]));
+function loadIcons(done) {
+  let left = 0;
+  for (const it of DATA.items) {
+    if (it.id === "torch") { it.canvas = paintTorch(); PIX[it.id] = iconPixels(it.canvas); continue; }
+    if (it.id === "shield") { it.canvas = shieldCanvas(16); continue; }
+    if (!it.icon) continue;
+    left++; const img = new Image();
+    img.onload = () => { PIX[it.id] = iconPixels(img); if (--left === 0) done(); };
+    img.src = it.icon;
+  }
+  if (left === 0) done();
+}
+// Placement inside the hand (approximating vanilla): grip pixel goes to the bottom of the hand.
+// size = model units, tilt = degrees the item leans forward, grip = [u, v] of the pixel held.
+const HOLD = {
+  blade: { size: 13.6, tilt: -40, grip: [3.5, 12.5] },
+  heavy: { size: 13.6, tilt: -40, grip: [3.5, 12.5] },
+  bow: { size: 12, tilt: -30, grip: [8, 8] },
+  light: { size: 10, tilt: -45, grip: [7.5, 13] },
+  book: { size: 8.8, tilt: 0, grip: [8, 13] },
+  flat: { size: 8.8, tilt: 0, grip: [8, 13] },
+};
+function itemModel(id, left) {
+  const it = ITEM[id]; const g = new THREE.Group();
+  if (it.kind === "shield") {
+    const sh = id === "shield" ? vanillaShield() : buildGeo(DATA.greatshield.geo, DATA.greatshield.tex).root;
+    // handle centre (1, 28, 3) in model units sits in the hand; the face looks out from the arm
+    sh.position.set(1, -28, -3);
+    const holder = new THREE.Group(); holder.add(sh);
+    holder.rotation.y = (left ? 1 : -1) * 90 * D2R;
+    holder.position.set(left ? -1.5 : 1.5, 2, 0);
+    g.add(holder); return g;
+  }
+  const h = HOLD[it.kind]; const pix = PIX[id];
+  const m = spriteMesh(pix, h.size), s = h.size / pix.w;
+  m.position.set(0, -(pix.h - h.grip[1]) * s, h.grip[0] * s);
+  const t = new THREE.Group(); t.add(m); t.rotation.x = h.tilt * D2R;
+  if (left) t.scale.z = 1;
+  g.add(t); return g;
+}
+function shieldCanvas(icon) {
+  const W = icon ? 10 : 12, H = icon ? 14 : 22;
+  const c = document.createElement("canvas"); c.width = icon ? 16 : W; c.height = icon ? 16 : H; const x = c.getContext("2d");
+  const ox = icon ? 3 : 0, oy = icon ? 1 : 0;
+  for (let i = 0; i < W; i++) for (let j = 0; j < H; j++) {
+    if (icon && j > 10 && (i < j - 10 || i > W - 1 - (j - 10))) continue;
+    const rim = i === 0 || i === W - 1 || j === 0 || j === H - 1;
+    x.fillStyle = rim ? (j % 4 === 0 ? "#9aa0a8" : "#7d838b") : ((i >> 2) % 2 ? "#8a6239" : "#7a5531");
+    if (!rim && (j + i * 7) % 9 === 0) x.fillStyle = "#6b4a2c";
+    x.fillRect(ox + i, oy + j, 1, 1);
+  }
+  return c;
+}
+function vanillaShield() {
+  const c = shieldCanvas(0);
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
+  const wood = new THREE.MeshLambertMaterial({ color: 0x6b4a2c });
+  const plate = new THREE.Mesh(new THREE.BoxGeometry(12, 22, 1), [wood, wood, wood, wood, wood, new THREE.MeshLambertMaterial({ map: t })]);
+  plate.position.set(1, 28, -0.5); plate.rotation.y = Math.PI;
+  const handle = new THREE.Mesh(new THREE.BoxGeometry(2, 6, 6), wood); handle.position.set(1, 28, 3);
+  const g = new THREE.Group(); g.add(plate, handle); return g;
+}
+
+// ---------- figure: body + items, posed every frame ----------
+const KIND = (id) => (id ? ITEM[id].kind : null);
+function makeFigure(spec) {
+  const { root, bones } = buildGeo(DATA.body, DATA.looks[spec.look], (b) => b.name === "cape");
+  const fig = { root, bones, spec, V: {}, Q: {}, dist: 0, swingStart: 0 };
+  if (spec.main) { const m = itemModel(spec.main, false); m.position.set(0, -3, -1); bones.rightitem.add(m); }
+  if (spec.off) { const m = itemModel(spec.off, true); m.position.set(0, -3, -1); bones.leftitem.add(m); }
+  return fig;
+}
+function poseFigure(fig, t) {
+  const { spec, bones, V, Q } = fig;
+  const mk = KIND(spec.main), ok = KIND(spec.off);
+  const walking = spec.pose === "walk", swinging = spec.pose === "swing", blocking = spec.pose === "block" && ok === "shield";
+  const drawing = spec.pose === "draw" && mk === "bow", idle = spec.pose === "idle";
+  const speed = walking ? 0.5 : 0;
+  // what the game's per-frame script would work out
+  Q.life_time = t; Q.modified_move_speed = speed; Q.modified_distance_moved = t * 9.4 * (walking ? 1 : 0); Q.walk_distance = Q.modified_distance_moved;
+  V.tcos0 = Math.cos(Q.modified_distance_moved * 38.17 * D2R) * speed * 57.3;
+  V.hc_rbend = spec.main ? 0 : 1; V.hc_lbend = spec.off ? 0 : 1;
+  V.hc_light_off = ok === "light" ? 1 : 0;
+  V.hc_sprint = 0; V.hc_airb = 0; V.hc_rise = 0; V.hc_tuck = 0; V.hc_fall = 0; V.hc_land = 0; V.hc_hurt = 0;
+  // swings: 0.35 s each, three in a row then a pause
+  let attack = 0, combo = 0;
+  if (swinging) { const c = t % 2.2; if (c < 1.05) { combo = Math.floor(c / 0.35); attack = (c % 0.35) / 0.35; } }
+  const ht = attack, r = M.clamp((ht - 0.65) / 0.35, 0, 1), q = M.clamp((ht - 0.2) / 0.35, 0, 1);
+  V.hc_e = attack > 0 ? Math.sin(Math.min(ht / 0.2, 1) * Math.PI / 2) * (1 - r * r * (3 - 2 * r)) : 0;
+  V.hc_s = q * q * (3 - 2 * q);
+  // bow: draw 1 s, hold with a shake, let go
+  const bc = t % 3.2; const isDraw = drawing && bc < 2.6;
+  V.hc_draw = isDraw ? Math.min(bc, 1) : 0; V.hc_shake = isDraw ? M.clamp((bc - 1.5) / 3, 0, 1) : 0;
+  V.hc_release = drawing && !isDraw ? M.clamp(1 - (bc - 2.6) / 0.35, 0, 1) : 0;
+  const freeTarget = attack > 0 || isDraw || blocking || V.hc_release > 0 ? 0 : 1;
+  V.hc_free = fig.free = fig.free === undefined ? freeTarget : fig.free + (freeTarget - fig.free) * 0.25;
+  V.hc_freel = V.hc_free * (1 - V.hc_light_off);
+  V.hc_read = mk === "book" && attack <= 0 ? 1 - Math.min(speed * 2.5, 0.6) : 0;
+  V.hc_fidt = t % 7; V.hc_fid = idle ? Math.sin(V.hc_fidt / 7 * Math.PI) : 0;
+  const weapon = !spec.main ? 3 : mk === "heavy" ? 2 : mk === "blade" ? 1 : 0;
+
+  // vanilla's own layers (approximate): walking swing, holding, shield up, bow pose
+  const R = {}, P = {};
+  for (const k of Object.keys(bones)) { R[k] = [0, 0, 0]; P[k] = [0, 0, 0]; }
+  R.rightarm[0] = V.tcos0; R.leftarm[0] = -V.tcos0; R.rightleg[0] = -V.tcos0 * 1.4; R.leftleg[0] = V.tcos0 * 1.4;
+  if (spec.main) R.rightarm[0] = R.rightarm[0] * 0.5 - 18;
+  if (spec.off) R.leftarm[0] = R.leftarm[0] * 0.5 - 18;
+  if (blocking) { R.leftarm[0] = R.leftarm[0] * 0.5 - 54 + 18; R.leftarm[1] = 30; }
+  if (drawing && (isDraw)) { R.rightarm = [-90, 6, 0]; R.leftarm = [-90, -29, 0]; }
+  if (attack > 0 && weapon === 0) R.rightarm[0] -= Math.sin(attack * Math.PI) * 70;
+
+  // the game's custom moves, in the same order as its controller
+  const active = ["locomotion"];
+  if (idle) active.push(weapon === 1 || weapon === 2 ? "idle_blade" : "idle_stretch");
+  if (mk === "light" && attack <= 0) active.push("light_main");
+  if (ok === "light" && !isDraw) active.push("light_off");
+  if (V.hc_read > 0) active.push("read");
+  if (isDraw) active.push("bow_draw");
+  if (V.hc_release > 0) active.push("bow_release");
+  if (attack > 0 && weapon > 0) {
+    const name = weapon === 1 ? ["attack.blade_forehand", "attack.blade_backhand", "attack.blade_thrust"][combo]
+      : weapon === 2 ? (combo === 1 ? "attack.heavy_sweep" : "attack.heavy_chop") : (combo === 2 ? "attack.fist_hook" : "attack.fist_jab");
+    active.push(name);
+  }
+  for (const a of active) for (const ch of ANIM[a] || []) {
+    if (!R[ch.bone]) continue;
+    if (ch.rot) for (let i = 0; i < 3; i++) R[ch.bone][i] += ch.rot[i](V, Q, R[ch.bone][i]);
+    if (ch.pos) for (let i = 0; i < 3; i++) P[ch.bone][i] += ch.pos[i](V, Q, P[ch.bone][i]);
+  }
+  for (const [k, g] of Object.entries(bones)) {
+    g.rotation.set(-R[k][0] * D2R, -R[k][1] * D2R, R[k][2] * D2R);
+    g.position.set(g.userData.rest.x - P[k][0], g.userData.rest.y + P[k][1], g.userData.rest.z + P[k][2]);
+  }
+  return active;
+}
+
+// ---------- scene ----------
+const canvas = $("c");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(30, 1, 1, 2000);
+scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+const sun = new THREE.DirectionalLight(0xffffff, 0.62); sun.position.set(-30, 60, -50); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(40, 20, 40); scene.add(fill);
+const world = new THREE.Group(); scene.add(world);
+
+const LINEUP = [
+  { main: "longsword", pose: "stand", label: "Longsword" },
+  { main: "warhammer", pose: "stand", label: "Warhammer" },
+  { main: "kings_journal", pose: "stand", label: "Journal (reading)" },
+  { main: "torch", pose: "stand", label: "Torch (held up)" },
+  { main: "rimefang_bow", pose: "stand", label: "Rimefang Bow" },
+  { main: "oath_of_oswin", off: "seneschal_greatshield", pose: "stand", label: "Kept Oath + Greatshield" },
+  { main: "vault_key", off: "shield", pose: "stand", label: "Key + Shield" },
+];
+const POSES = [["stand", "Standing"], ["walk", "Walking"], ["swing", "Swinging"], ["idle", "Idle fidget"], ["block", "Shield up"], ["draw", "Drawing the bow"]];
+const st = { view: "one", main: "longsword", off: "seneschal_greatshield", pose: "stand", look: "moss_sedgewick", yaw: 0.5, pitch: 0.12, dist: 95 };
+try { const s = JSON.parse(localStorage.getItem("hc-held") || "{}"); Object.assign(st, s); } catch (e) {}
+let figs = [];
+function rebuild() {
+  while (world.children.length) world.remove(world.children[0]);
+  const specs = st.view === "all" ? LINEUP.map((s) => ({ ...s, pose: st.pose === "draw" || st.pose === "block" ? st.pose : st.pose, look: st.look }))
+    : [{ main: st.main, off: st.off, pose: st.pose, look: st.look }];
+  const gap = 24;
+  figs = specs.map((s, i) => { const f = makeFigure(s); f.root.position.x = -(i - (specs.length - 1) / 2) * gap; world.add(f.root); return f; });
+  if (st.view === "all") { st.dist = 285; st.yaw = 0.55; st.pitch = 0.08; } else { st.dist = Math.min(Math.max(st.dist, 60), 130); }
+  $("names").innerHTML = st.view === "all" ? LINEUP.map((s) => `<span>${s.label}</span>`).join("") : "";
+  document.querySelectorAll(".sel").forEach((e) => (e.style.display = st.view === "all" ? "none" : ""));
+  try { localStorage.setItem("hc-held", JSON.stringify({ main: st.main, off: st.off, pose: st.pose, look: st.look, view: st.view })); } catch (e) {}
+}
+function info(active) {
+  if (st.view === "all") return `<b>Line-up</b><p>Seven players each holding something different, all doing "${POSES.find((p) => p[0] === st.pose)[1]}". Pick a pose to see them all move.</p>`;
+  const mk = KIND(st.main), ok = KIND(st.off);
+  const lines = [];
+  if (mk === "book" && st.pose !== "swing") lines.push("Holding a book, you read it: both arms come up and the head tips down.");
+  if (mk === "light") lines.push("A torch in the main hand is held up high to light the way.");
+  if (ok === "light") lines.push("A torch in the off hand is held up on the left.");
+  if (st.pose === "swing") lines.push(mk === "blade" ? "Swords chain forehand, backhand, thrust." : mk === "heavy" ? "Heavy weapons chop, sweep, chop." : !st.main ? "Empty fists jab, jab, hook." : "Other items keep vanilla's swing.");
+  if (st.pose === "block" && ok !== "shield") lines.push("Put a shield in the off hand to raise it.");
+  if (st.pose === "draw" && mk !== "bow") lines.push("Hold the Rimefang Bow to draw it.");
+  if (st.pose === "idle") lines.push("After standing still a while, players fidget. With a blade or hammer they bring it up to the brow.");
+  if (st.main) lines.push("The main hand holds an item, so its elbow stays straight and the shoulder takes the bend.");
+  const n = (id) => (id ? ITEM[id].name : "nothing");
+  return `<b>${n(st.main)}${st.off ? " + " + n(st.off) : ""}</b>` + lines.map((l) => `<p>${l}</p>`).join("") + `<p style="font-size:.78rem">Moves playing: ${active.join(", ")}</p>`;
+}
+function iconEl(it) {
+  if (it && it.canvas) { const c = document.createElement("canvas"); c.width = c.height = 16; c.getContext("2d").drawImage(it.canvas, 0, 0); return c; }
+  const img = document.createElement("img"); img.alt = ""; if (it && it.icon) img.src = it.icon; return img;
+}
+function itemGrid(el, list, cur, set) {
+  el.innerHTML = "";
+  for (const it of list) {
+    const b = document.createElement("button"); b.setAttribute("aria-pressed", (it ? it.id : null) === cur);
+    if (it) { b.appendChild(iconEl(it)); } else { const s = document.createElement("span"); s.textContent = "–"; s.style.cssText = "font-size:1.4rem;line-height:32px"; b.appendChild(s); }
+    const l = document.createElement("span"); l.textContent = it ? it.name : "Empty"; b.appendChild(l);
+    b.onclick = () => { set(it ? it.id : null); renderUi(); rebuild(); }; el.appendChild(b);
+  }
+}
+function btns(el, items, isOn, onClick) {
+  el.innerHTML = "";
+  for (const [k, label] of items) {
+    const b = document.createElement("button"); b.textContent = label; b.setAttribute("aria-pressed", isOn(k));
+    b.onclick = () => { onClick(k); renderUi(); rebuild(); }; el.appendChild(b);
+  }
+}
+function renderUi() {
+  btns($("views"), [["one", "One player"], ["all", "Line-up of seven"]], (k) => st.view === k, (k) => (st.view = k));
+  itemGrid($("main"), [null, ...DATA.items.filter((i) => i.kind !== "shield")], st.main, (k) => (st.main = k));
+  itemGrid($("off"), [null, ...DATA.items.filter((i) => i.kind === "shield" || i.kind === "light")], st.off, (k) => (st.off = k));
+  btns($("poses"), POSES, (k) => st.pose === k, (k) => (st.pose = k));
+  btns($("looks"), Object.entries(DATA.lookNames), (k) => st.look === k, (k) => (st.look = k));
+}
+let lastInfo = "";
+function frame(ms) {
+  const t = ms / 1000;
+  let active = [];
+  figs.forEach((f, i) => { const a = poseFigure(f, t + i * 0.37); if (i === 0) active = a; });
+  const html = info(active); if (html !== lastInfo) { $("info").innerHTML = html; lastInfo = html; }
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) renderer.setSize(w, h, false);
+  cam.aspect = w / Math.max(1, h); cam.updateProjectionMatrix();
+  const tg = new THREE.Vector3(0, 18, 0);
+  cam.position.set(tg.x - Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist, tg.y + Math.sin(st.pitch) * st.dist, tg.z - Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist);
+  cam.lookAt(tg);
+  const names = $("names");
+  [...names.children].forEach((el, i) => { const f = figs[i]; if (!f) return; const v = new THREE.Vector3(); f.root.getWorldPosition(v); v.y = -3; v.project(cam);
+    el.style.left = ((v.x + 1) / 2 * w) + "px"; el.style.top = ((1 - v.y) / 2 * h) + "px"; });
+  renderer.render(scene, cam);
+  if (!window.__still) requestAnimationFrame(frame);
+}
+let drag = null;
+canvas.addEventListener("pointerdown", (e) => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointermove", (e) => { if (!drag) return; st.yaw += (e.clientX - drag[0]) * 0.01; st.pitch = Math.max(-0.6, Math.min(1.2, st.pitch + (e.clientY - drag[1]) * 0.01)); drag = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", () => (drag = null));
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); st.dist = Math.max(30, Math.min(320, st.dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+window.__render = (ms) => frame(ms);
+loadIcons(() => { renderUi(); rebuild(); requestAnimationFrame(frame); });
+</script>
