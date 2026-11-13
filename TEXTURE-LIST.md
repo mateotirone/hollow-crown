@@ -627,3 +627,17 @@ All 187 items and 202 blocks have an icon or texture that exists, is the right s
 - 81 blocks had no name in the language files (regional Castle Bricks/Tiles/Cobbled/Smooth/Stone and the unbreakable "Old" tree and trim blocks).
 - Boss unlock blocks, guard tier icons, vault key: see above.
 Not tested in game.
+
+## Rimeforged gear (Frostmarch; painted 2026-11-13 by `studio/art/build_rimeforged.py`, items wired by the custom armour thread)
+Dark iron rimed in pale blue, fur collar, dragon-head crest. Sheet: `art/rimeforged-gear.png`. Not tested in game.
+- Worn, 3D, one 64×32 vanilla-layout sheet per piece (trim-safe): `textures/models/siege_armor/rimeforged_<helmet|chestplate|leggings|boots>.png`, shapes `models/entity/armor/rimeforged_<piece>.geo.json`, attachables `attachables/rimeforged_<piece>.json` for `siege:rimeforged_<piece>`. Helm: dragon skull, snout and swept horns. Hauberk: fur collar, pauldrons. Greaves: knee cops. Boots: fur cuffs.
+- Flat sheets: `textures/models/armor/rimeforged_layer_1.png`, `_2.png`.
+- Icons (keys in `item_texture.json`): `siege_rimeforged_<piece>`, `siege_rime_axe`, `siege_rime_spear`, `siege_rime_steel`. The axe and spear have icons only (held like vanilla); a thrown-spear model is not painted.
+## Codex regional gear (painted 2026-11-13 by `studio/art/build_codex_art.py`; items, attachables and icon keys by the custom armour thread)
+Sheet: `art/codex-regional-gear.png`. In the Texture Studio under Armor. Not tested in game.
+- Sets: Watchward (Vale), Tidewrought (Saltreach), Sunscale (Emberwaste), Fenlight (Blackfen). Worn, 3D, one 64×32 trim-safe sheet per piece: `textures/models/siege_armor/codex_<set>_<piece>.png`; shapes `models/entity/armor/codex_<set>_<piece>.geo.json` (`geometry.siege_codex_<set>_<piece>`).
+- Icons in `textures/items/codex/`: the 16 armour pieces, `watchmans_glaive`, `watch_crossbow`, `lighthouse_harpoon`, `tidesteel_cutlass`, `sunbrand_sabre`, `sunscale_bow`, `wisp_bow`, `bogsilver_sickle`, and the alloys `watchsteel`, `tidesteel`, `sunsteel`, `bogsilver`.
+- Second batch (`studio/art/build_codex_art2.py`, sheet `art/codex-items.png`): Oathsworn set and Cairn-Helm of the Thane worn in 3D (`codex_oathsworn_<piece>`, `codex_cairn_helm`), and icons for every other Codex item: the drops, the twelve mythical weapons and tools, the seven charms, the caravan goods, the Codex. No stand-ins are left (`studio/codex/standins.json` is empty).
+- Codex book pictures, made by `studio/build_codex.py` from the item icons: `textures/ui/codex/<id>.png` (found) and `<id>_outline.png` (not found yet: dark silhouette, pale rim), for all 103 entries. Repaint an icon and run the script again to refresh them.
+- The five Choir Shards (`textures/items/codex/choir_shard_<reeve|huntsman|bride|seneschal|mother>.png`, keys `siege_cx_choir_shard_<boss>`): STAND-INS recoloured from `siege_choir_shard.png` (brass, ice, sea, ember, fen) by `studio/build_codex.py`, listed in `studio/codex/standins.json`. Each needs its own painted shape. The old `siege_choir_shard.png` stays for the "Faded Choir Shard" that old saves convert.
+- Tuning Fork icon repainted 2026-11-13 as a combination of the five Choir Shards (`studio/art/build_tuning_fork.py`, writes `textures/items/siege_tuning_fork.png`): Huntsman's ice tine and Bride's sea-green tine, the Reeve's brass cog at the yoke, the Seneschal's ember-cracked collar, an amethyst handle gripped by the Mother's roots. Replaces the one from `build_hollowcrown.py`; don't regenerate that one over it.

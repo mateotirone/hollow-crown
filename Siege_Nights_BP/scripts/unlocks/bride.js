@@ -19,7 +19,7 @@ import { grantTome } from "../lore/player.js";
 import { TOME_IN_UNLOCKS } from "../lore/places.js";
 
 export const RING = "siege:drowned_ring";
-const DROWNED = "minecraft:drowned";
+const DROWNED = "siege:brine_lurker"; // the drowned of Brannoc wear our own body, never vanilla's
 const DARK = 4;
 export const darkMoon = () => isNight() && moonPhase() === DARK;
 const pews = (site) => makePews(site.seed());

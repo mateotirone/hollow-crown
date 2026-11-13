@@ -108,7 +108,7 @@ function brazierClick(player, block, held) {
   const now = world.getAbsoluteTime();
   if (here) {
     if (here.owner !== player.id) return say(player, `§7${here.ownerName}'s egg is warming here.`);
-    const left = here.warmAt + S.hatchDays * DAY - now;
+    const left = here.warmAt + hatchDaysOf(here) * DAY - now;
     return say(player, left > 0 ? `§6Your egg is warm. §7About ${days(left)} more day${plural(days(left))}.` : "§6Something moves inside the egg.");
   }
   if (held !== EGG) {
@@ -208,7 +208,7 @@ async function roostMenu(player, block) {
   }
   if (rec.stage === "egg") {
     if (rec.status !== "warming") return say(player, "§7Set your Dragon Egg in a Hatching Brazier in the nursery.");
-    const left = rec.warmAt + S.hatchDays * DAY - now;
+    const left = rec.warmAt + hatchDaysOf(rec) * DAY - now;
     return say(player, left > 0 ? `§6The egg is warm. §7About ${days(left)} more day${plural(days(left))}.` : "§6Something moves inside the egg.");
   }
   rec.roost = { x: block.location.x, y: block.location.y, z: block.location.z };
@@ -552,19 +552,22 @@ function mindTick() {
 
 // ---------- Loops ----------
 
+// Days an egg takes to hatch: another feature may shorten it (the Codex's Hatching Brazier beside the Roost)
+const hatchDaysOf = (rec) => applyFilter("dragonHatchDays", S.hatchDays, { roost: rec.roost });
+
 function growthTick() {
   if (!isReady()) return;
   offerRider();
   const now = world.getAbsoluteTime();
   for (const rec of Object.values(store.data.dragons)) {
-    if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY * 0.75 && now < rec.warmAt + S.hatchDays * DAY) {
+    if (rec.status === "warming" && now >= rec.warmAt + hatchDaysOf(rec) * DAY * 0.75 && now < rec.warmAt + hatchDaysOf(rec) * DAY) {
       try {
         const block = world.getDimension("overworld").getBlock(rec.roost);
         if (block?.typeId === HATCHERY && block.permutation.getState("siege:egg") !== 2) setEgg(block, 2); // it starts to crack
       } catch {
         // not loaded: it shows the cracks when it is
       }
-    } else if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY) {
+    } else if (rec.status === "warming" && now >= rec.warmAt + hatchDaysOf(rec) * DAY) {
       try {
         const dim = world.getDimension("overworld");
         const block = dim.getBlock(rec.roost); // undefined until its brazier is loaded

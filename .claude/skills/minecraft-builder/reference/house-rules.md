@@ -119,3 +119,16 @@ under everything" (2026-11-11), which stood buildings on stone towers on slopes.
 - Water, streets and other built ground never move. Plan doc: https://claude.ai/artifact/MTfFZZwMhcq66gGjJNmVjE.
 - Check: `python3 map/structures/terraform_test.py` prints TERRAFORM OK; `node tools/check.mjs` compares the game
   copy against the same cases.
+
+### Every door is reached like a house door (Mateo, 2026-11-13: "make sure every building generates like this")
+
+- In front of every door: a landing, 3 wide and 4 out, paved level with the floor and sunk half a slab. Only when the
+  street is far below or above does it shorten (to 1) so the walk has room to step down.
+- From the landing to the street the walk climbs at most half a block a step, or a stair where it must climb a block.
+  A street that runs past a landing is held within half a block of it.
+- No door opens onto a building, a drop or open grass: a building placed without a walkway (claimed early, on the
+  square, a windmill in a field) gets one before the land is terraformed; with no street ahead, the walk runs on
+  straight down to the ground and a footpath goes round from there. A windmill's door must face open ground.
+- Check: every town bake prints `doors N door problems 0` (`door_report` in `towngen.py`).
+- In game, the Foundation Stone and raised buildings (and rival lords' outposts) hold the same landing level with
+  the floor in their Groundwork stage (`settle/ground.js`; the door is at plan x = 0 facing -z).

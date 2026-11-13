@@ -1,6 +1,8 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { hudString, readHud, arrowDir, placeName, regionAt, cleanLabel, ORIGIN, TILE, TILES, PLACES } from "./data.js";
 import { REGION_ROWS, REGION_CELL } from "./regions.js";
+import { hollowHud, hollowTile, hollowPlace, HOLLOW_MAP } from "./hollow.js";
+import { HOLLOW_TILES } from "./hollow_tiles.js";
 
 addTests("minimap", {
   "the arrow points the way the player faces": () => {
@@ -49,5 +51,20 @@ addTests("minimap", {
   "the region grid covers the whole map": () => {
     assertEqual(REGION_ROWS.length, (TILES * TILE) / REGION_CELL);
     assert(REGION_ROWS.every((r) => r.length === REGION_ROWS.length));
+  },
+  "the Hollow has its own map: the HUD reads it the same way, void and Slips are uncharted": () => {
+    assert(HOLLOW_TILES.length > 400, `only ${HOLLOW_TILES.length} Hollow tiles`);
+    const arrive = readHud(hollowHud({ x: 0.5, z: 0.5, yaw: 0 }));
+    const t = hollowTile(0.5, 0.5);
+    assert(t && arrive.tile === t.code && arrive.tile.length === 6 && arrive.tile.startsWith("h"), arrive.tile);
+    assert("abcdefghijklmnop".includes(arrive.spot) && arrive.spot.length === 1 && arrive.dir === "u", JSON.stringify(arrive));
+    assertEqual(arrive.label, "The Wound");
+    assertEqual(hollowPlace(-380, 2160), "The Needlehold");
+    assertEqual(hollowPlace(-349, 343), "Glimwade");
+    assertEqual(readHud(hollowHud({ x: 0, z: 0, yaw: 0, hidden: true })).label, "Uncharted", "no map during a Slip");
+    assertEqual(readHud(hollowHud({ x: 5000, z: 0, yaw: 0 })).tile, "none__");
+    const M = HOLLOW_MAP;
+    assertEqual(readHud(hollowHud({ x: M.x0 + 20 * M.tile + 63, z: M.z0 + 2 * M.tile + 63, yaw: 0 })).spot, "p");
+    for (const code of HOLLOW_TILES) assert(/^h\d\dz\d\d$/.test(code), code);
   },
 });

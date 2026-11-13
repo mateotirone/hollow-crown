@@ -215,7 +215,7 @@ for i in range(0, 5):                                                           
 t.set(9, 5, R(S, 4)); t.set(10, 6, R(S, 4)); t.set(10, 5, R(S, 2))
 for (x, y) in [(15, 0), (12, 0), (15, 3)]: t.set(x, y, R(BLUE, 4))                                         # ringing shimmer
 outline_alpha(t, R(S, 0)); t.set(15, 0, R(BLUE, 4)); t.set(12, 0, R(BLUE, 4)); t.set(15, 3, R(BLUE, 4))
-t.save(RP + 'items/siege_tuning_fork.png')
+# t.save(RP + 'items/siege_tuning_fork.png')  # the Tuning Fork is now painted by build_tuning_fork.py (made of the five shards)
 CL = {'o': R(VIOLET, 0), 'a': R(VIOLET, 5), 'b': R(VIOLET, 4), 'c': R(VIOLET, 3), 'd': R(VIOLET, 2), 'e': R(VIOLET, 1)}
 from_grid(["................",
            ".........oo.....",

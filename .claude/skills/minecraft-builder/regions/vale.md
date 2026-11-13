@@ -206,6 +206,27 @@ strip round the house (the skill's `bushes`, on by default).
 - jerkinhead roofs;
 - carriage arches through a range (use `arch` cut into the wall).
 
+## Arenas and grand civic sites (the Kingsrest arena, Mateo 2026-11-13)
+
+- **Round, Norman, not Roman** (Mateo: "more circular"): a round shell in the VAL-01 stone with a two-course plinth, pilasters one out on the piers,
+  string courses at each storey, a polished andesite cornice and battlements; an open round-arched arcade on the ground
+  storey with an ambulatory behind it, an open gallery storey, lancets above. Copper only on domes, cones and the gatehouse
+  roof (Kingsrest's civic accent).
+- **Seating** is the skill's `stands` part (`"round": true`): stone brick seats, polished andesite aisles and every fourth
+  row lighter.
+- **Gates on a round floor** need a flat wall: each starting room is square to its nearest axis, and where the circle
+  curves away from its gate a short paved passage runs through the podium to the floor.
+- **Lit for night fights** (Mateo asked "is it lit correctly?"): lamp posts every 4 blocks round each walkway and the
+  promenade, lights flush in two rows of seats and in the walkways, lanterns every 4 blocks in the ambulatory and
+  gallery, lights set flush in stair tower walls all the way up the spiral. `arena.py OUT --light` lists the darkest
+  standing spots per area; nothing people walk inside should be below light 4.
+- **The twelve settlement colours** (red, orange, yellow, lime, green, cyan, light blue, blue, purple, magenta, pink,
+  white, clockwise from north) show as wool and concrete: pennants on poles over every bay, a panel over each gate, a
+  roll of colours in the entrance hall and the royal box. Never coloured stone on the shell itself.
+- **The floor stays flat and plain:** lights go flush in it (ochre froglight) on rings every 7 or 8 blocks, never on
+  posts in the middle, and no colour wheel or medallion (Mateo: "I don't want the rainbow wheel at the center").
+- Source: `map/structures/arena.py`.
+
 ## Never
 
 - **Frames and plaster:** no dark oak frames on whole slate-roofed streets (gloomy), and no diorite

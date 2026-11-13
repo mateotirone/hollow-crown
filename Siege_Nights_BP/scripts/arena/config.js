@@ -36,13 +36,11 @@ export const DIFFICULTIES = [
   { id: "legend", name: "Legend", count: 4, effects: [["strength", 1], ["resistance", 1], ["speed", 0]], pay: 9 },
 ];
 
-// The mobs you can call into the arena. base: Regals for beating one at Squire. Arena mobs are tagged, so the
-// no-vanilla-monsters rule leaves them alone (they never spawn on their own anywhere).
+// The mobs you can call into the arena. base: Regals for beating one at Squire. All our own creatures: no vanilla
+// monster is ever spawned (Mateo 2026-11-13).
 // Hollow creatures are left out on purpose: the arena is open from day one, and the Hollow isn't shown early.
 export const ARENA_MOBS = [
-  { type: "minecraft:zombie", name: "Zombie", base: 3 },
-  { type: "minecraft:skeleton", name: "Skeleton", base: 4 },
-  { type: "minecraft:spider", name: "Spider", base: 4 },
+  { type: "siege:ash_scarab", name: "Ash Scarab", base: 3 },
   { type: "siege:rimewolf", name: "Rimewolf", base: 5 },
   { type: "siege:mire_toad", name: "Mire Toad", base: 4 },
   { type: "siege:hollow_footman", name: "Tollman", base: 6 },
