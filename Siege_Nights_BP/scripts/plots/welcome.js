@@ -531,6 +531,17 @@ function toHall(player) {
 const mustChoose = (player) =>
   hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
 
+/** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
+export function inWelcomeHall(player) {
+  try {
+    if (!player?.isValid) return false;
+    if (player.hasTag(ARRIVING) || mustChoose(player)) return true;
+    return player.dimension.id === OVERWORLD && inHall(player.location);
+  } catch {
+    return false;
+  }
+}
+
 // First join, step 20 of the join sequence (after the look picker, before the journal): up to the hall.
 addJoinStep(20, "welcome hall", async (player, { wait }) => {
   if (!isReady() || !player.isValid || !mapMode()) return;
