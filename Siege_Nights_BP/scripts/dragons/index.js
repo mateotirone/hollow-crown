@@ -9,6 +9,7 @@
 //   /scriptevent siege:dragons_grow     hatch it / grow it one stage (max bond, +5 training points)
 //   /scriptevent siege:dragons_reset    forget your dragon
 //   /scriptevent siege:dragons_species 0-3     change yours: 0 Cinderwing, 1 Ashen Wyvern, 2 Dune Drake, 3 Glass Wyrm
+//   /scriptevent siege:dragons_hue 0-2         change its colour (data.js SPECIES[].colours)
 //   /scriptevent siege:dragons_temper <name>   proud, curious, gentle, fierce, wary
 //   /scriptevent siege:dragons_down     knock yours unconscious
 //   /scriptevent siege:dragons_hungry   make it starving
@@ -18,7 +19,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem, emit } from "../siege/api.js";
 import {
   DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, HATCHERY, NEST, DAY, SPECIES, RESERVE, FOODS, TRAINING, STAGE_NAMES, TEMPERS,
-  newDragon, newMind, speciesOf, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
+  newDragon, newMind, speciesOf, kindOf, HUES, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
 } from "./data.js";
 import { speak, noise, emote } from "./voice.js";
 import { mindOf, mindLines, refusal, tell, onFed, pet, onHurt, think, guard, onOwnerDied } from "./mind.js";
@@ -156,13 +157,13 @@ function hatch(rec, dim) {
   }
   save();
   const owner = world.getPlayers().find((p) => p.id === rec.owner);
-  owner?.sendMessage(`§6Your egg has hatched: ${/^[AEIOU]/.test(speciesOf(rec).name) ? "an" : "a"} ${speciesOf(rec).name}. §7${speciesOf(rec).blurb} §7Feed it raw meat or fish to build its bond. Sneak and click it with an empty hand for its sheet.`);
+  owner?.sendMessage(`§6Your egg has hatched: ${/^[AEIOU]/.test(kindOf(rec)) ? "an" : "a"} ${kindOf(rec)}. §7${speciesOf(rec).blurb} §7Feed it raw meat or fish to build its bond. Sneak and click it with an empty hand for its sheet.`);
 }
 
 function sheetText(rec) {
   const now = world.getAbsoluteTime();
   const lines = [
-    `§6${rec.name}§7, ${speciesOf(rec).name} ${STAGE_NAMES[rec.stage]}`,
+    `§6${rec.name}§7, ${kindOf(rec)} ${STAGE_NAMES[rec.stage]}`,
     ...mindLines(rec, now),
     `§7Bond  ${bar(rec.bond, 100)} §f${Math.floor(rec.bond)}`,
     `§7Level §f${rec.level}§7${rec.level < S.maxLevel ? `  (${rec.xp}/${30 + rec.level * 15} xp)` : " (max)"}   Training points §f${rec.tp}`,
@@ -625,7 +626,13 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     if (!rec) return player.sendMessage("§7No dragon yet.");
     rec.species = Math.max(0, Math.min(SPECIES.length - 1, Number(event.message) || 0));
     refresh(rec);
-    return player.sendMessage(`§7${rec.name} is now ${speciesOf(rec).name}. ${speciesOf(rec).blurb}`);
+    return player.sendMessage(`§7${rec.name} is now ${kindOf(rec)}. ${speciesOf(rec).blurb}`);
+  }
+  if (event.id === "siege:dragons_hue") {
+    if (!rec) return player.sendMessage("§7No dragon yet.");
+    rec.hue = Math.max(0, Math.min(HUES - 1, Number(event.message) || 0));
+    refresh(rec);
+    return player.sendMessage(`§7${rec.name} is now ${kindOf(rec)}.`);
   }
   if (event.id === "siege:dragons_temper") {
     if (!rec || !TEMPERS[event.message]) return player.sendMessage(`§7Tempers: ${Object.keys(TEMPERS).join(", ")}`);

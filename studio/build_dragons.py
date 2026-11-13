@@ -114,6 +114,7 @@ write(BP + "entities/dragons/dragon.json", {"format_version": "1.26.30", "minecr
         "identifier": "siege:dragon", "is_spawnable": False, "is_summonable": True,
         "properties": {
             "siege:species": {"type": "int", "range": [0, 3], "default": 0, "client_sync": True},
+            "siege:hue": {"type": "int", "range": [0, 2], "default": 0, "client_sync": True},       # its colour (studio/art/dragon_colours.py)
             "siege:pose": {"type": "int", "range": [0, 3], "default": 0, "client_sync": True},   # 0 awake, 1 asleep, 2 unconscious, 3 dead
             "siege:emote": {"type": "int", "range": [0, 5], "default": 0, "client_sync": True},  # 1 roar, 2 nuzzle, 3 snarl, 4 head tilt, 5 shake
             "siege:flying": {"type": "bool", "default": False, "client_sync": True},
@@ -286,7 +287,8 @@ EMOTE = lambda n: f"query.property('siege:pose') == 0 && query.property('siege:e
 write(RP + "entity/dragons/dragon.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
     "identifier": "siege:dragon",
     "materials": {"default": "entity_alphatest"},
-    "textures": {k: f"textures/entity/siege/dragons/{k}" for k in SPECIES},
+    "textures": {**{k: f"textures/entity/siege/dragons/{k}" for k in SPECIES},
+                 **{f"{k}_{n}": f"textures/entity/siege/dragons/{k}_{n}" for k in SPECIES for n in (1, 2)}},
     "geometry": {k: f"geometry.siege_dragon.{k}" for k in SPECIES},
     "animations": {a: f"animation.siege_dragon.{a}" for a in ANIMS},
     "scripts": {"animate": [
@@ -300,10 +302,11 @@ write(RP + "entity/dragons/dragon.entity.json", {"format_version": "1.10.0", "mi
 
 write(RP + "render_controllers/siege_dragon.render_controllers.json", {"format_version": "1.8.0", "render_controllers": {
     "controller.render.siege_dragon": {
-        "arrays": {"textures": {"Array.skins": [f"Texture.{k}" for k in SPECIES]}, "geometries": {"Array.geos": [f"Geometry.{k}" for k in SPECIES]}},
+        "arrays": {"textures": {"Array.skins": [f"Texture.{k}" if n == 0 else f"Texture.{k}_{n}" for k in SPECIES for n in (0, 1, 2)]},
+                   "geometries": {"Array.geos": [f"Geometry.{k}" for k in SPECIES]}},
         "geometry": "Array.geos[query.property('siege:species')]",
         "materials": [{"*": "Material.default"}],
-        "textures": ["Array.skins[query.property('siege:species')]"],
+        "textures": ["Array.skins[query.property('siege:species') * 3 + query.property('siege:hue')]"],
         "part_visibility": [{"*": True}, {"saddle": "query.property('siege:saddled')"}],
     }}})
 

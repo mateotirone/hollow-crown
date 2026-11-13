@@ -1,5 +1,5 @@
 // Dragons in the test world (/scriptevent siege:showcase): a Roost, a Hatching Brazier, a wild Nest, the three growth stages
-// as display dragons, and (if you have no dragon yet) a grown, saddled, trained one that is yours to fly.
+// and every species' other colours as display dragons, and (if you have no dragon yet) a grown, saddled, trained one that is yours to fly.
 
 import { on } from "../siege/api.js";
 import { DRAGON, ROOST, HATCHERY, SPECIES, newDragon } from "./data.js";
@@ -45,6 +45,22 @@ on("showcase", ({ player, dim, origin, nextSpot, label }) => {
       console.warn(`[Hollow Crown] dragons showcase ${stage}: ${e}`);
     }
   });
+
+  // The other two colours of every species, as fledglings (colour 0 is the row above)
+  SPECIES.forEach((sp, species) => [1, 2].forEach((hue) => {
+    const at = nextSpot();
+    try {
+      const statue = dim.spawnEntity(DRAGON, { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
+      statue.addTag(TAG);
+      statue.triggerEvent("siege:stage_fledgling");
+      statue.setProperty("siege:species", species);
+      statue.setProperty("siege:hue", hue);
+      statue.nameTag = `${sp.colours[hue]} ${sp.name}`;
+      label(at, `${sp.colours[hue]}\n${sp.name}`);
+    } catch (e) {
+      console.warn(`[Hollow Crown] dragons showcase colour: ${e}`);
+    }
+  }));
 
   // Yours to fly
   let rec = dragonOf(player.id);

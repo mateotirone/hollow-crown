@@ -329,6 +329,8 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Hatc
 
 **The Dragon Stable**: claim land (any settlement of yours), then place a **Dragon Roost** facing away from you. ✅ "A dragon stable is going up behind it", and a sandstone kasbah stable rises: a wide red-framed arch in front with the Roost standing just outside it, four stalls with straw, hay and water troughs off a sandstone aisle, a tack corner and feed store by the arch, a ladder to the hay loft, a ladder from the loft to the flat roof terrace, and the domed nursery on the east side through an arch. ✅ Three Hatching Braziers glow against the nursery's east wall. Set an egg in one and wait ✅ the egg sits in the coals; with about half a day left (or `/time add` to get there) ✅ it shows glowing cracks; it hatches out of the brazier. Click a brazier holding someone else's egg ✅ "<name>'s egg is warming here". Craft a Roost at the Workshop ✅ acacia logs, a gold block, hay, a campfire and red sandstone (no blaze rods).
 
+**Dragon colours**: run `/scriptevent siege:showcase` ✅ a row of fledglings shows the two extra colours of each species, each named like "Copper Cinderwing". Hatch a few eggs ✅ the hatch message and the sheet name the colour, and they are not all the same colour. With your dragon out, run `/scriptevent siege:dragons_hue 1` then `2` then `0` ✅ it changes colour each time.
+
 Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
 ## Settlement building: zones, the Mason and pre-designed buildings (The Hollow Crown)

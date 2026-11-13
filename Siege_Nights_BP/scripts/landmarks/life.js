@@ -78,6 +78,7 @@ function spawnOne(dim, site, i, spot, k) {
     e.addTag(TAG); e.addTag(lifeTag(site, i));
     e.triggerEvent(`siege:stage_${k.stage}`);
     try { e.setProperty("siege:species", speciesIndex(k.species)); } catch { /* old pack */ }
+    try { e.setProperty("siege:hue", (i * 7 + site.length) % 3); } catch { /* old pack */ } // wild dragons come in every colour
     if (k.pose) { e.triggerEvent("siege:go_down"); try { e.setProperty("siege:pose", k.pose); } catch { /* old pack */ } }
     e.setRotation({ x: 0, y: (i * 97) % 360 });
     for (const [effect, ticks, amplifier] of [["resistance", 20000000, 4], ["fire_resistance", 20000000, 0]]) {
