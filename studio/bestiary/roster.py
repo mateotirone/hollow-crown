@@ -25,10 +25,16 @@ def targets(filters, dist=24, priority=2, must_see=False):
     return {"minecraft:behavior.nearest_attackable_target": {"priority": priority, "must_see": must_see, "reselect_targets": True,
             "within_radius": dist, "entity_types": [{"filters": filters, "max_dist": dist}]}}
 
-def melee(dmg, speed=1.2, effect=None):
+def melee(dmg, speed=1.2, effect=None, cooldown=None):
     a = {"damage": dmg}
     if effect: a.update(effect)
-    return {"minecraft:attack": a, "minecraft:behavior.melee_attack": {"priority": 3, "speed_multiplier": speed, "track_target": True}}
+    m = {"priority": 3, "speed_multiplier": speed, "track_target": True}
+    if cooldown: m["cooldown_time"] = cooldown          # big hitters swing slower, so there is a gap to step in or back off
+    return {"minecraft:attack": a, "minecraft:behavior.melee_attack": m}
+
+# No creature outside a boss fight may kill a full-health (20 hp) player with one bite, even on Hard, where Bedrock
+# multiplies melee by 1.5 (Mateo 2026-11-13: "the dune wyrm is one shooting people"). 12 x 1.5 = 18 leaves a heart.
+MAX_MOB_MELEE = 12
 
 def ranged(projectile, interval=(1.5, 2.5), radius=16, aux=None, priority=3):
     s = {"def": projectile}
@@ -129,7 +135,7 @@ def m_ogre(m):
     m.bone("seat", [0, 34, 2], "body")
 mob(id="siege_ogre", name="Siege Ogre", family="raider", model=m_ogre,
     pal=P(skin=(120, 128, 92), hide={"c": (110, 84, 60), "style": "fur"}, belt=(60, 40, 26), pants=(70, 56, 40), tusk=(230, 220, 190), log=WOOD, ironcap=DARKIRON, eye=(250, 220, 80)),
-    hp=120, speed=0.22, dmg=14, kb=1.0, collision=(1.6, 3.0), rideable=True, egg=("#78805c", "#6e543c"),
+    hp=120, speed=0.22, dmg=11, melee_cooldown=1.5, kb=1.0, collision=(1.6, 3.0), rideable=True, egg=("#78805c", "#6e543c"),
     lore="Carries a whole tree trunk as a ram. Walls crack where it walks.")
 
 def m_crowmage(m):
@@ -347,7 +353,7 @@ def m_wyrm(m):
     m.box("seg5", [-1, 2, 72], [2, 3, 6], "tooth")                                                                             # tail spike
 mob(id="dune_wyrm", name="Dune Wyrm", family="wild_hostile", model=m_wyrm, plan="wyrm",
     pal=P(scale={"c": (196, 160, 100), "style": "stone"}, plate={"c": (160, 120, 70), "style": "metal"}, tooth=(240, 230, 210), eye=(30, 20, 10)),
-    hp=90, speed=0.28, dmg=10, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
+    hp=90, speed=0.28, dmg=7, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
     spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, pop="monster"),
     lore="The sand ripples. Then the sand stands up. It hunts by the shake of your footsteps, so stand still or run.")
 
@@ -768,7 +774,7 @@ mob(id="shardcaster", name="Shardcaster", family="raider", model=m_shardcaster, 
     hp=28, speed=0.27, dmg=4, keep_distance=True, hollow_bolts=True, collision=(0.7, 2.4), resist=dict(fire=True), egg=("#3a284e", "#78beff"),
     lore="It stays at the back and the air around its head is full of knives. It does not touch the ground.")
 mob(id="gatebreaker", name="Gatebreaker", family="raider", model=m_gatebreaker, pal=P(**HOLLOWKIN),
-    hp=130, speed=0.22, dmg=15, kb=1.0, collision=(1.7, 3.2), resist=dict(fire=True, projectile=0.5), egg=("#221830", "#e646c8"),
+    hp=130, speed=0.22, dmg=12, melee_cooldown=1.5, kb=1.0, collision=(1.7, 3.2), resist=dict(fire=True, projectile=0.5), egg=("#221830", "#e646c8"),
     lore="Walls were built to keep out things that climb, or dig, or burn. Nobody built one for this.")
 
 # ---------- the reveal scene: one pose, three ages (stand-ins until the art pass) ----------
