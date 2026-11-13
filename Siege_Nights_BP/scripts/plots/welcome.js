@@ -31,7 +31,7 @@ import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
-import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
+import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, WAYSTONE_SIGN_ROT, fallbackOf } from "./miniature.js";
 import { addMenuLabel } from "../core/labels.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
@@ -130,12 +130,23 @@ function writeSign(dim, x, y, z, rot, text) {
   try {
     let block = dim.getBlock({ x, y, z });
     if (!block) return;
-    if (block.typeId !== "minecraft:standing_sign") block = put(dim, x, y, z, "minecraft:standing_sign", { ground_sign_direction: rot });
+    // A sign that is missing, or stands turned the wrong way (worlds built before the Waystone signs were turned to
+    // face the arrival spot), is set down again facing rot; that can wipe its words, so they are written after.
+    if (block.typeId !== "minecraft:standing_sign" || block.permutation.getState("ground_sign_direction") !== rot) {
+      block = put(dim, x, y, z, "minecraft:standing_sign", { ground_sign_direction: rot });
+    }
     const sign = block?.getComponent("minecraft:sign");
     if (sign && sign.getText() !== text) sign.setText(text);
   } catch {
     // a sign is a nicety
   }
+}
+
+// The two signs either side of the Waystone, turned to face the arrival spot (WAYSTONE_SIGN_ROT, miniature.js)
+function waystoneSigns(dim, o) {
+  const w = waystoneSpot();
+  writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, WAYSTONE_SIGN_ROT, "The Waystone\nClick it to hear\nhow things stand");
+  writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz - 1, WAYSTONE_SIGN_ROT, "The glowing stones\non the map are the\nplaces to start.\nOne each.");
 }
 
 // A block for the miniature, trying an older id if this game version doesn't know the new one
@@ -214,9 +225,7 @@ export function raiseHall(o, then, old) {
       }
       store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
       store.save();
-      const w = waystoneSpot();
-      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, 0, "The Waystone\nClick it to hear\nhow things stand");
-      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz - 1, 8, "The glowing stones\non the map are the\nplaces to start.\nOne each.");
+      waystoneSigns(dim, o);
       refreshHall();
       try {
         world.setDefaultSpawnLocation(arrivalPoint(o));
@@ -568,6 +577,7 @@ onTick("plots_welcome_signs", 100, () => {
   if (!hallBuilt()) return;
   if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
   refreshHall();
+  waystoneSigns(overworld(), store.data.hall); // turns signs in halls built before the fix to face the arrival spot
 });
 
 // A faint coloured beam over each stone a newcomer can still choose (green free, amber run by a lord), so they are

@@ -15,6 +15,7 @@ import { cradlePlan, mirelightPlan, rootCells, inCradle, inGlade, CRADLE, GLADE 
 import { grantTome } from "../lore/player.js";
 import { TOME_IN_UNLOCKS } from "../lore/places.js";
 import { BlockPermutation } from "@minecraft/server";
+import { signToward } from "../core/signs.js";
 
 export const EFFIGY = "siege:mire_effigy";
 const CHANGELING = "siege:changeling";
@@ -35,7 +36,8 @@ export const mirelightSite = defineSite({
     site.data.info.spots.forEach((s, i) => {
       try {
         const b = dim.getBlock(abs(site.data.center, s.sign));
-        b?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: 0 }));
+        // facing the middle of the square, where you stand to read them (they all faced south before)
+        b?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: signToward({ x: s.sign.dx, z: s.sign.dz }, { x: 0, z: 0 }) }));
         b?.getComponent("minecraft:sign")?.setText(VILLAGERS[i].house);
       } catch { /* words only */ }
     });
