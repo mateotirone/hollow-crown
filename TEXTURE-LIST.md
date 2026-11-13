@@ -12,6 +12,12 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 
 **Regional Castle Stone (textures ready, blocks not wired yet):** `textures/blocks/regional/siege_castle_stone_<region>[_<tier>_<cracks>].png` and `siege_mossy_castle_stone_<region>.png`, `siege_cracked_castle_stone_<region>.png` for frostmarch, saltreach, emberwaste, blackfen, undertow. The Vale look is the default `siege_castle_stone`.
 
+## Player skins (64×64, in `Hollow_Crown_Skins/`)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Reikia Cinderhale (Emberwaste, slim arms), Lorcan Duskmire (Blackfen) | `reikia_cinderhale.png`, `lorcan_duskmire.png`, made by `studio/art/build_photo_skins.py`; 3D preview `studio/photo_skins/build_preview.py` | **Approved by Mateo 2026-11-13** |
+
 ## Blocks (16×16, in `textures/blocks/`)
 
 | Asset | File(s) | Status |
