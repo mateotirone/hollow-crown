@@ -287,6 +287,7 @@ function fixtureOps(tier) { // founding.js placeFixture
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
 const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {} };
+if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt }); // the starter village's wall line (walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
@@ -495,11 +496,19 @@ function hallOps(level) {
 }
 ev("hall1", `Town hall level 1: the ${HALL_TIERS[1].name}`, "hall", hallOps(1), { hall: 1 });
 
-// the library, the Mason's Yard and the founder's cottage (plotmarker.js + basebuilds.js, on townLaidOut)
+// the starter village's houses, the library, the Mason's Yard and the founder's house (plotmarker.js + basebuilds.js, on townLaidOut)
 const taken = new Set();
 const baseBuilds = [];
+let founderStart = false;
+for (const s of slots) { // plotmarker.js raiseStart: the houses that stand from the start, one of them the founder's
+  if (s.tier !== 0 || !s.start || !seatFor(s, s.start)) continue;
+  taken.add(s.id);
+  const founder = (s.tags ?? []).includes("founder");
+  founderStart ||= founder;
+  baseBuilds.push({ slot: s.id, id: s.start, why: founder ? "Your own house: it stands from the start, in the starter village" : "A starter village house, standing from the start" });
+}
 {
-  const ok = slots.filter((s) => s.tier === 0 && seatFor(s, "library"));
+  const ok = slots.filter((s) => s.tier === 0 && !taken.has(s.id) && seatFor(s, "library"));
   const s = ok.find((x) => x.tags.includes("library")) ?? ok.find((x) => x.tags.includes("square")) ?? ok[0];
   if (s) { taken.add(s.id); baseBuilds.push({ slot: s.id, id: "library", why: "Every town starts with its library" }); }
 }
@@ -519,7 +528,7 @@ let masonSlot;
 }
 const masonSeat = masonSlot && seatFor(masonSlot, "mason_yard");
 if (masonSeat) baseBuilds.push({ slot: masonSlot.id, id: "mason_yard", why: "The Mason's Yard every new base gets", seat: masonSeat });
-{
+if (!founderStart) { // basebuilds.js founderHome: a cottage only when the layout has no founder's house
   const s = pickBaseSlot(slots, taken, { x: 0, z: 0 });
   if (s) { taken.add(s.id); baseBuilds.push({ slot: s.id, id: "cottage", why: "Your own house by the square" }); }
 }
@@ -558,7 +567,7 @@ const entityName = (id) => new RegExp(`^entity\\.${id.replace(/[.:]/g, (c) => "\
 const sieges = await runSieges({
   imp, mock, CX, CZ, BASE, gateAngle: wall.gate, radii: [0, 1, 2, 3].map((t) => wallRadius(tw, t)),
   homes: [1, 3, 6, 10], // a villager for each home the tier's charter asks for (planSiege counts villagers)
-  wallLevels: WALLS.tierCap,
+  wallLevels: WALLS.tierCap, outline: tw.outline,
 });
 sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatMap((n) => n?.waves.flat().map((e) => e.type) ?? []))].map((t) => [t, entityName(t)]));
 
