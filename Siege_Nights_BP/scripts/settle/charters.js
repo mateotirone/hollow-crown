@@ -6,7 +6,7 @@
 //   charterCheck(tier, counts, known) -> { met, lines: [{ what, have, need, skipped }] }
 //   charterKeeps(free, tier, counts, known, slot, id) -> undefined, or { what, tier, ids } the plot is kept for
 
-import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_MIN_BOX, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } from "./config.js";
+import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_MIN_BOX, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK, ONE_EACH } from "./config.js";
 
 export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works" };
 
@@ -20,6 +20,14 @@ export function slotDims(slot) {
 }
 
 export const opensAt = (id) => OPENS_AT[id] ?? 3;
+
+// One of each per settlement (config.js ONE_EACH). counts: what stands or is going up in the settlement.
+// -> undefined, or the words for a menu (ONE_EACH_WHY)
+export const ONE_EACH_WHY = "already built here (one per settlement)";
+export const oneEachTaken = (id, counts) => (ONE_EACH.includes(id) && (counts?.[id] ?? 0) >= 1 ? ONE_EACH_WHY : undefined);
+// Said when a second one is asked for. move: how to have it somewhere else
+export const oneEachMessage = (name, move = "take the old one down first") =>
+  `§cYour settlement already has a ${name}.§7 Special buildings are one per settlement: to have it somewhere else, ${move}.`;
 
 // freeClasses: a Set of the classes of the town's open, empty plots (for PLOT_FALLBACK)
 export function plotFit(id, slot, freeClasses = new Set()) {
@@ -65,7 +73,7 @@ export const charterText = (check) => check.lines.map((l) => (l.skipped
 export function lordPick(slots, tier, counts, designs, fits = () => true, seed = "", coming = slots) {
   if (!slots.length) return undefined;
   const free = new Set(slots.map(slotClass));
-  const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && plotFit(id, s, free).ok && fits(id, s) && !charterKeeps(coming, tier, counts, designs, s, id);
+  const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && !oneEachTaken(id, counts) && plotFit(id, s, free).ok && fits(id, s) && !charterKeeps(coming, tier, counts, designs, s, id);
   // this tier's charter, then a look ahead to the next one, so plots aren't spent on wells while homes are short
   // (the look ahead only takes Small plots: a house there would spend a Medium the next charter's Mint needs)
   for (const t of [tier, tier + 1]) {

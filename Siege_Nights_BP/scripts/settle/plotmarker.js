@@ -15,10 +15,10 @@ import { SETTLE, TAG_WORDS, HAND_NAMES, PLANS } from "./config.js";
 import { planChoices } from "./plandata.js";
 import { plansFor } from "./planbook.js";
 import { BUILDINGS, BUILDING, WORKS, drawBuilding } from "./buildings.js";
-import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
+import { plotFit, opensAt, slotClass, CLASS_NAMES, oneEachMessage } from "./charters.js";
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
-import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, setMarkerBlock, allMarkers, slotState, saveTowns, tierName, slotClosed, keptFor } from "./founding.js";
+import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, setMarkerBlock, allMarkers, slotState, saveTowns, tierName, slotClosed, keptFor, oneEachProblem } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
 import { runScan } from "./register.js";
 import { matches } from "./census.js";
@@ -71,10 +71,11 @@ export function choicesFor(owner, slot, player) {
     if (!rule.ok && !rule.tagged) continue; // not this plot's size
     if (!seatInWorld(owner, slot, id, style)) continue;
     const open = opensAt(id) <= tier;
-    const kept = rule.ok && open ? keptFor(owner, slot, id) : undefined; // the plot is the last one a charter need can use
-    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : kept ?? "";
+    const one = oneEachProblem(owner, id); // one of each per settlement (config.js ONE_EACH)
+    const kept = rule.ok && open && !one ? keptFor(owner, slot, id) : undefined; // the plot is the last one a charter need can use
+    const why = one ?? (!rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : kept ?? "");
     const name = foreign ? `${b.name} (${STYLES[style]?.name ?? style})` : b.name;
-    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok && !kept, why, tagged: rule.tagged && rule.ok });
+    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok && !kept && !one, why, tagged: rule.tagged && rule.ok, one: !!one });
   }
   out.hidden = BUILDINGS.filter((b) => !offers.some((o) => o.id === b.id) && plotFit(b.id, slot, free).ok).length;
   return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged) || (a.foreign - b.foreign));
@@ -157,6 +158,7 @@ async function openSlot(player, owner, slot) {
   if (own && res.selection === 0) return registerOwn(player, owner, slot);
   const c = choices[res.selection - (own ? 1 : 0)];
   if (!c) return;
+  if (!c.open && c.one) return player.sendMessage(oneEachMessage(BUILDING[c.id].name));
   if (!c.open) return player.sendMessage(/^Kept/.test(c.why) ? `§7${c.why}: this is the last plot it can go on. Raise that here, or another building on a different plot.` : `§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : works ? "" : " Try another plot."}`);
   Object.assign(state, { pick: c.id, pickStyle: c.style, pickedAt: system.currentTick, by: player.id });
   saveTowns();
@@ -174,6 +176,7 @@ async function confirm(player, owner, slot, state) {
   const foreign = style !== town.style;
   const seat = seatInWorld(owner, slot, building.id, style);
   if (!seat) { state.pick = undefined; saveTowns(); return player.sendMessage("§cThat building no longer fits here."); }
+  if (oneEachProblem(owner, building.id)) { state.pick = undefined; saveTowns(); return player.sendMessage(oneEachMessage(building.name)); } // an ally raised one meanwhile
   const credit = (town.credits?.[slotClass(slot)] ?? 0) > 0; // the hall took a plot of this size: one is on the house
   const free = isCreative(player) || credit;
   const price = free ? 0 : plotPrice(building.id, foreign);
@@ -213,7 +216,9 @@ async function registerOwn(player, owner, slot) {
   const fitsHere = (id) => plotFit(id, slot, free).ok && opensAt(id) <= (townOf(owner)?.tier ?? 0);
   const all = matches(t);
   const fitting = all.filter((m) => m.ok && fitsHere(m.id));
-  const good = fitting.filter((m) => !keptFor(owner, slot, m.id)); // the same rule as the plot menu
+  const single = fitting.filter((m) => oneEachProblem(owner, m.id));
+  const good = fitting.filter((m) => !single.includes(m) && !keptFor(owner, slot, m.id)); // the same rules as the plot menu
+  if (!good.length && single.length) return player.sendMessage(oneEachMessage(nameOf(single[0].id)));
   if (!good.length && fitting.length) return player.sendMessage(`§7This plot can't count as ${fitting.map((m) => nameOf(m.id)).join(" or ")}: ${keptFor(owner, slot, fitting[0].id)}, and it is the last plot that can hold it.`);
   if (!good.length) {
     const near = all.filter((m) => fitsHere(m.id)).sort((a, b) => a.missing.length - b.missing.length).slice(0, 3);
@@ -231,6 +236,7 @@ async function registerOwn(player, owner, slot) {
   const town = townOf(owner);
   const state = slotState(owner, slot.id);
   if (state.building) return player.sendMessage("§7Something already stands on this plot.");
+  if (oneEachProblem(owner, pick.id)) return player.sendMessage(oneEachMessage(nameOf(pick.id)));
   const box = { x0: town.x + slot.box.x0, z0: town.z + slot.box.z0, x1: town.x + slot.box.x1, z1: town.z + slot.box.z1 };
   clearMarker(owner, slot);
   Object.assign(state, { building: pick.id, hand: true, done: true, box, origin: { x: box.x0, y: town.y + slot.dy, z: box.z0 }, by: player.id, pick: undefined, paid: 0 });

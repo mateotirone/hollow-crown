@@ -715,7 +715,8 @@ addTests("settle walls", {
 });
 
 // ---------- Rival Lords on the same plots (charters.js lordPick) ----------
-import { lordPick } from "./charters.js";
+import { lordPick, oneEachTaken, oneEachMessage } from "./charters.js";
+import { ONE_EACH } from "./config.js";
 addTests("settle charters", {
   "a lord fills every layout's plots and meets each charter with the designs there are"() {
     const designs = new Set(BUILDINGS.map((b) => b.id));
@@ -735,7 +736,16 @@ addTests("settle charters", {
         if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
       assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+      for (const id of ONE_EACH) assert((counts[id] ?? 0) <= 1, `${name} ${v.label}: a lord raised ${counts[id]} of the one-of-each ${id}`);
     }
+  },
+  "one of each special building per settlement (config.js ONE_EACH)"() {
+    for (const id of ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"]) assert(ONE_EACH.includes(id), `${id} is one per settlement`);
+    for (const id of HOMES) assert(!ONE_EACH.includes(id), `${id} stays unlimited`);
+    assert(!oneEachTaken("mint", {}) && !oneEachTaken("mint", { mint: 0 }), "the first Mint is allowed");
+    assert(oneEachTaken("mint", { mint: 1 }), "a second Mint is refused");
+    assert(!oneEachTaken("cottage", { cottage: 9 }), "homes are unlimited");
+    assert(/already has a Mint/.test(oneEachMessage("Mint")), "the refusal names the building");
   },
 });
 
