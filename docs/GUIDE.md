@@ -37,7 +37,7 @@ This file is the audit behind `scripts/guide/` (the Settler's Almanac). It lists
 | Warlords, adapting raiders, Grand Siege, Sovereign | Titles when they happen | Siege nights: Warlords and the Grand Siege |
 | Keep menu, banner colour and dye, tiers by wins | Founding message mentions dye | Your settlement: The Keep Banner and its menu |
 | Writ of Alliance | **None** | Your settlement: Allies |
-| Hall Cornerstone, town hall, Rumor Board | Hall menu text | Your settlement: The town hall; Growing: The Rumor Board |
+| Hall Cornerstone, town hall, Town Board | Hall menu text | Your settlement: The town hall; Growing: The Town Board |
 | Settlement wall levels and mending | Hall menu "Settlement wall" | Your settlement: The settlement wall |
 | Mason, Mason's Bench, Foundation Stones | Mason's own lines; Foundation Stone menu | Your settlement: The Mason and ready-made buildings |
 | Barracks, recruiting, placing guards, armour upgrades, Wanted, guard limits | One line when the Barracks is placed | Your settlement: Guards and the Barracks |

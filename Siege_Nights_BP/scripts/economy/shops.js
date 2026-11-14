@@ -13,6 +13,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
+import { applyFilter } from "../core/events.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
@@ -398,6 +399,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   if ((target.typeId !== NPC_TYPE && !old) || !target.hasTag(JOB_TAG)) return;
   if (old && player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: the normal NPC editor
   event.cancel = true;
+  if (!old && applyFilter("npcClick", false, { player, target })) return; // a Town Board job with this trader (townhall/board.js)
   system.run(() => {
     if (!target.isValid) return;
     const npc = old ? renew(target) : target;
