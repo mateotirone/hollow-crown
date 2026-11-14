@@ -13,7 +13,7 @@ Plan with every building, its cost, plot and story source: <https://claude.ai/ar
 
 | What | Where |
 |---|---|
-| The stage table: each building's stage, name, story step (`act2:mint`) and who sends you; homes per stage; what is given | `Siege_Nights_BP/scripts/settle/config.js` `STAGES` |
+| The stage table: each building's stage, name, story step (`act3:mint`) and who sends you; homes per stage; what is given | `Siege_Nights_BP/scripts/settle/config.js` `STAGES` |
 | The level-up charters, made from that table | `config.js` `CHARTERS` (checked by `settle/charters.js charterCheck`) |
 | Plot sizes and which plots a building may take | `config.js` `PLOT_SIZE`, `PLOT_ALSO`, `PLOT_MIN_BOX`, `PLOT_TAGS` |
 | Seating every stage's buildings on a layout's plots | `settle/stages.js` `seatStages` |
