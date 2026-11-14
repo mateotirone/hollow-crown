@@ -1,0 +1,847 @@
+{
+ "format_version": "1.10.0",
+ "animations": {
+  "animation.siege.player.knight.bash": {
+   "animation_length": 0.5,
+   "bones": {
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.08": [
+       "-30 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.18": [
+       "-85 * (variable.is_first_person ? 0.5 : 1.0)",
+       "10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.32": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       "5 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.12": [
+       "25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "10 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.08": [
+       "4 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.18": [
+       "12 * (variable.is_first_person ? 0.5 : 1.0)",
+       "15 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.08": [
+       "-4 * (variable.is_first_person ? 0.5 : 1.0)",
+       "20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.18": [
+       "-12 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-15 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftleg": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.18": [
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.thrust": {
+   "animation_length": 0.55,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.1": [
+       "30 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "10 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.32": [
+       "-92 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.42": [
+       "-92 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.32": [
+       "25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "-10 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.1": [
+       "18 * (variable.is_first_person ? 0.5 : 1.0)",
+       "10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.32": [
+       "14 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-8 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.1": [
+       "-18 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.32": [
+       "-14 * (variable.is_first_person ? 0.5 : 1.0)",
+       "8 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "rightleg": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.32": [
+       "-30 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftleg": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.32": [
+       "20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.55": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.backhand": {
+   "animation_length": 0.35,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.06": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-60 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-10 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.2": [
+       "-70 * (variable.is_first_person ? 0.5 : 1.0)",
+       "50 * (variable.is_first_person ? 0.5 : 1.0)",
+       "20 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.35": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.06": [
+       "-65 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-35 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.2": [
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.35": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.06": [
+       0.0,
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.2": [
+       "4 * (variable.is_first_person ? 0.5 : 1.0)",
+       "25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.35": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.06": [
+       0.0,
+       "25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.2": [
+       "-4 * (variable.is_first_person ? 0.5 : 1.0)",
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.35": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.raise": {
+   "animation_length": 1.4,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-172 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "-8 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "1.1": [
+       "-172 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "-8 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "1.1": [
+       "-20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-18 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.1": [
+       "-18 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-6 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.1": [
+       "-6 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.plant": {
+   "animation_length": 1.0,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-160 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.45": [
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.8": [
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.0": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-150 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.45": [
+       "-35 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.8": [
+       "-35 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.0": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.25": [
+       "-6 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.45": [
+       "22 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.8": [
+       "22 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.0": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.lance": {
+   "animation_length": 1.6,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.2": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.6": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.2": [
+       "12 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       "12 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.6": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.chop": {
+   "animation_length": 0.5,
+   "bones": {
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "-175 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.28": [
+       "-20 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "-160 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.28": [
+       "-25 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "-8 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.28": [
+       "18 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.5": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.player.knight.kneel": {
+   "animation_length": 1.4,
+   "bones": {
+    "waist": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "26 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.7": [
+       "26 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.1": [
+       "4 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "rightarm": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "15 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "0.7": [
+       "-40 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       "15 * (variable.is_first_person ? 0.5 : 1.0)"
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "18 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.7": [
+       "18 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.0": [
+       "-10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "leftleg": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.8": [
+       "-80 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "rightleg": {
+     "rotation": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       "10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "0.8": [
+       "10 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0,
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "root": {
+     "position": {
+      "0.0": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "0.15": [
+       0.0,
+       "-5 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "0.8": [
+       0.0,
+       "-5 * (variable.is_first_person ? 0.5 : 1.0)",
+       0.0
+      ],
+      "1.4": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  }
+ }
+}
