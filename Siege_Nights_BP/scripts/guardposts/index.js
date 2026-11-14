@@ -31,7 +31,7 @@ import { slotsOf } from "../settle/towns.js";
 import { seatInWorld } from "../settle/plotmarker.js";
 import { BUILDING } from "../settle/buildings.js";
 import { wallOf } from "../settle/walls.js";
-import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight } from "../settle/walldata.js";
+import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight, WATCH } from "../settle/walldata.js";
 import { raisedBuildings } from "../settle/raised.js";
 import { hallOf } from "../townhall/townhall.js";
 import { drawHall, HALL_TIERS } from "../townhall/halls.js";
@@ -157,7 +157,7 @@ function baseOf(owner) {
 // Where a guard stands at a post: the middle of the block, feet height, facing out
 function postDest(post) {
   const stand = standOf(post);
-  return stand ? { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out) } : undefined;
+  return stand ? { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out), ...(post.watch ? { climb: true } : {}) } : undefined;
 }
 
 // Where a stationed guard waits while its watch is off: beside the nearest Barracks (its own spot of eight round it)
@@ -541,12 +541,15 @@ addTests("guard posts", {
     for (const level of [1, 3, 5, 7, 10]) {
       const w = { x: 1000, z: 2000, radius: 46, level, gate: 1.2, ground: new Array(WALLS.stations).fill(70), shape };
       const posts = wallPosts(w);
-      assertEqual(posts.length, POSTS.wallPosts + 2, `level ${level}`);
+      const watch = posts.filter((p) => p.key.startsWith("watch:"));
+      assertEqual(watch.length, level <= 6 ? 4 : 0, `level ${level} watchtower posts`);
+      assert(posts.length >= POSTS.wallPosts + 2 && posts.length <= POSTS.wallPosts + 2 + watch.length, `level ${level}: ${posts.length} posts`);
+      if (watch.length) assertEqual(posts.slice(0, 4).map((p) => p.key).join(), "watch:0,watch:1,watch:2,watch:3", "lookouts are manned first");
       assertEqual(new Set(posts.map((p) => p.key)).size, posts.length);
       for (const p of posts) {
         const r = Math.hypot(p.x - w.x, p.z - w.z);
         assert(r > 30 && r < 52, `level ${level} post ${p.key} at ${r.toFixed(1)}`);
-        assert(p.from > 70 && p.from <= 70 + WALL_LEVELS[level].h + 3, `level ${level} looks down from ${p.from}`);
+        assert(p.from > 70 && p.from <= 70 + (p.watch ? WATCH.guardUp : WALL_LEVELS[level].h + 3), `level ${level} looks down from ${p.from}`);
       }
       const gate = posts.filter((p) => p.key.startsWith("gate:"));
       assertEqual(gate.length, 2);
@@ -555,13 +558,17 @@ addTests("guard posts", {
   },
   "a wall post keeps its key and place round the ring when the wall moves out": () => {
     const w = { x: 0, z: 0, radius: 36, level: 4, gate: 0, ground: new Array(WALLS.stations).fill(64) };
-    const a = wallPosts(w), b = wallPosts({ ...w, radius: 56 });
-    for (let i = 0; i < a.length; i++) {
-      assertEqual(a[i].key, b[i].key);
-      if (a[i].key.startsWith("gate:")) continue; // the gate pair stay a few blocks from the gate, so their angle changes
-      assert(Math.abs(a[i].a - b[i].a) < 1e-9, "same angle");
-      assertEqual(compassOf(a[i].a), compassOf(b[i].a));
+    const a = wallPosts(w), b = new Map(wallPosts({ ...w, radius: 56 }).map((p) => [p.key, p]));
+    let same = 0;
+    for (const p of a) {
+      const q = b.get(p.key);
+      if (!q) continue; // a wall post beside a watchtower can be left out on one ring and not the other
+      same++;
+      if (p.key.startsWith("gate:")) continue; // the gate pair stay a few blocks from the gate, so their angle changes
+      assert(Math.abs(p.a - q.a) < 1e-9, "same angle");
+      assertEqual(compassOf(p.a), compassOf(q.a));
     }
+    assert(same >= POSTS.wallPosts, `${same} posts on both rings`);
   },
   "buildings get door posts, big ones corners and sides, all outside the building": () => {
     const small = buildingPosts("s", { x0: 0, z0: 0, x1: 8, z1: 8 }, { x: 0, z: 1 }, 64);

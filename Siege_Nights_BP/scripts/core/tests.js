@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle walls: levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand",
   "settle base: the founder's cottage has room for a bed indoors",
   "settle base: every map plot has a road out from its gate to the map's roads, starting where each layout's gate road ends",
   "undertow: the Needlehold: its tiles hold every block once, each inside its own tile, all inside its site",

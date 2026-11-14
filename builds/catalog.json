@@ -53,6 +53,7 @@
     "cloudcity": ["Design the Cloud City and flight", "cmsg_011t4CdXaQtd99UHuZXQMS7H51qzKtHvAHLjJaS3bk6Raa"],
     "interiors": ["Add interiors to every building", "cmsg_011t4CdXaQtd99UHuZXQMS7HHfZUjt5ufRyMzKiZ2nJTUT"],
     "storage": ["Plan storage across the world", "cmsg_011t4CdXaQtd99UHuZXQMS7HTtZNiahEq7HvMarXjWN67n"],
+    "wallwatch": ["Add guard watchtowers to first walls", "cmsg_011t4CdXaQtd99UHuZXQMS7H1Ga63GcozRSRe7dYhgXnxk"],
     "coordinator": ["Project chat (no thread yet)", ""]
   },
   "builds": [
@@ -82,6 +83,7 @@
     {"id": "settle-smithy", "name": "Smithy", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "settle-*", "thread": "refine", "source": "map/structures/settle_buildings.py", "variants": 5},
     {"id": "settle-stable", "name": "Stable (plot building)", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "settle-*", "thread": "refine", "source": "map/structures/settle_buildings.py", "variants": 5},
     {"id": "settle-storehouse", "name": "Storehouse (old plot building, retired)", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "settle-*", "thread": "refine", "source": "map/structures/settle_buildings.py", "variants": 5},
+    {"id": "settle-wall-watchtower", "name": "Wall watchtower (four on every wall, Low Palisade to Battlement Wall)", "group": "Settlements", "region": "regional", "status": "in game", "viewer": null, "thread": "wallwatch", "source": "map/structures/wallwatch_skill.py", "new": true, "variants": 5, "notes": "Built on the skill (review/specs/gen_wallwatch.py); settle/walls.js raises four astride the wall line from settle/wallwatch_data.js, where the Watch Wall's stone towers later stand. A guard post on each lookout."},
     {"id": "storehouse", "name": "Storehouse (4 levels, grows with the town)", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "storehouse-*", "thread": "storage", "source": "map/structures/storehouse_skill.py", "variants": 20},
     {"id": "settle-watchtower", "name": "Watchtower", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "settle-*", "thread": "refine", "source": "map/structures/settle_buildings.py", "variants": 5},
     {"id": "settle-market-stall", "name": "Market stall", "group": "Settlements", "region": "regional", "status": "in game", "viewer": "settle-*", "thread": "refine", "source": "map/structures/settle_buildings.py", "variants": 5, "notes": "Mateo 2026-11-12: use wool slabs/stairs for awning angles."},
