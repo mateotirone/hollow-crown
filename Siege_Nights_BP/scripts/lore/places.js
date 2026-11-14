@@ -42,6 +42,7 @@ import { halls } from "../townhall/townhall.js";
 import { SITES as HOLLOW_SITES } from "../undertow/roads.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { STORY_PEOPLE, TOWN_TOME_SPOTS } from "./story_spots_data.js";
+import { DESIGNS } from "../landmarks/designs_data.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NEAR = 48; // someone must be this close before a spot is filled (so its ground is loaded and built)
@@ -58,16 +59,17 @@ export const SUSPECTS = Object.fromEntries(
 SUSPECTS.odo = { name: "Odo Lowe", quest: "hesper", returned: false }; // Hesper's husband: the asker is the copy, not him
 const ONCE = new Set(["hesper", ...Object.keys(SUSPECTS)]);
 
-// Dusty Tomes at a Ledger place: tome id -> place id (lore/data/world.js PLACES; landmarks and thin places mark them)
+// Dusty Tomes at a Ledger place: tome id -> place id (lore/data/world.js PLACES; landmarks and thin places mark them).
+// They lie round the place's mark. A tome whose page names a spot inside a landmark (a cradle, a cell, a fallen bell)
+// is laid there by the landmark's own design instead (map/structures, design "tomes"; landmarks/index.js), never here.
 export const TOME_PLACES = {
-  chron_03: "crownhold", chron_06: "crownhold", chron_09: "crownhold", corv_09: "crownhold", lett_05: "crownhold",
-  seal_03: "bellhollow", seal_08: "bellhollow",
-  chron_10: "ashen_chapterhouse", seal_09: "ashen_chapterhouse", corv_10: "ashen_chapterhouse",
-  chron_04: "corvins_tower", seal_05: "corvins_tower", corv_01: "corvins_tower", corv_08: "corvins_tower",
-  chron_02: "deepforge", // "a ruined watchtower on the Frostmarch border": the Deepforge is the Frostmarch landmark that stands
   chron_08: "kings_barrow", chron_12: "kings_barrow", seal_10: "kings_barrow",
   scri_02: "bellfounders_mine",
 };
+// Tomes the landmark designs lay where their pages say (Crownhold's nursery and bedchamber, the gatehouse chest and
+// the great fallen bell; the chapterhouse; Corvin's Tower; the border watchtower; Bellhollow's shrine and the seal
+// chamber under it; the Bay road milestone)
+export const DESIGN_TOMES = [...new Set(Object.values(DESIGNS).flatMap((d) => (d.tomes ?? []).map((t) => t[3])))];
 // Found in the boss unlocks (unlocks/seneschal.js, bride.js, mother.js grant these)
 export const TOME_IN_UNLOCKS = {
   seneschal: ["chron_11", "corv_05"],
@@ -83,7 +85,7 @@ export const TOME_GATES = {
 };
 // Every tome this file accounts for, one way or another
 export const PLACED_TOMES = [
-  ...Object.keys(TOWN_TOME_SPOTS), ...Object.keys(TOME_PLACES),
+  ...Object.keys(TOWN_TOME_SPOTS), ...Object.keys(TOME_PLACES), ...DESIGN_TOMES,
   ...Object.values(TOME_IN_UNLOCKS).flat(), ...Object.values(TOME_BY_RANK).flatMap((r) => Object.values(r).flat()),
 ];
 

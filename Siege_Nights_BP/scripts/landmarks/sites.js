@@ -28,9 +28,9 @@ const PLOT_SITES = {
 // The story's places out in the land (map/structures/landmarks_story.py). `face` fixes which way a turning piece's
 // front looks (n/e/s/w): the Deepforge's door to the open hillside, the Cinder Roost's Span out over the drop.
 const STORY_SITES = [
-  { id: "crownhold", version: 3, region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
-  { id: "bellhollow", region: "Aldmere Vale", name: "Bellhollow", x: 155, z: -100, place: "bellhollow", pieces: [{ d: "bellhollow_seal" }, { d: "bellhollow_frame", dx: -22 }] },
-  { id: "ashen_chapterhouse", version: 3, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
+  { id: "crownhold", version: 4, region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
+  { id: "bellhollow", version: 3, region: "Aldmere Vale", name: "Bellhollow", x: 155, z: -100, place: "bellhollow", pieces: [{ d: "bellhollow_seal" }, { d: "bellhollow_frame", dx: -22 }] },
+  { id: "ashen_chapterhouse", version: 4, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
   { id: "ashen_watch", region: "Blackfen", name: "the Ashen Watch", x: 480, z: 560, pieces: [{ d: "ashen_watch" }] },
   { id: "corvins_tower", version: 3, region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
   { id: "mags_hut", region: "Blackfen", name: "Old Mag's hut", x: 4, z: 972, place: "mags_hut", pieces: [{ d: "mags_hut" }] },
@@ -56,6 +56,9 @@ const STORY_SITES = [
   { id: "shut_pass", region: "Frostmarch", name: "the Shut Pass", x: 1225, z: -190, pieces: [{ d: "shut_pass_gate", turns: true, face: "w" }] },
   { id: "far_shore", region: "Saltreach", name: "the Westwatch", x: -850, z: 300, pieces: [{ d: "westwatch", turns: true, seek: { kind: "water", bearing: 270, spread: 40, max: 40 } }] },
   { id: "horizon_isles", region: "Saltreach", name: "the Southmost Light", x: -725, z: 740, pieces: [{ d: "southmost_light", turns: true, seek: { kind: "water", bearing: 180, spread: 40, max: 40 } }] },
+  // The milestone on the Bay road, a quarter of the way from Gull's Rest toward Kingsrest (south side of the road,
+  // on the map's ground at x -536, z 297; the road runs north-east past it): the fifth Lighthouse Letter at its foot.
+  { id: "gulls_milestone", region: "Saltreach", name: "the Bay road milestone", x: -536, z: 297, pieces: [{ d: "gulls_milestone" }] },
   // The Warlord King's own ground: the Grey Host's war camp on the north-east Frostmarch plateau (flat at y 115).
   { id: "vorlunds_muster", region: "Frostmarch", name: "Vorlund's Muster", x: 1030, z: -990, pieces: [{ d: "vorlunds_muster" }] },
 ];

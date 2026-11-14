@@ -251,4 +251,23 @@ def hallowmere_ice_door():
     return d
 
 
-DESIGNS = {f.__name__: f for f in (frost_watchtower, hallowmere_shrine, hallowmere_ice_hut, hallowmere_ice_door)}
+# ---------------------------------------------------------------- the Bay road milestone
+
+
+def gulls_milestone():
+    """An old milestone on the Bay road out of Gull's Rest toward Kingsrest and Crownhold, the miles to the capital
+    cut in its face long worn smooth; the fifth Lighthouse Letter lies at its foot (lett_05: "the road from Gull's
+    Rest toward Crownhold, at a milestone"). Front (-z) is the road."""
+    d = D("gulls_milestone", "drape", seed=261)
+    for x in range(-1, 2):
+        for z in range(-1, 2):
+            if d.r(x, 0, z) < 0.7: d.put(x, 0, z, d.pick(x, 0, z, [("gravel", 2), ("coarse_dirt", 2), ("cobblestone", 1)]))
+    d.put(0, 1, 0, "chiseled_stone_bricks")
+    d.put(0, 2, 0, "mossy_stone_brick_wall")
+    d.put(1, 1, 1, "mossy_cobblestone_slab", half="bottom")                # a fallen chip of its cap
+    d.put(-1, 1, 0, "short_grass")
+    d.meta["tomes"] = [[0, 1, -1, "lett_05"]]
+    return d
+
+
+DESIGNS = {f.__name__: f for f in (frost_watchtower, hallowmere_shrine, hallowmere_ice_hut, hallowmere_ice_door, gulls_milestone)}
