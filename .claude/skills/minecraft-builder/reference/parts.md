@@ -244,8 +244,9 @@ places any local cell list at a point facing e/w/n/s (stairs, doors and log axes
   from the deck beams. `masts` `[{"at": u, "top": rows over its deck, "yards": [[y, half span, sail rows]], "nest": y}]`
   (default: mizzen, main with a crow's nest, fore): square sails of white wool with a cyan band, bellied forward,
   hung from log yards; the lowest `furl` (1) yards on each mast carry their sail furled, a roll of wool under the
-  yard, as a moored ship would; shrouds of iron chain (fences read as staircases, 2026-11-14) from the channels (a
-  slab ledge one out from the side) to under the lowest yard, each link turned along the line; main and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
+  yard, as a moored ship would; shrouds of spruce fence (Mateo preferred them to chain,
+  2026-11-14; a chain `rig` is turned link by link along the line) from the channels (a slab ledge one out from the
+  side) to under the lowest yard; main and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
   `gangway` opens the bulwark and lays a plank out to the pier. Every cell inside the hull is written, air included,
   so a stamp over the sea leaves no water in the hold; `materials` overrides any role (`SALT` in ship.py).
 - **`pier`**: a deck of `rects` (oak, darker spruce boards over the pile rows) at row `y`; stripped oak piles from
