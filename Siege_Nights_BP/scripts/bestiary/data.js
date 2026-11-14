@@ -376,7 +376,7 @@ export const MOBS = {
   "name": "Seep",
   "family": "seep",
   "hp": 60,
-  "lore": "A place where the Hollow is pushing through. Things come out of it. Left alone, it widens."
+  "lore": "A place where something below is pushing through. Things come out of it. Left alone, it widens."
  },
  "siege:hollow_bolt": {
   "name": "Veilbolt",
@@ -476,7 +476,7 @@ export const ITEMS = {
  },
  "siege:widows_veil": {
   "name": "Widow's Veil",
-  "lore": "From the Drowned Bride. Breathe water, see in the dark, and see things from the Hollow for what they are."
+  "lore": "From the Drowned Bride. Breathe water, see in the dark, and see the things that come up at night for what they are."
  },
  "siege:seneschal_greatshield": {
   "name": "Seneschal's Greatshield",
@@ -492,7 +492,7 @@ export const ITEMS = {
  },
  "siege:last_note": {
   "name": "The Last Note",
-  "lore": "From the Hollow Choir. Hold it in your offhand: things from the Hollow near you falter, as if they have lost the tune."
+  "lore": "From the Hollow Choir. Hold it in your offhand: the things that come up at night falter near you, as if they have lost the tune."
  },
  "siege:warlords_brand": {
   "name": "The Warlord's Brand",
