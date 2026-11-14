@@ -9,8 +9,11 @@
 //                  towns, the rest street cells past the townsfolk's own). The Returned cases' suspects (Harl, Bram,
 //                  Pip, Odo) stand in the street near their askers, as ordinary villagers the mobs feature knows
 //                  (bestiary/returned.js). Sister Wren is in Millbrook's chapel (opening/millbrook.js).
+//   Old Elspeth sits by the hearth in every hall from the Longhouse up, on a stool, with the ash she reads swept
+//                  out in front of it (Act 1's guide, newplayer/act1.js). She follows the hearth when the hall grows.
 //   Archivist Pell moves into every town hall at Town tier (the hall's "sage" mark) and follows the hall when it grows.
-//   Sir Aldous rides to your keep the morning after your first siege win and stays the day; after that he is at the
+//   Sir Aldous rides to your keep the morning after Old Elspeth reads your Ember (Act 1), or, on a keep from before
+//                  Act 1, the morning after your first siege win, and stays the day; after that he is at the
 //                  Ashen Gate chapterhouse, beside Brother Cael.
 //   The Voice in the Water (Corvin) is in the still water by the Wound landing, in the Hollow.
 // A character who goes missing is stood there again when someone comes near, except Hesper and the four suspects:
@@ -26,7 +29,8 @@
 //   /scriptevent siege:story_places          what is placed, what is still waiting for someone to come near
 //   /scriptevent siege:story_places tp <id>  go to a character's or tome's spot
 
-import { world, system, GameMode } from "@minecraft/server";
+import { world, system, GameMode, BlockPermutation } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 import { on, addFilter, onTick, moduleStore, keepOf, keepCenter, addTests, assert, assertEqual } from "../siege/api.js";
 import { mapMode } from "../plots/api.js";
 import { spawnNpc } from "./npcs.js";
@@ -39,13 +43,14 @@ import { fallenCount } from "./data/spine.js";
 import { progressOf, grantTome } from "./player.js";
 import { markReturned } from "../bestiary/returned.js";
 import { halls } from "../townhall/townhall.js";
+import { STYLES } from "../townhall/styles.js";
 import { SITES as HOLLOW_SITES } from "../undertow/roads.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { STORY_PEOPLE, TOWN_TOME_SPOTS } from "./story_spots_data.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NEAR = 48; // someone must be this close before a spot is filled (so its ground is loaded and built)
-const store = moduleStore("hc:story_places", () => ({ v: 1, once: {}, tomes: {}, visits: {} }));
+const store = moduleStore("hc:story_places", () => ({ v: 1, once: {}, tomes: {}, visits: {}, elspeth: {} }));
 const npcTag = (id) => `siege_lore_npc_${id}`;
 const NPC_IDS = new Set(NPCS.map((n) => n.id));
 
@@ -187,19 +192,111 @@ function pellInHalls() {
   }
 }
 
-// ---------- Sir Aldous: the morning after your first win, then the chapterhouse ----------
+// ---------- Old Elspeth, by every hall's hearth ----------
+
+const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+// Pure: the stair's "weirdo_direction" that puts its back away from the hearth (0 east, 1 west, 2 south, 3 north)
+export const stoolFacing = (dx, dz) => (dx > 0 ? 0 : dx < 0 ? 1 : dz > 0 ? 2 : 3);
+// Pure: from the hearth's open sides (each [dx, dz]), where the stool, Elspeth and the ash go. Elspeth stands
+// beside her stool, at the hearth's corner, so she is by the fire and the stool is plainly hers; the ash lies on
+// the side across from the stool.
+export function hearthPlan(open, isFree) {
+  const stool = open[0];
+  if (!stool) return undefined;
+  const corners = SIDES.filter(([dx, dz]) => dx !== stool[0] && dz !== stool[1] && !(dx === -stool[0] && dz === -stool[1]))
+    .map(([dx, dz]) => [stool[0] + dx, stool[1] + dz]);
+  const at = corners.find((c) => isFree(c)) ?? open.find((c) => c !== stool && !(c[0] === -stool[0] && c[1] === -stool[1])) ?? open[1];
+  const ash = open.find((c) => c[0] === -stool[0] && c[1] === -stool[1]) ?? open.find((c) => c !== stool && c !== at);
+  return { stool, at, ash };
+}
+
+function setBlock(dim, at, id, states) {
+  try { dim.getBlock(at)?.setPermutation(BlockPermutation.resolve(id, states)); return true; } catch { return false; }
+}
+
+// Set out her corner once per hall build: the stool in the region's wood and a little ash on the floor
+function furnishHearth(dim, hall) {
+  const h = hall.marks.hearth;
+  const cell = ([dx, dz]) => ({ x: h.x + dx, y: h.y, z: h.z + dz });
+  const free = (c) => {
+    const at = cell(c);
+    try {
+      const below = dim.getBlock({ ...at, y: at.y - 1 }), here = dim.getBlock(at), above = dim.getBlock({ ...at, y: at.y + 1 });
+      return !!below && firm(below) && !!here && here.isAir && !!above && above.isAir;
+    } catch { return false; }
+  };
+  const plan = hearthPlan(SIDES.filter(free), free);
+  if (!plan) return { at: standAt(dim, h) };
+  const seat = STYLES[hall.style]?.roles?.seat ?? ["minecraft:spruce_stairs"];
+  for (const id of seat) if (setBlock(dim, cell(plan.stool), id, { weirdo_direction: stoolFacing(...plan.stool), upside_down_bit: false })) break;
+  if (plan.ash) setBlock(dim, cell(plan.ash), "minecraft:light_gray_carpet") || setBlock(dim, cell(plan.ash), "minecraft:carpet", { color: "silver" });
+  return { at: plan.at ? cell(plan.at) : standAt(dim, h), stool: cell(plan.stool) };
+}
+
+// Where Elspeth sits in an owner's hall (the Act 1 tracker points at her), or undefined before the hall stands
+export function elspethSpot(owner) {
+  const hall = halls()?.[owner];
+  if (!hall || hall.lost) return undefined;
+  return store.data.elspeth[owner]?.at ?? hall.marks?.hearth ?? { x: hall.x, y: hall.y, z: hall.z };
+}
+
+function elspethInHalls() {
+  const dim = world.getDimension(OVERWORLD);
+  for (const [owner, hall] of Object.entries(halls() ?? {})) {
+    const h = hall && !hall.lost && !hall.building && (hall.level ?? 0) >= 1 ? hall.marks?.hearth : undefined;
+    if (!h || !someoneNear(OVERWORLD, h)) continue;
+    const mine = `hc_elspeth_${owner}`;
+    const there = present(dim, mine, h, 96);
+    if (!there) continue;
+    const key = `${hall.level}:${h.x},${h.y},${h.z}`;
+    let rec = store.data.elspeth[owner];
+    if (rec?.key !== key) {
+      const made = furnishHearth(dim, hall);
+      if (!made.at) continue; // not loaded
+      rec = store.data.elspeth[owner] = { key, at: made.at, stool: made.stool };
+      store.save();
+    }
+    for (const extra of there.slice(1)) { try { extra.remove(); } catch { /* gone */ } }
+    const to = { x: rec.at.x + 0.5, y: rec.at.y, z: rec.at.z + 0.5 };
+    const face = { x: 0, y: (Math.atan2(-(h.x - rec.at.x), h.z - rec.at.z) * 180) / Math.PI };
+    if (there[0]) {
+      const l = there[0].location;
+      if (Math.hypot(l.x - to.x, l.z - to.z) > 1.5) try { there[0].teleport(to, { rotation: face }); } catch { /* not loaded */ }
+      continue;
+    }
+    try {
+      const npc = spawnNpc(dim, to, "elspeth");
+      npc.addTag(mine);
+      npc.setRotation?.(face);
+    } catch { /* not loaded */ }
+  }
+}
+
+// ---------- Sir Aldous: the morning after Elspeth reads your Ember, then the chapterhouse ----------
 
 const VISIT_TICKS = 24000; // he stays one day at your keep
 const CHAPTERHOUSE_REACH = 64;
 
-on("siegeReward", ({ player }) => {
-  if (!player || !mapMode() || store.data.visits[player.id]) return;
-  if (progressOf(player).flags.includes("aldous_met")) return;
+// He rides in at first light: never sooner than the next morning
+const nextMorning = (now) => (Math.floor(now / 24000) + 1) * 24000;
+export function sendAldous(player) {
+  if (!player || !mapMode() || store.data.visits[player.id]) return false;
+  if (progressOf(player).flags.includes("aldous_met")) return false;
   const keep = keepOf(player.id);
-  if (!keep) return;
-  store.data.visits[player.id] = { due: true, at: keepCenter(keep), until: 0 };
+  if (!keep) return false;
+  store.data.visits[player.id] = { due: true, at: keepCenter(keep), until: 0, after: nextMorning(world.getAbsoluteTime()) };
   store.save();
-});
+  return true;
+}
+// Is he at this owner's keep now? { x, y, z } where he waits, or undefined
+export function aldousAt(owner) {
+  const v = store.data.visits[owner];
+  return v && v.until && !v.done ? { x: v.at.x + 4, y: v.at.y, z: v.at.z + 4 } : undefined;
+}
+// Act 1 sends him from Elspeth's reading of the Ember (newplayer/act1.js: "aldousByStory"); a keep from before
+// Act 1 still has him the morning after its first win
+on("siegeReward", ({ player }) => { if (player && !applyFilter("aldousByStory", false, { player })) sendAldous(player); });
+on("elspethEmber", ({ player }) => sendAldous(player));
 
 function aldous() {
   const dim = world.getDimension(OVERWORLD);
@@ -217,7 +314,7 @@ function aldous() {
       continue;
     }
     if (v.until || !someoneNear(OVERWORLD, spot)) continue;
-    if (world.getTimeOfDay() > 12000) continue; // he rides in by day
+    if (world.getTimeOfDay() > 12000 || (v.after && now < v.after)) continue; // he rides in by day, from the next morning
     try {
       if (stand(dim, "aldous", spot, tag)) {
         v.until = now + VISIT_TICKS;
@@ -306,7 +403,7 @@ on("rankUp", ({ player, path, rank }) => {
 
 onTick("story places", 40, () => {
   if (!mapMode() || !world.getAllPlayers().length) return;
-  for (const step of [townPeople, pellInHalls, aldous, corvin, tomes]) {
+  for (const step of [townPeople, pellInHalls, elspethInHalls, aldous, corvin, tomes]) {
     try { step(); } catch (e) { console.warn(`[Lore] story places (${step.name}): ${e}`); }
   }
 });
@@ -333,7 +430,7 @@ addTests("lore", {
   },
   "every NPC the story needs has a way onto the map": () => {
     // wren: opening/millbrook.js; carter: undertow/story.js; mag, cael, kesh, ulla, nell: landmark designs
-    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin"];
+    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin", "elspeth"]; // elspeth: every hall's hearth, above
     for (const n of NPCS) assert(elsewhere.includes(n.id) || STORY_PEOPLE[n.id], `${n.id} is never placed`);
   },
   "placed tomes are real and none is placed twice": () => {
@@ -354,5 +451,17 @@ addTests("lore", {
     assertEqual(pellSpot({ sage: { x: 1, y: 2, z: 3 } }), { x: 1, y: 2, z: 3 });
     assertEqual(pellSpot({ tree: { x: 1, y: 2, z: 3 } }), { x: 3, y: 2, z: 3 });
     assertEqual(pellSpot({}), undefined);
+  },
+  "Elspeth: stool on an open side, back to the fire; she stands at its corner; ash across from it": () => {
+    const all = (c) => true;
+    const p = hearthPlan([[1, 0], [-1, 0], [0, 1], [0, -1]], all);
+    assertEqual(p.stool, [1, 0]);
+    assertEqual(p.ash, [-1, 0]);
+    assert(Math.abs(p.at[0]) === 1 && Math.abs(p.at[1]) === 1, `at the hearth's corner: ${p.at}`);
+    assertEqual(stoolFacing(1, 0), 0);
+    assertEqual(stoolFacing(0, -1), 3);
+    assertEqual(hearthPlan([], all), undefined);
+    const one = hearthPlan([[0, 1]], () => false);
+    assertEqual(one.stool, [0, 1]);
   },
 });

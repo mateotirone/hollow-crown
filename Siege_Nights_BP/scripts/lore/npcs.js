@@ -26,6 +26,10 @@ const NPC = Object.fromEntries(NPCS.map((n) => [n.id, n]));
 const tagOf = (id) => `siege_lore_npc_${id}`;
 const npcIdOf = (entity) => entity.getTags().find((t) => t.startsWith("siege_lore_npc_"))?.slice("siege_lore_npc_".length);
 
+// Other features add to what a scene's conditions can see (Act 1 adds { act1: stage, raided }): fn(player) -> object
+const contextHooks = [];
+export const addLoreContext = (fn) => contextHooks.push(fn);
+
 function contextFor(player) {
   // "shelved" counts the Library of the land you stand on, else your own
   let owner;
@@ -33,7 +37,9 @@ function contextFor(player) {
     const block = player.dimension.getBlock(player.location);
     owner = block && landOwnerAt(block);
   } catch {}
-  return contextOf(player, libraryCount(owner ?? player.id));
+  const ctx = contextOf(player, libraryCount(owner ?? player.id));
+  for (const hook of contextHooks) { try { Object.assign(ctx, hook(player)); } catch (e) { console.warn(`[Lore] context: ${e}`); } }
+  return ctx;
 }
 
 // The recording of a greeting (tools/install_npc_voices.py), or undefined. A line whose words were rewritten since it
@@ -132,6 +138,7 @@ function apply(player, effect, npcId) {
   else if (kind === "sp") awardPoints(player, Number(value), "story", Number(value) * 15);
   else if (kind === "item") giveItem(player, new ItemStack(value, 1));
   else if (kind === "slip") startSlip(player, value, npcId);
+  else if (kind === "emit") emit(value, { player, npc: npcId });
 }
 
 export function choose(player, npcId, node, index) {

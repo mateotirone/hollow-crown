@@ -490,7 +490,7 @@ function sageMenu(player, owner) {
   const hall = hallOf(owner);
   const keep = api.keepOf(owner);
   const tips = [];
-  if (hero.path === "none") tips.push(hero.ember === "fallen" ? "\"That pale ember you found. Hold it and decide: take it into your hand, or carry it to the Tree and swear it away. I would not sleep near it either way.\"" : "\"Hold your keep through a siege night. They say something falls from the sky for those who do.\"");
+  if (hero.path === "none") tips.push(hero.ember === "fallen" ? "\"That pale ember you found. Hold it and decide: take it into your hand, or carry it to the Tree and swear it away. I would not sleep near it either way.\"" : "\"Old Elspeth by your hearth hears more than I read. If anything ever comes down near your gate, take it to her before you take it to anyone.\"");
   if (hero.points > 0) tips.push(`"You carry ${hero.points} unspent oath${hero.points === 1 ? "" : "s"}. The Tree is listening."`);
   if (hall.level < allowedLevel(keep)) tips.push("\"Your settlement has outgrown this hall. The cornerstone will take a bigger one.\"");
   else if (hall.level < 5) tips.push(`"A ${HALL_TIERS[hall.level + 1].name} wants a ${HALL_TIERS[hall.level + 1].settlement}. Win your sieges and the land will follow."`);

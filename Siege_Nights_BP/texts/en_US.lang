@@ -71,6 +71,7 @@ tile.hc:tome_cache.name=Dusty Tome
 tile.siege:citadel_cornerstone.name=Citadel Cornerstone
 tile.siege:throne.name=The Throne
 tile.siege:fallen_shard.name=Fallen Oath Shard
+tile.siege:fallen_ember.name=Fallen Ember
 item.siege:hollow_crown.name=The Hollow Crown
 item.siege:crown_shard.name=Oath Shard
 item.siege:gauntlet_of_challenge.name=Gauntlet of Challenge

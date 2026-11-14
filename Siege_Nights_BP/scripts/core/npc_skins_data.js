@@ -43,4 +43,6 @@ export const NPC_SKINS = [
   "hollow_foreman", "hollow_miner_0", "hollow_miner_1", "hollow_miner_2",
   // envoys of the Hollow's great houses after the fall (after/data/houses.js): envoy_<house id>
   "envoy_bell", "envoy_salt", "envoy_lamp", "envoy_root", "envoy_tide",
+  // Act 1's guide at every hall's hearth (newplayer/act1.js)
+  "lore_elspeth",
 ];

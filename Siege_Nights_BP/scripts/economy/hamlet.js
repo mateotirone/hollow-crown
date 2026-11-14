@@ -16,6 +16,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { allTowns, townOf, layoutOf } from "../settle/founding.js";
 import { slotsOf } from "../settle/towns.js";
 import { spawnJobNpc } from "./shops.js";
+import { pay } from "./coins.js";
 
 export const FARMER_TAG = "siege_hamlet_farmer";
 const REACH = 48; // blocks from the town centre: close enough that the chunks are loaded
@@ -45,9 +46,28 @@ export const farmerOf = (owner) => store.data.farmers[owner];
 
 // Wheat sold to any Farmer, for the quest tracker's first-Regals step (player property, a running count)
 export const WHEAT_SOLD = "hc:wheat_sold";
-on("goodsSold", ({ player, job, id, count }) => {
+// A new lord's first harvest fetches a good price (Act 1, Old Elspeth says so): the first FIRST_HARVEST wheat sold
+// pay FIRST_HARVEST_PAYS in all, the Farmer's own price plus a bonus, so the founder can hire a third guard.
+export const FIRST_HARVEST = 16, FIRST_HARVEST_PAYS = 40;
+// Pure: the bonus on a sale of `count` wheat after `before` were sold, when the Farmer paid `coins` for them
+export function firstHarvestBonus(before, count, coins) {
+  const inFirst = Math.max(0, Math.min(count, FIRST_HARVEST - before));
+  if (!inFirst || count <= 0) return 0;
+  const owed = (n) => Math.round((FIRST_HARVEST_PAYS * Math.min(n, FIRST_HARVEST)) / FIRST_HARVEST);
+  const want = owed(before + inFirst) - owed(before);
+  return Math.max(0, want - Math.round((coins * inFirst) / count));
+}
+on("goodsSold", ({ player, job, id, count, coins }) => {
   if (job !== "farmer" || id !== "minecraft:wheat") return;
-  try { player.setDynamicProperty(WHEAT_SOLD, Math.min(9999, (player.getDynamicProperty(WHEAT_SOLD) ?? 0) + count)); } catch { /* left */ }
+  try {
+    const before = player.getDynamicProperty(WHEAT_SOLD) ?? 0;
+    player.setDynamicProperty(WHEAT_SOLD, Math.min(9999, before + count));
+    const bonus = firstHarvestBonus(before, count, coins ?? 0);
+    if (bonus > 0) {
+      pay(player, bonus, "first harvest");
+      if (before + count >= FIRST_HARVEST) player.sendMessage("§7The Farmer counts out more than he has to. \"A new lord's first harvest. Good luck to it.\"");
+    }
+  } catch { /* left */ }
 });
 
 // What the quest tracker needs: undefined without a settlement
@@ -102,6 +122,18 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 addTests("economy hamlet farmer", {
+  "the first 16 wheat pay 40 in all, however they are sold": () => {
+    const sell = (lots, perWheat) => {
+      let sold = 0, total = 0;
+      for (const n of lots) { const base = Math.round(n * perWheat); total += base + firstHarvestBonus(sold, n, base); sold += n; }
+      return total;
+    };
+    assertEqual(sell([16], 0.4), 40);
+    assertEqual(sell([4, 4, 4, 4], 0.4), 40);
+    assertEqual(sell([3, 5, 8], 0.5), 40);
+    assertEqual(firstHarvestBonus(16, 10, 4), 0, "no bonus after the first sixteen");
+    assertEqual(sell([20], 0.4), 42, "past sixteen: the Farmer's own price");
+  },
   "the Farmer stands two steps out from the second starter house's door": () => {
     const slots = [
       { tier: 0, start: "house", tags: ["starter", "founder"], side: "s", step: { x: 23, z: -4 }, box: { x0: 18, z0: -19, x1: 28, z1: -5 } },
