@@ -54,6 +54,11 @@
    "door": [
     -949,
     400
+   ],
+   "door_block": [
+    -949,
+    65,
+    401
    ]
   },
   {
@@ -67,6 +72,11 @@
    "name": "harbourmaster",
    "door": [
     -916,
+    388
+   ],
+   "door_block": [
+    -915,
+    65,
     388
    ]
   },
@@ -83,7 +93,12 @@
     -905,
     438
    ],
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -906,
+    65,
+    438
+   ]
   },
   {
    "stamp": "station_grand_saltreach",
@@ -109,7 +124,12 @@
     403
    ],
    "walked": true,
-   "name": "town hall"
+   "name": "town hall",
+   "door_block": [
+    -900,
+    66,
+    403
+   ]
   },
   {
    "stamp": "gulls_rest_inn_d-901_431",
@@ -125,7 +145,12 @@
     422
    ],
    "walked": true,
-   "name": "inn"
+   "name": "inn",
+   "door_block": [
+    -908,
+    65,
+    423
+   ]
   },
   {
    "stamp": "gulls_rest_store_d-889_434",
@@ -141,7 +166,12 @@
     423
    ],
    "walked": true,
-   "name": "store"
+   "name": "store",
+   "door_block": [
+    -893,
+    65,
+    424
+   ]
   },
   {
    "stamp": "gulls_rest_smithy_d-885_376",
@@ -157,7 +187,12 @@
     379
    ],
    "walked": true,
-   "name": "smithy"
+   "name": "smithy",
+   "door_block": [
+    -893,
+    66,
+    379
+   ]
   },
   {
    "stamp": "gulls_rest_chapel_d-879_444",
@@ -173,7 +208,12 @@
     435
    ],
    "walked": true,
-   "name": "chapel"
+   "name": "chapel",
+   "door_block": [
+    -879,
+    68,
+    436
+   ]
   },
   {
    "stamp": "gulls_rest_fishmonger_d-876_366",
@@ -189,7 +229,12 @@
     372
    ],
    "walked": true,
-   "name": "fishmonger's loft"
+   "name": "fishmonger's loft",
+   "door_block": [
+    -876,
+    66,
+    371
+   ]
   },
   {
    "stamp": "breeder_yard_saltreach",
@@ -205,7 +250,12 @@
     413
    ],
    "walked": true,
-   "name": "breeder's post"
+   "name": "breeder's post",
+   "door_block": [
+    -861,
+    69,
+    413
+   ]
   },
   {
    "stamp": "gulls_rest_house_44053_t2_d-857_437_teal",
@@ -221,7 +271,12 @@
     430
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -860,
+    69,
+    431
+   ]
   },
   {
    "stamp": "gulls_rest_house_43987_t2_d-842_441_white",
@@ -237,7 +292,12 @@
     434
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -845,
+    68,
+    435
+   ]
   },
   {
    "stamp": "gulls_rest_house_43854_t1_d-832_439_orange",
@@ -253,7 +313,12 @@
     430
    ],
    "walked": true,
-   "roof": "orange"
+   "roof": "orange",
+   "door_block": [
+    -835,
+    70,
+    431
+   ]
   },
   {
    "stamp": "gulls_rest_house_43380_t2_d-807_439_white",
@@ -269,7 +334,12 @@
     430
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -810,
+    73,
+    431
+   ]
   },
   {
    "stamp": "gulls_rest_house_43176_t2_teal",
@@ -285,7 +355,12 @@
     430
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -798,
+    73,
+    434
+   ]
   },
   {
    "stamp": "gulls_rest_house_43880_t2_d-785_436_white",
@@ -301,7 +376,12 @@
     429
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -788,
+    75,
+    430
+   ]
   },
   {
    "stamp": "gulls_rest_house_43698_t1_orange",
@@ -317,7 +397,12 @@
     418
    ],
    "walked": true,
-   "roof": "orange"
+   "roof": "orange",
+   "door_block": [
+    -840,
+    71,
+    417
+   ]
   },
   {
    "stamp": "gulls_rest_house_43303_t1_white",
@@ -333,7 +418,12 @@
     422
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -824,
+    72,
+    421
+   ]
   },
   {
    "stamp": "gulls_rest_house_43884_t2_d-815_413_teal",
@@ -349,7 +439,12 @@
     422
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -812,
+    73,
+    421
+   ]
   },
   {
    "stamp": "gulls_rest_house_43709_t2_d-814_389_green",
@@ -365,7 +460,12 @@
     396
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -810,
+    76,
+    395
+   ]
   },
   {
    "stamp": "gulls_rest_house_43330_t1_d-849_331_teal",
@@ -381,7 +481,12 @@
     334
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -857,
+    68,
+    334
+   ]
   },
   {
    "stamp": "gulls_rest_house_43393_t2_d-883_340_white",
@@ -397,7 +502,12 @@
     347
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -880,
+    65,
+    346
+   ]
   },
   {
    "stamp": "gulls_rest_house_43817_t2_d-875_329_white",
@@ -413,7 +523,12 @@
     336
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -872,
+    67,
+    335
+   ]
   },
   {
    "stamp": "gulls_rest_house_44160_t2_d-822_446_green",
@@ -429,7 +544,12 @@
     439
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -825,
+    70,
+    440
+   ]
   },
   {
    "stamp": "gulls_rest_house_44054_t2_teal",
@@ -445,7 +565,12 @@
     447
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -801,
+    70,
+    447
+   ]
   },
   {
    "stamp": "gulls_rest_house_44167_t1_d-896_357_white",
@@ -461,7 +586,12 @@
     364
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -892,
+    65,
+    363
+   ]
   },
   {
    "stamp": "gulls_rest_house_43610_t2_d-859_459_green",
@@ -477,7 +607,12 @@
     449
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -862,
+    66,
+    453
+   ]
   },
   {
    "stamp": "gulls_rest_house_43255_t2_d-835_444_green",
@@ -493,7 +628,12 @@
     447
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -841,
+    67,
+    447
+   ]
   },
   {
    "stamp": "gulls_rest_house_43609_t1_d-861_382_green",
@@ -509,7 +649,12 @@
     391
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -858,
+    69,
+    390
+   ]
   },
   {
    "stamp": "gulls_rest_house_43963_t2_d-847_386_white",
@@ -525,7 +670,12 @@
     395
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -844,
+    71,
+    394
+   ]
   },
   {
    "stamp": "gulls_rest_house_44111_t1_d-835_385_teal",
@@ -541,7 +691,12 @@
     397
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -832,
+    73,
+    393
+   ]
   },
   {
    "stamp": "gulls_rest_house_43724_t1_d-836_374_teal",
@@ -557,7 +712,12 @@
     377
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -844,
+    70,
+    377
+   ]
   },
   {
    "stamp": "gulls_rest_house_43677_t2_green",
@@ -573,7 +733,12 @@
     359
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -856,
+    67,
+    359
+   ]
   },
   {
    "stamp": "gulls_rest_house_43998_t2_green",
@@ -589,7 +754,12 @@
     374
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -861,
+    67,
+    374
+   ]
   },
   {
    "stamp": "gulls_rest_house_44154_t2_teal",
@@ -605,7 +775,12 @@
     364
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -862,
+    67,
+    364
+   ]
   },
   {
    "stamp": "gulls_rest_house_44093_t2_orange",
@@ -621,7 +796,12 @@
     457
    ],
    "walked": true,
-   "roof": "orange"
+   "roof": "orange",
+   "door_block": [
+    -834,
+    66,
+    461
+   ]
   },
   {
    "stamp": "gulls_rest_house_43922_t1_d-831_363_teal",
@@ -637,7 +817,12 @@
     356
    ],
    "walked": true,
-   "roof": "teal"
+   "roof": "teal",
+   "door_block": [
+    -835,
+    69,
+    357
+   ]
   },
   {
    "stamp": "gulls_rest_house_43542_t2_d-836_339_green",
@@ -653,7 +838,12 @@
     346
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -833,
+    69,
+    345
+   ]
   },
   {
    "stamp": "gulls_rest_house_43429_t2_white",
@@ -669,7 +859,12 @@
     366
    ],
    "walked": true,
-   "roof": "white"
+   "roof": "white",
+   "door_block": [
+    -823,
+    71,
+    367
+   ]
   },
   {
    "stamp": "gulls_rest_house_44160_t2_d-811_352_green",
@@ -685,7 +880,12 @@
     355
    ],
    "walked": true,
-   "roof": "green"
+   "roof": "green",
+   "door_block": [
+    -817,
+    71,
+    355
+   ]
   },
   {
    "stamp": "tg_windmill_salt_1335",
@@ -701,7 +901,12 @@
     463
    ],
    "fence_path": true,
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -868,
+    65,
+    464
+   ]
   },
   {
    "stamp": "tg_cross_43",
@@ -1465,6 +1670,168 @@
    "x": -869,
    "z": 458,
    "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -779,
+   "z": 427,
+   "ground_y": 75,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -893,
+   "z": 419,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -780,
+   "z": 410,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -797,
+   "z": 429,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -917,
+   "z": 430,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -787,
+   "z": 428,
+   "ground_y": 74,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -867,
+   "z": 448,
+   "ground_y": 65,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -890,
+   "z": 439,
+   "ground_y": 63,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -841,
+   "z": 429,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -899,
+   "z": 423,
+   "ground_y": 65,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -908,
+   "z": 398,
+   "ground_y": 64,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -861,
+   "z": 429,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -806,
+   "z": 446,
+   "ground_y": 69,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -886,
+   "z": 419,
+   "ground_y": 65,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -846,
+   "z": 376,
+   "ground_y": 69,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -854,
+   "z": 435,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -832,
+   "z": 416,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_salt",
+   "kind": "lamp",
+   "x": -823,
+   "z": 425,
+   "ground_y": 70,
    "rotation": 0,
    "footprint": 0
   },
