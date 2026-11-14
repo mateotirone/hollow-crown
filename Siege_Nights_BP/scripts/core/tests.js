@@ -16,6 +16,7 @@ const tests = [];
 export const OFFLINE_ONLY = new Set([
   "settle: every hanging lantern in a hall or plot building hangs from something (a chain up to the roof)",
   "settle: watchtowers on every map plot's wall line: nothing of the wall on the way in to a door", "settle: lane lamps: every Hamlet's lanes get posts on the verge, never on a plot, the same every time",
+  "undertow: thin places: the books their pages put inside lie where they say, on something firm, clear of the way in",
   "settle walls: levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand",
   "settle base: the founder's cottage has room for a bed indoors",
   "settle base: every map plot has a road out from its gate to the map's roads, starting where each layout's gate road ends",
