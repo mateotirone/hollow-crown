@@ -120,7 +120,16 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
         if i in drop: continue
         e = entry(i); nm = e["name"]; st = e.get("states") or {}
         x, y, z = cell
-        if POST.search(nm) and "fence_gate" not in nm and not nm.startswith("siege:old_") and st.get("pillar_axis", "y") == "y":
+        is_post = POST.search(nm) and "fence_gate" not in nm and not nm.startswith("siege:old_") and st.get("pillar_axis", "y") == "y"
+        if is_post:                                  # a post on a bottom slab (a market stall's leg on the square)
+            below = at.get((x, y - 1, z))
+            if below is not None and below not in drop:
+                b = entry(below); bst = b.get("states") or {}
+                if (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                        and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"):
+                    blocks[below] = [*blocks[below][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[below][4:]]
+                    full += 1
+        if is_post:
             if solid((x, y - 1, z)) or name_at((x, y - 1, z)) is not None and not NOTHING.search(name_at((x, y - 1, z))): pass
             elif any(solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): pass
             else:
@@ -150,6 +159,38 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
         if "torch" in nm and st.get("torch_facing_direction", "top") != "top": continue
         blocks[below] = [*blocks[below][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[below][4:]]
         full += 1
+    # a railing still hanging (no ground within three blocks: a gallery or terrace whose floor was cut away): where a
+    # floor runs beside it, that floor comes back under it; a run with no floor anywhere beside it goes
+    def fence_at(c): return (name_at(c) or "").endswith("_fence") and not (name_at(c) or "").startswith("siege:old_")
+    hang = set()
+    for cell, i in at.items():
+        if i in drop or not fence_at(cell): continue
+        x, y, z = cell
+        if solid((x, y - 1, z)) or name_at((x, y - 1, z)) not in (None, "minecraft:air"): continue
+        if any(solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): continue
+        hang.add(cell)
+    floored = set()
+    for (x, y, z) in hang:
+        for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            j = at.get((x + a, y - 1, z + b))
+            if j is not None and j not in drop and solid((x + a, y - 1, z + b)) and not solid((x, y - 2, z)):
+                blocks.append([x, y - 1, z, blocks[j][3]]); at[(x, y - 1, z)] = len(blocks) - 1; floored.add((x, y, z)); break
+    seen, cut = set(), 0
+    for c0 in hang - floored:
+        if c0 in seen: continue
+        run, todo = [], [c0]; seen.add(c0)
+        while todo:
+            x, y, z = todo.pop(); run.append((x, y, z))
+            for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                q = (x + a, y, z + b)
+                if q not in seen and fence_at(q): seen.add(q); todo.append(q)
+        if all(q in hang and q not in floored for q in run):
+            for q in run:
+                drop.add(at[q]); cut += 1
+                up = (q[0], q[1] + 1, q[2])
+                if (name_at(up) or "").endswith("lantern"): drop.add(at[up])
+    if floored: n["floored"] = len(floored)
+    if cut: n["railings_cut"] = cut
     if footed: n["footed"] = footed
     if full: n["full"] = full
 
