@@ -53,7 +53,7 @@ SITES = {
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
                       first=("chapel",),        # Sister Wren's chapel claims its place on the square (storyline audit)
                       first_r=13,               # its door 13 out: the Seneschal's clock posts ring the square at 10 (well_plan.js)
-                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel", bells=False)),
+                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel", bells=False, healer=True)),
                              ("clock tower", vale_civic.clock_tower),
                              ("bakery", lambda: __import__("story_builds").build("bakery")),
                              ("order waystation", lambda: __import__("story_builds").build("waystation")),
@@ -1178,6 +1178,7 @@ class Town:
 
     LAMP_EVERY = {"main": 9, "lane": 11, "walk": 13}   # blocks between lamps along a street, sides alternating
     LAMP_REACH = 7                                       # no lamp within this of another (a lantern lights ~7 round)
+    DARK_REACH = 9                                       # a street cell further than this (steps) from every lamp is dark
 
     def lamp_region(self):
         r = getattr(self, "region", None) or getattr(self, "arch", None) or "vale"
@@ -1196,6 +1197,19 @@ class Town:
             nx, nz = rot_xz(0, 1, sdeg)
             if -8 <= (x - sx) * nx + (z - sz) * nz <= 3: return False
         return all((x - a) ** 2 + (z - b) ** 2 >= self.LAMP_REACH ** 2 for a, b in lamps)
+
+    def plaza_spot(self, x, z, lamps):
+        """A post out in a wide paved place (Sunscar's caravan yard was 20 blocks across with no verge near its middle,
+        town audit 2026-11-14): a street cell with street two blocks all round it, so no lane is narrowed."""
+        if not (self.inside(x, z, 3) and all(abs(x - a) + abs(z - b) >= 5 for a, b in lamps)): return False
+        if getattr(self, "DOORWALK", None) is not None and self.DOORWALK[self.ij(x, z)]: return False
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                if not self.ok(x + dx, z + dz): return False
+                i, j = self.ij(x + dx, z + dz)
+                if self.K[i, j] < 0 or self.WET[i, j] or self.TAKEN[i, j] not in (0, 1): return False
+                if getattr(self, "EAVES", None) is not None and self.EAVES[i, j]: return False
+        return True
 
     def put_lamp(self, bp, x, z, y, deg, lamps):
         self.stamp(bp, x, z, y, deg, "lamp"); self.TAKEN[self.ij(x, z)] = 4; lamps.append((x, z))
@@ -1245,6 +1259,31 @@ class Town:
                         if not self.lamp_spot_ok(lx, lz, lamps): continue
                         self.put_lamp(post, lx, lz, int(self.G[self.ij(lx, lz)]), 0, lamps); done = True; break
                     if done: break
+        # then the dark stretches left over (town audit 2026-11-14: 16 to 31 per town): the street cell furthest from any
+        # lamp gets a post on the nearest free verge, until every street cell has a lamp within DARK_REACH
+        st = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere((self.K >= 0) & self.IN & ~self.WET)]
+        if not st or not lamps: return
+        P = np.array(st, float); tried = set()
+        for _ in range(200):
+            L = np.array(lamps, float)
+            dd = np.full(len(P), 1e9)
+            for k in range(0, len(L), 64): dd = np.minimum(dd, np.abs(P[:, None, :] - L[None, k:k + 64, :]).sum(2).min(1))
+            order = [q for q in np.argsort(-dd) if dd[q] > self.DARK_REACH and q not in tried]
+            if not order: break
+            q = order[0]; tried.add(q); cx, cz = st[q]; placed = False
+            for r in (1, 2, 3):
+                for dx in range(-r, r + 1):
+                    for dz in range(-r, r + 1):
+                        if max(abs(dx), abs(dz)) != r: continue
+                        x, z = cx + dx, cz + dz
+                        if self.lamp_spot_ok(x, z, [l for l in lamps if abs(l[0] - x) + abs(l[1] - z) < 2 * self.DARK_REACH], margin=1) or \
+                           (self.inside(x, z, 1) and self.ok(x, z) and self.K[self.ij(x, z)] < 0 and self.TAKEN[self.ij(x, z)] in (0, 1) and not self.WET[self.ij(x, z)]
+                            and not (getattr(self, "EAVES", None) is not None and self.EAVES[self.ij(x, z)]) and all(abs(x - a) + abs(z - b) >= 5 for a, b in lamps)) or \
+                           self.plaza_spot(x, z, lamps):
+                            if abs(int(self.G[self.ij(x, z)]) * 2 + 1 - int(self.K[self.ij(cx, cz)])) > 4: continue
+                            self.put_lamp(post, x, z, int(self.G[self.ij(x, z)]), 0, lamps); placed = True; break
+                    if placed: break
+                if placed: break
 
     tree_index = None; tree_dir = None; tree_src = None
     TOWN_TREES = {"vale": {"vale_great_oak": 2, "vale_ash": 2, "vale_silver_birch": 1, "vale_apple": 1, "vale_hawthorn": 1},
@@ -1471,6 +1510,22 @@ class Town:
         T, wall = TF.solve(self.G.astype(int), sites, fixed)
         self.tf_report = TF.report(self.G.astype(int), T, wall, sites)
         self.G = np.where(fixed, self.G, T).astype(self.G.dtype)
+        self.soften_cliffs(fixed | own)
+
+    def soften_cliffs(self, keep, it=12):
+        """Natural cliffs inside the town (town audit 2026-11-14: 22 to 30 per town, 3+ blocks straight up) are cut back
+        to at most 2 a step, never filled, so the land steps down like a bank; water's edge, streets, plots and anything
+        built stay as they are."""
+        free = self.IN & ~self.WET & ~keep & (self.K < 0)
+        G = self.G.astype(int)
+        for _ in range(it):
+            lo = np.full(G.shape, 10 ** 6)
+            for sh in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nb = np.roll(np.where(self.WET, 10 ** 6, G), sh, (0, 1)); lo = np.minimum(lo, nb)
+            new = np.where(free & (G > lo + 2), lo + 2, G)
+            if (new == G).all(): break
+            G = new
+        self.G = G.astype(self.G.dtype)
 
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
@@ -1600,7 +1655,10 @@ class Town:
         furnish_blocks.furnish_worldblocks(d, {"buildings": self.plan})
         if not self.site.get("dark"):            # every build lit at night (Mateo 2026-11-13): rooms, doors, yards
             import light_blocks
-            light_blocks.light_worldblocks(d)
+            light_blocks.light_worldblocks(d, ground=lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) and self.inside(x, z, 0) else None)
+        import tidy_blocks                      # nothing hung on nothing, standing on nothing or facing a wall (town audit 2026-11-14)
+        print("tidy", tidy_blocks.tidy_worldblocks(d, lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) else None,
+                                                   lambda x, z: max(int(self.G[self.ij(x, z)]), int(self.G0[self.ij(x, z)])) if self.ok(x, z) else None))
         with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
         return len(rows)
 
@@ -1609,6 +1667,16 @@ class Town:
         db = {e["stamp"] for e in self.plan if e.get("db_stamp")}            # tree database stamps live in map/trees' output
         for name, bp in self.designs.items():
             if name not in db: bp.save_json(os.path.join(out, "stamps", name + ".json"))
+        for e in self.plan:                    # where the door itself is (the plan's "door" is the step in front of it)
+            bp = self.designs.get(e["stamp"])
+            if not e.get("door") or bp is None or e["kind"] in ("tree", "lamp", "stall", "square"): continue
+            best = None
+            for (x, y, z), (n, p) in bp.cells.items():
+                if not ((n.endswith("_door") and "trapdoor" not in n or n.endswith("fence_gate")) and not p.get("upper")): continue
+                rx, rz = rot_xz(x, z, e["rotation"]); w = (e["x"] + rx, e["ground_y"] + y, e["z"] + rz)
+                dd = abs(w[0] - e["door"][0]) + abs(w[2] - e["door"][1])
+                if dd <= 12 and (best is None or dd < best[0]): best = (dd, w)
+            if best: e["door_block"] = [int(v) for v in best[1]]
         json.dump({"town": self.name, "centre": list(self.C), "radius": self.R, "square": {"centre": list(self.sq), "y": self.sqY, "radius": self.sqR},
                    "about": "Stamp origin = blueprint (0,0,0) at world x, ground_y, z after turning clockwise by rotation (0 = front faces south). "
                             "Apply the groundwork file first (it already levels every plot and builds the foundations), then the stamps. "

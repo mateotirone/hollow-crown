@@ -89,13 +89,32 @@ def _skill_spec(fname, name, bells=True):
     return bp
 
 
-def chapel(seed=5, name="kingsrest_chapel", bells=True):
+def chapel(seed=5, name="kingsrest_chapel", bells=True, healer=False):
     """Stone chapel on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py): a buttressed nave with
     lancets, a front tower in three stages with the door at its foot, a louvred belfry and a broach spire
     (build-instructions/towers/README.md), a lower chancel at the back. bells=False: the belfry stands empty."""
     bp = _skill_spec("kingsrest_chapel.json", name, bells)
     bp.markers["door"] = (5, 2, 24); bp.markers["priest"] = (5, 2, 3)
+    if healer: _healers_corner(bp)
     return bp.finish()
+
+
+def _healers_corner(bp):
+    """Sister Wren's chapel (Millbrook, story-critical; story-builds thread 2026-11-14): the three pew rows nearest the
+    chancel step go, and her healer's corner stands on the north side of the aisle there. Local z is the row counted
+    back from the chancel arch (0), x 5 the aisle; in the plan's turn (90) local +z is west and local -x is north.
+    Wren stands in the aisle at (5, 2, 2): the bed's head beside her, its foot one row back, the water cauldron
+    between the bed and the aisle, a stair chair, a barrel with a flower pot at the bed's foot."""
+    for z in (1, 3, 5):
+        for x in (3, 4, 6, 7):
+            if (x, 2, z) in bp.cells and bp.cells[(x, 2, z)][0].endswith("_stairs"): bp.set(x, 2, z, "air")
+    bp.set(2, 2, 2, "bed", facing="n", head=True)       # head to the east (towards the altar)
+    bp.set(2, 2, 3, "bed", facing="n", head=False)
+    bp.set(3, 2, 2, "cauldron", water=True)
+    bp.set(3, 2, 4, "spruce_stairs", facing="w")        # back to the north wall: sits facing the aisle
+    bp.set(2, 2, 5, "barrel", facing="up")
+    bp.set(2, 3, 5, "flower_pot")
+    bp.markers["wren"] = (5, 2, 2)
 
 
 def station(seed=9):

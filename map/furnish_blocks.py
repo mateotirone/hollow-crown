@@ -43,7 +43,7 @@ def furnish_worldblocks(d, plan=None, log=print):
     solid = lambda c: c in at and not SOLID_NOT.search(name(c))
     stand = lambda c: c in at and not STANDABLE_NOT.search(name(c))
     covered = lambda c: any(c[:1] + (c[1] + dy,) + c[2:] in at and not OPEN.search(name((c[0], c[1] + dy, c[2])))
-                            for dy in range(2, 9))
+                            for dy in range(2, 25))   # a tall house open to its roof ridge is a room too (Rimehold, 2026-11-14)
     pidx = {json.dumps([e["name"], e.get("states", {}), bool(e.get("soft"))], sort_keys=True): i for i, e in enumerate(pal)}
 
     def pid(n, st):
@@ -52,7 +52,7 @@ def furnish_worldblocks(d, plan=None, log=print):
         return pidx[k]
 
     def room(c):
-        """Floor cells (feet level) of the room a door opens on: free feet and head, a floor, a ceiling within 7."""
+        """Floor cells (feet level) of the room a door opens on: free feet and head, a floor, a roof overhead."""
         if not (free(c) and free((c[0], c[1] + 1, c[2])) and covered(c)): return None, True
         seen, todo, leak = {c}, [c], False
         while todo and len(seen) < 700:

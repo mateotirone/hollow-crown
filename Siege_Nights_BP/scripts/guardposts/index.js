@@ -39,7 +39,7 @@ import { worldBox } from "../townhall/build.js";
 import { STYLES } from "../townhall/styles.js";
 import { sfx } from "../core/sfx.js";
 import { standY } from "./ground.js";
-import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, WALK } from "./walk.js";
+import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, upAbove, WALK } from "./walk.js";
 import { POSTS, wallPosts, buildingPosts, frontOf, numberPosts, skyCamera, yawOf, wallStand, compassOf } from "./posts.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -155,9 +155,17 @@ function baseOf(owner) {
 // ---------- stationing ----------
 
 // Where a guard stands at a post: the middle of the block, feet height, facing out
+// (a lookout up a ladder also carries climb, and foot = where the guard steps off the ladder at the bottom)
 function postDest(post) {
   const stand = standOf(post);
-  return stand ? { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out), ...(post.watch ? { climb: true } : {}) } : undefined;
+  if (!stand) return undefined;
+  const dest = { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out) };
+  if (post.watch) {
+    dest.climb = true;
+    const y = post.foot ? standY(post.foot.x, post.foot.z, post.foot.from) : undefined;
+    if (y !== undefined) dest.foot = { x: post.foot.x + 0.5, y, z: post.foot.z + 0.5 };
+  }
+  return dest;
 }
 
 // Where a stationed guard waits while its watch is off: beside the nearest Barracks (its own spot of eight round it)
@@ -201,7 +209,8 @@ function sendOff(guard, owner, post, { salute = false } = {}) {
   const current = postOf(guard);
   if (near(current, dest) && (isWalking(guard) || !guard.getDynamicProperty("siege:walking"))) return true;
   setPost(guard, { ...dest, stand: true });
-  walkTo(guard, owner, dest, { salute: salute || dest === atPost });
+  // off a lookout (the watch ended, or a new post): down the ladder first, then walk
+  walkTo(guard, owner, dest, { salute: salute || dest === atPost, down: current?.foot ?? (current?.climb ? atPost.foot : undefined) });
   return true;
 }
 
@@ -545,6 +554,11 @@ addTests("guard posts", {
       assertEqual(watch.length, level <= 6 ? 4 : 0, `level ${level} watchtower posts`);
       assert(posts.length >= POSTS.wallPosts + 2 && posts.length <= POSTS.wallPosts + 2 + watch.length, `level ${level}: ${posts.length} posts`);
       if (watch.length) assertEqual(posts.slice(0, 4).map((p) => p.key).join(), "watch:0,watch:1,watch:2,watch:3", "lookouts are manned first");
+      for (const p of watch) { // the ladder's foot (the front step) is close enough to climb up from and to be put down at
+        assert(p.foot && Math.hypot(p.x - p.foot.x, p.z - p.foot.z) <= WALK.climb, `level ${level} ${p.key}: foot ${JSON.stringify(p.foot)}`);
+        assert(upAbove({ x: p.x, y: p.from, z: p.z }, { x: p.foot.x, y: p.foot.from, z: p.foot.z }), `level ${level} ${p.key}: up on the lookout`);
+        assert(!upAbove({ x: p.x, y: p.foot.from, z: p.z }, { x: p.foot.x, y: p.foot.from, z: p.foot.z }), "on the ground is not up");
+      }
       assertEqual(new Set(posts.map((p) => p.key)).size, posts.length);
       for (const p of posts) {
         const r = Math.hypot(p.x - w.x, p.z - w.z);
