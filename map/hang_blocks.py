@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Turn or drop wall-hung blocks (and vines) in baked world files that would hang on nothing.
+"""Turn or drop wall-hung blocks (and vines), and chain up hanging lanterns, in baked world files that would hang on nothing.
 
 An item frame, ladder, button or wall sign needs a solid block behind it, or it pops off the first time a block
 next to it changes (tools/hung-check.mjs finds them). For each one that hangs on air, this turns it to face away
@@ -61,10 +61,24 @@ def fix(path):
                 turned += 1; break
         else:
             drop.add(i); dropped += 1
-    if drop:
-        d["blocks"] = [b for i, b in enumerate(blocks) if i not in drop]
-        if "groundwork_blocks" in d and isinstance(d["groundwork_blocks"], int):
-            d["groundwork_blocks"] -= sum(1 for i in drop if i < d["groundwork_blocks"])
+    # a hanging lantern needs something right above it: hang it on a chain up to the ceiling, or drop it
+    chains = []
+    for cell, i in at.items():
+        e = pal[blocks[i][3]]
+        if i in drop or not (e["name"].endswith("lantern") and (e.get("states") or {}).get("hanging")): continue
+        gap, held = [], False
+        for dy in range(1, 13):
+            j = at.get((cell[0], cell[1] + dy, cell[2]))
+            if j is None or j in drop or pal[blocks[j][3]]["name"].endswith(":air"): gap.append(dy); continue
+            held = True; break
+        if not held: drop.add(i); dropped += 1; continue
+        if gap:
+            ci = index_of({"name": "minecraft:chain", "states": {"pillar_axis": "y"}})
+            chains += [[cell[0], cell[1] + dy, cell[2], ci] for dy in gap]   # placed last, so they win over air
+    if chains: print(f"{path}: {len(chains)} chain links added")
+    if drop and isinstance(d.get("groundwork_blocks"), int):
+        d["groundwork_blocks"] -= sum(1 for i in drop if i < d["groundwork_blocks"])
+    d["blocks"] = [b for i, b in enumerate(blocks) if i not in drop] + chains
     with open(path, "w") as fh: json.dump(d, fh, separators=(",", ":"))
     print(f"{path}: {turned} turned, {dropped} dropped")
 
