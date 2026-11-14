@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **40 signature sounds** are meant to be real recordings made with an AI sound generator. 40 of 40 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **34 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **39 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -607,6 +607,11 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `cast.hollowstep` | Veilstep | `portal.travel` pitch 0.6 vol 0.2 + `mob.warden.heartbeat` pitch 0.8 vol 0.8 after 0.2 s + `block.bell.hit` pitch 0.35 vol 0.5 after 0.4 s | townhall (2) |
 | `cast.choir` | Choir's Call | `block.bell.hit` pitch 0.4 + `block.bell.hit` pitch 0.3 vol 0.6 after 0.15 s + `ambient.cave` pitch 0.7 vol 0.3 after 0.3 s | - |
 | `cast.crescendo` | A Crescendo begins | `block.bell.hit` pitch 1.6 vol 0.8 + `block.bell.hit` pitch 1.2 vol 0.5 after 0.1 s + `chime.amethyst_block` vol 0.6 after 0.2 s | townhall |
+| `cast.shatter` | A Ward plate or Bind chain breaks | `random.glass` pitch 1.4 vol 0.5 + `block.bell.hit` pitch 1.7 vol 0.18 after 0.05 s | townhall (4) |
+| `cast.toll` | The Choir's bell tolls | `block.bell.hit` pitch 0.35 vol 0.9 + `block.bell.hit` pitch 0.26 vol 0.5 after 0.15 s + `ambient.cave` pitch 0.6 vol 0.2 after 0.25 s | townhall |
+| `cast.channel` | Veilstep opening | `mob.warden.heartbeat` pitch 0.7 vol 0.7 + `portal.trigger` pitch 0.5 vol 0.2 after 0.1 s + `mob.warden.heartbeat` pitch 0.7 vol 0.6 after 0.45 s | townhall |
+| `cast.pulse` | Echo Sight listening | `block.bell.hit` pitch 0.45 vol 0.25 + `chime.amethyst_block` pitch 0.45 vol 0.2 after 0.1 s | townhall |
+| `cast.push` | A soft push wave | `mob.endermen.portal` pitch 0.5 vol 0.25 + `chime.amethyst_block` pitch 0.8 vol 0.3 after 0.05 s | townhall |
 | `cast.overwhelmed` | The Choir is too loud | `mob.warden.sonic_boom` pitch 0.7 vol 0.35 + `block.bell.hit` pitch 0.3 vol 0.5 after 0.2 s | townhall |
 | `cast.open` | The magic hotbar opens | `chime.amethyst_block` pitch 1.2 vol 0.5 + `item.book.page_turn` pitch 0.7 vol 0.4 after 0.05 s | townhall |
 | `cast.close` | The magic hotbar closes | `chime.amethyst_block` pitch 0.8 vol 0.4 + `item.book.page_turn` pitch 0.6 vol 0.4 after 0.05 s | townhall |

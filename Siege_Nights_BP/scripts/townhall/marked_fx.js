@@ -2,7 +2,7 @@
 // Pack files come from tools/build_sorcerer_fx.py; notes in docs/SORCERER-FX.md. Everything here is cosmetic
 // and never throws, so a power still works if a particle or an animation is missing.
 
-import { MolangVariableMap } from "@minecraft/server";
+import { MolangVariableMap, system } from "@minecraft/server";
 import { sfx } from "../core/sfx.js";
 
 // skill id -> short key used by the animation, sound and spell icon names
@@ -62,3 +62,62 @@ export function handSpot(player) {
 
 /** One second of sparks off the Ember in hand: more of them, the louder you are. */
 export const smoulder = (player, resonance) => puff(player.dimension, "siege:arc_smoulder", handSpot(player), { "variable.ember_rate": 2 + resonance / 8 });
+
+// ---------- the 3D effect objects (siege:arc_fx, tools/build_sorcerer_fx.py) ----------
+// One entity, six models. Scripts place, move and remove them; a 30 s timer clears any left behind.
+export const ARC_FX = "siege:arc_fx";
+export const FX_FORMS = ["shard", "ward", "chains", "bell", "rift", "ghost"];
+
+/** Spawn an effect object; `life` ticks later it goes (0 = the caller removes it). */
+export function spawnFx(dim, form, at, { life = 0, yaw, count } = {}) {
+  let e;
+  try {
+    e = dim.spawnEntity(`${ARC_FX}<siege:form_${form}>`, at);
+    if (count !== undefined) e.setProperty("siege:count", count);
+    if (yaw !== undefined) e.setRotation({ x: 0, y: yaw });
+  } catch {
+    return undefined; // unloaded chunk, or a world without the pack: the power still works
+  }
+  if (life > 0) system.runTimeout(() => removeFx(e), life);
+  return e;
+}
+
+export function removeFx(e) {
+  try {
+    if (e?.isValid) e.remove();
+  } catch {
+    // gone already
+  }
+}
+
+export function moveFx(e, at, yaw) {
+  try {
+    if (!e?.isValid) return false;
+    e.teleport(at, yaw === undefined ? undefined : { rotation: { x: 0, y: yaw } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function playFx(e, animation) {
+  try {
+    e.playAnimation(animation);
+  } catch {
+    // older engine
+  }
+}
+
+export const setFxCount = (e, n) => {
+  try {
+    e.setProperty("siege:count", Math.max(0, Math.min(3, n)));
+  } catch {
+    // gone
+  }
+};
+
+/** Yaw (degrees, Minecraft style) that faces from one spot toward another. */
+export const yawToward = (from, to) => (Math.atan2(-(to.x - from.x), to.z - from.z) * 180) / Math.PI;
+
+/** The Marked layer stage for a Resonance (1-5; 0 means not Marked). Pure, for the self-tests. */
+export const markStage = (resonance, crescendo = false) => (crescendo ? 5 : resonance < 10 ? 1 : resonance < 35 ? 2 : resonance < 60 ? 3 : resonance < 85 ? 4 : 5);

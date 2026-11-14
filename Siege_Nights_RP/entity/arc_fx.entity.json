@@ -1,0 +1,68 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:arc_fx",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "shard": "textures/entity/siege_arc_shard",
+    "ward": "textures/entity/siege_arc_ward",
+    "chains": "textures/entity/siege_arc_chains",
+    "bell": "textures/entity/siege_arc_bell",
+    "rift": "textures/entity/siege_arc_rift",
+    "ghost": "textures/entity/siege_arc_ghost"
+   },
+   "geometry": {
+    "shard": "geometry.siege.arc_shard",
+    "ward": "geometry.siege.arc_ward",
+    "chains": "geometry.siege.arc_chains",
+    "bell": "geometry.siege.arc_bell",
+    "rift": "geometry.siege.arc_rift",
+    "ghost": "geometry.siege.arc_ghost"
+   },
+   "animations": {
+    "spin": "animation.siege.arc_fx.spin",
+    "orbit": "animation.siege.arc_fx.orbit",
+    "bind": "animation.siege.arc_fx.bind",
+    "chain_turn": "animation.siege.arc_fx.chain_turn",
+    "bell_form": "animation.siege.arc_fx.bell_form",
+    "rift_open": "animation.siege.arc_fx.rift_open",
+    "rift_breathe": "animation.siege.arc_fx.rift_breathe",
+    "ghost_fade": "animation.siege.arc_fx.ghost_fade"
+   },
+   "scripts": {
+    "animate": [
+     {
+      "spin": "query.property('siege:form') == 0"
+     },
+     {
+      "orbit": "query.property('siege:form') == 1"
+     },
+     {
+      "bind": "query.property('siege:form') == 2"
+     },
+     {
+      "chain_turn": "query.property('siege:form') == 2"
+     },
+     {
+      "bell_form": "query.property('siege:form') == 3"
+     },
+     {
+      "rift_open": "query.property('siege:form') == 4"
+     },
+     {
+      "rift_breathe": "query.property('siege:form') == 4"
+     },
+     {
+      "ghost_fade": "query.property('siege:form') == 5"
+     }
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_arc_fx"
+   ]
+  }
+ }
+}
