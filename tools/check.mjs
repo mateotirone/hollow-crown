@@ -675,6 +675,14 @@ step("Wall-hung blocks have a wall");
   if (r.status === 0) console.log("every item frame, ladder, button and wall sign has a wall");
 }
 
+// ---------- 2c3. nothing floats in a landmark design ----------
+step("Landmark designs have nothing floating");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "landmark-float-check.mjs")], { encoding: "utf8" });
+  for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 20)) fail(`floating: ${line}`);
+  if (r.status === 0) console.log("every rigid landmark design stands on its ground");
+}
+
 // ---------- 2d. build catalog ----------
 // Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
 step("Build catalog");
