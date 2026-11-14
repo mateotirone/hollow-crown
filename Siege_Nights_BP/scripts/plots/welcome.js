@@ -15,6 +15,7 @@
 //   /scriptevent siege:welcome kingsrest    make where you stand the "start without a home" arrival spot
 //   /scriptevent siege:welcome release Name give up Name's pick so the plot is free again
 //   /scriptevent siege:welcome status       list every plot's Map Stone and who has it
+//   /scriptevent siege:welcome skip         leave the hall without choosing (a builder); unskip to undo
 // A world that still has the old round hall gets it swapped for the miniature by itself.
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
@@ -544,8 +545,11 @@ function toHall(player) {
   }
 }
 
+// A player in Creative is a newcomer like any other (Mateo plays every test in Creative, 2026-11-14); a map builder
+// who wants the world without choosing a start types /scriptevent siege:welcome skip, which tags them.
+const SKIP_TAG = "hc_skip_welcome";
 const mustChoose = (player) =>
-  hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
+  hallBuilt() && mapMode() && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
 
 /** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
 export function inWelcomeHall(player) {
@@ -745,10 +749,20 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       store.save();
       refreshHall();
       player.sendMessage(`§6${found[1].name}'s choice (${found[1].plot ?? "Kingsrest"}) is released. They choose again next time they arrive without a keep.`);
+    } else if (verb === "skip") {
+      // a builder in Creative leaves the hall without choosing a start (and is never brought back up)
+      player.addTag(SKIP_TAG);
+      player.removeTag(ARRIVING);
+      const k = store.data.kingsrest ?? WELCOME.kingsrest;
+      if (inHall(player.location)) player.teleport({ x: k.x + 0.5, y: k.y, z: k.z + 0.5 }, { dimension: overworld() });
+      player.sendMessage("§6You skip the welcome hall on this world.§7 /scriptevent siege:welcome unskip to be a newcomer again.");
+    } else if (verb === "unskip") {
+      player.removeTag(SKIP_TAG);
+      player.sendMessage("§6You'll be brought up to the welcome hall to choose a start.");
     } else if (verb === "status") {
       for (const line of statusLines()) player.sendMessage(line);
     } else {
-      player.sendMessage("§7/scriptevent siege:welcome build | build here | go | testarea | kingsrest | release <name> | status");
+      player.sendMessage("§7/scriptevent siege:welcome build | build here | go | testarea | kingsrest | release <name> | skip | unskip | status");
     }
   } catch (e) {
     player.sendMessage(`§c[Hollow Crown] welcome: ${e}`);
