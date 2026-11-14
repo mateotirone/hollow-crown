@@ -244,8 +244,68 @@ function pickTile(players) {
   return best;
 }
 
-function nextChunk(players, d) {
-  // Wound chunks first, then the nearest unbuilt chunk round any player in the Undertow.
+// ---- the arrival ----------------------------------------------------------------------------
+// Mateo 2026-11-13, then again 2026-11-14 ("Fix the loading issue in the hollow"): he came in by
+// hc:undertow_go and stood on a bare platform with nothing round it until he walked about. The way in only
+// waited for two chunks under the ledge, so the rest of what you see from it was built after you landed, a
+// chunk at a time round you. Now the whole arrival (the Wound, its back cliff and the valley out to about
+// 110 blocks in front of the ledge) is built ahead of time while nobody is down here, held loaded by one
+// ticking area, and nobody is let in until all of it is finished (index.js enter). It takes about 15 s of
+// building once per world.
+export const ARRIVAL_CHUNKS = { cx0: -4, cx1: 3, cz0: -3, cz1: 6 }; // x -64..63, z -48..111: 80 chunks
+export const ARRIVAL_AREA = "hc_undertow_wound";
+export const arrivalAreaCmd = () => {
+  const A = ARRIVAL_CHUNKS;
+  return `tickingarea add ${A.cx0 * 16} 0 ${A.cz0 * 16} ${A.cx1 * 16 + 15} 0 ${A.cz1 * 16 + 15} ${ARRIVAL_AREA} true`;
+};
+export function arrivalChunks() {
+  const A = ARRIVAL_CHUNKS, out = [];
+  for (let cx = A.cx0; cx <= A.cx1; cx++) for (let cz = A.cz0; cz <= A.cz1; cz++) if (chunkInRange(cx, cz)) out.push([cx, cz]);
+  return out;
+}
+// How much of the arrival is built, 0..1, and whether a player may come in now (its land and the Wound's cave).
+export function arrivalProgress(work = needsWork) {
+  const all = arrivalChunks();
+  return all.filter(([cx, cz]) => !work(cx, cz)).length / all.length;
+}
+export const arrivalReady = () => arrivalProgress() >= 1 && (pieces().woundV ?? 0) >= WOUND.v;
+
+// A world can say a chunk is built when its blocks are gone (a world file copied without the Hollow's own
+// chunks, or a crash before they were saved). Every chunk of the arrival has blackstone floor at L.floorY under
+// its middle, so once per session each one is looked at, and any that is empty there is built again.
+const checked = new Set();
+function forget(cx, cz) {
+  const i = idx(cx, cz);
+  bits[i >> 3] &= ~(1 << (i & 7));
+  roofBits[i >> 3] &= ~(1 << (i & 7));
+  dirty = true;
+}
+function checkArrival(d) {
+  if (checked.size >= arrivalChunks().length) return;
+  let lost = 0, woundLost = false;
+  for (const [cx, cz] of arrivalChunks()) {
+    const k = cx * 1000 + cz;
+    if (checked.has(k)) continue;
+    if (!isBuilt(cx, cz)) { checked.add(k); continue; }
+    let b;
+    try { b = d.getBlock({ x: cx * 16 + 8, y: L.floorY, z: cz * 16 + 8 }); } catch { b = undefined; }
+    if (!b) continue; // not loaded yet: looked at again later
+    checked.add(k);
+    if (!b.isAir) continue;
+    forget(cx, cz); lost++;
+    const [wx1, wz1, wx2, wz2] = WOUND.box;
+    if (cx * 16 + 15 >= wx1 && cx * 16 <= wx2 && cz * 16 + 15 >= wz1 && cz * 16 <= wz2) woundLost = true;
+  }
+  if (woundLost) {
+    // the cave and the first waystone went with the land: set them again once it is back
+    const q = pieces(); q.wound = false; q.woundV = 0; q.waystones = q.waystones.filter((i) => i !== 0); savePieces(q);
+  }
+  if (lost) { doneTiles.clear(); flushBits(); }
+}
+
+function nextChunk(players, d, arriving = false) {
+  // Wound chunks first, then the rest of the arrival while nobody is down here (or someone is waiting to come in),
+  // then the nearest unbuilt chunk round any player in the Undertow.
   let best, bestD = Infinity;
   const consider = (cx, cz, n) => {
     if (!needsWork(cx, cz)) return;
@@ -253,6 +313,11 @@ function nextChunk(players, d) {
   };
   for (let cx = -2; cx <= 1; cx++) for (let cz = -3; cz <= 2; cz++) consider(cx, cz, -1);
   if (best) return best;
+  if (arriving || !players.length) {
+    // nearest the ledge first, the land in front of it before the cliff behind
+    for (const [cx, cz] of arrivalChunks()) consider(cx, cz, (cx + 0.5) ** 2 + (cz - 1) ** 2 * (cz < 0 ? 2 : 1));
+    if (best) return best;
+  }
   for (const p of players) {
     const pcx = Math.floor(p.location.x / 16), pcz = Math.floor(p.location.z / 16);
     for (let dx = -RADIUS; dx <= RADIUS; dx++) for (let dz = -RADIUS; dz <= RADIUS; dz++) consider(pcx + dx, pcz + dz, nearness(players, pcx + dx, pcz + dz));
@@ -284,12 +349,13 @@ function nextChunk(players, d) {
 
 // Called every tick from index.js.
 let waitUntil = 0, tickNo = 0;
-export function buildTick(players) {
+export function buildTick(players, arriving = false) {
   if (++tickNo < waitUntil) return;
   const d = dim();
+  if (tickNo % 20 === 0) checkArrival(d);
   if (!job && extra.length) job = extra.shift(); // a set piece too big for one tick (the Wound's cave)
   if (!job) {
-    const next = nextChunk(players, d);
+    const next = nextChunk(players, d, arriving);
     if (next) {
       const swap = lowRoof(next[0], next[1]), redo = toRedo(next[0], next[1]);
       // planned again: the old low roof (if it is still there) is taken away first, then the whole chunk is planned over the land that stands
