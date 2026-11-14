@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **40 signature sounds** are meant to be real recordings made with an AI sound generator. 40 of 40 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **39 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **52 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -615,6 +615,19 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `cast.overwhelmed` | The Choir is too loud | `mob.warden.sonic_boom` pitch 0.7 vol 0.35 + `block.bell.hit` pitch 0.3 vol 0.5 after 0.2 s | townhall |
 | `cast.open` | The magic hotbar opens | `chime.amethyst_block` pitch 1.2 vol 0.5 + `item.book.page_turn` pitch 0.7 vol 0.4 after 0.05 s | townhall |
 | `cast.close` | The magic hotbar closes | `chime.amethyst_block` pitch 0.8 vol 0.4 + `item.book.page_turn` pitch 0.6 vol 0.4 after 0.05 s | townhall |
+| `kn.bash` | Shield Bash | `item.shield.block` pitch 0.6 vol 0.9 + `mob.irongolem.hit` pitch 0.7 vol 0.45 + `dig.gravel` pitch 0.6 vol 0.5 after 0.1 s | townhall |
+| `kn.lunge` | Lunge: the dash | `step.gravel` pitch 0.7 vol 0.8 + `item.trident.riptide_1` pitch 1.5 vol 0.25 after 0.05 s | townhall |
+| `kn.thrust` | Lunge: the thrust lands | `item.trident.hit` pitch 0.9 vol 0.7 + `armor.equip_iron` pitch 0.7 vol 0.4 | townhall |
+| `kn.parry` | Riposte: the shield rings, then the cut | `item.shield.block` pitch 1.3 vol 0.8 + `block.bell.hit` pitch 1.9 vol 0.15 after 0.05 s + `item.trident.hit` pitch 1.1 vol 0.5 after 0.2 s | townhall |
+| `kn.rally` | Rallying Cry | `note.didgeridoo` pitch 0.5 vol 0.7 + `horn.call.1` pitch 0.7 vol 0.4 after 0.05 s + `block.bell.hit` pitch 0.6 vol 0.55 after 0.3 s | townhall |
+| `kn.plant` | Banner of the Keep planted | `mace.heavy_smash_ground` pitch 0.6 vol 0.8 + `random.anvil_land` pitch 0.5 vol 0.25 after 0.05 s + `note.didgeridoo` pitch 0.45 vol 0.6 after 0.2 s + `block.bell.hit` pitch 0.5 vol 0.4 after 0.4 s | townhall |
+| `kn.furl` | The banner furls and sinks | `item.book.page_turn` pitch 0.5 vol 0.6 + `dig.gravel` pitch 0.5 vol 0.4 after 0.5 s + `dig.gravel` pitch 0.45 vol 0.3 after 0.9 s | townhall |
+| `kn.gallop` | Hooves at charging speed | `mob.horse.gallop` pitch 0.7 vol 1.1 + `land.stone` pitch 0.6 vol 0.35 | townhall |
+| `kn.trample` | Warhorse Charge hits | `mob.irongolem.hit` pitch 0.6 vol 0.8 + `dig.gravel` pitch 0.5 vol 0.6 after 0.05 s | townhall |
+| `kn.execute` | Execution | `mace.smash_ground` pitch 0.7 vol 0.7 + `random.anvil_land` pitch 0.45 vol 0.2 after 0.05 s + `block.bell.hit` pitch 0.45 vol 0.5 after 0.1 s | townhall |
+| `kn.secondwind` | Second Wind: a held breath, the bell, a sword scraping up off stone | `mob.breeze.inhale` pitch 0.6 vol 0.4 + `block.bell.hit` pitch 0.55 vol 0.6 after 0.3 s + `block.grindstone.use` pitch 0.8 vol 0.3 after 0.7 s | townhall |
+| `kn.crown` | Crownbreaker: the greatsword lands | `mace.heavy_smash_ground` pitch 0.7 vol 0.8 + `block.bell.hit` pitch 0.6 vol 0.8 + `resonate.amethyst_block` pitch 0.5 vol 0.5 after 0.2 s + `block.bell.hit` pitch 0.6 vol 0.3 after 0.8 s | townhall |
+| `kn.mastery` | Armor Mastery gives health back | `armor.equip_iron` pitch 1.6 vol 0.25 | townhall |
 | `horn.assault` | Another assault is coming | `raid.horn` pitch 0.85 vol 0.8 + `raid.horn` pitch 0.64 vol 0.35 after 0.25 s | siege |
 | `wx.gust` | A gust of wind | `elytra.loop` pitch 0.55 vol 0.35 + `ambient.weather.rain` pitch 0.5 vol 0.15 after 0.3 s | - |
 | `wx.spray` | Sea spray on the wind | `random.splash` pitch 0.6 vol 0.25 + `ambient.weather.rain` pitch 0.8 vol 0.2 after 0.1 s | - |
@@ -748,8 +761,8 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 36 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 23 | trade (4), economy (2), townhall (2), unlocks (2), arena, codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 21 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), arena, codex, economy, horses, roletrials, trade |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 19 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, plotcaves, roletrials, townhall, warwrit |
-| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 18 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, plotcaves, roletrials, warwrit |
+| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 12 | bestiary (5), unlocks (3), crown, dragons, rivals, townhall |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 10 | reach (3), bestiary (2), newplayer (2), undertow (2), lore |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
@@ -760,11 +773,11 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown, unlocks |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 5 | bestiary (3), arena, undertow |
-| `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 3 | lore (2), codex |
 | `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 3 | rails, siege, unlocks |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
+| `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 3 | crown, horses, townhall |
 | `ambient.weather.thunder` | Thunder with no sky | `ambient.weather.thunder` pitch 0.9 vol 0.9 | 3 | undertow (2), crown |
 | `mob.wither.ambient` | A breath from below | `mob.wither.ambient` pitch 0.9 vol 0.8 | 3 | bestiary (3) |
 | `mob.wolf.howl` | A howl far off | `mob.wolf.big.whine` pitch 0.6 vol 0.8 + `mob.wolf.big.whine` pitch 0.5 vol 0.4 after 0.3 s | 3 | unlocks (3) |
@@ -782,10 +795,10 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `mob.horse.gallop` | 6 | letters (2), townhall (2), horses, roletrials |
-| `item.shield.block` | 4 | bestiary (3), townhall |
+| `mob.horse.gallop` | 5 | letters (2), horses, roletrials, townhall |
 | `random.door_open` | 4 | warwrit (2), siege, vault |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
+| `item.shield.block` | 3 | bestiary (3) |
 | `mob.blaze.shoot` | 3 | roletrials (2), dragons |
 | `note.bass` | 3 | townhall (2), dragons |
 | `note.bell` | 3 | rails, roletrials, townhall |

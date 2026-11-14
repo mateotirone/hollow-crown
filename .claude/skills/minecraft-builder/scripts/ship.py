@@ -21,7 +21,7 @@ from materials import h3
 
 SALT = dict(bottom="dark_oak_planks", boot="spruce_planks", wale="stripped_dark_oak_log", hull="oak_planks",
             stripe="warped_planks", rail="birch_fence", deck="oak_planks", castle="oak_planks", post="stripped_birch_log",
-            mast="stripped_spruce_log", yard="spruce_log", sail="white_wool", band="cyan_wool", rig="iron_chain",
+            mast="stripped_spruce_log", yard="spruce_log", sail="white_wool", band="cyan_wool", rig="spruce_fence",
             trim="spruce", glass="light_blue_stained_glass_pane", door="birch_door", pennant="cyan_wool",
             ballast="spruce_planks", carpet="cyan_carpet", strake="dark_oak_slab", port="spruce_trapdoor",
             figure="quartz_block", figure_pillar="quartz_pillar", figure_head="chiseled_quartz_block", figure_wing="quartz_stairs")
@@ -67,6 +67,9 @@ def ship_cells(s):
     C = {}
 
     def put(u, y, w, b, **p): C[(u, y, w)] = (b, p)
+
+    def rig(ax):                  # a chain link is turned along its line; a fence (Mateo's pick, 2026-11-14) needs no state
+        return {"axis": ax} if M["rig"].endswith("chain") else {}
 
     def plan(u):                  # half beam at the rail
         if u < 0 or u >= L: return -1
@@ -283,7 +286,7 @@ def ship_cells(s):
                 for u in range(mu - 3, mu + 2):
                     put(u, D, sgn * (half(u, D) + 1), trim + "_slab", half="top")
             for (w, y, ax) in _chain_axes(_lerp_line(start, (sgn * 1, low)), "z"):
-                if (mu - 1, y, w) not in C or C[(mu - 1, y, w)][0] == "air": put(mu - 1, y, w, M["rig"], axis=ax)
+                if (mu - 1, y, w) not in C or C[(mu - 1, y, w)][0] == "air": put(mu - 1, y, w, M["rig"], **rig(ax))
     # ---- bowsprit, stays and the jib
     stem_y = FD + 1
     bow = [(L + k, stem_y + k // 3) for k in range(9)]
@@ -301,7 +304,7 @@ def ship_cells(s):
         fore = us[-1]
         stay = _lerp_line((fore, mast_tops[fore] - 2), bow[-1])
         for (u, y, ax) in _chain_axes(stay, "x"):
-            if C.get((u, y, 0), ("air",))[0] in ("air",): put(u, y, 0, M["rig"], axis=ax)
+            if C.get((u, y, 0), ("air",))[0] in ("air",): put(u, y, 0, M["rig"], **rig(ax))
         line = {}
         for (u, y) in stay: line.setdefault(u, []).append(y)
         for (u, yb) in bow[1:-1]:                            # the jib: between the bowsprit and the forestay
@@ -310,7 +313,7 @@ def ship_cells(s):
                 if C.get((u, y, 0), ("air",))[0] == "air": put(u, y, 0, M["sail"])
         for a, b in zip(us, us[1:]):                         # main stay, mizzen stay
             for (u, y, ax) in _chain_axes(_lerp_line((a, mast_tops[a] - 1), (b, base_deck(b) + 4)), "x"):
-                if C.get((u, y, 0), ("air",))[0] == "air" and u not in (a, b): put(u, y, 0, M["rig"], axis=ax)
+                if C.get((u, y, 0), ("air",))[0] == "air" and u not in (a, b): put(u, y, 0, M["rig"], **rig(ax))
 
     # ---- the deck: hatch grating, capstan, wheel, barrels by the masts
     for u in range(26, 29):
