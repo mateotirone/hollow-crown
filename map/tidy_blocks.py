@@ -25,6 +25,8 @@ SOFT = re.compile(r"(^|:)air$|vine|ladder|lantern|button|sign|frame|torch|carpet
                   r"water|lava|leaves|_pane$|wheat|carrots|potatoes|beetroot|reeds|sugar_cane|leaf_litter|petals|roots$|"
                   r"pressure_plate|flower_pot|_pot$|lily|mushroom|dripleaf|bamboo|cactus|kelp|seagrass|cocoa|moss_carpet")
 HUNG = re.compile(r"(^|:)(glow_)?frame$|(^|:)ladder$|_button$|wall_sign$")
+# groundwork that is not the land's top: crops and plants (STANDS), field fences, water, posts
+GW_NOT_LAND = re.compile(r"(^|:)air$|water|lava|_fence$|(^|:)fence$|_wall$|lantern|chain|torch|_gate$")
 STANDS = re.compile(r"(short_grass|tall_grass|tallgrass|(^|:)fern$|large_fern|deadbush|poppy|dandelion|cornflower|oxeye|bluet|"
                     r"allium|_tulip$|lily_of_the_valley|blue_orchid|wildflowers|pink_petals|leaf_litter|sweet_berry|wheat$|"
                     r"carrots$|potatoes$|beetroot$|sapling$|sugar_cane|reeds$|snow_layer|carpet$|pressure_plate|flower_pot$|"
@@ -53,11 +55,19 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
         if j is None or j in drop: return None
         return pal[blocks[j][3]]["name"]
 
+    # the map grades the land to the groundwork's top where the town lays groundwork (restamp thread 2026-11-14:
+    # Millbrook flowers stood at y76 over stone bricks at y74, the bake's land said 75, the world had air there)
+    gw_top = {}
+    for b in blocks[:d.get("groundwork_blocks") or 0]:
+        nm_ = pal[b[3]]["name"]
+        if not (STANDS.search(nm_) or GW_NOT_LAND.search(nm_)): gw_top[(b[0], b[2])] = max(gw_top.get((b[0], b[2]), b[1]), b[1])
+
     def solid(c):
         nm = name_at(c)
         if nm is not None:
             return not SOFT.search(nm)
         if c in at: return False                                        # dropped: air now
+        if (c[0], c[2]) in gw_top: return c[1] <= gw_top[(c[0], c[2])]
         g = ground(c[0], c[2]) if ground else None
         return g is not None and c[1] <= g
 
@@ -109,6 +119,99 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
             stoop += 1
     if stoop: n["stoops"] = stoop
 
+    # what's underneath (Mateo 2026-11-14: "under it is ____ but it's a slab so it's floating. Needs to be a full block").
+    # A post (fence, wall, upright log) with nothing hard beside it stands on the ground: a gap, a crop, a plant or
+    # leaves under it becomes more of the post, three blocks at most (lamp posts in Sunscar's fields stood on the
+    # beetroot). Anything resting on a bottom slab hangs half a block in the air: that slab becomes its double slab.
+    POST = re.compile(r"_fence$|(^|:)fence$|_wall$|_log$")
+    NOTHING = re.compile(r"(^|:)air$|leaves|" + STANDS.pattern)
+    footed = full = 0
+    for cell, i in sorted(at.items(), key=lambda a: a[0][1]):
+        if i in drop: continue
+        e = entry(i); nm = e["name"]; st = e.get("states") or {}
+        x, y, z = cell
+        is_post = POST.search(nm) and "fence_gate" not in nm and not nm.startswith("siege:old_") and st.get("pillar_axis", "y") == "y"
+        if is_post:                                  # a post on a bottom slab (a market stall's leg on the square)
+            below = at.get((x, y - 1, z))
+            if below is not None and below not in drop:
+                b = entry(below); bst = b.get("states") or {}
+                if (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                        and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"):
+                    blocks[below] = [*blocks[below][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[below][4:]]
+                    full += 1
+        if is_post:
+            if solid((x, y - 1, z)) or name_at((x, y - 1, z)) is not None and not NOTHING.search(name_at((x, y - 1, z))): pass
+            elif any(solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): pass
+            else:
+                gap = []
+                for k in range(1, 4):
+                    c = (x, y - k, z)
+                    if solid(c) or name_at(c) is not None and not NOTHING.search(name_at(c)): break
+                    gap.append(c)
+                else: gap = None
+                base = (x, y - len(gap) - 1, z) if gap else None
+                bi = at.get(base) if base else None
+                if bi is not None and bi not in drop and not solid(base):   # the street's sunk slab under the gap
+                    b = entry(bi); bst = b.get("states") or {}
+                    if (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                            and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"):
+                        blocks[bi] = [*blocks[bi][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[bi][4:]]
+                        full += 1
+                if gap and (solid(base) or bi is not None and bi not in drop and "double_slab" in entry(bi)["name"]):
+                    for c in gap:
+                        j = at.get(c)
+                        if j is not None and j not in drop: blocks[j] = [*c, blocks[i][3], *blocks[j][4:]]
+                        else: blocks.append([*c, blocks[i][3]]); at[c] = len(blocks) - 1
+                    footed += 1
+            continue
+        below = at.get((x, y - 1, z))
+        if below is None or below in drop: continue
+        b = entry(below); bst = b.get("states") or {}
+        if not (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"): continue
+        if re.search(r"(^|:)air$|water|lava|chain$|leaves|trapdoor|vine|snow_layer|scaffolding", nm) or HUNG.search(nm): continue
+        if nm.endswith("lantern") and st.get("hanging"): continue
+        if nm.endswith("_slab") and st.get("minecraft:vertical_half") == "top": continue
+        if nm.endswith("_stairs") and st.get("upside_down_bit"): continue
+        if nm.endswith("_door") and st.get("upper_block_bit"): continue
+        if "torch" in nm and st.get("torch_facing_direction", "top") != "top": continue
+        blocks[below] = [*blocks[below][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[below][4:]]
+        full += 1
+    # a railing still hanging (no ground within three blocks: a gallery or terrace whose floor was cut away): where a
+    # floor runs beside it, that floor comes back under it; a run with no floor anywhere beside it goes
+    def fence_at(c): return (name_at(c) or "").endswith("_fence") and not (name_at(c) or "").startswith("siege:old_")
+    hang = set()
+    for cell, i in at.items():
+        if i in drop or not fence_at(cell): continue
+        x, y, z = cell
+        if solid((x, y - 1, z)) or name_at((x, y - 1, z)) not in (None, "minecraft:air"): continue
+        if any(solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): continue
+        hang.add(cell)
+    floored = set()
+    for (x, y, z) in hang:
+        for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            j = at.get((x + a, y - 1, z + b))
+            if j is not None and j not in drop and solid((x + a, y - 1, z + b)) and not solid((x, y - 2, z)):
+                blocks.append([x, y - 1, z, blocks[j][3]]); at[(x, y - 1, z)] = len(blocks) - 1; floored.add((x, y, z)); break
+    seen, cut = set(), 0
+    for c0 in hang - floored:
+        if c0 in seen: continue
+        run, todo = [], [c0]; seen.add(c0)
+        while todo:
+            x, y, z = todo.pop(); run.append((x, y, z))
+            for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                q = (x + a, y, z + b)
+                if q not in seen and fence_at(q): seen.add(q); todo.append(q)
+        if all(q in hang and q not in floored for q in run):
+            for q in run:
+                drop.add(at[q]); cut += 1
+                up = (q[0], q[1] + 1, q[2])
+                if (name_at(up) or "").endswith("lantern"): drop.add(at[up])
+    if floored: n["floored"] = len(floored)
+    if cut: n["railings_cut"] = cut
+    if footed: n["footed"] = footed
+    if full: n["full"] = full
+
     for _ in range(3):                                                  # a drop can leave the next one hanging
         changed = False
         for cell, i in list(at.items()):
@@ -117,18 +220,29 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
             if nm.endswith(":air"): continue
             if HUNG.search(nm):
                 f = st.get("facing_direction")
-                def ok(fd):
+                def ok(fd, strict=False):
                     o = BEHIND[fd]; back = (cell[0] + o[0], cell[1], cell[2] + o[2]); front = (cell[0] - o[0], cell[1], cell[2] - o[2])
                     bn = name_at(back)
-                    held = solid(back) or (nm.endswith("wall_sign") and bn is not None and "leaves" in bn)
+                    # strict: held by one of the town's own blocks, as tools/hung-check.mjs sees it (the land is not in
+                    # the file: Rimehold's planter signs held by the hillside kept failing the check, 2026-11-14)
+                    held = (bn is not None and not SOFT.search(bn) if strict else solid(back)) or (nm.endswith("wall_sign") and bn is not None and "leaves" in bn)
                     if nm.endswith("ladder") and bn is not None and bn.endswith("ladder"): held = False
                     # in front: the land as it was counts too (ground_hi: a sign by a house at the town's edge faced
                     # the hillside the grading never reached, Rimehold 2026-11-14)
                     g_hi = ground_hi(front[0], front[2]) if ground_hi and name_at(front) is None and front not in at else None
-                    return held and not solid(front) and not (g_hi is not None and front[1] <= g_hi)
-                if f in BEHIND and ok(f): continue
+                    # the top rung of a shaft through a floor has the floor in front: the ladder under it leads up to it
+                    # (Gull's Rest lighthouse lost the rung through its deck, restamp thread 2026-11-14)
+                    lb = at.get((cell[0], cell[1] - 1, cell[2]))
+                    shaft = (nm.endswith("ladder") and lb is not None and lb not in drop and entry(lb)["name"].endswith("ladder")
+                             and (entry(lb).get("states") or {}).get("facing_direction") == fd)
+                    return held and (shaft or not solid(front) and not (g_hi is not None and front[1] <= g_hi))
+                if f in BEHIND and ok(f, True): continue
+                # only a side held by one of our own blocks (the land is not in the file, and tools/hung-check.mjs fails
+                # a sign the land holds); with no such side open, it goes (Rimehold's planter signs between leaves and
+                # a hillside, restamp thread 2026-11-14)
                 for fd in (2, 3, 4, 5):
-                    if ok(fd):
+                    if fd == f: continue
+                    if ok(fd, True):
                         blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**st, "facing_direction": fd}}), *blocks[i][4:]]
                         n["turned"] += 1; changed = True; break
                 else:

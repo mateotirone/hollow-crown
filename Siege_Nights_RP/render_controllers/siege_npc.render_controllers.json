@@ -93,7 +93,20 @@
             "Texture.envoy_lamp",
             "Texture.envoy_root",
             "Texture.envoy_tide",
-            "Texture.lore_elspeth"
+            "Texture.lore_elspeth",
+            "Texture.lore_elspeth__frostmarch",
+            "Texture.lore_elspeth__saltreach",
+            "Texture.lore_elspeth__emberwaste",
+            "Texture.lore_elspeth__blackfen",
+            "Texture.mason__frostmarch",
+            "Texture.mason__saltreach",
+            "Texture.mason__emberwaste",
+            "Texture.mason__blackfen",
+            "Texture.herald_vale",
+            "Texture.herald_frostmarch",
+            "Texture.herald_saltreach",
+            "Texture.herald_emberwaste",
+            "Texture.herald_blackfen"
           ]
         }
       },
@@ -104,7 +117,7 @@
         }
       ],
       "textures": [
-        "Array.skins[query.variant]"
+        "Array.skins[query.property('siege:skin') > 0 ? query.property('siege:skin') - 1 : query.variant]"
       ]
     }
   }

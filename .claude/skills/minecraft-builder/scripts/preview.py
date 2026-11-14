@@ -158,6 +158,7 @@ def render_view(blocks, palette, q, a, view="se"):
 
 
 def render(blocks, palette, path, max_w=1200, views=("se", "nw"), label=None):
+    blocks = {c: v for c, v in blocks.items() if v[0] not in ("air", "minecraft:air")}   # air a build clears (a hull's hold) is not drawn
     if not blocks:
         Image.new("RGB", (200, 100), (222, 228, 232)).save(path); return path
     xs, ys, zs = zip(*blocks)

@@ -93,6 +93,7 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 | House | Atlantean (above): pale stone and quartz columns on a prismarine plinth, sea-glass windows, one of seven roof forms. Settlement plot houses still use the older look: a stone ground storey, whitewash between pale birch posts above, a low hipped roof |
 | Net store / farm store | stone below, white boards above, a low hipped roof, a hoist beam over a loft door |
 | Quay | a stone quay wall with mooring bollards, a timber jetty on piles, a cargo crane, barrels and nets, the harbourmaster's hut |
+| Deep-water pier | (Mateo 2026-11-14) a stone causeway on from the promenade, then a timber pier on piles out to water deep enough for a big ship, 5 wide, widening to a 9-wide head; bollards and lamp posts on the mooring face, rails on the other, a cargo crane over the ship, barrels and crates; a great three-masted ship moored along it with a gangway |
 | Lighthouse | an octagonal white tower banded in teal on a stone base at the water's edge, a gallery on brackets, a glass lamp room with sea lanterns, an oxidized copper cap, the keeper's cottage beside it |
 | Boathouse | a stone shed straddling the shore, its back open over a water slip with a boat cradle and winch, a sea-green hipped roof, a net loft |
 | Inn, smithy, store | the region's versions of the town set: pale stone below, whitewash above, hipped roofs |
@@ -206,9 +207,13 @@ Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, 
  "roof": {"type": "hip"}, "storey_style": [{"frame_kind": "stone", "infill": "SAL-01"}, {}], "shutters": true}
 ```
 
+- **Piers and ships:** the `pier` part (a timber deck on log piles, bollards and lamp posts on the mooring face)
+  and the `ship` part (a moored three-master: dark tarred bottom, oak topsides under a teal stripe, birch rails,
+  white sails with a cyan band, cyan pennants). Gull's Rest's deep-water pier and great ship
+  (`map/structures/harbour_specs/great_ship.json`, Mateo 2026-11-14) are the worked example.
+
 **Not in the skill yet:**
-- the octagonal lighthouse (build it with shapes: a cylinder at 8 sides);
-- piles and jetties (use `place`).
+- the octagonal lighthouse (build it with shapes: a cylinder at 8 sides).
 
 ## The Moneyer (Mateo, 2026-11-14)
 

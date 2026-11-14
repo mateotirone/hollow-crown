@@ -114,6 +114,10 @@ def entity_bp(m):
     mid = m["id"]; fam = "boss" if m.get("boss") else m["family"]
     if not m.get("boss") and m.get("dmg", 0) > roster.MAX_MOB_MELEE:
         raise SystemExit(f"{mid}: dmg {m['dmg']} would kill a full-health player in one bite on Hard (cap {roster.MAX_MOB_MELEE}, see roster.MAX_MOB_MELEE)")
+    if not m.get("boss") and m.get("family") in roster.WILD_FAMILIES and m.get("dmg", 0) > roster.MAX_WILD_MELEE:
+        raise SystemExit(f"{mid}: dmg {m['dmg']} is too much for a wild creature (cap {roster.MAX_WILD_MELEE}, see roster.MAX_WILD_MELEE)")
+    if not m.get("boss") and m.get("family") in roster.WILD_FAMILIES and m.get("dmg", 0) > 5 and not m.get("melee_cooldown"):
+        raise SystemExit(f"{mid}: a wild creature hitting for {m['dmg']} needs a melee_cooldown (a slower swing)")
     families = list(FAMILIES[fam])
     if m.get("raider"): families.append("siege_raider")
     if mid in SCRIPTED: families.append("siege_scripted")
@@ -185,7 +189,7 @@ def entity_bp(m):
     tgt = roster.targets(filt, dist) if filt else {}
     fight = {}
     if m.get("ranged_def"):
-        fight.update(roster.ranged(m["ranged_def"][0], aux=m["ranged_def"][1], radius=18 if m.get("boss") else 14))
+        fight.update(roster.ranged(m["ranged_def"][0], interval=m.get("ranged_interval", (1.5, 2.5)), aux=m["ranged_def"][1], radius=18 if m.get("boss") else 14))
         fight["minecraft:attack"] = {"damage": m["dmg"]}
     elif mid == "crow_mage" or m.get("hollow_bolts"):
         fight.update(roster.ranged("siege:hollow_bolt", interval=(2.5, 4), radius=16)); fight["minecraft:attack"] = {"damage": m["dmg"]}
