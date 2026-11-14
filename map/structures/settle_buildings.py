@@ -339,70 +339,81 @@ BUILDERS = {"cottage": cottage, "well": well, "library": library, "market": mark
             "smithy": smithy, "stable": stable, "storehouse": storehouse, "watchtower": watchtower}
 
 # ---------------------------------------------------------------- the Stables (three levels) and the Breeder's Yard
-# Raised by the Stables block (horses/barn.js drawBarn). Every level is 11 wide with a 3-wide aisle up the middle
-# and stalls either side; each level keeps the one before inside its outline (an upgrade builds over the top).
-# Level 1: 3 stalls, 11 x 9. Level 2: 5 stalls, 11 x 13. Level 3: 8 stalls and a tack room behind, 11 x 21, with a hayloft.
-BARN = {1: dict(depth=9, rows=2, stalls=3), 2: dict(depth=13, rows=3, stalls=5), 3: dict(depth=21, rows=4, stalls=8)}
+# Raised on a town's Barn plot (21 wide along the lane x 11 deep, 2026-11-14: every building goes on a plot) and
+# rebuilt bigger by the Stables upgrades (horses/barn.js drawBarn). Gable-on to the lane: the door is in the middle of
+# the long front wall, a 3-wide aisle runs across the barn behind the front stalls, and stalls open off it front and
+# back, 3 wide between fence dividers every 4 blocks. Each level keeps the one before inside its outline.
+# Level 1: 3 stalls along the back, a tack corner and a feed corner, 13 x 11.
+# Level 2: 5 stalls along the back, tack and feed corners, two open bays, 21 x 11.
+# Level 3: 8 stalls (3 more along the front), a tack corner, taller walls and a hayloft over the stalls, 21 x 11.
+BARN = {1: dict(width=13, stalls=3), 2: dict(width=21, stalls=5), 3: dict(width=21, stalls=8)}
+BARN_DEEP = 11
+SLOT_X = [(-1, 1), (3, 5), (-5, -3), (7, 9), (-9, -7)]   # stall slots across the barn, middle first
 
 def stables(region, level=1):
     S = BARN[level]
     bp, B, P, k, L = new(f"stables_{level}", region)
-    rect = (-5, -(S["depth"] - 1), 5, 0)
+    half = S["width"] // 2
+    rect = (-half, -(BARN_DEEP - 1), half, 0)
     x0, z0, x1, z1 = rect
     B.foundation(rect, 0); B.floor(rect, 0)
     wall_h = 7 if level == 3 else 4
     top = body(B, P, L, rect, wall_h)
-    side_windows(B, L, rect, 2 if level == 3 else 1)
+    side_windows(B, L, rect, 1, sides="n")
+    for x in (-8, -4, 4, 8):                        # front windows over the front stalls, either side of the door
+        if x0 < x < x1: B.window(x, 2, 0, "s", 1, 2, kind="stone")
     gate = P["fence"].replace("_fence", "_fence_gate")
-    # stall floors and the aisle
+    post = P["frame"] if L["wall"] == "timber" else k("stone")
+    inside = lambda a, b: a > x0 and b < x1
+    # floors: the aisle (z -4..-6) and the passage from the door are the region's floor, the stalls coarse dirt
     for x in range(x0 + 1, x1):
-        for z in range(z0 + 1, z1): bp.set(x, 0, z, P["floor"] if abs(x) <= 1 else "coarse_dirt")
-    stall_end = -2 - 3 * S["rows"]                 # last divider line
-    n = 0
-    for j in range(S["rows"]):
-        zs = (-3 - 3 * j, -4 - 3 * j)              # the stall's two rows
-        for side in (-1, 1):
-            n += 1
-            tack = n > S["stalls"]
-            xs = range(2, 5) if side > 0 else range(-4, -1)
-            for x in xs:                           # divider fences front and back of the stall
-                for z in (-2 - 3 * j, -5 - 3 * j): bp.set(x, 1, z, P["fence"])
-            if tack:                               # the spare slot is the tack room: barrels and a chest
-                for z in zs: bp.set(2 * side, 1, z, P["fence"])
-                bp.set(4 * side, 1, zs[0], "barrel"); bp.set(4 * side, 2, zs[0], "barrel"); bp.set(4 * side, 1, zs[1], "chest", facing="w" if side > 0 else "e")
-                continue
-            bp.set(2 * side, 1, zs[0], gate, facing="w" if side > 0 else "e", open=False)
-            bp.set(2 * side, 1, zs[1], P["fence"])
-            bp.set(4 * side, 1, zs[1], "hay_block", axis="y"); bp.set(4 * side, 1, zs[0], "cauldron")
-    if level == 3:                                 # tack room across the back, behind a wall with a door
+        for z in range(z0 + 1, z1): bp.set(x, 0, z, P["floor"] if -6 <= z <= -4 or (abs(x) <= 1 and z > -4) else "coarse_dirt")
+    back = [(a, b, "back") for a, b in SLOT_X if inside(a, b)]
+    front = [(a, b, "front") for a, b in SLOT_X[1:] if inside(a, b)]
+    stalls = back + front
+    n_stall = 0; spare = 0
+    for a, b, row in stalls:
+        zs = (-7, -8, -9) if row == "back" else (-3, -2, -1)
+        zf, zr = zs[0], zs[2]                       # the stall's front line (on the aisle) and its far end
+        mid = (a + b) // 2
+        for x in (a - 1, b + 1):                    # dividers either side, unless that is the outer wall
+            if x0 < x < x1:
+                for z in zs: bp.set(x, 1, z, P["fence"])
+        for x in (a, b): bp.set(x, 1, zf, P["fence"])
+        bp.set(mid, 1, zf, gate, facing="s" if row == "back" else "n", open=False)
+        if n_stall < S["stalls"]:
+            n_stall += 1
+            bp.set(mid, 1, zr, "hay_block", axis="y"); bp.set(a, 1, zr, "cauldron")
+            continue
+        spare += 1
+        if spare == 1:                              # the tack corner: barrels and a chest
+            bp.set(a, 1, zr, "barrel"); bp.set(a, 2, zr, "barrel"); bp.set(b, 1, zr, "chest", facing="s" if row == "front" else "n")
+        elif spare == 2:                            # the feed corner: sacks of oats and a composter
+            bp.set(a, 1, zr, "barrel", facing="u"); bp.set(mid, 1, zr, "composter"); bp.set(b, 1, zr, "barrel", facing="u")
+        else:                                       # an open bay, waiting for the next upgrade
+            bp.set(mid, 1, zf, P["fence"])
+    if level == 3:                                  # the hayloft over both rows of stalls, open over the aisle
+        B.floor(rect, 5)
         for x in range(x0 + 1, x1):
-            for y in range(1, 4): bp.set(x, y, stall_end - 1, P["frame"] if L["wall"] == "timber" else k("stone"), axis="x")
-        for y in (1, 2): bp.set(0, y, stall_end - 1, "air")
-        bp.set(0, 1, stall_end - 1, P["door"], facing="n"); bp.set(0, 2, stall_end - 1, P["door"], facing="n", upper=True)
-        for x in (-4, -3, 3, 4): bp.set(x, 1, z0 + 1, "barrel")
-        bp.set(-4, 2, z0 + 1, "barrel"); bp.set(0, 1, z0 + 1, "crafting_table"); bp.set(4, 2, z0 + 1, "barrel")
-        B.floor(rect, 5)                           # the hayloft, open over the aisle, with a loft door in the front gable
-        for x in (-1, 0, 1):
-            for z in range(z0 + 1, z1): bp.set(x, 5, z, "air")
-        for x in (-4, -3, 3, 4):
-            for z in range(z0 + 2, z1 - 1, 2): bp.set(x, 6, z, "hay_block", axis="x")
-        bp.set(0, 6, 0, "air"); bp.set(0, 7, 0, "air")
-        bp.set(0, 8 if L["roof"] != "flat" else 7, 1, P["trim"], facing="s", half="top") if L["roof"] != "flat" else None
-    # the big front opening up the aisle, with a lintel and lanterns
+            for z in (-4, -5, -6): bp.set(x, 5, z, "air")
+        for x in range(x0 + 2, x1 - 1, 2):
+            for z in (-2, -8): bp.set(x, 6, z, "hay_block", axis="x")
+        for x in (x0 + 1, x1 - 1): bp.set(x, 1, -5, "ladder", facing="e" if x == x0 + 1 else "w")
+        for x in (x0 + 1, x1 - 1):
+            for y in range(2, 6): bp.set(x, y, -5, "ladder", facing="e" if x == x0 + 1 else "w")
+    # the big front opening into the aisle, with a lintel and lanterns
     for x in (-1, 0, 1):
         for y in (1, 2, 3): bp.set(x, y, 0, "air")
-    post = P["frame"] if L["wall"] == "timber" else k("stone")
     for x in (-2, 2):
         for y in (1, 2, 3, 4): bp.set(x, y, 0, post, axis="y")
     for x in (-1, 0, 1): bp.set(x, 4, 0, post, axis="x")
-    hang(bp, [(0, 3, -2 - 3 * j) for j in range(S["rows"])])
-    rtop = roof(bp, B, P, L, rect, top + 1 if L["roof"] != "flat" else top, ridge="z", region=region)
+    hang(bp, [(x, 3, -5) for x in range(-(half - 2), half - 1, 4)])
+    roof(bp, B, P, L, rect, top + 1 if L["roof"] != "flat" else top, ridge="x", region=region)
     dress(bp, k, L, rect, 1, top, region)
-    if level >= 2 and L["roof"] == "gable":    # a louvred cupola on the ridge with a horse weathervane
-        cz = (z0 + z1) // 2; h = B.H[(0, cz)][0] + 1
+    if level >= 2 and L["roof"] == "gable":     # a louvred cupola on the ridge with a horse weathervane
+        cz = -5; h = B.H[(0, cz)][0] + 1
         for x in (-1, 0, 1):
             for z in (cz - 1, cz, cz + 1):
-                edge = abs(x) == 1 and z != cz or x == 0 and z != cz or abs(x) == 1
                 bp.set(x, h, z, P["trim_block"]); bp.set(x, h + 1, z, P["fence"] if (x, z) != (0, cz) else "air")
                 bp.set(x, h + 2, z, P["roof_slab"], half="bottom")
         bp.set(0, h + 2, cz, P["roof_block"]); bp.set(0, h + 3, cz, P["fence"]); bp.set(0, h + 4, cz, "lightning_rod")
