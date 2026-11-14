@@ -1,6 +1,8 @@
 // No vanilla XP bar (Mateo, 2026-11-14: "Remove the vanilla xp bar"). The green bar above the hotbar and the level
 // number on it are hidden for every player, all the time. Our own HUD (Regal balance beside the hotbar, the minimap
-// and quest tracker top right) never sat on that strip, so nothing else moves.
+// and quest tracker top right) never sat on that strip. The game keeps the empty strip, so the resource pack moves
+// the hearts, armour, hunger and air rows down onto the hotbar (tools/hud_rows_ui.py), except while riding a mount
+// whose jump bar needs it.
 //
 // How: the script HUD call setHudVisibility(Hide, [ProgressBar]), the same switch as `/hud @s hide progress_bar`.
 // It works on a Realm with no Beta and no resource pack change. The game forgets it when a player rejoins, so it is
