@@ -70,7 +70,7 @@ export function procession(road, t) {
 const dimension = () => world.getDimension(OVERWORLD);
 const passable = (b) => !!b && (b.isAir || /snow_layer|short_grass|tall_grass|fern|flower|carpet|torch|lantern/.test(b.typeId));
 // The y to stand at over (x, z), searching from `near` up and down; undefined when not loaded
-function groundY(dim, x, z, near) {
+export function groundY(dim, x, z, near) {
   const bx = Math.floor(x), bz = Math.floor(z);
   for (let dy = 6; dy >= -10; dy--) {
     const y = Math.floor(near) + dy;
@@ -120,7 +120,7 @@ function place(owner, role, e, spot, yaw) {
 
 // ---------- the cart sets off ----------
 
-const playersNear = (at, r) => world.getPlayers().filter((p) => p.dimension.id === OVERWORLD && Math.hypot(p.location.x - at.x, p.location.z - at.z) <= r);
+export const playersNear = (at, r) => world.getPlayers().filter((p) => p.dimension.id === OVERWORLD && Math.hypot(p.location.x - at.x, p.location.z - at.z) <= r);
 
 export function startCart(owner) {
   const ring = wallRing(owner);

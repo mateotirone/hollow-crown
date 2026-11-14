@@ -800,6 +800,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `armor.equip_leather` | 3 | dragons, horses, looks |
 | `item.shield.block` | 3 | bestiary (3) |
 | `mob.blaze.shoot` | 3 | roletrials (2), dragons |
+| `mob.horse.idle` | 3 | horses (2), newplayer |
 | `note.bass` | 3 | townhall (2), dragons |
 | `note.bell` | 3 | rails, roletrials, townhall |
 | `note.flute` | 3 | bestiary, horses, unlocks |
@@ -814,7 +815,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
 | `mob.enderdragon.flap` | 2 | codex, roletrials |
 | `mob.evocation_illager.cast_spell` | 2 | bestiary, codex |
-| `mob.horse.idle` | 2 | horses (2) |
 | `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |

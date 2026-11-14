@@ -7,7 +7,13 @@
    "is_summonable": true,
    "is_experimental": false
   },
-  "component_groups": {},
+  "component_groups": {
+   "siege:tall": {
+    "minecraft:scale": {
+     "value": 1.7
+    }
+   }
+  },
   "components": {
    "minecraft:type_family": {
     "family": [
@@ -177,6 +183,14 @@
     ]
    }
   },
-  "events": {}
+  "events": {
+   "siege:make_tall": {
+    "add": {
+     "component_groups": [
+      "siege:tall"
+     ]
+    }
+   }
+  }
  }
 }

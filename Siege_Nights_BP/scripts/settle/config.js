@@ -171,7 +171,9 @@ export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1",
 // count: how many (default 1). more: this many work buildings beyond the ones the charters name.
 // A line whose buildings are not in the game yet is skipped (and said so), so nobody is stuck.
 export const CHARTERS = [
-  [ // Hamlet, to become a Town: nothing beyond the library it starts with
+  [ // Hamlet, to become a Town: the Barracks (and the Ironworks, which settle can't count: newplayer/act2.js adds it,
+    // and Act 2 of the story in Story Mode; Mateo's Act 2 pass, 2026-11-14)
+    { what: "Barracks", ids: ["barracks"] },
   ],
   [ // Town, to become a City
     { what: "homes", ids: HOMES, count: 3 },
