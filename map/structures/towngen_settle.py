@@ -57,9 +57,11 @@ CLEAR = 3                                       # a slot's far corner stays this
 # (placement thread 2026-11-11): S 9x13, M 11x15 (long M 13x15, also the Hamlet's library slot),
 # L 15x15, G 21x21; Large and Great may be 2 longer either way.
 SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)],
-          "W": [(27, 17)]}                    # Works: the resource yards (Ironworks, Gold Sluice, Deep Shaft; material loop thread)
+          "W": [(27, 13)],                    # Works: the second yard (Forester's grove; the Hamlet's 27 x 17 Ironworks yard is the starter's)
+          "D": [(23, 11)],                    # Dragon: the Dragon Stable and its nursery (Emberwaste towns only)
+          "B": [(23, 11)]}                    # Barn: the horse Stables (21 x 9 walls, eaves all round), gable-on to its road (Mateo 2026-11-14: big plots)
 SIZES = {k: v[0][0] for k, v in SHAPES.items()}   # frontage of the plain box
-SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works"}
+SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works", "D": "Dragon", "B": "Barn", "O": "Wood"}
 MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=4, L=1, G=0, field=1),      # agreed with the placement
            dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
 HALL_AT = {"Hamlet": 1, "Town": 2, "City": 3, "Castle": 4}   # hall level per tier (5 = Sovereign, reserved anyway)
@@ -589,6 +591,19 @@ class Settlement(Town):
         self.in_field = False
         return got
 
+    def big_plots(self, C, sizes="BWD"):
+        """The big plots every town gets (Mateo 2026-11-14, settlement thread): a second Works yard (Forester's Lodge or
+        Ironworks; the first is in the starter village), the Stables' barn by the Town, and in Emberwaste the Dragon
+        Stable. All 13 deep or less, so they fit the Town band (settlement thread 2026-11-14)."""
+        cs = C[:]; self.rng.shuffle(cs)
+        want = [("B", (1, 2, 3)), ("W", (1, 2, 3))] + ([("D", (1, 2, 3))] if self.arch == "ember" else [])
+        if self.arch == "ember": want = [want[2], want[0], want[1]]   # the Dragon Stable first: eggs come early
+        self.in_field = True                           # a yard may take the corner of a field
+        for size, tiers in [w for w in want if w[0] in sizes]:
+            for max_tier in tiers:
+                if any(self.try_slot(size, c, max_tier) for c in cs): break
+        self.in_field = False
+
     def field_by(self, e, reach=None, need=3):
         """True when crop ground (field cells that will be planted) lies within reach of the slot's box,
         the same test tag() uses for field_edge once the crops are in."""
@@ -723,9 +738,11 @@ class Settlement(Town):
         near_field = (lambda c: float(np.min(np.abs(fc[:, 0] - c[0][0]) + np.abs(fc[:, 1] - c[0][1]))) + 2 * self.rng.random()) if len(fc) else near_sq
         got = self.farmhouse(C, near_sq)               # as one big), the Farmhouse: a plain Medium by its own crops
         if not got: pass_("M", 1, 1, near_sq)
+        if getattr(self, "starter", None): self.big_plots(C, "BD")   # the Stables' barn and the Dragon Stable, by the Town (Mateo 2026-11-14)
         pass_("M", 1, 1, near_sq)
         pass_("S", 1, 3, hamlet)
         if self.WORKS: self.works_yards(C)             # the Works yards (27 x 17): off until the yards are reshaped
+        # the second Works yard (big_plots "W") is held: the Forester's grove may become an unwalled woodlot outside the wall
         pass_("L", 2, 1, near_sq)                      # City: the inn needs a true Large; the barracks, one more work
         pass_("M", 2, 2, near_sq)                      # building and three more homes
         pass_("S", 2, 3, near_sq)
@@ -779,8 +796,8 @@ class Settlement(Town):
         for e in self.slots:
             if e.get("library"): e["opensAt"] = e["geo"]          # the Hamlet's library slot opens with the Hamlet
         for e in self.slots:
-            if e["size"] == "W": e["opensAt"] = e["geo"]            # a Works yard opens as soon as it is inside the wall
-        self.slots.sort(key=lambda e: (e["opensAt"], "WGLMS".index(e["size"])))
+            if e["size"] in ("W", "D", "B"): e["opensAt"] = e["geo"]            # a Works yard opens as soon as it is inside the wall
+        self.slots.sort(key=lambda e: (e["opensAt"], "DWGBLMS".index(e["size"])))
 
     def counts(self):
         out = []
@@ -821,6 +838,10 @@ class Settlement(Town):
                 sup["W"] += 1     # and its Works yard (starter.py, PR 399): the Ironworks'
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
             if not starter: needs.append(("library", ("ML", "L")))
+            if starter:   # the big plots (Mateo 2026-11-14, 11 deep so they fit the Town band): the Stables' barn
+                          # and the Dragon Stable (Emberwaste), both by the Town
+                if t >= 1: needs.append(("stables", ("B",)))
+                if t >= 1 and self.arch == "ember": needs.append(("dragon", ("D",)))
             needs += [("home", self.HOME)] * max(0, max(self.HOMES_BY[:t + 1]) - (2 if starter else 0))
             needs.sort(key=lambda n: (len(n[1]), n[1] != ("LD",)))   # strictest first (the Barracks' deep Large before the inn's Large), each into its smallest class
             for name, classes in needs:

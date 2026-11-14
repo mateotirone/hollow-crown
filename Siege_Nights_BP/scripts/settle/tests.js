@@ -486,6 +486,20 @@ addTests("settle towns", {
       }
     }
   },
+  "every layout has one woodlot (41 x 29) outside the Castle wall, open by Town (Mateo 2026-11-14)": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const w = slotsOf(layout).filter((s) => s.size === "O");
+        assert(w.length === 1 && w[0].tier <= 1, `${key} ${layout.label}: ${w.length} woodlots`);
+        const { x0, z0, x1, z1 } = w[0].box;
+        assertEqual([x1 - x0 + 1, z1 - z0 + 1].sort((a, b) => a - b).join("x"), "29x41", `${key}: woodlot size`);
+        for (const [x, z] of [[x0, z0], [x1, z1], [x0, z1], [x1, z0]]) {
+          const wall = radiusAt(town.outline, wallRadius(town, 3), Math.atan2(z, x));
+          assert(Math.hypot(x, z) > wall, `${key} ${layout.label}: woodlot corner inside the Castle wall`);
+        }
+      }
+    }
+  },
   "every layout has the starter village's cow pen at Hamlet (Mateo 2026-11-14)": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
       for (const layout of town.variants) {
@@ -501,6 +515,7 @@ addTests("settle towns", {
         assert(slots.some((s) => s.tier === 0), `${key} ${layout.label}: no Hamlet slots`);
         for (const s of slots) {
           assert(s.tier >= 0 && s.tier <= 3 && s.door, `${key} ${s.id}`);
+          if (s.size === "O") continue; // the Forester's woodlot stands outside the wall by design (woodlot.py)
           for (const [x, z] of [[s.box.x0, s.box.z0], [s.box.x1, s.box.z1], [s.box.x0, s.box.z1], [s.box.x1, s.box.z0]]) {
             const wall = town.outline ? radiusAt(town.outline, wallRadius(town, s.tier), Math.atan2(z, x)) : wallRadius(town, s.tier);
             assert(Math.hypot(x, z) < wall, `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
@@ -827,13 +842,18 @@ addTests("settle charters", {
   },
   "a plot that is the last one a charter need can use is kept for it, for players and lords alike"() {
     const known = new Set(BUILDINGS.map((b) => b.id));
-    const v = townByName("gullcliff").variants.find((x) => x.charter !== false);
-    const slots = slotsOfLayout(v);
-    // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use
-    const used = new Set(slots.filter((s) => s.start || s.tags.includes("library")).map((s) => s.id)); // standing from the start
-    const take = (id, size) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && (!size || q.size === size) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
-    const farm = take("farmhouse"), mint = take("mint"), market = take("market", "S"), homes = [take("cottage"), take("cottage")];
-    assert(farm && mint && market && homes.every(Boolean), "gullcliff has a plot for each Town charter building");
+    // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use.
+    // Any passing layout whose Town plots give two cottage Smalls besides the market's will do (the big plots crowd some out).
+    let slots, used, farm, mint, market, homes;
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (farm || v.charter === false) continue;
+      slots = slotsOfLayout(v);
+      used = new Set(slots.filter((s) => s.start || s.tags.includes("library")).map((s) => s.id)); // standing from the start
+      const take = (id, size) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && (!size || q.size === size) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
+      const f = take("farmhouse"), m = take("mint"), k = take("market", "S"), h = [take("cottage"), take("cottage")];
+      if (f && m && k && h.every(Boolean)) [farm, mint, market, homes] = [f, m, k, h];
+    }
+    assert(farm, "some layout has a plot for each Town charter building");
     const free = [farm, mint, market, ...homes];
     const counts = { library: 1, house: 2, barracks: 1 }; // the Hamlet's stage is built (its Ironworks isn't a plot design here)
     const kept = charterKeeps(free, 0, counts, known, mint, "house");
@@ -890,7 +910,7 @@ addTests("settle charters", {
         }
         if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
-      assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+      assert(HOMES.reduce((n, id) => n + (counts[id] ?? 0), 0) >= 3, `${name}: a lord's town has homes`);
       for (const id of ONE_EACH) assert((counts[id] ?? 0) <= 1, `${name} ${v.label}: a lord raised ${counts[id]} of the one-of-each ${id}`);
     }
   },

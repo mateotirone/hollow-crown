@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- **Big plots in every town.** Each town layout now has a 23 x 11 Barn plot for the Stables, opening at Town, and Emberwaste towns also get a 23 x 11 Dragon plot for the Dragon Stable. Every town also gets the Forester's woodlot: a 41 x 29 lot just outside the outer wall beside the gate road, with a path to the road, opening at Town.
 - Every starter village's pen is now a cow pen with two cows in it from day one. Breed them with spare wheat; nothing refills it for you.
 - **Build out each stage to level up.** Your settlement now grows to its next level only when every building of its stage stands, as well as the three sieges held. Hamlet: the Barracks and the Ironworks. Town: the Farmhouse, the Mint, the Market Stall and three homes (your two starting houses count). City: the Quartermaster's Armoury, the Inn, the Smithy, the Kitchen Garden, the Well and six homes. Every one of them has a plot waiting for it, and the town hall board shows what is still missing. The Market Stall now fits a Small plot, and the Quartermaster's Armoury opens at the City, where there is a plot for it.
 - **One stable building.** The old three-stall plot Stable is gone from the Plot Marker; the Stables barn is the one place for horses. A plot Stable already standing in your town stays.
