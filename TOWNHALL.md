@@ -86,6 +86,11 @@ Recover and Look. Hunt, Camp, Supply, Carry, Escort and Watch come back once the
 "again" line; the rest happen once. When a region's own jobs run out for the round, the board also draws from the regions
 next to it (Mateo, 2026-11-14).
 
+Ten shared jobs (`SHARED_JOBS`) travel the whole realm. Every town has a smith, a farmer and a factor, so a shared job names
+a role and is given by that role in the region's own town (`ROLE_TOWN`); a Carry goes to the same role in a neighbouring
+region. Each lives in one region at a time and moves on whenever one of your rounds turns (`sharedHome`), so it never
+holds a region's round back, and a shared job done anywhere counts as done everywhere (`doneKey`).
+
 Camps, dens, pens, lamps, ruins and the rest are 3D builds made with the minecraft-builder skill
 (`map/structures/board_sites.py` -> `townhall/board_sites_data.js`). A job's site is stamped on its place when the job is
 given, while you are still far off; the ground it covers is saved first and put back once the job is over and you have

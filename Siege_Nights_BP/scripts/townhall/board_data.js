@@ -57,6 +57,9 @@ export const GIVERS = {
   bryony: { kind: "folk", town: "Millbrook", name: "Bryony Ward", trade: "midwife" },
   harlan: { kind: "folk", town: "Millbrook", name: "Harlan Voss", trade: "blacksmith" },
   kingsrest_hunter: { kind: "trader", town: "Kingsrest", job: "hunter", name: "the Kingsrest hunter", trade: "hunter" },
+  kingsrest_smith: { kind: "trader", town: "Kingsrest", job: "smith", name: "the Kingsrest smith", trade: "smith" },
+  kingsrest_farmer: { kind: "trader", town: "Kingsrest", job: "farmer", name: "the Kingsrest farmer", trade: "farmer" },
+  kingsrest_factor: { kind: "trader", town: "Kingsrest", job: "factor", name: "the Kingsrest factor", trade: "factor" },
   millbrook_woodcutter: { kind: "trader", town: "Millbrook", job: "woodcutter", name: "the Millbrook woodcutter", trade: "woodcutter" },
   daisy: { kind: "folk", town: "Kingsrest", name: "Daisy Wickham", trade: "milkmaid" },
   // Frostmarch: Rimehold
@@ -87,6 +90,7 @@ export const GIVERS = {
   ottery: { kind: "folk", town: "Gull's Rest", name: "Grandma Ottery", trade: "shell seller" },
   gulls_farmer: { kind: "trader", town: "Gull's Rest", job: "farmer", name: "the Gull's Rest farmer", trade: "farmer" },
   gulls_factor: { kind: "trader", town: "Gull's Rest", job: "factor", name: "the Gull's Rest factor", trade: "factor" },
+  gulls_smith: { kind: "trader", town: "Gull's Rest", job: "smith", name: "the Gull's Rest smith", trade: "smith" },
   // Emberwaste: Sunscar
   kadir: { kind: "folk", town: "Sunscar", name: "Kadir Oss", trade: "water-seller" },
   zara: { kind: "folk", town: "Sunscar", name: "Zara Merrow", trade: "potter" },
@@ -117,6 +121,7 @@ export const GIVERS = {
   mirelight_hunter: { kind: "trader", town: "Mirelight", job: "hunter", name: "the Mirelight hunter", trade: "hunter" },
   mirelight_farmer: { kind: "trader", town: "Mirelight", job: "farmer", name: "the Mirelight farmer", trade: "farmer" },
   mirelight_factor: { kind: "trader", town: "Mirelight", job: "factor", name: "the Mirelight factor", trade: "factor" },
+  mirelight_smith: { kind: "trader", town: "Mirelight", job: "smith", name: "the Mirelight smith", trade: "smith" },
   // the far ends of carries
   agnes: { kind: "folk", town: "Kingsrest", name: "Sister Agnes Thorne", trade: "Ashen Sister" },
   tilda: { kind: "folk", town: "Millbrook", name: "Old Tilda Fernsby", trade: "storyteller" },
@@ -173,6 +178,7 @@ export const PLACES = {
   annets_cave: { region: "Saltreach", name: "the strand where Annet walked", x: -578, z: 229 },
   gull_head: { region: "Saltreach", name: "Gull Head", x: -695, z: 399 },
   cliff_road: { region: "Saltreach", name: "the cliff road lamps", x: -725, z: 340 },
+  cliff_road_way: { region: "Saltreach", name: "the cliff road", x: -725, z: 340 },
   dune_pasture: { region: "Saltreach", name: "the dune pasture", x: -618, z: 480 },
   // Emberwaste (round Sunscar, 850 450; the Cinder Roost cliff north, the caravan road south, the Red Wash west)
   caravan_road: { region: "Emberwaste", name: "the caravan road south of Sunscar", x: 882, z: 573, alt: [[9, 60], [-6, -20]] },
@@ -1174,5 +1180,120 @@ export const JOBS = [
   },
 ];
 
-// Shared jobs that can turn up in any region (written after the regions). Each names its giver per region.
-export const SHARED_JOBS = [];
+// Shared jobs: ten that can turn up in any region (Mateo 2026-11-14, "lets go"). Every town has a smith, a farmer and a
+// factor (economy/config.js TOWNS), so a shared job names a `role` instead of a giver: in each region it is given by
+// that role in the region's own town (ROLE_TOWN). A shared job lives in one region at a time and moves on as your
+// rounds turn (board_rules.js sharedHome), so it never shows on every board at once.
+//   {town}: the giver's town. {to}: the town a Carry goes to (`toRole` there, in a neighbouring region).
+//   places: { region: PLACES key } for a job that happens somewhere. {place}: that place's name.
+// Ids are `<id>_<region short>` once expanded (board_rules.js): never rename the base ids either.
+export const ROLE_TOWN = {
+  "Aldmere Vale": ["kingsrest", "vale"], Frostmarch: ["rimehold", "frost"], Saltreach: ["gulls", "salt"],
+  Emberwaste: ["sunscar", "ember"], Blackfen: ["mirelight", "fen"],
+};
+export const SHARED_JOBS = [
+  {
+    id: "any_gate_iron", kind: "supply", role: "smith", about: "iron for the gates", title: "Iron bands for the gate",
+    item: "minecraft:iron_ingot", need: [6, 14],
+    lines: {
+      notice: "Iron wanted for gate bands. Every gate on the roads is getting them this year. The {town} smith.",
+      offer: "Every town on the roads is putting iron on its gates this year, and every smith is short. Nobody's said why out loud. They just come in and ask for bands, and look at the road while they ask. Bring me iron and {town}'s gate gets its bands before the next lot of them.",
+      again: "More gates, more bands. I'm out of iron again.",
+      done: "That's a gate that'll hold. For a while. Here, for your trouble.",
+    },
+  },
+  {
+    id: "any_bow_string", kind: "supply", role: "smith", about: "string for the bows", title: "String for the wall bows",
+    item: "minecraft:string", need: [8, 18],
+    lines: {
+      notice: "String wanted, lots of it. The wall's bows are all drawn and half of them are fraying. The {town} smith.",
+      offer: "I do the arrowheads, the bowyer does the rest, and the bowyer's run out of string. Every man on the wall wants a spare bow now, not just a bow. Bring string. Not wool. String. I've had wool brought and I've had to explain.",
+      again: "String again. They're snapping them faster than we can make them.",
+      done: "Good, strong string. The wall will thank you, and it doesn't thank anybody.",
+    },
+  },
+  {
+    id: "any_carters_bread", kind: "supply", role: "factor", about: "bread for the carters", title: "Bread for the carters",
+    item: "minecraft:bread", need: [8, 20],
+    lines: {
+      notice: "Bread for the carters before they set out. They won't stop on the road to cook. The {town} factor.",
+      offer: "The carters used to stop and light a fire on the road. They don't any more. They drive straight through, day and dusk, and they won't say why, only that they'd rather not be sitting still out there. So they need bread they can eat on the box. Bring me bread.",
+      again: "The carters want bread again. They're driving longer every week.",
+      done: "That'll see the carts out and back. Here. The carters say thank you, from the box, not stopping.",
+    },
+  },
+  {
+    id: "any_watch_cloaks", kind: "supply", role: "factor", about: "wool for the watch cloaks", title: "Cloaks for the night watch",
+    item: "minecraft:white_wool", need: [6, 16],
+    lines: {
+      notice: "Wool wanted for night-watch cloaks. The watch is doubled and the cloaks are not. The {town} factor.",
+      offer: "The watch is doubled at night now, in {town} and everywhere else I hear of. Twice the men on the wall means twice the cloaks, and the nights are colder than they used to be. Nobody can say why that is either. Bring me wool and I'll have the cloaks sewn.",
+      again: "More watchmen, more cloaks. Wool, if you've got it.",
+      done: "Good. Nobody should stand a night watch cold. You stand there long enough cold and you start seeing things.",
+    },
+  },
+  {
+    id: "any_fence_oak", kind: "supply", role: "farmer", about: "oak for the fences", title: "Something leans on the fences",
+    item: "minecraft:oak_log", need: [8, 20],
+    lines: {
+      notice: "Oak wanted for new fence posts. Mine keep leaning. The {town} farmer.",
+      offer: "My fence posts lean. Not fall. Lean, all of them the same way, a bit more every morning, like something big was leaning on them all night to look in at the animals. I've stopped going out to look at night. I want new posts, oak, thick ones. Bring me oak.",
+      again: "They're leaning again. Same way. More oak, if you've got it.",
+      done: "Thick posts. Let it lean on those. Here, and thank you.",
+    },
+  },
+  {
+    id: "any_winter_wheat", kind: "supply", role: "farmer", about: "wheat for the store", title: "Wheat for the winter store",
+    item: "minecraft:wheat", need: [12, 28],
+    lines: {
+      notice: "Wheat wanted for the town store. Every barn's to be full by first frost. The {town} farmer.",
+      offer: "Word's come round from every town on the roads: fill the barns early this year. Nobody's ordered it. It's just what everyone's doing, the way birds all go at once. My harvest was short. Bring me wheat and {town} won't be the town that wasn't ready.",
+      again: "The store's down again. Folk are eating like they're worried. Bring wheat.",
+      done: "That's a fuller barn. I sleep better with a full barn. I sleep better than I did, anyway.",
+    },
+  },
+  {
+    id: "any_tally_book", kind: "carry", role: "factor", toRole: "factor", about: "the tally book", title: "The tally book",
+    thing: "the tally book", find: "minecraft:book",
+    lines: {
+      notice: "Tally book to go to the factor in {to}. Our numbers and theirs need to agree. The {town} factor.",
+      offer: "Every cart that crosses between us and {to} goes in my book, and in theirs. This season the books don't agree. Carts they counted out never reached me. Not robbed, mind. Just never arrived, horse and all. Take my book to the factor in {to} and let them see for themselves.",
+      again: "The books are out again. More carts that never came. Take it over.",
+      at: "Same carts missing in mine. Same days. Tell your factor I've marked them both, and that I'm sending nothing on that road after dark till we know.",
+      done: "Same carts, same days. I thought so. I'll not send anything at dusk now. Thank you.",
+    },
+  },
+  {
+    id: "any_snapped_blade", kind: "carry", role: "smith", toRole: "smith", about: "a snapped blade", title: "A blade that snapped clean",
+    thing: "the snapped blade", find: "minecraft:iron_sword",
+    lines: {
+      notice: "Old blade, broken. Want another smith's eye on it. The {town} smith.",
+      offer: "A man brought me a sword that snapped clean in half in his hands. Not in a fight. He was holding it on the wall at night and it went cold, he said, colder and colder, and then it broke. It's old work. Better than mine. The smith in {to} knows old work. Take it to them and ask what they make of it.",
+      again: "Another one broke the same way. Same cold. Take it over, would you?",
+      at: "Look at the break. Clean as glass. I've seen that once before, on a blade my old master kept wrapped up and wouldn't talk about. Tell your smith to keep iron by the door and not to ask me any more than that.",
+      done: "Iron by the door. Right. I'll not ask. I'll do it, though.",
+    },
+  },
+  {
+    id: "any_seed_swap", kind: "carry", role: "farmer", toRole: "farmer", about: "the seed swap", title: "Seed corn for {to}",
+    thing: "a sack of seed corn", find: "minecraft:wheat_seeds",
+    lines: {
+      notice: "Seed corn to go to the farmer in {to}. A swap, an old custom. The {town} farmer.",
+      offer: "Every autumn the farms swap seed with the next region over. Keeps the corn strong, my grandad said. This year's the first in a long while anyone's bothered, and every farmer I know is doing it, like we all remembered at once. Take this sack to the farmer in {to}.",
+      again: "Another sack for {to}. They sent theirs, I owe them.",
+      at: "Seed from over the border. Good. My grandmother swore by it. She said the old kings had it done every year, so the realm grew as one field. Funny thing to remember now. Tell your farmer I'll send mine back with the next cart.",
+      done: "One field, she said? I like that. Here, for the walk.",
+    },
+  },
+  {
+    id: "any_herald_road", kind: "look", role: "factor", about: "the road at night", title: "Bells on the road at night",
+    places: { "Aldmere Vale": "bellhollow_road", Frostmarch: "watchtower_pass", Saltreach: "cliff_road_way", Emberwaste: "caravan_road", Blackfen: "causeway" },
+    when: { night: true, notRaid: true },
+    lines: {
+      notice: "Someone to walk {place} one night and tell me what rings there. The {town} factor.",
+      offer: "The carters say they hear a bell on {place} at night. A small one, like a rider's, coming up behind them. They look round and the road's empty, and the bell goes on past them, up the road, and stops. Walk it one night. Tell me if it's carters' talk.",
+      seen: "On {place} in the dark you hear it: a small bell, coming up behind you at a rider's pace. Nothing passes. The ringing goes by close enough to touch, on up the road, and stops. In the dust ahead there are hoofprints, old and shod, that start nowhere.",
+      done: "A rider's bell, and nobody riding. I'll tell the carters it's real and to let it pass. Seems polite.",
+    },
+  },
+];

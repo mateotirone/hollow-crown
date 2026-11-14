@@ -1,10 +1,10 @@
 // Self-tests for the Town Board (pure: board_data.js and board_rules.js). Run offline by tools/check.mjs.
 
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { JOBS, GIVERS, PLACES, NEIGHBOURS, REGIONS, MOB_NAMES, ITEM_NAMES } from "./board_data.js";
+import { JOBS, SHARED_JOBS, GIVERS, PLACES, NEIGHBOURS, REGIONS, MOB_NAMES, ITEM_NAMES } from "./board_data.js";
 import {
   KINDS, STEPS, repeats, blankMemory, noticesFor, startJob, finish, trackerStep, offerLine, noticeOf, openIn, roundDone, poolFor,
-  needAt, foesAt, payFor, jobById, NOTICES_PER_DAY,
+  needAt, foesAt, payFor, jobById, NOTICES_PER_DAY, allJobs, SHARED, sharedHome, doneKey,
 } from "./board_rules.js";
 import { TOWNSFOLK } from "../townsfolk/data.js";
 import { NEVER_SAID } from "../townsfolk/rules.js";
@@ -17,7 +17,7 @@ const STORY = { story: true, siegesWon: 5 };
 addTests("town board", {
   "every job is whole: giver, place, lines, kind": () => {
     const ids = new Set();
-    for (const j of JOBS) {
+    for (const j of allJobs()) {
       assert(!ids.has(j.id), `${j.id} twice`); ids.add(j.id);
       assert(KINDS.includes(j.kind), `${j.id}: kind ${j.kind}`);
       assert(REGIONS.includes(j.region), `${j.id}: region`);
@@ -25,6 +25,7 @@ addTests("town board", {
       assert(j.title && j.about, `${j.id}: title and about`);
       const L = j.lines ?? {};
       assert(L.notice && L.offer && L.done, `${j.id}: notice, offer and done lines`);
+      assert(!/[{}]/.test(Object.values(L).flat().join(" ") + j.title + j.about), `${j.id}: a {word} left unfilled`);
       if (repeats(j)) assert(L.again, `${j.id} repeats, so it needs an again line`);
       if (STEPS[j.kind].includes("go") || j.kind === "escort") assert(PLACES[j.place], `${j.id}: place ${j.place}`);
       if (j.place) assert(PLACES[j.place].region === j.region, `${j.id}: its place is in its region`);
@@ -46,14 +47,14 @@ addTests("town board", {
     }
   },
   "nobody on the board says what the street doesn't know": () => {
-    for (const j of JOBS) {
+    for (const j of allJobs()) {
       const text = Object.values(j.lines).flat().join(" ").toLowerCase();
       for (const w of NEVER_SAID) assert(!new RegExp(`\\b${w}\\b`).test(text), `${j.id} says "${w}"`);
     }
   },
   "places are on the map, fights away from every plot": () => {
     const plots = [[-470, -300], [260, -480], [300, 130], [-200, 220], [-520, -760], [520, -1010], [-760, -560], [-560, 650], [-230, 560], [260, 980], [700, 60], [760, 860]];
-    for (const j of JOBS) {
+    for (const j of allJobs()) {
       if (!["hunt", "camp", "watch", "escort"].includes(j.kind)) continue;
       const p = PLACES[j.place];
       const d = Math.min(...plots.map(([x, z]) => Math.hypot(p.x - x, p.z - z)));
@@ -73,6 +74,7 @@ addTests("town board", {
   "one-offs once, everyday jobs once a round, then the neighbours": () => {
     const mem = blankMemory();
     const vale = JOBS.filter((j) => j.region === "Aldmere Vale");
+    const sharedHere = () => openIn("Aldmere Vale", mem, STORY).filter((j) => j.shared);
     let guard = 0;
     // play the Vale through, taking the first notice each day
     for (let day = 0; (mem.round["Aldmere Vale"] ?? 0) < 1 && guard < 400; day++, guard++) {
@@ -80,10 +82,11 @@ addTests("town board", {
       if (!n.length) { mem.last = undefined; continue; }
       finish(mem, n[0], STORY);
     }
+    for (const j of sharedHere()) mem.done[j.id] = mem.done[j.shared] = 1; // (shared jobs travel; the next test covers them)
     assert(guard < 400, "the Vale's pool goes round");
     for (const j of vale) assertEqual(mem.done[j.id] ?? 0, 1, `${j.id} done once in the first round`);
     // round two: one-offs never again, everyday jobs back with their again line
-    const open = openIn("Aldmere Vale", mem, STORY);
+    const open = openIn("Aldmere Vale", mem, STORY).filter((j) => !j.shared);
     for (const j of open) assert(repeats(j), `${j.id} came back but is one-off`);
     assertEqual(open.length, vale.filter(repeats).length);
     const run = startJob(open[0], mem, 0, 50);
@@ -93,6 +96,26 @@ addTests("town board", {
     const { near } = poolFor("Aldmere Vale", mem, STORY);
     assert(Array.isArray(near));
     assert(!roundDone("Aldmere Vale", mem, STORY), "a fresh round is not done");
+  },
+  "shared jobs: one in each region, given by that town's own trader, living in one region at a time": () => {
+    assertEqual(SHARED_JOBS.length, 10);
+    assertEqual(SHARED.length, SHARED_JOBS.length * REGIONS.length);
+    for (const j of SHARED) {
+      assert(GIVERS[j.giver].town && WARDS.some((w) => w.name === GIVERS[j.giver].town), `${j.id}: giver ${j.giver}`);
+      if (j.to) assert(GIVERS[j.to].town !== GIVERS[j.giver].town, `${j.id}: carried to another town`);
+    }
+    const mem = blankMemory();
+    for (const s of SHARED_JOBS) {
+      const homes = SHARED.filter((j) => j.shared === s.id && openIn(j.region, mem, STORY).includes(j));
+      assert(homes.length <= 1, `${s.id} is up in ${homes.length} regions at once`);
+    }
+    // a one-off shared job done in one region is done everywhere; it moves when a round turns
+    const look = SHARED.find((j) => j.kind === "look");
+    const home = sharedHome(look, mem);
+    mem.round.Frostmarch = 1;
+    assert(sharedHome(look, mem) !== home, "a shared job moves on when a round turns");
+    mem.done[doneKey(look)] = 1;
+    for (const r of REGIONS) assert(!openIn(r, mem, STORY).some((j) => j.shared === look.shared), `${look.shared} done, but up again in ${r}`);
   },
   "a region with no jobs of its own draws from its neighbours once its round has turned": () => {
     const mem = blankMemory();
@@ -109,7 +132,7 @@ addTests("town board", {
     }
   },
   "every step has tracker words, and pay grows with tier": () => {
-    for (const j of JOBS) {
+    for (const j of allJobs()) {
       const run = startJob(j, blankMemory(), 2, 1);
       for (let s = 0; s < STEPS[j.kind].length; s++) {
         run.step = s;

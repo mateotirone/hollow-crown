@@ -14,7 +14,7 @@
 //     next to yours. Their givers stay where they live, so you ride to them.
 //   * Story jobs only show in Story Mode; Settlement Mode gets the rest.
 
-import { JOBS, SHARED_JOBS, GIVERS, PLACES, NEIGHBOURS, MOB_NAMES, ITEM_NAMES } from "./board_data.js";
+import { JOBS, SHARED_JOBS, ROLE_TOWN, REGIONS, GIVERS, PLACES, NEIGHBOURS, MOB_NAMES, ITEM_NAMES } from "./board_data.js";
 
 export const KINDS = ["hunt", "camp", "missing", "supply", "carry", "escort", "recover", "look", "watch"];
 export const REPEATS = new Set(["hunt", "camp", "supply", "carry", "escort", "watch"]);
@@ -23,10 +23,38 @@ export const JOBS_PER_POINT = 3;
 // The Storyteller's mood for each kind (core/storyteller.js): it mixes the board against what you have done lately
 export const KIND_MOOD = { hunt: "fight", camp: "fight", watch: "fight", missing: "mystery", look: "mystery", recover: "mystery", supply: "quiet", carry: "social", escort: "social" };
 
-export const allJobs = () => [...JOBS, ...SHARED_JOBS];
-const BY_ID = new Map(JOBS.map((j) => [j.id, j]));
+// ---------- shared jobs (board_data.js SHARED_JOBS): one copy per region, given by that region's smith/farmer/factor ----------
+const fill = (v, words) => (typeof v === "string" ? v.replace(/\{(\w+)\}/g, (m, k) => words[k] ?? m) : Array.isArray(v) ? v.map((x) => fill(x, words)) : v);
+function expandShared() {
+  const out = [];
+  SHARED_JOBS.forEach((s, i) => {
+    for (const region of REGIONS) {
+      const [prefix, short] = ROLE_TOWN[region];
+      const giver = `${prefix}_${s.role}`;
+      const near = NEIGHBOURS[region][i % NEIGHBOURS[region].length];
+      const to = s.toRole ? `${ROLE_TOWN[near][0]}_${s.toRole}` : undefined;
+      const place = s.places?.[region];
+      const words = { town: GIVERS[giver]?.town, to: to && GIVERS[to]?.town, place: place && PLACES[place]?.name };
+      const lines = Object.fromEntries(Object.entries(s.lines).map(([k, v]) => [k, fill(v, words)]));
+      const { role, toRole, places, ...rest } = s;
+      out.push({ ...rest, id: `${s.id}_${short}`, shared: s.id, region, giver, to, place, title: fill(s.title, words), about: fill(s.about, words), lines });
+    }
+  });
+  return out;
+}
+export const SHARED = expandShared();
+export const allJobs = () => [...JOBS, ...SHARED];
+const BY_ID = new Map(allJobs().map((j) => [j.id, j]));
 export const jobById = (id) => BY_ID.get(id);
 export const repeats = (job) => REPEATS.has(job.kind) && !job.chain && !job.story;
+// what a job's done count is kept under: a shared job counts once, whichever region it was done in
+export const doneKey = (job) => job.shared ?? job.id;
+// the region a shared job is in now: it moves on each time one of your regions' rounds turns
+export function sharedHome(job, mem) {
+  const turns = Object.values(mem.round ?? {}).reduce((a, b) => a + b, 0);
+  const i = SHARED_JOBS.findIndex((s) => s.id === job.shared);
+  return REGIONS[(i * 2 + turns) % REGIONS.length];
+}
 
 // tier 0-4 from Renown level: bigger jobs, better pay (as the old board)
 export const jobTier = (level) => Math.min(4, Math.floor((level ?? 0) / 8));
@@ -74,13 +102,15 @@ function chainOk(job, mem) {
 export function openIn(region, mem, ctx) {
   const round = mem.round[region] ?? 0;
   const inRound = new Set(mem.inRound[region] ?? []);
-  return allJobs().filter((j) => j.region === region && whenOk(j, ctx) && chainOk(j, mem) && (repeats(j) ? !inRound.has(j.id) && (round > 0 || !(mem.done[j.id] > 0)) : !(mem.done[j.id] > 0)));
+  return allJobs().filter((j) => j.region === region && (!j.shared || sharedHome(j, mem) === region) && whenOk(j, ctx) && chainOk(j, mem)
+    && (repeats(j) ? !inRound.has(j.id) && (round > 0 || !(mem.done[doneKey(j)] > 0)) : !(mem.done[doneKey(j)] > 0)));
 }
 
 // Has this region's pool gone round? Every everyday job done this round, and no one-off waiting.
+// Shared jobs travel, so they never hold a region's round back.
 export function roundDone(region, mem, ctx) {
-  const left = openIn(region, mem, ctx);
-  const everyday = allJobs().filter((j) => j.region === region && repeats(j) && whenOk(j, ctx));
+  const left = openIn(region, mem, ctx).filter((j) => !j.shared);
+  const everyday = allJobs().filter((j) => j.region === region && !j.shared && repeats(j) && whenOk(j, ctx));
   return everyday.length > 0 && left.length === 0;
 }
 
@@ -112,7 +142,7 @@ export function noticesFor(day, playerId, home, mem, ctx, moods) {
   const { own, near } = poolFor(home, mem, ctx);
   const shuffled = (list) => list.map((j) => [roll(), j]).sort((a, b) => a[0] - b[0]).map(([, j]) => j);
   // one-off jobs and jobs not yet seen come before repeats; the kind just done goes to the back
-  const rank = (j) => (repeats(j) && (mem.done[j.id] ?? 0) > 0 ? 1 : 0) + (j.kind === mem.last ? 2 : 0);
+  const rank = (j) => (repeats(j) && (mem.done[doneKey(j)] ?? 0) > 0 ? 1 : 0) + (j.kind === mem.last ? 2 : 0);
   const order = (list) => shuffled(list).sort((a, b) => rank(a) - rank(b));
   // own region: up to two (three if nothing near), then near regions fill the rest
   const pick = [], givers = new Set(), kinds = new Set();
@@ -148,11 +178,11 @@ export const STEPS = {
 
 export function startJob(job, mem, tier, day) {
   const round = mem.round[job.region] ?? 0;
-  const again = repeats(job) && (mem.done[job.id] ?? 0) > 0;
+  const again = repeats(job) && (mem.done[doneKey(job)] ?? 0) > 0;
   const place = PLACES[job.place];
   // a repeat moves to one of the place's other spots, so it is never quite the same twice
   const alts = place?.alt ?? [];
-  const a = again && alts.length ? alts[((mem.done[job.id] ?? 0) - 1) % alts.length] : [0, 0];
+  const a = again && alts.length ? alts[((mem.done[doneKey(job)] ?? 0) - 1) % alts.length] : [0, 0];
   const pay = payFor(job, tier);
   return {
     id: job.id, step: 0, round, again, tier, day,
@@ -205,13 +235,14 @@ export const offerLine = (job, run) => (run.again && job.lines.again ? job.lines
 // The notice on the board: its title, who pinned it, and its text
 export function noticeOf(job, mem) {
   const g = giverOf(job);
-  const again = repeats(job) && (mem?.done?.[job.id] ?? 0) > 0;
+  const again = repeats(job) && (mem?.done?.[doneKey(job)] ?? 0) > 0;
   return { title: job.title + (again ? " (again)" : ""), from: g.kind === "trader" ? cap(g.name) : `${g.name}, ${g.town}`, text: job.lines.notice };
 }
 
 // Remember a finished job: counts, the round, the kind just done
 export function finish(mem, job, ctx) {
   mem.done[job.id] = (mem.done[job.id] ?? 0) + 1;
+  if (job.shared) mem.done[job.shared] = (mem.done[job.shared] ?? 0) + 1;
   if (repeats(job)) mem.inRound[job.region] = [...new Set([...(mem.inRound[job.region] ?? []), job.id])];
   mem.last = job.kind;
   mem.jobsDone = (mem.jobsDone ?? 0) + 1;
