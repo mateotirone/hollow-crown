@@ -471,6 +471,10 @@ class Starter:
                         for k in range(2 if rr != r1 - 3 else 1):
                             x, y, z = self.at(rr, a); self.put(x, y + 1 + k, z, f"{W}_log", {"axis": "x" if self.F[0] else "z"})
                             x, y, z = self.at(rr, a + 1); self.put(x, y + 1 + k, z, f"{W}_log", {"axis": "x" if self.F[0] else "z"})
+                # a lantern on the middle pile: the piles shade the ground behind them from the lane's posts, which
+                # left the back of the yard at light 0-3 (town audit 2026-11-14); from up here the gaps get 9 or more
+                piles = list(range(a0 + 1, a1, 4))
+                x, y, z = self.at(r1 - 2, piles[len(piles) // 2]); self.put(x, y + 3, z, "lantern")
                 x, y, z = self.at(r0 + 3, da); self.put(x, y + 1, z, f"stripped_{W}_log", {"axis": "y"})
                 x, y, z = self.at(r0 + 2, a1 - 1); self.put(x, y + 1, z, "barrel")
                 x, y, z = self.at(r0 + 3, a1 - 1); self.put(x, y + 1, z, "barrel")
