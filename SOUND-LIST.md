@@ -747,8 +747,8 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
+| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), bestiary (2), undertow (2), lore, newplayer |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 8 | lore (6), bestiary, guide |
-| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), bestiary (2), undertow (2), lore |
 | `ui.toast.challenge_complete` | Something earned (the bell rings three times: Mateo, 2026-11-12) | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.45 after 0.4 s + `block.bell.hit` pitch 0.6 vol 0.4 after 1.4 s + `block.bell.hit` pitch 0.6 vol 0.35 after 2.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
@@ -801,11 +801,14 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `random.bow` | 2 | bestiary (2) |
+| `random.door_close` | 2 | newplayer, vault |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_diamond` | 1 | codex |
 | `armor.equip_elytra` | 1 | looks |
 | `armor.equip_netherite` | 1 | siege |
+| `beacon.activate` | 1 | newplayer |
+| `beacon.ambient` | 1 | newplayer |
 | `block.campfire.crackle` | 1 | dragons |
 | `block.end_portal_frame.fill` | 1 | crown |
 | `block.end_portal.spawn` | 1 | undertow |
@@ -829,7 +832,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
 | `note.pling` | 1 | arena |
-| `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `random.splash` | 1 | codex |
 | `step.stone` | 1 | bestiary |

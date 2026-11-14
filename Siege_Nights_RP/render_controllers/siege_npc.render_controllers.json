@@ -101,7 +101,12 @@
             "Texture.mason__frostmarch",
             "Texture.mason__saltreach",
             "Texture.mason__emberwaste",
-            "Texture.mason__blackfen"
+            "Texture.mason__blackfen",
+            "Texture.herald_vale",
+            "Texture.herald_frostmarch",
+            "Texture.herald_saltreach",
+            "Texture.herald_emberwaste",
+            "Texture.herald_blackfen"
           ]
         }
       },
