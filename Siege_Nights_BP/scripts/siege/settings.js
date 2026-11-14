@@ -3,7 +3,7 @@
 
 
 export const SETTINGS = {
-  firstSiegeDay: 5, // no sieges before this day, so a new world has time to prepare
+  firstSiegeDay: 3, // the first siege is on this night (Mateo 2026-11-14: day 3, not 5); a multiple of siegeEveryNNights so it lands on a siege night
   siegeEveryNNights: 3, // after that, a siege comes every 3rd night (set to 1 for every night)
   assaultsPerSiege: 3, // each siege night has this many attack waves
   ticksBetweenAssaults: 600, // 20 ticks = 1 second, so 600 = 30 seconds
