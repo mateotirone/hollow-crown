@@ -151,6 +151,11 @@ so these rules are strict:
   joined by single 45 degree bends, within 7 blocks of the routed line (tighter where that would stray into a
   town, plot or story site). To re-plan the track without moving any station, run genworld with
   `GW_RAIL_KEEP=map/rail-segments.json`.
+  `GW_RAIL_EXACT=1` with it keeps the track cells exactly (only heights and works re-fitted to the world): use
+  that for a world rebuild. `GW_RAIL_ROUTE=<older export>` straightens from an older export's routes, and
+  `GW_RAIL_PLAIN="x,z;..."` keeps the routed cells within 30 blocks of each spot. The 2026-11-14 plan keeps the
+  whole Gullcliff to Frosthelm climb as routed: straightened, its bed cuts left bridge stones floating.
+  Every change to the plan reruns `node tools/rail_lay_test.mjs <corridor.json>` on the real world: ALL OK.
 - **A bought stretch goes down all the way.** On a Realm only the ground near players is loaded, so the game
   walks one ticking area (`hc_rail_lay`, 65 x 65) along whatever is still waiting (`trains/route_game.js`).
 

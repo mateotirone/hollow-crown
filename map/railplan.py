@@ -245,7 +245,7 @@ def _despike(cells, keep=()):
             cells[i] = ((ax + bx) // 2, (az + bz) // 2)
     return cells
 
-def trace(points, stops=(), routed=False, blocked=None):
+def trace(points, stops=(), routed=False, blocked=None, straighten=True):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
     blocks each side of every stop (only on the line's side at a line end). routed=True: the points already run
@@ -303,7 +303,7 @@ def trace(points, stops=(), routed=False, blocked=None):
     keep = set()
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
-    cells = _long_runs(cells, keep, blocked)   # long straights and 45 degree bends, not a staircase (was _climb_jogs)
+    if straighten: cells = _long_runs(cells, keep, blocked)   # long straights and 45 degree bends, not a staircase (was _climb_jogs)
     cells = _despike(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
