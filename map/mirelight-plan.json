@@ -61,7 +61,14 @@
     -71,
     70,
     902
-   ]
+   ],
+   "spots": {
+    "entry": [
+     -71,
+     70,
+     902
+    ]
+   }
   },
   {
    "stamp": "mirelight_inn_d-44_946",
@@ -82,7 +89,14 @@
     -51,
     68,
     938
-   ]
+   ],
+   "spots": {
+    "innkeeper": [
+     -47,
+     68,
+     944
+    ]
+   }
   },
   {
    "stamp": "mirelight_smithy",
@@ -103,20 +117,60 @@
     -28,
     67,
     920
-   ]
+   ],
+   "spots": {
+    "smith": [
+     -24,
+     67,
+     926
+    ]
+   }
   },
   {
-   "stamp": "mirelight_general_store_25_d-68_876",
+   "stamp": "town_moneyer_blackfen_d-64_885",
    "kind": "civic",
-   "x": -68,
-   "z": 876,
+   "x": -64,
+   "z": 885,
    "ground_y": 68,
    "rotation": 0,
-   "footprint": 88,
-   "foundation": 2,
+   "footprint": 115,
+   "foundation": 1,
    "door": [
     -64,
     886
+   ],
+   "walked": true,
+   "name": "moneyer",
+   "door_block": [
+    -64,
+    69,
+    885
+   ],
+   "spots": {
+    "moneyer": [
+     -61,
+     69,
+     880
+    ],
+    "sign": [
+     -64,
+     71,
+     886
+    ]
+   }
+  },
+  {
+   "stamp": "mirelight_general_store_25_d-56_916",
+   "kind": "civic",
+   "x": -56,
+   "z": 916,
+   "ground_y": 67,
+   "rotation": 180,
+   "footprint": 88,
+   "foundation": 3,
+   "door": [
+    -60,
+    906
    ],
    "walked": true,
    "name": "store"
@@ -160,7 +214,19 @@
     -36,
     73,
     859
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     -46,
+     71,
+     862
+    ],
+    "water_edge": [
+     -41,
+     67,
+     862
+    ]
+   }
   },
   {
    "stamp": "mirelight_stilt_house_5101",
@@ -180,7 +246,19 @@
     -74,
     72,
     841
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     -62,
+     70,
+     837
+    ],
+    "water_edge": [
+     -68,
+     66,
+     837
+    ]
+   }
   },
   {
    "stamp": "mirelight_stilt_house_5102",
@@ -200,27 +278,19 @@
     -44,
     73,
     848
-   ]
-  },
-  {
-   "stamp": "mirelight_stilt_house_5104",
-   "kind": "shore",
-   "x": -56,
-   "z": 920,
-   "ground_y": 66,
-   "rotation": 180,
-   "footprint": 72,
-   "foundation": 2,
-   "door": [
-    -60,
-    905
    ],
-   "name": "stilt_house",
-   "door_block": [
-    -60,
-    72,
-    912
-   ]
+   "spots": {
+    "stilt": [
+     -50,
+     71,
+     851
+    ],
+    "water_edge": [
+     -47,
+     67,
+     851
+    ]
+   }
   },
   {
    "stamp": "mirelight_house_51456_t2_moss",
@@ -241,7 +311,14 @@
     -94,
     74,
     852
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     -86,
+     72,
+     849
+    ]
+   }
   },
   {
    "stamp": "mirelight_house_51943_t2_moss",
@@ -262,7 +339,14 @@
     -14,
     72,
     881
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     -18,
+     70,
+     875
+    ]
+   }
   },
   {
    "stamp": "mirelight_house_51555_t2_mangrove",
@@ -283,7 +367,14 @@
     -113,
     74,
     874
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     -116,
+     72,
+     868
+    ]
+   }
   },
   {
    "stamp": "mirelight_barn_51162_d-112_902",
@@ -319,7 +410,14 @@
     -4,
     73,
     892
-   ]
+   ],
+   "spots": {
+    "stilt": [
+     2,
+     71,
+     889
+    ]
+   }
   },
   {
    "stamp": "mirelight_barn_51337_d-18_863",
@@ -408,19 +506,10 @@
   {
    "stamp": "market_stall_53",
    "kind": "stall",
-   "x": -57,
-   "z": 905,
+   "x": -55,
+   "z": 901,
    "ground_y": 67,
-   "rotation": 180,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_54",
-   "kind": "stall",
-   "x": -65,
-   "z": 904,
-   "ground_y": 67,
-   "rotation": 270,
+   "rotation": 90,
    "footprint": 0
   },
   {
@@ -435,9 +524,9 @@
   {
    "stamp": "lamp_post_fen_arm",
    "kind": "lamp",
-   "x": -64,
-   "z": 907,
-   "ground_y": 67,
+   "x": -63,
+   "z": 905,
+   "ground_y": 66,
    "rotation": 180,
    "footprint": 0
   },
@@ -1100,16 +1189,6 @@
    "footprint": 0
   },
   {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
-   "kind": "tree",
-   "x": -59,
-   "z": 872,
-   "ground_y": 68,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "fen_bald_cypress__fen_bald_cypress_sapling_0",
    "db_stamp": "fen_bald_cypress/fen_bald_cypress_sapling_0",
    "kind": "tree",
@@ -1160,16 +1239,6 @@
    "footprint": 0
   },
   {
-   "stamp": "fen_pollard_willow__fen_pollard_willow_young_0",
-   "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_0",
-   "kind": "tree",
-   "x": -53,
-   "z": 906,
-   "ground_y": 65,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
    "stamp": "fen_pollard_willow__fen_pollard_willow_young_1",
    "db_stamp": "fen_pollard_willow/fen_pollard_willow_young_1",
    "kind": "tree",
@@ -1215,16 +1284,6 @@
    "kind": "tree",
    "x": -54,
    "z": 880,
-   "ground_y": 67,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "fen_black_alder__fen_black_alder_sapling_1",
-   "db_stamp": "fen_black_alder/fen_black_alder_sapling_1",
-   "kind": "tree",
-   "x": -57,
-   "z": 889,
    "ground_y": 67,
    "rotation": 0,
    "footprint": 0
@@ -1340,12 +1399,42 @@
    "footprint": 0
   },
   {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_1",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_1",
+   "kind": "tree",
+   "x": -61,
+   "z": 870,
+   "ground_y": 68,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_pollard_willow__fen_pollard_willow_sapling_0",
+   "db_stamp": "fen_pollard_willow/fen_pollard_willow_sapling_0",
+   "kind": "tree",
+   "x": -58,
+   "z": 889,
+   "ground_y": 67,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
    "stamp": "fen_bald_cypress__fen_bald_cypress_sapling_1",
    "db_stamp": "fen_bald_cypress/fen_bald_cypress_sapling_1",
    "kind": "tree",
    "x": -53,
    "z": 884,
    "ground_y": 66,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "fen_black_alder__fen_black_alder_sapling_0",
+   "db_stamp": "fen_black_alder/fen_black_alder_sapling_0",
+   "kind": "tree",
+   "x": -28,
+   "z": 890,
+   "ground_y": 64,
    "rotation": 0,
    "footprint": 0
   }

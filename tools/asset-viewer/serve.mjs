@@ -367,7 +367,7 @@ const EXTRAS = [
     label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
   { id: "bridges", title: "Bridges", marker: "map/structures/bridges_gallery.py",
     args: (out) => [out] },
-  { id: "harbour", title: "Harbour: lighthouse, boathouse, harbourmaster", marker: "map/structures/harbour_builds.py",
+  { id: "harbour", title: "Harbour: lighthouse, boathouse, harbourmaster, great ship and pier", marker: "map/structures/harbour_builds.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   { id: "arena", title: "The Twelve Gates (arena at Kingsrest)", marker: "map/structures/arena.py",

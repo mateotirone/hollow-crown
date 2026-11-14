@@ -350,7 +350,9 @@ PRE = [
 # ---------- held items: no elbow bend in a hand that holds something ----------
 # The item bones hang on the upper arm (Bedrock floats held items if the bone path to rightItem differs from
 # vanilla), so a hand that holds something must not bend at the elbow, or the item would hang in the air
-# beside a bent forearm. While a hand holds an item, its forearm turn moves to the shoulder instead.
+# beside a bent forearm. While a hand holds an item, its forearm turn is simply dropped and the arm moves
+# from the shoulder only, like vanilla. (PR #250 first ADDED the forearm turn to the shoulder instead; that
+# swung chambered arms up and back, so blades pointed into the chest and face: playtest 1.2.1616.)
 BEND = {"right": "variable.hc_rbend", "left": "variable.hc_lbend"}
 
 def fold_elbows(anims):
@@ -360,13 +362,9 @@ def fold_elbows(anims):
             fore = bones.get(f"{side}forearm", {}).get("rotation")
             if not fore:
                 continue
-            arm = bones.setdefault(f"{side}arm", {}).setdefault("rotation", r())
             for i in range(3):
-                f = fore[i]
-                if f == 0.0:
-                    continue
-                arm[i] = f"({arm[i]}) + ({f}) * (1.0 - {flag})" if arm[i] != 0.0 else f"({f}) * (1.0 - {flag})"
-                fore[i] = f"({f}) * {flag}"
+                if fore[i] != 0.0:
+                    fore[i] = f"({fore[i]}) * {flag}"
 
 fold_elbows(A)
 

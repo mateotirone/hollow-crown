@@ -13,7 +13,7 @@
 //   millbrook    Sister Wren at the altar of Millbrook's chapel, or in front of it until it stands (millbrook.js)
 // Anything a builder already did by hand (hall built, Plot Stones placed) is kept and skipped.
 //
-// Builder commands (Creative):
+// Commands (status works in any mode; setup needs Creative):
 //   /scriptevent siege:opening status   what is done and what is left
 //   /scriptevent siege:opening setup    run the setup here even without the gold block (a hand-built copy of the map)
 
@@ -23,7 +23,7 @@ import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, WARDS, WELCOME, PLOT_STONE, OVERWORLD } from "../plots/config.js";
 import { allPlots, registerPlot, isBuilder } from "../plots/claims.js";
-import { hallBuilt, raiseHall, setKingsrestArrival } from "../plots/welcome.js";
+import { hallBuilt, hallRaising, raiseHall, setKingsrestArrival } from "../plots/welcome.js";
 import { buildMillbrook, MILLBROOK } from "./millbrook.js";
 
 // state: "unchecked" (not looked yet) | "map" (the Hollow Crown map: set it up) | "plain" (some other world)
@@ -201,9 +201,16 @@ function step() {
     const area = areaNames.find((n) => ![...active.values()].some((j) => j.area === n));
     command(dim, `tickingarea remove ${area}`);
     command(dim, `tickingarea add circle ${task.x} 0 ${task.z} ${task.radius} ${area} true`);
-    active.set(task.id, { area, tries: 0, running: false });
+    active.set(task.id, { area, tries: 0, idle: 0, running: false });
   }
   for (const [id, job] of [...active]) {
+    // A hall raise that stopped (its chunks never loaded, a block it could not set) is let go and tried again,
+    // instead of holding every newcomer at Kingsrest for good
+    if (id === "hall" && job.running && !hallRaising() && !store.data.done.includes("hall") && ++job.idle > 20) {
+      console.warn("[Hollow Crown] opening: the welcome hall stopped going up; trying again");
+      release(id);
+      continue;
+    }
     if (job.running || (store.data.state !== "map" && id !== "detect")) continue;
     const task = TASKS.find((t) => t.id === id);
     if (!loaded(dim, task)) {
@@ -248,9 +255,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "siege:opening") return;
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player") return;
-  if (!isBuilder(player)) return player.sendMessage("§cThe map is set up by the map builder in Creative.");
   const verb = event.message.trim();
   if (verb === "setup") {
+    if (!isBuilder(player)) return player.sendMessage("§cOnly a player in Creative can force the map setup. /scriptevent siege:opening status works in any mode.");
     store.data.state = "map";
     if (!store.data.done.includes("detect")) store.data.done.push("detect");
     store.save();

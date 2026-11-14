@@ -34,31 +34,55 @@ export const NPCS = [
       [["act1:talk_barracks"], "barracks"],
       [["act1:barracks"], "barracks_wait"],
       [["act1:guards"], "guards_wait"],
+      [["act1:station"], "post_wait"],
       [["act1:talk_wheat"], "wheat"],
       [["act1:sell"], "sell_wait"],
       [["act1:bread"], "bread_wait"],
       [["act1:talk_station"], "station"],
       [["act1:station"], "station_wait"],
+      [["act1:talk_mine"], "mine"],
+      [["act1:mine"], "mine_wait"],
+      [["act1:ore"], "ore_wait"],
+      [["act1:smelt"], "smelt_wait"],
       [["act1:rest"], "rest"],
       [["act1:talk_sundown"], "sundown"],
       [["act1:home"], "home_wait"],
       [["act1:talk_supper"], "supper"],
       [["act1:defend"], "defend"],
+      // Settlement Mode (newplayer/mode_rules.js): the same hearth, no story. After the raid she grows the hall.
+      [["act1:talk_raid_won", "mode:settlement"], "raid_won_s"],
+      [["act1:talk_raid_lost", "mode:settlement"], "raid_lost_s"],
+      [["act1:talk_grow_0"], "grow_0"],
+      [["act1:talk_grow_1"], "grow_1"],
+      [["act1:talk_grow_2"], "grow_2"],
+      [["act1:talk_grow_3"], "grow_3"],
+      [["act1:grow"], "grow_wait"],
       [["act1:talk_raid_won"], "raid_won"],
       [["act1:talk_raid_lost"], "raid_lost"],
       [["act1:rebanner"], "rebanner_wait"],
+      [["act1:mend"], "mend_wait"],
       [["act1:wren"], "wren_wait"],
       [["act1:ride_home"], "home_again"],
       [["act1:find_ember"], "ember_wait"],
       [["act1:ask_ember"], "ember"],
       [["act1:sleep"], "sleep"],
       [["act1:aldous"], "aldous_wait"],
+      // Act 2 (newplayer/act2_rules.js act2Stage)
+      [["act2:tree"], "tree_wait"],
+      [["act2:chapterhouse"], "knight_wait"],
+      [["act2:mag"], "mag_wait"],
+      [["act2:talk_bills"], "bills"],
+      [["act2:moneyer"], "moneyer_wait"],
+      [["act2:ironworks"], "ironworks_wait"],
+      [["act2:collect"], "collect_wait"],
+      [["act2:read_notice"], "notice_up"],
+      [["act2:board_job"], "chest_wait"],
       [[], "hub"],
     ],
     nodes: {
       // ---- day 1
       meet: {
-        text: "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nGo and touch the Plot Stone outside. Raise your banner, and this place is yours.",
+        text: "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nThe cob tied by your gate is yours too. Slow, and no jumper, but it knows the roads. Blow the whistle in your pack and it comes from anywhere.\n\nNow go and touch the Plot Stone outside. Raise your banner, and this place is yours.",
         opts: [["Thank you.", "end", ["flag:elspeth_met", "emit:elspethPurse"]]],
       },
       banner: { text: "The stone's still waiting for your hand. Go on.", opts: [["I'm stuck.", "stuck_banner"], ["I'll go.", "end"]] },
@@ -68,7 +92,7 @@ export const NPCS = [
       stuck_chest: { text: "Someone left you more than a purse.", opts: [["Still stuck.", "stuck2_chest"], ["Thank you.", "end"]] },
       stuck2_chest: { text: "There's a chest in your house. Open it.", opts: [["Thank you.", "end"]] },
       workshop: {
-        text: "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.",
+        text: "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.\n\nThe Store Shed beside it keeps what you can't carry. Use it. A lord with full pockets walks slow.",
         opts: [["I'll find it.", "end", ["flag:elspeth_workshop"]], ["I'm stuck.", "stuck_workshop", ["flag:elspeth_workshop"]]],
       },
       workshop_wait: { text: "The Workshop. Nothing gets built without it.", opts: [["I'm stuck.", "stuck_workshop"], ["I'll go.", "end"]] },
@@ -76,8 +100,8 @@ export const NPCS = [
       stuck2_workshop: { text: "Your Workshop stands in the Mason's Yard, beside the bench. It costs nothing. Open it.", opts: [["Thank you.", "end"]] },
       // ---- day 2
       barracks: {
-        text: "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.",
-        opts: [["I will.", "end", ["flag:elspeth_barracks"]], ["I'm stuck.", "stuck_barracks", ["flag:elspeth_barracks"]]],
+        text: "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall, and send the first of them up the lookout by your gate.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
+        opts: [["I will.", "end", ["flag:elspeth_barracks", "emit:elspethPlanBook"]], ["I'm stuck.", "stuck_barracks", ["flag:elspeth_barracks", "emit:elspethPlanBook"]]],
       },
       barracks_wait: { text: "A Barracks first. Men want a roof before they'll guard you.", opts: [["I'm stuck.", "stuck_barracks"], ["I'll go.", "end"]] },
       stuck_barracks: { text: "Men want a roof before they'll guard you.", opts: [["Still stuck.", "stuck2_barracks"], ["Thank you.", "end"]] },
@@ -85,8 +109,11 @@ export const NPCS = [
       guards_wait: { text: "A roof with nobody under it. Hire your men.", opts: [["I'm stuck.", "stuck_guards"], ["I'll go.", "end"]] },
       stuck_guards: { text: "An empty Barracks guards nothing.", opts: [["Still stuck.", "stuck2_guards"], ["Thank you.", "end"]] },
       stuck2_guards: { text: "Go into the Barracks and hire a guard. Forty Regals a head.", opts: [["Thank you.", "end"]] },
+      post_wait: { text: "One of them up the lookout by your gate. A man up there sees the road before you do, and the road is where trouble comes from.", opts: [["I'm stuck.", "stuck_post"], ["I'll go.", "end"]] },
+      stuck_post: { text: "Your men take orders. Give one.", opts: [["Still stuck.", "stuck2_post"], ["Thank you.", "end"]] },
+      stuck2_post: { text: "Click one of your guards, choose Station, and send him up the gate lookout.", opts: [["Thank you.", "end"]] },
       wheat: {
-        text: "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.",
+        text: "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.\n\nAnd mind the two cows in the pen. Feed them wheat and you'll have calves. Nobody sends you more.",
         opts: [["I will.", "end", ["flag:elspeth_wheat"]], ["I'm stuck.", "stuck_sell", ["flag:elspeth_wheat"]]],
       },
       sell_wait: { text: "Sixteen sheaves to the Farmer. Then bread.", opts: [["I'm stuck.", "stuck_sell"], ["I'll go.", "end"]] },
@@ -96,12 +123,25 @@ export const NPCS = [
       stuck_bread: { text: "Your belly will thank you.", opts: [["Still stuck.", "stuck2_bread"], ["Thank you.", "end"]] },
       stuck2_bread: { text: "Three wheat at a crafting table makes a loaf.", opts: [["Thank you.", "end"]] },
       station: {
-        text: "The rail runs past here. Find the station. You'll want roads that don't tire your horse.",
+        text: "The rail runs past here. Find the station. You'll want roads that don't tire your horse.\n\nThere's a Goods Crate on the platform. Whatever you put in it finds its way home to your Store Shed.",
         opts: [["I'll find it.", "end", ["flag:elspeth_station"]], ["I'm stuck.", "stuck_station", ["flag:elspeth_station"]]],
       },
       station_wait: { text: "The station. Roads that don't tire your horse.", opts: [["I'm stuck.", "stuck_station"], ["I'll go.", "end"]] },
       stuck_station: { text: "Listen for the rails.", opts: [["Still stuck.", "stuck2_station"], ["Thank you.", "end"]] },
       stuck2_station: { text: "Follow the pin on your map to the station.", opts: [["Thank you.", "end"]] },
+      mine: {
+        text: "You found the rails. Good. Now take that pickaxe from the chest.\n\nThere's an old shaft past your wall. The ore comes back every night. Nobody knows why, and nobody asks.\n\nBring back coal and iron. There's a furnace in your house. Smelt the iron, and the Moneyer will buy every ingot you make.",
+        opts: [["I'll find it.", "end", ["flag:elspeth_mine"]], ["I'm stuck.", "stuck_mine", ["flag:elspeth_mine"]]],
+      },
+      mine_wait: { text: "The old shaft, past your wall. It won't come to you.", opts: [["I'm stuck.", "stuck_mine"], ["I'll go.", "end"]] },
+      stuck_mine: { text: "Listen for the wheel. It creaks when the wind's up.", opts: [["Still stuck.", "stuck2_mine"], ["Thank you.", "end"]] },
+      stuck2_mine: { text: "Follow the pin on your map to the headframe. There's a ladder down.", opts: [["Thank you.", "end"]] },
+      ore_wait: { text: "Coal and iron. Your pockets are still light.", opts: [["I'm stuck.", "stuck_ore"], ["I'll go.", "end"]] },
+      stuck_ore: { text: "The rock tells you where to swing, if you look.", opts: [["Still stuck.", "stuck2_ore"], ["Thank you.", "end"]] },
+      stuck2_ore: { text: "Coal is black-flecked stone. Iron is speckled tan. Mine both with the pickaxe.", opts: [["Thank you.", "end"]] },
+      smelt_wait: { text: "Iron's no use as rock. The furnace.", opts: [["I'm stuck.", "stuck_smelt"], ["I'll go.", "end"]] },
+      stuck_smelt: { text: "Fire does the work. You only feed it.", opts: [["Still stuck.", "stuck2_smelt"], ["Thank you.", "end"]] },
+      stuck2_smelt: { text: "The furnace in your house. Iron in the top, coal underneath.", opts: [["Thank you.", "end"]] },
       rest: {
         greets: ["Walk your walls. Learn your people's names. The ash has nothing else for you today.", "Sit a while, if you like. I don't get many who sit.", "The fire's low. Put a log on it on your way out."],
         text: "Nothing in the ash for you today. Rest your feet.",
@@ -130,16 +170,19 @@ export const NPCS = [
         opts: [["What were those things?", "raid_won2"]],
       },
       raid_won2: {
-        text: "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nTake your cob. Stay on the road.",
+        text: "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nSee to your wall before you go. The Mason will mend it, for a price. And mind your purse: win a night and the town starts costing you. Every dawn.\n\nThen take your cob. Stay on the road.",
         opts: [["I'll ride to Millbrook.", "end", ["flag:elspeth_raid"]]],
       },
       raid_lost: {
-        text: "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.",
+        text: "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, and have the Mason see to your wall. Then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.\n\nWhen you do win a night, the town starts costing you. Every dawn. Keep some coin back.",
         opts: [["I will.", "end", ["flag:elspeth_raid"]]],
       },
       rebanner_wait: { text: "Banners go back up. The stone's waiting.", opts: [["I'm stuck.", "stuck_rebanner"], ["I'll go.", "end"]] },
       stuck_rebanner: { text: "The stone outside wants a hand on it.", opts: [["Still stuck.", "stuck2_rebanner"], ["Thank you.", "end"]] },
       stuck2_rebanner: { text: "The grey stone by your gate. Touch it and raise your banner again.", opts: [["Thank you.", "end"]] },
+      mend_wait: { text: "Your wall's still open. The Mason, before the road.", opts: [["I'm stuck.", "stuck_mend"], ["I'll go.", "end"]] },
+      stuck_mend: { text: "Masons mend. That's the whole of their trade.", opts: [["Still stuck.", "stuck2_mend"], ["Thank you.", "end"]] },
+      stuck2_mend: { text: "The Mason stands by his bench in the yard. Ask him to mend the wall.", opts: [["Thank you.", "end"]] },
       wren_wait: { text: "Millbrook. Sister Wren. Go on, before the road gets any longer.", opts: [["I'm stuck.", "stuck_wren"], ["I'll go.", "end"]] },
       stuck_wren: { text: "Millbrook's down the road, where it's always night.", opts: [["Still stuck.", "stuck2_wren"], ["Thank you.", "end"]] },
       stuck2_wren: { text: "Follow the pin. Look for the light over the chapel.", opts: [["Thank you.", "end"]] },
@@ -161,6 +204,67 @@ export const NPCS = [
       aldous_wait: { text: "He's at your keep. Hear him out. Give him nothing you haven't read.", opts: [["I'm stuck.", "stuck_aldous"], ["I'll go.", "end"]] },
       stuck_aldous: { text: "Knights don't come in. They wait by the banner.", opts: [["Still stuck.", "stuck2_aldous"], ["Thank you.", "end"]] },
       stuck2_aldous: { text: "Sir Aldous stands by your Keep Banner. Follow the pin.", opts: [["Thank you.", "end"]] },
+      // ---- Settlement Mode: after the raid, no Wren and no Ember; she grows the hall from Hamlet to Castle
+      raid_won_s: {
+        text: "You're still breathing. Good. So am I, which surprises nobody anymore.",
+        opts: [["What were those things?", "raid_won2_s"]],
+      },
+      raid_won2_s: {
+        text: "Not men. And not anything I'll name at my own hearth. Whatever they are, they'll come again, and more of them each time a hall grows fat.\n\nSee to your wall first. The Mason will mend it, for a price. And mind your purse: win a night and the town starts costing you. Every dawn.\n\nWhen your wall's whole, come and sit. I'll tell you how a hall becomes a town.",
+        opts: [["I'll see to the wall.", "end", ["flag:elspeth_raid"]]],
+      },
+      raid_lost_s: {
+        text: "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, and have the Mason see to your wall. Then come and sit, and I'll tell you how a hall that falls becomes one that doesn't.\n\nWhen you do win a night, the town starts costing you. Every dawn. Keep some coin back.",
+        opts: [["I will.", "end", ["flag:elspeth_raid"]]],
+      },
+      grow_0: {
+        text: "Your wall's whole. Good. Now listen.\n\nA hall grows two ways: by the nights it holds, and by what it builds. Hold three siege nights, and raise what your Plan Book says a Hamlet must have. Do both and this place is a Town.\n\nThe ravens tell you when a night is coming. They always do.",
+        opts: [["I'll hold.", "end", ["flag:elspeth_grow_0"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_0"]]],
+      },
+      grow_1: {
+        text: "A Town. I could hear it from here: more feet on the road, more doors.\n\nMore doors means more to feed and more to guard. Hold six nights in all, and raise everything your Plan Book says a Town must have. Then you're a City.",
+        opts: [["I'll see to it.", "end", ["flag:elspeth_grow_1"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_1"]]],
+      },
+      grow_2: {
+        text: "A City. I can smell bread from three ovens now, and none of them mine.\n\nThe last step is the hardest. Ten nights in all, and two of their warlords dead at your wall. And raise everything your Plan Book says a City must have before it's a Castle.",
+        opts: [["I'll see to it.", "end", ["flag:elspeth_grow_2"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_2"]]],
+      },
+      grow_3: {
+        text: "A Castle. Ten nights held, and their warlords in the ditch.\n\nThere's nothing left I can teach you. Keep your wall mended and your purse fat. They'll keep coming, and you'll keep standing. That's all a Castle is.\n\nSit with me sometimes. The fire likes company.",
+        opts: [["I will.", "end", ["flag:elspeth_grow_3"]]],
+      },
+      grow_wait: {
+        greets: ["Hold your nights. Raise your buildings. There's no third thing.", "Your Plan Book knows what the charter wants. So do I, but I'm slower.", "The ravens were quiet today. Use it."],
+        text: "Nights held and buildings raised. Nothing else grows a hall.",
+        opts: [["I'm stuck.", "stuck_grow"], ["I'll go.", "end"]],
+      },
+      stuck_grow: { text: "A hall grows by what it holds and what it builds.", opts: [["Still stuck.", "stuck2_grow"], ["Thank you.", "end"]] },
+      stuck2_grow: { text: "Hold your siege nights. Click a Plot Marker to raise what the charter asks; your Plan Book lists it.", opts: [["Thank you.", "end"]] },
+      // ---- Act 2: the Tree, the road, the bills
+      tree_wait: { text: "It's still in your pack. I can feel it from here. The Tree's just there. Choose, or tell it not yet. Either is an answer.", opts: [["I'm stuck.", "stuck_tree"], ["I'll go.", "end"]] },
+      stuck_tree: { text: "The Tree of Oaths stands in this hall.", opts: [["Still stuck.", "stuck2_tree"], ["Thank you.", "end"]] },
+      stuck2_tree: { text: "Keep the Ember in your pack and touch the Tree.", opts: [["Thank you.", "end"]] },
+      knight_wait: { text: "The Order's, then. Go and get your name in their book.", opts: [["I'm stuck.", "stuck_knight"], ["I'll go.", "end"]] },
+      stuck_knight: { text: "Aldous rode for the chapterhouse. Follow him.", opts: [["Still stuck.", "stuck2_knight"], ["Thank you.", "end"]] },
+      stuck2_knight: { text: "The Ashen Gate chapterhouse is pinned. Brother Cael keeps the book.", opts: [["Thank you.", "end"]] },
+      mag_wait: { text: "Mirelight. Past the last lantern. Mag will be expecting someone. She always is.", opts: [["I'm stuck.", "stuck_mag"], ["I'll go.", "end"]] },
+      stuck_mag: { text: "Her hut is past the last lantern of Mirelight.", opts: [["Still stuck.", "stuck2_mag"], ["Thank you.", "end"]] },
+      stuck2_mag: { text: "Old Mag's hut is pinned. Talk to her.", opts: [["Thank you.", "end"]] },
+      bills: {
+        text: "Sit. Look at this.\n\nYou've been paying since your first win. Wages, feed, mending, a little out of your purse every morning, and it only goes one way.\n\nTake the iron you smelted to the Moneyer. See what a bar's worth.",
+        opts: [["I'll go.", "end", ["flag:elspeth_bills"]]],
+      },
+      moneyer_wait: { text: "The Moneyer. Take him your iron.", opts: [["I'm stuck.", "stuck_moneyer"], ["I'll go.", "end"]] },
+      stuck_moneyer: { text: "He trades in the town on your pin. Sell him a bar.", opts: [["Still stuck.", "stuck2_moneyer"], ["Thank you.", "end"]] },
+      stuck2_moneyer: { text: "No iron left? The old shaft fills again every night. Dig, smelt, and sell him an ingot.", opts: [["Thank you.", "end"]] },
+      ironworks_wait: { text: "He told you to build, didn't he? Then build.", opts: [["I'm stuck.", "stuck_ironworks"], ["I'll go.", "end"]] },
+      stuck_ironworks: { text: "Your Works yard has a marker waiting.", opts: [["Still stuck.", "stuck2_ironworks"], ["Thank you.", "end"]] },
+      stuck2_ironworks: { text: "Use the Plot Marker on the Works yard and pick the Ironworks.", opts: [["Thank you.", "end"]] },
+      notice_up: { text: "There's a notice up you'll want to read. On the board by the door. Tobin put his whole name to it.", opts: [["I'll read it.", "end"]] },
+      chest_wait: { text: "Bring them their chest. And look at the doors, like he asked. Then come and tell me what you saw, if you like. I've only got his word for it.", opts: [["I will.", "end"]] },
+      collect_wait: { text: "Let it work a night. Then go and see what it dug.", opts: [["I'm stuck.", "stuck_collect"], ["Good night.", "end"]] },
+      stuck_collect: { text: "The Ironworks keeps a storeroom.", opts: [["Still stuck.", "stuck2_collect"], ["Thank you.", "end"]] },
+      stuck2_collect: { text: "Click the Ironworks block in its yard and take everything.", opts: [["Thank you.", "end"]] },
       // ---- after Act 1: she stays at the hearth
       hub: {
         greets: ["Sit, if you're staying. The fire likes company.", "You smell of the road. Sit.", "The ash is quiet tonight. That's not always good news."],
@@ -355,6 +459,7 @@ export const NPCS = [
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
+      [["act2:talk_aldous"], "tree"], // Act 2: you met him but left before he sent you to the Tree
       [["flag:aldous_met"], "hub"],
       [[], "first"],
     ],
@@ -372,28 +477,42 @@ export const NPCS = [
         opts: [
           ["What is it?", "what", ["flag:aldous_met"]],
           ["Why does the Order want it?", "why", ["flag:aldous_met"]],
-          ["I haven't seen anything.", "end", ["flag:aldous_met"]],
+          ["I have it. I'm keeping it.", "keep", ["flag:aldous_met"]],
+          ["I haven't seen anything.", "lie", ["flag:aldous_met"]],
         ],
+      },
+      // Act 2, step 1 (story pass, Mateo 2026-11-14): you keep the Ember and he sends you to the Tree of Oaths
+      keep: {
+        text: "Show me. ...Bare-handed, and you're still standing.\n\nThe Rule says a knight takes a light before it takes anyone. I don't think it has taken you. And I won't pull it out of a lord's hand at his own gate like a thief.",
+        opts: [["Then what?", "tree"]],
+      },
+      lie: {
+        text: "It hums, you know. I can hear it from here, through your wall.\n\nNo, I won't search your house. The Rule doesn't let me, and I wouldn't if it did.",
+        opts: [["...I'm keeping it.", "tree"]],
+      },
+      tree: {
+        text: "Not to me, then. Take it to the Tree and choose.\n\nThe Tree of Oaths, in your hall. Give the light up there and I'll box it and carry it to the chapterhouse myself. Keep it, and that is between you and it. Only choose. I don't think a light nobody has chosen stays quiet for long.",
+        opts: [["I'll go to the Tree.", "end", ["flag:aldous_tree"]]],
       },
       what: {
         text: "A fallen star. That is what I was told and that is what I will tell you.\n\n...It did not look like a star to me either. Stars do not whisper. But a knight of the Gate does not ask what lies below. It is the second line of the Rule.",
         opts: [
           ["What's the first line?", "rule"],
           ["Why does the Order want it?", "why"],
-          ["Good day, Sir Aldous.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       why: {
         text: "\"If ever a light falls from below, a knight shall ride to it and take it, before it takes anyone.\" That is the Rule.\n\nFrom below. I have always thought that a strange word to use about something that fell out of the sky.",
         opts: [
           ["May I read this Rule?", "rule"],
-          ["Good day.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       rule: {
         text: "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
         opts: [
-          ["Thank you.", "end", ["tome:seal_01", "lead:ashen_chapterhouse"]],
+          ["I already have.", "keep", ["tome:seal_01", "lead:ashen_chapterhouse"]],
         ],
       },
       hub: {
@@ -1545,6 +1664,71 @@ export const NPCS = [
       last: {
         text: "It's gone quiet all the way down. Not the Court. All of it. The whole Hollow stopped humming for a breath, the way you do when someone leaves the room.\n\nWho was he?\n\n...No. Don't tell me yet. Tell me some other time, when I'm older. I'd like there to be something left to find out.",
         opts: [["Some other time.", "end", ["flag:carter_last", "sp:1"]]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ The family at the gate (Act 2, step 6)
+  // A cart comes up the road the morning after a siege (newplayer/family.js). The Order's riders blamed raiders for
+  // their hamlet, but the doors were barred from outside and nothing was taken. Housed in the Longhouse, they become
+  // your first settlers. Never named here: the Hollow or what walked round the houses.
+  {
+    id: "tobin", name: "Tobin", where: "Arrives with his family's cart at a player's gate the morning after a siege in Act 2, then lives in their Longhouse (newplayer/family.js).",
+    start: [
+      [["flag:family_housed"], "hub"],
+      [["flag:family_met"], "ask"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "Easy, my lord, we're no trouble. Tobin. That's Marta with the cart, and the boy's asleep on the sacks. Let him be.\n\nWe had a hamlet, three days back up the road. We haven't now.",
+        opts: [["What happened?", "what"]],
+      },
+      what: {
+        text: "The Order's riders came by after and looked it over. Raiders, they said. Wrote it in their book and rode on.\n\nBut the doors were barred from outside, and nothing was taken. Not a hen. I never heard of raiders who bar you in and leave the hens.",
+        opts: [["How did you get out?", "who"], ["Where will you go?", "ask"]],
+      },
+      who: {
+        text: "Marta heard the bar go across and woke me, and we went out the back, through the byre. Nobody else had a byre door.\n\nWe never saw who. We heard them going round the houses, slow, trying each door to see it held. Then the smoke.",
+        opts: [["Where will you go?", "ask"]],
+      },
+      ask: {
+        text: "That's the question. Nobody wants a family the raiders came for, even raiders who don't take anything.\n\nWe can work. Marta keeps bees, I can thatch, and the boy can carry. We only need a roof.",
+        opts: [["There's room in the Longhouse.", "housed", ["flag:family_met", "flag:family_housed"]], ["Let me think about it.", "end", ["flag:family_met"]]],
+      },
+      housed: {
+        text: "...Thank you, my lord. We won't forget it.\n\nMarta! Wake the boy. We're stopping.",
+        opts: [["Go on in.", "end"]],
+      },
+      hub: {
+        greets: ["My lord. The roof doesn't leak. You don't know what that's worth till you've had none.", "Marta's found a place for the bees, if your guards will stop poking at the hive.", "The boy asks every night if the doors here bar from outside. I tell him no. I check, after."],
+        text: "My lord.",
+        opts: [["Tell me again about the night it burned.", "again"], ["Good day, Tobin.", "end"]],
+      },
+      again: {
+        text: "Doors barred from outside. Nothing taken. Raiders, the Order wrote.\n\nI've told it to everyone who'll listen, my lord. You're the only one who's asked twice.",
+        opts: [["Good day, Tobin.", "end"]],
+      },
+    },
+  },
+  {
+    id: "marta", name: "Marta", where: "Tobin's wife: rides in on the family's cart in Act 2, then lives in the player's Longhouse (newplayer/family.js).",
+    start: [
+      [["flag:family_housed"], "hub"],
+      [[], "cart"],
+    ],
+    nodes: {
+      cart: {
+        text: "Talk to Tobin, my lord. He does the talking. I do the remembering.",
+        opts: [["What do you remember?", "remember"], ["Of course.", "end"]],
+      },
+      remember: {
+        text: "The bar going across. You know that sound your whole life, a bar dropping into its brackets. Only it was on the wrong side of the door.\n\nAnd it was patient. Whatever went round the houses, it was in no hurry at all.",
+        opts: [["I'll talk to Tobin.", "end"]],
+      },
+      hub: {
+        greets: ["The bees are settling. They didn't like the road.", "I sleep by the door. Don't mind me.", "Your old woman by the fire asked me what it sounded like. Nobody else asked."],
+        text: "My lord.",
+        opts: [["Rest well, Marta.", "end"]],
       },
     },
   },

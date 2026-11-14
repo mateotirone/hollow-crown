@@ -351,7 +351,8 @@ def model(n, p):
                                 "e": (8 / 16, 0, 5 / 16, 1, 14 / 16, 11 / 16), "w": (0, 0, 5 / 16, 8 / 16, 14 / 16, 11 / 16)}[d], t, {}))
         return out
     if is_pane(n):
-        t = {"side": "glass", "edge": "glass_pane_top"}; c = p.get("conn", {}); out = [((7 / 16, 0, 7 / 16, 9 / 16, 1, 9 / 16), t, {"cut": 1})]
+        t = {"side": "iron_bars", "edge": "iron_bars"} if n == "iron_bars" else {"side": "glass", "edge": "glass_pane_top"}
+        c = p.get("conn", {}); out = [((7 / 16, 0, 7 / 16, 9 / 16, 1, 9 / 16), t, {"cut": 1})]
         if not any(c.values()): c = {"n": True, "s": True}
         for d, on in c.items():
             if on: out.append(({"n": (7 / 16, 0, 0, 9 / 16, 1, 7 / 16), "s": (7 / 16, 0, 9 / 16, 9 / 16, 1, 1),
@@ -391,7 +392,7 @@ def model(n, p):
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
     if n.endswith("_hanging_sign"):     # a board hanging on two short chains under the block above
         w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
-        fd = (p.get("bs") or {}).get("facing_direction", 2)
+        fd = (p.get("bs") or {}).get("facing_direction") or {"n": 2, "s": 3, "w": 4, "e": 5}.get(p.get("facing"), 2)
         board = (1 / 16, 0, 7 / 16, 15 / 16, 10 / 16, 9 / 16) if fd in (2, 3) else (7 / 16, 0, 1 / 16, 9 / 16, 10 / 16, 15 / 16)
         return [(board, t, {}), ("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.3, "y": 10 / 16})]
     if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
@@ -447,6 +448,8 @@ def model(n, p):
         head = p.get("head"); part = "head" if head else "feet"
         return [((0, 3 / 16, 0, 1, 9 / 16, 1), {"side": f"bed_{part}_side", "top": f"bed_{part}_top", "bottom": "planks_oak"}, {}),
                 ((0, 0, 0, 3 / 16, 3 / 16, 3 / 16), {"side": "planks_oak"}, {}), ((13 / 16, 0, 13 / 16, 1, 3 / 16, 1), {"side": "planks_oak"}, {})]
+    if n in ("heavy_weighted_pressure_plate", "light_weighted_pressure_plate"):   # iron and gold plates (the Moneyer's scales)
+        return [((1 / 16, 0, 1 / 16, 15 / 16, 1 / 16, 15 / 16), {"side": "iron_block" if n.startswith("heavy") else "gold_block"}, {})]
     if n.endswith("pressure_plate"):
         return [((1 / 16, 0, 1 / 16, 15 / 16, 1 / 16, 15 / 16), {"side": base_material(n.replace("_pressure_plate", "_planks"))}, {})]
     if n == "chest":

@@ -1,0 +1,63 @@
+{
+ "card": {
+  "title": "Moneyer",
+  "sub": "Saltreach, stone",
+  "region": "saltreach",
+  "where": "Town square, Medium 11 x 15",
+  "kind": "Work",
+  "blurb": "The town's money-changer: the Mint's stone shell, a grilled counter with scales, a strongbox, stacked iron, and a hanging sign by the door. Sell your iron here."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_stone",
+    "roof": "dark_prismarine",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "interior": "moneyer",
+   "chimney": [
+    [
+     2,
+     -8
+    ]
+   ],
+   "shutters": 0
+  },
+  {
+   "part": "trade_sign",
+   "at": [
+    0,
+    5,
+    0
+   ],
+   "out": "s",
+   "len": 1,
+   "face": "s",
+   "wood": "birch",
+   "fence": "birch_fence"
+  }
+ ],
+ "name": "settle_moneyer_saltreach"
+}

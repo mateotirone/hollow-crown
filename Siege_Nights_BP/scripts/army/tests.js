@@ -65,3 +65,23 @@ addTests("army-armoury", {
     assertEqual(armouryCost(4, 3), undefined, "nothing beyond Royal Guard Plate");
   },
 });
+
+import { unhideSoldier } from "./region.js";
+
+addTests("army-visible", {
+  "an invisible soldier is made visible again; other creatures keep their invisibility": () => {
+    const fake = (typeId) => {
+      const fx = new Set(["invisibility"]);
+      return { typeId, fx, getEffect: (e) => (fx.has(e) ? {} : undefined), removeEffect: (e) => fx.delete(e) };
+    };
+    for (const s of SOLDIERS) {
+      const g = fake(s.id);
+      assert(unhideSoldier(g), s.id);
+      assert(!g.fx.has("invisibility"), s.id);
+      assert(!unhideSoldier(g), `${s.id} twice`);
+    }
+    const boss = fake("siege:morvane");
+    assert(!unhideSoldier(boss));
+    assert(boss.fx.has("invisibility"));
+  },
+});

@@ -1,0 +1,58 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.siege_arc_fx": {
+   "arrays": {
+    "geometries": {
+     "Array.geo": [
+      "Geometry.shard",
+      "Geometry.ward",
+      "Geometry.chains",
+      "Geometry.bell",
+      "Geometry.rift",
+      "Geometry.ghost"
+     ]
+    },
+    "textures": {
+     "Array.tex": [
+      "Texture.shard",
+      "Texture.ward",
+      "Texture.chains",
+      "Texture.bell",
+      "Texture.rift",
+      "Texture.ghost"
+     ]
+    }
+   },
+   "geometry": "Array.geo[query.property('siege:form')]",
+   "textures": [
+    "Array.tex[query.property('siege:form')]"
+   ],
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "part_visibility": [
+    {
+     "plate1": "query.property('siege:count') >= 1"
+    },
+    {
+     "plate2": "query.property('siege:count') >= 2"
+    },
+    {
+     "plate3": "query.property('siege:count') >= 3"
+    },
+    {
+     "loop1": "query.property('siege:count') >= 1"
+    },
+    {
+     "loop2": "query.property('siege:count') >= 2"
+    },
+    {
+     "loop3": "query.property('siege:count') >= 3"
+    }
+   ]
+  }
+ }
+}
