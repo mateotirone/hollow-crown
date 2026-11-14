@@ -27,7 +27,7 @@ import { addTests, assert } from "../core/tests.js";
 import "./arenas_tests.js";
 import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
-import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
+import { getSourceSite, getSites, markSite, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { CHASM, inChasm } from "./chasm.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
@@ -54,7 +54,7 @@ import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { thinTick, thinCommand, requestRift, goSee, plannedSeam, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
 import { THIN_LAND } from "./thin_land.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
@@ -492,8 +492,13 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       break;
     case "hc:open_rift": {
       if (!player || !isBuilder(player)) break;
-      const r = openRift(player);
-      if (!r.ok) say(player, `§cCan't open the Rift: ${r.why}.`);
+      // testing: no fork and no bosses needed. Takes you to the picked site to watch; builds its cave first if
+      // nobody has been there yet (requestRift), then the crack tears open.
+      const id = getSourceSite(), site = THIN_PLACES.find((s) => s.id === id);
+      const r = requestRift(player);
+      if (!r.ok) { say(player, `§cCan't open the Rift: ${r.why}.`); break; }
+      if (site) goSee(player, site);
+      say(player, r.waiting ? `§d${r.name}: its cave is being built first. The Rift tears open as soon as it stands (about a minute).` : `§dThe Rift is opening at ${SITE_NAMES[id]}.`);
       break;
     }
     case "hc:reveal_source":
@@ -548,6 +553,18 @@ addTests("undertow", {
     assert(THIN_PLACES.length === 7, `${THIN_PLACES.length} thin places`);
     assert(new Set(THIN_PLACES.map((t) => t.id)).size === 7 && THIN_PLACES.every((t) => SOURCE_SITE_IDS.includes(t.id) && SITE_FEATURES[t.id]));
     assert(new Set(Object.values(CAMP_TOME)).size === 7 && THIN_PLACES.every((t) => CAMP_TOME[t.id]));
+  },
+  "thin places: every seam is known from the map's data before its cave is built, exactly where building puts it": () => {
+    for (const t of THIN_PLACES) {
+      const floor = THIN_LAND[t.id]?.floor;
+      assert(floor !== undefined, `${t.id} has no shaped-land floor, so its seam cannot be worked out before it is built`);
+      const want = plannedSeam(t, floor);
+      let plan;
+      setHills(false);
+      try { plan = planThinPlace(t.id, t.x, t.z, floor, { facing: t.facing }); } finally { setHills(true); }
+      const s = plan.seam;
+      assert(s.x === want.x && s.y === want.y && s.z === want.z && s.facing === want.facing && plan.crackH === want.h, `${t.id}: planned seam ${JSON.stringify(want)} but the build puts it at ${JSON.stringify({ ...s, h: plan.crackH })}`);
+    }
   },
   "thin places: each cave shows exactly Fennick's features for it": () => {
     for (const t of THIN_PLACES) {

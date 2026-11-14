@@ -333,7 +333,7 @@ def m_scarab(m):
 mob(id="ash_scarab", name="Ash Scarab", family="wild_hostile", model=m_scarab, plan="bug",
     pal=P(shell={"c": (60, 40, 30), "style": "metal"}, leg=(40, 30, 24), eye=(255, 120, 30)),
     hp=6, speed=0.4, dmg=2, collision=(0.5, 0.35), resist=dict(fire=True), region="Emberwaste", egg=("#3c281e", "#ff781e"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(3, 5), weight=8, density=3, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(2, 3), weight=4, density=2, pop="monster"),  # sparse (Mateo 2026-11-14; scripts/bestiary/sands.js thins more)
     lore="One is nothing. They are never one. Their bites smoulder, and their shells are half glass.")
 
 def m_wyrm(m):
@@ -354,7 +354,7 @@ def m_wyrm(m):
 mob(id="dune_wyrm", name="Dune Wyrm", family="wild_hostile", model=m_wyrm, plan="wyrm",
     pal=P(scale={"c": (196, 160, 100), "style": "stone"}, plate={"c": (160, 120, 70), "style": "metal"}, tooth=(240, 230, 210), eye=(30, 20, 10)),
     hp=90, speed=0.28, dmg=7, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, density=1, pop="monster"),  # one at a time (Mateo 2026-11-14)
     lore="The sand ripples. Then the sand stands up. It hunts by the shake of your footsteps, so stand still or run.")
 
 def m_hag(m):
