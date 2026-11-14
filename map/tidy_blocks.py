@@ -9,7 +9,9 @@ on nothing, standing on nothing or facing into a wall (town audit 2026-11-14, PR
   * a plant, crop, snow layer, carpet, flower pot, candle or standing lantern needs a solid block under it (a snow
     layer never sits on a plant, a crop or another snow layer); a standing lantern under a solid block hangs from it;
   * a hanging lantern needs something above it: a chain up to the ceiling (12 at most), or it is dropped;
-  * a chain needs a solid block (or more chain) above it, or it and whatever hung from it go.
+  * a chain needs a solid block (or more chain) above it, or it and whatever hung from it go;
+  * a lone post, barrel or stair standing a block or two over the ground, touching nothing, settles onto it;
+  * a door's outside step over a gap of 1 to 3 blocks gets a stoop of the door's sill block down to the ground.
 Uses the same idea of "solid" as map/hang_blocks.py and tools/town_audit.py. Run as a script it tidies files in
 place, with the land taken as unknown (only the town's own blocks hold things up).
 
@@ -59,6 +61,52 @@ def tidy_worldblocks(d, ground=None):
         return g is not None and c[1] <= g
 
     def entry(i): return pal[blocks[i][3]]
+
+    # a lone yard piece (a post, a barrel, a stair seat) standing a block or two over the ground with nothing on any
+    # side of it settles down onto the ground (Rimehold's pen: its fittings sat a block over the graded floor)
+    LONE = re.compile(r"_fence$|_stairs$|(^|:)barrel$|hay_block$|composter$|cauldron$|_slab$")
+    settled = 0
+    for cell, i in sorted(at.items(), key=lambda a: a[0][1]):
+        e = entry(i); nm = e["name"]
+        if not LONE.search(nm) or (nm.endswith("_slab") and (e.get("states") or {}).get("minecraft:vertical_half") == "top"): continue
+        x, y, z = cell
+        if solid((x, y - 1, z)) or name_at((x, y - 1, z)) not in (None, "minecraft:air") or name_at((x, y + 1, z)) not in (None, "minecraft:air"): continue
+        if any(name_at((x + a, y, z + b)) not in (None, "minecraft:air") or solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): continue
+        k = 1
+        while k <= 2 and not solid((x, y - k - 1, z)) and name_at((x, y - k - 1, z)) in (None, "minecraft:air"): k += 1
+        if k > 2 or not solid((x, y - k - 1, z)): continue
+        c = (x, y - k, z)
+        blocks[i] = [*c, blocks[i][3], *blocks[i][4:]]; del at[cell]; at[c] = i
+        settled += 1
+    if settled: n["settled"] = settled
+
+    # a door's outside step needs ground under it: a step left over a gap (a ditch along the wall, a house floor a block
+    # or two over the land) gets a stoop of the door's own sill block down to the ground, 3 blocks at most
+    stoop = 0
+    for cell, i in list(at.items()):
+        e = entry(i); nm = e["name"]; st = e.get("states") or {}
+        if not re.search(r"_door$|:door$", nm) or "trapdoor" in nm or st.get("upper_block_bit"): continue
+        cd = st.get("minecraft:cardinal_direction")
+        ax = (1, 0) if cd in ("east", "west") or (cd is None and int(st.get("direction", 1)) % 2 == 0) else (0, 1)
+        sill = at.get((cell[0], cell[1] - 1, cell[2]))
+        fill = entry(sill) if sill is not None and solid((cell[0], cell[1] - 1, cell[2])) else {"name": "minecraft:cobblestone", "states": {}}
+        for sgn in (1, -1):
+            sx, sz = cell[0] + ax[0] * sgn, cell[2] + ax[1] * sgn
+            if solid((sx, cell[1], sz)) or solid((sx, cell[1] + 1, sz)) or solid((sx, cell[1] - 1, sz)): continue
+            gap = []
+            for k in range(1, 5):
+                c = (sx, cell[1] - k, sz)
+                if solid(c): break
+                nmk = name_at(c)
+                if nmk is not None and not (nmk.endswith(":air") or PLANTISH.search(nmk)): gap = None; break
+                gap.append(c)
+            else: gap = None
+            if not gap or len(gap) > 3: continue
+            fi = index_of(fill)
+            for c in gap:
+                blocks.append([*c, fi]); at[c] = len(blocks) - 1
+            stoop += 1
+    if stoop: n["stoops"] = stoop
 
     for _ in range(3):                                                  # a drop can leave the next one hanging
         changed = False

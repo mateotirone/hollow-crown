@@ -305,8 +305,9 @@ for (const [k, p] of cells) {
   outXYZ.push(x, y, z); outPid.push(pidx.get(key));
 }
 const town = FLAT ? null : (await import(pathToFileURL(join(SCRIPTS, "settle/founding.js")).href)).townOf(player.id);
+const wallR = town ? (await import(pathToFileURL(join(SCRIPTS, "settle/towns.js")).href)).wallRadius((await import(pathToFileURL(join(SCRIPTS, "settle/towns.js")).href)).townFor(town.plot), town.tier ?? 0) : undefined;
 const out = {
-  meta: { ...meta, kind: FLAT ? "buildings" : "hamlet", placed, name: meta.name, sq: town ? [town.x, town.z - 8] : [meta.x, meta.z], sqy: town?.y, town: town ? { x: town.x, y: town.y, z: town.z, layout: town.layout, style: town.style, tier: town.tier, slots: town.slots } : null,
+  meta: { ...meta, kind: FLAT ? "buildings" : "hamlet", placed, name: meta.name, sq: town ? [town.x, town.z - 8] : [meta.x, meta.z], sqy: town?.y, wall: wallR, town: town ? { x: town.x, y: town.y, z: town.z, layout: town.layout, style: town.style, tier: town.tier, slots: town.slots } : null,
     ticks: t, changed: changed.size },
   pal,
   xyz: Buffer.from(new Int32Array(outXYZ).buffer).toString("base64"),

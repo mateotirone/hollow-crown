@@ -55,3 +55,17 @@ export function watchCells(style, origin, forward) {
   }
   return out.sort((a, b) => b.y - a.y); // top down, so nothing is left hanging while it comes down
 }
+
+// Just the way in (the cleared step and the paving up to the door), laid again once a town's groundwork is down: the
+// Hamlet's groundwork and the wall rise at the same time, and ground laid after the tower buried Oakmere's step (town
+// audit 2026-11-14)
+const ways = new Map();
+export function watchWayPlan(style) {
+  const full = watchPlan(style);
+  if (ways.has(full.region)) return ways.get(full.region);
+  const p = new Plan(full.style);
+  for (const c of full.cells.values()) if (c.z <= 0) p.set(c.x, c.y, c.z, c.role, c.o);
+  p.region = full.region;
+  ways.set(full.region, p);
+  return p;
+}

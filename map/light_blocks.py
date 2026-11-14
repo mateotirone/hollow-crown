@@ -21,7 +21,8 @@ def logical(e):
     n, st = lighting.bare(e["name"]), e.get("states") or {}
     p = {}
     if n.endswith("_door") and "trapdoor" not in n:
-        p["facing"] = DOOR_DIR.get(st.get("direction", 1), "s")
+        cd = st.get("minecraft:cardinal_direction")   # newer bakes spell it this way: without it every door read as facing south,
+        p["facing"] = cd[0] if cd in ("north", "south", "east", "west") else DOOR_DIR.get(st.get("direction", 1), "s")   # so an east-west door's step got a lantern
         if st.get("upper_block_bit"): p["upper"] = True
     if st.get("hanging"): p["hanging"] = True
     if n.endswith("_slab"): p["half"] = st.get("minecraft:vertical_half", "top" if st.get("top_slot_bit") else "bottom")

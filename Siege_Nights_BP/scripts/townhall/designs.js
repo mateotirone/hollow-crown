@@ -108,7 +108,7 @@ function holdHung(p, d, prefix, opts) {
         chainRole = `${prefix}:chain`;
         p.style.roles[chainRole] = ["minecraft:iron_chain", "minecraft:chain"];
       }
-      for (let dy = 1; dy < top; dy++) if (!p.cells.has(`${c.x},${c.y + dy},${c.z}`)) p.cells.set(`${c.x},${c.y + dy},${c.z}`, { x: c.x, y: c.y + dy, z: c.z, role: chainRole, o: { axis: "y" } });
+      for (let dy = 1; dy < top; dy++) if ((p.cells.get(`${c.x},${c.y + dy},${c.z}`)?.role ?? "air") === "air") p.cells.set(`${c.x},${c.y + dy},${c.z}`, { x: c.x, y: c.y + dy, z: c.z, role: chainRole, o: { axis: "y" } });
     } else if (HUNG_ON_WALL.test(id) && c.o?.dir && STEP[c.o.dir]) {
       const sign = /_sign$/.test(id);
       const [bx, bz] = STEP[FLIP[c.o.dir]];

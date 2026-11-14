@@ -19,7 +19,28 @@ KEEP = ("facing", "axis", "half", "upper", "hinge", "open", "hanging", "conn", "
 # limits from the plot: the level-5 hall must stay within 15 blocks each side and 42 deep (settle/rules.js)
 SIDE, DEEP, FRONT = 15, 42, -2
 
+SIDES = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
+
+def tidy(bp):
+    """Take out what a composed build leaves that no one would build (the 2026-11-14 town audit): a window box's sign
+    whose face is right up against the next wing's wall, and a fence left floating on its own (a gallery post cut away
+    by the room behind it). Returns how many cells went."""
+    gone = []
+    get = lambda x, y, z: (bp.cells.get((x, y, z)) or ("air", {}))[0]
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if n.endswith("wall_sign") and p.get("facing") in SIDES:
+            dx, dz = SIDES[p["facing"]]
+            front = get(x + dx, y, z + dz)
+            if front != "air" and lighting.opaque(front): gone.append((x, y, z))
+        elif n.endswith("_fence"):
+            if all(get(x + a, y + b, z + c) == "air" for a, b, c in ((0, -1, 0), (0, 1, 0), (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1))):
+                gone.append((x, y, z))
+    for c in gone: bp.cells[c] = ("air", {})
+    if gone: bp.finish()
+    return len(gone)
+
 def export(bp, light=True):
+    tidy(bp)
     if light: lighting.light_blueprint(bp)
     dx, dy, dz = bp.markers["door"]
     to = lambda x, y, z: (x - dx, y, dz - z + 1)

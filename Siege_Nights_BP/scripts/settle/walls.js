@@ -23,7 +23,7 @@ import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js";
-import { watchPlan, watchCells } from "./wallwatch.js";
+import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
@@ -435,12 +435,24 @@ export function raiseWatch(id) {
     if (!t) { t = { k: s.k, origin: s.origin, forward: s.forward, style: w.style }; w.watch.push(t); }
     const plan = watchPlan(w.style);
     startBuild({
-      id: watchJobId(id, s.k), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.style, perTick: WATCH_PER_TICK,
+      id: watchJobId(id, s.k), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.style, perTick: WATCH_PER_TICK, anyOrigin: true, // the origin is the door's front step, cleared like the rest of the way in
       onDone: () => { const now = walls()[id]?.watch?.find((x) => x.k === s.k && sameSpot(x, s)); if (now) { now.built = true; save(); } emit("wallWatchBuilt", { id, k: s.k }); },
     });
   }
   save();
 }
+
+// Lay the way in to every standing watchtower again (wallwatch.js watchWayPlan): a town tier's groundwork is laid while
+// the wall and its towers rise, and ground laid after a tower must not bury its step
+export function clearWatchWays(id) {
+  const w = walls()[id];
+  for (const t of w?.watch ?? []) {
+    if (!t.built || buildFor(`${watchJobId(id, t.k)}:way`)) continue;
+    const plan = watchWayPlan(t.style);
+    startBuild({ id: `${watchJobId(id, t.k)}:way`, dimensionId: OVERWORLD, origin: t.origin, forward: t.forward, plan, style: plan.style, perTick: WATCH_PER_TICK, anyOrigin: true });
+  }
+}
+on("townLaidOut", ({ owner }) => { try { clearWatchWays(owner); } catch (e) { console.warn(`[Hollow Crown] watchtower ways ${owner}: ${e}`); } });
 
 // Take watchtowers down (a few hundred blocks each, a little at a time): everything above the floor goes, the floor and
 // plinth turn back to earth. done() runs once they are gone and off the wall record.

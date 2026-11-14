@@ -58,7 +58,7 @@ export const buildsRunning = () => jobs.length;
 
 function setCell(dim, job, x, y, z, role, o) {
   const at = toWorld(job.frame, job.origin, x, y, z);
-  if (at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) return true; // never the cornerstone
+  if (!job.anyOrigin && at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) return true; // never the cornerstone (anyOrigin: a build whose origin is not one)
   if (job.skip?.(at.x, at.y, at.z)) return true;
   const block = dim.getBlock(at);
   if (!block) return false; // chunk not loaded: wait

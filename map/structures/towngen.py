@@ -1198,6 +1198,19 @@ class Town:
             if -8 <= (x - sx) * nx + (z - sz) * nz <= 3: return False
         return all((x - a) ** 2 + (z - b) ** 2 >= self.LAMP_REACH ** 2 for a, b in lamps)
 
+    def plaza_spot(self, x, z, lamps):
+        """A post out in a wide paved place (Sunscar's caravan yard was 20 blocks across with no verge near its middle,
+        town audit 2026-11-14): a street cell with street two blocks all round it, so no lane is narrowed."""
+        if not (self.inside(x, z, 3) and all(abs(x - a) + abs(z - b) >= 5 for a, b in lamps)): return False
+        if getattr(self, "DOORWALK", None) is not None and self.DOORWALK[self.ij(x, z)]: return False
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                if not self.ok(x + dx, z + dz): return False
+                i, j = self.ij(x + dx, z + dz)
+                if self.K[i, j] < 0 or self.WET[i, j] or self.TAKEN[i, j] not in (0, 1): return False
+                if getattr(self, "EAVES", None) is not None and self.EAVES[i, j]: return False
+        return True
+
     def put_lamp(self, bp, x, z, y, deg, lamps):
         self.stamp(bp, x, z, y, deg, "lamp"); self.TAKEN[self.ij(x, z)] = 4; lamps.append((x, z))
         if hasattr(self, "fixtures"):
@@ -1265,7 +1278,8 @@ class Town:
                         x, z = cx + dx, cz + dz
                         if self.lamp_spot_ok(x, z, [l for l in lamps if abs(l[0] - x) + abs(l[1] - z) < 2 * self.DARK_REACH], margin=1) or \
                            (self.inside(x, z, 1) and self.ok(x, z) and self.K[self.ij(x, z)] < 0 and self.TAKEN[self.ij(x, z)] in (0, 1) and not self.WET[self.ij(x, z)]
-                            and not (getattr(self, "EAVES", None) is not None and self.EAVES[self.ij(x, z)]) and all(abs(x - a) + abs(z - b) >= 5 for a, b in lamps)):
+                            and not (getattr(self, "EAVES", None) is not None and self.EAVES[self.ij(x, z)]) and all(abs(x - a) + abs(z - b) >= 5 for a, b in lamps)) or \
+                           self.plaza_spot(x, z, lamps):
                             if abs(int(self.G[self.ij(x, z)]) * 2 + 1 - int(self.K[self.ij(cx, cz)])) > 4: continue
                             self.put_lamp(post, x, z, int(self.G[self.ij(x, z)]), 0, lamps); placed = True; break
                     if placed: break

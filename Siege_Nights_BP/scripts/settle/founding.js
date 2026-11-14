@@ -34,6 +34,7 @@ import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { idSpellings } from "../core/blockids.js";
+import { planLaneLamps } from "./lanelamps.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
 export const PLOT_MARKER = "siege:plot_marker";
@@ -161,6 +162,13 @@ function* layOutJob(owner, tier, done) {
   if (tier === 0) yield* joinRoad(dim, town, layout, 0);
   for (const f of fixturesOf(layout, tier)) {
     try { placeFixture(owner, town, f); } catch (e) { console.warn(`[Hollow Crown] town fixture ${f.kind}: ${e}`); }
+    yield;
+  }
+  // lamp posts wherever a lane inside the wall is still out of the lamps' reach (lanelamps.js)
+  const taken = Object.values(town.slots ?? {}).map((s) => s.box).filter(Boolean)
+    .map((b) => ({ x0: b.x0 - town.x, z0: b.z0 - town.z, x1: b.x1 - town.x, z1: b.z1 - town.z }));
+  for (const f of planLaneLamps(layout, tier, wallRadius(townFor(town.plot), tier), taken)) {
+    try { placeFixture(owner, town, { kind: "lamp", ...f }); } catch (e) { console.warn(`[Hollow Crown] lane lamp: ${e}`); }
     yield;
   }
   placeMarkers(owner, tier);

@@ -66,14 +66,17 @@ def fix(path):
     for cell, i in at.items():
         e = pal[blocks[i][3]]
         if i in drop or not (e["name"].endswith("lantern") and (e.get("states") or {}).get("hanging")): continue
-        gap, held = [], False
-        for dy in range(1, 13):
+        gap, held, link, own = [], False, "minecraft:chain", []
+        for dy in range(1, 16):
             j = at.get((cell[0], cell[1] + dy, cell[2]))
             if j is None or j in drop or pal[blocks[j][3]]["name"].endswith(":air"): gap.append(dy); continue
+            # a chain the bake already hung is not a ceiling: go on up it (the 2026-11-14 town audit found chains
+            # cut short a few blocks under the roof, with the lantern counted as held by its own chain)
+            if pal[blocks[j][3]]["name"].endswith("chain"): link = pal[blocks[j][3]]["name"]; own.append(j); continue
             held = True; break
-        if not held: drop.add(i); dropped += 1; continue
+        if not held: drop.update([i, *own]); dropped += 1; continue   # no roof in reach: the lantern and its chain go
         if gap:
-            ci = index_of({"name": "minecraft:chain", "states": {"pillar_axis": "y"}})
+            ci = index_of({"name": link, "states": {"pillar_axis": "y"}})
             chains += [[cell[0], cell[1] + dy, cell[2], ci] for dy in gap]   # placed last, so they win over air
     if chains: print(f"{path}: {len(chains)} chain links added")
     if drop and isinstance(d.get("groundwork_blocks"), int):

@@ -283,7 +283,21 @@ export function watchSpots(center, radius, gateAngle, smooth) {
     const a = gateAngle + ((k + 0.5) / WATCH.count) * TAU;
     const r = radiusAt(center, radius, a);
     const x = Math.round(center.x + Math.cos(a) * (r - 1)), z = Math.round(center.z + Math.sin(a) * (r - 1));
-    const forward = Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? { x: Math.sign(Math.cos(a)), z: 0 } : { x: 0, z: Math.sign(Math.sin(a)) };
+    // the door faces in along the nearer of the two axes, unless the wall line runs across its way in there (a wavy
+    // starter-village line at a tower set on the diagonal: the 2026-11-14 town audit found Dunehold's and Oakmere's
+    // doors opening onto a palisade stake), then along the other one
+    const ax = { x: Math.sign(Math.cos(a)), z: 0 }, az = { x: 0, z: Math.sign(Math.sin(a)) };
+    const both = (Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? [ax, az] : [az, ax]).filter((f) => f.x || f.z);
+    const crossed = (f) => {
+      let n = 0;
+      for (let step = 0; step < WATCH.clear; step++) for (let side = -1; side <= 1; side++) {
+        const cx = x - f.x * (WATCH.back + step) + side * f.z, cz = z - f.z * (WATCH.back + step) + side * f.x;
+        const dx = cx - center.x, dz = cz - center.z;
+        if (Math.hypot(dx, dz) > radiusAt(center, radius, Math.atan2(dz, dx)) - 2.5) n++;
+      }
+      return n;
+    };
+    const forward = both.reduce((best, f) => (crossed(f) < crossed(best) ? f : best));
     const ground = groundAt(smooth, a);
     return { k, a, x, z, ground, forward, origin: { x: x - forward.x * WATCH.back, y: ground + 1, z: z - forward.z * WATCH.back } };
   });
