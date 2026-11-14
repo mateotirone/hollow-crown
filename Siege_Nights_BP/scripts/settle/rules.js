@@ -69,7 +69,7 @@ export function placeVerdict(s) {
       zone: "wilds",
       message: s.hasKeep
         ? "§cYou can only build on your own land. Out here you can make camp: torches, a bed, a chest, a fire."
-        : "§cYou need land to build on. Raise a Keep Banner on a Plot Stone. Until then you can only make camp.",
+        : "§cYou need land to build on. Click a free Plot Stone and raise your banner. Until then you can only make camp.",
     };
   }
   if (!s.mine) return undefined; // foreign land: Siege Nights already refuses it

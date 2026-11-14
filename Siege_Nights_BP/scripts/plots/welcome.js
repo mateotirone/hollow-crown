@@ -477,7 +477,7 @@ function pick(player, plan) {
   const plotName = status.plot.name;
   const toward = compass(status.plot, KINGSREST);
   system.runTimeout(() => {
-    if (player.isValid) player.sendMessage(`§6Next: raise your Keep Banner on the Plot Stone beside you to found ${plotName}. Kingsrest lies ${toward}.`);
+    if (player.isValid) player.sendMessage(`§6Next: click the Plot Stone beside you and raise your banner to found ${plotName}. Kingsrest lies ${toward}.`);
   }, 160);
   player.onScreenDisplay.setTitle(`§6${status.plot.name}`, { subtitle: status.plot.region, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
   refreshHall();
@@ -564,7 +564,7 @@ addJoinStep(20, "welcome hall", async (player, { wait }) => {
     player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
   } else if (!hallBuilt() && !plotOf(player.id)) {
     const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
-    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
+    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a free Plot Stone, click it and raise your banner.`);
   }
 }, { when: "first" });
 

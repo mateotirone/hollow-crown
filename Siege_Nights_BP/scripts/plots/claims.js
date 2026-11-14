@@ -9,8 +9,8 @@
 // frees its plot by itself.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, getState, on, emit, addKeepMenuButtons, addFoundingCheck } from "../siege/api.js";
+import { ActionFormData, ModalFormData, MessageFormData } from "@minecraft/server-ui";
+import { isReady, getState, on, emit, addKeepMenuButtons, addFoundingCheck, foundSettlement, takeItems } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { MAP, PLOT_PLAN, REGION_STYLE, PLOT_STONE, KEEP_BANNER, OVERWORLD, DAY_TICKS } from "./config.js";
 
@@ -58,8 +58,8 @@ export function plotAt(loc) {
 const keeps = () => getState().keeps; // read only
 
 // Owner id of the keep standing on this plot's stone, if any
-export function holderOf(plot) {
-  for (const [owner, k] of Object.entries(keeps())) {
+export function holderOf(plot, keepsNow = keeps()) {
+  for (const [owner, k] of Object.entries(keepsNow)) {
     if (k.x === plot.x && k.y === plot.y + 1 && k.z === plot.z) return owner;
   }
   return undefined;
@@ -249,13 +249,56 @@ export function showAtlas(player) {
   const lines = allPlots().map((p) => `§f${p.name}§7, ${p.region}: ${statusOf(p, player)}§7, ${compass(player.location, p)}`);
   new ActionFormData()
     .title("Plot Atlas")
-    .body(`${freePlots(player).length} of ${plots.length} plots are free.\n\n${lines.join("\n")}\n\n§7Raise your Keep Banner on a free Plot Stone to claim it. Friends can share one plot with a Writ of Alliance.`)
+    .body(`${freePlots(player).length} of ${plots.length} plots are free.\n\n${lines.join("\n")}\n\n§7Click a free Plot Stone and choose Raise your banner here to claim it. Friends can share one plot with a Writ of Alliance.`)
     .button("Close")
     .show(player);
 }
 
+// ---------- Raising the banner from the stone ----------
+// Mateo 2026-11-14: the Plot Stone opens a menu when clicked, so putting a banner on top meant crouch-placing.
+// Now the stone's menu raises it: "Raise your banner here", a yes/no, and the banner goes up on the stone.
+// Offered to a player with no settlement yet, on a plot that is free for them (or held for them after a fall).
+// Moving an existing settlement stays a deliberate banner placement (sneak + place, as before).
+const SOFT_TOP = /(air|grass$|short_grass|tall_grass|fern|flower|snow_layer|dandelion|poppy|bush|vine)/;
+
+// Pure: the plot, who asks, the keeps now, and the world time (for a plot held for someone after a fall)
+export function canRaiseHere(player, plot, keepsNow = keeps(), now = world.getAbsoluteTime()) {
+  if (holderOf(plot, keepsNow) || plot.npc || keepsNow[player.id]) return false;
+  return !(plot.reservedFor && plot.reservedFor !== player.id && now < plot.reservedUntil);
+}
+
+export function raiseBannerOn(player, plot) {
+  let above;
+  try { above = world.getDimension(OVERWORLD).getBlock({ x: plot.x, y: plot.y + 1, z: plot.z }); } catch { /* not loaded */ }
+  if (!above) return player.sendMessage("§7This plot isn't loaded yet. Stand closer and try again.");
+  if (!SOFT_TOP.test(above.typeId)) return player.sendMessage("§cSomething is standing on the Plot Stone. Clear the block on top of it, then try again.");
+  const problem = claimProblem(player, above);
+  if (problem) return player.sendMessage(problem);
+  takeItems(player, KEEP_BANNER, 1); // the banner in the pack goes up, if there is one; the stone raises one anyway
+  above.setType(KEEP_BANNER);
+  foundSettlement(player, above); // the same founding as placing it: checks, colour, title, sound, keepFounded
+  if (getState().keeps[player.id]) {
+    try {
+      const dim = world.getDimension(OVERWORLD);
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        dim.spawnParticle("minecraft:villager_happy", { x: plot.x + 0.5 + Math.cos(a) * 1.2, y: plot.y + 1.6, z: plot.z + 0.5 + Math.sin(a) * 1.2 });
+      }
+    } catch { /* the sparkle is only for show (foundSettlement plays the title and the sound) */ }
+  }
+}
+
+async function confirmRaise(player, plot) {
+  const res = await new MessageFormData().title(plot.name)
+    .body(`Raise your banner here and claim ${plot.name}?\n\n§7The land around this stone becomes yours. Raiders come on the third night.`)
+    .button1("Raise it").button2("Not yet").show(player);
+  if (res.canceled || res.selection !== 0 || !player.isValid) return;
+  raiseBannerOn(player, plot);
+}
+
 async function plotMenu(player, plot) {
   const holder = holderOf(plot);
+  const raise = canRaiseHere(player, plot);
   const body = [
     `§7Region: §f${plot.region}`,
     `§7Building style: §f${REGION_STYLE[plot.region] ?? "your own"}`,
@@ -268,13 +311,17 @@ async function plotMenu(player, plot) {
         ? `§7${plot.npc.name} rules here.`
       : plotOf(player.id)
         ? "§7You already hold a plot. Raising your banner here would move your settlement and leave your old plot."
-        : "§7Place your Keep Banner on top of this stone to claim it.",
+        : raise ? "§7Choose Raise your banner here to claim it." : "§7This plot is not free for you.",
   ];
-  const form = new ActionFormData().title(plot.name).body(body.join("\n")).button("Plot Atlas").button("Close");
-  if (isBuilder(player)) form.button("Builder: set which plot this is");
+  const form = new ActionFormData().title(plot.name).body(body.join("\n"));
+  const actions = [];
+  if (raise) { form.button(`§2Raise your banner here\n§8Claim ${plot.name}`); actions.push(() => confirmRaise(player, plot)); }
+  form.button("Plot Atlas"); actions.push(() => showAtlas(player));
+  form.button("Close"); actions.push(() => {});
+  if (isBuilder(player)) { form.button("Builder: set which plot this is"); actions.push(() => builderMenu(player, plot)); }
   const res = await form.show(player);
-  if (res.selection === 0) showAtlas(player);
-  if (res.selection === 2) builderMenu(player, plot);
+  if (res.canceled) return;
+  actions[res.selection]?.();
 }
 
 const lastClick = new Map();
@@ -304,7 +351,7 @@ function holdTick() {
       plot.lastOwner = undefined;
       changed = true;
       world.getPlayers().find((p) => p.id === plot.reservedFor)?.sendMessage(
-        `§6${plot.name} is held for you for ${MAP.reserveDays} days. Raise a new Keep Banner on its Plot Stone to take it back.`);
+        `§6${plot.name} is held for you for ${MAP.reserveDays} days. Click its Plot Stone and raise your banner to take it back.`);
     } else if (holder && (holder !== plot.lastOwner || plot.lastOwnerName !== keeps()[holder].name)) {
       plot.lastOwner = holder;
       plot.lastOwnerName = keeps()[holder].name;

@@ -18,6 +18,7 @@ const BELL_RANGE = 16;
 function placeSuspect(player, id) {
   const c = CASE[id];
   if (!c) return player.sendMessage(`§7Cases: ${CASES.map((x) => `${x.id} (${x.suspect}, ${x.village})`).join(", ")}`);
+  // vanilla villager on purpose: the suspects may be Returned, and a Returned must pass for any villager
   const villager = player.dimension.spawnEntity("minecraft:villager_v2", player.location);
   villager.nameTag = c.suspect;
   if (c.returned) markReturned(villager, { name: c.suspect, quest: c.id });

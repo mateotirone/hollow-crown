@@ -11,6 +11,7 @@ import { fundsE, chargeE, robBank, giveCoins } from "../economy/coins.js";
 import { worth, fromEmeralds, coins } from "../economy/rules.js";
 import { moduleStore } from "../core/store.js";
 import { sfx } from "../core/sfx.js";
+import { fightingNear, leashFor, mendGuard } from "./guardcare.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
 // Bring an unemployed villager to your Barracks and click it with coins in hand (40 Regals) to recruit a
@@ -341,6 +342,7 @@ export function guardTick() {
         if (!attackable(owner) && !guard.hasTag(MARCHING_TAG)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
         if (keep?.sovereign) guard.addEffect("strength", 60, { amplifier: 0, showParticles: false }); // royal guard
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
+        mendGuard(guard); // heals while left alone (guardcare.js)
 
         if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
         if (guard.hasTag(MARCHING_TAG)) continue; // marching to war with its owner (warwrit/army.js)
@@ -349,12 +351,13 @@ export function guardTick() {
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;
         const loc = guard.location;
+        const fighting = guard.typeId !== "siege:archer" && fightingNear(guard); // a creature near: finish the fight first (guardcare.js)
         const away = post.stand ? Math.hypot(loc.x - post.x, loc.z - post.z) : Math.hypot(loc.x - (post.x + 0.5), loc.z - (post.z + 0.5));
         if (guard.typeId === "siege:archer") {
           if (away > 1.5) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
         } else if (post.stand) { // a stationed Man-at-Arms keeps to the post, and chases only so far from it in a fight
-          if (away > (underAttack(owner) ? STATION_LEASH : 2.5)) guard.teleport({ x: post.x, y: post.y, z: post.z });
-        } else if (!underAttack(owner) ? away > 5 : !keep || settlementAt(loc) !== owner) {
+          if (away > leashFor(underAttack(owner) ? STATION_LEASH : 2.5, fighting)) guard.teleport({ x: post.x, y: post.y, z: post.z });
+        } else if (!underAttack(owner) ? away > leashFor(5, fighting) : !keep || settlementAt(loc) !== owner) {
           guard.teleport({ x: post.x + 0.5, y: post.y + 1, z: post.z + 0.5 }); // back to the Barracks
         }
       } catch {

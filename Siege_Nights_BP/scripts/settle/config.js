@@ -102,7 +102,7 @@ export const MASON_LINES = {
     "You hear that? No. Nor did I. What do you need?",
     "Walls first, I'd say, on a night like this. But it's your coin.",
   ],
-  noLand: "You've no land to lay it on yet. Raise a Keep Banner on a Plot Stone and come back. I'll sell to you all the same.",
+  noLand: "You've no land to lay it on yet. Click a free Plot Stone, raise your banner and come back. I'll sell to you all the same.",
 };
 
 // ---------- Town plots and charters (Plot Markers, charters.js) ----------
