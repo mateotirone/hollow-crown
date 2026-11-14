@@ -33,6 +33,8 @@ import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
 import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, WAYSTONE_SIGN_ROT, fallbackOf } from "./miniature.js";
 import { addMenuLabel } from "../core/labels.js";
+import { modeChoiceOpen, askMode, modeOf, setMode } from "../newplayer/mode.js";
+import { STORY, SETTLEMENT } from "../newplayer/mode_rules.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
 const ARRIVING = "siege_plots_arriving"; // on a player who is in the hall and has not chosen yet
@@ -418,7 +420,11 @@ function confirmPick(player, p) {
     .body(`${p.plan.name} will be kept for you and nobody else can take it. You can't come back up here and choose again.`)
     .button1("Look at the others first").button2(`Yes, ${p.plan.name}`)
     .show(player).then((r) => {
-      if (!r.canceled && r.selection === 1) pick(player, p.plan);
+      if (r.canceled || r.selection !== 1) return;
+      // Story Mode or Settlement Mode (newplayer/mode.js): only once the story has been finished on this world;
+      // a first play is always Story Mode. Closing the choice leaves the plot unchosen.
+      if (!modeChoiceOpen(player)) return pick(player, p.plan, STORY);
+      askMode(player).then((mode) => { if (mode && player.isValid) pick(player, p.plan, mode); });
     }).catch(() => {});
 }
 
@@ -446,7 +452,7 @@ function arriveAt(player, plot, at) {
   }
 }
 
-function pick(player, plan) {
+function pick(player, plan, mode = STORY) {
   // Somebody else may have clicked first while this player was reading
   const status = statusOf(plan);
   if (status.state !== "free" && status.state !== "lord") return player.sendMessage(`§c${plan.name} was taken a moment ago. Choose another stone.`);
@@ -454,6 +460,8 @@ function pick(player, plan) {
   store.data.picks[player.id] = { plot: status.plot.name, name: player.name, day: Math.floor(world.getAbsoluteTime() / 24000) };
   store.save();
   player.removeTag(ARRIVING);
+  // a second play may start in either mode; a Story Mode pick leaves the story where this player had it
+  if (mode !== modeOf(player) || mode === SETTLEMENT) setMode(player, mode);
   emit("plotChosen", { player, plot: status.plot, lord: status.state === "lord" ? npcOf(status.plot) : undefined });
   if (npcOf(status.plot)) releaseNpc(status.plot.name); // the lord steps down, if whoever runs the lords hasn't done it already
   if (WELCOME.bannerOnArrival) {
