@@ -9,6 +9,7 @@
 //   - a siege on its settlement: it runs (Speed), and a guard further than WALK.far blocks away is put on its spot
 //     straight away so the wall is never bare
 //   - no closer for WALK.stuck seconds (no way through): it is put on its spot
+//   - a watchtower lookout (dest.climb): at the foot of the tower it is put up on the deck (the ladder is inside)
 // No marker slot free (more than WALK.slots guards walking at once) also puts it straight on its spot.
 
 import { world, system } from "@minecraft/server";
@@ -23,6 +24,7 @@ export const WALK = {
   calm: 3,
   far: 80,
   stuck: 20,
+  climb: 4.5, // a post up a ladder (a watchtower's lookout, dest.climb): this close to it on the ground, the guard climbs up
   every: 10, // ticks between checks
 };
 
@@ -145,6 +147,8 @@ function step(id, w) {
     try { guard.triggerEvent(`siege:walk_${w.slot}`); } catch { /* fine */ }
   }
   if (besieged || underAttack(w.owner)) try { guard.addEffect("speed", WALK.every + 10, { amplifier: 1, showParticles: false }); } catch { /* fine */ }
+  // at the foot of a watchtower: up the ladder and out through the hatch onto the lookout
+  if (w.dest.climb && d <= WALK.climb && w.dest.y - loc.y > 2.5) return stopWalking(guard, w, true);
   if (d < w.best - 1) { w.best = d; w.bestTick = now; }
   else if (now - w.bestTick > WALK.stuck * 20) return stopWalking(guard, w, !w.noJump);
   // keep the marker ahead, on the ground
