@@ -309,6 +309,11 @@ api.addTests("hall build", {
       api.assert(b && p.cells.get(`${b.x},${b.y},${b.z}`)?.role === "board", `${id} ${level} has a board`);
       api.assert(Math.abs(b.x) >= 2 && b.z <= t.z + 2, `${id} ${level}: board off the aisle, in front of the Tree`);
       api.assert(p.cells.get(`${b.x},${b.y},${b.z}`)?.o?.dir === boardDir(b.x), `${id} ${level}: board faces the aisle`);
+      const solid = (x, y, z) => { const c = p.cells.get(`${x},${y},${z}`); return !!c && c.role !== "air"; };
+      const out = b.x > 0 ? 1 : -1;
+      api.assert(solid(b.x + out, b.y, b.z) && solid(b.x + out, b.y + 1, b.z), `${id} ${level}: board's back is against the wall (inside the hall)`);
+      api.assert(!solid(b.x - out, b.y, b.z) && !solid(b.x - out, b.y + 1, b.z), `${id} ${level}: room in front of the board`);
+      api.assert(solid(b.x, b.y - 1, b.z), `${id} ${level}: board stands on the floor`);
     }
   },
   "the clear box holds every block of the old hall above the ground": () => {

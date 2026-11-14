@@ -291,7 +291,8 @@ export function tidyCornerstone(owner) {
   else turnBoard(owner);
 }
 
-// A Town Board set down before it was turned to face the aisle is turned round where it stands
+// A Town Board set down before it was turned to face the aisle is turned round where it stands, and one standing where
+// halls of its size no longer have it is moved
 function turnBoard(owner) {
   const hall = hallOf(owner);
   const plan = drawHall(hall.level, STYLES[hall.style]);
@@ -299,7 +300,25 @@ function turnBoard(owner) {
   if (!spot) return;
   const forward = { x: hall.fx, z: hall.fz };
   const at = worldMarks(plan, hall, forward).board;
-  if (!at || at.x !== hall.marks.board.x || at.y !== hall.marks.board.y || at.z !== hall.marks.board.z) return;
+  if (!at) return;
+  const old = hall.marks.board;
+  if (at.x !== old.x || at.y !== old.y || at.z !== old.z) {
+    // the hall's board spot moved (Mateo 2026-11-14: the small halls had it outside, under the eaves): take the old
+    // board down and put it where a new hall of this size has it
+    try {
+      const dim = world.getDimension("overworld");
+      const was = dim.getBlock(old), now = dim.getBlock(at);
+      if (!was || !now) return; // not loaded: next time
+      if (!now.isAir && now.typeId !== BOARD) return; // something of the player's stands there: leave the old one
+      if (was.typeId === BOARD) was.setType("minecraft:air");
+      hall.marks = { ...hall.marks, board: undefined };
+      saveHalls();
+      addBoard(owner);
+    } catch (e) {
+      console.warn(`[Town Hall] could not move the Town Board: ${e}`);
+    }
+    return;
+  }
   try {
     const block = world.getDimension("overworld").getBlock(at);
     if (block?.typeId !== BOARD) return;
