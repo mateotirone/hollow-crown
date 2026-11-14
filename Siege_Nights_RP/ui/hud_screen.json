@@ -903,17 +903,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ajg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ajt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'aj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -936,17 +940,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'akg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ake') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'akt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ak'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -969,17 +977,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'alg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ale') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'alt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'al'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1002,17 +1014,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'amg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ame') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'amt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'am'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1035,17 +1051,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ang') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ane') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ant')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'an'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1068,17 +1088,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ao'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1101,17 +1125,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'apg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ape') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'apt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ap'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1134,17 +1162,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'aq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1167,17 +1199,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'a') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'arg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'are') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'art')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ar'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1200,17 +1236,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bjt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1233,17 +1273,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bkt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bk'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1266,17 +1310,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'blg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ble') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'blt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1299,17 +1347,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1332,17 +1384,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1365,17 +1421,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'boe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bo'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1398,17 +1458,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1431,17 +1495,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1464,17 +1532,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'b') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'brg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'brt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'br'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1497,17 +1569,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cjt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1530,17 +1606,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ckg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ckt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ck'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1563,17 +1643,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'clg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'clt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1596,17 +1680,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1629,17 +1717,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1662,17 +1754,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'coe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'co'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1695,17 +1791,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1728,17 +1828,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1761,17 +1865,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'c') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'crg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'crt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cr'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1794,17 +1902,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'djg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'djt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1827,17 +1939,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dkt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dk'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1860,17 +1976,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dlg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dlt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1893,17 +2013,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1926,17 +2050,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1959,17 +2087,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'doe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'do'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -1992,17 +2124,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2025,17 +2161,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2058,17 +2198,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'd') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'drg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'drt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dr'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2091,17 +2235,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ejg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ejt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ej'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2124,17 +2272,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ekg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ekt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ek'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2157,17 +2309,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'elg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ele') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'elt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'el'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2190,17 +2346,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'emg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'emt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'em'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2223,17 +2383,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ene') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ent')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'en'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2256,17 +2420,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'eo'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2289,17 +2457,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'epg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'epe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ept')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ep'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2322,17 +2494,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'eq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2355,17 +2531,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'e') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'erg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ere') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ert')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'er'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2388,17 +2568,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fjt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2421,17 +2605,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fkt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fk'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2454,17 +2642,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'flg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'flt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2487,17 +2679,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2520,17 +2716,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2553,17 +2753,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'foe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fo'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2586,17 +2790,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2619,17 +2827,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2652,17 +2864,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'f') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'frg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'frt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fr'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2685,17 +2901,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gjt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2718,17 +2938,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gkt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gk'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2751,17 +2975,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'glg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'glt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2784,17 +3012,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2817,17 +3049,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2850,17 +3086,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'goe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'got')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'go'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2883,17 +3123,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2916,17 +3160,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2949,17 +3197,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'g') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'grg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'grt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gr'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -2982,17 +3234,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hjt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hj'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3015,17 +3271,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hkt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hk'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3048,17 +3308,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hlg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hlt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hl'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3081,17 +3345,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hmt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hm'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3114,17 +3382,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hnt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hn'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3147,17 +3419,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ho'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3180,17 +3456,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hp'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3213,17 +3493,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3246,17 +3530,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'h') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hrg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hrt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hr'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3279,17 +3567,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'j'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ijg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ije') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ijt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ij'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3312,17 +3604,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'k'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ikg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ike') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ikt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ik'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3345,17 +3641,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'l'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ilg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ile') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ilt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'il'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3378,17 +3678,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'm'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'img') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ime') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'imt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'im'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3411,17 +3715,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'n'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ing') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ine') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'int')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'in'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3444,17 +3752,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'o'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ioe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iot')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'io'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3477,17 +3789,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'p'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ip'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3510,17 +3826,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'q'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'iq'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {
@@ -3543,17 +3863,21 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "(((not ((#preserved_text - 'hcm:') = #preserved_text)) and (not (('%.6s' * ((#preserved_text - 'hcm:') - ('%.2s' * (#preserved_text - 'hcm:')))) = 'off___'))) and (not ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = '_')) and (('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'i') and ((('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.1s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))) = 'r'))",
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'irg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ire') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'irt')))",
                     "target_property_name": "#visible"
                   },
                   {
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - ('%.2s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:'))))))",
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ir'))",
                     "target_property_name": "#texture"
                   }
-                ]
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
               }
             },
             {

@@ -25,7 +25,7 @@ import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
-import { charterCheck, charterText, charterKeeps, plotFit } from "./charters.js";
+import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
@@ -648,6 +648,16 @@ export function builtCounts(owner) {
   for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1;
   return counts;
 }
+// What stands or is going up in a town, for the one-of-each rule (config.js ONE_EACH): plot buildings rising,
+// finished or hand-built (a hand-built one missing something still stands), and block buildings rising or finished
+export function standingCounts(owner) {
+  const counts = { ...raisedCounts(owner, { rising: true }) };
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  return counts;
+}
+// Why `id` can't be raised again in this settlement, or undefined
+export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(owner));
+
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
