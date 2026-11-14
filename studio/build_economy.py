@@ -74,6 +74,9 @@ if added:
 # ---------- the job NPC: one entity, eight painted skins (textures/entity/siege/npc/job_<id>.png, studio/art/build_job_npcs.py) ----------
 # The order is the value of the siege:job property and must match JOB_IDS in scripts/economy/config.js. Only ever add at the end.
 JOB_SKINS = ["farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "moneyer", "factor"]
+# regional looks (Mateo 2026-11-14), painted by build_job_npcs.py REGION_DRESS: <job>__<region>; the Vale wears the plain
+# skin. scripts/economy/shops.js jobLook() picks the index. Only ever add at the end.
+JOB_SKINS += [f"{job}__{r}" for job in ("moneyer", "farmer") for r in ("frostmarch", "saltreach", "emberwaste", "blackfen")]
 
 job_entity = {"format_version": "1.21.60", "minecraft:entity": {
     "description": {"identifier": "siege:job_npc", "is_spawnable": False, "is_summonable": True, "is_experimental": False,
