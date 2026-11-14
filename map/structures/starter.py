@@ -50,8 +50,12 @@ AREAS = [
     # The open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
     ("slot",      "Empty plot",       (-38, -22, 1, 15),  "r+", {"size": "L"}),
     ("pen",       "Pen",              (-30, -22, 18, 26), "r+", {}),
-    ("woodyard",  "Woodyard",         (22, 32, 1, 11),    "r-", {}),
-    ("field",     "Common field",     (22, 34, 14, 24),   "r-", {}),
+    # the Works yard (27 along its lane x 17 deep): the Ironworks opens at Hamlet, so its plot is set up from day one
+    # (Mateo 2026-11-14, settlement thread: "they should have their plots already done. Not done, but set up")
+    ("slot",      "Works yard",       (21, 37, -1, 25),   "r-", {"size": "W"}),
+    # the woodyard and the common field sit out front, past the library and the left house, off a walk from the main lane
+    ("woodyard",  "Woodyard",         (-35, -25, -28, -18), "r+", {}),
+    ("field",     "Common field",     (-37, -25, -14, -4),  "r+", {}),
     ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),   # the hall's own green: the hall grows over it
     # the Storehouse's ground (15 x 15, door on its lane side): the game raises it on arrival and rebuilds it bigger
     # at every tier on the same ground (Storehouse thread, 2026-11-13); a walk runs to it beside the Mason's yard
@@ -64,7 +68,7 @@ LANES = [
     ("lane", 3, [(5, -4), (9, 0), (19, 0), (19, 27)]),
 ]
 WALKS = [  # 1-wide paths from a lane or the square to a door or gate
-    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 6), (22, 6)], [(20, 19), (22, 19)], [(-20, 22), (-22, 22)], [(20, -1), (20, -10), (22, -10)],
+    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 12), (21, 12)], [(-3, -15), (-24, -15), (-24, -23), (-25, -23)], [(-24, -15), (-24, -9), (-25, -9)], [(-20, 22), (-22, 22)], [(20, -1), (20, -10), (22, -10)],
 ]
 HALL_REACH = 21                    # the widest level-5 hall (Blackfen) with its 2 clear: r = -21 .. 21 behind the square
 WALL_BASE = 36                     # the Hamlet wall ring (outer face). Rings 36/54/60/66 (Mateo 2026-11-13: the Town ring moved

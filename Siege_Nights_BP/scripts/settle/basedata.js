@@ -3,6 +3,9 @@
 //   bedSpot(plan) -> { x, y, z } local foot of a bed (head toward +z) on a free spot of the ground floor, or undefined
 //   bedSpots(plan) -> every such spot on the lowest floor that has one, best first (the first may be taken in the
 //     world by something the player put there)
+//   hasFurnace(plan) -> true when the design already has a furnace (or blast furnace) in it
+//   furnaceSpots(plan, bed) -> { x, y, z, face: {x, z} } spots for a furnace on the bed's floor: against a wall, with a
+//     free block in front to stand on (face points to it), clear of the bed and the door, best first
 
 export function pickBaseSlot(slots, taken, near, size = "S") {
   const free = slots.filter((s) => s.tier === 0 && s.size === size && !taken.has(s.id) && !(s.tags ?? []).includes("library"));
@@ -36,6 +39,42 @@ export function bedSpots(plan) {
     if (found.length) return found.sort((a, b2) => b2.score - a.score).map(({ x, y, z }) => ({ x, y, z }));
   }
   return [];
+}
+
+// The founder's furnace (Mateo 2026-11-14: one in every Hamlet from day one, "in the town hall or the cottage or
+// wherever it makes sense"): the starter village's houses have none, so the founder's house gets one beside the bed.
+const FURNACE_ROLE = /furnace/;
+export function hasFurnace(plan) {
+  for (const c of plan.cells.values()) {
+    if (FURNACE_ROLE.test(c.role) || (plan.style?.roles?.[c.role] ?? []).some((id) => FURNACE_ROLE.test(id))) return true;
+  }
+  return false;
+}
+
+export function furnaceSpots(plan, bed) {
+  const solid = new Set();
+  for (const c of plan.cells.values()) if (c.role !== "air") solid.add(`${c.x},${c.y},${c.z}`);
+  const has = (x, y, z) => solid.has(`${x},${y},${z}`);
+  const b = plan.bounds();
+  const f = (bed?.y ?? 1) - 1; // the floor the bed stands on
+  const sides = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const indoors = (x, z) => sides.every(([dx, dz]) => {
+    for (let k = 1; k <= 8; k++) if (has(x + dx * k, f + 1, z + dz * k) || has(x + dx * k, f + 2, z + dz * k)) return true;
+    return false;
+  });
+  const free = (x, z) => has(x, f, z) && !has(x, f + 1, z) && !has(x, f + 2, z) && indoors(x, z);
+  const nearBed = (x, z) => bed && Math.abs(x - bed.x) <= 1 && z >= bed.z - 1 && z <= bed.z + 2;
+  const found = [];
+  for (let z = b.z1; z >= Math.max(b.z0, 2); z--) for (let x = b.x0; x <= b.x1; x++) {
+    if (!free(x, z) || nearBed(x, z)) continue;
+    for (const [dx, dz] of sides) {
+      // a wall right behind it, and a free floor block in front to stand on and walk past
+      if (!has(x - dx, f + 1, z - dz) || !free(x + dx, z + dz) || nearBed(x + dx, z + dz)) continue;
+      found.push({ x, y: f + 1, z, face: { x: dx, z: dz }, score: z * 10 - Math.abs(x) });
+      break;
+    }
+  }
+  return found.sort((a, c) => c.score - a.score).map(({ x, y, z, face }) => ({ x, y, z, face }));
 }
 
 // ---------- joining the settlement road to the map's roads (Mateo's playtest 2026-11-12) ----------
