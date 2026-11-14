@@ -199,6 +199,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Fixed
 - **The Rift opens on the real map.** The seven thin-place caves no longer need marking by hand: each one's seam is known from the map as soon as the world loads. If the Rift is opened at a cave nobody has visited yet, the cave builds itself first and the crack tears open as soon as it stands. `/scriptevent hc:open_rift` now also takes you there to watch, setting you down gently on the ground.
+- The trebuchet now throws forward. Its arm used to swing the wrong way, so the boulder looked like it left over the back while it actually flew toward the target.
 - A Castle Gate no longer walks away from its gateway. Shutting an open gate used to do nothing the first time and then shut it where it hung, turned sideways, so every open and shut moved it further off. It now swings straight back into its gateway. (A gate that has already wandered stays where it is: break it and set it back in its gateway.)
 - The minimap's quest pins can no longer cover the map in pink and black squares: a pin only shows when it has its picture.
 - The moon is back in the night sky. Our cracked moon was saved as a see-through picture, which the sky does not draw; it now uses the same kind of picture as the vanilla moon, so every phase shows, and on a dark-moon night you can just make out a faint dim disc where it should be.
