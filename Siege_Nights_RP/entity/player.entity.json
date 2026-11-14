@@ -8,7 +8,8 @@
         "cape": "entity_alphatest",
         "animated": "player_animated",
         "spectator": "player_spectator",
-        "everwake_wings": "entity_alphatest"
+        "everwake_wings": "entity_alphatest",
+        "hc_mark": "entity_emissive_alpha"
       },
       "textures": {
         "default": "textures/entity/steve",
@@ -21,7 +22,12 @@
         "hc_look_6": "textures/entity/looks/hawise_barleycorn",
         "hc_look_7": "textures/entity/looks/bram_meadows",
         "hc_look_8": "textures/entity/looks/ridley_stagg",
-        "everwake_wings": "textures/entity/everwake_wings"
+        "everwake_wings": "textures/entity/everwake_wings",
+        "hc_mark_1": "textures/entity/hc_marked/stage_0",
+        "hc_mark_2": "textures/entity/hc_marked/stage_1",
+        "hc_mark_3": "textures/entity/hc_marked/stage_2",
+        "hc_mark_4": "textures/entity/hc_marked/stage_3",
+        "hc_mark_5": "textures/entity/hc_marked/stage_4"
       },
       "geometry": {
         "default": "geometry.humanoid.custom",
@@ -280,6 +286,15 @@
         },
         {
           "controller.render.siege.everwake_wings": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && (query.has_property('siege:wings') ? query.property('siege:wings') : 0) >= 1"
+        },
+        {
+          "controller.render.hc_marked": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_invisible && (query.has_property('hc:mark') ? query.property('hc:mark') : 0) >= 1 && (query.has_property('hc:look') ? query.property('hc:look') : 0) < 1"
+        },
+        {
+          "controller.render.hc_marked_look": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_invisible && (query.has_property('hc:mark') ? query.property('hc:mark') : 0) >= 1 && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
+        },
+        {
+          "controller.render.hc_marked_hand": "variable.is_first_person && !query.is_spectator && !query.is_invisible && (query.has_property('hc:mark') ? query.property('hc:mark') : 0) >= 1"
         }
       ],
       "enable_attachables": true

@@ -305,3 +305,314 @@ lines.append("entity.siege:spell_satchel.name=Sorcerer's Satchel")
 open(LANG, "w", encoding="utf-8").write("\n".join(lines) + "\n")
 
 print(f"{len(SPELLS)} spell icons, satchel entity")
+
+
+# =====================================================================================================================
+# Spell pass (2026-11-14, Mateo: "I see all the 'what's weak' notes, let's fix those"). Preview: the Ember Spellbook
+# artifact. Adds the 3D effect objects (siege:arc_fx), the new particles, the Echo fog, the Crescendo move, the Marked
+# layer on the player, and the "loud" hunting goal on Hollow creatures.
+# =====================================================================================================================
+
+# ---------- one effect entity, six forms: shard, ward plates, chains, bell, rift, afterimage ----------
+# siege:form picks the model; siege:count shows 0-3 plates or chain loops. Scripts move and remove them
+# (townhall/marked_fx.js); a timer clears any the script forgot (world closed mid-spell).
+FORMS = ["shard", "ward", "chains", "bell", "rift", "ghost"]
+
+
+def cube(origin, size, uv=(0, 0), rotation=None, pivot=None, inflate=0):
+    c = {"origin": list(origin), "size": list(size), "uv": list(uv)}
+    if rotation:
+        c["rotation"] = list(rotation)
+        c["pivot"] = list(pivot or [origin[0] + size[0] / 2, origin[1] + size[1] / 2, origin[2] + size[2] / 2])
+    if inflate:
+        c["inflate"] = inflate
+    return c
+
+
+def bone(name, pivot, cubes=(), parent=None, rotation=None):
+    b = {"name": name, "pivot": list(pivot), "cubes": list(cubes)}
+    if parent:
+        b["parent"] = parent
+    if rotation:
+        b["rotation"] = list(rotation)
+    return b
+
+
+def geo(name, bones, w=128, h=128, vis=(3, 3, 0)):
+    return {"description": {"identifier": f"geometry.siege.arc_{name}", "texture_width": w, "texture_height": h,
+                            "visible_bounds_width": vis[0], "visible_bounds_height": vis[1], "visible_bounds_offset": [0, vis[2], 0]},
+            "bones": bones}
+
+
+A = (64, 0)  # second half of every arc_fx texture: the bright accent colour
+
+GEOS = {}
+# Ember shard: a long thin diamond with a bright core (flies along z)
+GEOS["shard"] = geo("shard", [bone("shard", [0, 0, 0], [
+    cube([-1, -1, -5], [2, 2, 10], rotation=[0, 0, 45], pivot=[0, 0, 0]),
+    cube([-0.5, -0.5, -6.5], [1, 1, 13], A),
+])], vis=(2, 2, 0))
+# Ward: three bell-glass plates circling at chest height; plateN shows while siege:count >= N
+plates = [bone("ring", [0, 18, 0])]
+for i in range(3):
+    plates.append(bone(f"plate{i + 1}", [0, 18, 0], [cube([-2.5, 14, 11.5], [5, 8, 0.4]), cube([-0.25, 15, 11.3], [0.5, 6, 0.2], A), cube([-1.75, 18.5, 11.3], [3.5, 0.5, 0.2], A)],
+                       parent="ring", rotation=[0, i * 120, 0]))
+GEOS["ward"] = geo("ward", plates, vis=(3, 3, 1))
+# Bind: three loops of chain links at the feet, waist and chest
+loops = [bone("chains", [0, 0, 0])]
+for i, y in enumerate((3, 11, 19)):
+    links = []
+    for k in range(10):
+        a = k / 10 * 360
+        r = math.radians(a)
+        x, z = math.sin(r) * 7, math.cos(r) * 7
+        links.append(cube([x - 1, y - 1, z - 2], [2, 2, 4] if k % 2 else [1, 3, 4], A if k % 3 == 0 else (0, 0), rotation=[0, a, 0], pivot=[x, y, z]))
+    loops.append(bone(f"loop{i + 1}", [0, y, 0], links, parent="chains"))
+GEOS["chains"] = geo("chains", loops, vis=(3, 3, 1))
+# Choir's Call: a ghostly bell, 2.5 blocks across, hung from its crown (the toll swings it)
+GEOS["bell"] = geo("bell", [bone("bell", [0, 44, 0], [
+    cube([-4, 38, -4], [8, 5, 8]), cube([-7, 31, -7], [14, 7, 14]), cube([-10, 22, -10], [20, 9, 20]),
+    cube([-13, 17, -13], [26, 5, 26]), cube([-14, 15, -14], [28, 2, 28], A), cube([-1, 43, -1], [2, 3, 2], A),
+]), bone("clapper", [0, 38, 0], [cube([-1, 18, -1], [2, 20, 2], A), cube([-2.5, 15, -2.5], [5, 4, 5], A)], parent="bell")], vis=(4, 4, 1.5))
+# Veilstep: a tall jagged slit of dark with a pale edge, facing the way you looked
+rift = []
+for k in range(12):
+    y = k * 4
+    w = round(math.sin((k + 0.5) / 12 * math.pi) * 9 + 1, 1)
+    jag = 1.5 if k % 2 else -1.5
+    rift.append(cube([-w / 2 + jag, y, -0.25], [w, 4, 0.5]))
+    rift.append(cube([-w / 2 + jag - 1, y, -0.35], [1, 4, 0.7], A))
+    rift.append(cube([w / 2 + jag, y, -0.35], [1, 4, 0.7], A))
+GEOS["rift"] = geo("rift", [bone("rift", [0, 0, 0], rift)], vis=(3, 4, 1.5))
+# Blink: your afterimage, leaning in with the arms swept back (the Blink move)
+GEOS["ghost"] = geo("ghost", [
+    bone("ghost", [0, 0, 0]),
+    bone("legs", [0, 12, 0], [cube([-4, 0, -2], [4, 12, 4]), cube([0, 0, -2], [4, 12, 4])], parent="ghost"),
+    bone("body", [0, 12, 0], [cube([-4, 12, -2], [8, 12, 4]), cube([-4, 24, -4], [8, 8, 8])], parent="ghost", rotation=[14, 0, 0]),
+    bone("rarm", [-5, 22, 0], [cube([-8, 12, -2], [4, 12, 4])], parent="body", rotation=[35, 0, 15]),
+    bone("larm", [5, 22, 0], [cube([4, 12, -2], [4, 12, 4])], parent="body", rotation=[35, 0, -15]),
+    bone("cracks", [0, 12, 0], [cube([-0.25, 2, -2.2], [0.5, 28, 0.2], A), cube([-3, 16, -2.2], [6, 0.5, 0.2], A)], parent="body"),
+], vis=(2, 3, 1))
+
+dump(os.path.join(RP, "models", "entity", "siege_arc_fx.geo.json"), {"format_version": "1.12.0", "minecraft:geometry": [GEOS[f] for f in FORMS]})
+
+# textures: left half the body colour, right half the bright accent; alpha blended
+TEX = {  # form -> (body rgba, accent rgba)
+    "shard": ((215, 180, 255, 210), (255, 245, 255, 255)),
+    "ward": ((120, 140, 255, 90), (230, 215, 255, 230)),
+    "chains": ((70, 60, 95, 255), (190, 150, 255, 255)),
+    "bell": ((170, 140, 255, 70), (235, 220, 255, 180)),
+    "rift": ((10, 4, 20, 245), (235, 215, 255, 240)),
+    "ghost": ((165, 120, 255, 95), (240, 225, 255, 200)),
+}
+try:
+    from PIL import Image
+    import random
+    rng = random.Random(7)
+    for form, (body, accent) in TEX.items():
+        img = Image.new("RGBA", (128, 128))
+        px = img.load()
+        for y in range(128):
+            for x in range(128):
+                base = body if x < 64 else accent
+                n = rng.randint(-10, 10)
+                px[x, y] = (max(0, min(255, base[0] + n)), max(0, min(255, base[1] + n)), max(0, min(255, base[2] + n)), base[3])
+        img.save(os.path.join(RP, "textures", "entity", f"siege_arc_{form}.png"))
+except ImportError:
+    pass
+
+FX_ANIMS = {
+    "animation.siege.arc_fx.spin": {"loop": True, "animation_length": 0.5, "bones": {"shard": {"rotation": {"0.0": [0, 0, 0], "0.5": [0, 0, 360]}}}},
+    "animation.siege.arc_fx.orbit": {"loop": True, "animation_length": 4.0, "bones": {"ring": {"rotation": {"0.0": [0, 0, 0], "4.0": [0, 360, 0]}, "position": [0, "math.sin(query.life_time * 120) * 0.6", 0]}}},
+    "animation.siege.arc_fx.bind": {"loop": "hold_on_last_frame", "animation_length": 0.4, "bones": {
+        "chains": {"position": {"0.0": [0, -14, 0], "0.25": [0, 0, 0]}, "scale": {"0.0": [1.4, 1, 1.4], "0.25": [1.1, 1, 1.1], "0.4": [0.9, 1, 0.9]}}}},
+    "animation.siege.arc_fx.chain_turn": {"loop": True, "animation_length": 6.0, "bones": {
+        "loop1": {"rotation": {"0.0": [0, 0, 0], "6.0": [0, 60, 0]}}, "loop2": {"rotation": {"0.0": [0, 0, 0], "6.0": [0, -60, 0]}}, "loop3": {"rotation": {"0.0": [0, 0, 0], "6.0": [0, 60, 0]}}}},
+    "animation.siege.arc_fx.bell_form": {"loop": "hold_on_last_frame", "animation_length": 0.5, "bones": {"bell": {"scale": {"0.0": [0.1, 0.1, 0.1], "0.5": [1, 1, 1]}}}},
+    "animation.siege.arc_fx.toll": {"animation_length": 1.4, "bones": {
+        "bell": {"rotation": {"0.0": [0, 0, 0], "0.15": [0, 0, 18], "0.45": [0, 0, -12], "0.75": [0, 0, 7], "1.05": [0, 0, -3], "1.4": [0, 0, 0]}},
+        "clapper": {"rotation": {"0.0": [0, 0, 0], "0.2": [0, 0, -26], "0.5": [0, 0, 16], "0.8": [0, 0, -8], "1.4": [0, 0, 0]}}}},
+    "animation.siege.arc_fx.rift_open": {"loop": "hold_on_last_frame", "animation_length": 0.35, "bones": {
+        "rift": {"scale": {"0.0": [0.02, 0.3, 1], "0.2": [0.4, 1, 1], "0.35": [1, 1, 1]}}}},
+    "animation.siege.arc_fx.rift_breathe": {"loop": True, "animation_length": 1.0, "bones": {"rift": {"scale": [ "1 + math.sin(query.life_time * 900) * 0.04", 1, 1]}}},
+    "animation.siege.arc_fx.rift_close": {"loop": "hold_on_last_frame", "animation_length": 0.3, "bones": {"rift": {"scale": {"0.0": [1, 1, 1], "0.3": [0.02, 0.6, 1]}}}},
+    "animation.siege.arc_fx.ghost_fade": {"loop": "hold_on_last_frame", "animation_length": 1.0, "bones": {
+        "ghost": {"position": {"0.0": [0, 0, 0], "1.0": [0, -6, 0]}, "scale": {"0.0": [1, 1, 1], "0.6": [0.96, 0.9, 0.96], "1.0": [0.6, 0.2, 0.6]}}}},
+}
+dump(os.path.join(RP, "animations", "siege_arc_fx.animation.json"), {"format_version": "1.10.0", "animations": FX_ANIMS})
+
+FORM_Q = "query.property('siege:form')"
+COUNT_Q = "query.property('siege:count')"
+dump(os.path.join(RP, "entity", "arc_fx.entity.json"), {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+    "identifier": "siege:arc_fx",
+    "materials": {"default": "entity_alphablend"},
+    "textures": {f: f"textures/entity/siege_arc_{f}" for f in FORMS},
+    "geometry": {f: f"geometry.siege.arc_{f}" for f in FORMS},
+    "animations": {"spin": "animation.siege.arc_fx.spin", "orbit": "animation.siege.arc_fx.orbit", "bind": "animation.siege.arc_fx.bind",
+                   "chain_turn": "animation.siege.arc_fx.chain_turn", "bell_form": "animation.siege.arc_fx.bell_form",
+                   "rift_open": "animation.siege.arc_fx.rift_open", "rift_breathe": "animation.siege.arc_fx.rift_breathe", "ghost_fade": "animation.siege.arc_fx.ghost_fade"},
+    "scripts": {"animate": [{"spin": f"{FORM_Q} == 0"}, {"orbit": f"{FORM_Q} == 1"}, {"bind": f"{FORM_Q} == 2"}, {"chain_turn": f"{FORM_Q} == 2"},
+                            {"bell_form": f"{FORM_Q} == 3"}, {"rift_open": f"{FORM_Q} == 4"}, {"rift_breathe": f"{FORM_Q} == 4"}, {"ghost_fade": f"{FORM_Q} == 5"}]},
+    "render_controllers": ["controller.render.siege_arc_fx"],
+}}})
+dump(os.path.join(RP, "render_controllers", "siege_arc_fx.render_controllers.json"), {"format_version": "1.8.0", "render_controllers": {"controller.render.siege_arc_fx": {
+    "arrays": {"geometries": {"Array.geo": [f"Geometry.{f}" for f in FORMS]}, "textures": {"Array.tex": [f"Texture.{f}" for f in FORMS]}},
+    "geometry": f"Array.geo[{FORM_Q}]", "textures": [f"Array.tex[{FORM_Q}]"], "materials": [{"*": "Material.default"}],
+    "part_visibility": [{"plate1": f"{COUNT_Q} >= 1"}, {"plate2": f"{COUNT_Q} >= 2"}, {"plate3": f"{COUNT_Q} >= 3"},
+                        {"loop1": f"{COUNT_Q} >= 1"}, {"loop2": f"{COUNT_Q} >= 2"}, {"loop3": f"{COUNT_Q} >= 3"}],
+}}})
+dump(os.path.join(BP, "entities", "arc_fx.json"), {"format_version": "1.21.60", "minecraft:entity": {
+    "description": {"identifier": "siege:arc_fx", "is_spawnable": False, "is_summonable": True,
+                    "properties": {"siege:form": {"type": "int", "range": [0, 7], "default": 0, "client_sync": True},
+                                   "siege:count": {"type": "int", "range": [0, 3], "default": 3, "client_sync": True}}},
+    "component_groups": {"siege:gone": {"minecraft:instant_despawn": {}}},
+    "components": {
+        "minecraft:type_family": {"family": ["arc_fx", "inanimate"]},
+        "minecraft:health": {"value": 1, "max": 1},
+        "minecraft:collision_box": {"width": 0.01, "height": 0.01},
+        "minecraft:physics": {"has_gravity": False, "has_collision": False},
+        "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+        "minecraft:knockback_resistance": {"value": 1},
+        "minecraft:fire_immune": {},
+        "minecraft:breathable": {"breathes_water": True, "breathes_air": True, "breathes_lava": True, "breathes_solids": True},
+        "minecraft:damage_sensor": {"triggers": [{"cause": "all", "deals_damage": "no"}]},
+        "minecraft:timer": {"time": 30, "looping": False, "time_down_event": {"event": "siege:fade"}},
+        "minecraft:nameable": {"always_show": False, "allow_name_tag_renaming": False},
+    },
+    # spawned as "siege:arc_fx<siege:form_bell>" so the right model shows from the first frame
+    "events": {"siege:fade": {"add": {"component_groups": ["siege:gone"]}},
+               **{f"siege:form_{f}": {"set_property": {"siege:form": i}} for i, f in enumerate(FORMS)}},
+}})
+
+# ---------- particles for the pass ----------
+PARTICLES2 = {
+    # Ember Bolt: the smear behind the shard, the brand that flashes on a hit, Paleburn's cold flames
+    "arc_streak": particle("arc_streak", sprite="glow", size=0.4, life=0.18, colors=(PALE, MAGENTA, VIOLET)),
+    "arc_brand": particle("arc_brand", sprite="spark", size=0.75, life=0.45, colors=(PALE, MAGENTA, INDIGO), spin=90),
+    "arc_paleburn": particle("arc_paleburn", sprite="shard", size=0.28, life=0.6, count=4, shape=("box", {"offset": [0, 0.9, 0], "half_dimensions": [0.3, 0.8, 0.3], "direction": "outwards"}),
+                             speed=0.2, accel=(0, 1.6, 0), colors=([1, 1, 1], PALE, VIOLET)),
+    # Ward plates and Bind chains breaking
+    "arc_shatter": particle("arc_shatter", sprite="shard", size=0.3, life=0.7, count=16, shape=("sphere", {"offset": [0, 1.1, 0], "radius": 0.4, "direction": "outwards"}),
+                            speed=3.0, drag=2.0, accel=(0, -6, 0), colors=(PALE, GEMBLUE, VIOLET), spin=300),
+    # Halfstep: the faint outline others see
+    "arc_shimmer": particle("arc_shimmer", sprite="glow", size=0.12, life=0.6, count=10, shape=("box", {"offset": [0, 0.9, 0], "half_dimensions": [0.35, 0.9, 0.35], "surface_only": True, "direction": "outwards"}),
+                            speed=0.05, accel=(0, 0.2, 0), colors=(PALE, VIOLET)),
+    # Choir's Call: the cracked note over a turned raider, and the thread to the one it hates
+    "arc_note": particle("arc_note", sprite="spark", size=0.3, life=1.0, accel=(0, 0.5, 0), drag=1.0, colors=(MAGENTA, INDIGO), spin=120),
+    "arc_thread": particle("arc_thread", sprite="glow", size=0.09, life=0.5, colors=(PALE, VIOLET)),
+    # Echo Sight: a door that hums, a ring of sound off its face
+    "arc_hum": particle("arc_hum", sprite="ring", size=1, life="0.9", colors=(PALE, MAGENTA, INDIGO),
+                        grow="0.2 + 0.9 * variable.particle_age / variable.particle_lifetime"),
+    # The Crescendo: a crown of sparks circling the head
+    "arc_crown": particle("arc_crown", sprite="spark", size=0.14, life=0.5, count=8, shape=("disc", {"radius": 0.45, "surface_only": True, "direction": "outwards"}),
+                          speed=0.02, colors=(PALE, MAGENTA)),
+}
+for name, p in PARTICLES2.items():
+    dump(os.path.join(RP, "particles", f"{name}.particle.json"), p)
+
+# ---------- Echo Sight: a dim violet fog, so you see shapes, not daylight ----------
+dump(os.path.join(RP, "fogs", "siege_arc_echo.json"), {"format_version": "1.16.100", "minecraft:fog_settings": {
+    "description": {"identifier": "siege:arc_echo"},
+    "distance": {"air": {"fog_start": 3, "fog_end": 30, "fog_color": "#1b1030", "render_distance_type": "fixed"},
+                 "weather": {"fog_start": 3, "fog_end": 26, "fog_color": "#1b1030", "render_distance_type": "fixed"}}}})
+
+# ---------- moves: the Crescendo, and casts that show in first person ----------
+CAST2 = {
+    # Crescendo: head back, arms opened wide and a little raised, held (the script plays it again every 2 s)
+    "crescendo": move(2.0, {
+        "rightarm": [(0.35, (-35, 0, 70)), (1.65, (-40, 0, 75))],
+        "leftarm": [(0.35, (-35, 0, -70)), (1.65, (-40, 0, -75))],
+        "head": [(0.35, (-28, 0, 0)), (1.65, (-30, 0, 0))],
+        "waist": [(0.35, (-7, 0, 0)), (1.65, (-8, 0, 0))],
+    }),
+}
+moves_path = os.path.join(RP, "animations", "sorcerer_cast.animation.json")
+anims = json.load(open(moves_path))
+for k, a in CAST2.items():
+    anims["animations"][f"animation.siege.player.cast.{k}"] = a
+# first person: half the move instead of a quarter, so the Ember hand comes up into view
+text = json.dumps(anims, indent=1).replace("variable.is_first_person ? 0.25 : 1.0", "variable.is_first_person ? 0.5 : 1.0")
+open(moves_path, "w").write(text + "\n")
+
+# ---------- the Marked layer: palm mark, veins that climb with Resonance, eyes at full ----------
+# Player property hc:mark: 0 not Marked, 1-5 the stage (set by townhall/marked.js). The overlay glows
+# (entity_emissive_alpha: mark pixels at alpha 140 render as light; clear pixels are cut).
+MARK_SRC = os.path.join(ROOT, "art", "marked_layer")
+mark_tex = []
+for s in range(5):
+    src = os.path.join(MARK_SRC, f"stage_{s}.png")
+    dst = os.path.join(RP, "textures", "entity", "hc_marked", f"stage_{s}.png")
+    if os.path.exists(src):
+        try:
+            from PIL import Image
+            img = Image.open(src).convert("RGBA")
+            px = img.load()
+            for y in range(img.size[1]):
+                for x in range(img.size[0]):
+                    r, g, b, a = px[x, y]
+                    px[x, y] = (r, g, b, 140 if a > 20 else 0)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            img.save(dst)
+        except ImportError:
+            pass
+    mark_tex.append(f"hc_mark_{s + 1}")
+
+PLAYER_RP = os.path.join(RP, "entity", "player.entity.json")
+pe = json.load(open(PLAYER_RP))
+d = pe["minecraft:client_entity"]["description"]
+d["materials"]["hc_mark"] = "entity_emissive_alpha"
+for s in range(5):
+    d["textures"][f"hc_mark_{s + 1}"] = f"textures/entity/hc_marked/stage_{s}"
+MARK = "(query.has_property('hc:mark') ? query.property('hc:mark') : 0)"
+LOOK = "(query.has_property('hc:look') ? query.property('hc:look') : 0)"
+want = [
+    {"controller.render.hc_marked": f"!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_invisible && {MARK} >= 1 && {LOOK} < 1"},
+    {"controller.render.hc_marked_look": f"!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && !query.is_invisible && {MARK} >= 1 && {LOOK} >= 1"},
+    {"controller.render.hc_marked_hand": f"variable.is_first_person && !query.is_spectator && !query.is_invisible && {MARK} >= 1"},
+]
+rcs = [r for r in d["render_controllers"] if not (isinstance(r, dict) and any(k.startswith("controller.render.hc_marked") for k in r))]
+d["render_controllers"] = rcs + want
+open(PLAYER_RP, "w").write(json.dumps(pe, indent=2) + "\n")  # keep the file's own 2-space layout
+MARK_ARR = {"textures": {"Array.mark": [f"Texture.{t}" for t in mark_tex]}}
+MIDX = f"math.clamp({MARK} - 1, 0, 4)"
+dump(os.path.join(RP, "render_controllers", "hc_marked.render_controllers.json"), {"format_version": "1.8.0", "render_controllers": {
+    "controller.render.hc_marked": {"arrays": MARK_ARR, "geometry": "Geometry.default", "materials": [{"*": "Material.hc_mark"}], "textures": [f"Array.mark[{MIDX}]"]},
+    "controller.render.hc_marked_look": {"arrays": MARK_ARR, "geometry": "Geometry.hc_look", "materials": [{"*": "Material.hc_mark"}], "textures": [f"Array.mark[{MIDX}]"]},
+    "controller.render.hc_marked_hand": {"arrays": MARK_ARR, "geometry": "Geometry.default", "materials": [{"*": "Material.hc_mark"}], "textures": [f"Array.mark[{MIDX}]"],
+                                         "part_visibility": [{"*": False}, {"rightArm": True}, {"rightSleeve": True}]},
+}})
+PLAYER_BP = os.path.join(BP, "entities", "player.json")
+pb = json.load(open(PLAYER_BP))
+pb["minecraft:entity"]["description"].setdefault("properties", {})["hc:mark"] = {"type": "int", "range": [0, 5], "default": 0, "client_sync": True}
+open(PLAYER_BP, "w").write(json.dumps(pb, indent=2) + "\n")
+
+# ---------- loud means something: Hollow creatures hunt a loud Sorcerer first ----------
+# Player tag siege_resonant (Resonance 70+, townhall/marked.js). Every Hollow creature that picks its own fights
+# (not bosses and their adds, whose fights are scripted) gets a goal one step above its usual one: a loud
+# Sorcerer within 32 blocks, seen or not. studio/bestiary/build.py writes the same goal, so a rebuild keeps it.
+LOUD_GOAL = {"priority": 2, "must_see": False, "reselect_targets": True, "within_radius": 32, "entity_types": [{"filters": {"all_of": [
+    {"test": "is_family", "subject": "other", "operator": "==", "value": "player"},
+    {"test": "has_tag", "subject": "other", "operator": "==", "value": "siege_resonant"},
+    {"test": "has_tag", "subject": "other", "operator": "!=", "value": "siege_hollow_ruler"}]}, "max_dist": 32, "priority": 0}]}
+loud_count = 0
+for folder in ("bestiary", "hollowfolk"):
+    base = os.path.join(BP, "entities", folder)
+    if not os.path.isdir(base):
+        continue
+    for fn in sorted(os.listdir(base)):
+        path = os.path.join(base, fn)
+        try:
+            ent = json.load(open(path))
+        except (ValueError, IsADirectoryError):
+            continue
+        c = ent.get("minecraft:entity", {}).get("components", {})
+        fam = c.get("minecraft:type_family", {}).get("family", [])
+        nat = c.get("minecraft:behavior.nearest_attackable_target")
+        if "hollow" not in fam or not nat or "siege_boss" in fam or "siege_boss_add" in fam:
+            continue
+        c["minecraft:behavior.nearest_prioritized_attackable_target"] = LOUD_GOAL
+        nat["priority"] = max(nat.get("priority", 2), 3)
+        dump(path, ent)
+        loud_count += 1
+
+print(f"spell pass: {len(FORMS)} effect forms, {len(PARTICLES2)} particles, Echo fog, Crescendo move, Marked layer, loud goal on {loud_count} creatures")
