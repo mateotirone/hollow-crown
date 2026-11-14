@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:family_cart",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege/family_cart"
+      },
+      "geometry": {
+        "default": "geometry.siege_family_cart"
+      },
+      "animations": {
+        "roll": "animation.siege_family_cart.roll",
+        "sway": "animation.siege_family_cart.sway"
+      },
+      "scripts": {
+        "animate": [
+          { "roll": "query.property('siege:rolling')" },
+          "sway"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}
