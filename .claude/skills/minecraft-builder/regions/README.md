@@ -114,3 +114,22 @@ given here.
   `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
 - Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
   in the region's style; the post sells the foal of the region it stands in.
+
+## The plot mine in every region (Mateo 2026-11-14: "retexture the mine and redo the 3D build of the mine")
+
+Every plot's mine is a story build (Act 1 day 2 sends every player there). One design, every region's look:
+
+- **Pithead** (`map/structures/pithead/spec.py`, 25 x 15, front towards the Plot Stone): a 5 x 5 headframe of the
+  region's log braced at two girts, a head deck one wider all round with a rail, and the sheave wheel (radius 3, the
+  region's dark planks, fence spokes, an iron hub) standing open above it; the winding drum under an open shelter, the
+  rope straight up from it to the wheel's rim; the winding house is the region's timber preset (interior "storage").
+  Ore bin, spoil heap, pit bell and lamp post round it. The headframe stays timber in every region (Emberwaste acacia,
+  Saltreach birch, Blackfen mangrove, Frostmarch dark oak, the Vale spruce).
+- **Underground** (`Siege_Nights_BP/scripts/plotcaves/mine.js`): mine timber is the same wood as the pithead. Timber
+  sets are two posts and a cap, every 4 blocks of a haulage way, a lantern hung from every second cap, and no stretch of
+  road longer than 7 without a lantern.
+- **The rock is retextured by region** (`STRATA`): bands about 3 deep that wave with the ground, each mixed a little
+  into the next. Vale stone, andesite, tuff, mossy cobble; Frostmarch stone, calcite, diorite, packed ice; Saltreach
+  sandstone, diorite, calcite; Emberwaste red sandstone and the mesa terracottas; Blackfen tuff, packed mud, mud bricks,
+  clay. Below 0 every region is deepslate with tuff and smooth basalt (Emberwaste blackstone and basalt). Never a block
+  that falls (sand, gravel) in a wall or a roof.
