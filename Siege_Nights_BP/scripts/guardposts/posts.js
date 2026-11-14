@@ -8,7 +8,7 @@
 // Wall posts are keyed by their place round the ring (wall:3), not by blocks, so a guard on wall post 3 stays on
 // post 3 when the town grows and the wall moves out.
 
-import { WALL_LEVELS, radiusAt, groundAt, WATCH, hasWatch, watchSpots, inWatch } from "../settle/walldata.js";
+import { WALL_LEVELS, radiusAt, groundAt, WATCH_KINDS, watchSpots, inWatch } from "../settle/walldata.js";
 
 export const POSTS = {
   wallPosts: 22, // evenly spaced round the ring, besides the two at the gate
@@ -55,10 +55,10 @@ export function wallPosts(w) {
   const out = [];
   // the watchtowers' lookouts first (the levels before the Watch Wall: walldata.js WATCH), so a new Archer climbs a
   // tower before it walks the wall; a wall post that would land in a tower's shaft is left out
-  const watch = hasWatch(w.level) ? watchSpots(w, w.radius, w.gate, w.ground) : [];
+  const watch = watchSpots(w, w.radius, w.gate, w.ground, w.level);
   for (const s of watch) {
-    out.push({ key: `watch:${s.k}`, label: `Watchtower, ${compassOf(s.a)}`, x: s.x + s.forward.x * WATCH.guardOut, z: s.z + s.forward.z * WATCH.guardOut,
-      from: s.ground + WATCH.guardUp, a: s.a, out: { x: Math.cos(s.a), z: Math.sin(s.a) }, watch: true });
+    out.push({ key: `watch:${s.k}`, label: `${WATCH_KINDS[s.kind].name}, ${compassOf(s.a)}`, x: s.x + s.forward.x * s.guardOut, z: s.z + s.forward.z * s.guardOut,
+      from: s.ground + s.guardUp, a: s.a, out: { x: Math.cos(s.a), z: Math.sin(s.a) }, watch: true });
   }
   // the gate pair stand on the ground just inside the gateway, one either side
   const inside = (L.thick ?? 1) + (L.walk ? 1 : 0) + 1;

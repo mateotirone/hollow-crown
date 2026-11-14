@@ -118,6 +118,44 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
   return { ops: [...clear, ...fill, ...solid, ...hang], G };
 }
 
+// Nothing of a landmark may float (Mateo 2026-11-14: every story build has to be perfect). A drape design follows
+// each column's own ground and a rigid one is eased into the land round it, so on real ground a fence post, a leaf or
+// a wall stub can end up joined to nothing. settleOps replays the planned ops over the ground (height) and drops every
+// placed block not joined by a face or an edge to the ground or to something that is. It is a generator so the game
+// can spread it over ticks (yield* in a runJob); run it to the end with settleNow. Returns the kept ops.
+const N18 = [];
+for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const s = Math.abs(a) + Math.abs(b) + Math.abs(c); if (s > 0 && s < 3) N18.push([a, b, c]); }
+export function* settleOps(ops, d, height, step = 4000) {
+  const key = (x, y, z) => `${x},${y},${z}`;
+  const last = new Map(); // cell -> op index (AIR included)
+  ops.forEach((o, i) => last.set(key(o[0], o[1], o[2]), i));
+  const holds = (i) => i !== undefined && ops[i][3] !== AIR && !/water|lava/.test(d.palette[ops[i][3]]?.[0] ?? "");
+  const natural = (x, y, z) => { if (last.has(key(x, y, z))) return false; const g = height(x, z); return g !== undefined && y <= g; };
+  const grounded = new Set(), todo = [];
+  let n = 0;
+  for (const [k, i] of last) {
+    if (!holds(i)) continue;
+    const [x, y, z] = ops[i];
+    if (N18.some(([a, b, c]) => natural(x + a, y + b, z + c))) { grounded.add(k); todo.push(i); }
+    if (++n % step === 0) yield;
+  }
+  while (todo.length) {
+    const [x, y, z] = ops[todo.pop()];
+    for (const [a, b, c] of N18) {
+      const k = key(x + a, y + b, z + c), i = last.get(k);
+      if (!grounded.has(k) && holds(i)) { grounded.add(k); todo.push(i); }
+    }
+    if (++n % step === 0) yield;
+  }
+  return ops.filter((o) => { const k = key(o[0], o[1], o[2]); return o[3] === AIR || !holds(last.get(k)) || grounded.has(k); });
+}
+export function settleNow(ops, d, height) {
+  const g = settleOps(ops, d, height);
+  let r;
+  do { r = g.next(); } while (!r.done);
+  return r.value;
+}
+
 // Where a seeking piece goes. Walks out from the anchor along bearings (0 north, 90 east) round `bearing`,
 // `spread` either side, and takes the nearest spot of the wanted kind:
 //   water  the last dry column before open water (the piece's front, its -z side, faces the water)

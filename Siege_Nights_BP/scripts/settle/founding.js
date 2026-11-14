@@ -17,6 +17,7 @@
 // (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
 // Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter) | road (lay the road out again)]
 
+import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
@@ -24,7 +25,7 @@ import { buildFor } from "../townhall/build.js";
 import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
-import { wallShape } from "./walldata.js";
+import { wallShape, radiusAt } from "./walldata.js";
 import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
@@ -167,7 +168,9 @@ function* layOutJob(owner, tier, done) {
   // lamp posts wherever a lane inside the wall is still out of the lamps' reach (lanelamps.js)
   const taken = Object.values(town.slots ?? {}).map((s) => s.box).filter(Boolean)
     .map((b) => ({ x0: b.x0 - town.x, z0: b.z0 - town.z, x1: b.x1 - town.x, z1: b.z1 - town.z }));
-  for (const f of planLaneLamps(layout, tier, wallRadius(townFor(town.plot), tier), taken)) {
+  const w = wallOf(owner);
+  const within = w?.radius ? (x, z) => Math.hypot(x, z) <= radiusAt(w, w.radius, Math.atan2(z, x)) - 2 : undefined; // the wall's own line
+  for (const f of planLaneLamps(layout, tier, wallRadius(townFor(town.plot), tier), taken, within)) {
     try { placeFixture(owner, town, { kind: "lamp", ...f }); } catch (e) { console.warn(`[Hollow Crown] lane lamp: ${e}`); }
     yield;
   }
@@ -635,7 +638,7 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   save();
   const town = townOf(owner);
   if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) {
-    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: tw.outline });
+    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: { ...tw.outline, tight: HAMLET_WALLS[plot.name.toLowerCase()] } });
   }
   layOutTier(owner, 0);
   return true;

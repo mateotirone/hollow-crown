@@ -11,9 +11,10 @@ import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, hasWatch, watchSpots, inWatch, onWatchPath } from "./walldata.js";
-import { watchPlan, watchCells, SHAFT } from "./wallwatch.js";
-import { WALLWATCH_DESIGNS } from "./wallwatch_data.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath } from "./walldata.js";
+import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
+import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
+import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { planLaneLamps } from "./lanelamps.js";
 import { slotsOf as layoutSlots } from "./towns.js";
 
@@ -47,11 +48,12 @@ addTests("settle", {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     for (const [key, t] of Object.entries(TOWNS)) {
       if (!t.outline?.radii?.length) continue;
-      const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt };
+      const tight = HAMLET_WALLS[key] ?? HAMLET_WALLS[t.name?.toLowerCase()];
+      const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       const radius = t.walls[0];
-      const spots = watchSpots(center, radius, gate, smooth);
-      for (const level of [1, 6]) {
+      for (const level of [1, 2, 6]) {
+        const spots = watchSpots(center, radius, gate, smooth, level);
         const at = new Set(wallColumns({ center, radius, level, gateAngle: gate, smooth }).map((c) => `${c.x},${c.z}`));
         for (const s of spots) for (let n = 0; n < WATCH.clear; n++) for (let side = -1; side <= 1; side++) {
           const x = s.origin.x - s.forward.x * n + side * s.forward.z, z = s.origin.z - s.forward.z * n + side * s.forward.x;
@@ -201,8 +203,8 @@ addTests("settle walls", {
       const cols = wallColumns({ center: { x: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth });
       const at = new Set(cols.map((c) => `${c.x},${c.z}`));
       // a watchtower's shaft closes the ring where the wall leaves it open
-      const watch = hasWatch(level) ? watchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth) : [];
-      for (const t of watch) for (let dx = -WATCH.half; dx <= WATCH.half; dx++) for (let dz = -WATCH.half; dz <= WATCH.half; dz++) at.add(`${t.x + dx},${t.z + dz}`);
+      const watch = watchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth, level);
+      for (const t of watch) for (let dx = -t.half; dx <= t.half; dx++) for (let dz = -t.half; dz <= t.half; dz++) at.add(`${t.x + dx},${t.z + dz}`);
       for (const c of cols) {
         if (c.role === "stair" || c.role === "ladder" || c.role === "landing") continue; // steps, landings and ladders stand inside the ring
         let near = 0;
@@ -218,7 +220,10 @@ addTests("settle walls", {
   "levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand": () => {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, (_, i) => 64 + Math.round(2 * Math.sin(i / 7))));
     const center = { x: 300, z: -200, shape: Array.from({ length: 72 }, (_, i) => Math.sin(i / 4)) };
-    for (let level = 1; level <= MAX_WALL; level++) assertEqual(hasWatch(level), level <= 6, `level ${level}`);
+    for (let level = 1; level <= MAX_WALL; level++) {
+      assertEqual(hasWatch(level), level <= 6, `level ${level}`);
+      assertEqual(watchKind(level), level === 1 ? "stand" : level <= 6 ? "tower" : undefined, `level ${level}: the Low Palisade gets the small stand`);
+    }
     for (const radius of [36, 46, 66]) for (const gate of [0, 1.2, bearingToAngle(180)]) {
       const spots = watchSpots(center, radius, gate, smooth);
       assertEqual(spots.length, 4);
@@ -229,7 +234,8 @@ addTests("settle walls", {
         assert(s.forward.x * out.x + s.forward.z * out.z > 0, "the door faces into the settlement");
         assertEqual(s.origin.y, s.ground + 1);
       }
-      for (const level of [1, 3, 6]) {
+      for (const level of [1, 2, 3, 6]) {
+        const spots = watchSpots(center, radius, gate, smooth, level);
         const cols = wallColumns({ center, radius, level, gateAngle: gate, smooth });
         for (const c of cols) {
           assert(!inWatch(spots, c.x, c.z), `level ${level}: wall in a watchtower at ${c.x},${c.z}`);
@@ -241,20 +247,39 @@ addTests("settle walls", {
       }
     }
   },
-  "the watchtower design fits its spot, with a guard on the deck and a way up": () => {
-    for (const [region, d] of Object.entries(WALLWATCH_DESIGNS)) {
-      assertEqual(d.marks.guard.join(","), `0,${WATCH.guardUp},${WATCH.back + WATCH.guardOut}`, `${region} guard mark`);
-      const p = watchPlan(region);
+  "the watchtower and lookout stand designs fit their spots, with a guard on the deck and a way up": () => {
+    for (const [kind, designs] of [["tower", WALLWATCH_DESIGNS], ["stand", WALLSTAND_DESIGNS]]) for (const [region, d] of Object.entries(designs)) {
+      const K = WATCH_KINDS[kind], SHAFT = shaftOf(kind);
+      assertEqual(d.marks.guard.join(","), `0,${K.guardUp},${K.back + K.guardOut}`, `${region} ${kind} guard mark`);
+      assert(d.box.x0 >= -K.half - 2 && d.box.x1 <= K.half + 2, `${region} ${kind}: as wide as its spot`);
+      if (kind === "stand") assert(d.box.y1 <= 9, `${region}: the stand stays small (top at ${d.box.y1})`);
+      const p = watchPlan(region, kind);
       const id = (c) => (c && c.role !== "air" ? d.palette[Number(c.role.split(":").pop())][0] : "air");
       // the guard's spot: deck under, two free blocks over
       const [gx, gy, gz] = d.marks.guard;
       assert(id(p.get(gx, gy - 1, gz)) !== "air" && id(p.get(gx, gy, gz)) === "air" && id(p.get(gx, gy + 1, gz)) === "air", `${region}: the guard stands on the deck`);
       // a door at the front of the shaft, a ladder inside, a hatch in the deck
-      assert(id(p.get(0, 1, SHAFT.z0)).endsWith("_door"), `${region}: door`);
+      assert(kind === "stand" ? id(p.get(0, 1, SHAFT.z0)) === "minecraft:ladder" : id(p.get(0, 1, SHAFT.z0)).endsWith("_door"), `${region} ${kind}: door or ladder at the front`);
       assert([...p.cells.values()].some((c) => id(c) === "minecraft:ladder"), `${region}: ladder`);
-      assert([...p.cells.values()].some((c) => c.y === WATCH.guardUp - 1 && id(c).endsWith("trapdoor")), `${region}: hatch in the deck`);
-      const cells = watchCells(region, { x: 10, y: 70, z: 10 }, { x: 0, z: 1 });
-      assert(cells.length > 200 && cells[0].y >= cells[cells.length - 1].y, `${region}: taken down top first`);
+      assert([...p.cells.values()].some((c) => c.y === K.guardUp - 1 && id(c).endsWith("trapdoor")), `${region} ${kind}: hatch in the deck`);
+      const cells = watchCells(region, { x: 10, y: 70, z: 10 }, { x: 0, z: 1 }, kind);
+      assert(cells.length > (kind === "stand" ? 40 : 200) && cells[0].y >= cells[cells.length - 1].y, `${region} ${kind}: taken down top first`);
+    }
+  },
+  "the Hamlet wall is drawn tight round its village, never outside the starter's line, and the later rings keep the full outline": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      const tight = HAMLET_WALLS[key];
+      assert(tight?.length === town.outline.radii.length, `${key} has a tight Hamlet line`);
+      const c = { x: 0, z: 0, radii: town.outline.radii, radiiAt: town.outline.radiiAt, tight };
+      let cut = 0;
+      for (let i = 0; i < tight.length; i++) {
+        const a = (i / tight.length) * Math.PI * 2;
+        const h = radiusAt(c, 36, a), full = radiusAt({ ...c, tight: undefined }, 36, a);
+        assert(h <= full + 1e-6 && h >= 22, `${key}: Hamlet line ${h.toFixed(1)} at ${i}`);
+        cut = Math.max(cut, full - h);
+        assert(Math.abs(radiusAt(c, 54, a) - radiusAt({ ...c, tight: undefined }, 54, a)) < 1e-9, `${key}: the Town ring keeps the outline`);
+      }
+      assert(cut >= 2, `${key}: the Hamlet line pulls in somewhere (${cut.toFixed(1)})`);
     }
   },
   "steep ground is refused, the wall line is reserved": () => {

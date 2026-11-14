@@ -15,7 +15,7 @@ export const DOOR_REACH = 6;
 // what a laid lane is made of (the groundwork's top block of a column)
 const LANE = /(grass_path|dirt_path|gravel|cobblestone|stone_brick|_bricks$|andesite|tuff|_slab$|_stairs$|packed_mud|coarse_dirt|sandstone|_tiles$|deepslate|castle_)/;
 
-export function planLaneLamps(layout, tier, radius, avoid = []) {
+export function planLaneLamps(layout, tier, radius, avoid = [], within) {
   const glow = [];
   const top = new Map(); // "x,z" -> palette id of the column's highest groundwork block (tiers up to this one)
   const topY = new Map();
@@ -29,10 +29,13 @@ export function planLaneLamps(layout, tier, radius, avoid = []) {
     }
   }
   const r = radius - 2;
+  // inside the wall: the circle, or the wall's own line when the caller has it (a Hamlet's wall is drawn tight round
+  // the village, walldata.js radiusAt), two blocks in from it
+  const inWall = within ?? ((x, z) => x * x + z * z <= r * r);
   const lane = new Set();
   for (const [k, id] of top) {
     const [x, z] = k.split(",").map(Number);
-    if (LANE.test(id) && x * x + z * z <= r * r) lane.add(k);
+    if (LANE.test(id) && inWall(x, z)) lane.add(k);
   }
   const boxes = [...avoid];
   for (const s of slotsOf(layout)) boxes.push(s.box);
@@ -56,7 +59,7 @@ export function planLaneLamps(layout, tier, radius, avoid = []) {
   for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) blocked.add(`${a},${b}`); // the Plot Stone
   for (const g of glow) { lamps.push(g); for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) blocked.add(`${g.x + a},${g.z + b}`); }
   const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  const free = (x, z, soft) => { const k = `${x},${z}`; return !blocked.has(k) && !inBox(x, z) && (soft || !inBox(x, z, later)) && x * x + z * z <= r * r; };
+  const free = (x, z, soft) => { const k = `${x},${z}`; return !blocked.has(k) && !inBox(x, z) && (soft || !inBox(x, z, later)) && inWall(x, z); };
   // the nearest place for a post within R of (x, z), at least minD away: a verge cell (not lane, a lane cell beside it);
   // where the verge is all taken (a lane squeezed between plots and the hall ground), the edge cell of a lane at
   // least three wide, so two cells of lane still run past the post

@@ -8,6 +8,7 @@ Marks (feet height, the spec's frame; export_halls.export turns them into the de
   guard   where the guard keeping the lookout stands: on the deck, on the side away from the door (out over the wall)
 
     build(region) -> Blueprint with the door marker on the threshold, for export_buildings.py
+    build_stand(region) -> the same for the lookout stand that stands in for the tower on the Low Palisade (level 1)
 """
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -26,6 +27,18 @@ def build(region="vale"):
     bp = Blueprint(spec["name"]); bp.marks = {}
     engine.into_blueprint(bp, spec)
     bp.marks["guard"] = (0, DECK + 1, -3)
+    bp.markers["door"] = (0, YW, 0)
+    return bp.finish()
+
+STAND_DECK = 4                  # the lookout stand's deck (gen_wallwatch.STAND); its guard stands on the middle, feet at 5
+
+def build_stand(region="vale"):
+    """The Low Palisade's lookout stand (wallstand_<region>.json): the guard mark on the deck's middle."""
+    import engine
+    spec = json.load(open(os.path.join(SPECS, f"wallstand_{region}.json")))
+    bp = Blueprint(spec["name"]); bp.marks = {}
+    engine.into_blueprint(bp, spec)
+    bp.marks["guard"] = (0, STAND_DECK + 1, -1)
     bp.markers["door"] = (0, YW, 0)
     return bp.finish()
 

@@ -10,11 +10,14 @@
 //   3. Mending: a guard that hasn't been hurt for GUARD_CARE.calm seconds heals GUARD_CARE.mend health every guard
 //      tick (two seconds), so a guard that won one fight starts the next one whole.
 //   4. Health: the Man-at-Arms and Archer have twice the health they had (entities/man_at_arms.json, archer.json).
+//   5. Each creature's blow on a guard: guarddamage_data.js has a line for every creature that fights guards, and
+//      the damage it does to a guard (any guard or soldier) is scaled to that line. Players take the full blow.
 // Ash Scarab burns stay for players only (bestiary/mobs.js).
 
 import { world, system } from "@minecraft/server";
 import { GUARD_TYPES } from "./constants.js";
 import { addTests, assert, assertEqual } from "../core/tests.js";
+import { GUARD_DAMAGE } from "./guarddamage_data.js";
 
 export const GUARD_CARE = {
   chase: 12, // how far from its post a guard may go while a creature is near it
@@ -63,12 +66,40 @@ export function shouldRiposte({ guardType, foe, distance, now, last }) {
 
 export const calmFor = (now, hurtAt) => hurtAt === undefined || now - hurtAt >= GUARD_CARE.calm * 20;
 
+// What a blow of `damage` from this creature does to a guard (pure). Creatures without a line hit as usual.
+export function guardBlow(attackerType, damage) {
+  const line = GUARD_DAMAGE[attackerType];
+  if (!line || !(damage > 0) || !(line.base > 0)) return damage;
+  return Math.max(0.5, Math.round((damage * line.guard) / line.base * 2) / 2);
+}
+
+// Where the game lets a script change a blow before it lands, change it there; otherwise give the difference back after.
+let scaledBefore = false;
+try {
+  world.beforeEvents.entityHurt?.subscribe((event) => {
+    try {
+      if (!isGuardType(event.hurtEntity.typeId)) return;
+      const by = event.damageSource?.damagingEntity;
+      if (by && GUARD_DAMAGE[by.typeId]) event.damage = guardBlow(by.typeId, event.damage);
+    } catch { /* gone */ }
+  });
+  scaledBefore = !!world.beforeEvents.entityHurt;
+} catch {
+  scaledBefore = false; // older script engine
+}
+
 world.afterEvents.entityHurt.subscribe((event) => {
   const guard = event.hurtEntity;
   try {
     if (!isGuardType(guard.typeId)) return;
     const now = system.currentTick;
     lastHurt.set(guard.id, now);
+    const hitter = event.damageSource.damagingEntity;
+    if (!scaledBefore && hitter && GUARD_DAMAGE[hitter.typeId]) {
+      const back = event.damage - guardBlow(hitter.typeId, event.damage);
+      const hp = guard.getComponent("minecraft:health");
+      if (back > 0 && hp && hp.currentValue > 0) hp.setCurrentValue(Math.min(hp.effectiveMax, hp.currentValue + back));
+    }
     const by = event.damageSource.damagingEntity;
     if (!by || event.damageSource.cause !== "entityAttack") return;
     const a = guard.location, b = by.location;
@@ -114,6 +145,15 @@ addTests("guards", {
     assert(!shouldRiposte({ ...hit, distance: 10 }), "not at an archer far away");
     assert(!shouldRiposte({ ...hit, guardType: "siege:ash_scarab" }), "only guards");
     assert(riposteFor("siege:archer") >= 4 && riposteFor("siege:man_at_arms") >= 3, "a scarab dies in two");
+  },
+  "each creature hits a guard by its own line": () => {
+    assertEqual(guardBlow("siege:ash_scarab", 2), 1, "a scarab bite is half on a guard");
+    assertEqual(guardBlow("siege:ash_scarab", 3), 1.5, "and still half on Hard");
+    assertEqual(guardBlow("siege:pretender_brute", 13), 13, "bosses hit full");
+    assertEqual(guardBlow("minecraft:vindicator", 13), 7, "vanilla axes brought into line");
+    assertEqual(guardBlow("siege:not_listed", 5), 5, "no line: as usual");
+    assertEqual(guardBlow("siege:hollow_crow", 0.4), 0.5, "never less than half a heart");
+    for (const [id, l] of Object.entries(GUARD_DAMAGE)) assert(l.base > 0 && l.guard > 0 && l.guard <= l.base * 1.5, id);
   },
   "a guard mends once it's been left alone a while": () => {
     assert(calmFor(1000, undefined));

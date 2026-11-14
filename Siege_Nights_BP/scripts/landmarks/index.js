@@ -31,7 +31,7 @@ import { load, save, say, runCmd } from "../undertow/data.js";
 import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS, BUILD_NEAR } from "./sites.js";
-import { planPiece, seekSpot, reachOf, AIR, KEEP_TOP } from "./plan.js";
+import { planPiece, seekSpot, reachOf, settleOps, AIR, KEEP_TOP } from "./plan.js";
 import { clearTrees } from "../core/clearing.js";
 import "./tests.js";
 
@@ -40,7 +40,7 @@ const K_BUILT = "hc:landmarks_built"; // { site id: version }
 const PER_STEP = 40;
 const AREA = "hc_landmark";
 
-const SOFT = /leaves|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|log|vine|sapling|mushroom|azalea|dead_bush|torch|reeds|sugar_cane|kelp|seagrass|lily|wood/;
+const SOFT = /leaves|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|log|vine|sapling|mushroom|azalea|dead_bush|torch|reeds|sugar_cane|kelp|seagrass|lily|wood|fence/; // fence: the map's trees branch in fences
 function groundY(dim, x, z) {
   let b;
   try { b = dim.getTopmostBlock({ x, z }); } catch { return undefined; }
@@ -133,7 +133,9 @@ export function buildSite(site, by) {
         yield;
       }
       // 2. plan it
-      const { ops, G } = planPiece(p.d, p.x, p.z, (x, z) => heights.get(x * 4096 + z), (x, z) => waters.get(x * 4096 + z));
+      const planned = planPiece(p.d, p.x, p.z, (x, z) => heights.get(x * 4096 + z), (x, z) => waters.get(x * 4096 + z));
+      const G = planned.G;
+      const ops = yield* settleOps(planned.ops, p.d, (x, z) => heights.get(x * 4096 + z));   // nothing left floating
       const pal = p.d.palette.map(([id, st]) => perm(id, st));
       const near = (x, z) => tops.get(x * 4096 + z) ?? tops.get(p.x * 4096 + p.z);
       yield;

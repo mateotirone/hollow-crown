@@ -1657,7 +1657,8 @@ class Town:
             import light_blocks
             light_blocks.light_worldblocks(d)
         import tidy_blocks                      # nothing hung on nothing, standing on nothing or facing a wall (town audit 2026-11-14)
-        print("tidy", tidy_blocks.tidy_worldblocks(d, lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) else None))
+        print("tidy", tidy_blocks.tidy_worldblocks(d, lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) else None,
+                                                   lambda x, z: max(int(self.G[self.ij(x, z)]), int(self.G0[self.ij(x, z)])) if self.ok(x, z) else None))
         with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
         return len(rows)
 

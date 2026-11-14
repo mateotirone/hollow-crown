@@ -63,6 +63,14 @@ export const MAX_WALL = WALL_LEVELS.length - 1;
 //   from the middle of the shaft (the design's "guard" mark; the self-test checks the two agree).
 export const WATCH = { from: 1, to: 6, count: 4, half: 2, back: 3, clear: 2, guardUp: 11, guardOut: 1 };
 export const hasWatch = (level) => level >= WATCH.from && level <= WATCH.to && !WALL_LEVELS[level]?.towers;
+// The Low Palisade is only 2 high, so its watch posts are open lookout stands (Mateo, 2026-11-14: the towers are "too big
+// for a level one wall"): a 3 x 3 stand on posts, its deck 3 over the palisade. The towers rise from level 2.
+//   stand levels = the wall levels that get the stand instead of the tower. Sizes as WATCH, per kind.
+export const WATCH_KINDS = {
+  stand: { levels: [1], half: 1, back: 2, guardUp: 5, guardOut: 0, name: "Lookout" },
+  tower: { half: WATCH.half, back: WATCH.back, guardUp: WATCH.guardUp, guardOut: WATCH.guardOut, name: "Watchtower" },
+};
+export const watchKind = (level) => (!hasWatch(level) ? undefined : WATCH_KINDS.stand.levels.includes(level) ? "stand" : "tower");
 
 // How strong a wall of this level is, as a Castle Stone armor tier (0 stone, 1 iron, 2 diamond, 3 netherite)
 export const wallArmor = (level) => WALL_LEVELS[level]?.gateArmor ?? 0;
@@ -239,6 +247,13 @@ export function wallShape(seedText) {
 export function radiusAt(center, radius, a) {
   // A starter village wall (map/structures/starter.py) carries its whole outline: radii = blocks out at even angles,
   // worked out from the land and what the wall holds, for a ring of radiiAt. A bigger ring keeps the same outline, moved out.
+  // The Hamlet ring (radius at or inside radiiAt) follows center.tight instead when it has one: the line drawn tight round
+  // the starter village (settle/hamlet_walls_data.js, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
+  if (center?.tight?.length && radius <= (center.radiiAt ?? radius)) {
+    const tt = center.tight, f = (turn(a) / TAU) * tt.length;
+    const i = Math.floor(f) % tt.length, t = f - Math.floor(f);
+    return tt[i] * (1 - t) + tt[(i + 1) % tt.length] * t - ((center.radiiAt ?? radius) - radius);
+  }
   const radii = center?.radii;
   if (radii?.length) {
     const f = (turn(a) / TAU) * radii.length;
@@ -278,7 +293,11 @@ export function groundProblem(ground) {
 //   x, z = the middle of the shaft (on the line the Watch Wall's towers use: one block in from the outer face).
 //   forward = the way into the tower from its door (a wind, pointing out of the settlement: the door faces in).
 //   origin = the door's front step at feet height, the design's (0, 1, 0) for the build engine (townhall/build.js).
-export function watchSpots(center, radius, gateAngle, smooth) {
+// level picks the kind (stand or tower, watchKind); without one it is the tower. Each spot carries its kind's sizes.
+export function watchSpots(center, radius, gateAngle, smooth, level) {
+  const kind = level === undefined ? "tower" : watchKind(level);
+  if (!kind) return [];
+  const K = WATCH_KINDS[kind];
   return Array.from({ length: WATCH.count }, (_, k) => {
     const a = gateAngle + ((k + 0.5) / WATCH.count) * TAU;
     const r = radiusAt(center, radius, a);
@@ -291,7 +310,7 @@ export function watchSpots(center, radius, gateAngle, smooth) {
     const crossed = (f) => {
       let n = 0;
       for (let step = 0; step < WATCH.clear; step++) for (let side = -1; side <= 1; side++) {
-        const cx = x - f.x * (WATCH.back + step) + side * f.z, cz = z - f.z * (WATCH.back + step) + side * f.x;
+        const cx = x - f.x * (K.back + step) + side * f.z, cz = z - f.z * (K.back + step) + side * f.x;
         const dx = cx - center.x, dz = cz - center.z;
         if (Math.hypot(dx, dz) > radiusAt(center, radius, Math.atan2(dz, dx)) - 2.5) n++;
       }
@@ -299,11 +318,11 @@ export function watchSpots(center, radius, gateAngle, smooth) {
     };
     const forward = both.reduce((best, f) => (crossed(f) < crossed(best) ? f : best));
     const ground = groundAt(smooth, a);
-    return { k, a, x, z, ground, forward, origin: { x: x - forward.x * WATCH.back, y: ground + 1, z: z - forward.z * WATCH.back } };
+    return { k, a, x, z, ground, forward, kind, half: K.half, guardUp: K.guardUp, guardOut: K.guardOut, origin: { x: x - forward.x * K.back, y: ground + 1, z: z - forward.z * K.back } };
   });
 }
 // Is a column inside a watchtower's shaft (pad = blocks round it too)?
-export const inWatch = (spots, x, z, pad = 0) => spots.some((s) => Math.abs(x - s.x) <= WATCH.half + pad && Math.abs(z - s.z) <= WATCH.half + pad);
+export const inWatch = (spots, x, z, pad = 0) => spots.some((s) => Math.abs(x - s.x) <= (s.half ?? WATCH.half) + pad && Math.abs(z - s.z) <= (s.half ?? WATCH.half) + pad);
 // Is a column on the way in to a watchtower's door (the step and the blocks in front of it, a block either side)?
 export const onWatchPath = (spots, x, z) => spots.some((s) => {
   const along = (x - s.origin.x) * -s.forward.x + (z - s.origin.z) * -s.forward.z; // out from the door
@@ -317,7 +336,7 @@ export const onWatchPath = (spots, x, z) => spots.some((s) => {
 export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, smooth }) {
   const L = WALL_LEVELS[level];
   const cols = new Map();
-  const watch = hasWatch(level) ? watchSpots(center, radius, gateAngle, smooth) : [];
+  const watch = watchSpots(center, radius, gateAngle, smooth, level);
   const put = (x, z, col) => {
     if (watch.length && inWatch(watch, x, z)) return; // a watchtower's shaft: the wall butts against it
     const k = key(x, z), old = cols.get(k);

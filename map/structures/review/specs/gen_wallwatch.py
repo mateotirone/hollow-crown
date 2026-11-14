@@ -105,7 +105,7 @@ def spec(region):
     out = {
         "name": f"wallwatch_{region}",
         "card": {"title": "Wall watchtower", "sub": f"{NAMES[region]}", "region": region,
-                 "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+                 "where": "Every settlement wall from the Palisade (level 2) to the Battlement Wall: four astride the wall line (the Low Palisade gets lookout stands)",
                  "kind": "Defence",
                  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; "
                           "a ladder inside climbs to the deck, where a guard keeps watch."},
@@ -115,7 +115,69 @@ def spec(region):
     if roof_snow: out["snow"] = True
     return out
 
+# ---------- the lookout stand: the Low Palisade's watch post (Mateo, 2026-11-14: the towers are "too big for a level one
+# wall", which is 2 high) ----------
+# A 3 x 3 open stand on four corner posts and a middle post: a ladder up the middle post's front to a hatch, a railed deck
+# for one guard (feet at y 5, three over the palisade), a little roof of the region's on the corner posts. Frame as the
+# tower: the ladder side faces south (+z, into the settlement) on z = 0, the stand is x -1..1, z -2..0, its pad at y 0.
+STAND = dict(deck=4, top=6)
+S = {   # post log, deck planks, rail fence, trapdoor, roof stairs (or None: a flat canopy of slabs), roof block
+    "vale": ("stripped_spruce_log", "spruce_planks", "spruce_fence", "spruce_trapdoor", "deepslate_tile_stairs", "deepslate_tiles", "cobblestone"),
+    "frostmarch": ("stripped_dark_oak_log", "dark_oak_planks", "dark_oak_fence", "dark_oak_trapdoor", "deepslate_tile_stairs", "deepslate_tiles", "cobbled_deepslate"),
+    "saltreach": ("stripped_birch_log", "birch_planks", "birch_fence", "birch_trapdoor", "dark_prismarine_stairs", "dark_prismarine", "smooth_sandstone"),
+    "blackfen": ("mangrove_log", "mangrove_planks", "mangrove_fence", "mangrove_trapdoor", "dark_oak_stairs", "dark_oak_planks", "packed_mud"),
+    "emberwaste": ("stripped_acacia_log", "acacia_planks", "acacia_fence", "acacia_trapdoor", None, "smooth_sandstone", "sandstone"),
+}
+
+def stand_spec(region):
+    log, plank, rail, trap, stairs, roofb, pad = S[region]
+    D, T = STAND["deck"], STAND["top"]
+    place = []
+    for x in (-1, 0, 1):
+        for z in (-2, -1, 0): place.append([x, 0, z, pad])                      # a pad under it all
+    for x, z in ((-1, -2), (1, -2), (-1, 0), (1, 0)):
+        for y in range(1, D + 1): place.append([x, y, z, log, {"axis": "y"}])    # corner posts up to the deck,
+        for y in range(D + 1, T + 1): place.append([x, y, z, rail])             # fence posts above it, so the lookout stays open
+    for y in range(1, D): place.append([0, y, -1, log, {"axis": "y"}])           # the middle post the ladder climbs
+    for y in range(1, D): place.append([0, y, 0, "ladder", {"facing": "s"}])
+    for x in (-1, 0, 1):
+        for z in (-2, -1, 0):
+            if (x, z) in ((-1, -2), (1, -2), (-1, 0), (1, 0)): continue
+            place.append([x, D, z, trap, {"half": "top", "open": False, "facing": "n"}] if (x, z) == (0, 0) else [x, D, z, plank])
+    for x, z in ((0, -2), (-1, -1), (1, -1)): place.append([x, D + 1, z, rail])  # the rail round the guard (the hatch side open)
+    # braces under the deck: an upside-down stair out from each post under the deck's edge
+    place += [[0, D - 1, -2, plank.replace("planks", "stairs"), {"facing": "s", "half": "top"}],
+              [-1, D - 1, -1, plank.replace("planks", "stairs"), {"facing": "e", "half": "top"}],
+              [1, D - 1, -1, plank.replace("planks", "stairs"), {"facing": "w", "half": "top"}]]
+    # the roof: a little pyramid on the four posts (stairs on the edges, the region's block on the corners), a full
+    # block in the middle and the spire top on it
+    R = T + 1
+    if stairs:
+        for x in (-1, 0, 1):
+            for z in (-2, -1, 0):
+                if (x, z) == (0, -1): place.append([x, R, z, roofb]); continue
+                if x != 0 and z != -1: place.append([x, R, z, roofb]); continue
+                f = "e" if x == -1 else "w" if x == 1 else "s" if z == -2 else "n"
+                place.append([x, R, z, stairs, {"facing": f, "half": "bottom"}])
+        place.append([0, R + 1, -1, "siege:spire_roof"])
+    else:   # Emberwaste: a flat sandstone canopy with a parapet lip, no pitch
+        for x in (-1, 0, 1):
+            for z in (-2, -1, 0): place.append([x, R, z, roofb])
+        for x, z in ((-1, -2), (1, -2), (-1, 0), (1, 0)): place.append([x, R + 1, z, "sandstone_wall"])   # little horns
+        place.append([1, R + 2, -2, "gold_block"])
+    place.append([-1, D + 2, -1, "lantern", {"hanging": False}])               # a lantern on the rail post beside the guard (the light stage adds more where needed)
+    out = {"name": f"wallstand_{region}",
+           "card": {"title": "Lookout stand", "sub": NAMES[region], "region": region,
+                    "where": "The Low Palisade (wall level 1): four astride the wall line, where the watchtowers rise at level 2",
+                    "kind": "Defence",
+                    "blurb": "A small open stand on log posts: a ladder up the middle to a hatch, a railed deck for one guard "
+                             "three blocks over the palisade, and a little roof."},
+           "place": place}
+    if region == "frostmarch": out["snow"] = True
+    return out
+
 if __name__ == "__main__":
     for region in R:
         open(os.path.join(HERE, f"wallwatch_{region}.json"), "w").write(json.dumps(spec(region), indent=1))
-    print("wrote", len(R), "specs")
+        open(os.path.join(HERE, f"wallstand_{region}.json"), "w").write(json.dumps(stand_spec(region), indent=1))
+    print("wrote", 2 * len(R), "specs")

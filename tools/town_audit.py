@@ -377,7 +377,7 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             while jj > 0 and air[a, jj, c]: jj -= 1
             F.append(finding("door", f"{n}: nothing to stand on outside it (a {j - 1 - jj + 1}-block drop)", (wx, wy, wz)))
             continue
-        if not reach[a, j, c]:
+        if not reach[a, j, c] and not reach[a, j + 1, c]:   # (j + 1: a stair or slab step at the door, stood on)
             F.append(finding("door", f"{n}: can't be walked to from the square", (wx, wy, wz)))
         if SOFT_GROUND.match(floor) and meta.get("kind") != "buildings":   # a bare field round the test builds
             # paved within one step?
@@ -429,6 +429,12 @@ def audit(path, plan=None, centre_hint=None, radius=None):
     t = meta.get("town") or {}
     if meta.get("wall") and t:
         inwall = (ii - t["x"]) ** 2 + (kk - t["z"]) ** 2 <= (meta["wall"] - 1) ** 2
+        if meta.get("wall_line"):                       # the wall's own line (72 radii from angle 0, x towards +z)
+            wl = np.array(meta["wall_line"], float)
+            ang = np.mod(np.arctan2(kk - t["z"], ii - t["x"]), 2 * np.pi) / (2 * np.pi) * len(wl)
+            i0 = np.floor(ang).astype(int) % len(wl); fr = ang - np.floor(ang)
+            rr = wl[i0] * (1 - fr) + wl[(i0 + 1) % len(wl)] * fr
+            inwall = (ii - t["x"]) ** 2 + (kk - t["z"]) ** 2 <= (rr - 1) ** 2
     else:
         inwall = inside2d
     street = feet & floor_pathy & ~covered & reach & (inside2d & inwall)[:, None, :]

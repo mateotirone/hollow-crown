@@ -1,8 +1,9 @@
 """The last pass over a baked town (hollow-crown-worldblocks/1), after furnishing and lighting: nothing is left hanging
 on nothing, standing on nothing or facing into a wall (town audit 2026-11-14, PR #384's findings).
 
-    tidy_worldblocks(d, ground)      d: the worldblocks dict (changed in place); ground(x, z) -> the top y of the
-                                     land under the town there (graded), or None when it isn't known
+    tidy_worldblocks(d, ground, ground_hi)   d: the worldblocks dict (changed in place); ground(x, z) -> the top y of the
+                                     land under the town there (graded), or None when it isn't known; ground_hi(x, z) ->
+                                     the higher of that and the land as it was (what a sign must not face)
 
   * a wall sign, ladder, item frame or button needs a solid block behind it and open space in front: it turns to
     a side that has both, or is dropped (a ladder backed by another ladder is dropped too);
@@ -34,7 +35,7 @@ PLANTISH = re.compile(r"grass|fern|flower|tulip|orchid|allium|bluet|daisy|poppy|
 BEHIND = {2: (0, 0, 1), 3: (0, 0, -1), 4: (1, 0, 0), 5: (-1, 0, 0)}
 
 
-def tidy_worldblocks(d, ground=None):
+def tidy_worldblocks(d, ground=None, ground_hi=None):
     pal, blocks = d["palette"], d["blocks"]
     at = {}
     for i, b in enumerate(blocks): at[(b[0], b[1], b[2])] = i          # the last block placed at a cell wins
@@ -121,7 +122,10 @@ def tidy_worldblocks(d, ground=None):
                     bn = name_at(back)
                     held = solid(back) or (nm.endswith("wall_sign") and bn is not None and "leaves" in bn)
                     if nm.endswith("ladder") and bn is not None and bn.endswith("ladder"): held = False
-                    return held and not solid(front)
+                    # in front: the land as it was counts too (ground_hi: a sign by a house at the town's edge faced
+                    # the hillside the grading never reached, Rimehold 2026-11-14)
+                    g_hi = ground_hi(front[0], front[2]) if ground_hi and name_at(front) is None and front not in at else None
+                    return held and not solid(front) and not (g_hi is not None and front[1] <= g_hi)
                 if f in BEHIND and ok(f): continue
                 for fd in (2, 3, 4, 5):
                     if ok(fd):
@@ -151,7 +155,9 @@ def tidy_worldblocks(d, ground=None):
                         c = (cell[0], cell[1] + dy, cell[2]); blocks.append([*c, ci]); at[c] = len(blocks) - 1
                     n["chained"] += 1; changed = True
                 else:
-                    if solid(below): continue
+                    # a lantern stands on a fence or a wall post just as well (every town lamp post: the first tidy
+                    # pass took them all off, and Sunscar's yard went dark)
+                    if solid(below) or re.search(r"(_fence$|_wall$|_slab$|_stairs$|lantern$|chain$)", name_at(below) or ""): continue
                     if solid(above):
                         blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**st, "hanging": True}}), *blocks[i][4:]]
                         n["hung"] += 1
