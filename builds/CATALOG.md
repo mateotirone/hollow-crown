@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**118 builds:** 1 not started, 29 designed, 17 in viewer, 71 in game.
+**119 builds:** 1 not started, 30 designed, 17 in viewer, 71 in game.
 
 Statuses:
 
@@ -87,6 +87,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ Choir Seam: Seam Cut, Choir Winch, Singing Gallery, and the ore barge (4) | The Hollow | designed | choirseam | Design a repeatable material gathering loop | `map/structures/choirseam/spec.py` | Waiting in PR #190. The Choir Ore mine on a Hollow cliff, built on the skill in PR #190; the ore barge (choirseam/barge.py) moors at its jetty. Hosted 3D https://claude.ai/artifact/D58sGecJoqcFXsYkttAh7C (Choir Seam tab). |
 | Guard posts and wall steps | Anywhere / region-neutral | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/guardposts` | Markers and steps, not a building. |
 | Interiors for every building on the skill (stairs, rooms by use, attics, lights) | One version per overworld region | designed |  | Add interiors to every building |  | Waiting in PR #207. A skill stage furnishing all 25 plot buildings (house, townhouse, farmhouse, inn, mint x 5 regions), the Kingsrest capital, chapel, guildhall, houses and inn, and Millbrook's clock tower and watermill. Other builds get interiors as they move onto the skill. Hosted 3D with roof-off and floor cuts https://claude.ai/artifact/9rUS3eguTn9VJhK9asKHG4 |
+| ★ Plot mine: the pithead (headframe and sheave, winding drum and house, ore bin, pit bell) and the old mine under it (pit bottom, miners' rest, haulage way) | One version per overworld region | designed |  | Make the plot mine exciting | `map/structures/pithead/spec.py` | Every plot's mine shaft, a story build (Act 1 day 2). The pithead is the skill's (pithead/export.py writes plotcaves/pithead_data.js); the underground is the game's nightly plan (plotcaves/mine.js). 3D preview: map/structures/pithead/preview.py. |
 
 ## Strongholds
 
