@@ -388,7 +388,9 @@ if os.environ.get("GW_RAIL_KEEP"):
     for st_ in _kp["stops"]:
         d_ = next((b_[4] for g_ in _kp["segments"] for b_ in g_["blocks"] if (b_[0], b_[2]) == (st_["x"], st_["z"]) and b_[3] == 0), 2)
         STATION_POS[st_["id"]] = (st_["x"], st_["z"], "x" if d_ % 4 == 2 else "z"); stop_y[st_["id"]] = st_["y"]
-    for g_ in _kp["segments"]:
+    # GW_RAIL_ROUTE=<an older export with the same stations>: take the routes (the line before straightening) from it
+    _rt = json.load(open(os.environ["GW_RAIL_ROUTE"])) if os.environ.get("GW_RAIL_ROUTE") else _kp
+    for g_ in _rt["segments"]:
         pts_ = LINE_PTS.setdefault(g_["line"], [])
         cl_ = [(b_[0], b_[2]) for b_ in g_["blocks"]]
         pts_ += cl_ if not pts_ else cl_[1:]
@@ -421,14 +423,21 @@ for n_, tx_, tz_, _r, _ in TOWNS:
     rd_ = raster([[(fx_, fz_), (ex_, ez_)]], lambda f: 5) & land & ~isriver
     isroad |= rd_; istrail &= ~rd_
     log("station road", n_, (fx_, fz_), "->", (ex_, ez_), int(rd_.sum()), "cells")
+# GW_RAIL_PLAIN="x,z;x,z;...": spots where the line keeps its routed cells exactly, 30 blocks round each (where the
+# real-map lay test, tools/rail_lay_test.mjs, found the straightened line running along a road, a bridge's works or
+# under an overhang, and the routed one laid clean)
+RAIL_PLAIN = [tuple(map(int, p_.split(","))) for p_ in os.environ.get("GW_RAIL_PLAIN", "").split(";") if p_.strip()]
 def _rail_blocked(x, z):
-    """Ground the line was routed round (towns, plots, story sites): the straightener keeps out of it."""
-    return any(math.hypot(x - ax_, z - az_) < ar_ for ax_, az_, ar_ in AVOID) or any(math.hypot(x - tx_, z - tz_) < tr_ for _, tx_, tz_, tr_ in R_TOWNS)
+    """Ground the line was routed round (towns, plots, story sites), and the GW_RAIL_PLAIN spots: the straightener
+    keeps out of it and leaves the routed cells there as they are."""
+    return (any(math.hypot(x - ax_, z - az_) < ar_ for ax_, az_, ar_ in AVOID) or any(math.hypot(x - tx_, z - tz_) < tr_ for _, tx_, tz_, tr_ in R_TOWNS)
+            or any(math.hypot(x - px_, z - pz_) < 30 for px_, pz_ in RAIL_PLAIN))
 for lname in SEQ:
     pts = LINE_PTS[lname]
     on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
     stops_ = [(st["x"], st["z"], STATION_POS[sid][2][-1]) for sid, st in on]
-    cells, si = railplan.trace(pts, stops_, routed=True, blocked=_rail_blocked)
+    # GW_RAIL_EXACT=1 (with GW_RAIL_KEEP): the kept export's track cells exactly as they are, only heights and works re-fitted
+    cells, si = railplan.trace(pts, stops_, routed=True, blocked=_rail_blocked, straighten=os.environ.get("GW_RAIL_EXACT") != "1")
     order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
     ground = [gy(x, z) for x, z in cells]
     for (sid, st), i in zip(on, si):
