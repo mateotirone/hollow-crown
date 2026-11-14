@@ -5,8 +5,11 @@
 //                   message at founding, and a warning the day before each of the first three siege nights
 //   workshopbook.js sneak-click a Siege Workshop: a short book of what it makes, by category
 //   nudges.js       which hall to raise after a tier up; a how-to line the first time each siege machine is placed
+//   act1.js         Act 1, "The Counted Nights": Old Elspeth's steps from landing to Sister Wren and the Ember
+//                   (rules in act1_rules.js)
 import "./founder.js";
 import "./workshop.js";
 import "./firstnights.js";
 import "./workshopbook.js";
 import "./nudges.js";
+import "./act1.js";

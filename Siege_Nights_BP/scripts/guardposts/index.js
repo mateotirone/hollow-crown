@@ -31,7 +31,7 @@ import { slotsOf } from "../settle/towns.js";
 import { seatInWorld } from "../settle/plotmarker.js";
 import { BUILDING } from "../settle/buildings.js";
 import { wallOf } from "../settle/walls.js";
-import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight, WATCH } from "../settle/walldata.js";
+import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight, WATCH, WATCH_KINDS } from "../settle/walldata.js";
 import { raisedBuildings } from "../settle/raised.js";
 import { hallOf } from "../townhall/townhall.js";
 import { drawHall, HALL_TIERS } from "../townhall/halls.js";
@@ -549,7 +549,7 @@ addTests("guard posts", {
       for (const p of posts) {
         const r = Math.hypot(p.x - w.x, p.z - w.z);
         assert(r > 30 && r < 52, `level ${level} post ${p.key} at ${r.toFixed(1)}`);
-        assert(p.from > 70 && p.from <= 70 + (p.watch ? WATCH.guardUp : WALL_LEVELS[level].h + 3), `level ${level} looks down from ${p.from}`);
+        assert(p.from > 70 && p.from <= 70 + (p.watch ? WATCH_KINDS[level === 1 ? "stand" : "tower"].guardUp : WALL_LEVELS[level].h + 3), `level ${level} looks down from ${p.from}`);
       }
       const gate = posts.filter((p) => p.key.startsWith("gate:"));
       assertEqual(gate.length, 2);

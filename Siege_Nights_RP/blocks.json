@@ -135,6 +135,9 @@
  "siege:throne": {
   "sound": "stone"
  },
+ "siege:fallen_ember": {
+  "sound": "amethyst_block"
+ },
  "siege:fallen_shard": {
   "sound": "amethyst_block"
  },

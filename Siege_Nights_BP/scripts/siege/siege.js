@@ -177,7 +177,8 @@ export function siegeTick() {
     const day = world.getDay();
     const siegeDue = applyFilter("siegeDue", day >= SETTINGS.firstSiegeDay && day % SETTINGS.siegeEveryNNights === 0, { day });
     const anySettlement = Object.keys(state.keeps).length > 0;
-    if (night && siegeDue && anySettlement && day !== state.lastSiegeDay) startSiege();
+    // "holdSiege": Act 1 keeps a settlement's first raid waiting until its lord is home for supper, or midnight
+    if (night && siegeDue && anySettlement && day !== state.lastSiegeDay && !applyFilter("holdSiege", false, { day })) startSiege();
     return;
   }
 

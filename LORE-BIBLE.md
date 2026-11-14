@@ -12,13 +12,24 @@
 6. **The Lost Days.** On third nights people went below, some willingly, and shapes came up in their places. Aldmere came to hate the peace.
 7. **The overthrow.** Princess **Edda** and the lords took Oswin on the walls on a third night. He did not draw his sword. She put him through the Crack alive. Then they rang every bell in Aldmere to break the truce on purpose.
 8. **Bellhollow.** The Hollow came up in fury and lost. The last stroke of the Founding Bell tore every thin place shut at once and left one wound in the rock: **the Gate** (the Rift). The bell split. The Hollow is behind the Gate and cannot get back through.
-9. **The cover-up.** Edda took vows, became **Saint Ashe**, and founded the **Order of the Ashen Gate**. It burned the portraits, the chronicles and Corvin, and taught everyone that there was never a King Oswin.
+9. **The cover-up.** Edda took vows, became **Saint Ashe**, and founded the **Order of the Ashen Gate**. It burned the portraits, the chronicles and Corvin, and taught everyone that there was never a King Oswin. Edda did not die (see **Old Elspeth** below).
 10. **Now.** The Hollow wants back in, "because they're pissed". Everything strange in the land is the Hollow working at the Gate: the seep, the Slips, the Returned, the wrong moon. Every third night is still theirs by the truce, so on that night they call, and Vorlund (kept as their hound, with a splinter of the Crown in his brow) marches the angry and the empty against the brightest keep. **Every siege is a debt being collected.** The Gate is growing. It has even moved: it now sits at one of seven thin places.
-11. **The Ember** that falls after a player's first siege win is that pledged splinter of the Hollow Crown, sent to find the brightest keep.
+11. **The Ember** is that pledged splinter of the Hollow Crown. Morvane sends it: it falls in lightning just outside a player's gate the night they come home from Sister Wren in Act 1, whether they won or lost their first raid, because he has already chosen them (story pass, Mateo 2026-11-14).
 
 ## The leader: Morvane (who he was is secret until the end)
 
 Decided by Mateo, 2026-11-10. The one who controls the Hollow is **Morvane**. That is the name the Hollow gave him. Players may hear "Morvane" early (Vorlund, the Sung Verses, raider camps, rumors). **What stays secret until the final fight is that Morvane was King Oswin.** The Hollow took in the one human who ever kept his word to it, put its Crown on him, and renamed him. He has directed the sieges for three hundred years and taught the Hollow our walls. He drops *The Last Testament*. The Ledger mystery "Who Is Morvane?" can only be answered with a clue from the Hollow itself.
+
+## Old Elspeth (who she is is secret until the Rift opens)
+
+Decided by Mateo, 2026-11-14 (story-and-gameplay pass). Every hall has an old blind woman at its hearth who reads the ash: **Old Elspeth**. She is the player's guide from the first day. She hands over the purse, teaches the settlement (banner, chest, Workshop, Barracks, guards, the harvest, the station), points out the ravens at dusk on the third day, and after the first raid sends the player to Sister Wren. When the Ember falls she says "I held one like it once." Her menu always has **[I'm stuck]**, with two hand-written hints for each story step. Act 1 script: the story thread's elspeth-act1-script.md (in the project files).
+
+**The truth:** Old Elspeth is **Edda**, Saint Ashe. The last stroke of the Founding Bell scorched her palm (the Ashen Skin) and will not let her die until what she broke is mended. She went blind the night she watched her father go through the Crack. She is at every hearth at once because she lives in the ash, and that is why each settlement has "its own" Elspeth.
+
+- She never says who she is, or who Morvane is, before the reveal. Small seeds only: "Long ago", "which surprises nobody anymore", "I held one like it once".
+- **The reveal comes when the Rift opens.** She tells the player who she is and why she has been at their hearth.
+- **After Morvane falls** she says a daughter's goodbye to her father.
+- She ties into the hidden third ending: offering the truce again is the mending that lets her rest.
 
 ## The Hollow Crown, and the endings
 
@@ -262,7 +273,8 @@ A player shelves the six notes, reads them, visits the sites, and uses **Name th
 
 | Id | Who | Where | What they lead to |
 |---|---|---|---|
-| `wren` | Sister Wren, healer whose brother came back wrong | Millbrook | Recognises the Old King's Journal. The clock tower, the Order's waystation, Rimehold and Sigrun. Gives *What Happened to Tobin* |
+| `elspeth` | Old Elspeth, a blind woman who reads the ash at your hearth (secretly Edda) | Every hall's hearth | The whole first three days, then Sister Wren, then Sir Aldous. Her [I'm stuck] hints cover every story step |
+| `wren` | Sister Wren, healer whose brother came back wrong | Millbrook | Act 1's first mission: who attacked you, the journal, the First Slip, then "go home and read". Recognises the Old King's Journal. The clock tower, the Order's waystation, Rimehold and Sigrun. Gives *What Happened to Tobin* |
 | `aldous` | Sir Aldous Vane, young knight who believes the Order | Comes for the Ember, then the chapterhouse | The chapterhouse, Corvin's Tower (if you are a Sorcerer), Brother Cael. Turns ally once you've read Edda's letter |
 | `mag` | Old Mag, Corvin's last apprentice, 311 | Mirelight | Corvin's Tower, the frozen lake, the changeling. Gives Notebook III, a hymn, and (once all ten notebooks are read) *The Name We Were* |
 | `elias` | The Lighthouse Keeper, an echo who doesn't know it | Gull's Rest lighthouse | The letters, the Cipher Wheel, the sunken chapel. Ends by asking you to put the lamp out |

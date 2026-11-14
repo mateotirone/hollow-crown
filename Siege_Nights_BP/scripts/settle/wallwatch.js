@@ -9,23 +9,28 @@
 import { Plan, toWorld, frameFor } from "../townhall/halls.js";
 import { drawData } from "../townhall/designs.js";
 import { styleFor, spellings } from "./buildings.js";
-import { WALLWATCH_DESIGNS } from "./wallwatch_data.js";
-import { WATCH } from "./walldata.js";
+import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
+import { WATCH, WATCH_KINDS } from "./walldata.js";
 
 export const watchRegion = (style) => (WALLWATCH_DESIGNS[style] ? style : "vale");
 
-// The shaft in the design's frame: x -half..half, z 1..2*half+1 (the door in the wall at z 1)
-export const SHAFT = { x0: -WATCH.half, x1: WATCH.half, z0: 1, z1: 2 * WATCH.half + 1, top: WATCH.guardUp - 2 };
+// The footprint in the design's frame: x -half..half, z 1..2*half+1 (the door or ladder at z 1), kept clear up to top
+export const shaftOf = (kind = "tower") => { const K = WATCH_KINDS[kind]; return { x0: -K.half, x1: K.half, z0: 1, z1: 2 * K.half + 1, top: K.guardUp - 2 }; };
+export const SHAFT = shaftOf("tower");
+export const designOf = (style, kind = "tower") => (kind === "stand" ? WALLSTAND_DESIGNS : WALLWATCH_DESIGNS)[watchRegion(style)];
 
 const plans = new Map();
-// The plan for one region's watchtower: the design, plus air through the inside of the shaft and the way in, so a
-// palisade the tower now stands in, grass, or a bump of ground never stays inside it (the design's own cells win).
-export function watchPlan(style) {
+// The plan for one region's watchtower (kind "tower") or the Low Palisade's lookout stand (kind "stand"): the design,
+// plus air through the inside of its footprint and the way in, so a palisade it now stands in, grass, or a bump of
+// ground never stays inside it (the design's own cells win).
+export function watchPlan(style, kind = "tower") {
   const region = watchRegion(style);
-  if (plans.has(region)) return plans.get(region);
+  const key = `${region}|${kind}`;
+  if (plans.has(key)) return plans.get(key);
   const st = styleFor(region);
-  const d = WALLWATCH_DESIGNS[region];
-  const prefix = `ww:${region}`;
+  const d = designOf(region, kind);
+  const SHAFT = shaftOf(kind);
+  const prefix = `${kind === "stand" ? "wst" : "ww"}:${region}`;
   d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = spellings(id); });
   const p = new Plan(st);
   drawData(p, d, prefix);
@@ -39,15 +44,16 @@ export function watchPlan(style) {
   // tower's front step on bare grass or sand)
   for (let x = -1; x <= 1; x++) for (let z = 1 - WATCH.clear; z <= 0; z++) if (!p.get(x, 0, z)) p.set(x, 0, z, "path");
   p.region = region;
+  p.kind = kind;
   p.design = d;
-  plans.set(region, p);
+  plans.set(key, p);
   return p;
 }
 
 // Every block a standing watchtower takes up, in the world, for taking it down: [{ x, y, z, below }] where below = the
 // block is at or under the tower's floor (filled with earth, not left as a hole). Air cells are left out.
-export function watchCells(style, origin, forward) {
-  const p = watchPlan(style), frame = frameFor(forward);
+export function watchCells(style, origin, forward, kind = "tower") {
+  const p = watchPlan(style, kind), frame = frameFor(forward);
   const out = [];
   for (const c of p.cells.values()) {
     if (c.role === "air") continue;

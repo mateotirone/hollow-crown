@@ -90,7 +90,8 @@ api.on("siegeReward", ({ player, threat }) => {
   hero.siegesHeld++;
   grantPoints(player, 2, "siege held");
   grantRenown(player, 60 + (threat ?? 12) * 2, "siege held", true);
-  if (hero.path === "none" && hero.ember === "none") system.runTimeout(() => dropEmber(player), 100);
+  // in Act 1 the Ember is the story's: it falls outside the gate after Sister Wren (newplayer/act1.js)
+  if (hero.path === "none" && hero.ember === "none" && !applyFilter("emberByStory", false, { player })) system.runTimeout(() => dropEmber(player), 100);
 });
 
 api.on("tierUp", ({ owner, after }) => {

@@ -17,6 +17,7 @@
 // (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
 // Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter) | road (lay the road out again)]
 
+import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
@@ -627,7 +628,7 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   save();
   const town = townOf(owner);
   if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) {
-    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: tw.outline });
+    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: { ...tw.outline, tight: HAMLET_WALLS[plot.name.toLowerCase()] } });
   }
   layOutTier(owner, 0);
   return true;

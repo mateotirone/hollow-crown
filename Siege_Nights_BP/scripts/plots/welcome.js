@@ -325,9 +325,7 @@ addMenuLabel({ block: HALL_WAYSTONE, name: "Waystone", hint: "Click: how things 
 const PAGES = [
   ["How things stand",
     "This is Aldmere. It is an old land and a quiet one, by day.\n\n"
-    + "Every third night something comes against the settlements. Walls are tested, banners fall, and by morning the people rebuild. "
-    + "Nobody alive can tell you why it is every third night. The priests have one answer, the old soldiers another, and the Order of the Ashen Gate says it is handled.\n\n"
-    + "Lately there is more. Wells that taste of salt far from any sea. Nights that run long. People who went missing and came back not quite themselves.\n\n"
+    + "Lately the quiet has gone odd. Wells that taste of salt far from any sea. Nights that run long. People who went missing and came back not quite themselves.\n\n"
     + "There is a journal in your pack. You did not put it there. It was written by someone who saw all this begin and understood none of it. Read it or don't."],
   ["Where you start",
     "You arrive as nobody: no title, no oath, no land. What you become depends on where you settle and what you do there.\n\n"
@@ -473,11 +471,11 @@ function pick(player, plan) {
     if (other.id !== player.id) other.sendMessage(`§6${player.name} has chosen ${status.plot.name} in ${status.plot.region}.`);
   }
   // Chat order on arrival: the plot's past (lore, at once), then what has been laid out (settlement), then this
-  // one clear next step, last, so it is the line left on screen.
-  const plotName = status.plot.name;
+  // one thought, last, so it is the line left on screen. Every step comes from someone (Mateo 2026-11-14): the first
+  // is Old Elspeth's, by the hearth in your hall (Act 1), so the thought sends you to her.
   const toward = compass(status.plot, KINGSREST);
   system.runTimeout(() => {
-    if (player.isValid) player.sendMessage(`§6Next: click the Plot Stone beside you and raise your banner to found ${plotName}. Kingsrest lies ${toward}.`);
+    if (player.isValid) player.sendMessage(`§7§oSomeone here should know what to do with this place. There's smoke from the hall. §r§8(Kingsrest lies ${toward}.)`);
   }, 160);
   player.onScreenDisplay.setTitle(`§6${status.plot.name}`, { subtitle: status.plot.region, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
   refreshHall();

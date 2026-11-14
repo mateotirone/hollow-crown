@@ -94,7 +94,8 @@
         "envoy_salt": "textures/entity/siege/npc_skins/envoy_salt",
         "envoy_lamp": "textures/entity/siege/npc_skins/envoy_lamp",
         "envoy_root": "textures/entity/siege/npc_skins/envoy_root",
-        "envoy_tide": "textures/entity/siege/npc_skins/envoy_tide"
+        "envoy_tide": "textures/entity/siege/npc_skins/envoy_tide",
+        "lore_elspeth": "textures/entity/siege/npc_skins/lore_elspeth"
       },
       "geometry": {
         "default": "geometry.humanoid.custom"

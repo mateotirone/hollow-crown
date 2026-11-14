@@ -125,8 +125,12 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //   morvane: Morvane has fallen (world or player)                      farmer: { at?: { x, z }, sold, tag } once you have a settlement
 //                                                                       station: your railway station (stationQuest)
 //   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
+//   act1: { on, step } while Act 1 is this player's story (newplayer/act1.js)
 // }
 export function questsFor(f) {
+  // Act 1 (Mateo 2026-11-14): one line, the step Old Elspeth (or Wren, or your own thought) gave you, and nothing
+  // else, so a new player is never handed a list
+  if (f.act1?.on && f.dim !== UNDERTOW) return f.act1.step ? [f.act1.step] : [];
   const out = [];
   // Until the first siege is held, getting ready for it comes first (newplayer/firstnights.js)
   const first = f.dim !== UNDERTOW && !f.morvane ? firstStep(f.first) : undefined;

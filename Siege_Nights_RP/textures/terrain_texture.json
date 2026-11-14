@@ -367,6 +367,9 @@
   "siege_throne": {
    "textures": "textures/blocks/siege_throne"
   },
+  "siege_fallen_ember": {
+   "textures": "textures/blocks/siege_fallen_ember"
+  },
   "siege_fallen_shard": {
    "textures": "textures/blocks/siege_fallen_shard"
   },

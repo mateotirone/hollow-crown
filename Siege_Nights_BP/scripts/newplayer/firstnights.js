@@ -1,13 +1,14 @@
 // First nights (new-player audit, Mateo 2026-11-13): until a settlement has held its first siege, the quest tracker's
 // top line walks the founder through getting ready: raise the banner, open the Workshop, build a Barracks, train
 // guards, hold the night, with the countdown to the first siege under it. The story steps carry on below it.
-// Also: a short "what to do first" in chat when the banner goes up, and a warning the day before each of the first
-// three siege nights.
+// Also: a warning the day before the second and third siege nights. Never before the first: a new lord must not
+// know a raid is coming until Old Elspeth points out the ravens at dusk (Act 1, Mateo 2026-11-14). New players get
+// their first days from Act 1 (act1.js), which uses firstStep only for the Barracks and guards lines.
 //
 // firstStep(f) is pure (tests run it in Node); firstFacts(player) reads the world for it (quests/index.js asks).
 
 import { world } from "@minecraft/server";
-import { onTick, on, keepOf, homeOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, keepOf, homeOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
 import { ballistasOf } from "../siege/machines.js";
 import { fallenRecord } from "../siege/keep.js";
 import { plotFor } from "../settle/founding.js";
@@ -23,7 +24,7 @@ export function firstStep(f) {
   if (!f || (f.wins ?? 0) > 0) return undefined;
   const when = f.days === undefined ? "" : f.days <= 0 ? "The first siege comes tonight." : `First siege in ${f.days} day${f.days === 1 ? "" : "s"}.`;
   const step = (id, title, hint, target) => ({ id: `first_${id}`, title, hint, target, note: when });
-  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Click your Plot Stone, the glowing stone in the middle of your plot, and choose Raise your banner here. That makes the land yours. Raiders come on the third night." };
+  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Click your Plot Stone, the glowing stone in the middle of your plot, and choose Raise your banner here. That makes the land yours." };
   if (!f.barracks && !f.ballistas) {
     const pin = f.plot ? { name: "Barracks plot", x: f.plot.x, z: f.plot.z, dim: "minecraft:overworld" } : undefined;
     if (f.plot?.state === "rising") return step("rising", "Wait for your Barracks", "Builders are raising it on its plot, a layer at a time. When it stands, the Barracks block is by its front door.", pin);
@@ -56,21 +57,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ player, block }) => {
   if (block.typeId === "siege:workshop") player.setDynamicProperty("hc:made_workshop", true);
 });
 
-const FIRST_DAYS = [
-  "§6Your settlement stands. Before the first siege on the third night:",
-  "§7 1. Take what you need from the §ffounder's chest§7 in your house.",
-  "§7 2. Build a §fBarracks§7: go to your big empty plot, click its §fPlot Marker§7 (the post on it), choose Barracks and Raise it.",
-  "§7 3. When it stands, click the §fBarracks block§7 by its door and §ftrain guards§7 (40 Regals each).",
-  "§7 4. On the night, stay online and keep your Keep Banner standing. The top-right tracker shows your next step.",
-];
-on("keepFounded", ({ player, moved }) => {
-  if (moved || !player?.isValid) return;
-  const keep = keepOf(player.id);
-  if ((keep?.wins ?? 0) > 0) return;
-  for (const line of FIRST_DAYS) player.sendMessage(line);
-});
-
-// The day before each of a settlement's first three siege nights, at dawn
+// The day before a settlement's second and third siege nights, by day (never its first: see the top)
 const warned = new Map(); // owner -> day warned for
 onTick("newplayer_eve", 200, () => {
   if (!isReady()) return;
@@ -82,7 +69,7 @@ onTick("newplayer_eve", 200, () => {
   if (t > 12000) return; // only by day
   for (const player of world.getPlayers()) {
     const keep = keepOf(player.id);
-    if (!keep || (keep.sieges ?? 0) >= 3 || warned.get(player.id) === next) continue;
+    if (!keep || (keep.sieges ?? 0) < 1 || (keep.sieges ?? 0) >= 3 || warned.get(player.id) === next) continue;
     warned.set(player.id, next);
     player.onScreenDisplay.setActionBar("§cSiege tomorrow night");
     player.sendMessage(`§cTomorrow night is a siege night.§7 You have ${guardCount(player.id)} guard${guardCount(player.id) === 1 ? "" : "s"}. Patch your wall, eat well, and be here when the horn sounds.`);

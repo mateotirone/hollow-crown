@@ -18,10 +18,13 @@
 // Starting purse (Mateo 2026-11-13: "we should give the player a starting amount of regals"): every player gets
 // START_REGALS once, on their first join (or their next join, on a world from before this). Enough for seeds and
 // bread from the Farmer, planks from the Woodcutter, or one guard, not enough to skip the first days.
+// On a map, Old Elspeth hands it over when you first meet her by your hall's hearth (Act 1, newplayer/act1.js says
+// so through the "joinPurse" filter); starting in Kingsrest without a plot, it comes at once.
 // Saves: player property "hc:starting_purse".
 
 import { system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { on, addTests, assert, assertEqual } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { mapMode, hallBuilt } from "../plots/api.js";
 import { regionAt } from "../economy/shops.js";
 import { REGION_KEY } from "../economy/regional_armor.js";
@@ -96,7 +99,7 @@ export function giveKit(player, region, { once = true } = {}) {
 const later = (player, region, ticks = 40) => system.runTimeout(() => giveKit(player, region), ticks); // after the teleport lands
 
 on("plotChosen", ({ player, plot }) => later(player, plot?.region));
-on("startedHomeless", ({ player }) => later(player, "vale"));
+on("startedHomeless", ({ player }) => { later(player, "vale"); system.runTimeout(() => { try { givePurse(player); } catch { /* left */ } }, 60); });
 // The starting purse, once per player, a moment after they join
 export function givePurse(player) {
   if (!valid(player) || player.getDynamicProperty(PURSE) !== undefined) return false;
@@ -107,7 +110,9 @@ export function givePurse(player) {
 }
 
 on("joined", ({ player, first }) => {
-  system.runTimeout(() => { try { givePurse(player); } catch (e) { console.warn(`[Hollow Crown] starting purse: ${e}`); } }, 60);
+  system.runTimeout(() => {
+    try { if (applyFilter("joinPurse", true, { player })) givePurse(player); } catch (e) { console.warn(`[Hollow Crown] starting purse: ${e}`); }
+  }, 60);
   if (!first) return;
   let hall = false;
   try {
