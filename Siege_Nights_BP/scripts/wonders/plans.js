@@ -25,7 +25,7 @@ export function wonderPlan(id, stage) {
   const w = WONDER_BY_ID[id], d = WONDER_DESIGNS[id];
   const st = styleOf(w);
   const p = new Plan(st);
-  drawData(p, { ...d, rows: stage ? stageRows(d, stage) : d.rows, marks: {} }, `wd:${id}`);
+  drawData(p, { ...d, rows: stage ? stageRows(d, stage) : d.rows, whole: d.rows, marks: {} }, `wd:${id}`);
   if (stage > 1) p.columns.clear();
   p.wonderStyle = st;
   plans.set(key, p);

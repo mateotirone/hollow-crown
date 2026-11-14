@@ -4,6 +4,7 @@
 import { world, BlockPermutation, BlockVolume } from "@minecraft/server";
 import { buildOrder, frameFor, toWorld, statesFor } from "./halls.js";
 import { sfx } from "../core/sfx.js";
+import { idSpellings } from "../core/blockids.js";
 
 const permCache = new Map();
 const CORNERSTONE = "siege:hall_cornerstone"; // a build never overwrites or clears it, wherever it stands
@@ -13,7 +14,7 @@ export function resolveRole(style, frame, role, o) {
   const key = `${style.name}|${role}|${JSON.stringify(o ?? {})}|${frame.F.x},${frame.F.z}`;
   if (permCache.has(key)) return permCache.get(key);
   let found;
-  const ids = style.roles[role] ?? ["minecraft:air"];
+  const ids = (style.roles[role] ?? ["minecraft:air"]).flatMap(idSpellings); // the Bedrock name too (core/blockids.js)
   outer: for (const id of ids) {
     for (const states of statesFor(frame, role, o)) {
       try {

@@ -305,7 +305,7 @@ def watchtower(region):
     for y in (4, 7):
         for (x, z) in ((2, -2), (-2, -2), (0, -4)): bp.set(x, y, z, P["pane"])
     B.door(0, 1, 0, "s", canopy=False, lanterns=True, frame=k("stone"))
-    for y in range(1, 10): bp.set(1, y, -3, "ladder", facing="n")
+    for y in range(1, 10): bp.set(1, y, -3, "ladder", facing="s")   # faces away from the north wall it hangs on (emit.py)
     # the lookout platform overhangs the shaft by one all round
     for x in range(-3, 4):
         for z in range(-5, 2): bp.set(x, 9, z, P["floor"])

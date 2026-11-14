@@ -303,6 +303,13 @@ function placeBoard(p) {
 
 const CARDINAL = { "1,0": "east", "-1,0": "west", "0,1": "south", "0,-1": "north" };
 const WEIRDO = { east: 0, west: 1, south: 2, north: 3 };
+// Blocks that hang on a wall spell their facing as facing_direction (the way their face looks: ladders, wall signs,
+// item frames, buttons), beds, bells and decorated pots as direction (0 south, 1 west, 2 north, 3 east), the same
+// numbers the skill's emit.py writes. Without these the builder fell through to no states at all, so every ladder,
+// wall sign and frame went in facing down (and popped off or stood sideways) and every bed lay south with two foot
+// halves (Mateo's playtest 2026-11-13: "signs and boards are sideways"; town audit 2026-11-14).
+const FACING_DIRECTION = { north: 2, south: 3, west: 4, east: 5 };
+const DIRECTION = { south: 0, west: 1, north: 2, east: 3 };
 
 // forward = unit vector {x, z} pointing from the cornerstone into the hall
 export function frameFor(forward) {
@@ -332,9 +339,13 @@ export function statesFor(frame, role, o = {}) {
   if (o.dir) {
     const d = worldDir(frame, o.dir);
     const upside = o.half === "top";
+    if (o.wallHung) out.push({ facing_direction: FACING_DIRECTION[d] });
+    if (o.legacyDir) out.push({ direction: DIRECTION[d] });
     out.push({ weirdo_direction: WEIRDO[d], upside_down_bit: upside });
     out.push({ "minecraft:cardinal_direction": d, upside_down_bit: upside });
     out.push({ "minecraft:cardinal_direction": d }); // add-on blocks that only turn (vault doors and locks)
+    out.push({ facing_direction: FACING_DIRECTION[d] }); // anything else that hangs on a wall (a hand-made template's ladder)
+    out.push({ direction: DIRECTION[d] });
   } else if (o.axis) {
     const axis = o.axis === "y" ? "y" : (o.axis === "x" ? frame.R : frame.F).x !== 0 ? "x" : "z";
     out.push({ pillar_axis: axis });
@@ -348,6 +359,7 @@ export function statesFor(frame, role, o = {}) {
     out.unshift({ direction: WEIRDO[worldDir(frame, o.dir)], upside_down_bit: o.half === "top" });
   }
   if (o.st) for (const s of out) Object.assign(s, o.st);
+  if (o.st && !out.length) out.push({ ...o.st }); // states with no facing (a bell hung from its beam)
   out.push({});
   return out;
 }

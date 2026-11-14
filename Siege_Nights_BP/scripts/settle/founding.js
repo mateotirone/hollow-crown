@@ -33,6 +33,7 @@ import { ROAD_BLOCKS, WEAK_ROAD, ROAD_JOIN_PATHY, gateDir, roadEnd, roadLine, jo
 import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
+import { idSpellings } from "../core/blockids.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
 export const PLOT_MARKER = "siege:plot_marker";
@@ -99,7 +100,15 @@ function perm(id, states) {
   const key = `${id}${JSON.stringify(states ?? {})}`;
   if (!perms.has(key)) {
     let p;
-    try { p = BlockPermutation.resolve(id, states); } catch { try { p = BlockPermutation.resolve(id); } catch { p = null; } }
+    try { p = BlockPermutation.resolve(id, states); } catch { p = undefined; }
+    for (const alt of idSpellings(id).slice(1)) if (!p) { try { p = BlockPermutation.resolve(alt, states); id = alt; } catch { p = undefined; } }
+    // fence gates in the layouts spell their facing the old way (direction 0 south, 1 west, 2 north, 3 east); the game
+    // now wants minecraft:cardinal_direction, and without it every gate stood facing south, across north-south fences
+    if (!p && typeof states?.direction === "number") {
+      const { direction, ...rest } = states;
+      try { p = BlockPermutation.resolve(id, { ...rest, "minecraft:cardinal_direction": ["south", "west", "north", "east"][direction & 3] }); } catch { p = undefined; }
+    }
+    if (!p) { try { p = BlockPermutation.resolve(id); } catch { p = null; } }
     perms.set(key, p);
   }
   return perms.get(key);
@@ -213,7 +222,7 @@ function* blendGround(dim, town, layout, tier) {
             if (!b || (!NATURAL.test(b.typeId) && b.typeId !== "minecraft:air")) { natural = false; break; }
           }
           if (!natural) break; // something built stands there: leave it
-          for (let y = top; y > hiOk; y--) get(x, y, z)?.setPermutation(air);
+          for (let y = top + 1; y > hiOk; y--) get(x, y, z)?.setPermutation(air); // + the snow or grass on top
           const b = get(x, hiOk, z);
           if (b && /dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(b.typeId)) b.setPermutation(grass);
         } else if (top < loOk) {
@@ -225,7 +234,25 @@ function* blendGround(dim, town, layout, tier) {
       }
     }
   }
+  // 3. no snow or plant left on air: where the groundwork cut the land lower (or a pond under it), the snow layer that
+  // lay on the old ground stayed a block up in the air (the 2026-11-14 town audit: dozens in each Frostmarch Hamlet)
+  const tops = new Map();
+  for (let t = 0; t <= tier; t++) for (const [dx, dy, dz] of groundwork(layout, t)) {
+    const k = `${dx},${dz}`;
+    if ((tops.get(k)?.dy ?? -999) < dy) tops.set(k, { dx, dy, dz });
+  }
+  for (const c of tops.values()) {
+    const x = town.x + c.dx, z = town.z + c.dz;
+    for (let y = town.y + c.dy + 1, k = 0; k < 4; y++, k++) {
+      if (tired()) yield;
+      const b = get(x, y, z);
+      if (!b || !LOOSE.test(b.typeId)) continue;
+      const under = get(x, y - 1, z);
+      if (under && /air$|water|lava|snow_layer|short_grass|tall_grass|fern|flower/.test(under.typeId)) try { b.setPermutation(air); } catch { /* protected */ }
+    }
+  }
 }
+const LOOSE = /snow_layer|short_grass|tall_grass|fern$|flower|dandelion|poppy|tulip|daisy|cornflower|bluet|orchid|allium|lily_of_the_valley|deadbush|dead_bush/;
 
 // ---------- joining the gate road to the map's roads (Mateo's playtests 2026-11-12 and 2026-11-13) ----------
 // The settlement's road runs out through the gate and then must carry on to the map's own roads. Each map plot's
