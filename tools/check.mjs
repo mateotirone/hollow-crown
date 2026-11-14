@@ -440,6 +440,18 @@ step("Hostile mobs stay out of settlements");
     const fam = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components?.["minecraft:type_family"]?.family ?? [];
     if (!fam.includes("monster")) { bad++; fail(`${rel(file)}: ${id} is a wild hostile but lacks the "monster" family, so the walls sweep can't find it.`); }
   }
+  // Rule (Mateo 2026-11-14: "what abt the shit ton of damage they do?"): the wild is dangerous, not punishing. No wild
+  // creature (natural spawns, Hollow night walkers, Seep guards) bites for more than 7 on Normal, and anything above 5
+  // swings slowly (cooldown_time), so there is a gap to step back. studio/bestiary/build.py refuses the same.
+  for (const [id, m] of Object.entries(MOBS)) {
+    if (![...wildFamilies, "wild"].includes(m.family) && !wild.has(id)) continue;
+    const file = join(BP, "entities/bestiary", `${id.replace(/^siege:/, "")}.json`);
+    if (!existsSync(file)) continue;
+    const c = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components ?? {};
+    const dmg = c["minecraft:attack"]?.damage ?? 0, cd = c["minecraft:behavior.melee_attack"]?.cooldown_time;
+    if (dmg > 7) { bad++; fail(`${rel(file)}: ${id} bites for ${dmg}; a wild creature hits for 7 at most (roster.MAX_WILD_MELEE).`); }
+    else if (dmg > 5 && c["minecraft:behavior.melee_attack"] && !(cd >= 1)) { bad++; fail(`${rel(file)}: ${id} bites for ${dmg} with no melee cooldown_time; wild creatures above 5 swing slowly.`); }
+  }
   console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
 }
 
