@@ -315,13 +315,13 @@ export function choosePath(player, path) {
     give(player, OATH_BANNER);
     api.title(player, "§6Oathsworn", "§7Squire of the Ashen Gate");
     sfx(player, "random.anvil_use");
-    player.sendMessage("§6You are a Squire of the Ashen Gate.§7 The Blade branch of the Tree is open to you. Your §fOath Banner§7 is in your pack: once you learn Rallying Cry, use it to rally, sneak and use it to plant it.");
+    player.sendMessage("§6You are a Squire of the Ashen Gate.§7 The Blade branch of the Tree is open to you. Your §fOath Banner§7 is in your last hotbar slot, and stays there: once you learn Rallying Cry, use it to rally, sneak and use it to plant it.");
   } else if (path === "marked") {
     give(player, BOUND_EMBER);
     api.title(player, "§5Marked", "§7Something heard you");
     sfx(player, "mob.wither.spawn", { volume: 0.4, pitch: 1.6 });
     player.addEffect("darkness", 80, { showParticles: false });
-    player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. Hold the §fBound Ember§7: use it to cast your chosen power, sneak and use it to choose another. Watch your Resonance.");
+    player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. The §fBound Ember§7 lives in your last hotbar slot: use it (or double-tap sneak) to open your powers. Watch your Resonance.");
   }
   if (ROLES[path]?.region) {
     api.title(player, `${ROLES[path].color}${ROLES[path].name}`, `§7${RANKS[path][0].name}`);
