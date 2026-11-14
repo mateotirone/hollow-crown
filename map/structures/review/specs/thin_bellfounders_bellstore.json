@@ -1,0 +1,240 @@
+{
+ "name": "thin_bellfounders_bellstore",
+ "card": {
+  "title": "Bellfounders' bell store",
+  "sub": "Norse timber and stone",
+  "region": "frostmarch",
+  "where": "Bellfounders' Mine (thin place)",
+  "kind": "Landmark",
+  "blurb": "A two-storey store on a dark stone ground floor, steep shingle and dragon heads; in the open shed beside it a newly cast bell hangs from a timber frame, ready to go up. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    0,
+    0,
+    6,
+    8
+   ],
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "large",
+    "steps": 1
+   },
+   "windows": {
+    "w": [
+     {
+      "at": -2,
+      "storey": 1
+     },
+     {
+      "at": 2,
+      "storey": 1
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 0
+     },
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ],
+    "n": [
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ],
+    "e": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true,
+    "ridge": "z"
+   },
+   "chimney": [
+    [
+     1,
+     6
+    ]
+   ],
+   "vines": 0,
+   "interior": "storage"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    7,
+    1,
+    12,
+    7
+   ],
+   "against": "w",
+   "top": 7,
+   "pitch": "half",
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  }
+ ],
+ "place": [
+  [
+   11,
+   1,
+   3,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   2,
+   3,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   3,
+   3,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   1,
+   5,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   2,
+   5,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   3,
+   5,
+   "dark_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   11,
+   4,
+   3,
+   "stripped_dark_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   11,
+   4,
+   4,
+   "stripped_dark_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   11,
+   4,
+   5,
+   "stripped_dark_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   11,
+   3,
+   4,
+   "bell",
+   {
+    "attachment": "hanging",
+    "facing": "e"
+   }
+  ],
+  [
+   9,
+   1,
+   2,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   9,
+   1,
+   6,
+   "smithing_table"
+  ],
+  [
+   12,
+   1,
+   7,
+   "anvil",
+   {
+    "facing": "n"
+   }
+  ]
+ ]
+}
