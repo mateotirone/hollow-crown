@@ -5,11 +5,11 @@ import { world, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { applyFilter } from "../core/events.js";
 import { COLORS, GUARD_TYPES } from "./constants.js";
-import { GUARD_ARMOR, armorTier, guardCount, guardLimit, guardTag, upgradeGuard } from "./guards.js";
+import { GUARD_ARMOR, armorTier, guardCount, guardOwner, guardLimit, guardTag, upgradeGuard } from "./guards.js";
 import { keepHealth } from "./keep.js";
 import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
-import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
+import { TIERS, canManage, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
 import { funds } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
@@ -29,7 +29,8 @@ export function keepMenu(block, player) {
   const keep = state.keeps[owner];
   if (!keep) return;
   const tier = tierOf(keep);
-  const mine = owner === player.id;
+  const own = owner === player.id; // the owner alone recolors the banner and makes allies
+  const mine = canManage(owner, player.id); // the owner or a writ ally (Mateo, 2026-11-13)
   const allies = (keep.allies ?? []).map((id) => world.getPlayers().find((p) => p.id === id)?.name ?? "an ally (offline)");
   const until = nextSiegeDay() - world.getDay();
   const lines = [
@@ -46,12 +47,12 @@ export function keepMenu(block, player) {
   ];
   const form = new ActionFormData().title(`${keep.name}'s ${tier.name}`).body(lines.filter((l, i) => l || lines[i - 1]).join("\n"));
   const actions = [];
-  if (mine) {
-    form.button("Your guards", "textures/items/siege_man_at_arms"); actions.push(() => guardList(player));
+  if (mine) { form.button(own ? "Your guards" : "The settlement's guards", "textures/items/siege_man_at_arms"); actions.push(() => guardList(player, owner)); }
+  if (own) {
     form.button("How to change the banner color", "textures/items/dye_powder_red_new"); actions.push(() => player.sendMessage("§7Click your Keep Banner holding any dye. Each settlement needs its own color."));
     form.button("How to add an ally", "textures/items/siege_writ"); actions.push(() => player.sendMessage("§7Look at another player and use a Writ of Alliance. Allies can build on your land and your guards leave them alone."));
   }
-  for (const extra of applyFilter("keepMenuButtons", [], { player, keep, owner, mine })) { // addKeepMenuButtons
+  for (const extra of applyFilter("keepMenuButtons", [], { player, keep, owner, mine, own })) { // addKeepMenuButtons
     form.button(extra.label, extra.icon); actions.push(extra.action);
   }
   form.button("Close");
@@ -59,8 +60,9 @@ export function keepMenu(block, player) {
 }
 
 export function barracksMenu(block, player) {
-  if (settlementAt(block.location) !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can use these Barracks.");
-  const count = guardCount(player.id), limit = guardLimit(player.id);
+  const owner = settlementAt(block.location);
+  if (!canManage(owner, player.id)) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner and their allies can use these Barracks.");
+  const count = guardCount(owner), limit = guardLimit(owner);
   const form = new ActionFormData().title("Barracks").body([
     `Guards: ${count}/${limit}   You have ${coins(funds(player))}`,
     "",
@@ -69,20 +71,21 @@ export function barracksMenu(block, player) {
   ].join("\n"));
   // features add buttons here: applyFilter("barracksButtons", []) -> [{ label, icon?, run(player, block) }]
   // (army/index.js puts "Train soldiers" and "Upgrade the Barracks" first)
-  const extra = applyFilter("barracksButtons", [], { player, block });
+  const extra = applyFilter("barracksButtons", [], { player, block, owner });
   for (const b of extra) form.button(b.label, b.icon);
-  form.button(`Your guards (${count})`, "textures/items/iron_sword");
+  form.button(`${owner === player.id ? "Your" : "The"} guards (${count})`, "textures/items/iron_sword");
   form.button("Close");
   form.show(player).then((r) => {
     if (r.canceled) return;
     if (r.selection < extra.length) extra[r.selection].run(player, block);
-    else if (r.selection === extra.length) guardList(player);
+    else if (r.selection === extra.length) guardList(player, owner);
   }).catch(() => {});
 }
 
-export function guardList(player) {
-  const guards = Object.keys(GUARD_TYPES).flatMap((type) => overworld().getEntities({ type, tags: [guardTag(player.id)] }));
-  const form = new ActionFormData().title("Your guards");
+// owner: whose guards (a writ ally sees and upgrades the settlement's guards)
+export function guardList(player, owner = player.id) {
+  const guards = Object.keys(GUARD_TYPES).flatMap((type) => overworld().getEntities({ type, tags: [guardTag(owner)] }));
+  const form = new ActionFormData().title(owner === player.id ? "Your guards" : "The settlement's guards");
   form.body(guards.length ? "Pick a guard to see them or upgrade their armor." : "You have no guards nearby. Guards far away in unloaded land don't show here.");
   for (const g of guards) {
     const kind = g.typeId === "siege:archer" ? "Archer" : "Man-at-Arms";
@@ -111,6 +114,6 @@ export function guardMenu(guard, player) {
   form.show(player).then((r) => {
     if (r.canceled) return;
     if (r.selection === 0 && next) upgradeGuard(guard, player, new ItemStack(next.item, 1));
-    if (r.selection === 1) guardList(player);
+    if (r.selection === 1) guardList(player, guardOwner(guard) ?? player.id);
   }).catch(() => {});
 }

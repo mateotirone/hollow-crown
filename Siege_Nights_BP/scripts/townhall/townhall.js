@@ -392,7 +392,7 @@ export function hallMenu(player, owner) {
   const hall = hallOf(owner);
   const keep = api.keepOf(owner);
   if (!keep) return;
-  const mine = owner === player.id;
+  const mine = api.canManage(owner, player.id); // the owner or a writ ally (Mateo, 2026-11-13)
   if (!hall || hall.lost) {
     return player.sendMessage(mine
       ? "§7You have no town hall yet. Craft a §fHall Cornerstone§7 at the Siege Workshop and place it where the front door should be, facing the way the hall should run."

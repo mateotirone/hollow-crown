@@ -171,7 +171,7 @@ const savedSkills = new Map(); // owner id -> skills, remembered after they log 
 export function dropEmber(player) {
   if (!player.isValid) return;
   const hero = heroOf(player);
-  const keep = api.keepOf(player.id);
+  const keep = api.keepOf(api.homeOf(player.id) ?? player.id); // own keep, or the one they are a writ ally of
   const base = keep && player.dimension.id === "minecraft:overworld" ? api.keepCenter(keep) : player.location;
   const angle = Math.random() * Math.PI * 2;
   const dist = 8 + Math.random() * 10;
@@ -199,9 +199,10 @@ export function dropEmber(player) {
 // ---------- Keep and Wayfarer passives ----------
 
 function hallOrigin(player) {
-  const hall = hallOf(player.id);
+  const home = api.homeOf(player.id) ?? player.id;
+  const hall = hallOf(home);
   if (hall && !hall.lost) return { x: hall.x + 0.5 - hall.fx, y: hall.y, z: hall.z + 0.5 - hall.fz };
-  const keep = api.keepOf(player.id);
+  const keep = api.keepOf(home);
   return keep ? api.keepCenter(keep) : undefined;
 }
 
@@ -216,7 +217,7 @@ export function passiveTick() {
     savedSkills.set(player.id, s);
     const overworld = player.dimension.id === "minecraft:overworld";
     const land = overworld ? api.settlementAt(player.location) : undefined;
-    const home = land === player.id;
+    const home = api.canManage(land, player.id); // own land, or a settlement they are a writ ally of
     const fighting = inCombat(player);
 
     // Keep

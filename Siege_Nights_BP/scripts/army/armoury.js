@@ -36,8 +36,7 @@ export function dressForType(guard, owner) {
   if (t > armorTier(guard)) try { equipGuard(guard, t); } catch { /* gone */ }
 }
 
-export async function armouryMenu(player) {
-  const owner = player.id;
+export async function armouryMenu(player, owner = player.id) {
   const types = SOLDIERS.filter((s) => s.at === "barracks" && ofType(owner, s.id).length + typeTier(owner, s.id) > 0);
   if (!types.length) return say(player, "§7Train some soldiers first.");
   const form = new ActionFormData().title("Armoury").body("Upgrade the armour of a whole type of soldier at once. Those trained later wear it too.");

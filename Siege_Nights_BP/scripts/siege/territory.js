@@ -1,7 +1,7 @@
 // Land: who owns where, settlement tiers, alliances and banner colors.
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
-import { world } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import { emit, applyFilter } from "../core/events.js";
 import { COLORS, WRIT } from "./constants.js";
 import { saveState, state } from "./state.js";
@@ -60,6 +60,24 @@ export function isAlly(owner, playerId) {
   return state.keeps[owner]?.allies?.includes(playerId) ?? false;
 }
 
+// A writ ally runs the settlement with its owner (Mateo, 2026-11-13): Plot Markers, Barracks, the Town Hall,
+// guards, walls and paying all work for them too. Only the owner can recolor or move the banner and make allies.
+export function canManage(owner, playerId) {
+  return !!owner && (owner === playerId || isAlly(owner, playerId));
+}
+
+// The settlement a player acts for: their own, or else the first one they are a writ ally of.
+export function homeOf(playerId) {
+  if (state.keeps[playerId]) return playerId;
+  return Object.keys(state.keeps).find((owner) => isAlly(owner, playerId));
+}
+
+// The settlement a player acts for at a spot: the land's owner when they belong to it, else their home.
+export function homeAt(player, location) {
+  const land = location ? settlementAt(location) : undefined;
+  return canManage(land, player.id) ? land : homeOf(player.id);
+}
+
 export function useWrit(player) {
   const keep = state.keeps[player.id];
   if (!keep) return player.sendMessage("§7You need a settlement before you can make alliances.");
@@ -83,6 +101,20 @@ export function useWrit(player) {
 world.afterEvents.itemUse.subscribe((event) => {
   if (!state) return;
   if (event.itemStack.typeId === WRIT) useWrit(event.source);
+});
+
+// /scriptevent siege:alliance : which settlement you act for, and who is allied with it
+system.afterEvents.scriptEventReceive.subscribe((event) => {
+  if (event.id !== "siege:alliance" || !state) return;
+  const player = event.sourceEntity;
+  if (player?.typeId !== "minecraft:player") return;
+  const home = homeOf(player.id);
+  if (!home) return player.sendMessage("§7You have no settlement and are no one's ally. Ask a friend to look at you and use a Writ of Alliance.");
+  const keep = state.keeps[home];
+  const names = (keep.allies ?? []).map((id) => world.getPlayers().find((p) => p.id === id)?.name ?? "an ally (offline)");
+  player.sendMessage(home === player.id
+    ? `§6You own ${keep.name}'s settlement.§7 Allies: ${names.length ? names.join(", ") : "none"}.`
+    : `§6You are a writ ally of ${keep.name}'s settlement.§7 You can use its Plot Markers, Barracks, Town Hall and guards like its owner. Allies: ${names.join(", ")}.`);
 });
 
 // Which settlement a spot belongs to (owner id), or undefined in the wilds

@@ -24,7 +24,7 @@
 import { world, system, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, on, emit, addFilter, keepOf, guardOwner, guardTag, GUARD_TYPES, GUARD_ARMOR, armorTier,
-  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, underAttack, addTests, assert, assertEqual } from "../siege/api.js";
+  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, canManage, homeOf, underAttack, addTests, assert, assertEqual } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { townOf, layoutOf } from "../settle/founding.js";
 import { slotsOf } from "../settle/towns.js";
@@ -421,7 +421,7 @@ addFilter("barracksButtons", (buttons, { player, block }) => [...buttons, {
 
 // The sky view. guard = the guard being stationed, or none to look at the posts and fill them.
 export function openPosts(player, owner, guard) {
-  if (owner !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can station its guards.");
+  if (!canManage(owner, player.id)) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner and their allies can station its guards.");
   const sites = sitesFor(owner, true);
   if (!sites.length) return player.sendMessage("§7There are no posts yet. Raise a wall or put up a building, and posts come with it.");
   startView(player, owner);
@@ -524,7 +524,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player" || !isReady()) return;
   const cmd = event.message.trim() || "view";
-  if (cmd === "view") return openPosts(player, player.id);
+  if (cmd === "view") return openPosts(player, homeOf(player.id) ?? player.id);
   if (cmd === "list") {
     const manned = mannedOf(player.id);
     const lines = sitesFor(player.id, true).map((s) => `§6${s.name}§7: ${s.posts.map((p) => `${p.n}${manned[p.key] ? "§a*§7" : ""}`).join(" ")}`);
