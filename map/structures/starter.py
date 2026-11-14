@@ -49,7 +49,7 @@ AREAS = [
     # level-5 hall takes, so nothing is ever knocked down for it.
     # The open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
     ("slot",      "Empty plot",       (-38, -22, 1, 15),  "r+", {"size": "L"}),
-    ("pen",       "Pen",              (-30, -22, 18, 26), "r+", {}),
+    ("pen",       "Cow pen",          (-30, -22, 18, 26), "r+", {}),
     # the Works yard (27 along its lane x 17 deep): the Ironworks opens at Hamlet, so its plot is set up from day one
     # (Mateo 2026-11-14, settlement thread: "they should have their plots already done. Not done, but set up")
     ("slot",      "Works yard",       (21, 37, -1, 25),   "r-", {"size": "W"}),
@@ -551,6 +551,9 @@ class Starter:
                         x, y, z = self.at(r, a); self.put(x, y + 1, z, f"{W}_fence")
             elif kind == "pen":
                 self.fence_ring(box, side, 1)
+                # the cow pen (Mateo 2026-11-14, story pass): two cows in it from day one, bred with spare wheat
+                x, y, z = self.at((r0 + r1) // 2, (a0 + a1) // 2)
+                self.fixtures.append({"kind": "cow_pen", "at": [x - self.C[0], y + 1, z - self.C[1]]})
                 x, y, z = self.at(*self.door_cell(box, side)); self.put(x, y + 1, z, f"{W}_fence_gate")
                 for (r, a) in ((r1 - 1, a0 + 1), (r1 - 1, a0 + 2), (r1 - 2, a0 + 1)):
                     x, y, z = self.at(r, a); self.put(x, y + 1, z, "hay_block")
