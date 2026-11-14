@@ -376,6 +376,7 @@ export const NPCS = [
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
+      [["act2:talk_aldous"], "tree"], // Act 2: you met him but left before he sent you to the Tree
       [["flag:aldous_met"], "hub"],
       [[], "first"],
     ],
@@ -393,28 +394,42 @@ export const NPCS = [
         opts: [
           ["What is it?", "what", ["flag:aldous_met"]],
           ["Why does the Order want it?", "why", ["flag:aldous_met"]],
-          ["I haven't seen anything.", "end", ["flag:aldous_met"]],
+          ["I have it. I'm keeping it.", "keep", ["flag:aldous_met"]],
+          ["I haven't seen anything.", "lie", ["flag:aldous_met"]],
         ],
+      },
+      // Act 2, step 1 (story pass, Mateo 2026-11-14): you keep the Ember and he sends you to the Tree of Oaths
+      keep: {
+        text: "Show me. ...Bare-handed, and you're still standing.\n\nThe Rule says a knight takes a light before it takes anyone. I don't think it has taken you. And I won't pull it out of a lord's hand at his own gate like a thief.",
+        opts: [["Then what?", "tree"]],
+      },
+      lie: {
+        text: "It hums, you know. I can hear it from here, through your wall.\n\nNo, I won't search your house. The Rule doesn't let me, and I wouldn't if it did.",
+        opts: [["...I'm keeping it.", "tree"]],
+      },
+      tree: {
+        text: "Not to me, then. Take it to the Tree and choose.\n\nThe Tree of Oaths, in your hall. Give the light up there and I'll box it and carry it to the chapterhouse myself. Keep it, and that is between you and it. Only choose. I don't think a light nobody has chosen stays quiet for long.",
+        opts: [["I'll go to the Tree.", "end", ["flag:aldous_tree"]]],
       },
       what: {
         text: "A fallen star. That is what I was told and that is what I will tell you.\n\n...It did not look like a star to me either. Stars do not whisper. But a knight of the Gate does not ask what lies below. It is the second line of the Rule.",
         opts: [
           ["What's the first line?", "rule"],
           ["Why does the Order want it?", "why"],
-          ["Good day, Sir Aldous.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       why: {
         text: "\"If ever a light falls from below, a knight shall ride to it and take it, before it takes anyone.\" That is the Rule.\n\nFrom below. I have always thought that a strange word to use about something that fell out of the sky.",
         opts: [
           ["May I read this Rule?", "rule"],
-          ["Good day.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       rule: {
         text: "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
         opts: [
-          ["Thank you.", "end", ["tome:seal_01", "lead:ashen_chapterhouse"]],
+          ["I already have.", "keep", ["tome:seal_01", "lead:ashen_chapterhouse"]],
         ],
       },
       hub: {

@@ -140,7 +140,7 @@ export function act1Step(stage, f = {}, p = {}) {
     case "find_ember": return step("Find what fell", "Something came down by the gate. It's still glowing.", at("The light by the gate", p.ember));
     case "ask_ember": return talk("Ask Old Elspeth about the Ember", "Elspeth will know what this is.");
     case "sleep": return step("Sleep until morning", "Elspeth said a rider comes at first light. Sleep in your bed.", at("Home", p.keep));
-    case "aldous": return step("Talk to Sir Aldous", "A knight is waiting at your keep. Hear him out, but give him nothing you haven't read.", at("Sir Aldous", p.aldous ?? p.keep),
+    case "aldous": return step("Talk to Sir Aldous about the Ember", "A knight is waiting at your keep. Hear him out, but give him nothing you haven't read.", at("Sir Aldous", p.aldous ?? p.keep),
       { npc: { tag: "siege_lore_npc_aldous", name: "Sir Aldous" } });
     default: return undefined;
   }

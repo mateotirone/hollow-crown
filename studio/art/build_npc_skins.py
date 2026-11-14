@@ -145,6 +145,13 @@ LOOKS = {
     'envoy_lamp': S('#5a5030', '#e8d070', '#2e2a20', None, 'robe', 'lamp', 'skirt', sk=PALE, hair=WHITE_HAIR, trim='#e8d070'),
     'envoy_root': S('#2a3e2a', '#6a5a3a', '#22281e', '#2a3e2a', 'shawl', 'hood', 'skirt', sk=PALE, hair=1),
     'envoy_tide': S('#1e4448', '#5e6168', '#1a2a2e', None, 'mail', 'long', sk=PALE, hair=6, trim='#4a9a9a'),
+    # a Rival Lord's herald (Act 2): his lord's colours split down the middle of a tabard (o left, h right, also
+    # his cap), a gold badge and cord belt (trim), plain tunic sleeves; same cut in every region so he reads at a glance
+    'herald_vale': S('#4a3e30', '#2f6a2c', '#3a3632', '#ece6d4', 'tabard', 'cap', sk=1, hair=1, trim='#d8b04a', cuffs=True),
+    'herald_frostmarch': S('#3a3a42', '#24406a', '#2e2a28', '#f0ece4', 'tabard', 'cap', sk=0, hair=3, trim='#d8b04a', cuffs=True),
+    'herald_saltreach': S('#3a3e4a', '#2f8f88', '#2a2e3a', '#2a3e6a', 'tabard', 'cap', sk=0, hair=0, trim='#e2e6e8', cuffs=True),
+    'herald_emberwaste': S('#4a3024', '#b0382a', '#5a3a2a', '#e0b040', 'tabard', 'cap', sk=3, hair=5, trim='#f4ecd8', cuffs=True),
+    'herald_blackfen': S('#2e2a24', '#4e602a', '#24221e', '#6a4a7a', 'tabard', 'cap', sk=1, hair=4, trim='#d8b04a', cuffs=True),
 }
 
 # Regional looks (Mateo 2026-11-14): the same person dressed for each region, signature kept (Elspeth's shawl,
@@ -184,6 +191,12 @@ def person(key, seed):
     if hk == 'wimple' and s['h']: H_ = ramp(s['h'], 0.55, 0.95, sat=0.4)
     if H_ is None: H_ = O_                                                  # a cap or hood in the over colour
     TR = C(s['trim']) if s['trim'] else None
+    if ok == 'tabard':                     # a herald's colours stay true and bright (white stays white), the tunic dark
+        def heraldic(hx):
+            import colorsys
+            l = colorsys.rgb_to_hls(*[int(hx[k:k + 2], 16) / 255 for k in (1, 3, 5)])[1]
+            return ramp(hx, 0.45, 0.97, sat=0.4) if l > 0.75 else ramp(hx, 0.12, 0.66, sat=1.0)
+        O_, H_, T_ = heraldic(s['o']), heraldic(s['h']), ramp(s['t'], 0.06, 0.50, sat=0.6)
     sk = SKINS[s['sk']]
     hair = HAIRS[s['hair']]
     t = Tex(64, 64, seed=seed)
@@ -225,6 +238,14 @@ def person(key, seed):
                 return R(O_, 3 + edge - (j == fh - 1))
             if j == 7: return R(LEATHER, 2)
             return R(MAIL, 1 + ((i + j // 2) % 2) + edge + (j == 0))
+        if ok == 'tabard':                                                   # parti-coloured tabard over a tunic
+            if face in ('front', 'back') and 1 <= i <= 6:
+                if j == 7: return R(TR, 3 + (face == 'front' and i in (3, 4)))         # gold cord belt
+                if face == 'front' and 2 <= j <= 4 and i in (3, 4): return R(TR, 4 - (j == 4))   # the lord's badge
+                half = O_ if (i < 4) == (face == 'front') else H_
+                return R(half, 3 + edge + (j == 0) - (i in (1, 6)) - (j == fh - 1))
+            if j == 7: return R(TR, 2)
+            return R(T_, 3 + edge + (j == 0) - (i == fw - 1))
         if robe:
             if j == 7: return R(TR or LEATHER, 3 - (face != 'front'))           # rope or sash belt
             if face == 'front' and i in (3, 4) and j <= 2 and TR: return R(TR, 3)
@@ -265,8 +286,10 @@ def person(key, seed):
         if j == 9 and (s['cuffs'] or ok in ('coat', 'robe')): return R(TR or O_ if ok == 'coat' else TR or T_, 2 if not TR else 3)
         return R(T_, 3 - (face in ('back', 'left')) - (i == fw - 1) + (j == 0))
 
-    def leg(face, i, j, fw, fh):
+    def leg(face, i, j, fw, fh, side='r'):
         if face == 'top': return R(T_ if robe else L_, 2)
+        if ok == 'tabard' and j <= 3 and face in ('front', 'back'):                       # the tabard's hem
+            return R(O_ if (side == 'r') == (face == 'front') else H_, 3 - (j == 3) - (face == 'back'))
         if face == 'bottom': return R(LEATHER, 0)
         back = face in ('back', 'left')
         if robe and j <= 10: return R(T_, 3 - back - (i == fw - 1) - (j == 10) + (j == 0 and face == 'front'))
@@ -278,7 +301,7 @@ def person(key, seed):
         if ok == 'motley': return R(L_ if (i + face.__len__()) % 2 else O_, 3 - back)
         return R(L_, 3 - (i == fw - 1) - back)
 
-    for box, fn in ((HEAD, head), (BODY, body), (RARM, arm), (LARM, arm), (RLEG, leg), (LLEG, leg)): part(t, box, fn)
+    for box, fn in ((HEAD, head), (BODY, body), (RARM, arm), (LARM, arm), (RLEG, leg), (LLEG, lambda *a: leg(*a, side='l'))): part(t, box, fn)
     return t
 
 

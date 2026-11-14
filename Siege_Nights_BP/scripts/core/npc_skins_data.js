@@ -49,4 +49,6 @@ export const NPC_SKINS = [
   // the Vale wears the plain key. core/npc_skins.js regionalKey picks them by where the NPC stands.
   "lore_elspeth__frostmarch", "lore_elspeth__saltreach", "lore_elspeth__emberwaste", "lore_elspeth__blackfen",
   "mason__frostmarch", "mason__saltreach", "mason__emberwaste", "mason__blackfen",
+  // a Rival Lord's herald at your gate (Act 2), in his lord's region colours: herald_<region>
+  "herald_vale", "herald_frostmarch", "herald_saltreach", "herald_emberwaste", "herald_blackfen",
 ];
