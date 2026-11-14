@@ -1117,6 +1117,9 @@ CIVIC = {
                   ("breeder's post", lambda: _breeder("blackfen")),
                   ("moneyer", lambda: _moneyer("blackfen"))],
 }
+# the civic buildings that are story places (story_specs/): the story and its pins name them, so nothing added later
+# may push one off its ground
+STORY_PLACES = {"net sheds", "chapel", "fishmonger's loft", "warden's office", "library", "old cistern", "caravan water"}
 SHORE = {
     "gulls_rest": [("quay", gulls_rest_quay), ("lighthouse", gulls_rest_lighthouse), ("boathouse", gulls_rest_boathouse)],
     "mirelight": [("stilt_house", lambda seed=51: mirelight_stilt_house(seed, 1)), ("stilt_house_big", lambda seed=52: mirelight_stilt_house(seed, 0))],
