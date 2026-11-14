@@ -52,9 +52,13 @@ export function voiceLine(npcId, node, v) {
   return rec.text === (v ? n.greets?.[v - 1] : n.text) ? rec.id : undefined;
 }
 
+const speaking = new Map(); // player id -> the greeting recording last started for them
 function speak(player, npcId, node, v) {
   const id = voiceLine(npcId, node, v);
   if (!id) return;
+  const before = speaking.get(player.id);
+  if (before) { try { player.runCommand(`stopsound @s ${before}`); } catch {} } // never two greetings over each other
+  speaking.set(player.id, id);
   try {
     const npc = player.dimension.getEntities({ type: NPC_TYPE, tags: [tagOf(npcId)], location: player.location, closest: 1, maxDistance: 24 })[0];
     sfx(player, id, npc?.location ?? player.location); // only this player hears it, from the character
@@ -62,14 +66,16 @@ function speak(player, npcId, node, v) {
 }
 
 const lastGreet = new Map(); // player/npc/node -> wording last shown
-function openScene(player, npcId, node) {
+// `voiced` is true only when the player has just clicked the character: a button that leads back to the greeting
+// shows its words again but does not replay the recording, so a line is never heard out of the blue mid-conversation.
+function openScene(player, npcId, node, voiced = false) {
   const selector = `@e[type=${NPC_TYPE},tag=${tagOf(npcId)},c=1]`;
   try {
     const key = `${player.id}/${npcId}/${node}`;
     const v = pickGreet(greetCount(NPC[npcId]?.nodes[node]), lastGreet.get(key), Math.random());
     lastGreet.set(key, v);
     player.runCommand(`dialogue open ${selector} @s ${variantTag(npcId, node, v)}`);
-    speak(player, npcId, node, v);
+    if (voiced) speak(player, npcId, node, v);
   } catch (e) {
     console.warn(`[Lore] dialogue ${npcId}/${node}: ${e}`);
   }
@@ -191,7 +197,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
     try {
       const node = startNode(NPC[npcId], progressOf(player), contextFor(player));
       emit("loreTalk", { player, npc: npcId, node, choice: -1, next: node });
-      openScene(player, npcId, node);
+      openScene(player, npcId, node, true);
     } catch (e) {
       console.warn(`[Lore] npc click: ${e}`);
     }
