@@ -51,6 +51,9 @@ const PER_STEP = 96; // blocks placed per runJob step
 // face / off come from the ward (picked against the generated map: downhill, off the paths, back from cliff edges).
 export const THIN_PLACES = WARDS.filter((w) => w.thin && w.site).map((w) => ({ id: w.site, name: w.name, x: w.x + (w.off?.[0] ?? 0), z: w.z + (w.off?.[1] ?? 0), r: w.r, facing: w.face ?? "south" }));
 
+// The books whose pages name a spot inside a thin place, laid there when its cave is built (planThinPlace 9b)
+export const STORY_TOMES = { kings_barrow: ["chron_08", "chron_12", "seal_10"], bellfounders_mine: ["scri_02"] };
+
 // Which Field Note lies in each camp. Notes I to VI each state one feature; VII is Fennick's last report.
 export const CAMP_TOME = {
   sunken_quarry: "surv_01",
@@ -408,6 +411,39 @@ export function planThinPlace(id, cx, cz, G, opts = {}) {
     if (at(u, F, v)?.block === "air" && at(u, F - 1, v)?.block !== "water") put(u, F, v, "amethyst_cluster", 2);
   }
 
+  // 9b. what the books found here say is here (lore/data/tomes_*.js "where"), and the books themselves (STORY_TOMES)
+  const story = [];
+  if (id === "kings_barrow") {
+    // the antechamber: the last stretch of the passage before the chamber, Chronicle VIII against its wall
+    const [au, af, av, aw] = geo.route[geo.route.length - 1];
+    story.push([au + aw, af, av, "chron_08"]);
+    // the King's sarcophagus, empty, its lid shoved half off: Chronicle XII lies inside it, and Seal X under a loose
+    // floor stone beside it (the aisle from the passage to the seam stays clear)
+    const su0 = CH.uc + 1, su1 = CH.uc + 3, sv0 = CH.vc - 1, sv1 = CH.vc + 2;
+    for (let u = su0; u <= su1; u++) for (let v = sv0; v <= sv1; v++) {
+      const rim = u === su0 || u === su1 || v === sv0 || v === sv1;
+      for (let y = F; y <= F + 1; y++) put(u, y, v, rim ? (y === F ? "deepslate_tiles" : "polished_deepslate") : "air", 2);
+      if (v !== CH.vc) put(u, F + 2, v, "polished_deepslate_slab", 2, { "minecraft:vertical_half": "bottom" });
+    }
+    put(su1 + 1, F, CH.vc, "polished_deepslate_slab", 2, { "minecraft:vertical_half": "bottom" });   // the piece of lid that slid off
+    story.push([CH.uc + 2, F, CH.vc, "chron_12"]);
+    story.push([CH.uc, F - 1, CH.vc + 1, "seal_10"]);
+  }
+  if (id === "bellfounders_mine") {
+    // the deepest gallery: a bell cast and set down the wrong way up, standing on its crown, mouth to the roof
+    const bu = CH.uc + 4, bv = CH.vc + 2;
+    put(bu, F, bv, "waxed_oxidized_copper", 2);
+    for (let du = -1; du <= 1; du++) for (let dv = -1; dv <= 1; dv++) {
+      if (Math.abs(du) + Math.abs(dv) <= 1) put(bu + du, F + 1, bv + dv, "waxed_weathered_copper", 2);
+      put(bu + du, F + 2, bv + dv, du || dv ? "waxed_weathered_cut_copper" : "air", 2);
+    }
+    for (let du = -2; du <= 2; du++) for (let dv = -2; dv <= 2; dv++) {
+      if (Math.max(Math.abs(du), Math.abs(dv)) === 2 && Math.abs(du) + Math.abs(dv) < 4) put(bu + du, F + 3, bv + dv, "waxed_oxidized_cut_copper", 2);
+      else if (Math.max(Math.abs(du), Math.abs(dv)) < 2) put(bu + du, F + 3, bv + dv, "air", 2);
+    }
+    story.push([bu, F, bv + 3, "scri_02"]);
+  }
+
   // 10. the seam (4 tall) in the back wall, with solid rock behind and around for the crack, full wall height
   for (let u = CH.uc - 4; u <= CH.uc + 4; u++) for (let v = CH.wallV - 4; v <= CH.wallV; v++) for (let y = F - 1; y <= F + geo.crackH; y++) {
     if (!carved.has(key(u, y, v))) put(u, y, v, y > 0 && y === hillAt(u, v) ? look.top : worked ? cut(u, y, v) : raw(u, y, v));
@@ -486,6 +522,7 @@ export function planThinPlace(id, cx, cz, G, opts = {}) {
     facing,
     seam: { ...W(CH.uc, F, CH.wallV), facing },
     tome: { ...W(cu, c1, cv), id: CAMP_TOME[id] },
+    tomes: story.map(([u, y, v, tid]) => ({ ...W(u, y, v), id: tid })),
     mouth: W(0, 1, MOUTH_V),
     camp: W(cu, c1, cv - 3),
     edges: (() => { const e = {}; for (const k of geo.air) { const [u, , v] = k.split(",").map(Number); e[v] = Math.max(e[v] ?? -99, u); } return e; })(),
@@ -594,6 +631,7 @@ export function buildSite(site, by) {
     try {
       if (failed > plan.ops.length * 0.02) throw new Error("too much unloaded");
       placeCache(dim.getBlock(plan.tome), plan.tome.id);
+      for (const t of plan.tomes) placeCache(dim.getBlock(t), t.id);
       recordSite(site.id, { ...plan.seam, h: plan.crackH });
       markPlace(site.id, plan.mouth);
       const built = builtMap();
