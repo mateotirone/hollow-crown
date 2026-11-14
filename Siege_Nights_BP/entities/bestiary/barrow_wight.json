@@ -100,7 +100,7 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 6
+    "damage": 4
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,

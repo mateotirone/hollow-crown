@@ -36,11 +36,6 @@
    "minecraft:knockback_resistance": {
     "value": 0
    },
-   "minecraft:ambient_sound_interval": {
-    "value": 12,
-    "range": 20,
-    "event_name": "ambient"
-   },
    "minecraft:damage_sensor": {
     "triggers": [
      {
@@ -52,6 +47,11 @@
       "deals_damage": "no"
      }
     ]
+   },
+   "minecraft:ambient_sound_interval": {
+    "value": 12,
+    "range": 20,
+    "event_name": "ambient"
    },
    "minecraft:movement": {
     "value": 0.25
@@ -133,7 +133,7 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 4
+    "damage": 3
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,
