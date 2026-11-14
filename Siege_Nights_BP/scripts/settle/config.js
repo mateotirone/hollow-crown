@@ -193,7 +193,7 @@ export const STAGES = [
       { id: "farmhouse", name: "Farmhouse with its field", step: "act3:farmhouse", from: "your Hamlet Farmer" },
       { id: "mint", name: "Mint", step: "act3:mint", from: "Old Elspeth" },
       { id: "market", name: "Market Stall", step: "act3:market", from: "the caravan trader" },
-      { id: "stables", name: "Stables", step: "act3:stables", from: "a groom", pending: "the Stables plot the town layout thread is adding (still a crafted block)" },
+      { id: "stables", name: "Stables", step: "act3:stables", from: "a groom", pending: "the 23 x 13 Barn plot the layout thread is adding (still a crafted block)" },
     ] },
   { tier: 2, name: "City", homes: 6,
     build: [
@@ -202,8 +202,8 @@ export const STAGES = [
       { id: "smithy", name: "Smithy", step: "act4:smithy", from: "the Ironworks foreman" },
       { id: "garden", name: "Kitchen Garden", step: "act4:garden", from: "your Farmer" },
       { id: "well", name: "Well", step: "act4:well", from: "the settlers" },
-      { id: "foresters_lodge", name: "Forester's Lodge", step: "act4:forester", from: "the mason, short of wood", pending: "a second Works yard (still a crafted block)" },
-      { id: "dragon_roost", name: "Dragon Stable", step: "act4:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the Dragon Stable plot, 23 x 18 (still a crafted block)" },
+      { id: "foresters_lodge", name: "Forester's Lodge", step: "act4:forester", from: "the mason, short of wood", pending: "the 41 x 29 woodlot outside the wall the layout thread is adding (still a crafted block)" },
+      { id: "dragon_roost", name: "Dragon Stable", step: "act4:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the 23 x 13 Dragon plot the layout thread is adding (still a crafted block)" },
     ] },
   { tier: 3, name: "Castle", homes: 0,
     build: [
