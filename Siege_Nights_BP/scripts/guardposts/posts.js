@@ -58,7 +58,8 @@ export function wallPosts(w) {
   const watch = watchSpots(w, w.radius, w.gate, w.ground, w.level);
   for (const s of watch) {
     out.push({ key: `watch:${s.k}`, label: `${WATCH_KINDS[s.kind].name}, ${compassOf(s.a)}`, x: s.x + s.forward.x * s.guardOut, z: s.z + s.forward.z * s.guardOut,
-      from: s.ground + s.guardUp, a: s.a, out: { x: Math.cos(s.a), z: Math.sin(s.a) }, watch: true });
+      from: s.ground + s.guardUp, a: s.a, out: { x: Math.cos(s.a), z: Math.sin(s.a) }, watch: true,
+      foot: { x: s.origin.x, z: s.origin.z, from: s.origin.y } }); // the front step at the ladder's foot, for coming down
   }
   // the gate pair stand on the ground just inside the gateway, one either side
   const inside = (L.thick ?? 1) + (L.walk ? 1 : 0) + 1;
