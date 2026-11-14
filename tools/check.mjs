@@ -473,6 +473,30 @@ step("Creatures take knockback");
   console.log(bad ? `${bad} problem(s)` : `${foes} creatures take vanilla knockback or a stagger (${resisting} bosses and heavy ones stagger)`);
 }
 
+// ---------- 2b6. every creature that fights guards has its own guard damage ----------
+// Rule (Mateo 2026-11-14: "We need to have custom damage parameters for each mob"). scripts/siege/guarddamage_data.js
+// has a line for each: its ordinary blow (base) and what it does to a guard. base must match the entity file's attack.
+step("Every creature has its own damage against guards");
+{
+  const { GUARD_DAMAGE } = await import(pathToFileURL(join(SCRIPTS, "siege/guarddamage_data.js")).href);
+  let bad = 0, n = 0;
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    let ent;
+    try { ent = parseJson(readFileSync(f, "utf8"))["minecraft:entity"]; } catch { continue; }
+    const id = ent?.description?.identifier;
+    const c = ent?.components ?? {};
+    const fam = c["minecraft:type_family"]?.family ?? [];
+    if (fam.includes("siege_guard") || !JSON.stringify(ent).includes("\"siege_guard\"")) continue; // doesn't fight guards
+    const attack = [c, ...Object.values(ent.component_groups ?? {})].map((g) => g["minecraft:attack"]?.damage).find((d) => typeof d === "number");
+    if (!attack) continue; // no blow of its own (scripted only)
+    n++;
+    const line = GUARD_DAMAGE[id];
+    if (!line) { bad++; fail(`${rel(f)}: ${id} fights guards but has no line in scripts/siege/guarddamage_data.js (how hard it hits a guard).`); }
+    else if (line.base !== attack) { bad++; fail(`scripts/siege/guarddamage_data.js: ${id} base ${line.base}, but its entity file's attack is ${attack}. Update base (and guard if it should change too).`); }
+  }
+  console.log(bad ? `${bad} problem(s)` : `${n} creatures that fight guards, each with its own guard damage`);
+}
+
 // ---------- 2b3. every NPC has its own skin ----------
 // Rule (Mateo 2026-11-13: "make sure everyone has a skin"): no NPC shows Bedrock's default skin. Our packs replace the
 // built-in NPC's skins with ours (core/npc_skins_data.js, painted by studio/art/build_npc_skins.py), every script that
