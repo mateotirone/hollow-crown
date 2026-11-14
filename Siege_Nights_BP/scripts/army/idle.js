@@ -2,7 +2,8 @@
 //
 // Day: an idle soldier (off duty, waiting at the Barracks) strolls: three times in four to a spot in the Barracks
 // yard, otherwise somewhere in town, stands there a while, then picks the next spot. Night: they walk back into the
-// Barracks and sleep there, hidden, until morning. Anything that needs them wakes them at once: a siege night, a
+// Barracks and rest by it, standing still, until morning. They stay visible (Mateo saw an invisible guard with only
+// its sword showing, 2026-11-14), so a resting soldier is never just a floating weapon. Anything that needs them wakes them at once: a siege night, a
 // War Writ assault on their settlement, raiders or a Wanted player on their land. Stationed soldiers keep their
 // watch (guardposts) and Archers hold the spot you put them on, as before; soldiers marching to war are left alone.
 //
@@ -56,7 +57,6 @@ function alarm(owner) {
 function sleep(guard) {
   try {
     guard.addTag(ASLEEP);
-    guard.addEffect("invisibility", 20000000, { showParticles: false });
     guard.addEffect("slowness", 20000000, { amplifier: 255, showParticles: false });
     guard.addEffect("resistance", 20000000, { amplifier: 4, showParticles: false });
   } catch { /* gone */ }
@@ -70,11 +70,17 @@ export function wake(guard) {
   } catch { /* gone */ }
 }
 
+// Soldiers put to sleep by an older build still carry a long invisibility effect: take it off
+function unhide(guard) {
+  try { if (guard.getEffect("invisibility")) guard.removeEffect("invisibility"); } catch { /* gone */ }
+}
+
 const postOf = (g) => { try { return JSON.parse(g.getDynamicProperty("siege:post") ?? "null"); } catch { return null; } };
 // The Barracks building can name its yard: addFilter("barracksYard", (yard, { owner, barracks }) => ({ a, b }))
 const yardOf = (owner, barracks) => { try { return applyFilter("barracksYard", null, { owner, barracks }); } catch { return null; } };
 
 function think(guard, now, night) {
+  if (guard.hasTag(ASLEEP)) unhide(guard);
   const owner = guardOwner(guard);
   if (!owner || guard.hasTag(MARCHING_TAG)) return;
   const post = postOf(guard);
