@@ -35,6 +35,9 @@ export function watchPlan(style) {
     }
   }
   for (let x = -1; x <= 1; x++) for (let z = 1 - WATCH.clear; z <= 0; z++) for (let y = 1; y <= 3; y++) if (!p.get(x, y, z)) p.set(x, y, z, "air");
+  // the way in is paved up to the door (every door path paved to the door: the 2026-11-14 town audit found every
+  // tower's front step on bare grass or sand)
+  for (let x = -1; x <= 1; x++) for (let z = 1 - WATCH.clear; z <= 0; z++) if (!p.get(x, 0, z)) p.set(x, 0, z, "path");
   p.region = region;
   p.design = d;
   plans.set(region, p);

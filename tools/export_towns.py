@@ -39,7 +39,7 @@ def bedrock(name, states):
         elif k == "facing" and name.endswith("_stairs"):
             out["weirdo_direction"] = STAIR[v]
         elif k == "facing" and name.endswith("_gate"):
-            out["direction"] = GATE[v]
+            out["minecraft:cardinal_direction"] = {"s": "south", "w": "west", "n": "north", "e": "east"}[v]   # 26.x: no more "direction"
         elif k == "axis":
             out["pillar_axis"] = v
         elif k in ("growth", "persistent_bit"):
