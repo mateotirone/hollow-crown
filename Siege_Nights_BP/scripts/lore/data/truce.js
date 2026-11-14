@@ -56,7 +56,7 @@ export function offerVerdict({ morvaneDown, state, knowsName, solvedAll, day = 0
 }
 
 // Tonight is a Guest Night: the truce holds and it is a third night, counted the way sieges always were
-export const isGuestNight = (day, state, { firstDay = 5, every = 3 } = {}) =>
+export const isGuestNight = (day, state, { firstDay = 3, every = 3 } = {}) =>
   state === "kept" && day >= firstDay && day % every === 0;
 
 // How many guests each keep gets tonight so the map total stays under the cap

@@ -37,7 +37,7 @@ addTests("reach", {
     assertEqual(capReach(-5, none), 0);
   },
   "stage 1 is exactly every third night": () => {
-    for (let day = 0; day < 60; day++) assertEqual(nightKind(day, 1), day >= 5 && day % 3 === 0 ? "counted" : undefined, `day ${day}`);
+    for (let day = 0; day < 60; day++) assertEqual(nightKind(day, 1), day >= 3 && day % 3 === 0 ? "counted" : undefined, `day ${day}`);
   },
   "sieges come more often at every stage": () => {
     assertEqual(count(1, ["counted", "stolen"]), 100);
