@@ -15,7 +15,7 @@ import { OVERWORLD } from "../plots/config.js";
 import { isBuilder } from "../plots/claims.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
-import { clearTrees } from "../core/clearing.js";
+import { clearTrees, clearLooseBranches, treeClearBoxes } from "../core/clearing.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { bakedFor, bakedState } from "./baked.js";
@@ -246,8 +246,9 @@ export function defineSite(def) {
       const ops = [...stampOps(LANDMARKS[def.id]), ...plan.ops]; // the landmark first, the site's own cells on top
       // the map's trees out of the whole build and the air over it first, so none stand in its dead space or float
       // over it (Mateo 2026-11-12). Sites in a town square keep the town's trees (their stamp says clear: false).
+      let clearBox;
       if (ops.length && LANDMARKS[def.id]?.clear !== false) {
-        const c = plan.center, b = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
+        const c = plan.center, b = clearBox = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
         for (const o of ops) {
           b.x0 = Math.min(b.x0, c.x + o.dx); b.x1 = Math.max(b.x1, c.x + o.dx);
           b.y0 = Math.min(b.y0, c.y + o.dy); b.y1 = Math.max(b.y1, c.y + o.dy);
@@ -260,6 +261,7 @@ export function defineSite(def) {
         try { put(dim, plan.center, o); } catch { failed++; }
         if (++n % 64 === 0) yield;
       }
+      if (clearBox) yield* clearLooseBranches(dim, treeClearBoxes(clearBox));   // a tree on ground the site paved or cut away
       if (failed > ops.length * 0.02) {
         site.busy = false;
         if (by) say(by, `§c${def.name}: ${failed} blocks were not loaded. It will try again when someone comes near.`);

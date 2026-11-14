@@ -47,6 +47,7 @@ LOOKS = {
     # story people (lore/data/dialogue.js)
     'lore_wren': S('#4e5868', '#cdc2a6', '#3a3e48', '#e2d9c0', 'robe', 'wimple', 'skirt', sk=0, hair=4, trim='#8a6a3a'),
     'lore_aldous': S('#5e6168', '#d8d4c8', '#3a3632', None, 'mail', 'short', sk=0, hair=3, trim='#8a2a26'),
+    'lore_elspeth': S('#5a5048', '#cdc2a6', '#3e3630', '#8a7e70', 'shawl', 'kerchief', 'skirt', sk=0, hair=WHITE_HAIR),  # Old Elspeth: blind, very old, at every hall's hearth
     'lore_mag': S('#3e4a2c', '#5a4a3a', '#2e2a24', '#4a4a30', 'shawl', 'hood', 'skirt', sk=1, hair=WHITE_HAIR),
     'lore_elias': S('#2a3456', '#c8b070', '#2a2e3a', '#2a3456', 'coat', 'cap', sk=0, hair=WHITE_HAIR, beard=True, cuffs=True),
     'lore_sage': S('#6a4a2e', '#b09a6a', '#3a2e24', None, 'robe', 'short', 'skirt', sk=2, hair=1, trim='#2a3a5a'),

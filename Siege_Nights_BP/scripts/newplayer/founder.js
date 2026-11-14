@@ -10,7 +10,9 @@ import { on, moduleStore, addTests, assert } from "../siege/api.js";
 import { townOf } from "../settle/founding.js";
 
 const OVERWORLD = "minecraft:overworld";
-const store = moduleStore("siege:newplayer_founder", () => ({ given: {} })); // owner id -> day the chest was filled
+// given: owner id -> day the chest was filled; chest: owner id -> where it stands (Act 1's "Open the founder's chest")
+const store = moduleStore("siege:newplayer_founder", () => ({ given: {}, chest: {} }));
+export const founderChest = (owner) => store.data.chest?.[owner];
 
 // The region's own wood: [log, sapling]
 export const WOOD = {
@@ -65,6 +67,8 @@ function giveFor(owner, st, style) {
   const block = (box && chestIn(dim, box, y0 - 1)) ?? (st.ownerBed && chestBeside(dim, st.ownerBed));
   if (!fillChest(block, style)) return false;
   store.data.given[owner] = Math.floor(world.getAbsoluteTime() / 24000);
+  store.data.chest ??= {};
+  store.data.chest[owner] = { x: block.location.x, y: block.location.y, z: block.location.z };
   store.save();
   world.getPlayers().find((p) => p.id === owner)?.sendMessage(
     "§6A founder's chest waits in your house:§7 logs and saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out there can't be felled: plant the saplings for more wood.");
