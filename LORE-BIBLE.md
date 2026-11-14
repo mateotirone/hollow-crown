@@ -297,9 +297,25 @@ What a character says depends on what you've read, solved and done, and whether 
 - Drops need no placing: each boss drops its confession, some night creatures drop hymns and testimonies, the first siege win drops *Hymn for the Coming Crown*.
 - **The journal** needs no placing either: every player is given it the first time they join. `/scriptevent siege:journal` gives another copy.
 
+## Act 2: first win to Town (story pass, Mateo 2026-11-14)
+
+Theme: everyone has an explanation, and none of them fits. Each person hands the player an official story or half of one, and each fails to match what the player has seen. Reveals are small true things only (the Order burns reports and boxes the lights it takes; the Ember was sent on purpose; the attacks follow a rule someone set long ago; the plot's past contradicts the Order). Never named in Act 2: the Hollow, the truce, Oswin, Edda. Full step list with sources and pins: the story plan doc (https://claude.ai/artifact/G2h3GKqStitFtKv2A5Ad1L, Chapter 1).
+
+1. Sir Aldous comes for the Ember; you keep it; he sends you to the Tree of Oaths.
+2. The choice at the Tree, a full scene. Knight: Aldous boxes the Ember in lead ("They always go quiet once they're boxed"), then the Ashen Gate chapterhouse. Marked: three knocks from below, "Something heard you", then Old Mag. Not yet: Elspeth, "Good. Keep it covered."
+3. That night a far voice, no speaker: "Keep it safe for me." Never explained in Act 2.
+4. Elspeth points at the upkeep bills; you sell iron to the Moneyer (one in every town, in a money-changer's house); he tells you to build an Ironworks.
+5. The first local book names a place on your land; riding there shows the plot's past doesn't match the Order's.
+6. A family comes up the road with their cart after a siege. The Order's riders blamed raiders for their hamlet, but the doors were barred from outside and nothing was taken. They become your first settlers.
+7. Their notice is the first Town Board job: bring their chest out of the burned hamlet. The scorch marks start inside.
+8. After the second win a Rival Lord's herald rides in under his lord's colours demanding tribute; paying or refusing changes who rides with the next siege.
+9. The Town night: on the first siege night with 3 wins and the steps done, the first sighting happens (below): something tall walks through the army, looks at the wall and leaves. Morning: Elspeth says only "It came to see how high you build. Build higher." The charter comes through and Act 3 opens on the plot mystery.
+
+The Town charter needs these story steps only from players still in the story; Settlement Mode (no story) needs just the wins and the stage buildings.
+
 ## The first sighting and the morning after
 
-Mateo, 2026-11-10: the raids start as men (Grey Host variants) and one night become actual soldiers of the Hollow, "the first real what the heck is that moment", before anyone knows what the Hollow is. The siege raids feature stages the night itself (the army stops, looks back, and a Veinsworn walks up through it). Lore owns the morning after (`scripts/lore/glimpse.js`). Each settlement gets its own first sighting (Mateo's decision card, 2026-11-10), so the morning after is told per settlement: to its owner, its allies and whoever stood inside it that night.
+Mateo, 2026-11-10: the raids start as men (Grey Host variants) and one night become actual soldiers of the Hollow, "the first real what the heck is that moment", before anyone knows what the Hollow is. The siege raids feature stages the night itself (the army stops, looks back, and a Veinsworn walks up through it). Since the 2026-11-14 story pass it is timed to Act 2's Town night (above). Lore owns the morning after (`scripts/lore/glimpse.js`). Each settlement gets its own first sighting (Mateo's decision card, 2026-11-10), so the morning after is told per settlement: to its owner, its allies and whoever stood inside it that night.
 
 - At first light your own people talk about it (three versions if you were there, one if you were away). Nobody names it.
 - Five people then have one new conversation each, and each holds one corner only. Sigrun: the Host never brought anything like that, it was the last thing the Host saw, and "last night it sent one of its own". Brother Cael: an unlabelled drawer of eleven reports over three hundred years, each written the season before a village went silent; the old brothers' phrase "tall company". Old Mag: it was not angry, it was sent to look, to see how high you build; she will not say what it is. Sir Aldous: he reported one and watched the clerk burn the page without surprise. Archivist Pell: nothing in the books, but pages neatly cut from four of them.

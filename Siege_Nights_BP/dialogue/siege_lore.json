@@ -1211,6 +1211,325 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_elspeth_tree_wait",
+        "npc_name": "Old Elspeth",
+        "text": "It's still in your pack. I can feel it from here. The Tree's just there. Choose, or tell it not yet. Either is an answer.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth tree_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth tree_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_tree",
+        "npc_name": "Old Elspeth",
+        "text": "The Tree of Oaths stands in this hall.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_tree 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_tree 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_tree",
+        "npc_name": "Old Elspeth",
+        "text": "Keep the Ember in your pack and touch the Tree.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_tree 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_knight_wait",
+        "npc_name": "Old Elspeth",
+        "text": "The Order's, then. Go and get your name in their book.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth knight_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth knight_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_knight",
+        "npc_name": "Old Elspeth",
+        "text": "Aldous rode for the chapterhouse. Follow him.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_knight 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_knight 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_knight",
+        "npc_name": "Old Elspeth",
+        "text": "The Ashen Gate chapterhouse is pinned. Brother Cael keeps the book.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_knight 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_mag_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Mirelight. Past the last lantern. Mag will be expecting someone. She always is.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mag_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mag_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_mag",
+        "npc_name": "Old Elspeth",
+        "text": "Her hut is past the last lantern of Mirelight.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mag 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mag 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_mag",
+        "npc_name": "Old Elspeth",
+        "text": "Old Mag's hut is pinned. Talk to her.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_mag 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_bills",
+        "npc_name": "Old Elspeth",
+        "text": "Sit. Look at this.\n\nYou've been paying since your first win. Wages, feed, mending, a little out of your purse every morning, and it only goes one way.\n\nTake the iron you smelted to the Moneyer. See what a bar's worth.",
+        "buttons": [
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth bills 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_moneyer_wait",
+        "npc_name": "Old Elspeth",
+        "text": "The Moneyer. Take him your iron.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth moneyer_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth moneyer_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_moneyer",
+        "npc_name": "Old Elspeth",
+        "text": "He trades in the town on your pin. Sell him a bar.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_moneyer 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_moneyer 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_moneyer",
+        "npc_name": "Old Elspeth",
+        "text": "No iron left? The old shaft fills again every night. Dig, smelt, and sell him an ingot.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_moneyer 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_ironworks_wait",
+        "npc_name": "Old Elspeth",
+        "text": "He told you to build, didn't he? Then build.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ironworks_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ironworks_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_ironworks",
+        "npc_name": "Old Elspeth",
+        "text": "Your Works yard has a marker waiting.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ironworks 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ironworks 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_ironworks",
+        "npc_name": "Old Elspeth",
+        "text": "Use the Plot Marker on the Works yard and pick the Ironworks.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_ironworks 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_collect_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Let it work a night. Then go and see what it dug.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth collect_wait 0"
+            ]
+          },
+          {
+            "name": "Good night.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth collect_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_collect",
+        "npc_name": "Old Elspeth",
+        "text": "The Ironworks keeps a storeroom.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_collect 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_collect 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_collect",
+        "npc_name": "Old Elspeth",
+        "text": "Click the Ironworks block in its yard and take everything.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_collect 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_elspeth_hub",
         "npc_name": "Old Elspeth",
         "text": "Still here. I usually am.",
@@ -1884,9 +2203,54 @@
             ]
           },
           {
-            "name": "I haven't seen anything.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous first 2"
+            ]
+          },
+          {
+            "name": "I haven't seen anything.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_keep",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Show me. ...Bare-handed, and you're still standing.\n\nThe Rule says a knight takes a light before it takes anyone. I don't think it has taken you. And I won't pull it out of a lord's hand at his own gate like a thief.",
+        "buttons": [
+          {
+            "name": "Then what?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous keep 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_lie",
+        "npc_name": "Sir Aldous Vane",
+        "text": "It hums, you know. I can hear it from here, through your wall.\n\nNo, I won't search your house. The Rule doesn't let me, and I wouldn't if it did.",
+        "buttons": [
+          {
+            "name": "...I'm keeping it.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous lie 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_tree",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Not to me, then. Take it to the Tree and choose.\n\nThe Tree of Oaths, in your hall. Give the light up there and I'll box it and carry it to the chapterhouse myself. Keep it, and that is between you and it. Only choose. I don't think a light nobody has chosen stays quiet for long.",
+        "buttons": [
+          {
+            "name": "I'll go to the Tree.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous tree 0"
             ]
           }
         ]
@@ -1909,7 +2273,7 @@
             ]
           },
           {
-            "name": "Good day, Sir Aldous.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous what 2"
             ]
@@ -1928,7 +2292,7 @@
             ]
           },
           {
-            "name": "Good day.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous why 1"
             ]
@@ -1941,7 +2305,7 @@
         "text": "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
         "buttons": [
           {
-            "name": "Thank you.",
+            "name": "I already have.",
             "commands": [
               "/scriptevent siege:lore_say aldous rule 0"
             ]

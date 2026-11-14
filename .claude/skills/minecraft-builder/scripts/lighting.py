@@ -81,7 +81,10 @@ NATURAL = re.compile(r"(^grass_block$|^dirt$|^coarse_dirt$|^rooted_dirt$|^podzol
                      r"^deepslate$|^tuff$|^calcite$|^andesite$|^diorite$|^granite$|^moss_block$|^pale_moss_block$|"
                      r"^netherrack$|^soul_sand$|^soul_soil$|^basalt$|^blackstone$|^terracotta$|_terracotta$|^dripstone_block$|"
                      r"_ore$|^farmland$|^magma$|^obsidian$|^end_stone$|^sandstone$|^red_sandstone$|^siege:pale_ash$|"
-                     r"^siege:veinstone$|^siege:ashen_soil$)")
+                     r"^siege:veinstone$|^siege:ashen_soil$|"
+                     # a tree's crown and limbs are the land's too: never a floor to stand a lamp on (Millbrook's
+                     # treetops got lamp posts, plot plan thread 2026-11-14)
+                     r"leaves$|^siege:old_)")
 WOODS = ("pale_oak", "dark_oak", "spruce", "birch", "jungle", "acacia", "mangrove", "cherry", "bamboo", "crimson",
          "warped", "oak")
 TARGETS = {"normal": {"inside": 7, "outside": 4, "door": 8}, "hollow": {"inside": 5, "outside": 3, "door": 6}}

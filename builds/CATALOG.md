@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**173 builds:** 1 not started, 84 designed, 17 in viewer, 71 in game.
+**174 builds:** 1 not started, 84 designed, 18 in viewer, 71 in game.
 
 Statuses:
 
@@ -37,6 +37,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Gull's Rest lighthouse | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/lighthouse.json` | Waiting in PR #209. Harbour of Gull's Rest; town with quay, moles, jetty and crane is in /mnt/project-files/siege-nights/towngen/gulls_rest-harbour/. |
 | Gull's Rest boathouse | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/boathouse.json` | Waiting in PR #209. Harbour of Gull's Rest. |
 | Gull's Rest harbourmaster's hut | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/harbourmaster.json` | Waiting in PR #209. Harbour of Gull's Rest. |
+| ★ Gull's Rest deep-water pier and great ship | Saltreach | in viewer | harbour | Build a big sailboat and dock at Saltreach | `map/structures/harbour_specs/great_ship.json` | Mateo 2026-11-14: a big sailboat with a big dock as a prop. Three-masted ship (47 long; cabin, galley, lower deck) moored at a 79-long timber pier on a causeway north of the harbour's north breakwater, at -955..-1001, 352. Skill parts ship + pier; in map/gulls_rest-blocks.json (harbour.py patch) until the next full town bake. |
 | Mirelight stilt houses (2) | Blackfen | in viewer | town-mirelight | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` |  |
 | Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | Today towns use the Vale windmill; regional windmills for the five overworld regions are in world_props.py (viewer world_props), not yet placed by towngen. |
 | ★ Regional wells and field fencing | One version per overworld region | in viewer | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Wells and field fencing for all six regions. |

@@ -87,6 +87,7 @@ export function holds(cond, p, ctx = {}) {
     case "resonance": return (ctx.resonance ?? 0) >= Number(value);
     case "shelved": return (ctx.shelved ?? 0) >= Number(value);
     case "act1": return ctx.act1 === value; // newplayer/act1_rules.js act1Stage
+    case "act2": return ctx.act2 === value; // newplayer/act2_rules.js act2Stage
     default: return false;
   }
 }

@@ -241,6 +241,8 @@ function respec(player, hallLevel) {
 function pathMenu(player, hallLevel) {
   const hero = heroOf(player);
   const holding = has(player, EMBER);
+  // with the Ember, the choosing scene (newplayer/act2.js) plays instead of this list
+  if (holding && applyFilter("treeScene", false, { player })) return;
   const body = [
     "Two roads lead from here, and you can only walk one. §cThe choice is permanent.",
     "",
@@ -248,7 +250,7 @@ function pathMenu(player, hallLevel) {
     "",
     "§5The Marked.§r Take the Ember into your hand. It gives you powers no one living understands: bolts of pale fire, a step through the air, a call that turns armies on themselves. Every casting raises your Resonance, and loud Resonance is heard. Stages: " + RANKS.marked.map((r) => r.name).join(", ") + ".",
     "",
-    holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. It falls near your keep the night you first hold a siege.",
+    holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. Something will come down near your keep, early on; keep it until you are ready.",
     "",
     "§fOther roads, earned later in the regions.§7 Choosing the Ember's road closes these, because a person holds one role. There is no hurry: keep the Ember and come back to the Tree whenever you like.",
     ...Object.keys(ROLES).filter((id) => ROLES[id].region).map((id) => `${ROLES[id].color}${ROLES[id].name}§7: ${ROLE_DEEDS[id]?.deed ?? "a deed in " + STYLES[ROLES[id].region].name}.`),
@@ -315,13 +317,13 @@ export function choosePath(player, path) {
     give(player, OATH_BANNER);
     api.title(player, "§6Oathsworn", "§7Squire of the Ashen Gate");
     sfx(player, "random.anvil_use");
-    player.sendMessage("§6You are a Squire of the Ashen Gate.§7 The Blade branch of the Tree is open to you. Your §fOath Banner§7 is in your pack: once you learn Rallying Cry, use it to rally, sneak and use it to plant it.");
+    player.sendMessage("§6You are a Squire of the Ashen Gate.§7 The Blade branch of the Tree is open to you. Your §fOath Banner§7 is in your last hotbar slot, and stays there: once you learn Rallying Cry, use it to rally, sneak and use it to plant it.");
   } else if (path === "marked") {
     give(player, BOUND_EMBER);
     api.title(player, "§5Marked", "§7Something heard you");
     sfx(player, "mob.wither.spawn", { volume: 0.4, pitch: 1.6 });
     player.addEffect("darkness", 80, { showParticles: false });
-    player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. Hold the §fBound Ember§7: use it to cast your chosen power, sneak and use it to choose another. Watch your Resonance.");
+    player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. The §fBound Ember§7 lives in your last hotbar slot: use it (or double-tap sneak) to open your powers. Watch your Resonance.");
   }
   if (ROLES[path]?.region) {
     api.title(player, `${ROLES[path].color}${ROLES[path].name}`, `§7${RANKS[path][0].name}`);
@@ -394,5 +396,7 @@ export function acceptVictor(player) {
 export function openTree(player, block) {
   const level = hallLevelAt(block.location, block.dimension.id);
   if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands.");
+  // holding the Ember and on no road yet: the choosing scene (newplayer/act2.js: addFilter("treeScene", ...))
+  if (heroOf(player).path === "none" && has(player, EMBER) && applyFilter("treeScene", false, { player, block })) return;
   treeMenu(player, level);
 }

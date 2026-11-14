@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **40 signature sounds** are meant to be real recordings made with an AI sound generator. 40 of 40 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **34 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **39 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -607,6 +607,11 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `cast.hollowstep` | Veilstep | `portal.travel` pitch 0.6 vol 0.2 + `mob.warden.heartbeat` pitch 0.8 vol 0.8 after 0.2 s + `block.bell.hit` pitch 0.35 vol 0.5 after 0.4 s | townhall (2) |
 | `cast.choir` | Choir's Call | `block.bell.hit` pitch 0.4 + `block.bell.hit` pitch 0.3 vol 0.6 after 0.15 s + `ambient.cave` pitch 0.7 vol 0.3 after 0.3 s | - |
 | `cast.crescendo` | A Crescendo begins | `block.bell.hit` pitch 1.6 vol 0.8 + `block.bell.hit` pitch 1.2 vol 0.5 after 0.1 s + `chime.amethyst_block` vol 0.6 after 0.2 s | townhall |
+| `cast.shatter` | A Ward plate or Bind chain breaks | `random.glass` pitch 1.4 vol 0.5 + `block.bell.hit` pitch 1.7 vol 0.18 after 0.05 s | townhall (4) |
+| `cast.toll` | The Choir's bell tolls | `block.bell.hit` pitch 0.35 vol 0.9 + `block.bell.hit` pitch 0.26 vol 0.5 after 0.15 s + `ambient.cave` pitch 0.6 vol 0.2 after 0.25 s | townhall |
+| `cast.channel` | Veilstep opening | `mob.warden.heartbeat` pitch 0.7 vol 0.7 + `portal.trigger` pitch 0.5 vol 0.2 after 0.1 s + `mob.warden.heartbeat` pitch 0.7 vol 0.6 after 0.45 s | townhall |
+| `cast.pulse` | Echo Sight listening | `block.bell.hit` pitch 0.45 vol 0.25 + `chime.amethyst_block` pitch 0.45 vol 0.2 after 0.1 s | townhall |
+| `cast.push` | A soft push wave | `mob.endermen.portal` pitch 0.5 vol 0.25 + `chime.amethyst_block` pitch 0.8 vol 0.3 after 0.05 s | townhall |
 | `cast.overwhelmed` | The Choir is too loud | `mob.warden.sonic_boom` pitch 0.7 vol 0.35 + `block.bell.hit` pitch 0.3 vol 0.5 after 0.2 s | townhall |
 | `cast.open` | The magic hotbar opens | `chime.amethyst_block` pitch 1.2 vol 0.5 + `item.book.page_turn` pitch 0.7 vol 0.4 after 0.05 s | townhall |
 | `cast.close` | The magic hotbar closes | `chime.amethyst_block` pitch 0.8 vol 0.4 + `item.book.page_turn` pitch 0.6 vol 0.4 after 0.05 s | townhall |
@@ -747,8 +752,8 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
+| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), bestiary (2), undertow (2), lore, newplayer |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 8 | lore (6), bestiary, guide |
-| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), bestiary (2), undertow (2), lore |
 | `ui.toast.challenge_complete` | Something earned (the bell rings three times: Mateo, 2026-11-12) | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.45 after 0.4 s + `block.bell.hit` pitch 0.6 vol 0.4 after 1.4 s + `block.bell.hit` pitch 0.6 vol 0.35 after 2.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
@@ -801,11 +806,14 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `random.bow` | 2 | bestiary (2) |
+| `random.door_close` | 2 | newplayer, vault |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_diamond` | 1 | codex |
 | `armor.equip_elytra` | 1 | looks |
 | `armor.equip_netherite` | 1 | siege |
+| `beacon.activate` | 1 | newplayer |
+| `beacon.ambient` | 1 | newplayer |
 | `block.campfire.crackle` | 1 | dragons |
 | `block.end_portal_frame.fill` | 1 | crown |
 | `block.end_portal.spawn` | 1 | undertow |
@@ -830,7 +838,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
 | `note.pling` | 1 | arena |
-| `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `random.splash` | 1 | codex |
 | `step.stone` | 1 | bestiary |

@@ -440,6 +440,18 @@ step("Hostile mobs stay out of settlements");
     const fam = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components?.["minecraft:type_family"]?.family ?? [];
     if (!fam.includes("monster")) { bad++; fail(`${rel(file)}: ${id} is a wild hostile but lacks the "monster" family, so the walls sweep can't find it.`); }
   }
+  // Rule (Mateo 2026-11-14: "what abt the shit ton of damage they do?"): the wild is dangerous, not punishing. No wild
+  // creature (natural spawns, Hollow night walkers, Seep guards) bites for more than 7 on Normal, and anything above 5
+  // swings slowly (cooldown_time), so there is a gap to step back. studio/bestiary/build.py refuses the same.
+  for (const [id, m] of Object.entries(MOBS)) {
+    if (![...wildFamilies, "wild"].includes(m.family) && !wild.has(id)) continue;
+    const file = join(BP, "entities/bestiary", `${id.replace(/^siege:/, "")}.json`);
+    if (!existsSync(file)) continue;
+    const c = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components ?? {};
+    const dmg = c["minecraft:attack"]?.damage ?? 0, cd = c["minecraft:behavior.melee_attack"]?.cooldown_time;
+    if (dmg > 7) { bad++; fail(`${rel(file)}: ${id} bites for ${dmg}; a wild creature hits for 7 at most (roster.MAX_WILD_MELEE).`); }
+    else if (dmg > 5 && c["minecraft:behavior.melee_attack"] && !(cd >= 1)) { bad++; fail(`${rel(file)}: ${id} bites for ${dmg} with no melee cooldown_time; wild creatures above 5 swing slowly.`); }
+  }
   console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
 }
 
@@ -522,6 +534,13 @@ step("Every NPC has a skin");
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   if (ce?.identifier !== "minecraft:npc" || !same(Object.keys(ce?.textures ?? {}), keys)) no(null, "Siege_Nights_RP/entity/npc.entity.json does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
   if (!same(rc?.arrays?.textures?.["Array.skins"], keys.map((k) => `Texture.${k}`))) no(null, "the siege_npc render controller does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  // the skin is picked by the siege:skin property (key index + 1), which nothing in Bedrock resets; 0 = skinIndex
+  const skinProp = bp?.description?.properties?.["siege:skin"];
+  if (!skinProp || skinProp.type !== "int" || !same(skinProp.range, [0, keys.length]) || skinProp.client_sync !== true) no(null, `Siege_Nights_BP/entities/npc.json needs the siege:skin property (int, range [0, ${keys.length}], client_sync): run python3 studio/art/build_npc_skins.py`);
+  if (!same(rc?.textures, ["Array.skins[query.property('siege:skin') > 0 ? query.property('siege:skin') - 1 : query.variant]"])) no(null, "the siege_npc render controller must pick the skin by siege:skin: run python3 studio/art/build_npc_skins.py");
+  if (!/setProperty\(SKIN_PROP/.test(readFileSync(join(SCRIPTS, "core/npc_skins.js"), "utf8"))) no(null, "core/npc_skins.js must set the siege:skin property when it dresses an NPC");
+  // regional looks (<key>__<region>) belong to a plain key
+  for (const k of keys.filter((x) => x.includes("__"))) if (!keys.includes(k.split("__")[0]) || !["frostmarch", "saltreach", "emberwaste", "blackfen"].includes(k.split("__")[1])) no(null, `NPC skin "${k}" is a regional look of no plain key, or of an unknown region`);
   const list = bp?.components?.["minecraft:npc"]?.npc_data?.skin_list ?? [];
   if (bp?.description?.identifier !== "minecraft:npc" || !same(list.map((x) => x.variant), keys.map((_, i) => i))) no(null, "Siege_Nights_BP/entities/npc.json skin_list does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
   // story people, wonder keepers: each has a key
@@ -556,6 +575,11 @@ step("Every NPC has a skin");
       }
       for (const m of ln.matchAll(/\bsummon\s+((?:minecraft:)?[a-z0-9_]+)\b/g)) if (/runCommand|["'`]/.test(ln)) made.push({ type: m[1].includes(":") ? m[1] : `minecraft:${m[1]}`, line: i });
     });
+    // a key named right in the call must have a picture (a template key must match at least one)
+    for (const m of src.matchAll(/\bdressNpc\(\s*[^,]+,\s*(?:["']([a-z0-9_]+)["']|`([a-z0-9_]*)\$\{)/g)) {
+      if (m[1] && !keys.includes(m[1])) no(file, `${r}: dressNpc(..., "${m[1]}") but there is no NPC skin "${m[1]}" in core/npc_skins_data.js`);
+      if (m[2] !== undefined && !keys.some((k) => k.startsWith(m[2]))) no(file, `${r}: dressNpc(..., \`${m[2]}...\`) but no NPC skin starts with "${m[2]}"`);
+    }
     if (made.some((x) => x.type === "minecraft:npc") && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
     // A person in a vanilla villager's coat is the default look too: talking people are minecraft:npc (dressNpc) or one
     // of our own entities. Only villagers that must pass for any vanilla villager (the Returned) may stay, marked so.

@@ -18,6 +18,7 @@ import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rul
 import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
 import { onTick } from "../core/loop.js";
+import { addTests, assertEqual } from "../core/tests.js";
 import { guildMenu } from "../guild/index.js";
 import { reforgeTarget, reforgePrice, armourName } from "./regional_armor.js";
 
@@ -26,7 +27,15 @@ const jobTag = (id) => `siege_job_${id}`;
 const regionTag = (region) => `siege_region_${REGIONS.indexOf(region)}`;
 const NPC_TYPE = "siege:job_npc";
 const OLD_NPC_TYPE = "minecraft:npc"; // job NPCs placed before the painted skins
-const JOB_PROP = "siege:job"; // which skin: the job's place in JOB_IDS
+const JOB_PROP = "siege:job"; // which skin: the job's place in JOB_LOOKS
+// The skins, in the order of studio/build_economy.py JOB_SKINS: the jobs, then regional looks "<job>__<region>"
+// (Mateo 2026-11-14: the Moneyer and the Farmer dress for their region and keep their signature). The Vale wears the plain one.
+const REGION_SLUG = { "Frostmarch": "frostmarch", "Saltreach": "saltreach", "Emberwaste": "emberwaste", "Blackfen": "blackfen" };
+export const JOB_LOOKS = [...JOB_IDS, ...["moneyer", "farmer"].flatMap((j) => Object.values(REGION_SLUG).map((r) => `${j}__${r}`))];
+export function jobLook(jobId, region) {
+  const own = JOB_LOOKS.indexOf(`${jobId}__${REGION_SLUG[region]}`);
+  return own >= 0 ? own : JOB_LOOKS.indexOf(jobId);
+}
 const SOLD = "siege:economy_sold"; // per player: { day, n: { "<region>|<item>": units sold today } }
 
 const known = (id) => {
@@ -66,7 +75,7 @@ export function spawnJobNpc(dim, location, jobId, region = regionAt(location)) {
   if (region && REGIONS.includes(region)) npc.addTag(regionTag(region));
   npc.nameTag = job.name;
   try {
-    npc.setProperty(JOB_PROP, JOB_IDS.indexOf(jobId));
+    npc.setProperty(JOB_PROP, jobLook(jobId, region));
   } catch {
     // looks are optional
   }
@@ -370,6 +379,17 @@ onTick("economy_renew_old_npcs", 100, () => {
       seen.add(old.id);
       renew(old);
     }
+    // job NPCs from before the regional looks put on their region's (the Moneyer and the Farmer)
+    let jobs = [];
+    try { jobs = p.dimension.getEntities({ type: NPC_TYPE, tags: [JOB_TAG], location: p.location, maxDistance: 64 }); } catch { continue; }
+    for (const npc of jobs) {
+      if (seen.has(npc.id)) continue;
+      seen.add(npc.id);
+      const jobId = jobOf(npc);
+      if (!jobId) continue;
+      const look = jobLook(jobId, regionOf(npc));
+      try { if (npc.getProperty(JOB_PROP) !== look) npc.setProperty(JOB_PROP, look); } catch { /* old pack */ }
+    }
   }
 });
 
@@ -397,4 +417,15 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (!JOBS[jobId]) return player.sendMessage(`§cWhich job? One of: ${JOB_IDS.join(", ")}. Add a region name for regional prices.`);
   spawnJobNpc(player.dimension, player.location, jobId, region);
   player.sendMessage(`§a${JOBS[jobId].name} placed${region ? ` (${region} prices)` : " (no region: plain prices)"}. Remove with /kill @e[tag=${jobTag(jobId)},c=1] to remove.`);
+});
+
+addTests("job npc looks", {
+  "the Moneyer and the Farmer dress for their region, the rest keep one skin, the Vale wears the plain one": () => {
+    assertEqual(jobLook("smith", "Frostmarch"), JOB_IDS.indexOf("smith"));
+    assertEqual(jobLook("moneyer", "Aldmere Vale"), JOB_IDS.indexOf("moneyer"));
+    assertEqual(JOB_LOOKS[jobLook("moneyer", "Blackfen")], "moneyer__blackfen");
+    assertEqual(JOB_LOOKS[jobLook("farmer", "Saltreach")], "farmer__saltreach");
+    assertEqual(jobLook("farmer", undefined), JOB_IDS.indexOf("farmer"));
+    assertEqual(JOB_LOOKS.slice(0, JOB_IDS.length).join(), JOB_IDS.join());
+  },
 });
