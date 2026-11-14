@@ -340,6 +340,7 @@ export function clearBody(w, p, blocked, built) {
   for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (let y = p.y; y < p.y + 4; y++) {
     const x = p.x + dx, z = p.z + dz, t = w.get(x, y, z);
     if (!t || isAir(t) || t === TRACK || GATED.test(t) || isLiquid(t)) continue;
+    if (w.get(x, y + 1, z) === TRACK) continue; // the bed under a neighbouring piece's track stays
     if (treeish(t)) { if (fellTree(w, x, y, z, blocked, built) === undefined) return false; continue; }
     if (!isNatural(t)) continue; // the works' own blocks and buildings stay
     dig(w, x, y, z);
