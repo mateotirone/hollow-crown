@@ -296,7 +296,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
   try {
     switch (by?.typeId) {
       case "siege:torchbearer": victim.setOnFire(4, true); break;
-      case "siege:ash_scarab": victim.setOnFire(2, true); break;
+      case "siege:ash_scarab": if (!victim.matches({ families: ["siege_guard"] })) victim.setOnFire(2, true); break; // burns players, not guards (siege/guardcare.js)
       case "siege:barrow_wight": heal(by, 3); particle(by.dimension, "minecraft:villager_happy", by.getHeadLocation()); break; // every hit feeds it
       case "siege:stone_vigil": // its touch puts you somewhere else, in the dark
         if (victim.typeId === "minecraft:player") castAway(victim, by);
