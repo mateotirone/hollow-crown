@@ -477,7 +477,10 @@ step("Creatures take knockback");
 // Rule (Mateo 2026-11-13: "make sure everyone has a skin"): no NPC shows Bedrock's default skin. Our packs replace the
 // built-in NPC's skins with ours (core/npc_skins_data.js, painted by studio/art/build_npc_skins.py), every script that
 // spawns minecraft:npc dresses it with dressNpc(), nobody sets skinIndex by hand, and every NPC-family entity of our
-// own has its pictures.
+// own has its pictures. 2026-11-14 ("make sure every NPC has a skin", again): spawns through constants exported from
+// other files and runCommand("summon ...") count too, no .mcfunction summons people, a script that spawns a vanilla
+// villager or wandering trader must say why on that line ("// vanilla villager on purpose: ..."), and a skin picked by
+// an entity property can never point past the end of its list.
 step("Every NPC has a skin");
 {
   let bad = 0;
@@ -504,27 +507,75 @@ step("Every NPC has a skin");
     const { WONDERS } = await import(pathToFileURL(join(SCRIPTS, "wonders/data.js")).href);
     for (const w of WONDERS ?? []) if (!keys.includes(`keeper_${w.id}`)) no(null, `wonder keeper "${w.id}" has no skin: add "keeper_${w.id}"`);
   } catch (e) { no(null, `could not read the NPC lists for the skin check: ${e}`); }
-  for (const file of scripts) {
-    const src = readFileSync(file, "utf8");
+  // What each spawnEntity() / summon in our scripts makes. A type can be a literal, a const in the file, a const
+  // exported from any other script, or an object field (RETURNED.type -> type: "...").
+  const PEOPLE_VANILLA = ["minecraft:villager_v2", "minecraft:villager", "minecraft:wandering_trader"];
+  const ON_PURPOSE = /vanilla villager on purpose:/;
+  const srcOf = new Map(scripts.map((f) => [f, readFileSync(f, "utf8")]));
+  const exported = {};
+  for (const src of srcOf.values()) for (const m of src.matchAll(/export\s+const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)) exported[m[1]] = m[2];
+  for (const [file, src] of srcOf) {
     const r = rel(file);
     if (/\.skinIndex\s*=(?!=)/.test(src) && !r.endsWith("core/npc_skins.js")) no(file, `${r}: sets skinIndex by hand. Use dressNpc(entity, key) from core/npc_skins.js.`);
-    const consts = Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]]));
-    const spawnsNpc = [...src.matchAll(/spawnEntity\(\s*(["'`]minecraft:npc["'`]|([A-Za-z_]\w*))\s*,/g)].some((m) => !m[2] || consts[m[2]] === "minecraft:npc");
-    if (spawnsNpc && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
+    const consts = { ...exported, ...Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]])) };
+    const lines = src.split("\n");
+    const made = []; // { type, line }
+    lines.forEach((ln, i) => {
+      for (const m of ln.matchAll(/spawnEntity\(\s*(?:["'`]([^"'`]+)["'`]|([A-Za-z_][\w.]*))\s*,/g)) {
+        let type = m[1];
+        if (!type && m[2]) {
+          const parts = m[2].split(".");
+          const body = parts.length === 2 ? src.match(new RegExp(`const\\s+${parts[0]}\\s*=\\s*\\{([\\s\\S]*?)\\n\\};?`))?.[1] : undefined;
+          type = parts.length === 1 ? consts[parts[0]] : body?.match(new RegExp(`\\b${parts[1]}\\s*:\\s*["'\`]([^"'\`]+)["'\`]`))?.[1];
+        }
+        if (type) made.push({ type, line: i });
+      }
+      for (const m of ln.matchAll(/\bsummon\s+((?:minecraft:)?[a-z0-9_]+)\b/g)) if (/runCommand|["'`]/.test(ln)) made.push({ type: m[1].includes(":") ? m[1] : `minecraft:${m[1]}`, line: i });
+    });
+    if (made.some((x) => x.type === "minecraft:npc") && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
+    // A person in a vanilla villager's coat is the default look too: talking people are minecraft:npc (dressNpc) or one
+    // of our own entities. Only villagers that must pass for any vanilla villager (the Returned) may stay, marked so.
+    for (const x of made) {
+      if (!PEOPLE_VANILLA.includes(x.type)) continue;
+      if (ON_PURPOSE.test(lines[x.line]) || ON_PURPOSE.test(lines[x.line - 1] ?? "")) continue;
+      no(file, `${r}:${x.line + 1}: spawns ${x.type}, which wears Bedrock's own villager look. Spawn minecraft:npc and dressNpc() it, or mark the line "// vanilla villager on purpose: <why>"`);
+    }
   }
-  // our own NPC-family entities (job NPCs, townsfolk, ...) have a client entity with real pictures
+  // no .mcfunction summons an NPC or a villager: nothing there can dress it
+  for (const f of [join(BP, "functions"), join(ROOT, "map")].filter((d) => existsSync(d)).flatMap((d) => walk(d, ".mcfunction"))) {
+    const src = readFileSync(f, "utf8");
+    if (/\bsummon\s+(minecraft:)?(npc|villager_v2|villager|wandering_trader)\b/.test(src)) no(null, `${rel(f)}: summons an NPC or villager from a function, where it gets no skin of ours. Spawn it from a script with dressNpc().`);
+  }
+  // our own people (job NPCs, townsfolk, soldiers, champions, quartermaster, ...) have a client entity with real
+  // pictures, and a skin picked by a property never points past the end of its list
+  const PEOPLE = ["npc", "villager", "siege_guard", "siege_townsfolk", "siege_champion", "quartermaster", "ashen_order", "siege_arena_crowd"];
   const clients = new Map();
   for (const f of walk(join(RP, "entity"), ".json")) { const d = read(f)?.["minecraft:client_entity"]?.description; if (d?.identifier) clients.set(d.identifier, d); }
+  const rcs = {};
+  for (const f of walk(join(RP, "render_controllers"), ".json")) Object.assign(rcs, read(f)?.render_controllers ?? {});
+  let people = 0;
   for (const f of walk(join(BP, "entities"), ".json")) {
     const e = read(f)?.["minecraft:entity"];
     const id = e?.description?.identifier;
-    if (!id || id.startsWith("minecraft:") || !(e.components?.["minecraft:type_family"]?.family ?? []).includes("npc")) continue;
+    if (!id || id.startsWith("minecraft:") || !(e.components?.["minecraft:type_family"]?.family ?? []).some((x) => PEOPLE.includes(x))) continue;
+    people++;
     const d = clients.get(id);
     const tex = Object.values(d?.textures ?? {});
-    if (!tex.length) { no(null, `${id} is an NPC with no skin (no client entity textures)`); continue; }
-    for (const t of tex) if (/textures\/entity\/(npc|villager)/.test(t) || !["png", "tga"].some((x) => existsSync(join(RP, `${t}.${x}`)))) no(null, `${id}: skin ${t} is missing or a vanilla one`);
+    if (!tex.length) { no(null, `${id} is a person with no skin (no client entity textures)`); continue; }
+    for (const t of tex) if (/textures\/entity\/(npc|villager|villager2|wandering_trader|steve|alex)\b/.test(t) || !["png", "tga"].some((x) => existsSync(join(RP, `${t}.${x}`)))) no(null, `${id}: skin ${t} is missing or a vanilla one`);
+    for (const rcName of (d.render_controllers ?? []).map((x) => (typeof x === "string" ? x : Object.keys(x)[0]))) {
+      const rc = rcs[rcName];
+      for (const t of rc?.textures ?? []) {
+        const m = /^(Array\.\w+)\[q(?:uery)?\.property\('([\w:]+)'\)\]$/.exec(t);
+        if (!m) continue;
+        const n = rc.arrays?.textures?.[m[1]]?.length ?? 0;
+        const range = e.description.properties?.[m[2]]?.range;
+        if (!range || range[0] !== 0 || range[1] !== n - 1) no(null, `${id}: property ${m[2]} runs ${JSON.stringify(range)} but ${m[1]} has ${n} skins, so some would show no skin`);
+        for (const x of rc.arrays?.textures?.[m[1]] ?? []) if (!(x.split(".")[1] in (d.textures ?? {}))) no(null, `${id}: ${x} is in ${m[1]} but not in the client entity's textures`);
+      }
+    }
   }
-  console.log(bad ? `${bad} NPC skin problem(s)` : `${keys.length} NPC skins; every NPC spawner dresses its NPCs`);
+  console.log(bad ? `${bad} NPC skin problem(s)` : `${keys.length} NPC skins; every NPC spawner dresses its NPCs; ${people} kinds of our own people have their skins; no stray vanilla villagers`);
 }
 
 // ---------- 2c. sounds ----------

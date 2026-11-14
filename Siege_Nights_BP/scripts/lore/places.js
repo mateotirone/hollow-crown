@@ -124,6 +124,7 @@ function stand(dim, id, spot, extraTag) {
   const loc = { x: at.x + 0.5, y: at.y, z: at.z + 0.5 };
   if (SUSPECTS[id]) {
     const s = SUSPECTS[id];
+    // vanilla villager on purpose: the suspects may be Returned, and a Returned must pass for any villager
     const villager = dim.spawnEntity("minecraft:villager_v2", loc);
     villager.nameTag = s.name;
     villager.addTag(`hc_story_${id}`);
