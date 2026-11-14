@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { INSTALLED_MUSIC } from "./installed.js";
-import { REGION_POOLS, HOLLOW_POOL, FIGHT_TRACKS, SIEGE_TRACK, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, isNight, MUSIC } from "./data.js";
+import { REGION_POOLS, HOLLOW_POOL, FIGHT_TRACKS, SIEGE_TRACK, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, isNight, MUSIC, keepLoop } from "./data.js";
 
 const all = (...names) => Object.fromEntries(names.map((n) => [soundId(n), { seconds: 100 }]));
 
@@ -31,6 +31,10 @@ addTests("music", {
   },
   "the music keeps going: only a short breath between pieces, never minutes of silence": () => {
     for (const k of ["firstGap", "gap", "afterFight", "switchGap", "afterDimension"]) assert(MUSIC[k][1] <= 30, `${k} must stay under 30 s`);
+  },
+  "a fight's piece is not restarted when you drop out of the fight for a moment": () => {
+    assert(MUSIC.overrideGrace >= 5);
+    assert(keepLoop(20, MUSIC.overrideGrace * 20) && !keepLoop(MUSIC.overrideGrace * 20, MUSIC.overrideGrace * 20));
   },
   "walking into another region or the Hollow changes the pool key, day and night do not": () => {
     assertEqual(poolKey({ region: "Frostmarch", timeOfDay: 6000 }), poolKey({ region: "Frostmarch", timeOfDay: 18000 }));
