@@ -15,6 +15,7 @@ import "./placement.js";
 import "./machines.js";
 import "./quartermaster.js";
 import "./guards.js";
+import "./guardcare.js";
 import "./menus.js";
 import "./gear.js";
 import "./tests.js";
