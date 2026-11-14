@@ -109,6 +109,50 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
             stoop += 1
     if stoop: n["stoops"] = stoop
 
+    # what's underneath (Mateo 2026-11-14: "under it is ____ but it's a slab so it's floating. Needs to be a full block").
+    # A post (fence, wall, upright log) with nothing hard beside it stands on the ground: a gap, a crop, a plant or
+    # leaves under it becomes more of the post, three blocks at most (lamp posts in Sunscar's fields stood on the
+    # beetroot). Anything resting on a bottom slab hangs half a block in the air: that slab becomes its double slab.
+    POST = re.compile(r"_fence$|(^|:)fence$|_wall$|_log$")
+    NOTHING = re.compile(r"(^|:)air$|leaves|" + STANDS.pattern)
+    footed = full = 0
+    for cell, i in sorted(at.items(), key=lambda a: a[0][1]):
+        if i in drop: continue
+        e = entry(i); nm = e["name"]; st = e.get("states") or {}
+        x, y, z = cell
+        if POST.search(nm) and "fence_gate" not in nm and not nm.startswith("siege:old_") and st.get("pillar_axis", "y") == "y":
+            if solid((x, y - 1, z)) or name_at((x, y - 1, z)) is not None and not NOTHING.search(name_at((x, y - 1, z))): pass
+            elif any(solid((x + a, y, z + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): pass
+            else:
+                gap = []
+                for k in range(1, 4):
+                    c = (x, y - k, z)
+                    if solid(c) or name_at(c) is not None and not NOTHING.search(name_at(c)): break
+                    gap.append(c)
+                else: gap = None
+                if gap and solid((x, y - len(gap) - 1, z)):
+                    for c in gap:
+                        j = at.get(c)
+                        if j is not None and j not in drop: blocks[j] = [*c, blocks[i][3], *blocks[j][4:]]
+                        else: blocks.append([*c, blocks[i][3]]); at[c] = len(blocks) - 1
+                    footed += 1
+            continue
+        below = at.get((x, y - 1, z))
+        if below is None or below in drop: continue
+        b = entry(below); bst = b.get("states") or {}
+        if not (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"): continue
+        if re.search(r"(^|:)air$|water|lava|chain$|leaves|trapdoor|vine|snow_layer|scaffolding", nm) or HUNG.search(nm): continue
+        if nm.endswith("lantern") and st.get("hanging"): continue
+        if nm.endswith("_slab") and st.get("minecraft:vertical_half") == "top": continue
+        if nm.endswith("_stairs") and st.get("upside_down_bit"): continue
+        if nm.endswith("_door") and st.get("upper_block_bit"): continue
+        if "torch" in nm and st.get("torch_facing_direction", "top") != "top": continue
+        blocks[below] = [*blocks[below][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[below][4:]]
+        full += 1
+    if footed: n["footed"] = footed
+    if full: n["full"] = full
+
     for _ in range(3):                                                  # a drop can leave the next one hanging
         changed = False
         for cell, i in list(at.items()):
