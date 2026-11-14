@@ -23,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -426,7 +426,7 @@ const goingDown = new Set(); // wall ids whose watchtowers are coming down
 export function raiseWatch(id) {
   const w = walls()[id];
   if (!w || jobs.has(id) || goingDown.has(id) || !(w.level > 0) || !w.ground) return;
-  const want = watchSpots(w, w.radius, w.gate, w.ground, w.level);
+  const want = allWatchSpots(w, w.radius, w.gate, w.ground, w.level);
   w.watch ??= [];
   const stale = w.watch.filter((t) => t.style !== w.style || !want.some((s) => s.k === t.k && (t.kind ?? "tower") === s.kind && sameSpot(t, s)));
   if (stale.length) return takeDownWatch(id, stale, () => raiseWatch(id));

@@ -99,9 +99,9 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 4,
+    "damage": 3,
     "effect_name": "slowness",
-    "effect_duration": 3
+    "effect_duration": 1.5
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,

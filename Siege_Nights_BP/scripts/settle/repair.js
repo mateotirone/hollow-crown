@@ -107,7 +107,10 @@ export function offerRepair(player, owner = player.id, { free = false } = {}) {
     onDone: async (found) => {
       if (!player.isValid) return;
       const price = free ? 0 : repairCost(found, lot());
-      if (found.missing + found.cracked === 0) return player.sendMessage(`§aYour wall is whole. Nothing to mend.${farNote(found)}`);
+      if (found.missing + found.cracked === 0) {
+        if (!found.skipped) emit("wallRepaired", { owner, missing: 0, cracked: 0, skipped: 0, whole: true }); // nothing to mend counts as mended
+        return player.sendMessage(`§aYour wall is whole. Nothing to mend.${farNote(found)}`);
+      }
       if (!free) {
         const res = await new MessageFormData().title("Mend the wall")
           .body(`The masons walked your ${WALL_LEVELS[wallOf(owner)?.level]?.name ?? "wall"}.\n\n§f${found.missing}§r blocks knocked out\n§f${found.cracked}§r blocks cracked\n\nMending all of it costs §6${coins(price)}§r. You carry ${coins(purse(player))}.`)

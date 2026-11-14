@@ -295,6 +295,26 @@ export function aldousAt(owner) {
   const v = store.data.visits[owner];
   return v && v.until && !v.done ? { x: v.at.x + 4, y: v.at.y, z: v.at.z + 4 } : undefined;
 }
+// Act 2's choice (newplayer/act2.js): for a Knight's oath he comes into the hall to box the Ember. Brings the visiting
+// Aldous to `spot` (or stands one there) and returns him.
+export function aldousWitness(owner, spot) {
+  const dim = world.getDimension(OVERWORLD);
+  const tag = `hc_aldous_visit_${owner}`;
+  let him;
+  try { him = dim.getEntities({ tags: [tag] })[0]; } catch { /* not loaded */ }
+  const at = standAt(dim, spot);
+  if (!at) return him;
+  const loc = { x: at.x + 0.5, y: at.y, z: at.z + 0.5 };
+  if (him) { try { him.teleport(loc); } catch { /* not loaded */ } return him; }
+  try { return stand(dim, "aldous", spot, tag); } catch { return undefined; }
+}
+// ...then rides on to the chapterhouse with it: his visit to this keep is over
+export function aldousRidesOn(owner) {
+  const dim = world.getDimension(OVERWORLD);
+  try { for (const e of dim.getEntities({ tags: [`hc_aldous_visit_${owner}`] })) e.remove(); } catch { /* not loaded */ }
+  store.data.visits[owner] = { ...(store.data.visits[owner] ?? {}), done: true };
+  store.save();
+}
 // Act 1 sends him from Elspeth's reading of the Ember (newplayer/act1.js: "aldousByStory"); a keep from before
 // Act 1 still has him the morning after its first win
 on("siegeReward", ({ player }) => { if (player && !applyFilter("aldousByStory", false, { player })) sendAldous(player); });
@@ -431,8 +451,8 @@ addTests("lore", {
     for (const c of CASES) assert(STORY_PEOPLE[c.asker], `${c.asker} (asker of ${c.id}) has no town spot`);
   },
   "every NPC the story needs has a way onto the map": () => {
-    // wren: opening/millbrook.js; carter: undertow/story.js; mag, cael, kesh, ulla, nell: landmark designs
-    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin", "elspeth"]; // elspeth: every hall's hearth, above
+    // wren: opening/millbrook.js; carter: undertow/story.js; mag, cael, kesh, ulla, nell: landmark designs; tobin, marta: newplayer/family.js (the family at the gate)
+    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin", "elspeth", "tobin", "marta"]; // elspeth: every hall's hearth, above
     for (const n of NPCS) assert(elsewhere.includes(n.id) || STORY_PEOPLE[n.id], `${n.id} is never placed`);
   },
   "placed tomes are real and none is placed twice": () => {

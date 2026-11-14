@@ -8,7 +8,7 @@
 
 import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_MIN_BOX, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK, ONE_EACH } from "./config.js";
 
-export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works" };
+export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works", D: "Dragon", B: "Barn", O: "Wood" };
 
 export const slotClass = (slot) => (slot.size === "M" && slot.long ? "ML" : slot.size);
 // [width along the door side, depth] of a slot with a box and door (undefined without them)
@@ -45,14 +45,22 @@ export function plotFit(id, slot, freeClasses = new Set()) {
 }
 
 // counts: { buildingId: how many stand }. known: a Set of the building ids the game can raise.
-export function charterCheck(tier, counts, known) {
+// region: the settlement's style id; a line kept for another region (config.js STAGES region) is skipped
+export function charterCheck(tier, counts, known, region) {
   const lines = [];
   const charter = CHARTERS[tier] ?? [];
-  // the work buildings the charters up to this one name (only the ones that exist), for "more"
+  // the work buildings the charters up to this one name (only the ones that exist), for "more"; a building two
+  // charters name (the Barracks: Hamlet and City) counts once, at the larger count
+  const namedBy = new Map();
+  for (let t = 0; t <= tier; t++) for (const l of CHARTERS[t] ?? []) {
+    if (l.more || !l.ids.every((i) => WORK.includes(i)) || !l.ids.some((i) => known.has(i))) continue;
+    const key = l.ids.join();
+    namedBy.set(key, Math.max(namedBy.get(key) ?? 0, l.count ?? 1));
+  }
   let named = 0;
-  for (let t = 0; t <= tier; t++) for (const l of CHARTERS[t] ?? []) if (!l.more && l.ids.every((i) => WORK.includes(i)) && l.ids.some((i) => known.has(i))) named += l.count ?? 1;
+  for (const n of namedBy.values()) named += n;
   for (const l of charter) {
-    const live = l.ids.filter((i) => known.has(i));
+    const live = l.region && region && l.region !== region ? [] : l.ids.filter((i) => known.has(i));
     const have = live.reduce((n, i) => n + (counts[i] ?? 0), 0);
     const need = l.more ? named + l.more : l.count ?? 1;
     lines.push({ what: l.what, have: Math.min(have, need), need, skipped: !live.length, more: l.more ?? 0 });
@@ -62,7 +70,7 @@ export function charterCheck(tier, counts, known) {
 
 // One line per charter need, for a menu or chat
 export const charterText = (check) => check.lines.map((l) => (l.skipped
-  ? `§8${l.what}: not in the game yet, skipped`
+  ? `§8${l.what}: not on a plot here yet, skipped`
   : `${l.have >= l.need ? "§a" : "§7"}${l.more ? `${l.more} ${l.what}` : l.what}: ${l.have}/${l.need}`));
 
 // What a Rival Lord raises next in their town (the same plots and rules as a player): the charter for the tier

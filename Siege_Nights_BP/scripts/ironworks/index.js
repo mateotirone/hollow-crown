@@ -19,14 +19,14 @@ import { regionRate } from "../economy/config.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor, addWorks } from "../settle/buildings.js";
-import { townOf, layoutOf, saveTowns } from "../settle/founding.js";
+import { townOf, layoutOf, saveTowns, allMarkers } from "../settle/founding.js";
 import { slotsOf } from "../settle/towns.js";
 import { siteProblem, styleOf } from "../settle/plans.js";
 import { footprint } from "../settle/rules.js";
 import { plotAt } from "../plots/claims.js";
 import { addMenuLabel } from "../core/labels.js";
 import { sfx } from "../core/sfx.js";
-import { addFilter } from "../core/events.js";
+import { addFilter, emit } from "../core/events.js";
 import { IRONWORKS_BLOCK, LEVELS, MAX_LEVEL, FUEL, IRONWORKS, tierAtLeast, capOf, produce, lootShare } from "./data.js";
 import { drawIronworks, drawWorks, worksShape } from "./design.js";
 import "./tests.js";
@@ -63,6 +63,23 @@ function standing(owner) {
   const w = works()[owner];
   if (!w || w.slot) return false;
   try { return world.getDimension(OVERWORLD).getBlock(w)?.typeId === IRONWORKS_BLOCK; } catch { return true; }
+}
+
+// For the story (newplayer/act2.js): does this town's Ironworks stand (or is it going up), how far it is built, and
+// where to point: its block once built, else a Works plot's marker
+export function ironworksFacts(owner) {
+  const w = works()[owner];
+  let at = w?.built ? { x: w.x, y: w.y, z: w.z } : undefined;
+  if (!at) {
+    try {
+      const ids = new Set(worksPlots(owner).map((s) => s.id));
+      const m = allMarkers().find((k) => k.owner === owner && ids.has(k.slot));
+      if (m) at = { x: m.x, y: m.y, z: m.z };
+    } catch { /* no town yet */ }
+  }
+  let up = false;
+  try { up = standing(owner); } catch { /* not ready */ }
+  return { standing: up, built: w?.built ?? 0, at };
 }
 
 addWorks({
@@ -216,6 +233,7 @@ function take(player, w) {
   if (raw) hand(player, "minecraft:raw_iron", raw);
   if (ingots) hand(player, "minecraft:iron_ingot", ingots);
   sfx(player, "random.orb");
+  emit("ironworksTaken", { player, raw, ingots });
   player.onScreenDisplay.setActionBar(`§7Taken: ${raw ? `${raw} raw iron ` : ""}${ingots ? `${ingots} iron ingots` : ""}`);
 }
 

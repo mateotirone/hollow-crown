@@ -55,11 +55,13 @@ on("loreFlag", ({ player, flag }) => {
   }
 });
 
-on("dragonDied", ({ ownerName, name, how }) => {
+on("dragonDied", ({ owner, ownerName, name, how }) => {
   roll.data.fallen.push({ rider: ownerName ?? "a rider", dragon: name ?? "her dragon", how: how ?? "died" });
   if (roll.data.fallen.length > 60) roll.data.fallen.shift(); // the wall is long, but not endless
   roll.save();
-  for (const p of world.getPlayers()) sfx(p, "sig.roll_drum", { volume: 0.5 });
+  // the drum is for the rider who lost her, not a drumroll out of nowhere for everyone else online
+  const rider = world.getPlayers().find((p) => p.id === owner);
+  if (rider) sfx(rider, "sig.roll_drum", { volume: 0.5 });
 });
 
 on("dragonBondFull", ({ owner, name }) => {
