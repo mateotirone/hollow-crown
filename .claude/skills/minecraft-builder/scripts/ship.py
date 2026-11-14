@@ -6,7 +6,8 @@ Two parts, registered in parts.py:
   ship   a block-built sailing ship moored on water: a curved hull fitted row by row (upside-down stairs where the
          bilge turns in), a raised quarterdeck over the captain's cabin and a forecastle over the galley, a lower
          deck with crew bunks, a mess table and the cargo hold, square sails on yards, shrouds and stays, a
-         bowsprit with a jib, a crow's nest, stern lanterns and a gangway. Every room has a door or a stair.
+         bowsprit with a jib and a figurehead, a crow's nest, a poop deck over a chart room, a stern gallery, stern lanterns
+         and a gangway. Every room has a door or a stair.
   pier   a timber pier on log piles: a deck of one or more rectangles, stringers and cross beams, rails on the
          sides that are not for mooring, bollards and lamp posts along the mooring face, lamp posts along the rail.
 
@@ -20,12 +21,13 @@ from materials import h3
 
 SALT = dict(bottom="dark_oak_planks", boot="spruce_planks", wale="stripped_dark_oak_log", hull="oak_planks",
             stripe="warped_planks", rail="birch_fence", deck="oak_planks", castle="oak_planks", post="stripped_birch_log",
-            mast="stripped_spruce_log", yard="spruce_log", sail="white_wool", band="cyan_wool", rig="spruce_fence",
+            mast="stripped_spruce_log", yard="spruce_log", sail="white_wool", band="cyan_wool", rig="iron_chain",
             trim="spruce", glass="light_blue_stained_glass_pane", door="birch_door", pennant="cyan_wool",
-            ballast="spruce_planks", carpet="cyan_carpet")
+            ballast="spruce_planks", carpet="cyan_carpet", strake="dark_oak_slab", port="spruce_trapdoor",
+            figure="quartz_block", figure_pillar="quartz_pillar", figure_head="chiseled_quartz_block", figure_wing="quartz_stairs")
 
 DEFAULT_MASTS = [  # u, top (rows over the deck it stands on), yards [[y over that deck, half span, sail rows]], nest
-    {"at": 7, "top": 13, "yards": [[8, 5, 5]]},
+    {"at": 7, "top": 16, "yards": [[7, 5, 4], [13, 4, 4]]},
     {"at": 23, "top": 27, "yards": [[10, 8, 6], [19, 6, 7]], "nest": 21},
     {"at": 36, "top": 22, "yards": [[10, 7, 4], [18, 5, 6]]},
 ]
@@ -43,12 +45,23 @@ def _lerp_line(a, b):
     return out
 
 
+def _chain_axes(cells, flat):
+    """Axis for each chain link of a stepped line (2D cells (a, y)): upright where the line climbs, `flat` where it runs
+    across, so every link lines up with the next."""
+    out = []
+    for i, (a, y) in enumerate(cells):
+        nb = [cells[j] for j in (i - 1, i + 1) if 0 <= j < len(cells)]
+        out.append((a, y, "y" if any(n[0] == a for n in nb) or not nb else flat))
+    return out
+
+
 def ship_cells(s):
     """Local cells [u, y, w, block, {states}] of the ship described by spec part s."""
     M = dict(SALT); M.update(s.get("materials", {}))
     L = s.get("length", 47); B = s.get("beam", 13) // 2; K = s.get("keel", 5); D = s.get("deck", 3)
-    A = s.get("aft", 11); F = s.get("fore", 9)
-    QD = D + 3                    # quarterdeck block row (its walking row is QD + 1)
+    A = s.get("aft", 11); F = s.get("fore", 9); P = s.get("poop", 5)
+    QD = D + 4                    # quarterdeck block row (its walking row is QD + 1): a tall great cabin under it
+    PD = QD + 3                   # poop deck block row, over the chart room at the very stern (u < P)
     FD = D + 2                    # forecastle deck block row
     masts = s.get("masts", DEFAULT_MASTS)
     C = {}
@@ -59,17 +72,20 @@ def ship_cells(s):
         if u < 0 or u >= L: return -1
         hb = B
         if u < 6: hb = B - 1.5 * (1 - u / 6)
-        ub = L - 17
-        if u > ub: hb = min(hb, B * math.sqrt(max(0.0, 1 - ((u - ub) / (L - 1 - ub + 0.5)) ** 2)))
+        ub = L - 17                # the bow: a parabola, so it runs in to a sharp prow (an ellipse ends blunt)
+        if u > ub: hb = min(hb, B * max(0.0, 1 - ((u - ub) / (L - 1 - ub + 0.5)) ** 2))
         return hb
 
     def keel(u):
         if u < 3: return -K + (3 - u) * 0.67
-        if u > L - 11: return -K + ((u - (L - 11)) / 10) ** 2 * (K + 1)
+        if u > L - 9: return -K + ((u - (L - 9)) / 8) ** 2 * (K - 1)     # the forefoot stays under water
         return -K
 
     def top(u):                   # top row of the hull side (bulwark / castle walls)
-        return QD if u < A else FD if u >= L - F else D
+        return PD if u < P else QD if u < A else FD if u >= L - F else D
+
+    def wy(u):                    # the wale's row: it sweeps up toward both ends (the sheer), so the side isn't flat
+        return 1 + (u < 9 or u > L - 13) + (u < 4 or u > L - 6)
 
     def half(u, y):               # half width of the hull at row y
         k = keel(u); t = (y - k) / max(0.5, D - k)
@@ -84,8 +100,8 @@ def ship_cells(s):
     def hull_block(u, y, w):
         if y == top(u): return M["stripe"], {}
         if y <= -1: return M["bottom"], {}
-        if y == 0: return M["boot"], {}
-        if y == 1: return M["wale"], {"axis": "x"}
+        if y < wy(u): return M["boot"], {}
+        if y == wy(u): return M["wale"], {"axis": "x"}
         if u < A and y > D: return M["castle"], {}
         return M["hull"], {}
     for u in range(L):
@@ -114,6 +130,7 @@ def ship_cells(s):
                 if y < -2: put(u, y, w, M["ballast"])
                 elif y == -2: put(u, y, w, M["deck"])                       # lower deck floor
                 elif y == D - 1: put(u, y, w, M["deck"])                    # main deck
+                elif u < P and y == PD: put(u, y, w, M["deck"])             # poop deck
                 elif u < A and y == QD: put(u, y, w, M["deck"])             # quarterdeck
                 elif u >= L - F and y == FD: put(u, y, w, M["deck"])        # forecastle deck
                 else: put(u, y, w, "air")
@@ -129,6 +146,17 @@ def ship_cells(s):
     for (u, w) in edge:
         if abs(w) == half(u, top(u)) and u % 5 == 2 and 0 < u < L - 2:
             put(u, top(u) + 2, w, "lantern")
+    # the rubbing strake: a dark ledge one block out along the wale, following the sheer; gunport lids on the waist
+    for u in range(1, L - 1):
+        y = wy(u); hw = half(u, y)
+        if hw < 2 or any(wy(v) != y or half(v, y) != hw for v in (u - 1, u + 1)): continue   # only on straight runs
+        for sgn in (1, -1):
+            if (u, y, sgn * (hw + 1)) not in C: put(u, y, sgn * (hw + 1), M["strake"], half="top")
+    for u in range(A + 3, L - F - 1, 4):
+        for sgn in (1, -1):
+            hw = half(u, D - 1)
+            if (u, D - 1, sgn * (hw + 1)) not in C:
+                put(u, D - 1, sgn * (hw + 1), M["port"], facing="s" if sgn > 0 else "n", open=True, half="bottom")
 
     # ---- the castles: front walls, doors, windows, stairs up
     trim = M["trim"]
@@ -145,6 +173,17 @@ def ship_cells(s):
             put(u, y0 + 1, w, M["glass"])
     wall_row(A - 1, D, QD - 1, windows=(-2, 2))
     wall_row(L - F, D, FD - 1, windows=())
+    wall_row(P - 1, QD + 1, PD - 1, windows=(-2, 2))       # the chart room's front, under the poop deck
+    hw_p = half(P - 1, PD)
+    for w in range(-hw_p + 1, hw_p):                      # poop rail, gaps for its two stairs
+        if abs(w) == 3: continue
+        put(P - 1, PD + 1, w, M["rail"])
+    for sgn in (1, -1):                                   # stairs up to the poop deck, rising aft
+        w = sgn * 3
+        for k in range(3):
+            u = P + k; y = PD - 1 - k
+            put(u, y, w, trim + "_stairs", facing="w", half="bottom")
+            for yy in range(QD + 1, y): put(u, yy, w, M["castle"])
     # quarterdeck rail across its front, with gaps for the two stairs
     hw_q = half(A - 1, QD)
     for w in range(-hw_q + 1, hw_q):
@@ -152,7 +191,7 @@ def ship_cells(s):
         put(A - 1, QD + 1, w, M["rail"])
     for sgn in (1, -1):                                   # stairs up to the quarterdeck, each side, rising aft
         w = sgn * 4
-        for k in range(4):
+        for k in range(5):
             u = A + k; y = QD - k
             put(u, y, w, trim + "_stairs", facing="w", half="bottom")
             for yy in range(D, y): put(u, yy, w, M["castle"])
@@ -166,31 +205,47 @@ def ship_cells(s):
             u = L - F - 1 - k; y = FD - k
             put(u, y, w, trim + "_stairs", facing="e", half="bottom")
             for yy in range(D, y): put(u, yy, w, M["castle"])
-    # stern windows and side lights of the great cabin; the cabin's stern lanterns
-    for w in (-3, 0, 3):
-        for y in (D + 1, D + 2):
-            if (0, y, w) in C and C[(0, y, w)][0] != "air": put(0, y, w, M["glass"])
+    # the stern: two tiers of windows (the great cabin, the chart room over it), a gallery outside the cabin's,
+    # carved cornices under each deck, side lights, and the stern lanterns on the poop
+    for (ws, ys) in (((-4, -2, 0, 2, 4), (D + 1, D + 2)), ((-2, 0, 2), (QD + 1, QD + 2))):
+        for w in ws:
+            for y in ys:
+                if (0, y, w) in C and C[(0, y, w)][0] != "air": put(0, y, w, M["glass"])
     for u in (3, 6, 9):
         hw = half(u, D + 1)
-        for sgn in (1, -1): put(u, D + 1, sgn * hw, M["glass"])
-    put(0, QD + 1, 0, M["rail"]); put(0, QD + 2, 0, M["rail"]); put(0, QD + 3, 0, "lantern")
+        for sgn in (1, -1):
+            for y in (D + 1, D + 2): put(u, y, sgn * hw, M["glass"])
     for sgn in (1, -1):
-        hw = half(0, QD)
-        put(0, QD + 2, sgn * hw, "lantern")
-    # the rudder on the stern post
-    for y in range(math.ceil(keel(0)), D):
+        for y in (QD + 1, QD + 2): put(2, y, sgn * half(2, y), M["glass"])
+    for y in range(math.ceil(keel(0)), D - 1):            # the rudder on the stern post
         put(-1, y, 0, M["bottom"] if y < 1 else M["hull"])
+    gw_ = half(0, D) - 1
+    for w in range(-gw_, gw_ + 1):
+        put(-1, D - 1, w, trim + "_slab", half="top")        # the stern gallery: a walk outside the cabin windows
+        put(-1, D, w, M["rail"])
+        put(-1, QD, w, trim + "_stairs", facing="e", half="top")
+        put(-1, PD, w, trim + "_stairs", facing="e", half="top")
+    for sgn in (1, -1): put(-1, D + 1, sgn * gw_, "lantern")
+    put(0, PD + 2, 0, M["rail"]); put(0, PD + 3, 0, "lantern")
+    for sgn in (1, -1):
+        put(0, PD + 2, sgn * half(0, PD), "lantern")
 
     # ---- masts, yards, sails, nests, pennants
     def base_deck(u):
-        return (QD + 1) if u < A else (FD + 1) if u >= L - F else (D)
+        return (PD + 1) if u < P else (QD + 1) if u < A else (FD + 1) if u >= L - F else (D)
     mast_tops = {}
     for m in masts:
         mu = m["at"]; dk = base_deck(mu); tp = dk + m["top"]
         for y in range(-1, tp + 1): put(mu, y, 0, M["mast"], axis="y")
         mast_tops[mu] = tp
-        for (yy, span, rows) in m.get("yards", []):
+        furl = s.get("furl", 1)                              # moored: the lowest sails (courses) are furled on their yards
+        for n, (yy, span, rows) in enumerate(sorted(m.get("yards", []))):
             yy += dk
+            if n < furl:
+                for w in range(-span, span + 1): put(mu + 1, yy, w, M["yard"], axis="z")
+                put(mu, yy, 0, M["mast"], axis="y")
+                for w in range(-span + 1, span): put(mu + 1, yy - 1, w, M["sail"])     # the furled roll under the yard
+                continue
             for w in range(-span, span + 1): put(mu + 1, yy, w, M["yard"], axis="z")
             put(mu, yy, 0, M["mast"], axis="y")
             sw = span - 1
@@ -214,7 +269,7 @@ def ship_cells(s):
         for k in range(3):                                   # a pennant streaming aft from the truck
             put(mu - 1 - k, tp, 0, M["pennant"])
             if k < 2: put(mu - 1 - k, tp - 1, 0, M["pennant"])
-        put(mu, tp + 1, 0, M["rig"])
+        put(mu, tp + 1, 0, trim + "_fence")
     # ---- shrouds: a stepped line each side, from the channel (a ledge one out from the side, on the waist) or the
     # castle rail, up to under the lowest yard
     for m in masts:
@@ -227,19 +282,26 @@ def ship_cells(s):
             if waist:
                 for u in range(mu - 3, mu + 2):
                     put(u, D, sgn * (half(u, D) + 1), trim + "_slab", half="top")
-            for (w, y) in _lerp_line(start, (sgn * 1, low)):
-                if (mu - 1, y, w) not in C or C[(mu - 1, y, w)][0] == "air": put(mu - 1, y, w, M["rig"])
+            for (w, y, ax) in _chain_axes(_lerp_line(start, (sgn * 1, low)), "z"):
+                if (mu - 1, y, w) not in C or C[(mu - 1, y, w)][0] == "air": put(mu - 1, y, w, M["rig"], axis=ax)
     # ---- bowsprit, stays and the jib
     stem_y = FD + 1
     bow = [(L + k, stem_y + k // 3) for k in range(9)]
     for (u, y) in bow: put(u, y, 0, M["mast"], axis="x")
-    for y in range(D, stem_y): put(L, y, 0, M["hull"])     # the stem carried down to the cutwater
+    for y in range(math.ceil(keel(L - 1)), stem_y):        # the stem, carried down to the forefoot as a cutwater
+        put(L, y, 0, M["bottom"] if y <= -1 else M["boot"] if y < wy(L - 1) else M["wale"] if y == wy(L - 1) else M["hull"],
+            **({"axis": "y"} if y == wy(L - 1) else {}))
+    # the figurehead: a white figure with spread wings on a knee under the bowsprit
+    put(L + 1, D - 1, 0, M["wale"], axis="x")
+    put(L + 1, D, 0, M["figure_pillar"], axis="y"); put(L + 1, D + 1, 0, M["figure"]); put(L + 1, D + 2, 0, M["figure_head"])
+    put(L + 1, D + 1, 1, M["figure_wing"], facing="n", half="top"); put(L + 1, D + 1, -1, M["figure_wing"], facing="s", half="top")
+    put(L + 1, D + 2, 1, M["figure_wing"], facing="n", half="bottom"); put(L + 1, D + 2, -1, M["figure_wing"], facing="s", half="bottom")
     us = sorted(mast_tops)
     if len(us) >= 2:
         fore = us[-1]
         stay = _lerp_line((fore, mast_tops[fore] - 2), bow[-1])
-        for (u, y) in stay:
-            if C.get((u, y, 0), ("air",))[0] in ("air",): put(u, y, 0, M["rig"])
+        for (u, y, ax) in _chain_axes(stay, "x"):
+            if C.get((u, y, 0), ("air",))[0] in ("air",): put(u, y, 0, M["rig"], axis=ax)
         line = {}
         for (u, y) in stay: line.setdefault(u, []).append(y)
         for (u, yb) in bow[1:-1]:                            # the jib: between the bowsprit and the forestay
@@ -247,8 +309,8 @@ def ship_cells(s):
             for y in range(yb + 1, top_y + 1):
                 if C.get((u, y, 0), ("air",))[0] == "air": put(u, y, 0, M["sail"])
         for a, b in zip(us, us[1:]):                         # main stay, mizzen stay
-            for (u, y) in _lerp_line((a, mast_tops[a] - 1), (b, base_deck(b) + 4)):
-                if C.get((u, y, 0), ("air",))[0] == "air" and u not in (a, b): put(u, y, 0, M["rig"])
+            for (u, y, ax) in _chain_axes(_lerp_line((a, mast_tops[a] - 1), (b, base_deck(b) + 4)), "x"):
+                if C.get((u, y, 0), ("air",))[0] == "air" and u not in (a, b): put(u, y, 0, M["rig"], axis=ax)
 
     # ---- the deck: hatch grating, capstan, wheel, barrels by the masts
     for u in range(26, 29):
@@ -288,6 +350,11 @@ def ship_cells(s):
         for w in (-1, 0, 1):
             if C.get((u, D, w), ("air",))[0] == "air": put(u, D, w, M["carpet"])
 
+    # ---- the chart room (under the poop deck)
+    put(1, QD + 1, -2, "cartography_table"); put(1, QD + 1, 0, "lectern", facing="e")
+    put(1, QD + 1, 2, "barrel", facing="up"); put(1, QD + 2, 2, "lantern")
+    put(2, QD + 1, -3, "bookshelf"); put(3, QD + 1, 3, "chest", facing="n")
+
     # ---- the galley (under the forecastle)
     gu = L - F + 2
     put(gu, D, -2, "smoker", facing="e"); put(gu + 1, D, -2, "barrel", facing="up"); put(gu, D, 2, "cauldron")
@@ -326,7 +393,7 @@ def ship_cells(s):
         gu0 = g.get("at", 27); gw = g.get("w", 3) // 2; out = g.get("out", 1)
         for u in range(gu0 - gw, gu0 + gw + 1):
             hw = half(u, D)
-            put(u, D, sgn * hw, "air"); put(u, D + 1, sgn * hw, "air")
+            put(u, D, sgn * hw, "air"); put(u, D + 1, sgn * hw, "air"); put(u, D + 2, sgn * hw, "air")
         for u in range(gu0 - gw - 1, gu0 + gw + 2):
             hw = half(u, D)
             for k in range(1, out + 1):
