@@ -137,7 +137,9 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
             below = (cell[0], cell[1] - 1, cell[2]); above = (cell[0], cell[1] + 1, cell[2])
             if nm.endswith("lantern"):
                 if st.get("hanging"):
-                    if solid(above) or (name_at(above) or "").endswith("chain"): continue
+                    # a fence bracket, a wall post, bars or a slab hold a hung lantern too (the engine's light stage hangs
+                    # its wall lanterns under a fence arm: the first tidy pass took them all down, 2026-11-14)
+                    if solid(above) or re.search(r"(chain$|_fence$|_wall$|iron_bars$|_slab$|_stairs$|trapdoor$)", name_at(above) or ""): continue
                     gap = []
                     for dy in range(1, 13):
                         c = (cell[0], cell[1] + dy, cell[2])
