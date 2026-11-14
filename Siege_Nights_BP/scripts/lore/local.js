@@ -23,6 +23,8 @@ export const booksOwed = (tierIndex) => Math.max(1, Math.min(3, 1 + (tierIndex ?
 
 // owner id -> { x, y, z } of their Library's bottom shelf (shelf0), so later books go there too
 const store = moduleStore("siege:lore_local", () => ({ shelf: {} }));
+// For the story (newplayer/act2.js): where this owner's first local book waits, once their Library stands
+export const libraryShelfOf = (owner) => store.data.shelf[owner];
 const WAIT_TRIES = 40; // while the Library is going up (or its shelf is out of range), look again every 30 s for 20 minutes
 const playerById = (id) => world.getAllPlayers().find((p) => p.id === id);
 

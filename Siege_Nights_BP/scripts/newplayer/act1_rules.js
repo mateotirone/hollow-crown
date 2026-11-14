@@ -168,7 +168,7 @@ export function act1Step(stage, f = {}, p = {}) {
     case "talk_grow_2": return talk("Talk to Old Elspeth", "Your Town is a City now. She'll want to hear it.");
     case "talk_grow_3": return talk("Talk to Old Elspeth", "Your City is a Castle now. Tell her.");
     case "grow": return growStep(f);
-    case "aldous": return step("Talk to Sir Aldous", "A knight is waiting at your keep. Hear him out, but give him nothing you haven't read.", at("Sir Aldous", p.aldous ?? p.keep),
+    case "aldous": return step("Talk to Sir Aldous about the Ember", "A knight is waiting at your keep. Hear him out, but give him nothing you haven't read.", at("Sir Aldous", p.aldous ?? p.keep),
       { npc: { tag: "siege_lore_npc_aldous", name: "Sir Aldous" } });
     default: return undefined;
   }

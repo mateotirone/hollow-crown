@@ -1,0 +1,363 @@
+{
+ "name": "gulls_rest_great_ship",
+ "edition": "bedrock",
+ "notes": "Gull's Rest's deep-water pier and its great ship (Mateo 2026-11-14). Frame: x = world X + 923, y = world Y - 62 (the sea's top water row), z = world Z - 364. harbour.py stamps it north of the harbour's north breakwater.",
+ "parts": [
+  {
+   "part": "pier",
+   "name": "pier",
+   "rects": [
+    [
+     -27,
+     -2,
+     0,
+     2
+    ],
+    [
+     -78,
+     -4,
+     -28,
+     4
+    ]
+   ],
+   "y": 2,
+   "bed": -8,
+   "moor": "n",
+   "land": "e"
+  },
+  {
+   "part": "ship",
+   "name": "great_ship",
+   "at": [
+    -32,
+    0,
+    -12
+   ],
+   "heading": "w",
+   "length": 47,
+   "beam": 13,
+   "gangway": {
+    "side": "port",
+    "at": 27,
+    "w": 3,
+    "out": 1
+   }
+  }
+ ],
+ "place": [
+  [
+   -51,
+   3,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   4,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   5,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   6,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   7,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   8,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   9,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "y"
+   }
+  ],
+  [
+   -51,
+   10,
+   -8,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   10,
+   -7,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   10,
+   -6,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   10,
+   -5,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   10,
+   -4,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   10,
+   -3,
+   "stripped_oak_log",
+   {
+    "axis": "z"
+   }
+  ],
+  [
+   -51,
+   9,
+   -5,
+   "oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   -51,
+   6,
+   -8,
+   "iron_chain"
+  ],
+  [
+   -51,
+   7,
+   -8,
+   "iron_chain"
+  ],
+  [
+   -51,
+   8,
+   -8,
+   "iron_chain"
+  ],
+  [
+   -51,
+   9,
+   -8,
+   "iron_chain"
+  ],
+  [
+   -51,
+   5,
+   -8,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -50,
+   3,
+   -3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -50,
+   4,
+   -3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -49,
+   3,
+   -3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -50,
+   3,
+   -2,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -52,
+   3,
+   -3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -36,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -35,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -36,
+   3,
+   2,
+   "chest",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   -34,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -36,
+   4,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -66,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -65,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -66,
+   3,
+   2,
+   "chest",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   -64,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -66,
+   4,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -74,
+   3,
+   3,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -74,
+   4,
+   3,
+   "spruce_trapdoor",
+   {
+    "facing": "n",
+    "half": "bottom"
+   }
+  ]
+ ]
+}

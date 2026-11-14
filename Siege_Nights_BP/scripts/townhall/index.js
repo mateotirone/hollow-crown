@@ -30,7 +30,7 @@ import { CORNERSTONE, TREE, BOARD, hallMenu, hallOf, halls, saveHalls, resumeBui
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
-import { markedTick } from "./marked.js";
+import { markedTick, markedFastTick } from "./marked.js";
 import "./spellbar.js";
 import "./messenger.js";
 import "./showcase.js";
@@ -107,6 +107,7 @@ api.onTick("townhall_passives", 20, passiveTick);
 api.onTick("townhall_knight", 20, knightTick);
 api.onTick("townhall_charge", 5, chargeTick);
 api.onTick("townhall_marked", 20, markedTick);
+api.onTick("townhall_marked_fast", 1, markedFastTick);
 api.onTick("townhall_watchfire", 20, watchfireTick);
 
 api.on("ready", () => resumeBuilds());

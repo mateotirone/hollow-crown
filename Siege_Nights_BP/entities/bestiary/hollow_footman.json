@@ -73,7 +73,7 @@
     "speed_multiplier": 0.8
    },
    "minecraft:behavior.nearest_attackable_target": {
-    "priority": 2,
+    "priority": 3,
     "must_see": false,
     "reselect_targets": true,
     "within_radius": 24,
@@ -122,6 +122,40 @@
    "minecraft:persistent": {},
    "minecraft:loot": {
     "table": "loot_tables/entities/bestiary/hollow_footman.json"
+   },
+   "minecraft:behavior.nearest_prioritized_attackable_target": {
+    "priority": 2,
+    "must_see": false,
+    "reselect_targets": true,
+    "within_radius": 32,
+    "entity_types": [
+     {
+      "filters": {
+       "all_of": [
+        {
+         "test": "is_family",
+         "subject": "other",
+         "operator": "==",
+         "value": "player"
+        },
+        {
+         "test": "has_tag",
+         "subject": "other",
+         "operator": "==",
+         "value": "siege_resonant"
+        },
+        {
+         "test": "has_tag",
+         "subject": "other",
+         "operator": "!=",
+         "value": "siege_hollow_ruler"
+        }
+       ]
+      },
+      "max_dist": 32,
+      "priority": 0
+     }
+    ]
    }
   },
   "events": {}

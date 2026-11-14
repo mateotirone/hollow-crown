@@ -8,7 +8,9 @@ like a station spot because the map is one fixed world:
     breakwater, so the basin opens to the south-west through a 13-wide mouth;
   * the basin dredged to 4 deep (the shore here is a 1-2 deep shoal), a timber jetty on piles across it;
   * the harbourmaster's hut on the quay, a cargo crane, bollards, lanterns that read in a sea fret;
-  * the boathouse straddling the shore south of the basin, its slip open to the sea.
+  * the boathouse straddling the shore south of the basin, its slip open to the sea;
+  * north of the north breakwater, a stone causeway and a deep-water pier with a great three-masted ship moored
+    along it (Mateo 2026-11-14), the skill's pier and ship parts (harbour_specs/great_ship.json).
 
 Buildings come from the building skill (harbour_specs/*.json through the skill's engine.py, Mateo's one
 engine), in the Saltreach style: salt_stone / salt_timber, sea-green hip roofs, white tower banded in teal.
@@ -35,6 +37,12 @@ HUT = (-911, 388, 90)                      # x, z, rotation (front faces west on
 BOATHOUSE = (-912, 438, 270)               # water end west, land door east
 CRANE = (-920, 414)
 SQUARE = (-910, 403)
+# the deep-water pier and the great ship (Mateo 2026-11-14: "a big sailboat at saltreach with a big dock"): north of
+# the north breakwater, where the sea is 7 to 9 deep. A stone causeway carries the promenade on north from the
+# breakwater's root; the pier runs west from it, widening to a 9-wide head with the ship moored along its north face.
+SHIP_SPEC = "great_ship"                   # harbour_specs/great_ship.json (pier + ship parts of the skill)
+SHIP_AT = (QUAY_X - 1, SEA, 364)           # that spec's origin in the world: x -923, the sea's top row, z 364
+CAUSEWAY = ((-922, 360), (-918, 377))      # promenade to pier root, stone, level at TOP
 
 
 def _skill_scripts():
@@ -58,6 +66,54 @@ def skill_build(name, door, folder="harbour_specs"):
     bp.cells = {c: v for c, v in bp.cells.items() if v[0] != "air"}
     bp.markers["door"] = (door[0], 0, door[1])
     return bp
+
+
+def causeway_blocks(ground, mole=()):
+    """The stone causeway from the breakwater root north to the pier (CAUSEWAY), solid from the sea bed, level at TOP,
+    with a parapet and lanterns round its open sides; the pier's approach joins its west side."""
+    W = {}
+    (cx0, cz0), (cx1, cz1) = CAUSEWAY
+    for x in range(cx0, cx1 + 1):
+        for z in range(cz0, cz1 + 1):
+            if (x, z) in mole: continue
+            for y in range(min(ground(x, z), BED) - 1, TOP): W[(x, y, z)] = (stone(x, y, z), {})
+            W[(x, TOP, z)] = (("polished_andesite" if h(x, z, 3) < 0.4 else "stone_bricks"), {})
+            for y in range(TOP + 1, TOP + 4): W[(x, y, z)] = ("air", {})
+            pier_root = x == cx0 and SHIP_AT[2] - 2 <= z <= SHIP_AT[2] + 2      # the pier's approach joins here
+            if (x == cx1 or z == cz0 or x == cx0) and not pier_root:
+                W[(x, TOP + 1, z)] = ("stone_brick_wall", {})
+                if (x + z) % 8 == 0: W[(x, TOP + 2, z)] = ("lantern", {})
+    return W
+
+
+def ship_blocks(ground):
+    """The deep-water pier and its ship as world blocks {(x, y, z): (name, props)} (bp style, air kept: the hull's
+    hold is air under the sea, so the stamp leaves no water in it). ground(x, z) is the top ground block y of an
+    untouched column (the sea bed); the pier's piles are carried down to it and the bed is dredged a block under the
+    keel wherever it is shallower."""
+    p = _skill_scripts()
+    if p not in sys.path: sys.path.insert(0, p)
+    import engine
+    spec = json.load(open(os.path.join(HERE, "harbour_specs", SHIP_SPEC + ".json")))
+    bp = Blueprint(spec["name"]); engine.into_blueprint(bp, spec, offset=SHIP_AT)
+    W = dict(bp.cells)
+    bed = SHIP_AT[1] + next(pt for pt in spec["parts"] if pt["part"] == "pier").get("bed", -8)
+    for (x, y, z), (n, q) in list(W.items()):                  # piles stand on the sea bed, not on the water
+        if y == bed and n == "stripped_oak_log" and q.get("axis") == "y":
+            g = ground(x, z)
+            for yy in range(g + 1, bed): W[(x, yy, z)] = (n, {"axis": "y"})      # down to the bed
+            for yy in range(bed, g + 1): W.pop((x, yy, z), None)                 # or stopped where the bed is higher
+    keel = {}
+    for (x, y, z), (n, _q) in W.items():
+        if y <= SEA and n != "stripped_oak_log": keel[(x, z)] = min(keel.get((x, z), 99), y)
+    for (x, z), k in keel.items():                             # dredge under the hull
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                c = (x + dx, z + dz)
+                if ground(*c) >= k - 1:
+                    W.setdefault((c[0], k - 2, c[1]), ("gravel", {}))
+                    for yy in range(k - 1, SEA + 1): W.setdefault((c[0], yy, c[1]), ("water", {}))
+    return W
 
 
 def h(x, z, s=0):
@@ -148,6 +204,18 @@ def build(t):
     for dx, dz in ((1, 1), (1, 2), (2, 1), (1, -1)): W[(cx + dx, TOP + 1, cz + dz)] = ("barrel", {"facing": "up"})
     W[(cx + 2, TOP + 2, cz + 1)] = ("barrel", {"facing": "up"})
 
+    # the causeway north from the breakwater root to the deep-water pier: stone, a parapet on the open side
+    def ground(x, z):
+        return int(t.at(t.G0, x, z)) if t.ok(x, z) else BED - 4
+    for (x, y, z), v in causeway_blocks(ground, mole).items():
+        W[(x, y, z)] = v; take(x, z, 1)
+    (cx0, cz0), (cx1, cz1) = CAUSEWAY
+    prom[:0] = [(QUAY_X + 2, z) for z in range(cz0, cz1 + 1)]          # the promenade runs on up the causeway
+    # the pier and the great ship (skill parts pier + ship, harbour_specs/great_ship.json)
+    for (x, y, z), v in ship_blocks(ground).items():
+        W[(x, y, z)] = v
+        take(x, z)
+
     # buildings on the skill
     lb = skill_build("lighthouse", (0, 5))
     t.stamp(lb, LIGHT[0], LIGHT[1], TOP, 180, "civic"); t.plan[-1].update(name="lighthouse", door=[LIGHT[0], LIGHT[1] - 5])
@@ -178,3 +246,35 @@ def build(t):
                 W[(x, BED, z)] = ("gravel", {})
                 for y in range(BED + 1, SEA + 1): W[(x, y, z)] = ("water", {})
     return prom
+
+
+def patch(blocks_path, heights_path, origin=-1264):
+    """Put the causeway, pier and great ship into an already baked town file (map/gulls_rest-blocks.json) without
+    baking the whole town again: appended after everything else (placed last, so they win), and replaced, not
+    doubled, on a second run. The next full Gull's Rest bake gets the same blocks from build()."""
+    import numpy as np
+    H = np.load(heights_path, mmap_mode="r")
+    ground = lambda x, z: int(H[x - origin, z - origin])
+    d = json.load(open(blocks_path))
+    old = d.pop("great_ship_patch", None)
+    if old: d["blocks"] = d["blocks"][:old["from"]] + d["blocks"][old["from"] + old["n"]:]
+    mole = set()
+    for box in NORTH: mole |= set(cells(box))
+    W = causeway_blocks(ground, mole); W.update(ship_blocks(ground))
+    bp = Blueprint("great_ship_patch"); bp.cells = W; bp.finish()
+    idx = {json.dumps([e["name"], e["states"], bool(e.get("soft"))], sort_keys=True): i for i, e in enumerate(d["palette"])}
+    start = len(d["blocks"])
+    for (x, y, z), (n, q) in sorted(bp.cells.items(), key=lambda c: (c[0][1], c[0][0], c[0][2])):
+        name, st = bp.to_bedrock(n, q)
+        k = json.dumps([name, st, False], sort_keys=True)
+        if k not in idx: idx[k] = len(d["palette"]); d["palette"].append({"name": name, "states": st})
+        d["blocks"].append([x, y, z, idx[k]])
+    d["great_ship_patch"] = {"from": start, "n": len(d["blocks"]) - start, "note": "harbour.py patch: causeway, pier, great ship"}
+    with open(blocks_path, "w") as fh: json.dump(d, fh, separators=(",", ":"))
+    return len(d["blocks"]) - start
+
+
+if __name__ == "__main__":
+    # python3 map/structures/harbour.py patch map/gulls_rest-blocks.json hollow-crown-full-map-heights-pretown.npy
+    if len(sys.argv) >= 4 and sys.argv[1] == "patch":
+        print("great ship patch:", patch(sys.argv[2], sys.argv[3]), "blocks")

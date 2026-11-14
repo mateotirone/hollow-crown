@@ -66,6 +66,14 @@ export const NPCS = [
       [["act1:ask_ember"], "ember"],
       [["act1:sleep"], "sleep"],
       [["act1:aldous"], "aldous_wait"],
+      // Act 2 (newplayer/act2_rules.js act2Stage)
+      [["act2:tree"], "tree_wait"],
+      [["act2:chapterhouse"], "knight_wait"],
+      [["act2:mag"], "mag_wait"],
+      [["act2:talk_bills"], "bills"],
+      [["act2:moneyer"], "moneyer_wait"],
+      [["act2:ironworks"], "ironworks_wait"],
+      [["act2:collect"], "collect_wait"],
       [[], "hub"],
     ],
     nodes: {
@@ -226,6 +234,29 @@ export const NPCS = [
       },
       stuck_grow: { text: "A hall grows by what it holds and what it builds.", opts: [["Still stuck.", "stuck2_grow"], ["Thank you.", "end"]] },
       stuck2_grow: { text: "Hold your siege nights. Click a Plot Marker to raise what the charter asks; your Plan Book lists it.", opts: [["Thank you.", "end"]] },
+      // ---- Act 2: the Tree, the road, the bills
+      tree_wait: { text: "It's still in your pack. I can feel it from here. The Tree's just there. Choose, or tell it not yet. Either is an answer.", opts: [["I'm stuck.", "stuck_tree"], ["I'll go.", "end"]] },
+      stuck_tree: { text: "The Tree of Oaths stands in this hall.", opts: [["Still stuck.", "stuck2_tree"], ["Thank you.", "end"]] },
+      stuck2_tree: { text: "Keep the Ember in your pack and touch the Tree.", opts: [["Thank you.", "end"]] },
+      knight_wait: { text: "The Order's, then. Go and get your name in their book.", opts: [["I'm stuck.", "stuck_knight"], ["I'll go.", "end"]] },
+      stuck_knight: { text: "Aldous rode for the chapterhouse. Follow him.", opts: [["Still stuck.", "stuck2_knight"], ["Thank you.", "end"]] },
+      stuck2_knight: { text: "The Ashen Gate chapterhouse is pinned. Brother Cael keeps the book.", opts: [["Thank you.", "end"]] },
+      mag_wait: { text: "Mirelight. Past the last lantern. Mag will be expecting someone. She always is.", opts: [["I'm stuck.", "stuck_mag"], ["I'll go.", "end"]] },
+      stuck_mag: { text: "Her hut is past the last lantern of Mirelight.", opts: [["Still stuck.", "stuck2_mag"], ["Thank you.", "end"]] },
+      stuck2_mag: { text: "Old Mag's hut is pinned. Talk to her.", opts: [["Thank you.", "end"]] },
+      bills: {
+        text: "Sit. Look at this.\n\nYou've been paying since your first win. Wages, feed, mending, a little out of your purse every morning, and it only goes one way.\n\nTake the iron you smelted to the Moneyer. See what a bar's worth.",
+        opts: [["I'll go.", "end", ["flag:elspeth_bills"]]],
+      },
+      moneyer_wait: { text: "The Moneyer. Take him your iron.", opts: [["I'm stuck.", "stuck_moneyer"], ["I'll go.", "end"]] },
+      stuck_moneyer: { text: "He trades in the town on your pin. Sell him a bar.", opts: [["Still stuck.", "stuck2_moneyer"], ["Thank you.", "end"]] },
+      stuck2_moneyer: { text: "No iron left? The old shaft fills again every night. Dig, smelt, and sell him an ingot.", opts: [["Thank you.", "end"]] },
+      ironworks_wait: { text: "He told you to build, didn't he? Then build.", opts: [["I'm stuck.", "stuck_ironworks"], ["I'll go.", "end"]] },
+      stuck_ironworks: { text: "Your Works yard has a marker waiting.", opts: [["Still stuck.", "stuck2_ironworks"], ["Thank you.", "end"]] },
+      stuck2_ironworks: { text: "Use the Plot Marker on the Works yard and pick the Ironworks.", opts: [["Thank you.", "end"]] },
+      collect_wait: { text: "Let it work a night. Then go and see what it dug.", opts: [["I'm stuck.", "stuck_collect"], ["Good night.", "end"]] },
+      stuck_collect: { text: "The Ironworks keeps a storeroom.", opts: [["Still stuck.", "stuck2_collect"], ["Thank you.", "end"]] },
+      stuck2_collect: { text: "Click the Ironworks block in its yard and take everything.", opts: [["Thank you.", "end"]] },
       // ---- after Act 1: she stays at the hearth
       hub: {
         greets: ["Sit, if you're staying. The fire likes company.", "You smell of the road. Sit.", "The ash is quiet tonight. That's not always good news."],
@@ -420,6 +451,7 @@ export const NPCS = [
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
+      [["act2:talk_aldous"], "tree"], // Act 2: you met him but left before he sent you to the Tree
       [["flag:aldous_met"], "hub"],
       [[], "first"],
     ],
@@ -437,28 +469,42 @@ export const NPCS = [
         opts: [
           ["What is it?", "what", ["flag:aldous_met"]],
           ["Why does the Order want it?", "why", ["flag:aldous_met"]],
-          ["I haven't seen anything.", "end", ["flag:aldous_met"]],
+          ["I have it. I'm keeping it.", "keep", ["flag:aldous_met"]],
+          ["I haven't seen anything.", "lie", ["flag:aldous_met"]],
         ],
+      },
+      // Act 2, step 1 (story pass, Mateo 2026-11-14): you keep the Ember and he sends you to the Tree of Oaths
+      keep: {
+        text: "Show me. ...Bare-handed, and you're still standing.\n\nThe Rule says a knight takes a light before it takes anyone. I don't think it has taken you. And I won't pull it out of a lord's hand at his own gate like a thief.",
+        opts: [["Then what?", "tree"]],
+      },
+      lie: {
+        text: "It hums, you know. I can hear it from here, through your wall.\n\nNo, I won't search your house. The Rule doesn't let me, and I wouldn't if it did.",
+        opts: [["...I'm keeping it.", "tree"]],
+      },
+      tree: {
+        text: "Not to me, then. Take it to the Tree and choose.\n\nThe Tree of Oaths, in your hall. Give the light up there and I'll box it and carry it to the chapterhouse myself. Keep it, and that is between you and it. Only choose. I don't think a light nobody has chosen stays quiet for long.",
+        opts: [["I'll go to the Tree.", "end", ["flag:aldous_tree"]]],
       },
       what: {
         text: "A fallen star. That is what I was told and that is what I will tell you.\n\n...It did not look like a star to me either. Stars do not whisper. But a knight of the Gate does not ask what lies below. It is the second line of the Rule.",
         opts: [
           ["What's the first line?", "rule"],
           ["Why does the Order want it?", "why"],
-          ["Good day, Sir Aldous.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       why: {
         text: "\"If ever a light falls from below, a knight shall ride to it and take it, before it takes anyone.\" That is the Rule.\n\nFrom below. I have always thought that a strange word to use about something that fell out of the sky.",
         opts: [
           ["May I read this Rule?", "rule"],
-          ["Good day.", "end"],
+          ["I have it. I'm keeping it.", "keep"],
         ],
       },
       rule: {
         text: "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
         opts: [
-          ["Thank you.", "end", ["tome:seal_01", "lead:ashen_chapterhouse"]],
+          ["I already have.", "keep", ["tome:seal_01", "lead:ashen_chapterhouse"]],
         ],
       },
       hub: {

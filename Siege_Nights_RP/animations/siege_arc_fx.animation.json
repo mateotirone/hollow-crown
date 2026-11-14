@@ -1,0 +1,318 @@
+{
+ "format_version": "1.10.0",
+ "animations": {
+  "animation.siege.arc_fx.spin": {
+   "loop": true,
+   "animation_length": 0.5,
+   "bones": {
+    "shard": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       360
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.orbit": {
+   "loop": true,
+   "animation_length": 4.0,
+   "bones": {
+    "ring": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "4.0": [
+       0,
+       360,
+       0
+      ]
+     },
+     "position": [
+      0,
+      "math.sin(query.life_time * 120) * 0.6",
+      0
+     ]
+    }
+   }
+  },
+  "animation.siege.arc_fx.bind": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.4,
+   "bones": {
+    "chains": {
+     "position": {
+      "0.0": [
+       0,
+       -14,
+       0
+      ],
+      "0.25": [
+       0,
+       0,
+       0
+      ]
+     },
+     "scale": {
+      "0.0": [
+       1.4,
+       1,
+       1.4
+      ],
+      "0.25": [
+       1.1,
+       1,
+       1.1
+      ],
+      "0.4": [
+       0.9,
+       1,
+       0.9
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.chain_turn": {
+   "loop": true,
+   "animation_length": 6.0,
+   "bones": {
+    "loop1": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "6.0": [
+       0,
+       60,
+       0
+      ]
+     }
+    },
+    "loop2": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "6.0": [
+       0,
+       -60,
+       0
+      ]
+     }
+    },
+    "loop3": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "6.0": [
+       0,
+       60,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.bell_form": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.5,
+   "bones": {
+    "bell": {
+     "scale": {
+      "0.0": [
+       0.1,
+       0.1,
+       0.1
+      ],
+      "0.5": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.toll": {
+   "animation_length": 1.4,
+   "bones": {
+    "bell": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.15": [
+       0,
+       0,
+       18
+      ],
+      "0.45": [
+       0,
+       0,
+       -12
+      ],
+      "0.75": [
+       0,
+       0,
+       7
+      ],
+      "1.05": [
+       0,
+       0,
+       -3
+      ],
+      "1.4": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "clapper": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.2": [
+       0,
+       0,
+       -26
+      ],
+      "0.5": [
+       0,
+       0,
+       16
+      ],
+      "0.8": [
+       0,
+       0,
+       -8
+      ],
+      "1.4": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.rift_open": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.35,
+   "bones": {
+    "rift": {
+     "scale": {
+      "0.0": [
+       0.02,
+       0.3,
+       1
+      ],
+      "0.2": [
+       0.4,
+       1,
+       1
+      ],
+      "0.35": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.rift_breathe": {
+   "loop": true,
+   "animation_length": 1.0,
+   "bones": {
+    "rift": {
+     "scale": [
+      "1 + math.sin(query.life_time * 900) * 0.04",
+      1,
+      1
+     ]
+    }
+   }
+  },
+  "animation.siege.arc_fx.rift_close": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.3,
+   "bones": {
+    "rift": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.3": [
+       0.02,
+       0.6,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.arc_fx.ghost_fade": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 1.0,
+   "bones": {
+    "ghost": {
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.0": [
+       0,
+       -6,
+       0
+      ]
+     },
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.6": [
+       0.96,
+       0.9,
+       0.96
+      ],
+      "1.0": [
+       0.6,
+       0.2,
+       0.6
+      ]
+     }
+    }
+   }
+  }
+ }
+}

@@ -8,6 +8,14 @@
 //                           other tags. A name given here wins over the remembered one (a lord's title can change).
 //   npcSkin(key)            the skinIndex of a key (throws on a key that has no painted skin).
 //
+// How the skin is shown (2026-11-14, Mateo: "last playtest there was a ton of NPCs without skins"): the NPC's
+// siege:skin property (key index + 1) picks the picture; 0 falls back to Bedrock's own skin choice (query.variant),
+// which only hand-placed NPCs use. A property is set the moment we call it and nothing in Bedrock resets it, unlike
+// skinIndex, which a fresh NPC overwrites as it finishes spawning. skinIndex is still set, for the editor.
+// Regional looks: a key with variants "<key>__<region>" (frostmarch, saltreach, emberwaste, blackfen; the Vale wears the
+// plain key) is dressed in the variant for the region the NPC stands in, so Old Elspeth, the Mason and friends keep
+// their signature look but dress for where they live.
+//
 // Every few seconds the NPCs near players are checked and any that lost their look get it back. NPCs nobody
 // claims (hand-placed with the editor) are left as the builder set them; every index shows one of our skins.
 // Names (Mateo 2026-11-13: an NPC read just "NPC"): no NPC near a player keeps Bedrock's "NPC" or a blank name. It
@@ -16,10 +24,12 @@ import { world, system } from "@minecraft/server";
 import { onTick } from "./loop.js";
 import { addTests, assert, assertEqual } from "./tests.js";
 import { NPC_SKINS } from "./npc_skins_data.js";
+import { regionAt } from "../minimap/data.js";
 
 export const NPC_ENTITY = "minecraft:npc";
 const TAG = "siege_skin_";
 const NAME_PROP = "siege:npc_name";
+export const SKIN_PROP = "siege:skin"; // key index + 1; 0 = Bedrock's own choice
 const STOCK_NAMES = new Set(["", "NPC"]);
 // a plain name by kind, for an NPC whose own name is lost
 const KIND_NAMES = [["lore_", "Stranger"], ["settler_", "Settler"], ["fair_", "Trader"], ["mummer_", "Mummer"],
@@ -27,6 +37,21 @@ const KIND_NAMES = [["lore_", "Stranger"], ["settler_", "Settler"], ["fair_", "T
   ["mire_", "Villager"], ["lord_", "Lord"], ["guest_", "Guest"], ["hollow_foreman", "Foreman"],
   ["hollow_miner_", "Miner"], ["envoy_", "Envoy"], ["mason", "Mason"]];
 export const kindName = (key) => KIND_NAMES.find(([p]) => String(key ?? "").startsWith(p))?.[1] ?? "Townsfolk";
+// regional variants: "<key>__<slug>"
+export const REGION_SLUGS = { "Aldmere Vale": "", "Frostmarch": "frostmarch", "Saltreach": "saltreach", "Emberwaste": "emberwaste", "Blackfen": "blackfen" };
+export const baseKey = (key) => String(key ?? "").split("__")[0];
+/** The key to wear in a region (a region name as minimap/data.js regionAt gives it): the regional variant if painted. */
+export function regionalKey(key, region) {
+  const slug = REGION_SLUGS[region];
+  const k = baseKey(key);
+  return slug && INDEX.has(`${k}__${slug}`) ? `${k}__${slug}` : k;
+}
+function regionOf(entity) {
+  try {
+    if (!entity.dimension.id.endsWith("overworld")) return "";
+    return regionAt(entity.location.x, entity.location.z);
+  } catch { return ""; }
+}
 const INDEX = new Map(NPC_SKINS.map((k, i) => [k, i]));
 const looks = [];
 
@@ -42,6 +67,9 @@ function wear(entity, index, name) {
   try {
     if (!entity?.isValid) return;
     if (name && entity.nameTag !== name) entity.nameTag = name;
+    if (index !== undefined) {
+      try { if (entity.getProperty(SKIN_PROP) !== index + 1) entity.setProperty(SKIN_PROP, index + 1); } catch { /* an old pack without the property */ }
+    }
     const npc = entity.getComponent("minecraft:npc");
     if (!npc) return;
     if (index !== undefined && npc.skinIndex !== index) npc.skinIndex = index;
@@ -51,6 +79,11 @@ function wear(entity, index, name) {
 }
 
 export function dressNpc(entity, key, name) {
+  key = regionalKey(key, regionOf(entity));
+  if (!INDEX.has(key)) { // never leave an NPC undressed: a plain skin, and a warning for whoever added the key
+    console.warn(`[Hollow Crown] no NPC skin "${key}": add it to core/npc_skins_data.js and paint it. Wearing "commoner".`);
+    key = "commoner";
+  }
   const index = npcSkin(key);
   try {
     for (const t of entity.getTags()) if (t.startsWith(TAG) && t !== TAG + key) entity.removeTag(t);
@@ -61,6 +94,7 @@ export function dressNpc(entity, key, name) {
   const keep = () => wear(entity, index, lookOf(entity).name);
   keep();
   system.runTimeout(keep, 10);
+  system.runTimeout(keep, 60); // a slow chunk finishes spawning the NPC late
   return entity;
 }
 
@@ -74,8 +108,8 @@ export function lookOf(entity) {
       const got = fn(entity);
       const k = typeof got === "string" ? got : got?.key;
       if (!k || !INDEX.has(k)) continue;
-      key ??= k;
-      if (k === key) { name = typeof got === "object" ? got.name : undefined; break; }
+      key ??= regionalKey(k, regionOf(entity));
+      if (baseKey(k) === baseKey(key)) { name = typeof got === "object" ? got.name : undefined; break; }
     } catch { /* that feature could not tell */ }
   }
   let kept;
@@ -112,6 +146,17 @@ addTests("npc skins", {
     assertEqual(kindName("settler_5"), "Settler");
     assertEqual(kindName("commoner"), "Townsfolk");
     assertEqual(kindName(undefined), "Townsfolk");
+  },
+  "regional variants: the Vale wears the plain key, other regions their own, unknown keys stay plain": () => {
+    assertEqual(regionalKey("mason", "Aldmere Vale"), "mason");
+    assertEqual(regionalKey("mason", "Frostmarch"), "mason__frostmarch");
+    assertEqual(regionalKey("lore_elspeth__saltreach", "Blackfen"), "lore_elspeth__blackfen");
+    assertEqual(regionalKey("lore_wren", "Frostmarch"), "lore_wren");
+    assertEqual(regionalKey("mason", ""), "mason");
+    for (const k of NPC_SKINS.filter((x) => x.includes("__"))) {
+      assert(INDEX.has(baseKey(k)), `${k} has no plain key`);
+      assert(Object.values(REGION_SLUGS).includes(k.split("__")[1]), `${k}: unknown region`);
+    }
   },
   "an unknown key is refused": () => {
     let threw = false;

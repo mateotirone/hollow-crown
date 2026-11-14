@@ -35,6 +35,11 @@ def melee(dmg, speed=1.2, effect=None, cooldown=None):
 # No creature outside a boss fight may kill a full-health (20 hp) player with one bite, even on Hard, where Bedrock
 # multiplies melee by 1.5 (Mateo 2026-11-13: "the dune wyrm is one shooting people"). 12 x 1.5 = 18 leaves a heart.
 MAX_MOB_MELEE = 12
+# The wild (natural spawns, Hollow night walkers, Seep guards) is dangerous, not punishing (Mateo 2026-11-14: "what abt
+# the shit ton of damage they do?"). A vanilla zombie hits for 3; nothing out there hits harder than this on Normal,
+# and anything above 5 swings slowly (melee_cooldown) so there is a gap to step back.
+MAX_WILD_MELEE = 7
+WILD_FAMILIES = ("wild", "wild_hostile", "undead", "hollow")
 
 def ranged(projectile, interval=(1.5, 2.5), radius=16, aux=None, priority=3):
     s = {"def": projectile}
@@ -189,7 +194,7 @@ def villagerish(m, robe, face):
 def m_lost(m): villagerish(m, "robe", "hollow")
 mob(id="lost_villager", name="Lost Villager", family="hollow", model=m_lost,
     pal=P(skin=(176, 150, 130), robe={"c": (110, 92, 70), "style": "cloth"}, eye=(230, 230, 220)),
-    hp=20, speed=0.22, dmg=6, groups="lost", egg=("#6e5c46", "#e6e6dc"),
+    hp=20, speed=0.22, dmg=4, groups="lost", egg=("#6e5c46", "#e6e6dc"),
     lore="One of the Lost Days. It just stands there facing you. It is never where you left it when you look back.")
 
 def m_changeling(m):
@@ -198,7 +203,7 @@ def m_changeling(m):
 mob(id="changeling", name="Changeling", family="hollow", model=m_changeling, variants=2,
     pal=P(skin=(184, 150, 120), robe={"c": (60, 90, 70), "style": "cloth"}, eye=(40, 30, 20)),
     pal_alt=P(skin=(120, 150, 110), robe={"c": (40, 60, 44), "style": "fur"}, eye=(255, 230, 80)),
-    hp=28, speed=0.24, dmg=6, groups="changeling", egg=("#3c5a46", "#ffe650"),
+    hp=28, speed=0.24, dmg=4, groups="changeling", egg=("#3c5a46", "#ffe650"),
     lore="Something wearing a villager. It gets the face nearly right. Nearly.")
 
 def m_wrongling(m):
@@ -212,7 +217,7 @@ def m_wrongling(m):
     m.box("body", [-0.5, 21, 1.5], [1, 12, 1], "skin")                                                                        # spine
 mob(id="wrongling", name="Wrongling", family="hollow", model=m_wrongling,
     pal=P(skin=(214, 210, 200), eye=(10, 8, 10)),
-    hp=40, speed=0.45, dmg=10, collision=(0.6, 2.9), groups="wrongling", egg=("#d6d2c8", "#0a080a"),
+    hp=40, speed=0.45, dmg=7, melee_cooldown=1.5, collision=(0.6, 2.9), groups="wrongling", egg=("#d6d2c8", "#0a080a"),
     lore="It only moves when nobody is looking. Don't blink. Don't turn around. Don't go alone.")
 
 def m_vigil(m):
@@ -231,7 +236,7 @@ def m_vigil(m):
 mob(id="stone_vigil", name="Stone Vigil", family="hollow", model=m_vigil, plan="none",
     pal=P(stone={"c": (150, 152, 146), "style": "bone"}, robe={"c": (124, 128, 124), "style": "cloth"}, wing={"c": (100, 108, 104), "style": "stone"},
           plinth={"c": (84, 92, 84), "style": "stone"}, eye=(18, 16, 22)),
-    hp=60, speed=0.5, dmg=8, kb=1, collision=(0.7, 2.1), resist=dict(projectile=0.0, fire=True, drown=True), groups=None, egg=("#8c908a", "#12101a"),
+    hp=60, speed=0.5, dmg=6, melee_cooldown=1.5, kb=1, collision=(0.7, 2.1), resist=dict(projectile=0.0, fire=True, drown=True), groups=None, egg=("#8c908a", "#12101a"),
     lore="The Order carved them to keep watch over its dead. Something else is keeping watch through them now. It is only a statue while somebody is looking.")
 
 def m_hound(m):
@@ -243,7 +248,7 @@ def m_hound(m):
     for s in (-1, 1): m.box("jaw", [s * 2 - 0.5, q["hy"] - 3, -18], [1, 2, 1], "bone"); m.box("head", [s * 2 - 0.5, q["hy"] - 2, -18.5], [1, 2, 1], "bone")
 mob(id="echo_hound", name="Echo Hound", family="hollow", model=m_hound, plan="quad",
     pal=P(hide={"c": (40, 44, 60), "style": "fur"}, bone={"c": (200, 200, 190), "style": "bone"}, eye=(120, 220, 255)),
-    hp=24, speed=0.38, dmg=5, collision=(0.8, 1.0), groups="hound", egg=("#282c3c", "#78dcff"),
+    hp=24, speed=0.38, dmg=4, collision=(0.8, 1.0), groups="hound", egg=("#282c3c", "#78dcff"),
     lore="Blind. It hunts by the hum of the Ember. The more of the Ember you carry, the farther away it hears you.")
 
 def m_mirror(m):
@@ -255,7 +260,7 @@ def m_mirror(m):
     shield(m, size=(8, 12), shield="mirror", trim="trim", kite=True)
 mob(id="mirror_knight", name="Mirror Knight", family="hollow", model=m_mirror,
     pal=P(mirror={"c": (200, 214, 226), "style": "metal"}, trim={"c": (120, 140, 160), "style": "metal"}),
-    hp=45, speed=0.3, dmg=7, groups="mirror", egg=("#c8d6e2", "#788ca0"),
+    hp=45, speed=0.3, dmg=5, groups="mirror", egg=("#c8d6e2", "#788ca0"),
     lore="Whatever you hit it with last, it learns. Shoot it and it shoots back. Strike it and it parries. Change it up.")
 
 def m_shade(m):
@@ -272,7 +277,7 @@ def m_shade(m):
     m.box("bell", [x - 2.5, 1 + y, -11.5 + z], [5, 4, 5], "bell"); m.box("bell", [x - 3, y, -12 + z], [6, 1, 6], "bell")
 mob(id="tolling_shade", name="Tolling Shade", family="hollow", model=m_shade, plan="float", material="entity_alphablend",
     pal=P(shroud={"c": (60, 70, 90, 190), "style": "cloth"}, wisp={"c": (90, 110, 140, 120), "style": "cloth"}, bell=GOLD, eye=(140, 230, 255)),
-    hp=30, speed=0.25, dmg=4, fly=0.25, groups=None, egg=("#3c465a", "#8ce6ff"), anim_extra=[("bell", "rotation", ["math.sin(query.life_time*300)*25", "0", "0"])],
+    hp=30, speed=0.25, dmg=3, fly=0.25, groups=None, egg=("#3c465a", "#8ce6ff"), anim_extra=[("bell", "rotation", ["math.sin(query.life_time*300)*25", "0", "0"])],
     lore="You have heard that bell before, under your own keep. Each ring drags at your legs and darkens the world.")
 
 # ======================================================================================
@@ -289,7 +294,7 @@ def m_stag(m):
     m.box("body", [-1.5, 21, 8], [3, 3, 3], "antler")                         # white scut of a tail
 mob(id="frost_stag", name="Frost Stag", family="wild", model=m_stag, plan="quad",
     pal=P(fur={"c": (214, 220, 226), "style": "fur"}, antler={"c": (190, 220, 240), "style": "bone"}, eye=(20, 30, 40)),
-    hp=30, speed=0.3, dmg=7, collision=(1.2, 1.8), neutral=True, region="Frostmarch", egg=("#d6dce2", "#bedcf0"),
+    hp=30, speed=0.3, dmg=5, collision=(1.2, 1.8), neutral=True, region="Frostmarch", egg=("#d6dce2", "#bedcf0"),
     spawn=dict(biomes=["taiga", "frozen", "cold"], light=None, herd=(1, 3), weight=6, pop="animal"),
     lore="Gentle until you strike it. Its Pale Antlers are worth a fortune to any Stables master.")
 
@@ -300,8 +305,8 @@ def m_rimewolf(m):
     for s in (-1, 1): m.box("head", [s * 1.5 - 0.5, q["hy"] - 3, q["hz"] - 3.5], [1, 2, 1], "frost")                         # fangs
 mob(id="rimewolf", name="Rimewolf", family="wild_hostile", model=m_rimewolf, plan="quad",
     pal=P(fur={"c": (170, 186, 200), "style": "fur"}, frost={"c": (210, 240, 255), "style": "stone"}, eye=(120, 220, 255)),
-    hp=22, speed=0.36, dmg=4, collision=(0.8, 0.9), region="Frostmarch", effect={"effect_name": "slowness", "effect_duration": 3}, egg=("#aabac8", "#d2f0ff"),
-    spawn=dict(biomes=["taiga", "frozen", "cold"], light=7, herd=(2, 4), weight=8, pop="monster"),
+    hp=22, speed=0.36, dmg=3, collision=(0.8, 0.9), region="Frostmarch", effect={"effect_name": "slowness", "effect_duration": 1.5}, egg=("#aabac8", "#d2f0ff"),
+    spawn=dict(biomes=["taiga", "frozen", "cold"], light=7, herd=(2, 3), weight=6, density=2, pop="monster"),
     lore="Hunts in packs through the snow. Their bite freezes your legs, and they know it.")
 
 def m_lurker(m):
@@ -317,8 +322,8 @@ def m_lurker(m):
     m.bone("tail", [0, 8, 8], "body"); m.box("tail", [-2, 5, 8], [4, 4, 8], "scale"); m.box("tail", [-1.5, 5.5, 16], [3, 3, 6], "scale"); m.box("tail", [-0.5, 4, 20], [1, 7, 5], "fin")
 mob(id="brine_lurker", name="Brine Lurker", family="wild_hostile", model=m_lurker, plan="quad",
     pal=P(scale={"c": (50, 90, 84), "style": "stone"}, fin={"c": (90, 140, 120), "style": "bone"}, belly=(170, 180, 150), eye=(240, 250, 120)),
-    hp=34, speed=0.26, dmg=6, collision=(1.2, 0.9), swim=True, region="Saltreach", egg=("#325a54", "#f0fa78"),
-    spawn=dict(biomes=["beach", "ocean", "river"], light=7, herd=(1, 2), weight=6, pop="monster"),
+    hp=34, speed=0.26, dmg=4, collision=(1.2, 0.9), swim=True, region="Saltreach", egg=("#325a54", "#f0fa78"),
+    spawn=dict(biomes=["beach", "ocean", "river"], light=7, herd=(1, 2), weight=4, density=2, pop="monster"),
     lore="Lies still in the shallows like a rock. When you walk past, it drags you under.")
 
 def m_scarab(m):
@@ -353,7 +358,7 @@ def m_wyrm(m):
     m.box("seg5", [-1, 2, 72], [2, 3, 6], "tooth")                                                                             # tail spike
 mob(id="dune_wyrm", name="Dune Wyrm", family="wild_hostile", model=m_wyrm, plan="wyrm",
     pal=P(scale={"c": (196, 160, 100), "style": "stone"}, plate={"c": (160, 120, 70), "style": "metal"}, tooth=(240, 230, 210), eye=(30, 20, 10)),
-    hp=90, speed=0.28, dmg=7, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
+    hp=90, speed=0.28, dmg=6, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
     spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, density=1, pop="monster"),  # one at a time (Mateo 2026-11-14)
     lore="The sand ripples. Then the sand stands up. It hunts by the shake of your footsteps, so stand still or run.")
 
@@ -369,8 +374,8 @@ def m_hag(m):
     m.box("staff", [-7.5, 28, -1.5], [3, 2, 3], "hat"); m.box("staff", [-7, 30, 0.5], [1, 2, 1], "hat")                        # gnarled knot at the top
 mob(id="bog_hag", name="Bog Hag", family="wild_hostile", model=m_hag,
     pal=P(skin=(120, 140, 90), rags={"c": (60, 64, 40), "style": "fur"}, hat={"c": (40, 36, 30), "style": "cloth"}, eye=(255, 140, 40)),
-    hp=30, speed=0.27, dmg=3, ranged_def=("minecraft:splash_potion", 25), region="Blackfen", egg=("#3c4028", "#ff8c28"),
-    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=7, herd=(1, 1), weight=4, pop="monster"),
+    hp=30, speed=0.27, dmg=3, ranged_def=("minecraft:splash_potion", 25), ranged_interval=(3, 5), region="Blackfen", egg=("#3c4028", "#ff8c28"),
+    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=7, herd=(1, 1), weight=3, density=2, pop="monster"),
     lore="Throws poison and lays hexes. Old Mag says the hags were her sisters once. Old Mag says a lot of things.")
 
 def m_toad(m):
@@ -386,8 +391,8 @@ def m_toad(m):
         m.box(nm, [x + sx * 1.5 - 2, 0, z - 3 * (1 if sz < 0 else 1)], [4, 1, 3], "wart", mirror=sx > 0)                       # splayed toes
 mob(id="mire_toad", name="Mire Toad", family="wild_hostile", model=m_toad, plan="quad",
     pal=P(skin={"c": (90, 110, 50), "style": "stone"}, wart=(160, 90, 40), eye=(250, 200, 40)),
-    hp=16, speed=0.3, dmg=3, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
-    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=6, density=2, pop="monster"),
+    hp=16, speed=0.3, dmg=2, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
+    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=4, density=2, pop="monster"),
     lore="It sits so still it looks like a stone in the mud. Its skin is poison, so punching it is a mistake.")
 
 def m_wight(m):
@@ -401,8 +406,8 @@ def m_wight(m):
     hold(m, "sword", blade="mail", hilt="crown", long=15)
 mob(id="barrow_wight", name="Barrow Wight", family="undead", model=m_wight,
     pal=P(bone={"c": (200, 196, 176), "style": "bone"}, mail={"c": (80, 84, 80), "style": "metal"}, crown={"c": (150, 130, 70), "style": "metal"}, shroud={"c": (50, 60, 56), "style": "cloth"}, eye=(120, 255, 180)),
-    hp=34, speed=0.28, dmg=6, region="Aldmere Vale", burns=True, egg=("#c8c4b0", "#78ffb4"),
-    spawn=dict(biomes=["plains", "forest"], light=7, herd=(1, 2), weight=5, pop="monster"),
+    hp=34, speed=0.28, dmg=4, region="Aldmere Vale", burns=True, egg=("#c8c4b0", "#78ffb4"),
+    spawn=dict(biomes=["plains", "forest"], light=7, herd=(1, 2), weight=4, density=2, pop="monster"),
     lore="A knight buried with his crown and his grudge. Every hit it lands heals it. The Vale's barrows are full of them.")
 
 # ======================================================================================
