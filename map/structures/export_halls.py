@@ -35,9 +35,37 @@ def tidy(bp):
         elif n.endswith("_fence"):
             if all(get(x + a, y + b, z + c) == "air" for a, b, c in ((0, -1, 0), (0, 1, 0), (1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1))):
                 gone.append((x, y, z))
+    # a railing left hanging where a gallery's floor was cut away (halls 3 to 5): a run of fence with air under every
+    # post and nothing hard beside it stands on nothing (the "what's underneath" audit, Mateo 2026-11-14)
+    hard = lambda n: n != "air" and lighting.opaque(n)
+    hang = {(x, y, z) for (x, y, z), (n, p) in bp.cells.items() if n.endswith("_fence") and get(x, y - 1, z) == "air"
+            and not any(hard(get(x + a, y, z + c)) for a, c in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+    # where the gallery's floor still runs beside the post, the floor comes back under it (the railing stands on
+    # the gallery's edge again); a railing with no floor anywhere beside it goes below
+    floored = set()
+    for (x, y, z) in hang:
+        for a, c in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = get(x + a, y - 1, z + c)
+            if hard(n) and get(x, y - 2, z) == "air":
+                bp.cells[(x, y - 1, z)] = bp.cells[(x + a, y - 1, z + c)]; floored.add((x, y, z)); break
+    hang -= floored
+    seen = set()
+    for c0 in hang:
+        if c0 in seen: continue
+        run, todo = [], [c0]; seen.add(c0)
+        while todo:
+            x, y, z = todo.pop(); run.append((x, y, z))
+            for a, c in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                q = (x + a, y, z + c)
+                if q not in seen and get(*q).endswith("_fence"):
+                    seen.add(q); todo.append(q)
+        if all(q in hang or q in floored or q not in hang and get(q[0], q[1] - 1, q[2]) == "air" for q in run) and not any(q in floored for q in run):                        # every post of the run hangs: the whole railing goes
+            for q in run:
+                gone.append(q)
+                if get(q[0], q[1] + 1, q[2]) in ("lantern", "soul_lantern"): gone.append((q[0], q[1] + 1, q[2]))
     for c in gone: bp.cells[c] = ("air", {})
-    if gone: bp.finish()
-    return len(gone)
+    if gone or floored: bp.finish()
+    return len(gone) + len(floored)
 
 def export(bp, light=True):
     tidy(bp)

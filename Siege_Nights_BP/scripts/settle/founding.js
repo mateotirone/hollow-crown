@@ -19,6 +19,7 @@
 
 import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { world, system, BlockPermutation } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
@@ -142,6 +143,7 @@ function* layOutJob(owner, tier, done) {
   const layout = layoutOf(town);
   const dim = world.getDimension(OVERWORLD);
   const pal = layout.pal.map(([id, st]) => perm(id, st));
+  const rests = layout.pal.map(([id, st]) => restsOn(id, st));
   let rows = groundwork(layout, tier);
   for (let pass = 0; pass < 60 && rows.length; pass++) { // unloaded chunks: try again a little later
     const later = [];
@@ -154,6 +156,7 @@ function* layOutJob(owner, tier, done) {
       try { block = dim.getBlock(at); } catch { block = undefined; }
       if (!block) { later.push([dx, dy, dz, p]); continue; }
       try { if (pal[p] && block.permutation !== pal[p]) block.setPermutation(pal[p]); } catch { /* protected block */ }
+      if (pal[p] && rests[p]) fullUnder(dim, at);
     }
     rows = later;
     if (rows.length) for (let i = 0; i < 40; i++) yield; // ~2 s
@@ -467,10 +470,30 @@ onTick("settle_roadjoin", 200, () => {
   })());
 });
 
+// What's underneath (Mateo 2026-11-14: "under it is ____ but it's a slab so it's floating. Needs to be a full block"):
+// nothing rests on a bottom slab. The square's sunk-slab paving under a bench, a table or a lamp post becomes its
+// double slab, so the piece stands on a full block instead of half a block of air.
+const NOT_RESTING = /(:air$|water|lava|chain$|leaves|trapdoor|vine|snow_layer|scaffolding|ladder|_button$|wall_sign|frame$|_slab$|torch)/;
+export const restsOn = (id, states) => !NOT_RESTING.test(id) && !(id.endsWith("lantern") && states?.hanging) && !states?.upside_down_bit
+  && states?.half !== "top" && !states?.upper_block_bit;
+export const fullSlab = (id) => (id.endsWith("_slab") && !id.includes("double") ? id.replace(/_slab$/, "_double_slab") : undefined);
+function fullUnder(dim, at) {
+  let below;
+  try { below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z }); } catch { return; }
+  const full = below && fullSlab(below.typeId);
+  if (!full) return;
+  let half;
+  try { half = below.permutation.getState("minecraft:vertical_half"); } catch { half = undefined; }
+  if (half !== "bottom") return;
+  const p = perm(full, {});
+  if (p) try { below.setPermutation(p); } catch { /* protected block */ }
+}
+
 function setAt(dim, at, id, states) {
   const p = perm(id, states);
   const block = dim.getBlock(at);
   if (p && block) block.setPermutation(p);
+  if (p && restsOn(id, states)) fullUnder(dim, at);
 }
 
 function placeFixture(owner, town, f) {
@@ -698,7 +721,9 @@ export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(own
 
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
-export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
+// The story can add its own lines ("charterStory": the Hamlet's Ironworks and Act 2, newplayer/act2.js)
+export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => applyFilter("charterStory",
+  charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN), { owner, tier, lord: !!townOf(owner)?.lord });
 
 // Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
 // Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"

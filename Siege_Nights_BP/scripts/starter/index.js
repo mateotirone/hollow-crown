@@ -5,8 +5,9 @@
 // weapon, once, the first time they start:
 //   - picking a plot in the welcome hall (event plotChosen): that plot's region;
 //   - starting in Kingsrest with no plot (event startedHomeless): the Vale;
-//   - a world with no welcome hall (no map, or the hall not raised yet): at the end of their first join, the region
-//     of the nearest Plot Stone, or the Vale.
+//   - a world that is not the Hollow Crown map (no welcome hall): at the end of their first join, the region of the
+//     nearest Plot Stone, or the Vale. On the map a newcomer who arrives before the hall stands waits for it and
+//     gets the kit with the start they choose (noHallGift).
 // Each piece goes straight onto the body if that slot is empty, otherwise into the pack (or at their feet when the
 // pack is full). The clothes are leather-weak (art: studio/art/build_starter_clothes.py) and Hunters sell them,
 // Smiths the weapons, in their own region, for a few Regals (economy/config.js).
@@ -26,6 +27,7 @@ import { system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { on, addTests, assert, assertEqual } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { mapMode, hallBuilt } from "../plots/api.js";
+import { setupState } from "../opening/setup.js";
 import { regionAt } from "../economy/shops.js";
 import { REGION_KEY } from "../economy/regional_armor.js";
 import { pay, coins } from "../economy/api.js";
@@ -121,8 +123,20 @@ on("joined", ({ player, first }) => {
     // no plots on this world
   }
   if (hall) return; // the welcome hall's choice gives it
-  later(player, regionAt(player.location), 5);
+  noHallGift(player, () => later(player, regionAt(player.location), 5));
 });
+
+// On the Hollow Crown map the welcome hall may still be going up when a newcomer's join sequence ends; they are
+// brought up to it once it stands (plots/welcome.js), and their kit comes with the start they choose there.
+// Only a world that is not the map (setup says "plain") hands it out at the end of the first join. Until setup
+// knows which it is, look again every 10 seconds.
+export function noHallGift(player, give, tries = 0) {
+  let state = "plain";
+  try { state = setupState(); } catch { /* no setup on this world */ }
+  if (state === "map") return;
+  if (state === "plain" || tries >= 60) return give();
+  system.runTimeout(() => { if (valid(player)) noHallGift(player, give, tries + 1); }, 200);
+}
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "siege:starter_kit") return;

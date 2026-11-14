@@ -82,7 +82,14 @@
     -76,
     113,
     -1071
-   ]
+   ],
+   "spots": {
+    "jarl": [
+     -76,
+     113,
+     -1058
+    ]
+   }
   },
   {
    "stamp": "rimehold_inn",
@@ -103,7 +110,14 @@
     -67,
     113,
     -1077
-   ]
+   ],
+   "spots": {
+    "innkeeper": [
+     -61,
+     113,
+     -1081
+    ]
+   }
   },
   {
    "stamp": "rimehold_stave_chapel",
@@ -145,7 +159,14 @@
     -95,
     113,
     -1081
-   ]
+   ],
+   "spots": {
+    "shopkeeper": [
+     -103,
+     113,
+     -1081
+    ]
+   }
   },
   {
    "stamp": "rimehold_smithy",
@@ -166,7 +187,14 @@
     -52,
     114,
     -1059
-   ]
+   ],
+   "spots": {
+    "smith": [
+     -48,
+     114,
+     -1053
+    ]
+   }
   },
   {
    "stamp": "rimehold_net_sheds",
@@ -190,6 +218,39 @@
    ]
   },
   {
+   "stamp": "town_moneyer_frostmarch",
+   "kind": "civic",
+   "x": -63,
+   "z": -1095,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 115,
+   "foundation": 0,
+   "door": [
+    -63,
+    -1094
+   ],
+   "walked": true,
+   "name": "moneyer",
+   "door_block": [
+    -63,
+    113,
+    -1095
+   ],
+   "spots": {
+    "moneyer": [
+     -60,
+     113,
+     -1100
+    ],
+    "sign": [
+     -63,
+     115,
+     -1094
+    ]
+   }
+  },
+  {
    "stamp": "breeder_yard_frostmarch",
    "kind": "civic",
    "x": -116,
@@ -211,34 +272,13 @@
    ]
   },
   {
-   "stamp": "rimehold_house_31547_t1_mid",
-   "kind": "house",
-   "x": -67,
-   "z": -1104,
-   "ground_y": 112,
-   "rotation": 0,
-   "footprint": 99,
-   "foundation": 0,
-   "door": [
-    -64,
-    -1095
-   ],
-   "walked": true,
-   "roof": "mid",
-   "door_block": [
-    -64,
-    114,
-    -1096
-   ]
-  },
-  {
-   "stamp": "rimehold_house_31577_t1_dark",
+   "stamp": "rimehold_house_32001_t1_dark",
    "kind": "house",
    "x": -55,
    "z": -1108,
    "ground_y": 112,
    "rotation": 0,
-   "footprint": 81,
+   "footprint": 84,
    "foundation": 0,
    "door": [
     -52,
@@ -253,7 +293,7 @@
    ]
   },
   {
-   "stamp": "rimehold_barn_31465",
+   "stamp": "rimehold_barn_31076",
    "kind": "barn",
    "x": -143,
    "z": -1076,
@@ -268,37 +308,43 @@
    "walked": true
   },
   {
-   "stamp": "rimehold_barn_31924_d-124_-1050",
-   "kind": "barn",
-   "x": -124,
-   "z": -1050,
+   "stamp": "rimehold_house_31400_t2_dark",
+   "kind": "house",
+   "x": -123,
+   "z": -1055,
    "ground_y": 114,
    "rotation": 180,
-   "footprint": 144,
-   "foundation": 1,
+   "footprint": 84,
+   "foundation": 0,
    "door": [
-    -128,
-    -1061
+    -126,
+    -1062
    ],
-   "walked": true
+   "walked": true,
+   "roof": "dark",
+   "door_block": [
+    -126,
+    116,
+    -1061
+   ]
   },
   {
-   "stamp": "rimehold_barn_31130_d-54_-1124",
+   "stamp": "rimehold_barn_31424",
    "kind": "barn",
    "x": -54,
-   "z": -1124,
+   "z": -1122,
    "ground_y": 112,
    "rotation": 90,
-   "footprint": 198,
-   "foundation": 1,
+   "footprint": 165,
+   "foundation": 0,
    "door": [
     -67,
-    -1119
+    -1118
    ],
    "walked": true
   },
   {
-   "stamp": "rimehold_house_31311_t1_dark",
+   "stamp": "rimehold_house_31365_t1_mid",
    "kind": "house",
    "x": -67,
    "z": -1060,
@@ -311,7 +357,7 @@
     -1063
    ],
    "walked": true,
-   "roof": "dark",
+   "roof": "mid",
    "door_block": [
     -61,
     115,
@@ -319,81 +365,60 @@
    ]
   },
   {
-   "stamp": "rimehold_house_31917_t2_d-106_-1024",
+   "stamp": "rimehold_house_31282_t2_dark",
    "kind": "house",
-   "x": -106,
-   "z": -1024,
+   "x": -103,
+   "z": -1022,
    "ground_y": 115,
    "rotation": 270,
-   "footprint": 81,
-   "foundation": 1,
-   "door": [
-    -99,
-    -1027
-   ],
-   "walked": true,
-   "roof": "slate",
-   "door_block": [
-    -100,
-    117,
-    -1027
-   ]
-  },
-  {
-   "stamp": "rimehold_barn_31638",
-   "kind": "barn",
-   "x": -67,
-   "z": -1027,
-   "ground_y": 114,
-   "rotation": 180,
-   "footprint": 145,
+   "footprint": 99,
    "foundation": 0,
    "door": [
-    -71,
-    -1038
-   ],
-   "walked": true
-  },
-  {
-   "stamp": "rimehold_house_31120_t2_d-33_-1072_dark",
-   "kind": "house",
-   "x": -33,
-   "z": -1072,
-   "ground_y": 113,
-   "rotation": 90,
-   "footprint": 99,
-   "foundation": 1,
-   "door": [
-    -42,
-    -1069
+    -96,
+    -1026
    ],
    "walked": true,
    "roof": "dark",
    "door_block": [
-    -41,
-    115,
-    -1069
+    -97,
+    117,
+    -1026
    ]
   },
   {
-   "stamp": "rimehold_house_31160_t2_d-106_-1132_mid",
+   "stamp": "rimehold_barn_31340_d-75_-1038",
+   "kind": "barn",
+   "x": -75,
+   "z": -1038,
+   "ground_y": 115,
+   "rotation": 90,
+   "footprint": 144,
+   "foundation": 1,
+   "door": [
+    -86,
+    -1034
+   ],
+   "walked": true
+  },
+  {
+   "stamp": "rimehold_house_31964_t2_d-104_-1134",
    "kind": "house",
-   "x": -106,
-   "z": -1132,
+   "x": -104,
+   "z": -1134,
    "ground_y": 114,
    "rotation": 270,
    "footprint": 81,
    "foundation": 1,
    "door": [
-    -99,
-    -1135
+    -97,
+    -1137
    ],
    "walked": true,
-   "roof": "mid",
+   "roof": "slate",
    "door_block": [
-    -100,
+    -98,
     116,
-    -1135
+    -1137
    ]
   },
   {
@@ -439,7 +464,7 @@
    ]
   },
   {
-   "stamp": "tg_well_31",
+   "stamp": "tg_cross_31",
    "kind": "square",
    "x": -80,
    "z": -1080,
@@ -450,52 +475,52 @@
   {
    "stamp": "market_stall_31",
    "kind": "stall",
-   "x": -85,
-   "z": -1081,
-   "ground_y": 112,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_32",
-   "kind": "stall",
-   "x": -81,
-   "z": -1085,
-   "ground_y": 112,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_33",
-   "kind": "stall",
-   "x": -75,
-   "z": -1082,
-   "ground_y": 112,
-   "rotation": 90,
-   "footprint": 0
-  },
-  {
-   "stamp": "market_stall_34",
-   "kind": "stall",
-   "x": -77,
+   "x": -79,
    "z": -1075,
    "ground_y": 112,
    "rotation": 180,
    "footprint": 0
   },
   {
+   "stamp": "market_stall_32",
+   "kind": "stall",
+   "x": -85,
+   "z": -1078,
+   "ground_y": 112,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_33",
+   "kind": "stall",
+   "x": -84,
+   "z": -1085,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_34",
+   "kind": "stall",
+   "x": -78,
+   "z": -1084,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
    "stamp": "market_stall_35",
    "kind": "stall",
-   "x": -82,
-   "z": -1076,
+   "x": -75,
+   "z": -1079,
    "ground_y": 112,
-   "rotation": 180,
+   "rotation": 90,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_frost_arm",
    "kind": "lamp",
-   "x": -78,
+   "x": -79,
    "z": -1086,
    "ground_y": 111,
    "rotation": 0,
@@ -505,7 +530,7 @@
    "stamp": "lamp_post_frost_arm",
    "kind": "lamp",
    "x": -74,
-   "z": -1080,
+   "z": -1081,
    "ground_y": 111,
    "rotation": 90,
    "footprint": 0
@@ -513,10 +538,19 @@
   {
    "stamp": "lamp_post_frost_arm",
    "kind": "lamp",
-   "x": -85,
+   "x": -78,
+   "z": -1075,
+   "ground_y": 111,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_frost_arm",
+   "kind": "lamp",
+   "x": -84,
    "z": -1076,
    "ground_y": 111,
-   "rotation": 270,
+   "rotation": 180,
    "footprint": 0
   },
   {
@@ -569,7 +603,7 @@
    "kind": "lamp",
    "x": -109,
    "z": -1030,
-   "ground_y": 114,
+   "ground_y": 113,
    "rotation": 0,
    "footprint": 0
   },
@@ -648,6 +682,15 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
+   "x": -91,
+   "z": -1078,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_frost",
+   "kind": "lamp",
    "x": -100,
    "z": -1074,
    "ground_y": 112,
@@ -675,17 +718,17 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -127,
-   "z": -1063,
-   "ground_y": 114,
+   "x": -131,
+   "z": -1067,
+   "ground_y": 112,
    "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -139,
-   "z": -1060,
+   "x": -140,
+   "z": -1064,
    "ground_y": 113,
    "rotation": 0,
    "footprint": 0
@@ -693,8 +736,8 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -146,
-   "z": -1063,
+   "x": -145,
+   "z": -1059,
    "ground_y": 113,
    "rotation": 0,
    "footprint": 0
@@ -704,15 +747,6 @@
    "kind": "lamp",
    "x": -68,
    "z": -1093,
-   "ground_y": 112,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_frost",
-   "kind": "lamp",
-   "x": -68,
-   "z": -1106,
    "ground_y": 112,
    "rotation": 0,
    "footprint": 0
@@ -855,17 +889,8 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -86,
-   "z": -1034,
-   "ground_y": 113,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_frost",
-   "kind": "lamp",
-   "x": -94,
-   "z": -1036,
+   "x": -92,
+   "z": -1035,
    "ground_y": 113,
    "rotation": 0,
    "footprint": 0
@@ -937,7 +962,7 @@
    "stamp": "lamp_post_frost",
    "kind": "lamp",
    "x": -94,
-   "z": -1026,
+   "z": -1024,
    "ground_y": 115,
    "rotation": 0,
    "footprint": 0
@@ -1017,6 +1042,15 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
+   "x": -67,
+   "z": -1109,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_frost",
+   "kind": "lamp",
    "x": -57,
    "z": -1108,
    "ground_y": 112,
@@ -1064,7 +1098,7 @@
    "kind": "lamp",
    "x": -94,
    "z": -1136,
-   "ground_y": 113,
+   "ground_y": 114,
    "rotation": 0,
    "footprint": 0
   },
@@ -1107,15 +1141,6 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -92,
-   "z": -1086,
-   "ground_y": 112,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_frost",
-   "kind": "lamp",
    "x": -43,
    "z": -1048,
    "ground_y": 114,
@@ -1125,27 +1150,9 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -83,
-   "z": -1069,
+   "x": -91,
+   "z": -1086,
    "ground_y": 113,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_frost",
-   "kind": "lamp",
-   "x": -66,
-   "z": -1109,
-   "ground_y": 112,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_frost",
-   "kind": "lamp",
-   "x": -69,
-   "z": -1074,
-   "ground_y": 112,
    "rotation": 0,
    "footprint": 0
   },
@@ -1161,9 +1168,18 @@
   {
    "stamp": "lamp_post_frost",
    "kind": "lamp",
-   "x": -90,
-   "z": -1020,
-   "ground_y": 115,
+   "x": -86,
+   "z": -1066,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_frost",
+   "kind": "lamp",
+   "x": -69,
+   "z": -1079,
+   "ground_y": 112,
    "rotation": 0,
    "footprint": 0
   },
@@ -1268,21 +1284,11 @@
    "footprint": 0
   },
   {
-   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_0",
-   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_0",
+   "stamp": "frost_tall_spruce__frost_tall_spruce_young_1",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_young_1",
    "kind": "tree",
    "x": -111,
    "z": -1127,
-   "ground_y": 113,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "frost_scots_pine__frost_scots_pine_young_1",
-   "db_stamp": "frost_scots_pine/frost_scots_pine_young_1",
-   "kind": "tree",
-   "x": -89,
-   "z": -1055,
    "ground_y": 113,
    "rotation": 0,
    "footprint": 0
@@ -1318,8 +1324,8 @@
    "footprint": 0
   },
   {
-   "stamp": "frost_tall_spruce__frost_tall_spruce_young_0",
-   "db_stamp": "frost_tall_spruce/frost_tall_spruce_young_0",
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_0",
    "kind": "tree",
    "x": -92,
    "z": -1142,
@@ -1424,6 +1430,16 @@
    "x": -115,
    "z": -1104,
    "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_0",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_0",
+   "kind": "tree",
+   "x": -124,
+   "z": -1113,
+   "ground_y": 112,
    "rotation": 0,
    "footprint": 0
   }

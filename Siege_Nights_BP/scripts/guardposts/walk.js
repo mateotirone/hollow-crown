@@ -10,6 +10,7 @@
 //     straight away so the wall is never bare
 //   - no closer for WALK.stuck seconds (no way through): it is put on its spot
 //   - a watchtower lookout (dest.climb): at the foot of the tower it is put up on the deck (the ladder is inside)
+//   - leaving a lookout (down = the foot of its ladder): it is put down at the foot of the tower first, then walks
 // No marker slot free (more than WALK.slots guards walking at once) also puts it straight on its spot.
 
 import { world, system } from "@minecraft/server";
@@ -36,6 +37,9 @@ const dim = () => world.getDimension("minecraft:overworld");
 const entityById = (id) => { try { return world.getEntity(id); } catch { return undefined; } };
 export const isWalking = (guard) => walkers.has(guard.id);
 export const walkingCount = () => walkers.size;
+
+// Pure: is a guard at `loc` up on the lookout whose ladder comes down at `foot` (beside it, well above it)?
+export const upAbove = (loc, foot) => !!foot && loc.y - foot.y > 2.5 && Math.hypot(loc.x - foot.x, loc.z - foot.z) <= WALK.climb + 1;
 
 // Pure: where the marker goes, `lead` blocks from the guard toward the destination (or the destination itself)
 export function leadPoint(from, to, lead = WALK.lead) {
@@ -68,10 +72,12 @@ function stopWalking(guard, w, arrived) {
 // arrival). The caller has already set its post (siege:post) to dest. Returns false if it was put there at once.
 // noJump (soldiers at war, warwrit/army.js): never put it there by teleport. With no slot free it doesn't start,
 // and stuck or far it just stops where it is.
-export function walkTo(guard, owner, dest, { salute = false, done, noJump = false } = {}) {
+// down: the foot of the ladder of the lookout it is leaving ({ x, y, z }); up there, it climbs down first.
+export function walkTo(guard, owner, dest, { salute = false, done, noJump = false, down } = {}) {
   const old = walkers.get(guard.id);
   if (old) stopWalking(guard, old, false);
-  const loc = guard.location;
+  let loc = guard.location;
+  if (upAbove(loc, down)) { setOn(guard, { ...down, yaw: dest.yaw }); loc = down; }
   const d = Math.hypot(loc.x - dest.x, loc.z - dest.z);
   if (d <= WALK.arrive + 0.5) { setOn(guard, dest); done?.(true); return false; }
   const slot = slotOwner.indexOf(null);

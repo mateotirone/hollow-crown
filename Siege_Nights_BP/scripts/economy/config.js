@@ -176,14 +176,23 @@ export const LINES = {
 // ---------- job NPCs in the map's towns (towns.js) ----------
 // Who trades in each town of the map (plots/config.js WARDS). The first time a player comes near a town on a mapped
 // world, its NPCs are placed in a ring round the town centre (at `ring` blocks, on the ground) and never placed again,
-// so map builders can move or remove them. Kingsrest, the capital, has all eight and the only Moneyer.
+// so map builders can move or remove them. Kingsrest, the capital, has all eight. Every other town has a Moneyer too
+// (Mateo 2026-11-14), standing behind the grilled counter of his house on or beside the square: `at` is his spot (the
+// cell he stands in, `yaw` facing the scales), `signs` the hanging sign over his door. Both come from the town bakes
+// (map/structures settle_skill.town_moneyer; the plan's "spots"): rebake a town and copy its numbers here.
 // Region sets the prices; each town gets its region's trades plus the ones every town needs.
 export const TOWN_RING = 9;
+const MONEYER_SIGN = "§6Moneyer\n§eIron bought\n§eand sold";
 export const TOWNS = [
   { name: "Kingsrest", region: V, jobs: ["moneyer", "farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "factor"] },
-  { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter", "factor"] },
-  { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer", "factor"] },
-  { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter", "factor"] },
-  { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer", "factor"] },
-  { name: "Mirelight", region: B, jobs: ["herbalist", "woodcutter", "fisher", "hunter", "farmer", "smith", "factor"] },
+  { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter", "factor", "moneyer"],
+    at: { moneyer: { x: -64, y: 79, z: -453, yaw: -90 } }, signs: [{ x: -61, y: 81, z: -459, text: MONEYER_SIGN }] },
+  { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer", "factor", "moneyer"],
+    at: { moneyer: { x: -60, y: 113, z: -1100, yaw: 90 } }, signs: [{ x: -63, y: 115, z: -1094, text: MONEYER_SIGN }] },
+  { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter", "factor", "moneyer"],
+    at: { moneyer: { x: -856, y: 69, z: 416, yaw: 180 } }, signs: [{ x: -862, y: 71, z: 413, text: MONEYER_SIGN }] },
+  { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer", "factor", "moneyer"],
+    at: { moneyer: { x: 888, y: 95, z: 421, yaw: 90 } }, signs: [{ x: 878, y: 97, z: 421, text: MONEYER_SIGN }] },
+  { name: "Mirelight", region: B, jobs: ["herbalist", "woodcutter", "fisher", "hunter", "farmer", "smith", "factor", "moneyer"],
+    at: { moneyer: { x: -61, y: 69, z: 880, yaw: 90 } }, signs: [{ x: -64, y: 71, z: 886, text: MONEYER_SIGN }] },
 ];

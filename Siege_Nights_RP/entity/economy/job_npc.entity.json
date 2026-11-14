@@ -15,7 +15,15 @@
         "hunter": "textures/entity/siege/npc/job_hunter",
         "herbalist": "textures/entity/siege/npc/job_herbalist",
         "moneyer": "textures/entity/siege/npc/job_moneyer",
-        "factor": "textures/entity/siege/npc/job_factor"
+        "factor": "textures/entity/siege/npc/job_factor",
+        "moneyer__frostmarch": "textures/entity/siege/npc/job_moneyer__frostmarch",
+        "moneyer__saltreach": "textures/entity/siege/npc/job_moneyer__saltreach",
+        "moneyer__emberwaste": "textures/entity/siege/npc/job_moneyer__emberwaste",
+        "moneyer__blackfen": "textures/entity/siege/npc/job_moneyer__blackfen",
+        "farmer__frostmarch": "textures/entity/siege/npc/job_farmer__frostmarch",
+        "farmer__saltreach": "textures/entity/siege/npc/job_farmer__saltreach",
+        "farmer__emberwaste": "textures/entity/siege/npc/job_farmer__emberwaste",
+        "farmer__blackfen": "textures/entity/siege/npc/job_farmer__blackfen"
       },
       "geometry": {
         "default": "geometry.villager.v1.8"

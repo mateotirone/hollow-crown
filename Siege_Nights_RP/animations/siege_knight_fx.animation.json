@@ -1,0 +1,207 @@
+{
+ "format_version": "1.10.0",
+ "animations": {
+  "animation.siege.knight_fx.banner_drop": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.6,
+   "bones": {
+    "banner": {
+     "position": {
+      "0.0": [
+       0,
+       180,
+       0
+      ],
+      "0.3": [
+       0,
+       0,
+       0
+      ],
+      "0.4": [
+       0,
+       2,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rotation": {
+      "0.0": [
+       8,
+       0,
+       0
+      ],
+      "0.3": [
+       0,
+       0,
+       0
+      ],
+      "0.4": [
+       -2,
+       0,
+       0
+      ],
+      "0.6": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.knight_fx.banner_wave": {
+   "loop": true,
+   "animation_length": 8.0,
+   "bones": {
+    "cloth1": {
+     "rotation": [
+      "math.sin(query.life_time * 140 + 0) * 3.0",
+      "math.sin(query.life_time * 90 + 0) * 1.2",
+      0
+     ]
+    },
+    "cloth2": {
+     "rotation": [
+      "math.sin(query.life_time * 140 + 38) * 5.2",
+      "math.sin(query.life_time * 90 + 25) * 2.1",
+      0
+     ]
+    },
+    "cloth3": {
+     "rotation": [
+      "math.sin(query.life_time * 140 + 76) * 7.4",
+      "math.sin(query.life_time * 90 + 50) * 3.0",
+      0
+     ]
+    },
+    "cloth4": {
+     "rotation": [
+      "math.sin(query.life_time * 140 + 114) * 9.6",
+      "math.sin(query.life_time * 90 + 75) * 3.8",
+      0
+     ]
+    },
+    "cloth5": {
+     "rotation": [
+      "math.sin(query.life_time * 140 + 152) * 11.8",
+      "math.sin(query.life_time * 90 + 100) * 4.7",
+      0
+     ]
+    }
+   }
+  },
+  "animation.siege.knight_fx.banner_furl": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.7,
+   "bones": {
+    "cloth1": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.7": [
+       0.4,
+       0.15,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.knight_fx.banner_sink": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 1.2,
+   "bones": {
+    "banner": {
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.2": [
+       0,
+       -168,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.knight_fx.sword_fall": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.5,
+   "bones": {
+    "sword": {
+     "position": {
+      "0.0": [
+       0,
+       112,
+       0
+      ],
+      "0.3": [
+       0,
+       -6,
+       0
+      ],
+      "0.5": [
+       0,
+       -6,
+       0
+      ]
+     },
+     "scale": {
+      "0.0": [
+       0.8,
+       0.8,
+       0.8
+      ],
+      "0.3": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege.knight_fx.sword_fade": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.8,
+   "bones": {
+    "sword": {
+     "position": {
+      "0.0": [
+       0,
+       -6,
+       0
+      ],
+      "0.8": [
+       0,
+       -40,
+       0
+      ]
+     },
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.8": [
+       0.4,
+       1,
+       0.4
+      ]
+     }
+    }
+   }
+  }
+ }
+}
