@@ -161,7 +161,7 @@ export function dayRoll(day, salt = 0, k = 0) {
 //   "muster"   after the story: a rival town's army, on the night index.js rolled (musterDay)
 //   "oathbroken" after the story, once someone has rung the truce broken at Bellhollow: every third night the Hollow comes again
 //   undefined  a quiet night
-export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0, musterDay, oathbroken = false } = {}) {
+export function nightKind(day, stageId, { firstDay = 3, every = 3, salt = 0, musterDay, oathbroken = false } = {}) {
   if (day < firstDay) return undefined;
   const s = stage(stageId);
   if (stageId === AFTER) return day === musterDay ? "muster" : oathbroken && day % every === 0 ? "oathbroken" : undefined;

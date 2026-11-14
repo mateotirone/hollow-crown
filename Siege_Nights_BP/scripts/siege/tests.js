@@ -35,6 +35,7 @@ addTests("siege", {
   "settings are sensible numbers": () => {
     for (const [k, v] of Object.entries(SETTINGS)) assert(typeof v === "number" && v > 0, `${k} = ${v}`);
     assert(SETTINGS.firstSiegeDay >= SETTINGS.siegeEveryNNights, "first siege day before the first siege night");
+    assertEqual(SETTINGS.firstSiegeDay % SETTINGS.siegeEveryNNights, 0, "the first siege day is itself a siege night, so the guide's \"third night\" is true");
   },
   "settlement tiers grow in order": () => {
     for (let i = 1; i < TIERS.length; i++) {

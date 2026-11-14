@@ -424,7 +424,7 @@ addTests("lore truce", {
   },
   "guest nights are the third nights, and only while it holds": () => {
     assert(isGuestNight(9, "kept") && !isGuestNight(10, "kept") && !isGuestNight(9, "broken") && !isGuestNight(9, "none"));
-    assert(!isGuestNight(3, "kept"), "not before the first siege day");
+    assert(!isGuestNight(0, "kept") && isGuestNight(3, "kept"), "never before the first siege day, which is day 3");
     assertEqual(guestsFor(1), TRUCE.guestsPerKeep);
     assert(guestsFor(12) * 12 <= TRUCE.maxGuests && guestsFor(12) >= 1);
     assertEqual(guestsFor(0), 0);
