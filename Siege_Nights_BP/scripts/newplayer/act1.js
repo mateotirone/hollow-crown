@@ -16,7 +16,7 @@
 
 import { world, system, ItemStack, BlockPermutation } from "@minecraft/server";
 import { on, emit, addFilter } from "../core/events.js";
-import { onTick, moduleStore, keepOf, keepCenter, homeOf, nextSiegeDay, getState, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, moduleStore, keepOf, keepCenter, homeOf, nextSiegeDay, getState, addTests, assert, assertEqual, TIERS } from "../siege/api.js";
 import { mapMode } from "../plots/api.js";
 import { plotOf } from "../plots/claims.js";
 import { progressOf } from "../lore/player.js";
@@ -40,6 +40,8 @@ import { firstFacts } from "./firstnights.js";
 import { founderChest } from "./founder.js";
 import { yardWorkshop } from "./workshop.js";
 import { act1Stage, act1Step, inAct1, F, DUSK, MIDNIGHT, PILLAR } from "./act1_rules.js";
+import { modeOf } from "./mode.js";
+import { SETTLEMENT } from "./mode_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const FALLEN_EMBER = "siege:fallen_ember";
@@ -108,7 +110,9 @@ export function act1Facts(player) {
     bread: player.getDynamicProperty(BAKED) === true, time: world.getTimeOfDay(),
     mine: player.getDynamicProperty(MINE_FOUND) === true, ore: player.getDynamicProperty(ORE) === true,
     smelted: player.getDynamicProperty(SMELTED) === true, mended: !!store.data.mended?.[home],
+    mode: modeOf(player),
   };
+  if (f.mode === SETTLEMENT) f.grow = growFacts(home, keep);
   if (!inAct1(f)) return { f };
   const chestAt = founderChest(home);
   if (!chestAt) f.chest = true; // no founder's chest on this settlement: nothing to open
@@ -140,6 +144,17 @@ export function act1Facts(player) {
   return { f, places, ring, home };
 }
 
+// Settlement Mode's growing step: the town's tier, the siege nights and warlords the next tier wants (siege/territory.js
+// TIERS), and the charter's buildings not yet standing (settle/charters.js, the same check that holds a town back)
+function growFacts(home, keep) {
+  let tier = 0;
+  try { tier = settle.townOf(home)?.tier ?? Math.max(0, TIERS.findIndex((t) => t.name === keep?.tier)); } catch { /* no town */ }
+  const next = TIERS[Math.min(tier + 1, TIERS.length - 1)];
+  let build = [];
+  try { build = settle.charterOf(home, tier).lines.filter((l) => !l.skipped && l.have < l.need).map((l) => (l.need > 1 ? `${l.need - l.have} more ${l.what}` : l.what)); } catch { /* no town */ }
+  return { tier, wins: keep?.wins ?? 0, winsNeed: next.wins, warlords: keep?.warlordsSlain ?? 0, warlordsNeed: next.warlords ?? 0, build };
+}
+
 // The player's stage and tracker line, worked out at most once every STAGE_EVERY ticks
 const STAGE_EVERY = 40;
 const cache = new Map(); // player id -> { at, stage, step, f, places, ring, home }
@@ -157,7 +172,19 @@ export function act1Of(player, fresh = false) {
   return out;
 }
 const forget = (player) => { if (player?.id) cache.delete(player.id); };
-for (const name of ["loreFlag", "keepFounded", "keepFallen", "siegeEnd", "goodsSold", "emberFell"]) on(name, (d) => forget(d?.player));
+for (const name of ["loreFlag", "keepFounded", "keepFallen", "siegeEnd", "goodsSold", "emberFell", "modeSet"]) on(name, (d) => forget(d?.player));
+// A settlement that grows (or whose charter moves) changes Settlement Mode's step at once
+for (const name of ["tierUp", "settleCharter"]) on(name, (d) => { if (d?.owner) forgetOwner(d.owner); });
+
+// Starting a new settlement in Settlement Mode (newplayer/mode.js clears Elspeth's flags): the day-by-day marks go too,
+// so she walks the player through the founder's chest, the bread and the mine again
+on("modeSet", ({ player, mode }) => {
+  if (mode !== SETTLEMENT || !player?.isValid) return;
+  for (const prop of [CHEST_OPENED, WORKSHOP_OPENED, BAKED, RAVEN_TOLD, MINE_FOUND, ORE, SMELTED]) player.setDynamicProperty(prop, undefined);
+  for (const k of ["raided", "lost", "mended"]) delete store.data[k]?.[player.id];
+  store.save();
+  forget(player);
+});
 const forgetOwner = (owner) => { for (const p of world.getAllPlayers()) if (homeId(p) === owner) forget(p); };
 world.afterEvents.playerLeave.subscribe(({ playerId }) => cache.delete(playerId));
 
@@ -168,7 +195,7 @@ export const act1Quest = (player) => { const a = act1Of(player); return { on: !!
 addLoreContext((player) => {
   const a = act1Of(player);
   if (!a.f) return {};
-  return { act1: a.stage, raided: !inAct1(a.f) || (a.f.sieges ?? 0) > 0 || !!a.f.lost };
+  return { act1: a.stage, raided: !inAct1(a.f) || (a.f.sieges ?? 0) > 0 || !!a.f.lost, mode: a.f.mode };
 });
 
 // ---------- what Elspeth hands over, what the player does ----------

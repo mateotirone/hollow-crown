@@ -23,6 +23,7 @@ import { isThirdNight } from "./singing.js";
 import { storyOver } from "../reach/api.js";
 import { inWelcomeHall } from "../plots/api.js";
 import { fallenCount } from "./data/spine.js";
+import { storyOn } from "../newplayer/mode.js";
 import { REVEAL } from "./data/reveal.js";
 import { MORVANE_LINES, VOICE_PREFIX } from "./data/morvane_lines.js";
 import { sfx } from "../core/sfx.js";
@@ -54,6 +55,7 @@ export const OF_THE_MOMENT = new Set(["first_dusk", "siege_first", "siege_held",
 /** Can this player hear him at all right now? Not before they have left the welcome hall. */
 export function canHear(player, line) {
   if (!player?.isValid) return false;
+  if (line?.fx === "far" && !storyOn(player)) return false; // Settlement Mode has no story, so no voice on the wind
   if (line?.fx !== "far") return true; // the Hollow and the fight: they are already where he is
   let hall = false;
   try { hall = inWelcomeHall(player); } catch { /* plots not ready: no hall */ }
