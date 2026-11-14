@@ -186,7 +186,7 @@ export const STAGES = [
     given: ["library", "founder's house", "house", "storehouse", "mason_yard", "town hall", "railway halt"],
     build: [
       { id: "barracks", name: "Barracks", step: "act1:barracks", from: "Old Elspeth" },
-      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "Old Elspeth, after your first upkeep bill" },
+      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "the Moneyer, after your first upkeep bill" },
     ] },
   { tier: 1, name: "Town", homes: 3,
     build: [
