@@ -5,7 +5,9 @@
 //
 // On a mapped world, the first time a player comes near a plot its shaft is placed: 76 blocks from the plot's
 // stone (outside the Castle wall, inside the plot's land), on dry natural ground, away from the gate, the
-// landmark and any Old Working. From then on, once each night, while a player is near (so the chunks are loaded)
+// landmark and any Old Working. Then the pithead is raised over it (pithead.js: the building skill's collar,
+// headframe and sheave, winding house, ore bin and pit bell, facing the Plot Stone, on a terraformed pad), and the
+// cave under it is written for the first time with the old mine in it (mine.js). From then on, once each night, while a player is near (so the chunks are loaded)
 // and nobody is in the cave, the whole cave is written back to its first shape with that night's ore. When the
 // plot's tier goes up, the next reset opens the next level down.
 //
@@ -19,6 +21,7 @@
 //   /scriptevent siege:plotcave reset <plot|all>   reset it now (as soon as nobody is inside)
 //   /scriptevent siege:plotcave tier <plot> <0-3|clear>   pretend the plot is at a tier, to look at the levels
 //   /scriptevent siege:plotcave here               put a test cave's shaft where you stand (plot "test")
+//   /scriptevent siege:plotcave pithead <plot|all> raise the pithead over the shaft again
 //   /scriptevent siege:plotcave mouth              go to the tunnel mouth beside the Rift
 
 import { world, system, BlockPermutation, GameMode } from "@minecraft/server";
@@ -37,6 +40,10 @@ import { getRift, canOpen } from "../undertow/source.js";
 import { progressOf } from "../lore/player.js";
 import { fallenCount } from "../lore/data/spine.js";
 import { CAVE, LEVELS, LOG, REGION_KEY, nightAt, nightPlanJob, mouthSpots, mouthPlan, splitBlock, insideBox } from "./data.js";
+import { PIT_VERSION, pitheadPlan, pitheadFacing, pitheadOrigin } from "./pithead.js";
+import { startBuild, buildFor, clearBoxFor } from "../townhall/build.js";
+import { Groundwork } from "../settle/ground.js";
+import { idSpellings } from "../core/blockids.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -56,7 +63,11 @@ const perm = (b) => {
   let p = perms.get(b);
   if (!p) {
     const [id, states] = splitBlock(b);
-    try { p = BlockPermutation.resolve(id, states); } catch { p = BlockPermutation.resolve(id); }
+    for (const name of idSpellings(id)) { // the Bedrock spelling too (core/blockids.js: chain is iron_chain)
+      try { p = BlockPermutation.resolve(name, states); break; } catch { /* next */ }
+      try { p = BlockPermutation.resolve(name); break; } catch { /* next */ }
+    }
+    p ??= BlockPermutation.resolve("minecraft:air");
     perms.set(b, p);
   }
   return p;
@@ -143,7 +154,7 @@ function* caveFor(name, site) {
 
 function* reset(plot, site, tierIndex, night) {
   const cave = yield* caveFor(plot.name, site);
-  const plan = yield* nightPlanJob(cave, { tierIndex, region: site.region, night, plot: plot.name, groundY: site.y, rate: (region, metal) => regionRate(plot.region, metal) });
+  const plan = yield* nightPlanJob(cave, { tierIndex, region: site.region, night, plot: plot.name, groundY: site.y, front: site.front, rate: (region, metal) => regionRate(plot.region, metal) });
   const dim = overworld();
   let missed = 0, n = 0;
   for (const [k, b] of plan.blocks) {
@@ -158,6 +169,13 @@ function* reset(plot, site, tierIndex, night) {
     } catch { missed++; }
     if (++n % 192 === 0) yield;
   }
+  // the last shift's note in the miners' rest
+  for (const s of plan.signs) {
+    try {
+      const sign = dim.getBlock({ x: site.x + s.x, y: site.y + s.y, z: site.z + s.z })?.getComponent("minecraft:sign");
+      if (sign && sign.getText() !== s.text) { sign.setText(s.text); sign.setWaxed(true); }
+    } catch { /* unloaded: the next night writes it */ }
+  }
   const at = (key) => { const [x, y, z] = key.split(",").map(Number); return { x: site.x + x, y: site.y + y, z: site.z + z }; };
   const t = plan.tunnel;
   return {
@@ -166,6 +184,21 @@ function* reset(plot, site, tierIndex, night) {
     trig: t ? boxOf(t.trigger.map(at)) : undefined,
     landing: t ? { x: site.x + t.landing.x, y: site.y + t.landing.y, z: site.z + t.landing.z, look: at(`${t.landing.look.x},${t.landing.look.y},${t.landing.look.z}`) } : undefined,
   };
+}
+
+// ---------- the pithead ----------
+
+const pitId = (name) => `pithead:${name}`;
+function raisePithead(plot, site) {
+  const { forward, front } = pitheadFacing(site, plot.test ? null : plot);
+  const plan = pitheadPlan(site.region), origin = pitheadOrigin(site, forward, site.region);
+  site.front = front;
+  startBuild({
+    id: pitId(plot.name), dimensionId: OVERWORLD, origin, forward, plan, style: plan.style, perTick: 48,
+    clearBox: clearBoxFor(plan, origin, forward, 1), // the old headframe, and any tree standing on the ground
+    ground: new Groundwork(plan, origin, forward, site.region),
+    onDone: () => { site.pit = PIT_VERSION; site.v = 0; store.save(); }, // then the cave (ladder top, rope) goes in
+  });
 }
 
 function boxOf(cells) {
@@ -194,6 +227,11 @@ function tick() {
     if (!site) {
       if (plot.test || !near({ x: plot.x, z: plot.z }, CAVE.shaftR + CAVE.reach) || !placeShaft(plot)) continue;
       site = store.data.sites[plot.name];
+    }
+    if ((site.pit ?? 0) < PIT_VERSION) {
+      // the pithead first: the cave waits for it, because the build clears the ground row round the shaft
+      if (near(site, CAVE.reach) && !buildFor(pitId(plot.name))) raisePithead(plot, site);
+      continue;
     }
     const tier = tierIndexOf(plot);
     const due = (site.v ?? 0) < CAVE.version || site.night !== night || site.tier !== tier;
@@ -317,7 +355,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     const s = sites[arg];
     if (!s) return say("§cNo shaft placed for that plot yet.");
     if (cmd === "door") return s.door ? tp({ x: s.landing.x - 0.5, y: s.landing.y - 1, z: s.landing.z - 0.5 }) : say("§cNo door yet: it comes with the Castle level.");
-    return tp({ x: s.x + 3, y: s.y, z: s.z + 3 });
+    const [fx, fz] = s.front ?? [0, -1];
+    return tp({ x: s.x + fx * 11, y: s.y, z: s.z + fz * 11 }); // on the path in front of the pithead
   }
   if (cmd === "mouth") return store.data.mouth ? tp({ x: store.data.mouth.landing.x - 0.5, y: store.data.mouth.landing.y - 1, z: store.data.mouth.landing.z - 0.5 }) : say("§cNot cut yet.");
   if (cmd === "reset") {
@@ -332,6 +371,11 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     store.save();
     return say(`§a${arg} cave: ${s.override === undefined ? "back to its real tier" : `shown at the ${LEVELS[s.override].tier} level`}. It rebuilds once you are out of it.`);
   }
+  if (cmd === "pithead") {
+    for (const name of arg === "all" ? Object.keys(sites) : [arg]) if (sites[name]) sites[name].pit = 0;
+    store.save();
+    return say("§aThe pithead goes up again as soon as a player is near.");
+  }
   if (cmd === "here") {
     if (player?.typeId !== "minecraft:player") return;
     const l = player.location;
@@ -340,5 +384,5 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     store.save();
     return say("§aA test cave goes in under your feet in a moment. Step a few blocks away from here.");
   }
-  say("§cUse: list | tp <plot> | door <plot> | reset <plot|all> | tier <plot> <0-3|clear> | here [region] | mouth");
+  say("§cUse: list | tp <plot> | door <plot> | reset <plot|all> | tier <plot> <0-3|clear> | pithead <plot|all> | here [region] | mouth");
 });
