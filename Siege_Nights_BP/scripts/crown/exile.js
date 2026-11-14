@@ -8,7 +8,7 @@ import { CROWN } from "./config.js";
 import { payE } from "../economy/coins.js";
 import { EXILE_STAGES, nextExileStage } from "./rules.js";
 import { crown, saveCrown, playerById, addClaim, claimOf, announce, rulerLabel, citadelName } from "./state.js";
-import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
+import { crownStatus, annalLines, endReign, vacate, throneKnown } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
 import { sfx } from "../core/sfx.js";
 
@@ -55,8 +55,8 @@ on("keepFallen", ({ owner, keep }) => {
   vacate("The throne is empty");
 });
 
-// A "The High Throne" page on every Keep Banner menu
-addKeepMenuButtons(({ player }) => [{
+// A "The High Throne" page on every Keep Banner menu, once the throne is part of the story
+addKeepMenuButtons(({ player }) => (!throneKnown(player.id) ? [] : [{
   label: "The High Throne",
   icon: "textures/items/siege_heart_of_the_hollow",
   action: () => {
@@ -72,4 +72,4 @@ addKeepMenuButtons(({ player }) => [{
     lines.push("", ...annalLines());
     new ActionFormData().title("The High Throne").body(lines.join("\n")).button("Close").show(player).catch(() => {});
   },
-}]);
+}]));

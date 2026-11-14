@@ -15,7 +15,7 @@
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { isReady, on, emit, moduleStore } from "../siege/api.js";
+import { isReady, on, emit, moduleStore, homeOf } from "../siege/api.js";
 import { hallOf, hallMenuExtras } from "../townhall/townhall.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLANS, REGION_TO_STYLE, PLOT_SIZE, PLOT_TAGS, TAG_WORDS, SETTLERS, CHARTERS, HOMES, HAND_NAMES } from "./config.js";
@@ -96,7 +96,7 @@ export function randomPlanScroll(player, from = DESIGNS.map((id) => ({ id, style
 world.afterEvents.itemUse.subscribe(({ source: player, itemStack }) => {
   if (player?.typeId !== "minecraft:player" || !isReady() || !itemStack) return;
   if (itemStack.typeId === PLAN_SCROLL) return readScroll(player, itemStack);
-  if (itemStack.typeId === PLAN_BOOK) system.run(() => openPlanScreen(player).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
+  if (itemStack.typeId === PLAN_BOOK) system.run(() => openPlanScreen(player, homeOf(player.id) ?? player.id).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
 });
 
 function readScroll(player, item) {
