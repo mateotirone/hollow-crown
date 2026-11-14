@@ -71,7 +71,7 @@ export const ENTRIES = [
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
       + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
       + "3. §fOpen your founder's chest§r in your house: logs, saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out in the world can't be felled, so plant the saplings.\n"
-      + "4. §fUse the Siege Workshop§r in the Mason's Yard (sneak-click it for its book). Build a §fBarracks§r there from stone bricks, planks and a barrel, then train guards in it (40 Regals each).\n"
+      + "4. §fBuild a Barracks§r: go to your big empty plot, click its §fPlot Marker§r (the post on it), choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its door and train guards (40 Regals each).\n"
       + "5. §fHold the night.§r The first siege comes on the fifth night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"
       + "The top-right tracker shows your next step until then. Iron lies under your land: dig down with a pickaxe. Nothing is charged for upkeep until you have held your first siege.",
     when: ["event:keepFounded"],
@@ -100,7 +100,7 @@ export const ENTRIES = [
     tip: "The Siege Workshop is a crafting table for castle things. Open it and check its recipe book: most of this world's items are made here.",
     page: "Every new settlement has one in its Mason's Yard. More can be crafted at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
       + "§fSneak-click§r a Workshop for its book: the main things it makes, what each does and what it takes.\n\n"
-      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Barracks, the Hall Cornerstone, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
+      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Hall Cornerstone, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
       + "Siege blocks can only be placed inside your own settlement.",
     when: ["place:siege:workshop", "carry:siege:workshop"],
   },
@@ -314,7 +314,7 @@ export const ENTRIES = [
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Click your Barracks and choose Train soldiers.",
-    page: "Craft a §fBarracks§r at the Siege Workshop (3 stone bricks over planks, a barrel and planks), place it on your land and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
+    page: "Raise a §fBarracks§r from the §fPlot Marker§r on a big plot (15 x 17: every Hamlet has one): click the marker, choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its front door. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them. Men-at-Arms stroll round the Barracks yard and sometimes the town by day, sleep inside the Barracks at night, and turn out at once when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders. The Barracks §fArmoury§r upgrades a whole type at once (the same materials for each soldier), and those trained later wear it too.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"

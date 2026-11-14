@@ -86,12 +86,12 @@ export const SKILLS = [
   S("arc_echo", "arcana", 2, "Echo Sight", 3, 2, ["Power. For 10 / 15 / 20s see in the dark, sense every creature within 24 / 32 / 40 blocks, and reveal hidden doors. Resonance +10."], { power: true }),
   S("arc_bind", "arcana", 2, "Bind", 3, 2, ["Power. Root the creature you look at for 3 / 5 / 7s (half on bosses). Resonance +14. Cooldown 10s."], { power: true, needs: "arc_bolt" }),
   S("arc_ashen", "arcana", 2, "Ashen Skin", 2, 2, ["Fire Resistance always. Rank 2: Resistance I while Resonance is 50 or more."], { needs: "arc_ward" }),
-  S("arc_step", "arcana", 3, "Halfstep", 3, 3, ["Power. Slip half out of the world, toward the Hollow, for 3 / 4 / 5s: invisible, untouchable, fast. Resonance +20. Cooldown 30s."], { power: true, needs: "arc_blink" }),
+  S("arc_step", "arcana", 3, "Halfstep", 3, 3, ["Power. Slip half out of the world for 3 / 4 / 5s: invisible, untouchable, fast. Resonance +20. Cooldown 30s."], { power: true, needs: "arc_blink" }),
   S("arc_choir", "arcana", 3, "Choir's Call", 3, 3, ["Power. Raiders within 10 / 14 / 18 blocks hear the bell and turn on each other for 6 / 8 / 10s. Resonance +30. Cooldown 60s."], { power: true, needs: "arc_echo" }),
   S("arc_resonant", "arcana", 3, "Resonant Soul", 2, 3, ["While Resonance is 70 or more, powers are 25% / 50% stronger."], { needs: "arc_quiet" }),
   S("arc_hollowborn", "arcana", 4, "Choirborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
-  S("arc_hollowstep", "arcana", 4, "Veilstep", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
-  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden.", "Asks three things of you: a Sovereign's Throne, which only a settlement that has won the Grand Siege can raise; Renown 30; and Veilstep."], { needs: "arc_hollowstep" }),
+  S("arc_hollowstep", "arcana", 4, "Veilstep", 1, 5, ["Power. Step all the way out of the world, wherever you stand. Cast it again on the other side to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
+  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. What lies below answers to you now: you may claim its throne and rule it as its Warden.", "Asks three things of you: a Sovereign's Throne, which only a settlement that has won the Grand Siege can raise; Renown 30; and Veilstep."], { needs: "arc_hollowstep" }),
   S("arc_crownless", "arcana", 5, "Crownless", 1, 8, ["Ember Bolt arcs to 2 more enemies near the first."], { needs: "arc_hollowborn" }),
 
   // ---------------- WING (Dragon Rider, Emberwaste) ----------------

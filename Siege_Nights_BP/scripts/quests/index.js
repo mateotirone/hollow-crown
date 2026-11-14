@@ -18,7 +18,7 @@ import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@min
 import { onTick } from "../core/loop.js";
 import { on } from "../core/events.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
-import { keepOf } from "../siege/api.js";
+import { keepOf, homeOf } from "../siege/api.js";
 import { plotOf, plotAt } from "../plots/api.js";
 import { progressOf, setFlag } from "../lore/player.js";
 import { LOCAL_THREADS, slugOf } from "../lore/data/plots.js";
@@ -50,7 +50,7 @@ function plotName(player) {
   try {
     const held = plotOf(player.id)?.name;
     if (held) return held;
-    const keep = keepOf(player.id);
+    const keep = keepOf(homeOf(player.id) ?? player.id); // own keep, or the one they are a writ ally of
     if (keep) return plotAt(keep)?.name;
   } catch { /* plots not ready */ }
   return undefined;
@@ -89,7 +89,7 @@ function factsOf(player) {
   let carter;
   if (inHollow) { try { carter = stationSpot(carterStation()); } catch { /* the Hollow isn't laid out yet */ } }
   let keep = false;
-  try { keep = !!keepOf(player.id); } catch { /* siege state not ready */ }
+  try { keep = !!homeOf(player.id); } catch { /* siege state not ready */ }
   return {
     flags: p.flags, solved: p.solved, got: p.got, plot, mystery, keep,
     items: itemsOf(player),

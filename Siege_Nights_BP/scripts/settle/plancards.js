@@ -3,10 +3,11 @@
 // fingerprint to plancards_data.js; a self-test fails when a design changes and the cards weren't redrawn.
 import { drawBuilding, styleFor, BUILDINGS, WAITING, BUILDING } from "./buildings.js";
 import { STYLES } from "../townhall/styles.js";
+import { PLANS } from "./config.js";
 
 export const CARD_STYLES = Object.keys(STYLES);
 // the buildings waiting to be offered get cards too, so they are ready when they join BUILDINGS
-export const CARD_IDS = [...BUILDINGS, ...(WAITING ?? [])].map((b) => b.id);
+export const CARD_IDS = [...BUILDINGS, ...(WAITING ?? [])].map((b) => b.id).filter((id) => !PLANS.noPlan.includes(id)); // no plan, no card
 
 export function planCardCells(id, style) {
   const st = styleFor(style);

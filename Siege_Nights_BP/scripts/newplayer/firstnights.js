@@ -7,51 +7,47 @@
 // firstStep(f) is pure (tests run it in Node); firstFacts(player) reads the world for it (quests/index.js asks).
 
 import { world } from "@minecraft/server";
-import { onTick, on, keepOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, on, keepOf, homeOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
 import { ballistasOf } from "../siege/machines.js";
 import { fallenRecord } from "../siege/keep.js";
-import { yardWorkshop } from "./workshop.js";
+import { plotFor } from "../settle/founding.js";
+import { plotPrice } from "../settle/plotmarker.js";
 
-const PICKS = /_pickaxe$/;
-const WOOD = /(_log|_planks|_wood)$/;
-
-// f = { keep, wins, days (to the next siege, 0 = tonight), workshop: { x, z } | true | undefined, barracks, guards,
-//       ballistas, pick, wood }
+// f = { keep, wins, days (to the next siege, 0 = tonight), barracks (a working Barracks block on your land),
+//       plot: where to raise one ({ x, z, state: "free" | "rising" | "built" } from founding.js plotFor),
+//       price (Regals for the Barracks on its plot), guards, ballistas }
+// Mateo 2026-11-13: every step written out on screen, saying exactly what to do and where; nothing assumed.
+// The Barracks is no longer crafted: it unlocks with the Hamlet and goes on a plot that fits it, from that
+// plot's Plot Marker.
 export function firstStep(f) {
   if (!f || (f.wins ?? 0) > 0) return undefined;
   const when = f.days === undefined ? "" : f.days <= 0 ? "The first siege comes tonight." : `First siege in ${f.days} day${f.days === 1 ? "" : "s"}.`;
   const step = (id, title, hint, target) => ({ id: `first_${id}`, title, hint, target, note: when });
-  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Raise your Keep Banner on your Plot Stone. Raiders come from the fifth night." };
+  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Place your Keep Banner on your Plot Stone, the stone in the middle of your plot. That makes the land yours. Raiders come from the fifth night." };
   if (!f.barracks && !f.ballistas) {
-    if (!f.workshop) {
-      if (!f.pick) return step("tools", "Get a pickaxe", "Your founder's chest has one. Or craft one: Woodcutters sell planks.");
-      return step("workshop", "Make a Siege Workshop", "An iron ingot over stone brick, crafting table, stone brick. Iron lies under your land: dig down.");
-    }
-    const target = f.workshop.x !== undefined ? { name: "Siege Workshop", x: f.workshop.x, z: f.workshop.z, dim: "minecraft:overworld" } : undefined;
-    return step("barracks", "Build a Barracks", "At the Siege Workshop: 3 stone bricks over planks, a barrel and planks. The Mason sells stone bricks.", target);
+    const pin = f.plot ? { name: "Barracks plot", x: f.plot.x, z: f.plot.z, dim: "minecraft:overworld" } : undefined;
+    if (f.plot?.state === "rising") return step("rising", "Wait for your Barracks", "Builders are raising it on its plot, a layer at a time. When it stands, the Barracks block is by its front door.", pin);
+    if (f.plot?.state === "built") return step("barracks_block", "Find your Barracks block", "Your Barracks stands, but its Barracks block is missing. It belongs by the front door: put one back there.", pin);
+    const price = f.price ? `${f.price} Regals` : "a few Regals";
+    return step("barracks", "Build a Barracks",
+      `Go to your big empty plot (the pin shows it). The post standing on it is its Plot Marker: click it, choose Barracks, then Raise it (${price}). Builders put it up for you.`, pin);
   }
-  if (f.barracks && !f.guards && !f.ballistas) return step("guards", "Train your first guards", "Click your Barracks, then Train soldiers. 40 Regals each; a Hamlet keeps 4.");
-  return step("hold", "Hold the first siege", "Stay online that night. Kill every raider before they reach your Keep Banner.");
+  if (f.barracks && !f.guards && !f.ballistas) return step("guards", "Train your first guards", "Go to your Barracks and click the Barracks block by its front door. Choose Train soldiers: 40 Regals each, and a Hamlet keeps 4.");
+  return step("hold", "Hold the first siege", "Be here that night. Your guards fight beside you: kill every raider before they reach your Keep Banner.");
 }
 
 export function firstFacts(player) {
-  const keep = keepOf(player.id);
+  const home = homeOf(player.id) ?? player.id; // a writ ally follows the settlement they share
+  const keep = keepOf(home);
   if (keep && (keep.wins ?? 0) > 0) return undefined;
   const f = { keep: !!keep, wins: keep?.wins ?? 0 };
   if (!keep) return f;
   try { f.days = Math.max(0, nextSiegeDay() - world.getDay()); } catch { /* not ready */ }
-  try { f.barracks = barracksOf(player.id).length > 0; } catch { /* not ready */ }
-  try { f.guards = guardCount(player.id); } catch { /* not ready */ }
-  try { f.ballistas = ballistasOf(player.id).length; } catch { /* not loaded */ }
-  f.workshop = yardWorkshop(player.id) ?? (player.getDynamicProperty("hc:made_workshop") ? true : undefined);
-  const inv = player.getComponent("minecraft:inventory")?.container;
-  for (let i = 0; inv && i < inv.size; i++) {
-    const it = inv.getItem(i);
-    if (!it) continue;
-    if (PICKS.test(it.typeId)) f.pick = true;
-    if (WOOD.test(it.typeId)) f.wood = true;
-    if (it.typeId === "siege:workshop") f.workshop ??= true;
-  }
+  try { f.barracks = barracksOf(home).length > 0; } catch { /* not ready */ }
+  try { f.guards = guardCount(home); } catch { /* not ready */ }
+  try { f.ballistas = ballistasOf(home).length; } catch { /* not loaded */ }
+  try { f.plot = plotFor(home, "barracks"); } catch { /* no town layout */ }
+  try { f.price = plotPrice("barracks"); } catch { /* no wallet yet */ }
   return f;
 }
 
@@ -63,8 +59,8 @@ world.afterEvents.playerPlaceBlock.subscribe(({ player, block }) => {
 const FIRST_DAYS = [
   "§6Your settlement stands. Before the first siege on the fifth night:",
   "§7 1. Take what you need from the §ffounder's chest§7 in your house.",
-  "§7 2. Open the §fSiege Workshop§7 in the Mason's Yard. Build a §fBarracks§7 there (stone bricks, planks and a barrel).",
-  "§7 3. Click the Barracks and §ftrain guards§7 (40 Regals each).",
+  "§7 2. Build a §fBarracks§7: go to your big empty plot, click its §fPlot Marker§7 (the post on it), choose Barracks and Raise it.",
+  "§7 3. When it stands, click the §fBarracks block§7 by its door and §ftrain guards§7 (40 Regals each).",
   "§7 4. On the night, stay online and keep your Keep Banner standing. The top-right tracker shows your next step.",
 ];
 on("keepFounded", ({ player, moved }) => {
@@ -94,16 +90,24 @@ onTick("newplayer_eve", 200, () => {
 });
 
 addTests("newplayer first nights", {
-  "first nights: banner, workshop, barracks, guards, hold, then nothing": () => {
+  "first nights: banner, Barracks from its Plot Marker, guards, hold, then nothing": () => {
     assertEqual(firstStep({ keep: false }).id, "keep");
-    assertEqual(firstStep({ keep: true, days: 4 }).id, "first_tools");
-    assertEqual(firstStep({ keep: true, days: 4, pick: true }).id, "first_workshop");
-    assertEqual(firstStep({ keep: true, days: 4, workshop: { x: 1, z: 2 } }).id, "first_barracks");
-    assertEqual(firstStep({ keep: true, days: 2, workshop: true, barracks: true }).id, "first_guards");
-    assertEqual(firstStep({ keep: true, days: 0, workshop: true, barracks: true, guards: 2 }).id, "first_hold");
+    const plot = { x: 5, z: 9, state: "free" };
+    const b = firstStep({ keep: true, days: 4, plot, price: 16 });
+    assertEqual(b.id, "first_barracks");
+    assert(/Plot Marker/.test(b.hint) && /16 Regals/.test(b.hint) && b.target?.x === 5 && b.target?.z === 9, "says where and how, with a pin");
+    assertEqual(firstStep({ keep: true, days: 4 }).id, "first_barracks", "no fitting plot known: still the step, no pin");
+    assertEqual(firstStep({ keep: true, days: 3, plot: { ...plot, state: "rising" } }).id, "first_rising");
+    assertEqual(firstStep({ keep: true, days: 3, plot: { ...plot, state: "built" } }).id, "first_barracks_block");
+    assertEqual(firstStep({ keep: true, days: 2, barracks: true }).id, "first_guards");
+    assertEqual(firstStep({ keep: true, days: 0, barracks: true, guards: 2 }).id, "first_hold");
     assertEqual(firstStep({ keep: true, days: 3, ballistas: 1 }).id, "first_hold");
     assert(firstStep({ keep: true, wins: 1 }) === undefined, "gone after the first win");
-    assert(firstStep({ keep: true, days: 0, workshop: true, barracks: true, guards: 1 }).note.includes("tonight"), "tonight");
+    assert(firstStep({ keep: true, days: 0, barracks: true, guards: 1 }).note.includes("tonight"), "tonight");
+    for (const f of [{ keep: false }, { keep: true, plot }, { keep: true, barracks: true }, { keep: true, barracks: true, guards: 1 }]) {
+      const st = firstStep(f);
+      assert(st.title && st.hint && st.hint.length > 40, `${st.id} spells out what to do`);
+    }
   },
   "a fallen keep loses one win, never its tier": () => {
     assertEqual(fallenRecord({ wins: 0 }).wins, 0);

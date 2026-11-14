@@ -16,7 +16,8 @@ export const SETTLE = {
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
   plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, smithy: 12, stable: 14,
-    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16 },
+    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16,
+    barracks: 2 }, // the Barracks opens with the Hamlet and is cheap: the first guards are what the first siege needs
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -109,7 +110,7 @@ export const MASON_LINES = {
 // old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
-  smithy: 2, stable: 2, inn: 2, barracks: 2, watchtower: 3,
+  smithy: 2, stable: 2, inn: 2, barracks: 0, watchtower: 3,
   // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
   ironworks: 0,
 };
@@ -289,7 +290,7 @@ export const SETTLER_LINES = {
 //   isn't your town's own costs foreignMul times as much to raise.
 //   Rule: a player always gets what a charter needs. Every home and every building a charter names is taught by
 //   basics or by the hall level that tier reaches (hall level = tier + 1), never only by a lucky scroll (tested).
-//   noPlan: charter buildings raised from their own block item, which need no plan.
+//   noPlan: buildings every player may raise on a fitting plot without a plan (no Plan Book card).
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
   hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["watchtower"] },

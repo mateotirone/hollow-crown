@@ -9,7 +9,7 @@
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
 import { world, system } from "@minecraft/server";
-import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter, keepOf } from "../siege/api.js";
+import { onTick, on, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter, keepOf, trackMachine } from "../siege/api.js";
 import { COLORS } from "../siege/constants.js";
 import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
@@ -35,7 +35,8 @@ export function forgetRaised(key) { if (store.data.built?.[key]) { delete store.
 // Finished block buildings on a settlement's land, by building id ("siege:barracks" -> "barracks")
 export function raisedCounts(owner) {
   const out = {};
-  for (const b of Object.values(store.data.built ?? {})) if (b.owner && b.owner === owner) { const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
+  for (const b of Object.values(store.data.built ?? {})) if (b.owner && b.owner === owner && !b.plot) { // (a plot-built one counts as its plot)
+    const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
   return out;
 }
 const keyOf = (l) => `${l.x},${l.y},${l.z}`;
@@ -127,6 +128,20 @@ function start(key, job) {
   if (gaps.cols.size) b.columns = b.columns.filter((c) => !gaps.cols.has(`${c.x},${c.z}`));
 }
 
+// A Barracks raised on a plot from its Plot Marker (or a Foundation Stone): the working Barracks block goes at its
+// front, where a placed block would have stood, and the guardhouse is remembered like a block-raised one (its yard
+// for the off-duty soldiers, guard posts) without counting twice for the charter (plot: the plot counts it).
+on("settleBuilt", ({ owner, building, style, origin, forward, box }) => {
+  if (building !== "barracks") return;
+  const dim = world.getDimension(OVERWORLD);
+  try { dim.getBlock(origin)?.setType("siege:barracks"); } catch { return; }
+  trackMachine(OVERWORLD, origin, "siege:barracks");
+  (store.data.built ??= {})[keyOf(origin)] = { type: "siege:barracks", fx: forward.x, fz: forward.z, style, owner, box, lift: 0, plot: true };
+  store.save();
+  const player = world.getPlayers().find((p) => p.id === owner);
+  player?.sendMessage("§6Your Barracks stands.§7 Click the Barracks block at its front and choose §fTrain soldiers§7: 40 Regals each, and a Hamlet keeps 4.");
+});
+
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const build = BLOCK_BUILDS[block.typeId];
   if (!build || !isReady() || block.dimension.id !== OVERWORLD) return;
@@ -138,7 +153,10 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const key = keyOf(block.location);
   const box = footprint(block.location, f, planFor(block.typeId, style).bounds());
   const problem = siteProblem(owner, box);
-  if (problem) return player.sendMessage(`§7No room for a ${build.name} here: ${problem} §8The block works on its own.`);
+  if (problem) {
+    const bb = planFor(block.typeId, style).bounds();
+    return player.sendMessage(`§7No room for a ${build.name} here: ${problem} §7It needs open ground ${bb.x1 - bb.x0 + 1} wide and ${bb.z1 - bb.z0 + 1} deep beyond the block, the way you face. Break it and set it down somewhere clearer. §8The block works on its own meanwhile.`);
+  }
   store.data.pending[key] = { type: block.typeId, fx: f.x, fz: f.z, style, owner };
   store.save();
   start(key, store.data.pending[key]);
