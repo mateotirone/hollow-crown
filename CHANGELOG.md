@@ -198,6 +198,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The Vault is now an add-on to your town hall: buy it from the Town Hall menu and it is dug out by itself, with the stairs going down through the hall's own floor. You no longer pick a spot with the Vault Key (the key still opens the door). When the hall grows the stairs stay where they are if they still fit; if the bigger hall has something there, the vault moves to a spot that fits and your relics on their stands move with it (barrels come back empty). Vaults already dug by hand stay where they are.
 
 ### Fixed
+- The trebuchet now throws forward. Its arm used to swing the wrong way, so the boulder looked like it left over the back while it actually flew toward the target.
 - A Castle Gate no longer walks away from its gateway. Shutting an open gate used to do nothing the first time and then shut it where it hung, turned sideways, so every open and shut moved it further off. It now swings straight back into its gateway. (A gate that has already wandered stays where it is: break it and set it back in its gateway.)
 - The minimap's quest pins can no longer cover the map in pink and black squares: a pin only shows when it has its picture.
 - The moon is back in the night sky. Our cracked moon was saved as a see-through picture, which the sky does not draw; it now uses the same kind of picture as the vanilla moon, so every phase shows, and on a dark-moon night you can just make out a faint dim disc where it should be.
