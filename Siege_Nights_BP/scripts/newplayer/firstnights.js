@@ -7,7 +7,7 @@
 // firstStep(f) is pure (tests run it in Node); firstFacts(player) reads the world for it (quests/index.js asks).
 
 import { world } from "@minecraft/server";
-import { onTick, on, keepOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, on, keepOf, homeOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
 import { ballistasOf } from "../siege/machines.js";
 import { fallenRecord } from "../siege/keep.js";
 import { plotFor } from "../settle/founding.js";
@@ -37,15 +37,16 @@ export function firstStep(f) {
 }
 
 export function firstFacts(player) {
-  const keep = keepOf(player.id);
+  const home = homeOf(player.id) ?? player.id; // a writ ally follows the settlement they share
+  const keep = keepOf(home);
   if (keep && (keep.wins ?? 0) > 0) return undefined;
   const f = { keep: !!keep, wins: keep?.wins ?? 0 };
   if (!keep) return f;
   try { f.days = Math.max(0, nextSiegeDay() - world.getDay()); } catch { /* not ready */ }
-  try { f.barracks = barracksOf(player.id).length > 0; } catch { /* not ready */ }
-  try { f.guards = guardCount(player.id); } catch { /* not ready */ }
-  try { f.ballistas = ballistasOf(player.id).length; } catch { /* not loaded */ }
-  try { f.plot = plotFor(player.id, "barracks"); } catch { /* no town layout */ }
+  try { f.barracks = barracksOf(home).length > 0; } catch { /* not ready */ }
+  try { f.guards = guardCount(home); } catch { /* not ready */ }
+  try { f.ballistas = ballistasOf(home).length; } catch { /* not loaded */ }
+  try { f.plot = plotFor(home, "barracks"); } catch { /* no town layout */ }
   try { f.price = plotPrice("barracks"); } catch { /* no wallet yet */ }
   return f;
 }

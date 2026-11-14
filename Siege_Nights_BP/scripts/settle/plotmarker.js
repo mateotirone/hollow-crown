@@ -8,7 +8,7 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, isAlly, on, emit, onTick } from "../siege/api.js";
+import { isReady, isAlly, canManage, on, emit, onTick } from "../siege/api.js";
 import { purse, charge, refund, coins, lot } from "./wallet.js";
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, TAG_WORDS, HAND_NAMES, PLANS } from "./config.js";
@@ -244,7 +244,7 @@ async function registerOwn(player, owner, slot) {
 async function builtMenu(player, owner, slot, state) {
   if (state.hand) return handMenu(player, owner, slot, state);
   const name = nameOf(state.building);
-  if (player.id !== owner) return player.sendMessage(`§7This ${name} stands. Only the town's owner can knock it down.`);
+  if (!canManage(owner, player.id)) return player.sendMessage(`§7This ${name} stands. Only the town's owner and their allies can knock it down.`);
   const back = Math.floor((state.paid ?? 0) / 2);
   const res = await new MessageFormData().title(name)
     .body(`This plot holds your ${name}.\n\nKnock it down to free the plot for something else. Everything above the floor is cleared${back ? `, and ${coins(back)} come back` : ""}.`)
@@ -256,7 +256,7 @@ async function builtMenu(player, owner, slot, state) {
 // Your own build: un-count it (the blocks stay) or check it again
 async function handMenu(player, owner, slot, state) {
   const name = nameOf(state.building);
-  if (player.id !== owner) return player.sendMessage(`§7This ${name} was built by hand${state.broken ? ", and is missing what it needs" : ""}.`);
+  if (!canManage(owner, player.id)) return player.sendMessage(`§7This ${name} was built by hand${state.broken ? ", and is missing what it needs" : ""}.`);
   const res = await new ActionFormData().title(name)
     .body(`You built this ${name} yourself.${state.broken ? "\n\n§cIt doesn't count right now:§r something it needs is gone." : ""}`)
     .button("Check it again").button("Stop counting it\n§8The blocks stay").show(player);
@@ -294,7 +294,7 @@ export function demolish(owner, slot, state, player, { back = Math.floor((state.
   }
   for (const k of Object.keys(state)) delete state[k];
   saveTowns();
-  const payee = player?.id === owner ? player : world.getPlayers().find((p) => p.id === owner);
+  const payee = player && canManage(owner, player.id) ? player : world.getPlayers().find((p) => p.id === owner); // whoever knocks it down (owner or ally)
   if (back && payee) refund(payee, back);
   system.runJob((function* clear() {
     const dim = world.getDimension(OVERWORLD);
