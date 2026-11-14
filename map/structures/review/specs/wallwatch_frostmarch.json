@@ -1,0 +1,275 @@
+{
+ "name": "wallwatch_frostmarch",
+ "card": {
+  "title": "Wall watchtower",
+  "sub": "Frostmarch",
+  "region": "frostmarch",
+  "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+  "kind": "Defence",
+  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber"
+   },
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": [
+       "cobbled_deepslate",
+       "polished_deepslate"
+      ],
+      "axis": "noise",
+      "scale": 3
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "canopy": false
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "hatch": false,
+    "beams": false,
+    "parapet": "none"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": {
+    "use": "tower",
+    "hatch": true
+   }
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 5,
+   "sides": "nsew",
+   "material": "deepslate_brick_stairs"
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 9,
+   "sides": "nsew",
+   "material": "dark_oak_stairs"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -3,
+    -5,
+    3,
+    1
+   ],
+   "y": 10,
+   "h": 3,
+   "pier": "dark_oak_fence",
+   "deck": "dark_oak_planks",
+   "trim": "dark_oak_planks",
+   "bell": false,
+   "louvres": false,
+   "cap_trim": "dark_oak_planks",
+   "cap": "spire",
+   "rows": 3,
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "finial": "rod"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   11,
+   -4,
+   "dark_oak_fence"
+  ],
+  [
+   -3,
+   11,
+   -3,
+   "dark_oak_fence"
+  ],
+  [
+   -3,
+   11,
+   -2,
+   "dark_oak_fence"
+  ],
+  [
+   -3,
+   11,
+   -1,
+   "dark_oak_fence"
+  ],
+  [
+   -3,
+   11,
+   0,
+   "dark_oak_fence"
+  ],
+  [
+   -2,
+   11,
+   -5,
+   "dark_oak_fence"
+  ],
+  [
+   -2,
+   11,
+   1,
+   "dark_oak_fence"
+  ],
+  [
+   -1,
+   11,
+   -5,
+   "dark_oak_fence"
+  ],
+  [
+   -1,
+   11,
+   1,
+   "dark_oak_fence"
+  ],
+  [
+   0,
+   11,
+   -5,
+   "dark_oak_fence"
+  ],
+  [
+   0,
+   11,
+   1,
+   "dark_oak_fence"
+  ],
+  [
+   1,
+   11,
+   -5,
+   "dark_oak_fence"
+  ],
+  [
+   1,
+   11,
+   1,
+   "dark_oak_fence"
+  ],
+  [
+   2,
+   11,
+   -5,
+   "dark_oak_fence"
+  ],
+  [
+   2,
+   11,
+   1,
+   "dark_oak_fence"
+  ],
+  [
+   3,
+   11,
+   -4,
+   "dark_oak_fence"
+  ],
+  [
+   3,
+   11,
+   -3,
+   "dark_oak_fence"
+  ],
+  [
+   3,
+   11,
+   -2,
+   "dark_oak_fence"
+  ],
+  [
+   3,
+   11,
+   -1,
+   "dark_oak_fence"
+  ],
+  [
+   3,
+   11,
+   0,
+   "dark_oak_fence"
+  ],
+  [
+   0,
+   13,
+   -2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ]
+ ],
+ "snow": true
+}

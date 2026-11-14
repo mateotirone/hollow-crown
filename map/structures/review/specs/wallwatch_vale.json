@@ -1,0 +1,271 @@
+{
+ "name": "wallwatch_vale",
+ "card": {
+  "title": "Wall watchtower",
+  "sub": "Vale",
+  "region": "vale",
+  "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+  "kind": "Defence",
+  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log"
+   },
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "canopy": false
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "hatch": false,
+    "beams": false,
+    "parapet": "none"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0.04,
+   "interior": {
+    "use": "tower",
+    "hatch": true
+   }
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 5,
+   "sides": "nsew",
+   "material": "stone_brick_stairs"
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 9,
+   "sides": "nsew",
+   "material": "spruce_stairs"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -3,
+    -5,
+    3,
+    1
+   ],
+   "y": 10,
+   "h": 3,
+   "pier": "spruce_fence",
+   "deck": "spruce_planks",
+   "trim": "dark_oak_planks",
+   "bell": false,
+   "louvres": false,
+   "cap_trim": "dark_oak_planks",
+   "cap": "spire",
+   "rows": 3,
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "finial": "spire_block"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   11,
+   -4,
+   "spruce_fence"
+  ],
+  [
+   -3,
+   11,
+   -3,
+   "spruce_fence"
+  ],
+  [
+   -3,
+   11,
+   -2,
+   "spruce_fence"
+  ],
+  [
+   -3,
+   11,
+   -1,
+   "spruce_fence"
+  ],
+  [
+   -3,
+   11,
+   0,
+   "spruce_fence"
+  ],
+  [
+   -2,
+   11,
+   -5,
+   "spruce_fence"
+  ],
+  [
+   -2,
+   11,
+   1,
+   "spruce_fence"
+  ],
+  [
+   -1,
+   11,
+   -5,
+   "spruce_fence"
+  ],
+  [
+   -1,
+   11,
+   1,
+   "spruce_fence"
+  ],
+  [
+   0,
+   11,
+   -5,
+   "spruce_fence"
+  ],
+  [
+   0,
+   11,
+   1,
+   "spruce_fence"
+  ],
+  [
+   1,
+   11,
+   -5,
+   "spruce_fence"
+  ],
+  [
+   1,
+   11,
+   1,
+   "spruce_fence"
+  ],
+  [
+   2,
+   11,
+   -5,
+   "spruce_fence"
+  ],
+  [
+   2,
+   11,
+   1,
+   "spruce_fence"
+  ],
+  [
+   3,
+   11,
+   -4,
+   "spruce_fence"
+  ],
+  [
+   3,
+   11,
+   -3,
+   "spruce_fence"
+  ],
+  [
+   3,
+   11,
+   -2,
+   "spruce_fence"
+  ],
+  [
+   3,
+   11,
+   -1,
+   "spruce_fence"
+  ],
+  [
+   3,
+   11,
+   0,
+   "spruce_fence"
+  ],
+  [
+   0,
+   13,
+   -2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ]
+ ]
+}

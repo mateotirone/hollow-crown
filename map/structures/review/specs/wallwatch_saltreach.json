@@ -1,0 +1,273 @@
+{
+ "name": "wallwatch_saltreach",
+ "card": {
+  "title": "Wall watchtower",
+  "sub": "Saltreach",
+  "region": "saltreach",
+  "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+  "kind": "Defence",
+  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_timber"
+   },
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "cut_sandstone",
+     "infill": {
+      "ladder": [
+       "smooth_sandstone",
+       "sandstone"
+      ],
+      "axis": "noise",
+      "scale": 3
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "canopy": false
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "hatch": false,
+    "beams": false,
+    "parapet": "none"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": {
+    "use": "tower",
+    "hatch": true
+   }
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 5,
+   "sides": "nsew",
+   "material": "smooth_sandstone_stairs"
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 9,
+   "sides": "nsew",
+   "material": "birch_stairs"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -3,
+    -5,
+    3,
+    1
+   ],
+   "y": 10,
+   "h": 3,
+   "pier": "birch_fence",
+   "deck": "birch_planks",
+   "trim": "birch_planks",
+   "bell": false,
+   "louvres": false,
+   "cap_trim": "birch_planks",
+   "cap": "hip",
+   "roof": {
+    "block": "dark_prismarine"
+   },
+   "finial": "short"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   11,
+   -4,
+   "birch_fence"
+  ],
+  [
+   -3,
+   11,
+   -3,
+   "birch_fence"
+  ],
+  [
+   -3,
+   11,
+   -2,
+   "birch_fence"
+  ],
+  [
+   -3,
+   11,
+   -1,
+   "birch_fence"
+  ],
+  [
+   -3,
+   11,
+   0,
+   "birch_fence"
+  ],
+  [
+   -2,
+   11,
+   -5,
+   "birch_fence"
+  ],
+  [
+   -2,
+   11,
+   1,
+   "birch_fence"
+  ],
+  [
+   -1,
+   11,
+   -5,
+   "birch_fence"
+  ],
+  [
+   -1,
+   11,
+   1,
+   "birch_fence"
+  ],
+  [
+   0,
+   11,
+   -5,
+   "birch_fence"
+  ],
+  [
+   0,
+   11,
+   1,
+   "birch_fence"
+  ],
+  [
+   1,
+   11,
+   -5,
+   "birch_fence"
+  ],
+  [
+   1,
+   11,
+   1,
+   "birch_fence"
+  ],
+  [
+   2,
+   11,
+   -5,
+   "birch_fence"
+  ],
+  [
+   2,
+   11,
+   1,
+   "birch_fence"
+  ],
+  [
+   3,
+   11,
+   -4,
+   "birch_fence"
+  ],
+  [
+   3,
+   11,
+   -3,
+   "birch_fence"
+  ],
+  [
+   3,
+   11,
+   -2,
+   "birch_fence"
+  ],
+  [
+   3,
+   11,
+   -1,
+   "birch_fence"
+  ],
+  [
+   3,
+   11,
+   0,
+   "birch_fence"
+  ],
+  [
+   0,
+   13,
+   -2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ]
+ ]
+}
