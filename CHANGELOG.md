@@ -202,6 +202,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Fixed
 - Track bought on the Dunehold to Lanternbog line no longer leaves one piece hanging over a hole where the line climbs out of the cutting near Lanternbog: digging the cutting no longer takes away the ballast under the track next to it.
+- The map was rebuilt on the re-straightened railway lines, so every line can be bought and laid cleanly; Frosthelm's station is back at its old height.
 - The map was rebuilt. In Millbrook the Reeve's well, the clock posts and the clock tower now stand on the square's own floor instead of a few blocks up on the old well's roof, so the tower's arch meets the street. The towns' house doors get the new door landings and their lights. Signs, buttons, ladders and vines that hung on nothing in the towns were turned to a wall or removed, lanterns that floated under a ceiling now hang on chains, the arena's floor is dug out again, and the railway lines are re-laid straight.
 - **The Rift opens on the real map.** The seven thin-place caves no longer need marking by hand: each one's seam is known from the map as soon as the world loads. If the Rift is opened at a cave nobody has visited yet, the cave builds itself first and the crack tears open as soon as it stands. `/scriptevent hc:open_rift` now also takes you there to watch, setting you down gently on the ground.
 - The trebuchet now throws forward. Its arm used to swing the wrong way, so the boulder looked like it left over the back while it actually flew toward the target.
