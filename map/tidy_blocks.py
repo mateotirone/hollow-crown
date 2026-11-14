@@ -235,19 +235,14 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
                     lb = at.get((cell[0], cell[1] - 1, cell[2]))
                     shaft = (nm.endswith("ladder") and lb is not None and lb not in drop and entry(lb)["name"].endswith("ladder")
                              and (entry(lb).get("states") or {}).get("facing_direction") == fd)
-                    if strict == 1:                    # held by our own block, no side open to the land: only our own block in
-                        fn = name_at(front)            # front stops it (Rimehold's planter signs between leaves and hill)
-                        return held and (shaft or fn is None or bool(SOFT.search(fn)))
                     return held and (shaft or not solid(front) and not (g_hi is not None and front[1] <= g_hi))
-                if f in BEHIND and ok(f, 2): continue
-                for fd in ([(fd, 2) for fd in (2, 3, 4, 5) if fd != f] + [(fd, 1) for fd in (f, 2, 3, 4, 5) if fd in BEHIND]
-                           + ([(f, False)] if f in BEHIND else []) + [(fd, False) for fd in (2, 3, 4, 5) if fd != f]):
-                    fd, strict = fd
-                    if fd == f and not strict:         # no side with a block of ours: held by the land is fine as it is
-                        if ok(f): break
-                        continue
-                    if ok(fd, strict):
-                        if fd == f: break
+                if f in BEHIND and ok(f, True): continue
+                # only a side held by one of our own blocks (the land is not in the file, and tools/hung-check.mjs fails
+                # a sign the land holds); with no such side open, it goes (Rimehold's planter signs between leaves and
+                # a hillside, restamp thread 2026-11-14)
+                for fd in (2, 3, 4, 5):
+                    if fd == f: continue
+                    if ok(fd, True):
                         blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**st, "facing_direction": fd}}), *blocks[i][4:]]
                         n["turned"] += 1; changed = True; break
                 else:
