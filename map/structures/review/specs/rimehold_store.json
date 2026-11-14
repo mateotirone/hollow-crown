@@ -1,0 +1,155 @@
+{
+ "name": "rimehold_store",
+ "card": {
+  "title": "Rimehold store",
+  "sub": "Norse timber and stone",
+  "region": "frostmarch",
+  "where": "Rimehold",
+  "kind": "Civic",
+  "blurb": "A tall narrow store: stone ground storey with the shop, plank loft above under a steep roof with dragon heads, barrels and a woodpile at the side. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    0,
+    0,
+    8,
+    10
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "at": 0,
+    "kind": "house",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -2,
+      "storey": 0
+     },
+     {
+      "at": 2,
+      "storey": 0
+     },
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ],
+    "e": [
+     {
+      "at": -2,
+      "storey": 1
+     },
+     {
+      "at": 2,
+      "storey": 1
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     },
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ],
+    "n": [
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": [
+    [
+     1,
+     6
+    ]
+   ],
+   "vines": 0,
+   "interior": "shop"
+  },
+  {
+   "part": "woodpile",
+   "at": [
+    9,
+    1,
+    7
+   ],
+   "len": 3,
+   "h": 2,
+   "facing": "e",
+   "wood": "spruce"
+  }
+ ],
+ "place": [
+  [
+   -1,
+   1,
+   9,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -1,
+   1,
+   8,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -1,
+   2,
+   9,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ]
+ ]
+}

@@ -1,0 +1,92 @@
+{
+ "name": "rimehold_barn",
+ "card": {
+  "title": "Rimehold byre",
+  "sub": "Norse stone and timber",
+  "region": "frostmarch",
+  "where": "Rimehold, the edges",
+  "kind": "Barn",
+  "blurb": "A low byre: dark stone walls, plank rows above, a very steep roof coming down low, big cart doors in the gable and hay inside. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "floor": "coarse_dirt"
+   },
+   "rect": [
+    0,
+    0,
+    10,
+    12
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    }
+   ],
+   "door": {
+    "side": "s",
+    "kind": "large",
+    "steps": 0
+   },
+   "windows": {
+    "e": [
+     {
+      "at": -3,
+      "storey": 0
+     },
+     {
+      "at": 3,
+      "storey": 0
+     }
+    ],
+    "w": [],
+    "n": [],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": false,
+   "vines": 0,
+   "interior": "storage"
+  },
+  {
+   "part": "woodpile",
+   "at": [
+    -1,
+    1,
+    3
+   ],
+   "len": 3,
+   "h": 2,
+   "facing": "w",
+   "wood": "spruce"
+  }
+ ]
+}
