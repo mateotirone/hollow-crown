@@ -210,7 +210,7 @@ export function raiseHall(o, then, old) {
   command(dim, `tickingarea add ${o.x - R_ALL} ${o.y} ${o.z - R_ALL} ${o.x + R_ALL} ${o.y} ${o.z + R_ALL} ${BUILD_AREA} true`);
   let tries = 0;
   const wait = system.runInterval(() => {
-    if (!allLoaded(dim, o) && ++tries < 90) return;
+    if (!allLoaded(dim, o) && ++tries < 450) return; // looked at every 2 ticks, up to 45 seconds
     system.clearRun(wait);
     const markers = pedestalLayout().map((p) => ({ dx: p.dx, dz: p.dz, pedestal: REGION_BLOCK[p.plan.region] ?? "minecraft:stone_bricks" }));
     system.runJob((function* () {
@@ -222,7 +222,9 @@ export function raiseHall(o, then, old) {
           const b = dim.getBlock({ x, y, z });
           if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
         };
-        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
+        // A playtest world ships with the hall already built into it (tools/hall_blocks.mjs lists its blocks): take it as it stands
+        if (old || !hallBakedAt(dim, o)) yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
+        else console.warn("[Hollow Crown] welcome: the hall is already built into this world; using it");
       } catch (e) {
         console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
         raising = false;
@@ -256,7 +258,17 @@ export function raiseHall(o, then, old) {
       command(dim, `tickingarea remove ${BUILD_AREA}`);
       raising = false;
     })());
-  }, 10);
+  }, 2);
+}
+
+/** The world file already holds the hall (baked in ahead of time): its Waystone stands on the quay. */
+export function hallBakedAt(dim, o) {
+  const w = waystoneSpot();
+  try {
+    return dim.getBlock({ x: o.x + w.dx, y: o.y + w.dy, z: o.z + w.dz })?.typeId === HALL_WAYSTONE;
+  } catch {
+    return false;
+  }
 }
 
 // Where a newcomer stands in the hall: on the quay beside the Waystone
