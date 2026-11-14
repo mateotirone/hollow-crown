@@ -310,6 +310,9 @@ def audit(path, plan=None, centre_hint=None, radius=None):
     G_ = S.g
     r_ = S.C(rests); s_ = S.C(sunk); p_ = S.C(post); no_ = S.C(nothing)
     on_slab = np.zeros_like(r_); on_slab[:, 1:, :] = r_[:, 1:, :] & s_[:, :-1, :]
+    # a tree's limb on its own branch slab is the tree database's design, not a build resting on a slab
+    tree = S.C(np.array([n.startswith("siege:old_") for n, _ in S.pal] + [False]))
+    on_slab[:, 1:, :] &= ~(tree[:, 1:, :] & tree[:, :-1, :])
     post_air = np.zeros_like(r_); post_air[:, 1:, :] = p_[:, 1:, :] & no_[:, :-1, :]
     # held from the side (a parapet over an arch, a rail between two posts) is not standing on anything: only a post
     # with no hard block beside it at its own height must stand on the ground
@@ -532,7 +535,8 @@ def audit(path, plan=None, centre_hint=None, radius=None):
     for c, n, grp in cluster(pts, 2):
         F.append(finding("junk", "a tree trunk standing on a path", S.w(*c), n, sev="check"))
     leaves = S.C(S.is_leaves)
-    built = S.C(np.array([bool(re.search(r"(_stairs$|_slab$|_planks$|bricks$|^chimney)", n)) for n, _ in S.pal] + [False]))
+    built = S.C(np.array([bool(re.search(r"(_stairs$|_slab$|_planks$|bricks$|^chimney)", n)) and not n.startswith("siege:old_")
+                          for n, _ in S.pal] + [False]))         # a tree's own branch slabs are not a roof
     over = np.zeros_like(free)
     over[:, 1:, :] = leaves[:, 1:, :] & built[:, :-1, :]
     over &= inside2d[:, None, :]

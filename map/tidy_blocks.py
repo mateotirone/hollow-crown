@@ -139,7 +139,15 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
                     if solid(c) or name_at(c) is not None and not NOTHING.search(name_at(c)): break
                     gap.append(c)
                 else: gap = None
-                if gap and solid((x, y - len(gap) - 1, z)):
+                base = (x, y - len(gap) - 1, z) if gap else None
+                bi = at.get(base) if base else None
+                if bi is not None and bi not in drop and not solid(base):   # the street's sunk slab under the gap
+                    b = entry(bi); bst = b.get("states") or {}
+                    if (b["name"].startswith("minecraft:") and b["name"].endswith("_slab") and "double" not in b["name"]
+                            and bst.get("minecraft:vertical_half", "top" if bst.get("top_slot_bit") else "bottom") == "bottom"):
+                        blocks[bi] = [*blocks[bi][:3], index_of({"name": b["name"].replace("_slab", "_double_slab"), "states": {}}), *blocks[bi][4:]]
+                        full += 1
+                if gap and (solid(base) or bi is not None and bi not in drop and "double_slab" in entry(bi)["name"]):
                     for c in gap:
                         j = at.get(c)
                         if j is not None and j not in drop: blocks[j] = [*c, blocks[i][3], *blocks[j][4:]]
