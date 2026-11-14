@@ -9,14 +9,14 @@
    {
     "minecraft:spawns_on_surface": {},
     "minecraft:weight": {
-     "default": 8
+     "default": 4
     },
     "minecraft:herd": {
-     "min_size": 3,
-     "max_size": 5
+     "min_size": 2,
+     "max_size": 3
     },
     "minecraft:density_limit": {
-     "surface": 3
+     "surface": 2
     },
     "minecraft:biome_filter": {
      "any_of": [
