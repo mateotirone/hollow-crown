@@ -812,7 +812,9 @@ def corvins_tower():
         for z in range(-3, 4):
             for y in (5, 10):
                 if math.hypot(x, z) < 3.6 and d.r(x, y, z) < 0.45 and (x, z) != (0, -3): d.put(x, y, z, "spruce_slab", half="top")
-    # the bell frame on top, against the sky
+    # the bell frame on top, against the sky, on two old posts up from the ground floor (2026-11-14: it hung in the air)
+    for x in (-2, 2):
+        for y in range(1, 15): d.put(x, y, 0, "stripped_spruce_log", axis="y")
     for x in range(-2, 3):
         for z in (-1, 0, 1): d.put(x, 15, z, "spruce_planks" if d.r(x, 15, z) < 0.85 else "spruce_slab")
     bell_frame(d, 0, 16, 0, w=2, tall=4, wood="oak")

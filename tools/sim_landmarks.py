@@ -5,7 +5,7 @@ The landmarks (Siege_Nights_BP/scripts/landmarks/sites.js: Crownhold, Bellhollow
 role homes, the plot relics ...) are built by the game the first time a player comes near. This reads the ground
 out of a generated world the way the game does (landmarks/index.js groundY / waterY), plans every piece with the
 game's own planner (tools/sim_landmarks.mjs), lays it over the real blocks and reports:
-  - blocks of the landmark (or of the ground it cut) that float, 6-connected to nothing that reaches the ground
+  - blocks of the landmark (or of the ground it cut) that float, joined by no face or edge to anything that reaches the ground
   - pieces that could not be placed
 and writes one scene per site for map/structures/render/render.py (real terrain round it, same view as in game).
 
@@ -28,7 +28,7 @@ level = amulet.load_level(WORLD)
 DIM = "minecraft:overworld"
 tr = level.translation_manager.get_version("bedrock", (1, 21, 0))
 
-SOFT = re.compile(r"leaves|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|log|vine|sapling|mushroom|azalea|dead_bush|torch|reeds|sugar_cane|kelp|seagrass|lily|wood")
+SOFT = re.compile(r"leaves|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|log|vine|sapling|mushroom|azalea|dead_bush|torch|reeds|sugar_cane|kelp|seagrass|lily|wood|fence")
 _bed = {}
 
 
@@ -115,6 +115,7 @@ def logical(n, st):
     return n, p
 
 
+N18 = [(a, b, e) for a in (-1, 0, 1) for b in (-1, 0, 1) for e in (-1, 0, 1) if 0 < abs(a) + abs(b) + abs(e) < 3]
 report = {}
 for sid, pieces in plans.items():
     ops = [o for p in pieces for o in p.get("ops", [])]
@@ -134,13 +135,13 @@ for sid, pieces in plans.items():
         n = n.replace("minecraft:", "")
         if n == "air": cells.pop((x, y, z), None); mine.discard((x, y, z))
         else: cells[(x, y, z)] = (n, st); mine.add((x, y, z))
-    # grounded: reachable (6 ways) from the bottom layer through anything solid-ish; water holds nothing
+    # grounded: reachable (by a face or an edge, so a stair roof stepping down holds) from the bottom layer through anything solid-ish; water holds nothing
     holds = lambda c: c in cells and "water" not in cells[c][0] and "lava" not in cells[c][0]
     seen = set(c for c in cells if c[1] == yb0 and holds(c))
     q = deque(seen)
     while q:
         x, y, z = q.popleft()
-        for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+        for d in N18:
             c = (x + d[0], y + d[1], z + d[2])
             if c not in seen and holds(c) and x0 <= c[0] <= x1 and z0 <= c[2] <= z1:
                 seen.add(c); q.append(c)

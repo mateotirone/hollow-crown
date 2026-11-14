@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { DESIGNS } from "../Siege_Nights_BP/scripts/landmarks/designs_data.js";
 import { SPOTS } from "../Siege_Nights_BP/scripts/landmarks/spots_data.js";
 import { LANDMARKS } from "../Siege_Nights_BP/scripts/landmarks/sites.js";
-import { planPiece, seekSpot, AIR, KEEP_TOP } from "../Siege_Nights_BP/scripts/landmarks/plan.js";
+import { planPiece, seekSpot, settleNow, AIR, KEEP_TOP } from "../Siege_Nights_BP/scripts/landmarks/plan.js";
 
 const designId = (piece, face) => (piece.turns ? `${piece.d}@${face ?? "n"}` : piece.d);
 const [mode, ...rest] = process.argv.slice(2);
@@ -48,7 +48,8 @@ if (mode === "need") {
       }
       const did = designId(piece, face), d = DESIGNS[did];
       if (!d) { out[s.id].push({ k, missing: true, d: did }); return; }
-      const { ops, G } = planPiece(d, x, z, height, water);
+      const planned = planPiece(d, x, z, height, water), G = planned.G;
+      const ops = settleNow(planned.ops, d, height);   // as landmarks/index.js does
       const top = (ox, oz) => { const i = idx(ox, oz); return (i >= 0 && P.top[i]) || P.top[idx(x, z)] || ["minecraft:grass_block", {}]; };
       out[s.id].push({ k, d: did, x, z, G, ops: ops.map(([ox, oy, oz, i]) => i === AIR ? [ox, oy, oz, "minecraft:air", {}]
         : i === KEEP_TOP ? [ox, oy, oz, ...top(ox, oz)] : [ox, oy, oz, ...d.palette[i]]) });
