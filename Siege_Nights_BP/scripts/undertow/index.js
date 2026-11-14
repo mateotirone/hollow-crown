@@ -23,7 +23,7 @@
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { onTick } from "../core/loop.js";
-import { addTests, assert } from "../core/tests.js";
+import { addTests, assert, assertEqual } from "../core/tests.js";
 import "./arenas_tests.js";
 import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
@@ -54,7 +54,7 @@ import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, requestRift, goSee, plannedSeam, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { thinTick, thinCommand, requestRift, goSee, plannedSeam, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V, STORY_TOMES } from "./thinplaces.js";
 import { THIN_LAND } from "./thin_land.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
@@ -674,6 +674,21 @@ addTests("undertow", {
         prev = fy;
       }
       assert(Math.abs(prev - plan.chamber.F) <= 1, `${t.id}: the way in does not meet the chamber floor`);
+    }
+  },
+  "thin places: the books their pages put inside lie where they say, on something firm, clear of the way in": () => {
+    for (const t of THIN_PLACES) {
+      const plan = planThinPlace(t.id, 0, 0, 64);
+      assertEqual(plan.tomes.map((b) => b.id).sort(), [...(STORY_TOMES[t.id] ?? [])].sort(), t.id);
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      const route = new Set(plan.route.map(([u, fy, v]) => `${u},${64 + fy},${v}`));
+      for (const b of plan.tomes) {
+        const here = last.get(`${b.x},${b.y},${b.z}`), below = last.get(`${b.x},${b.y - 1},${b.z}`), above = last.get(`${b.x},${b.y + 1},${b.z}`);
+        if (b.y < 64 + plan.chamber.F) assert(here !== "minecraft:air" && above === "minecraft:air", `${t.id} ${b.id}: a floor stone with room over it`);
+        else assert(here === "minecraft:air" && below && below !== "minecraft:air", `${t.id} ${b.id}: lying on something`);
+        assert(!route.has(`${b.x},${b.y},${b.z}`), `${t.id} ${b.id}: in the way`);
+      }
     }
   },
   "thin places: nothing the planner builds stands in front of a cave mouth": () => {
