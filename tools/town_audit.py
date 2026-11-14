@@ -416,15 +416,25 @@ def audit(path, plan=None, centre_hint=None, radius=None):
                 r = 0 if db else 2                          # a design with no door at all (an open shop front, a granary
                 arch = any(0 <= i + a < S.shape[0] and 0 <= k + c < S.shape[2] and bool((feet[i + a, :, k + c] & covered[i + a, :, k + c]).any())
                            for a in range(-r, r + 1) for c in range(-r, r + 1))   # arch): its open front is within a step or two
+                # a design with no door at all that stands open on that side (a trough under an awning, a raised granary)
+                openside = not db and not arch and any(0 <= i + a < S.shape[0] and 0 <= k + c < S.shape[2] and bool(feet[i + a, :, k + c].any())
+                                                       for a in range(-1, 2) for c in range(-1, 2))
+                if openside:
+                    F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): open on its plan's door side, no door in the design", (d[0], gy + 1, d[1]), sev="check"))
+                    continue
                 F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): no door where the plan puts it" + (" (an open doorway is there)" if arch else ""),
                                  (d[0], gy + 1, d[1]), sev="check" if arch else "fix"))
         for b in plan.get("buildings", []):
-            if b.get("kind") in ("barn", "windmill", "house", "civic") and not b.get("door"):
+            if b.get("kind") in ("barn", "windmill", "house", "civic") and not b.get("door") and not re.search(r"wall tower", b.get("name") or ""):  # a wall tower is the wall's own, entered off the wall walk
                 F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): the plan gives it no door", (b["x"], b.get("ground_y", 0) + 1, b["z"]), sev="check"))
 
     # ---- streets: built paths under the sky darker than 4
     floor_pathy = np.zeros_like(free)
     floor_pathy[:, 1:, :] = S.C(S.is_pathy)[:, :-1, :]
+    # a street is laid on the ground: a stepped roof or an awning (slabs and stairs with air under them) is not one
+    floor_pathy[:, 2:, :] &= ~air[:, :-2, :]
+    stairs = S.C(np.array([n.endswith("_stairs") for n, _ in S.pal] + [False]))
+    floor_pathy[:, 1:, :] &= ~stairs[:, :-1, :]          # a stair underfoot is a roof's slope or a flight of steps, as the engine's light stage reads it
     # a Hamlet's streets are the ones inside its wall: the road beyond is the open country's (meta wall = its radius)
     t = meta.get("town") or {}
     if meta.get("wall") and t:

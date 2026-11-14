@@ -183,6 +183,7 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
     if drop and isinstance(d.get("groundwork_blocks"), int):
         d["groundwork_blocks"] -= sum(1 for i in drop if i < d["groundwork_blocks"])
     d["blocks"] = [b for i, b in enumerate(blocks) if i not in drop]
+    if ground: d["tidied_on_land"] = True    # hang_blocks.py: what hangs on the land here was checked against it
     return n
 
 

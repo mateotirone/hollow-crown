@@ -55,6 +55,9 @@ def fix(path):
         wall = lambda fd: (lambda j: pal[blocks[j][3]] if j is not None and j not in drop else None)(
             at.get(tuple(c + o for c, o in zip(cell, BEHIND[fd]))))
         if f in BEHIND and holds(e, wall(f)): continue
+        # a bake tidied against its land (tidy_blocks with ground): a sign with nothing of the town's behind it is on
+        # the hillside, which this file doesn't hold (Rimehold's planter signs were turned to face the hill, 2026-11-14)
+        if d.get("tidied_on_land") and f in BEHIND and at.get(tuple(c + o for c, o in zip(cell, BEHIND[f]))) is None: continue
         for fd in (2, 3, 4, 5):
             if holds(e, wall(fd)):
                 blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**(e.get("states") or {}), "facing_direction": fd}}), *blocks[i][4:]]

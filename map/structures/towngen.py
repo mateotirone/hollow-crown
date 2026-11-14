@@ -1655,7 +1655,7 @@ class Town:
         furnish_blocks.furnish_worldblocks(d, {"buildings": self.plan})
         if not self.site.get("dark"):            # every build lit at night (Mateo 2026-11-13): rooms, doors, yards
             import light_blocks
-            light_blocks.light_worldblocks(d)
+            light_blocks.light_worldblocks(d, ground=lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) and self.inside(x, z, 0) else None)
         import tidy_blocks                      # nothing hung on nothing, standing on nothing or facing a wall (town audit 2026-11-14)
         print("tidy", tidy_blocks.tidy_worldblocks(d, lambda x, z: int(self.G[self.ij(x, z)]) if self.ok(x, z) else None,
                                                    lambda x, z: max(int(self.G[self.ij(x, z)]), int(self.G0[self.ij(x, z)])) if self.ok(x, z) else None))
