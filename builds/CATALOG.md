@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**117 builds:** 1 not started, 29 designed, 17 in viewer, 70 in game.
+**118 builds:** 1 not started, 29 designed, 17 in viewer, 71 in game.
 
 Statuses:
 
@@ -50,7 +50,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Smithy (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
 | Stable (plot building) (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
 | Storehouse (old plot building, retired) (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
-| ★ Wall watchtower (four on every wall, Low Palisade to Battlement Wall) (5) | One version per overworld region | in game |  | Add guard watchtowers to first walls | `map/structures/wallwatch_skill.py` | Built on the skill (review/specs/gen_wallwatch.py); settle/walls.js raises four astride the wall line from settle/wallwatch_data.js, where the Watch Wall's stone towers later stand. A guard post on each lookout. |
+| ★ Lookout stand (four on the Low Palisade, wall level 1) (5) | One version per overworld region | in game |  | Add guard watchtowers to first walls | `map/structures/wallwatch_skill.py` | Built on the skill (review/specs/gen_wallwatch.py, wallstand_<region>.json); settle/walls.js raises it at level 1 and swaps it for the watchtower at level 2. A guard post on each deck. |
+| ★ Wall watchtower (four on every wall, Palisade to Battlement Wall) (5) | One version per overworld region | in game |  | Add guard watchtowers to first walls | `map/structures/wallwatch_skill.py` | Built on the skill (review/specs/gen_wallwatch.py); settle/walls.js raises four astride the wall line from settle/wallwatch_data.js, where the Watch Wall's stone towers later stand. A guard post on each lookout. |
 | Storehouse (4 levels, grows with the town) (20) | One version per overworld region | in game | storehouse-* | Plan storage across the world | `map/structures/storehouse_skill.py` |  |
 | Watchtower (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
 | Market stall (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` | Mateo 2026-11-12: use wool slabs/stairs for awning angles. |
