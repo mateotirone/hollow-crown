@@ -201,8 +201,9 @@ function garden(p) {
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { p.set(x, 1, z, "pillar", { axis: "y" }); p.set(x, 2, z, "light"); }
 }
 
-// The town's library: two storeys of books round a reading table, with eight Archive Shelves on the
-// back wall (marks shelf0..shelf7, lower row first) and a lectern (mark "lectern") in front of them.
+// The town's library: two storeys of books round a reading table, with fourteen Archive Shelves: eight on the
+// back wall (marks shelf0..shelf7, lower row first) and three along each side wall (shelf8..shelf13), and a lectern
+// (mark "lectern") in front of them. (The regions' own designs, designs_data.js, have the same marks.)
 // The lore feature fills the shelves with this town's own books when the library is built.
 function library(p) {
   const x0 = -4, x1 = 4, z0 = 1, z1 = 9, H = 5;
@@ -218,6 +219,7 @@ function library(p) {
   // the Archive Shelves, two rows of four, either side of the middle of the back wall
   let n = 0;
   for (const y of [1, 2]) for (const x of [-2, -1, 1, 2]) { p.set(x, y, z1 - 1, "archive"); p.mark(`shelf${n++}`, x, y, z1 - 1); }
+  for (const x of [x0 + 1, x1 - 1]) for (const z of [3, 5, 7]) { p.set(x, 1, z, "archive"); p.mark(`shelf${n++}`, x, 1, z); }
   p.fill(0, 1, z1 - 1, 0, 2, z1 - 1, "bookshelf");
   for (const x of [-2, -1, 0, 1, 2]) p.set(x, 3, z1 - 1, "bookshelf");
   p.set(0, 1, z1 - 3, "lectern"); p.mark("lectern", 0, 1, z1 - 3);
@@ -280,7 +282,7 @@ export const BUILDINGS = [
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
-  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
+  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and fourteen Archive Shelves for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
   { id: "house", name: "House", blurb: "One storey and a tall attic under a steep gable, with a chimney. About four beds.", draw: house },
   { id: "townhouse", name: "Townhouse", blurb: "A taller house: stone below, a jettied floor over the road, a high attic. About six beds.", draw: townhouse },
