@@ -69,7 +69,7 @@ export const ENTRIES = [
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
-      + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
+      + "2. §fClick your Plot Stone§r and choose §fRaise your banner here§r. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
       + "3. §fOpen your founder's chest§r in your house: logs, saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out in the world can't be felled, so plant the saplings.\n"
       + "4. §fBuild a Barracks§r: go to your big empty plot, click its §fPlot Marker§r (the post on it), choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its door and train guards (40 Regals each).\n"
       + "5. §fHold the night.§r The first siege comes on the third night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"

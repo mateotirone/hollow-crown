@@ -24,6 +24,7 @@ export { MASONRY, TREBUCHET as THROW } from "./structure.js";
 // ----- guards -----
 export { guardTag, guardOwner, guardCount, guardLimit, isGuard, markWanted, GUARD_ARMOR, armorTier, equipGuard, upgradeGuard, barracksOf, nearestBarracks, setPost, STATION_LEASH, underAttack, wanted } from "./guards.js";
 export { setGate, mayWorkGate } from "./block_clicks.js";
+export { foundSettlement } from "./placement.js";
 export { openLeafAt } from "./gates.js";
 
 // ----- shared helpers and ids -----
