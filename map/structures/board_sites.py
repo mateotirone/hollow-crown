@@ -1293,7 +1293,7 @@ CHAR = [("blackstone", 3), ("coal_block", 1), ("polished_blackstone_bricks", 1)]
 
 def burned_cottage(d, S, wall, x0, z0, x1, z1, door="s", salt=0):
     """A cottage burned to its walls: the stone stands, scorched black at the top and round the openings, the roof gone
-    but for two charred rafters, ash on the floor, a table and a bed frame inside, the door out on the grass."""
+    but for two charred rafters, ash on the floor, a table and a bed frame inside, the door shut and barred from outside, the floor burned black from the back."""
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
             edge = x in (x0, x1) or z in (z0, z1)
@@ -1306,9 +1306,21 @@ def burned_cottage(d, S, wall, x0, z0, x1, z1, door="s", salt=0):
                 d.put(x, y, z, d.pick(x, y, z, CHAR, salt) if y == top and d.r(x, y, z, salt) < 0.7 else d.pick(x, y, z, wall, salt))
     cx = (x0 + x1) // 2
     dz = z1 if door == "s" else z0
-    for y in (1, 2): d.air(cx, y, dz)
+    out = 1 if door == "s" else -1
     d.put(cx, 3, dz, d.pick(cx, 3, dz, CHAR, salt))
-    d.put(cx - 1, 1, dz + (2 if door == "s" else -2), "dark_oak_trapdoor", facing="s", half="bottom")   # the door, flung out
+    # the door still shut in its frame, and barred from the OUTSIDE (Act 2: Tobin's "the doors were barred from
+    # outside"): a beam across it at the latch, its ends dropped into two posts set in the ground either side
+    way = 3 if door == "s" else 1   # Bedrock door direction: the way into the house (frost_bothy: an east door is 2)
+    d.put(cx, 1, dz, "dark_oak_door", bs={"direction": way, "upper_block_bit": False})
+    d.put(cx, 2, dz, "dark_oak_door", bs={"direction": way, "upper_block_bit": True})
+    for x in (cx - 1, cx + 1): d.put(x, 1, dz + out, "dark_oak_fence")
+    for x in (cx - 1, cx, cx + 1): d.put(x, 2, dz + out, "stripped_dark_oak_log", axis="x")
+    # the fire started inside: the floor burned black from the back wall forward, the char thickest round the hearth
+    back = z0 + 1 if door == "s" else z1 - 1
+    for x in range(x0 + 1, x1):
+        for z in range(z0 + 1, z1):
+            near = abs(z - back)
+            if d.r(x, 0, z, salt + 5) < 0.85 - near * 0.18: d.put(x, 0, z, d.pick(x, 0, z, CHAR, salt))
     for z in (z0 + 1, z1 - 2):                         # two charred rafters left, on wall ends kept to full height
         for x in (x0, x1):
             for y in range(1, 4): d.put(x, y, z, d.pick(x, y, z, wall, salt + 1))
@@ -1335,6 +1347,7 @@ def burned_hamlet(region):
     d.put(0, 1, 8, "campfire", bs={"extinguished": False})
     for x, z in ((-1, 0), (3, -1), (-4, 1), (5, 5)): d.put(x, 1, z, "light_gray_carpet")
     mark(d, 0, 1, 0, "look"); mark(d, 0, 1, 2, "person")
+    mark(d, -1, 1, 6, "find")   # the family's chest (Act 2's first job): in the last house, by what's left of the table
     return d
 
 

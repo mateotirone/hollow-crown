@@ -614,9 +614,9 @@ addTests("settle charters", {
     assert(plotFit("watchtower", { size: "S", tags: ["wall"] }).ok, "watchtower by the wall");
     assert(plotFit("well", { size: "S", tags: ["square"] }).tagged, "well on the square is a good spot");
   },
-  "charters: Hamlet free, Town needs homes and a market, missing designs are skipped"() {
+  "charters: Hamlet needs the Barracks, Town needs homes and a market, missing designs are skipped"() {
     const known = new Set(["cottage", "market", "barracks", "smithy"]);
-    assert(charterCheck(0, {}, known).met, "Hamlet charter is empty");
+    assert(!charterCheck(0, {}, known).met && charterCheck(0, { barracks: 1 }, known).met, "the Hamlet's charter is the Barracks");
     const short = charterCheck(1, { cottage: 2, market: 1 }, known);
     assert(!short.met, "two homes are not enough");
     assert(short.lines.find((l) => l.what === "Mint").skipped, "the Mint is skipped until it exists");
@@ -812,7 +812,7 @@ addTests("settle charters", {
     const farm = take("farmhouse"), mint = take("mint"), market = take("market"), homes = [take("cottage"), take("cottage"), take("cottage")];
     assert(farm && mint && market && homes.every(Boolean), "gullcliff has a plot for each Town charter building");
     const free = [farm, mint, market, ...homes];
-    const counts = { library: 1, house: 2 };
+    const counts = { library: 1, house: 2, barracks: 1 }; // the Hamlet's own charter (the Barracks) is met
     const kept = charterKeeps(free, 0, counts, known, mint, "house");
     assert(kept, "a house on the Mint's only Medium would leave the Town charter without a plot");
     assert(kept.ids.length && kept.ids.every((id) => plotFit(id, mint).ok), "it names what may go there");

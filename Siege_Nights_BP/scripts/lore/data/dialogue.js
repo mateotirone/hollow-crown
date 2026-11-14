@@ -75,6 +75,8 @@ export const NPCS = [
       [["act2:moneyer"], "moneyer_wait"],
       [["act2:ironworks"], "ironworks_wait"],
       [["act2:collect"], "collect_wait"],
+      [["act2:read_notice"], "notice_up"],
+      [["act2:board_job"], "chest_wait"],
       [[], "hub"],
     ],
     nodes: {
@@ -258,6 +260,8 @@ export const NPCS = [
       ironworks_wait: { text: "He told you to build, didn't he? Then build.", opts: [["I'm stuck.", "stuck_ironworks"], ["I'll go.", "end"]] },
       stuck_ironworks: { text: "Your Works yard has a marker waiting.", opts: [["Still stuck.", "stuck2_ironworks"], ["Thank you.", "end"]] },
       stuck2_ironworks: { text: "Use the Plot Marker on the Works yard and pick the Ironworks.", opts: [["Thank you.", "end"]] },
+      notice_up: { text: "There's a notice up you'll want to read. On the board by the door. Tobin put his whole name to it.", opts: [["I'll read it.", "end"]] },
+      chest_wait: { text: "Bring them their chest. And look at the doors, like he asked. Then come and tell me what you saw, if you like. I've only got his word for it.", opts: [["I will.", "end"]] },
       collect_wait: { text: "Let it work a night. Then go and see what it dug.", opts: [["I'm stuck.", "stuck_collect"], ["Good night.", "end"]] },
       stuck_collect: { text: "The Ironworks keeps a storeroom.", opts: [["Still stuck.", "stuck2_collect"], ["Thank you.", "end"]] },
       stuck2_collect: { text: "Click the Ironworks block in its yard and take everything.", opts: [["Thank you.", "end"]] },

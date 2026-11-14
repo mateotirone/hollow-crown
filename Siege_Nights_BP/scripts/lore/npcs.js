@@ -18,6 +18,7 @@ import { NPCS } from "./data/dialogue.js";
 import { progressOf, saveProgress, contextOf, grantTome, learnClues, learnLeads, awardPoints, setFlag, giveItem, landOwnerAt } from "./player.js";
 import { libraryCount } from "./library.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 import { NPC_VOICES } from "./data/npc_voices.js";
 import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
@@ -184,6 +185,8 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   if (!npcId || !NPC[npcId]) return;
   if (player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: normal NPC editor
   event.cancel = true;
+  // a story person who gave you a Town Board job answers about the job first (townhall/board.js, Tobin's chest)
+  if (applyFilter("npcClick", undefined, { player, target })) return;
   system.run(() => {
     try {
       const node = startNode(NPC[npcId], progressOf(player), contextFor(player));

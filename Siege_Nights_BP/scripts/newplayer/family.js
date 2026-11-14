@@ -8,7 +8,7 @@
 // Per settlement (owner), saved: { due, state: "due" | "rolling" | "here" | "housed", road, t, caller, spots }.
 // newplayer/act2.js decides when the cart is due (the story) and asks for the scene; this file moves the cart.
 //
-//   familyOf(owner) -> { state, cart: { x, z }, caller } | undefined
+//   familyOf(owner) -> { state, cart: { x, z }, caller, housedAt, tobin: { x, z } } | undefined
 //   familyDue(owner, now)        the next fitting morning, the cart sets off
 //   startCart(owner)             it sets off now (the test command); true if it did
 //   houseFamily(owner)           Tobin and Marta into the Longhouse, the cart to its door
@@ -35,7 +35,8 @@ export function familyOf(owner) {
   const r = store.data.by[owner];
   if (!r) return undefined;
   const at = r.spots?.cart ?? (r.road ? roadPoint(r.road, r.t ?? CART_ROAD.from) : undefined);
-  return { state: r.state, cart: at ? { x: at.x, z: at.z } : undefined, caller: r.caller };
+  const t = r.spots?.tobin;
+  return { state: r.state, cart: at ? { x: at.x, z: at.z } : undefined, caller: r.caller, housedAt: r.housedAt, tobin: t ? { x: t.x, z: t.z } : undefined };
 }
 
 export function familyDue(owner, now) {
@@ -69,7 +70,7 @@ export function procession(road, t) {
 const dimension = () => world.getDimension(OVERWORLD);
 const passable = (b) => !!b && (b.isAir || /snow_layer|short_grass|tall_grass|fern|flower|carpet|torch|lantern/.test(b.typeId));
 // The y to stand at over (x, z), searching from `near` up and down; undefined when not loaded
-function groundY(dim, x, z, near) {
+export function groundY(dim, x, z, near) {
   const bx = Math.floor(x), bz = Math.floor(z);
   for (let dy = 6; dy >= -10; dy--) {
     const y = Math.floor(near) + dy;
@@ -119,7 +120,7 @@ function place(owner, role, e, spot, yaw) {
 
 // ---------- the cart sets off ----------
 
-const playersNear = (at, r) => world.getPlayers().filter((p) => p.dimension.id === OVERWORLD && Math.hypot(p.location.x - at.x, p.location.z - at.z) <= r);
+export const playersNear = (at, r) => world.getPlayers().filter((p) => p.dimension.id === OVERWORLD && Math.hypot(p.location.x - at.x, p.location.z - at.z) <= r);
 
 export function startCart(owner) {
   const ring = wallRing(owner);
@@ -188,6 +189,7 @@ export function houseFamily(owner) {
   const m = { x: c.x + fwd.x * 2.4, z: c.z + fwd.z * 2.4 };
   spots.mule = { ...m, y: groundY(dim, m.x, m.z, door.y) ?? door.y, yaw: along };
   r.state = "housed";
+  r.housedAt = world.getAbsoluteTime();
   r.spots = spots;
   save();
   keep(owner, r, true);
