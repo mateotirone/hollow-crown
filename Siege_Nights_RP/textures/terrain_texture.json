@@ -328,6 +328,9 @@
   "siege_breeder_post_top": {
    "textures": "textures/blocks/travel/siege_breeder_post_top"
   },
+  "siege_archive_shelf": {
+   "textures": "textures/blocks/siege_archive_shelf"
+  },
   "siege_shelf_side": {
    "textures": "textures/blocks/siege_shelf_side"
   },

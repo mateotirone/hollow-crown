@@ -3,7 +3,9 @@
 //   - which part of the cave is open, by the plot's tier (a deeper level opens at Town, City and Castle; the levels
 //     below are filled with rock, with a cave-in of rubble where they meet the open part)
 //   - tonight's ore (Mateo picked 12 iron a night at Hamlet), rolled into new places every night
-//   - the shaft's ladder, timbers, collar and headframe, and the miners' camp
+//   - the old mine dug into it (mine.js): the shaft's ladder, rings, lanterns and rope, the timbered pit bottom, the
+//     miners' rest, and the haulage way with its rails, timber sets and lanterns; the rock retextured by region
+//   (the collar, headframe and winding house on the surface are the building skill's pithead, raised once: index.js)
 //   - the sealed door at the deep end, the dark tunnel behind it, and the tunnel's mouth beside the Rift's tear
 //     (Mateo 2026-11-13: "a way to the Rift ... an underground tunnel shortcut")
 // Pure functions only: they run in Node, the self-tests and the 3D preview.
@@ -11,13 +13,14 @@
 // Coordinates are the generator's: local to the shaft top, (0,0,0) is the ground block the shaft goes down through.
 
 import { SHAFT_DEPTH, rollOre } from "../caves/cavegen.js";
+import { mineLayout, strataAt, MINE_LOG } from "./mine.js";
 
 export const CAVE = {
   shaftR: 76, // the shaft stands this far from the plot's stone: inside the plot's land, outside the Castle wall (r66)
   footprint: 3, // and needs dry, natural ground for 3 blocks round it (the headframe is 5 x 5)
   reach: 64, // a player this close to the shaft loads the cave's chunks: choose, build and reset then
   nightStarts: 13000, // a cave's night (its ore roll) changes at this time of day
-  version: 1, // raise to rebuild every cave in old worlds
+  version: 2, // raise to rebuild every cave in old worlds (2: the old mine and the new pithead, 2026-11-14)
   doorReach: 5, // the sealed door opens for a player who may pass, this close
 };
 
@@ -41,8 +44,7 @@ export const ORE = [
 export const TILTED = ["gold", "diamond"];
 
 export const REGION_KEY = { "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen" };
-export const LOG = { vale: "minecraft:stripped_oak_log", frostmarch: "minecraft:stripped_spruce_log", saltreach: "minecraft:stripped_birch_log",
-  emberwaste: "minecraft:stripped_acacia_log", blackfen: "minecraft:stripped_dark_oak_log" };
+export const LOG = MINE_LOG;
 export const RUBBLE = ["minecraft:cobblestone", "minecraft:gravel", "minecraft:cobblestone", "minecraft:tuff", "minecraft:mossy_cobblestone"];
 export const DOOR = "minecraft:chiseled_deepslate";
 export const DARK = "minecraft:black_concrete"; // the tunnel's far end: no wall you can see, just dark
@@ -141,6 +143,9 @@ function tunnelFrom(cave, d) {
   const door = [], tunnel = [], trigger = [];
   const at = (k, u, h) => key(d.x + fx * k + ux * u, d.y + h, d.z + fz * k + uz * u);
   for (let u = -1; u <= 1; u++) for (let h = 0; h < 4; h++) door.push(at(k0, u, h));
+  const frame = [], lamps = [at(k0 - 1, -2, 0), at(k0 - 1, 2, 0)];
+  for (const u of [-2, 2]) for (let h = 0; h < 5; h++) frame.push(at(k0, u, h));
+  for (let u = -1; u <= 1; u++) frame.push(at(k0, u, 4));
   for (let k = k0 + 1; k <= k0 + 6; k++) for (let u = -1; u <= 1; u++) for (let h = 0; h < 4; h++) tunnel.push(at(k, u, h));
   // second leg: from the end of the first, sideways
   const end = { x: d.x + fx * (k0 + 5), z: d.z + fz * (k0 + 5) };
@@ -149,7 +154,7 @@ function tunnelFrom(cave, d) {
   const dark = [];
   for (let w = -1; w <= 1; w++) for (let h = 0; h < 4; h++) dark.push(leg(9, w, h));
   const landing = { x: end.x + ux * turn * 2 + 0.5, y: d.y, z: end.z + uz * turn * 2 + 0.5, look: { x: d.x + 0.5, y: d.y + 1, z: d.z + 0.5 } };
-  return { door, tunnel, trigger, dark, landing, front: { x: d.x, y: d.y, z: d.z }, facing: [-fx, -fz] };
+  return { door, frame, lamps, tunnel, trigger, dark, landing, front: { x: d.x, y: d.y, z: d.z }, facing: [-fx, -fz] };
 }
 
 // The tunnel's other end: a mouth cut into the Rift cave's wall, beside the tear. The game tries spots along the
@@ -185,8 +190,12 @@ export function nightPlan(cave, opts) {
   for (;;) { const s = it.next(); if (s.done) return s.value; }
 }
 /** The same, as a generator for system.runJob: it yields between steps. */
-export function* nightPlanJob(cave, { tierIndex = 0, region = "vale", night = 0, plot = "plot", groundY = 70, rate } = {}) {
+export function* nightPlanJob(cave, { tierIndex = 0, region = "vale", night = 0, plot = "plot", groundY = 70, rate, front = [0, -1] } = {}) {
   const open = openAir(cave, tierIndex);
+  yield;
+  // the old mine: what it digs is open cave from now on
+  const mine = mineLayout(cave, open, { region, front, tierIndex, castleTier: LEVELS.length - 1 });
+  for (const k of mine.carve) open.add(k);
   yield;
   const blocks = new Map();
   // the rock skin, and every cave block the tier keeps shut, as rock; rubble where shut meets open
@@ -195,16 +204,27 @@ export function* nightPlanJob(cave, { tierIndex = 0, region = "vale", night = 0,
     if (open.has(k)) continue;
     const [x, y, z] = unkey(k);
     const face = N6.some(([dx, dy, dz]) => open.has(key(x + dx, y + dy, z + dz)));
-    blocks.set(k, face ? RUBBLE[Math.floor(hash(x, y, z) * RUBBLE.length)] : rockAt(groundY, y));
+    let b = face ? RUBBLE[Math.floor(hash(x, y, z) * RUBBLE.length)] : rockAt(groundY, y);
+    if (b === "minecraft:gravel" && open.has(key(x, y - 1, z))) b = "minecraft:cobblestone"; // nothing falls out of a cave-in's roof
+    blocks.set(k, b);
+  }
+  // a skin of rock round everything the mine dug, so a wall mined out of it comes back too
+  for (const k of mine.carve) {
+    const [x, y, z] = unkey(k);
+    for (const [dx, dy, dz] of N6) {
+      const n = key(x + dx, y + dy, z + dz);
+      if (!open.has(n) && !blocks.has(n) && y + dy < 0) blocks.set(n, rockAt(groundY, y + dy));
+    }
   }
   for (const k of open) blocks.set(k, "minecraft:air");
   yield;
   // the cave's plants, only in the open part
-  for (const [k, b] of cave.dress) if (open.has(k)) blocks.set(k, dressBlock(b));
+  for (const [k, b] of cave.dress) if (open.has(k) && !mine.carve.has(k)) blocks.set(k, dressBlock(b));
   for (const [k, b] of cave.skin) if (b === "minecraft:moss_block" || b === "minecraft:dripstone_block") blocks.set(k, b);
-  // tonight's ore, in rock that shows on the open part (and a little behind it)
+  // tonight's ore, in rock that shows on the open part (and a little behind it), never where the mine has built
   const budget = oreBudget(tierIndex, region, rate);
   const near = nearRock(cave, open, blocks);
+  for (const k of mine.blocks.keys()) near.delete(k);
   yield;
   const { diamond = 0, ...rest } = budget;
   const ore = new Map(rollOre({ air: open, skin: near }, `${plot}:${night}`, rest, groundY));
@@ -212,10 +232,15 @@ export function* nightPlanJob(cave, { tierIndex = 0, region = "vale", night = 0,
     const floorCity = LEVELS[2].floor, deepRock = new Map([...near].filter(([k]) => +k.split(",")[1] < floorCity));
     for (const [k, b] of rollOre({ air: open, skin: deepRock }, `${plot}:${night}:deep`, { diamond }, groundY)) if (!ore.has(k)) ore.set(k, b);
   }
+  // the rock in its region's strata (ore goes in after, so the ore stays Mateo's count)
+  for (const [k, b] of blocks) {
+    if (b !== "minecraft:stone" && b !== "minecraft:deepslate") continue;
+    const [x, y, z] = unkey(k);
+    blocks.set(k, strataAt(region, b, x, y, z, groundY));
+  }
   for (const [k, b] of ore) blocks.set(k, b);
   yield;
-  // the shaft: collar, ladder, timbers, headframe; the camp
-  for (const [k, b] of fittings(cave, open, region)) blocks.set(k, b);
+  for (const [k, b] of mine.blocks) blocks.set(k, b);
   // the door and the tunnel behind it: only once the Castle level is open
   const tunnel = tierIndex >= LEVELS.length - 1 ? tunnelPlan(cave, open) : null;
   yield;
@@ -224,16 +249,19 @@ export function* nightPlanJob(cave, { tierIndex = 0, region = "vale", night = 0,
     const cells = [...tunnel.tunnel, ...tunnel.trigger];
     for (const k of cells) {
       const [x, y, z] = unkey(k);
-      for (const [dx, dy, dz] of N6) { const n = key(x + dx, y + dy, z + dz); if (!cave.air.has(n)) wall.add(n); }
+      for (const [dx, dy, dz] of N6) { const n = key(x + dx, y + dy, z + dz); if (!cave.air.has(n) && !mine.carve.has(n)) wall.add(n); }
     }
-    for (const k of wall) blocks.set(k, rockAt(groundY, +k.split(",")[1]));
+    for (const k of wall) blocks.set(k, strataAt(region, rockAt(groundY, +k.split(",")[1]), ...unkey(k), groundY));
     for (const k of cells) blocks.set(k, "minecraft:air");
     for (const k of tunnel.dark) blocks.set(k, DARK);
+    // the old king's door: chiseled deepslate in a frame of polished deepslate, a soul lantern either side
+    for (const k of tunnel.frame) if (!open.has(k)) blocks.set(k, "minecraft:polished_deepslate");
     for (const k of tunnel.door) blocks.set(k, DOOR);
+    for (const k of tunnel.lamps) { const [x, y, z] = unkey(k); if (open.has(k) && !open.has(key(x, y - 1, z))) blocks.set(k, "minecraft:soul_lantern"); }
   }
   let mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
   for (const k of blocks.keys()) { const p = unkey(k); mn = mn.map((v, i) => Math.min(v, p[i])); mx = mx.map((v, i) => Math.max(v, p[i])); }
-  return { blocks, open, ore, tunnel, box: { min: { x: mn[0], y: mn[1], z: mn[2] }, max: { x: mx[0], y: mx[1], z: mx[2] } } };
+  return { blocks, open, ore, tunnel, way: mine.way, signs: mine.signs, rest: mine.rest, box: { min: { x: mn[0], y: mn[1], z: mn[2] }, max: { x: mx[0], y: mx[1], z: mx[2] } } };
 }
 
 // rock within two blocks of the open air (where ore may go)
@@ -264,33 +292,6 @@ export function dressBlock(name) {
   if (id === "glow_lichen") return `minecraft:glow_lichen${JSON.stringify({ multi_face_direction_bits: rest[0] === "up" ? 2 : 1 })}`;
   if (id === "pointed_dripstone") return `minecraft:pointed_dripstone${JSON.stringify({ dripstone_thickness: rest[0], hanging: rest[1] === "h" })}`;
   return `minecraft:${id}`;
-}
-
-/** The shaft's collar, ladder, timbers and headframe, and the miners' camp. */
-export function fittings(cave, open, region) {
-  const log = LOG[region] ?? LOG.vale, out = new Map();
-  // collar: the shaft opens at the ground, ringed in stone brick
-  for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) out.set(key(x, 0, z), Math.abs(x) <= 1 && Math.abs(z) <= 1 ? "minecraft:air" : "minecraft:stone_bricks");
-  // timber rings down the shaft every 4 blocks
-  for (let y = -4; y > -SHAFT_DEPTH; y -= 4) for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) if (Math.max(Math.abs(x), Math.abs(z)) === 2) out.set(key(x, y, z), log);
-  // the ladder, on the north wall, from the bottom of the shaft to the collar
-  for (let y = 0; y >= -SHAFT_DEPTH; y--) out.set(key(0, y, -1), `minecraft:ladder${JSON.stringify({ facing_direction: 3 })}`);
-  // headframe: four posts, two beams, a crossbeam and a lantern over the shaft; the air round it cleared
-  for (let x = -3; x <= 3; x++) for (let z = -3; z <= 3; z++) for (let y = 1; y <= 8; y++) out.set(key(x, y, z), "minecraft:air");
-  for (const x of [-2, 2]) for (const z of [-2, 2]) for (let y = 1; y <= 5; y++) out.set(key(x, y, z), log);
-  for (let x = -2; x <= 2; x++) { out.set(key(x, 6, -2), log); out.set(key(x, 6, 2), log); }
-  for (let z = -1; z <= 1; z++) out.set(key(0, 6, z), log);
-  out.set(key(0, 5, 0), `minecraft:lantern${JSON.stringify({ hanging: true })}`);
-  // the miners' camp, a few steps from the shaft foot: a cold fire, a barrel, a lantern and a bench
-  const c = cave.marks.camp;
-  if (c && open.has(key(c.x, c.y, c.z))) {
-    const spots = [[0, 0, `minecraft:campfire${JSON.stringify({ extinguished: true })}`], [1, 0, "minecraft:barrel"], [-1, 0, "minecraft:lantern"], [0, 1, "minecraft:crafting_table"]];
-    for (const [dx, dz, b] of spots) {
-      const k = key(c.x + dx, c.y, c.z + dz), below = key(c.x + dx, c.y - 1, c.z + dz);
-      if (open.has(k) && !open.has(below)) out.set(k, b);
-    }
-  }
-  return out;
 }
 
 /** "id" or "id{json}" -> [id, states] */

@@ -6,7 +6,18 @@
       "is_experimental": false,
       "is_summonable": true,
       "is_spawnable": true,
-      "spawn_category": "creature"
+      "spawn_category": "creature",
+      "properties": {
+        "siege:skin": {
+          "type": "int",
+          "range": [
+            0,
+            97
+          ],
+          "default": 0,
+          "client_sync": true
+        }
+      }
     },
     "components": {
       "minecraft:behavior.look_at_player": {
@@ -330,6 +341,30 @@
             },
             {
               "variant": 88
+            },
+            {
+              "variant": 89
+            },
+            {
+              "variant": 90
+            },
+            {
+              "variant": 91
+            },
+            {
+              "variant": 92
+            },
+            {
+              "variant": 93
+            },
+            {
+              "variant": 94
+            },
+            {
+              "variant": 95
+            },
+            {
+              "variant": 96
             }
           ]
         }

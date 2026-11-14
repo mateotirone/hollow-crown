@@ -686,8 +686,6 @@ item.siege:starter_blackfen_leggings.name=Blackfen Patched Trousers
 item.siege:starter_blackfen_boots.name=Blackfen Waders
 item.siege:starter_blackfen_weapon.name=Blackfen Reed Spear
 tile.siege:hatching_brazier.name=Hatching Brazier
-item.siege:plan_book.name=Plan Book
-item.siege:plan_scroll.name=Plan Scroll
 ## codex items (studio/build_codex.py)
 item.siege:rimeforged_helmet.name=Rimeforged Helm
 item.siege:rimeforged_chestplate.name=Rimeforged Hauberk
@@ -792,3 +790,5 @@ siege:itemGroup.name.lockedTrees=Hollow Crown: Locked World Trees
 siege:itemGroup.name.codex_equipment=Hollow Crown: Codex Arms and Armour
 siege:itemGroup.name.codex_items=Hollow Crown: Codex Goods and Charms
 siege:itemGroup.name.codex_nature=Hollow Crown: Codex Goods and Charms
+item.siege:plan_book.name=Plan Book
+item.siege:plan_scroll.name=Plan Scroll

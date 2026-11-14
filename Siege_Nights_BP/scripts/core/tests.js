@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "trains: routes: the bed is graded, never a trench, and trees on the line come down whole",
   "settle: every hanging lantern in a hall or plot building hangs from something (a chain up to the roof)",
   "settle: watchtowers on every map plot's wall line: nothing of the wall on the way in to a door", "settle: lane lamps: every Hamlet's lanes get posts on the verge, never on a plot, the same every time",
   "undertow: thin places: the books their pages put inside lie where they say, on something firm, clear of the way in",
@@ -25,6 +26,7 @@ export const OFFLINE_ONLY = new Set([
   "wonders: every wonder has a design, cut into six stages that hold every block",
   "landmarks: tomes laid in designs are real tomes, each laid once, each on something solid",
   "plot caves: a plot cave: each tier opens more, all of it reached from the shaft, ore only on open faces, a door at Castle",
+  "plot caves: a plot mine: the road from the pit bottom is walkable and lit, the rest has its note, the ladder reaches the floor",
   "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
   "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",

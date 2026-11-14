@@ -95,7 +95,15 @@
         "envoy_lamp": "textures/entity/siege/npc_skins/envoy_lamp",
         "envoy_root": "textures/entity/siege/npc_skins/envoy_root",
         "envoy_tide": "textures/entity/siege/npc_skins/envoy_tide",
-        "lore_elspeth": "textures/entity/siege/npc_skins/lore_elspeth"
+        "lore_elspeth": "textures/entity/siege/npc_skins/lore_elspeth",
+        "lore_elspeth__frostmarch": "textures/entity/siege/npc_skins/lore_elspeth__frostmarch",
+        "lore_elspeth__saltreach": "textures/entity/siege/npc_skins/lore_elspeth__saltreach",
+        "lore_elspeth__emberwaste": "textures/entity/siege/npc_skins/lore_elspeth__emberwaste",
+        "lore_elspeth__blackfen": "textures/entity/siege/npc_skins/lore_elspeth__blackfen",
+        "mason__frostmarch": "textures/entity/siege/npc_skins/mason__frostmarch",
+        "mason__saltreach": "textures/entity/siege/npc_skins/mason__saltreach",
+        "mason__emberwaste": "textures/entity/siege/npc_skins/mason__emberwaste",
+        "mason__blackfen": "textures/entity/siege/npc_skins/mason__blackfen"
       },
       "geometry": {
         "default": "geometry.humanoid.custom"

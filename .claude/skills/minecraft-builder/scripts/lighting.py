@@ -301,16 +301,37 @@ def report(blocks, targets=None, kind=None):
 
 
 def _outside(blocks, x, y, z, f, wc):
-    """The (x, z) of a door's outside step: the side with open sky over it (else the side not in wc as covered)."""
+    """The (x, z) of a door's outside step. A side with open sky over its step, or with no floor the build lays
+    (the street, the land), is outside. When both steps are roofed (a porch, a jetty, eaves over the step), the
+    outside is the side whose roofed patch is the smaller, or that reaches open sky within a few steps: the plot
+    thread's audit found house doors left at light 7 because both steps had a roof over them (2026-11-14)."""
     dx, dz = FACE.get(f, (0, 1))
-    best = None
+    sides = []
     for s in (1, -1):
         c = (x + s * dx, y, z + s * dz)
         if not free(_name(blocks, c)): continue
         cov = wc.get(c)
-        if cov is False or (cov is None and best is None): best = (c[0], c[2]) if cov is False else best or (c[0], c[2])
-        if cov is False: return best
-    return best
+        if cov is False or cov is None: return (c[0], c[2])
+        sides.append(c)
+    if not sides: return None
+    if len(sides) == 1: return (sides[0][0], sides[0][2])
+
+    def patch(c):
+        """Roofed walk cells joined to c (not through the door), up to 200; and whether it meets open sky."""
+        seen, todo = {c}, [c]
+        while todo and len(seen) < 200:
+            p = todo.pop()
+            for ex, ez in DIRS4:
+                for ey in (0, 1, -1):
+                    q = (p[0] + ex, p[1] + ey, p[2] + ez)
+                    if q in seen or (q[0], q[2]) == (x, z): continue
+                    if q not in wc: continue
+                    if wc[q] is False: return len(seen), True
+                    seen.add(q); todo.append(q)
+        return len(seen), False
+    (n0, sky0), (n1, sky1) = patch(sides[0]), patch(sides[1])
+    pick = sides[0] if (sky0, -n0) >= (sky1, -n1) else sides[1]
+    return (pick[0], pick[2])
 
 
 def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), posts=True, laid=()):
@@ -421,21 +442,29 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
         lx, lz = (abs(dz), abs(dx))                    # along the wall
         done = False
         for side in (1, -1):
-            for k in (1, 2, 3):
+            for k in (1, 2, 3, 4, 5):                # nearest free spot along the wall (past a door canopy too)
                 cx, cz = x + side * lx * k, z + side * lz * k
                 nb = _name(blocks, (cx, y, cz))
                 if nb and (nb.endswith("_door") and "trapdoor" not in nb): continue
                 fx, fz = cx + sx, cz + sz             # in front of the wall, beside the door
-                if not (empty((fx, y + 2, fz)) and empty((fx, y + 3, fz))): break
+                if not (empty((fx, y + 2, fz)) and empty((fx, y + 3, fz))): continue
                 w = (cx, y + 3, cz)
                 if opaque(_name(blocks, w) or "air") and _name(blocks, w) is not None:
                     setb((fx, y + 3, fz), st["fence"]); setb((fx, y + 2, fz), st["lantern"], {"hanging": True})
-                    done = True
-                break
+                    done = g.at(o[0], y, o[1]) >= T["door"]
+                    break
             if done: break
         if not done:
             # no wall beside it (an arch, a gate): hang from the lintel over the outside step
-            hang(o[0], y, o[1])
+            done = hang(o[0], y, o[1]) and g.at(o[0], y, o[1]) >= T["door"]
+        if not done:
+            # a canopy right over the step: the nearest wall bracket or overhead lantern that brings the step up
+            near = sorted(((o[0] + a, y + e, o[1] + b) for a in range(-3, 4) for b in range(-3, 4) for e in (0, -1, 1)
+                           if (a or b) and abs(a) + abs(b) <= 4), key=lambda c: (abs(c[0] - o[0]) + abs(c[2] - o[1]), c))
+            for c in near:
+                if c in reserved or not free(_name(blocks, c)) or not free(_name(blocks, (c[0], c[1] + 1, c[2]))): continue
+                if bracket(*c) or hang(*c):
+                    if g.at(o[0], y, o[1]) >= T["door"]: break
     g.light()
 
     # 2. inside and outside floors, darkest first, the light where it reaches the most dark cells
