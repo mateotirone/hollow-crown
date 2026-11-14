@@ -15,6 +15,7 @@ import { PLOT_REGION, REGION_BOSS, REGIONAL_BOSSES } from "../lore/data/spine.js
 import { WARDS } from "../plots/config.js";
 import { COURT, HEART } from "../undertow/layout.js";
 import { firstStep } from "../newplayer/firstnights.js";
+import { SETTLEMENT } from "../newplayer/mode_rules.js";
 
 export const KEY = "hcq:"; // hidden titles that start with this feed the HUD tracker (tools/minimap_ui.py)
 export const SPOT = { below: "_b", top: "_t", hidden: "_h" }; // where the panel sits: under the minimap, in its place, or not at all
@@ -126,11 +127,15 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //                                                                       station: your railway station (stationQuest)
 //   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
 //   act1: { on, step } while Act 1 is this player's story (newplayer/act1.js)
+//   mode: "story" | "settlement" (newplayer/mode.js)
 // }
 export function questsFor(f) {
   // Act 1 (Mateo 2026-11-14): one line, the step Old Elspeth (or Wren, or your own thought) gave you, and nothing
   // else, so a new player is never handed a list
   if (f.act1?.on && f.dim !== UNDERTOW) return f.act1.step ? [f.act1.step] : [];
+  // Settlement Mode (Mateo 2026-11-14): no story steps, ever. Old Elspeth's guide (above) leads the settlement; if it
+  // has nothing to say, only the settlement's own steps can show.
+  if (f.mode === SETTLEMENT) return settlementQuests(f);
   const out = [];
   // Until the first siege is held, getting ready for it comes first (newplayer/firstnights.js)
   const first = f.dim !== UNDERTOW && !f.morvane ? firstStep(f.first) : undefined;
@@ -146,6 +151,18 @@ export function questsFor(f) {
   const side = first ? stationQuest(f) : sideQuest(f, main);
   if (side) out.push(side);
   return out;
+}
+
+// Settlement Mode with no guide step: getting ready for the first siege, the cob, the Farmer, the station and the
+// banner, never the story
+function settlementQuests(f) {
+  if (f.dim === UNDERTOW) return [];
+  const first = firstStep(f.first);
+  const out = [first, cobQuest(f), farmerQuest(f)].filter(Boolean);
+  if (!first && !f.keep) out.push({ id: "keep", title: "Raise your banner", hint: "Click your Plot Stone and raise your banner again." });
+  const side = stationQuest(f);
+  if (side) out.push(side);
+  return out.slice(0, 3);
 }
 
 // The starter horse (horses/starter.js): shown from the moment the cob is given until it is first ridden

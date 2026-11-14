@@ -48,6 +48,14 @@ export const NPCS = [
       [["act1:home"], "home_wait"],
       [["act1:talk_supper"], "supper"],
       [["act1:defend"], "defend"],
+      // Settlement Mode (newplayer/mode_rules.js): the same hearth, no story. After the raid she grows the hall.
+      [["act1:talk_raid_won", "mode:settlement"], "raid_won_s"],
+      [["act1:talk_raid_lost", "mode:settlement"], "raid_lost_s"],
+      [["act1:talk_grow_0"], "grow_0"],
+      [["act1:talk_grow_1"], "grow_1"],
+      [["act1:talk_grow_2"], "grow_2"],
+      [["act1:talk_grow_3"], "grow_3"],
+      [["act1:grow"], "grow_wait"],
       [["act1:talk_raid_won"], "raid_won"],
       [["act1:talk_raid_lost"], "raid_lost"],
       [["act1:rebanner"], "rebanner_wait"],
@@ -182,6 +190,42 @@ export const NPCS = [
       aldous_wait: { text: "He's at your keep. Hear him out. Give him nothing you haven't read.", opts: [["I'm stuck.", "stuck_aldous"], ["I'll go.", "end"]] },
       stuck_aldous: { text: "Knights don't come in. They wait by the banner.", opts: [["Still stuck.", "stuck2_aldous"], ["Thank you.", "end"]] },
       stuck2_aldous: { text: "Sir Aldous stands by your Keep Banner. Follow the pin.", opts: [["Thank you.", "end"]] },
+      // ---- Settlement Mode: after the raid, no Wren and no Ember; she grows the hall from Hamlet to Castle
+      raid_won_s: {
+        text: "You're still breathing. Good. So am I, which surprises nobody anymore.",
+        opts: [["What were those things?", "raid_won2_s"]],
+      },
+      raid_won2_s: {
+        text: "Not men. And not anything I'll name at my own hearth. Whatever they are, they'll come again, and more of them each time a hall grows fat.\n\nSee to your wall first. The Mason will mend it, for a price. And mind your purse: win a night and the town starts costing you. Every dawn.\n\nWhen your wall's whole, come and sit. I'll tell you how a hall becomes a town.",
+        opts: [["I'll see to the wall.", "end", ["flag:elspeth_raid"]]],
+      },
+      raid_lost_s: {
+        text: "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, and have the Mason see to your wall. Then come and sit, and I'll tell you how a hall that falls becomes one that doesn't.\n\nWhen you do win a night, the town starts costing you. Every dawn. Keep some coin back.",
+        opts: [["I will.", "end", ["flag:elspeth_raid"]]],
+      },
+      grow_0: {
+        text: "Your wall's whole. Good. Now listen.\n\nA hall grows two ways: by the nights it holds, and by what it builds. Hold three siege nights, and raise what your Plan Book says a Hamlet must have. Do both and this place is a Town.\n\nThe ravens tell you when a night is coming. They always do.",
+        opts: [["I'll hold.", "end", ["flag:elspeth_grow_0"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_0"]]],
+      },
+      grow_1: {
+        text: "A Town. I could hear it from here: more feet on the road, more doors.\n\nMore doors means more to feed and more to guard. Hold six nights in all, and raise everything your Plan Book says a Town must have. Then you're a City.",
+        opts: [["I'll see to it.", "end", ["flag:elspeth_grow_1"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_1"]]],
+      },
+      grow_2: {
+        text: "A City. I can smell bread from three ovens now, and none of them mine.\n\nThe last step is the hardest. Ten nights in all, and two of their warlords dead at your wall. And raise everything your Plan Book says a City must have before it's a Castle.",
+        opts: [["I'll see to it.", "end", ["flag:elspeth_grow_2"]], ["I'm stuck.", "stuck_grow", ["flag:elspeth_grow_2"]]],
+      },
+      grow_3: {
+        text: "A Castle. Ten nights held, and their warlords in the ditch.\n\nThere's nothing left I can teach you. Keep your wall mended and your purse fat. They'll keep coming, and you'll keep standing. That's all a Castle is.\n\nSit with me sometimes. The fire likes company.",
+        opts: [["I will.", "end", ["flag:elspeth_grow_3"]]],
+      },
+      grow_wait: {
+        greets: ["Hold your nights. Raise your buildings. There's no third thing.", "Your Plan Book knows what the charter wants. So do I, but I'm slower.", "The ravens were quiet today. Use it."],
+        text: "Nights held and buildings raised. Nothing else grows a hall.",
+        opts: [["I'm stuck.", "stuck_grow"], ["I'll go.", "end"]],
+      },
+      stuck_grow: { text: "A hall grows by what it holds and what it builds.", opts: [["Still stuck.", "stuck2_grow"], ["Thank you.", "end"]] },
+      stuck2_grow: { text: "Hold your siege nights. Click a Plot Marker to raise what the charter asks; your Plan Book lists it.", opts: [["Thank you.", "end"]] },
       // ---- after Act 1: she stays at the hearth
       hub: {
         greets: ["Sit, if you're staying. The fire likes company.", "You smell of the road. Sit.", "The ash is quiet tonight. That's not always good news."],
