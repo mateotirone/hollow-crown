@@ -154,6 +154,8 @@ def main():
         spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec)
         if spec.get("after"):          # a furnished build: the review module's interior stage runs on the skill's shell
             import importlib; mod, fn = spec["after"].split(":"); m = importlib.import_module(mod)
+            if not hasattr(m, "Building") and hasattr(m, "build"):    # a module with its own build(region) entry
+                return m.build(k.rsplit("_", 1)[1]) if "_" in k else m.build()
             tmp = Blueprint("after"); getattr(m, fn)(tmp, m.Building(tmp, m.P, 3)); dy = spec.get("after_dy", 0)
             for (x, y, z), v in tmp.cells.items():
                 if v[0] not in ("keep",): b.cells[(x, y + dy, z)] = v
@@ -186,10 +188,10 @@ def main():
                         (lambda s=seed, t=t, c=col, f=form: atlantean.house(s, random.Random(s), t, c, f)), g,
                         extra={"group": "Atlantean houses: every roof form", "kind": "House"})
         for name, mk in RT.CIVIC[tid]:
-            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE.get(name, name.capitalize()), tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
                 mk, g, extra={"group": "On the square", "kind": "Civic"})
         for name, mk in RT.SHORE.get(tid, []):
-            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, TOWN_BLURB.get((tid, name), ""), mk, g,
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE.get(name, name.capitalize()), tname, TOWN_BLURB.get((tid, name), ""), mk, g,
                 view=(150, 30, 1.5), extra={"group": "On the water", "kind": "Harbour"})
 
     # ---- 2. Settlements: what grows on a player's plot ----
