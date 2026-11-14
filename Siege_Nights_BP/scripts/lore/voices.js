@@ -1,5 +1,5 @@
 // Hands the lore thread's words to the features that run the NPC "players" of a single-player
-// world: the NPC ruler of the Hollow, the Rumor Board, and the Rival Lords.
+// world: the NPC ruler of the Hollow, the old Rumor Board (now the Town Board), and the Rival Lords.
 //   returnedCases    { cases, tells }     the hidden Returned (data/returned.js); also on "returnedCasesWanted"
 //   rivalLordVoices  { lords, tempers }   emitted once at load, and again whenever someone emits "rivalLordsWanted"
 

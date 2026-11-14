@@ -247,7 +247,7 @@ Solving them all fires `loreAllSolved` (the key to the hidden ending).
 
 ## A world played alone (voices for NPC "players")
 
-In `lore/data/lords.js`: twelve **Rival Lords** (name, seat, region, one of six temperaments, eleven lines each including a third-night remark and a rumor that points at the story); ten names and all the lines for the **NPC rulers of the Hollow**; and extra job text for the town hall's **Rumor Board**. The lore module sends them out at load (`rivalLordVoices`, `rumorParts`, `setRegentVoice`).
+In `lore/data/lords.js`: twelve **Rival Lords** (name, seat, region, one of six temperaments, eleven lines each including a third-night remark and a rumor that points at the story); ten names and all the lines for the **NPC rulers of the Hollow**; and extra job text for the old **Rumor Board** (the Town Board's jobs are hand-written now). The lore module sends them out at load (`rivalLordVoices`, `rumorParts`, `setRegentVoice`).
 
 ## The First Slip
 

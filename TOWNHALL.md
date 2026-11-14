@@ -73,78 +73,27 @@ Everyone starts as a plain human (`path: "none"`) with the shared Keep and Wayfa
 
 Whoever defeats the Hollow can't wear its crown, but is offered the Sorcerer's path with a head start (the Crown feature sends `hollowVictor`). Accepting at the Tree of Oaths gives 15 skill points, opens every Arcana ring without the Renown requirement (the hall tier still applies), and makes powers cost 25% less Resonance. A Knight who accepts lays down the Knight's oath: Blade points are refunded and the Order rank is lost. Someone already on the magic path gets the head start at once.
 
-## The Rumor Board (jobs that never run out)
+## The Town Board (hand-written jobs from the people round about)
 
-Open it from the Town Hall menu once any hall stands. Three rumors arrive each in-game day, built from parts (who tells it, where, why), and you hold one job at a time. Everything works alone.
+Open it from the Town Hall menu once any hall stands. Every job is pinned up by a real person who stands somewhere in the
+world (a townsperson of `townsfolk/data.js` or a town trader) and happens at a real, named place on the map. Three notices a
+day, from three different people, never the kind of job you just did; you hold one job at a time, and the quest tracker
+says "Talk to <who> about <what>". Everything works alone, and story-only jobs stay out of Settlement Mode.
 
-| Job | What you do | Pays (grows with Renown) |
-|---|---|---|
-| Bounty | Kill a number of one kind of monster | 55+ Renown, 16+ Regals |
-| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 16+ Regals |
-| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 16+ Regals |
-| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 24+ Regals |
+About sixteen jobs a region (Aldmere Vale 18, Frostmarch 17, Saltreach 16, Emberwaste 17, Blackfen 17), in nine kinds:
+Hunt, Camp (a raider camp to break), Supply, Carry, Escort, Watch (keep lamps lit or a flock alive till dawn), Missing,
+Recover and Look. Hunt, Camp, Supply, Carry, Escort and Watch come back once the region's pool has gone round once, with an
+"again" line; the rest happen once. When a region's own jobs run out for the round, the board also draws from the regions
+next to it (Mateo, 2026-11-14).
 
-Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
+Camps, dens, pens, lamps, ruins and the rest are 3D builds made with the minecraft-builder skill
+(`map/structures/board_sites.py` -> `townhall/board_sites_data.js`). A job's site is stamped on its place when the job is
+given, while you are still far off; the ground it covers is saved first and put back once the job is over and you have
+gone (`townhall/board_sites.js`).
 
-Not built yet from the same proposal: escorts, tome hunts and lord favors (they need the story NPCs and Lore Tomes), story beats gated by tier, sieges and rank, and the Legacy/heir option.
-
-## The Rumor Board (jobs that never run out)
-
-Open it from the Town Hall menu once any hall stands. Three rumors arrive each in-game day, built from parts (who tells it, where, why), and you hold one job at a time. Everything works alone.
-
-| Job | What you do | Pays (grows with Renown) |
-|---|---|---|
-| Bounty | Kill a number of one kind of monster | 55+ Renown, 16+ Regals |
-| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 16+ Regals |
-| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 16+ Regals |
-| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 24+ Regals |
-
-Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
-
-Not built yet from the same proposal: escorts, tome hunts and lord favors (they need the story NPCs and Lore Tomes), story beats gated by tier, sieges and rank, and the Legacy/heir option.
-
-## Who's online
-
-One screen listing every player in the world with their role, rank, Renown level and where they are (overworld, the Hollow, the Nether), sorted by Renown. The top lines say whether the Hollow's ruler and the High Throne's ruler are online right now, since the Hollow's ruler can only be robbed or besieged while online. Everyone also gets a quiet chat line when the Hollow's ruler joins or leaves.
-
-Open it from the Town Hall menu, the keep menu, or anywhere with `/scriptevent siege:who`. Code: `townhall/roster.js`. Other features add a line under a player by listening for `rosterNotes` and calling `notes.add(playerId, "text")`. Rulers are learned from the `wardenChanged`, `crowned` and `stormEnd` events.
-
-## The Hall Map
-
-Every hall has a painted map of the realm (Mateo, 2026-11-12). Open it from the hall's Cartographer's Table (a vanilla cartography table inside a raised hall; sneak-click for the vanilla screen) or "Hall map" in the Town Hall menu. Code: `townhall/hallmap.js`.
-
-- Shows every settlement on a plot in its Keep Banner colour with its holder (your own ringed in gold), rival lords, free plots, the six towns, and found places. Never players.
-- Places: Crownhold, the Ashen Gate Chapterhouse and the Ashen Watch (from `plots/config.js` WARDS), plus the lore's **charted** places once the builder marks them (`/scriptevent siege:lore_mark_place`). Mystery places (`charted: false`, thin places, Bellhollow) are never marked, as the Ledger rule says.
-- Fog: the map is 16 x 16 cells of about 156 blocks. A player charts every cell within 96 blocks of where they walk on the overworld. A settlement knows what its owner and allies have charted and found (saved per player in `siege:hallmap`).
-- Screen: forms titled with `§h§m` are drawn by `ui/server_form.json` as the realm picture with a 16 x 16 grid of cell buttons over it (no other buttons; it closes with its X). Hover shows a mark's name; clicking a mark opens its details. Art: `textures/ui/hc/map/` from `studio/build_hallmap.py` (rerun after the world map is regenerated); UI from `studio/build_tree_ui.py`.
-
-## The upgrade fly-by, and walls
-
-When a hall is raised or upgraded, the owner's camera lifts off and circles the hall while it rises, then returns (sneak to return early). Code: `townhall/flyby.js`, `flyby(player, { center, radius, height, seconds, title })`, usable by any feature.
-
-**Settlement wall.** The Town Hall menu has a "Settlement wall" entry that shows the current wall level, the next level and its cost, and raises it with the same fly-by round the whole wall. The town hall owns the menu and the camera; the feature that owns walls answers `wallInfo` and `wallUpgrade` (the contract is at the top of `flyby.js`). Until something answers, the entry says the masons have not surveyed a wall yet.
-
-## Levels, and who can see them
-
-- **Player level** is Renown, 1 to 50, earned from kills, sieges, Rumor Board jobs and upgrades. On top of it sits the rank on your path (Squire to Knight-Commander, Touched to Sorcerer).
-- **Settlement level** is the settlement tier (Hamlet, Town, City, Castle, Sovereign) and the hall that goes with it.
-- Everyone can see both on the Who's online screen. Levels are remembered for players who are away: any feature can ask with `emit("levelsQuery", q = { playerId })` and read `q.level`, `q.rank`, `q.role`, `q.settlement`, `q.tier`, `q.hall`, `q.online`.
-
-**Castle Stone.** Every region's stonework comes from its own Castle Stone family: cobbled for foundations, castle stone for the lower walls, bricks for walls, smooth for daises, tiles for flat roofs and domes (Saltreach, Emberwaste). Blackfen keeps wooden walls and stilts on a castle stone footing. Roof stairs, slabs and crenels stay vanilla until the family has those shapes. Castle Stone also counts as "building stone" when paying for a hall.
-
-## Power origins
-
-Every Arcana power has an origin written by the lore feature (`scripts/lore/data/powers.js`, book `siege:fourteen_arts`). The Tree shows one line of it under each power. Four powers stay locked until the player finds where they come from: Echo Sight, Halfstep, Choir's Call and Veilstep. The lore feature sends `powerOriginInfo` (hints and lines) and `powerOrigin` ({ player, skill }) when one is found; the town hall remembers it on the player.
-
-## The tree screen
-
-Each branch opens as a graphical tree: a 6 by 6 grid of nodes, one row per ring, with connector lines behind them. The script sends an ordinary button form whose title starts with an invisible flag (`TREE_FLAG` in `townhall/tree_layout.js`); `Siege_Nights_RP/ui/server_form.json` draws any flagged form as the tree and leaves every other form alone. Buttons are sent in grid order and a button named `-` is an empty cell. Node pictures are `textures/ui/hc/node_*.png`; the lines are `tree_<branch>.png`.
-
-`python3 studio/build_tree_ui.py` writes the screen file and the line art from the layout, so rerun it when skills are added or moved. Players can switch to plain lists from the Tree's first page (saved per player as `plainTree`). This screen has not been seen in the game yet.
-
-## Rumor Board variety
-
-`rumorsFor(day, playerId, level, memory)` never offers the kind of job the player did last and avoids givers, places, reasons and targets they saw recently. One job in three carries a twist that shows when it is finished: a keepsake (ten named items, each given once), double pay, extra Renown, or a debt (no pay, one more guard on your walls, up to three). A self-test plays 120 days and fails if a job repeats.
+Pay grows with your Renown, and every third job also pays one skill point. Code: `townhall/board_data.js` (jobs, people,
+places), `board_rules.js` (picking, rounds, pay, tracker words; pure, self-tested), `board.js` (the game side). Test:
+`/scriptevent siege:board take <job id>|step|drop|reset`. Other features hear `boardJobDone` (and the old `rumorDone`).
 
 ## Regional roles
 

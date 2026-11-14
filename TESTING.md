@@ -225,7 +225,7 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 1. Run `/scriptevent siege:showcase`, walk into the hall and click the Tree of Oaths. Pick **Arcana** or **Keep**.
 2. ✅ A wide dark panel opens with the branch name in gold, your skill points under it, and the skills laid out in rows (first ring at the top) with lines joining them. Each skill is a small round badge with its name under it. Empty spots are empty.
 3. Click a skill. ✅ Its page opens with what it does and a button to swear it. Go back: the badge has changed.
-4. Open a normal menu (the Town Hall menu, the Rumor Board). ✅ These still look like ordinary Minecraft menus.
+4. Open a normal menu (the Town Hall menu, the Town Board). ✅ These still look like ordinary Minecraft menus.
 
 If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
 
@@ -238,9 +238,9 @@ For each of `rider`, `forgemaster`, `captain`, `witch`: type `/scriptevent siege
 3. Swear a first-ring skill and check it: Witch's Touch poisons what you hit, Emberblood lets you stand in fire, Hammer Arm gives Haste with a pickaxe in hand, Sea Legs lets you breathe underwater.
 4. To see the offer the normal way: `/scriptevent siege:townhall_path none`, then kill the Mother of Changelings (summon `siege:mother_of_changelings` and fell her while standing within 64 blocks). ✅ Chat says a path has opened, and "Choose your path" at the Tree offers Witch. The Pale Huntsman offers Forgemaster and the Drowned Bride offers Captain the same way. Building a hall no longer offers a role.
 
-### Rumor Board variety
+### The Town Board
 
-Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
+Open the Town Board from your hall menu over several in-game days and take a few jobs. ✅ Each notice names a real person in a real town; the three a day come from three different people and never repeat the kind of job you just did. Taking a job sets the tracker to "Talk to <who> about <what>"; that person has the gold "!" over them. A Camp or Watch job builds its camp, pen or lamps at the place before you get there, and once the job is done and you have walked away, the place is as it was. To try one straight away: `/scriptevent siege:board take vale_toll` (then `step` to skip a step, `drop` to give it up).
 
 ## The High Throne, the Citadel and usurping (The Hollow Crown)
 

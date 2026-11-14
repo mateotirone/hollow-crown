@@ -4,7 +4,7 @@
 //   RIVAL_LORDS   twelve NPC lords who hold the plots no player has claimed
 //   REGENT_VOICE  the NPC rulers of the Hollow: later wearers of the Hollow Crown, after Morvane
 //                 falls. They may say his name. Nobody here says who Morvane used to be.
-//   RUMOR_PARTS   extra job text for the town hall's Rumor Board
+//   RUMOR_PARTS   extra job text for the old Rumor Board (the Town Board's jobs are hand-written now)
 //
 // lines.march is shouted at the horn when that lord's host comes for a player's walls (reach feature's lordRaid).
 // Each lord: temper is one of proud | grasping | devout | wary | bold | kind. Every line stands alone,

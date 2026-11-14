@@ -43,6 +43,8 @@ const OVERWORLD = "minecraft:overworld";
 const FOE_TAG = "siege_board_foe";
 const NPC_TAG = "siege_board_npc"; // a person a job brings out (the missing boy, the herb seller on the road)
 const SHEEP_TAG = "siege_board_sheep";
+// A Watch that keeps a flock (the job names `animal`) rather than lamps
+const flockOf = (job) => job.animal ? `minecraft:${job.animal}` : undefined;
 const FOLK_TYPE = "siege:townsfolk";
 const TRADER_TYPE = "siege:job_npc";
 const SPAWN_NEAR = 72; // foes and people come out when you are this close (inside the loaded ground)
@@ -383,12 +385,12 @@ function spawnAt(player, type, at, name, tag) {
 const marksOf = (run, kind) => (run.marks ?? []).filter((m) => m.kind === kind);
 const ring = (run, n, i, r) => ({ x: Math.round(run.x + Math.cos((i / n) * Math.PI * 2) * r), z: Math.round(run.z + Math.sin((i / n) * Math.PI * 2) * r) });
 
-function spawnFoes(player, job, run, list) {
+function spawnFoes(player, job, run, list, r = 4) {
   const spots = marksOf(run, "foe");
   let made = 0, i = 0;
   const total = list.reduce((a, [, n]) => a + n, 0);
   for (const [type, n] of list) for (let k = 0; k < n; k++, i++) {
-    const at = spots.length ? spots[i % spots.length] : ring(run, total, i, 4);
+    const at = spots.length ? spots[i % spots.length] : ring(run, total, i, r);
     if (spawnAt(player, type, at, job.kind === "hunt" ? "Marked" : i === 0 && type === "siege:shieldwall_brute" ? "Camp Sergeant" : "Raider", FOE_TAG)) made++;
   }
   return made;
@@ -540,7 +542,7 @@ function tickOne(player) {
       run.away = 0;
       if (!ctx.night) {
         if (run.watching) { // the dawn bell
-          const kept = job.site === "vale_fold" ? outOf(player, SHEEP_TAG, near).length : lampsLit(player, run);
+          const kept = flockOf(job) ? outOf(player, SHEEP_TAG, near).length : lampsLit(player, run);
           if (kept >= run.need) { player.sendMessage("§aThe dawn bell. Your watch is over."); for (const e of outOf(player, FOE_TAG, near)) try { e.remove(); } catch { /* gone */ } next(player); }
           else fail(player, "Morning came, and too much was lost.");
         } else if (!run.told) { run.told = true; saveMem(player); player.sendMessage("§7Nothing to do here till dusk. Come back as the sun goes down."); }
@@ -549,18 +551,18 @@ function tickOne(player) {
       if (ctx.raid) return;
       if (!run.watching) {
         run.watching = true; run.wave = 0; run.nextWave = system.currentTick + 400;
-        if (job.site === "vale_fold") for (const m of marksOf(run, "sheep")) spawnAt(player, "minecraft:sheep", m, undefined, SHEEP_TAG);
+        if (flockOf(job)) for (const m of marksOf(run, "sheep")) spawnAt(player, flockOf(job), m, undefined, SHEEP_TAG);
         saveMem(player);
         player.sendMessage(`§7${job.lines.while?.[0] ?? "The watch begins."}`);
       }
       if (system.currentTick >= run.nextWave && run.wave < 4) {
         run.wave++; run.nextWave = system.currentTick + 2400;
-        spawnFoes(player, job, { ...run, marks: [] }, foesAt(job, run.tier).map(([t, n]) => [t, n]));
+        spawnFoes(player, job, { ...run, marks: [] }, foesAt(job, run.tier).map(([t, n]) => [t, n]), 15); // out of the dark, beyond the fold wall and the lamps
         saveMem(player);
       }
       // what the foes go for: a lamp goes dark, a sheep goes down
       for (const f of outOf(player, FOE_TAG, near)) {
-        if (job.site === "vale_fold") {
+        if (flockOf(job)) {
           for (const s of outOf(player, SHEEP_TAG, near)) if (Math.hypot(s.location.x - f.location.x, s.location.z - f.location.z) < 1.8) try { s.kill(); } catch { /* gone */ }
         } else {
           for (const m of marksOf(run, "lamp")) if (Math.hypot(m.x + 0.5 - f.location.x, m.z + 0.5 - f.location.z) < 2) try { const b = player.dimension.getBlock(m); if (b?.typeId === "minecraft:lantern") b.setType("minecraft:air"); } catch { /* unloaded */ }

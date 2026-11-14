@@ -10,6 +10,7 @@ import { TOWNSFOLK } from "../townsfolk/data.js";
 import { NEVER_SAID } from "../townsfolk/rules.js";
 import { TOWNS } from "../economy/config.js";
 import { WARDS } from "../plots/config.js";
+import { BOARD_SITES } from "./board_sites_data.js";
 
 const STORY = { story: true, siegesWon: 5 };
 
@@ -120,5 +121,21 @@ addTests("town board", {
       for (const [type, n] of foesAt(j, 4)) assert(type.startsWith("siege:") && n > 0, `${j.id}: foes ${type}`);
     }
     assert(jobById("vale_toll").kind === "camp");
+  },
+  "every job site is built, with the marks its job needs": () => {
+    const NEEDS = { camp: "foe", hunt: "foe", look: "look", recover: "find", missing: "person" };
+    for (const j of JOBS) {
+      if (!j.site) continue;
+      const d = BOARD_SITES[j.site];
+      assert(d?.palette?.length && d.rows?.length, `${j.id}: site ${j.site} is built (map/structures/board_sites.py)`);
+      const kinds = new Set((d.marks ?? []).map((m) => m[3]));
+      const need = j.kind === "watch" ? (j.animal ? "sheep" : "lamp") : NEEDS[j.kind];
+      if (need) assert(kinds.has(need), `${j.id}: ${j.site} has a ${need} mark`);
+      if (j.kind === "watch") assert(d.marks.filter((m) => m[3] === need).length >= j.need[1], `${j.id}: enough ${need}s to keep`);
+    }
+    for (const [key, d] of Object.entries(BOARD_SITES)) {
+      for (const k of ["x0", "x1", "z0", "z1"]) assert(Math.abs(d.box[k]) % 1 === 0, `${key}: box`);
+      assert(d.mode === "rigid" || d.mode === "drape", `${key}: mode`);
+    }
   },
 });
