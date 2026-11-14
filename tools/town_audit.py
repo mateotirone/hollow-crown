@@ -168,6 +168,8 @@ def audit(path, plan=None, centre_hint=None, radius=None):
     solidish[:, 1:, :] &= ~(lily[:, 1:, :] & fluid[:, :-1, :])
     cx, cz = meta.get("x", 0), meta.get("z", 0)
     R = radius or meta.get("r", 80)
+    if plan and plan.get("centre") and plan.get("radius") and not radius:   # the bake's own centre and reach (Kingsrest's
+        cx, cz = plan["centre"]; R = max(R, plan["radius"] + 12)          # outer cottages lay past the site's circle)
     ii, kk = np.meshgrid(np.arange(S.shape[0]) + S.o[0], np.arange(S.shape[2]) + S.o[2], indexing="ij")
     inside2d = (ii - cx) ** 2 + (kk - cz) ** 2 <= R * R
 
@@ -329,6 +331,11 @@ def audit(path, plan=None, centre_hint=None, radius=None):
         opn = []
         for (a, c) in sides:
             ok = free[a, j, c] and free[a, j + 1, c] if (0 <= a < S.shape[0] and 0 <= c < S.shape[2]) else False
+            if not ok and 0 <= a < S.shape[0] and 0 <= c < S.shape[2] and free[a, j + 1, c] and free[a, j + 2, c]:
+                # a bottom slab or a right-way-up stair at the step is the path climbing away from the door, not a wall
+                n0, st0 = S.pal[g[a, j, c]] if g[a, j, c] >= 0 else ("", {})
+                ok = (n0.endswith("_slab") and st0.get("minecraft:vertical_half", "bottom") == "bottom" and not st0.get("top_slot_bit")) or \
+                     (n0.endswith("_stairs") and not st0.get("upside_down_bit"))
             opn.append(bool(ok))
         if not all(opn):
             # a side blocked: which one
@@ -336,15 +343,20 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             F.append(finding("facing", f"{n} opens into a block ({b[0] if not opn[0] else b[1]}): one side is walled up", (wx, wy, wz)))
         # inside = the side whose roofed space is the bigger closed room; outside = the other (a porch roof or eaves
         # may cover its step, but that covered patch is small and joins the open sky)
-        rooms = []
+        rooms, talls = [], []
         for (a, c), o in zip(sides, opn):
+            # a tall hall (a storehouse's roof 12 rows up) is still a room: anything overhead lets the flood decide
+            tall = bool(o and not low[a, j, c] and covered[a, j, c])
+            talls.append(tall)
             if not o: rooms.append(None); continue
-            if not low[a, j, c]: rooms.append((0, True)); continue
-            cells = _room_cells(S, free, covered, (a, c), j)
-            sky = any(free[q[0] + dx, q[1], q[2] + dz] and free[q[0] + dx, q[1] + 1, q[2] + dz] and not low[q[0] + dx, q[1], q[2] + dz]
+            if not low[a, j, c] and not tall: rooms.append((0, True)); continue
+            roof = covered if tall else low
+            cells = _room_cells(S, free, covered, (a, c), j, tall)
+            if tall and len(cells) >= 4000: rooms.append((0, True)); continue   # not a hall: open country under a far roof
+            sky = any(free[q[0] + dx, q[1], q[2] + dz] and free[q[0] + dx, q[1] + 1, q[2] + dz] and not roof[q[0] + dx, q[1], q[2] + dz]
                       for q in cells for dx, dz in DIR4 if 0 <= q[0] + dx < S.shape[0] and 0 <= q[2] + dz < S.shape[2]
                       and (q[0] + dx, q[2] + dz) != (i, k))
-            rooms.append((len(cells), sky and len(cells) < 60))
+            rooms.append((len(cells), sky and (tall or len(cells) < 60)))
         outs, ins = [], []
         for s_, r in zip(sides, rooms):
             if r is None: continue
@@ -355,6 +367,8 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             # a door standing in the open (a gate between yards, or a building with no room behind it)
             big = max(rooms[0][0], rooms[1][0])
             if big == 0: F.append(finding("interior", f"{n}: no room on either side (open to the sky both ways)", (wx, wy, wz), sev="check"))
+        # both sides open (a hall with a second doorway, a gate): the outside is the side you can walk up to
+        outs.sort(key=lambda s_: (not reach[s_[0], j, s_[1]], rooms[sides.index(s_)][0]))
         a, c = outs[0]
         door_spots.append((wx, wy, wz))
         floor = nm(a, j - 1, c)
@@ -363,7 +377,7 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             while jj > 0 and air[a, jj, c]: jj -= 1
             F.append(finding("door", f"{n}: nothing to stand on outside it (a {j - 1 - jj + 1}-block drop)", (wx, wy, wz)))
             continue
-        if not reach[a, j, c]:
+        if not reach[a, j, c] and not reach[a, j + 1, c]:   # (j + 1: a stair or slab step at the door, stood on)
             F.append(finding("door", f"{n}: can't be walked to from the square", (wx, wy, wz)))
         if SOFT_GROUND.match(floor) and meta.get("kind") != "buildings":   # a bare field round the test builds
             # paved within one step?
@@ -373,13 +387,14 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             F.append(finding("light", f"{n}: door step light {int(L[a, j, c])} (needs 8)", (wx, wy, wz), sev="check"))
         # interior
         if ins:
-            room, fur, sky = _room(S, free, covered, ins[0], j)
+            tl = talls[sides.index(ins[0])]
+            room, fur, sky = _room(S, free, covered, ins[0], j, tl)
             if sky:
                 F.append(finding("interior", f"{n}: the room behind it is open to the sky (roof or wall missing)", (wx, wy, wz)))
             elif fur == 0:
                 F.append(finding("interior", f"{n}: the room behind it ({room} cells) has no furnishing", (wx, wy, wz)))
             else:
-                dark = sum(1 for c3 in _room_cells(S, free, covered, ins[0], j) if feet[c3] and L[c3] < 7)
+                dark = sum(1 for c3 in _room_cells(S, free, covered, ins[0], j, tl) if feet[c3] and L[c3] < 7)
                 if dark > 3: F.append(finding("light", f"{n}: {dark} floor cells inside darker than 7", (wx, wy, wz), dark, sev="check"))
 
     # plan doors: a building the plan gives a door must have one there
@@ -388,22 +403,51 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             d = b.get("door")
             if not d or b.get("kind") in ("lamp", "tree", "square", "stall"): continue
             gy = b.get("ground_y", 0)
+            db = b.get("door_block")                         # the bake names the door block itself (towngen, 2026-11-14): [x, y, z]
+            if db: d = [db[0], db[2]]; gy = db[1] - 1
             ok = any(abs(x - d[0]) <= 2 and abs(z - d[1]) <= 2 and abs(y - gy) <= 8 for x, y, z in [S.w(i, j, k) for i, j, k, *_ in doors])
             ok = ok or any(abs(x - d[0]) <= 2 and abs(z - d[1]) <= 2 for x, y, z in door_spots)
+            if not ok and db:                               # a yard's gate is its door
+                gi, gj, gk = db[0] - S.o[0], db[1] - S.o[1], db[2] - S.o[2]
+                ok = 0 <= gi < S.shape[0] and 0 <= gj < S.shape[1] and 0 <= gk < S.shape[2] and "fence_gate" in nm(gi, gj, gk)
             if not ok:
                 # an open archway counts: walkable cell at the door spot under cover
                 i, k = d[0] - S.o[0], d[1] - S.o[2]
-                arch = 0 <= i < S.shape[0] and 0 <= k < S.shape[2] and bool((feet[i, :, k] & covered[i, :, k]).any())
+                r = 0 if db else 2                          # a design with no door at all (an open shop front, a granary
+                arch = any(0 <= i + a < S.shape[0] and 0 <= k + c < S.shape[2] and bool((feet[i + a, :, k + c] & covered[i + a, :, k + c]).any())
+                           for a in range(-r, r + 1) for c in range(-r, r + 1))   # arch): its open front is within a step or two
+                # a design with no door at all that stands open on that side (a trough under an awning, a raised granary)
+                openside = not db and not arch and any(0 <= i + a < S.shape[0] and 0 <= k + c < S.shape[2] and bool(feet[i + a, :, k + c].any())
+                                                       for a in range(-1, 2) for c in range(-1, 2))
+                if openside:
+                    F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): open on its plan's door side, no door in the design", (d[0], gy + 1, d[1]), sev="check"))
+                    continue
                 F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): no door where the plan puts it" + (" (an open doorway is there)" if arch else ""),
                                  (d[0], gy + 1, d[1]), sev="check" if arch else "fix"))
         for b in plan.get("buildings", []):
-            if b.get("kind") in ("barn", "windmill", "house", "civic") and not b.get("door"):
+            if b.get("kind") in ("barn", "windmill", "house", "civic") and not b.get("door") and not re.search(r"wall tower", b.get("name") or ""):  # a wall tower is the wall's own, entered off the wall walk
                 F.append(finding("door", f"{b.get('name') or b['stamp']} ({b['kind']}): the plan gives it no door", (b["x"], b.get("ground_y", 0) + 1, b["z"]), sev="check"))
 
     # ---- streets: built paths under the sky darker than 4
     floor_pathy = np.zeros_like(free)
     floor_pathy[:, 1:, :] = S.C(S.is_pathy)[:, :-1, :]
-    street = feet & floor_pathy & ~covered & reach & inside2d[:, None, :]
+    # a street is laid on the ground: a stepped roof or an awning (slabs and stairs with air under them) is not one
+    floor_pathy[:, 2:, :] &= ~air[:, :-2, :]
+    stairs = S.C(np.array([n.endswith("_stairs") for n, _ in S.pal] + [False]))
+    floor_pathy[:, 1:, :] &= ~stairs[:, :-1, :]          # a stair underfoot is a roof's slope or a flight of steps, as the engine's light stage reads it
+    # a Hamlet's streets are the ones inside its wall: the road beyond is the open country's (meta wall = its radius)
+    t = meta.get("town") or {}
+    if meta.get("wall") and t:
+        inwall = (ii - t["x"]) ** 2 + (kk - t["z"]) ** 2 <= (meta["wall"] - 1) ** 2
+        if meta.get("wall_line"):                       # the wall's own line (72 radii from angle 0, x towards +z)
+            wl = np.array(meta["wall_line"], float)
+            ang = np.mod(np.arctan2(kk - t["z"], ii - t["x"]), 2 * np.pi) / (2 * np.pi) * len(wl)
+            i0 = np.floor(ang).astype(int) % len(wl); fr = ang - np.floor(ang)
+            rr = wl[i0] * (1 - fr) + wl[(i0 + 1) % len(wl)] * fr
+            inwall = (ii - t["x"]) ** 2 + (kk - t["z"]) ** 2 <= (rr - 1) ** 2
+    else:
+        inwall = inside2d
+    street = feet & floor_pathy & ~covered & reach & (inside2d & inwall)[:, None, :]
     dark = np.argwhere(street & (L < 4))
     if len(dark):
         for c, n, grp in cluster([tuple(p) for p in dark[:3000]], 5)[:40]:
@@ -555,10 +599,11 @@ def _walk(feet, seeds, S):
     return reach
 
 
-def _room_cells(S, free, covered, start, j):
+def _room_cells(S, free, covered, start, j, tall=False):
     """The room a door opens on: cells at the door's floor level (a step up or down allowed) with a ceiling no
-    more than 7 rows over them, flooded sideways from the cell inside the door."""
-    low = S.lowroof
+    more than 7 rows over them (tall: any roof at all, for a hall like the storehouse), flooded sideways from the cell
+    inside the door."""
+    low = covered if tall else S.lowroof
     i0, k0 = start
     if not (free[i0, j, k0] and low[i0, j, k0]): return set()
     seen = {(i0, j, k0)}; todo = [(i0, j, k0)]
@@ -574,8 +619,9 @@ def _room_cells(S, free, covered, start, j):
     return seen
 
 
-def _room(S, free, covered, start, j):
-    cells = _room_cells(S, free, covered, start, j)
+def _room(S, free, covered, start, j, tall=False):
+    cells = _room_cells(S, free, covered, start, j, tall)
+    roof = covered if tall else S.lowroof
     # sky leak: a free cell in the room with nothing over it
     sky = 0
     fur = set()
@@ -590,7 +636,7 @@ def _room(S, free, covered, start, j):
     for (i, jj, k) in cells:
         for d in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             q = (i + d[0], jj, k + d[1])
-            if 0 <= q[0] < S.shape[0] and 0 <= q[2] < S.shape[2] and free[q] and not S.lowroof[q]: sky += 1
+            if 0 <= q[0] < S.shape[0] and 0 <= q[2] < S.shape[2] and free[q] and not roof[q]: sky += 1
     # the door itself leaks one or two cells
     return len(cells), len(fur), sky > 6 and len(cells) < 60
 

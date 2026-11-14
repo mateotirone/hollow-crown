@@ -94,6 +94,8 @@ def bedrock_state(n, p):
         c = p.get("conn", {})
         if n != "iron_bars":
             for d in "nsew": st["minecraft:connection_" + CARD[d]] = bool(c.get(d))
+    elif n == "cauldron" and p.get("water"):          # a filled cauldron (Sister Wren's healer's corner)
+        st["fill_level"] = 6; st["cauldron_liquid"] = "water"
     elif n.endswith("_door"):
         n = DOOR_ID.get(n, n)
         st["minecraft:cardinal_direction"] = CARD[f or "s"]; st["upper_block_bit"] = bool(p.get("upper"))

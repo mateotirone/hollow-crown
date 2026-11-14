@@ -66,7 +66,12 @@
     -118
    ],
    "walked": true,
-   "name": "capital hall"
+   "name": "capital hall",
+   "door_block": [
+    -109,
+    77,
+    -125
+   ]
   },
   {
    "stamp": "kingsrest_inn_d-95_-96_copper",
@@ -82,7 +87,12 @@
     -87
    ],
    "name": "inn",
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -103,
+    79,
+    -87
+   ]
   },
   {
    "stamp": "kingsrest_guildhall_copper",
@@ -98,7 +108,12 @@
     -95
    ],
    "walked": true,
-   "name": "guildhall"
+   "name": "guildhall",
+   "door_block": [
+    -137,
+    80,
+    -95
+   ]
   },
   {
    "stamp": "kingsrest_chapel_copper",
@@ -114,7 +129,12 @@
     -79
    ],
    "name": "chapel",
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -141,
+    81,
+    -79
+   ]
   },
   {
    "stamp": "breeder_yard_vale_copper",
@@ -130,7 +150,12 @@
     -106
    ],
    "name": "breeder's post",
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -147,
+    79,
+    -106
+   ]
   },
   {
    "stamp": "vale_house_13303_d-129_-76_mangrove",
@@ -146,7 +171,12 @@
     -85
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -131,
+    80,
+    -84
+   ]
   },
   {
    "stamp": "tg_cottage_13062_dark_oak",
@@ -162,7 +192,12 @@
     -104
    ],
    "walked": true,
-   "roof": "dark shingle"
+   "roof": "dark shingle",
+   "door_block": [
+    -69,
+    80,
+    -104
+   ]
   },
   {
    "stamp": "tg_cottage_13784_mangrove",
@@ -178,7 +213,12 @@
     -115
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -66,
+    80,
+    -115
+   ]
   },
   {
    "stamp": "tg_cottage_13869_dark_oak",
@@ -194,7 +234,12 @@
     -124
    ],
    "walked": true,
-   "roof": "dark shingle"
+   "roof": "dark shingle",
+   "door_block": [
+    -62,
+    79,
+    -124
+   ]
   },
   {
    "stamp": "vale_house_13650_stone_d-52_-134_mangrove",
@@ -210,7 +255,12 @@
     -132
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -60,
+    79,
+    -132
+   ]
   },
   {
    "stamp": "vale_house_13950_d-48_-145",
@@ -226,7 +276,12 @@
     -142
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -58,
+    78,
+    -142
+   ]
   },
   {
    "stamp": "tg_cottage_13422_mangrove",
@@ -242,7 +297,12 @@
     -157
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -54,
+    74,
+    -157
+   ]
   },
   {
    "stamp": "tg_cottage_13822_d-74_-151",
@@ -258,7 +318,12 @@
     -153
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -70,
+    75,
+    -153
+   ]
   },
   {
    "stamp": "vale_house_13814_mangrove",
@@ -274,7 +339,12 @@
     -95
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -78,
+    80,
+    -94
+   ]
   },
   {
    "stamp": "tg_cottage_14013_d-91_-156",
@@ -290,7 +360,12 @@
     -151
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -88,
+    74,
+    -152
+   ]
   },
   {
    "stamp": "tg_cottage_13726_mangrove",
@@ -306,7 +381,12 @@
     -164
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -161,
+    73,
+    -165
+   ]
   },
   {
    "stamp": "vale_house_13621",
@@ -322,7 +402,12 @@
     -168
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -171,
+    76,
+    -169
+   ]
   },
   {
    "stamp": "tg_cottage_14018_mangrove",
@@ -338,7 +423,12 @@
     -173
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -180,
+    77,
+    -174
+   ]
   },
   {
    "stamp": "vale_house_13854_stone_d-174_-139",
@@ -354,7 +444,12 @@
     -141
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -166,
+    74,
+    -141
+   ]
   },
   {
    "stamp": "tg_cottage_13889_d-184_-156",
@@ -370,7 +465,12 @@
     -161
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -187,
+    75,
+    -160
+   ]
   },
   {
    "stamp": "tg_cottage_14017_d-98_-155_dark_oak",
@@ -386,7 +486,12 @@
     -150
    ],
    "walked": true,
-   "roof": "dark shingle"
+   "roof": "dark shingle",
+   "door_block": [
+    -96,
+    74,
+    -151
+   ]
   },
   {
    "stamp": "vale_house_13833_stone_d-177_-131_mangrove",
@@ -402,7 +507,12 @@
     -133
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -169,
+    75,
+    -133
+   ]
   },
   {
    "stamp": "vale_house_14009_d-190_-121",
@@ -418,7 +528,12 @@
     -123
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -182,
+    77,
+    -123
+   ]
   },
   {
    "stamp": "tg_cottage_13499",
@@ -434,7 +549,12 @@
     -101
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -188,
+    79,
+    -101
+   ]
   },
   {
    "stamp": "tg_cottage_13897_d-164_-117_mangrove",
@@ -450,7 +570,12 @@
     -115
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -170,
+    78,
+    -115
+   ]
   },
   {
    "stamp": "tg_cottage_13606",
@@ -466,7 +591,12 @@
     -107
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -172,
+    78,
+    -107
+   ]
   },
   {
    "stamp": "vale_house_13235_d-164_-100",
@@ -482,7 +612,12 @@
     -97
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -172,
+    79,
+    -97
+   ]
   },
   {
    "stamp": "tg_cottage_13461",
@@ -498,7 +633,12 @@
     -91
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -63,
+    80,
+    -90
+   ]
   },
   {
    "stamp": "tg_cottage_14135_mangrove",
@@ -514,7 +654,12 @@
     -104
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -58,
+    80,
+    -105
+   ]
   },
   {
    "stamp": "vale_house_13795_stone",
@@ -530,7 +675,12 @@
     -80
    ],
    "walked": true,
-   "roof": "slate"
+   "roof": "slate",
+   "door_block": [
+    -82,
+    79,
+    -80
+   ]
   },
   {
    "stamp": "vale_house_13863_d-73_-73_mangrove",
@@ -546,7 +696,12 @@
     -69
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -83,
+    80,
+    -69
+   ]
   },
   {
    "stamp": "tg_cottage_13467_mangrove",
@@ -562,7 +717,12 @@
     -78
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -65,
+    80,
+    -78
+   ]
   },
   {
    "stamp": "tg_cottage_13745_mangrove",
@@ -578,7 +738,12 @@
     -91
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -184,
+    79,
+    -91
+   ]
   },
   {
    "stamp": "tg_cottage_14209_d-196_-112_mangrove",
@@ -594,7 +759,12 @@
     -114
    ],
    "walked": true,
-   "roof": "warm red"
+   "roof": "warm red",
+   "door_block": [
+    -192,
+    78,
+    -114
+   ]
   },
   {
    "stamp": "tg_windmill_vale_407_d-148_-181",
@@ -610,7 +780,12 @@
     -177
    ],
    "fence_path": true,
-   "walked": true
+   "walked": true,
+   "door_block": [
+    -148,
+    76,
+    -178
+   ]
   },
   {
    "stamp": "tg_well_13",
@@ -1392,6 +1567,78 @@
    "x": -138,
    "z": -142,
    "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -100,
+   "z": -71,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -56,
+   "z": -158,
+   "ground_y": 73,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -125,
+   "z": -97,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -157,
+   "z": -160,
+   "ground_y": 73,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -159,
+   "z": -91,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -178,
+   "z": -124,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -66,
+   "z": -94,
+   "ground_y": 79,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -149,
+   "z": -175,
+   "ground_y": 75,
    "rotation": 0,
    "footprint": 0
   },

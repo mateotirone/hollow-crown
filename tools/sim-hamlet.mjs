@@ -305,8 +305,16 @@ for (const [k, p] of cells) {
   outXYZ.push(x, y, z); outPid.push(pidx.get(key));
 }
 const town = FLAT ? null : (await import(pathToFileURL(join(SCRIPTS, "settle/founding.js")).href)).townOf(player.id);
+// the wall's own line (a Hamlet's is drawn tight round the village): its radius at 72 angles, for the audit's streets
+const wallLine = await (async () => {
+  if (!town) return undefined;
+  const W = await import(pathToFileURL(join(SCRIPTS, "settle/walls.js")).href), D = await import(pathToFileURL(join(SCRIPTS, "settle/walldata.js")).href);
+  const w = W.wallOf(player.id);
+  return w?.radius ? Array.from({ length: 72 }, (_, i) => Math.round(D.radiusAt(w, w.radius, (i / 72) * Math.PI * 2) * 10) / 10) : undefined;
+})();
+const wallR = town ? (await import(pathToFileURL(join(SCRIPTS, "settle/towns.js")).href)).wallRadius((await import(pathToFileURL(join(SCRIPTS, "settle/towns.js")).href)).townFor(town.plot), town.tier ?? 0) : undefined;
 const out = {
-  meta: { ...meta, kind: FLAT ? "buildings" : "hamlet", placed, name: meta.name, sq: town ? [town.x, town.z - 8] : [meta.x, meta.z], sqy: town?.y, town: town ? { x: town.x, y: town.y, z: town.z, layout: town.layout, style: town.style, tier: town.tier, slots: town.slots } : null,
+  meta: { ...meta, kind: FLAT ? "buildings" : "hamlet", placed, name: meta.name, sq: town ? [town.x, town.z - 8] : [meta.x, meta.z], sqy: town?.y, wall: wallR, wall_line: wallLine, town: town ? { x: town.x, y: town.y, z: town.z, layout: town.layout, style: town.style, tier: town.tier, slots: town.slots } : null,
     ticks: t, changed: changed.size },
   pal,
   xyz: Buffer.from(new Int32Array(outXYZ).buffer).toString("base64"),

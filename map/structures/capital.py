@@ -208,7 +208,9 @@ def capital(take="medieval", seed=7):
             for z in range(10, 15):
                 for y in range(1, 5): bp.set(x, y, z, "air")
         bp.set(-2, 4, 15, "stone_brick_stairs", facing="e", half="top"); bp.set(2, 4, 15, "stone_brick_stairs", facing="w", half="top")
-        bp.set(0, 1, 10, "spruce_door", facing="n"); bp.set(0, 2, 10, "spruce_door", facing="n", upper=True)
+        # the door goes in the hall's own front wall at the back of the pavilion (z 9): one block out, it stood against
+        # the wall with no way in (town audit 2026-11-14)
+        bp.set(0, 1, 9, "spruce_door", facing="n"); bp.set(0, 2, 9, "spruce_door", facing="n", upper=True)
         for x in (-5, 5): FB.window(x, 2, 15, "s", 1, 3, kind="stone")
         hang(bp, [(-3, 4, 16), (3, 4, 16)])
         for x in range(-3, 4): bp.set(x, 1, 16, "stone_brick_stairs", facing="n")   # steps
