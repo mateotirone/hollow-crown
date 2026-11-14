@@ -29,6 +29,7 @@
 import "./zones.js";
 import "./plans.js";
 import "./raised.js";
+import "./oneeach.js"; // one of each special building per settlement
 import "./mason.js";
 import "./coins.js"; // world currency
 import "./walls.js";

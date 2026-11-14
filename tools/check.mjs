@@ -430,6 +430,16 @@ step("Hostile mobs stay out of settlements");
   }
   for (const id of wild) if (!existsSync(join(dir, `bestiary_${id.replace(/^siege:/, "")}.json`))) { bad++; fail(`bestiary/gentle.js WILD lists ${id}, which has no spawn rule.`); }
   if (!/shelteredAt\(at, dim\.id\)/.test(readFileSync(join(SCRIPTS, "bestiary/spawns.js"), "utf8"))) { bad++; fail("bestiary/spawns.js: Hollow things must ask shelteredAt() before they spawn."); }
+  // the sweep (bestiary/sheltered.js) finds strays with families: ["monster"], so every wild hostile body must carry it
+  const { MOBS } = await import(pathToFileURL(join(SCRIPTS, "bestiary/data.js")).href);
+  const wildFamilies = ["wild_hostile", "undead", "hollow"];
+  for (const [id, m] of Object.entries(MOBS)) {
+    if (!wildFamilies.includes(m.family) && !wild.has(id)) continue;
+    const file = join(BP, "entities/bestiary", `${id.replace(/^siege:/, "")}.json`);
+    if (!existsSync(file)) continue;
+    const fam = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components?.["minecraft:type_family"]?.family ?? [];
+    if (!fam.includes("monster")) { bad++; fail(`${rel(file)}: ${id} is a wild hostile but lacks the "monster" family, so the walls sweep can't find it.`); }
+  }
   console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
 }
 

@@ -152,6 +152,14 @@ export const PLOT_TAGS = {
 };
 export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
+// One of each per settlement (Mateo 2026-11-14: "only one of special buildings can be built"). A second can't be
+// picked at a Plot Marker, counted as hand-built, raised by a Rival Lord, or set down as a block on the same
+// settlement's land; writ allies building in a shared settlement share the limit. Ids are plot buildings
+// (buildings.js) and raising blocks without "siege:" (blockdesigns.js). The Ironworks, Stables and Rail Depot keep
+// their own one-a-settlement rules (ironworks/, horses/barn.js, rails/). Homes, farms, wells, markets and the rest
+// stay unlimited.
+export const ONE_EACH = ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"];
+
 export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1", "storehouse_2", "storehouse_3", "storehouse_4", "farmhouse", "mint", "inn", "barracks"];
 
