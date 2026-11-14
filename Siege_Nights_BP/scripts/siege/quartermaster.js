@@ -48,6 +48,7 @@ export function quartermasterTick() {
       if (!desk) continue;
       const block = dim.getBlock(desk);
       if (!block || block.typeId === DESK) continue;
+      // vanilla villager on purpose: without a desk the Quartermaster is a plain villager again, who can be hired as a guard
       const villager = dim.spawnEntity("minecraft:villager_v2", qm.location);
       if (qm.nameTag) villager.nameTag = qm.nameTag;
       qm.remove();

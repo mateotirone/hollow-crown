@@ -16,6 +16,7 @@ import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
+import { onTick } from "../core/loop.js";
 import { guildMenu } from "../guild/index.js";
 import { reforgeTarget, reforgePrice, armourName } from "./regional_armor.js";
 
@@ -355,6 +356,21 @@ export async function openShop(player, npc) {
   const res = await form.show(player);
   if (!res.canceled) await acts[res.selection]?.();
 }
+
+// An old job NPC near a player turns into the new kind straight away, so nobody sees it in the wrong skin until
+// they happen to click it (Mateo 2026-11-14: every NPC has a skin)
+onTick("economy_renew_old_npcs", 100, () => {
+  const seen = new Set();
+  for (const p of world.getPlayers()) {
+    let olds = [];
+    try { olds = p.dimension.getEntities({ type: OLD_NPC_TYPE, tags: [JOB_TAG], location: p.location, maxDistance: 64 }); } catch { continue; }
+    for (const old of olds) {
+      if (seen.has(old.id)) continue;
+      seen.add(old.id);
+      renew(old);
+    }
+  }
+});
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target } = event;

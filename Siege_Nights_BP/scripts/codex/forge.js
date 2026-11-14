@@ -152,6 +152,7 @@ onTick("codex:caravan", 200, () => {
     try {
       const dim = world.getDimension("overworld");
       const top = dim.getTopmostBlock({ x: k.x + 6, z: k.z + 6 });
+      // vanilla villager on purpose: the caravan is Bedrock's own wandering trader, with its own trades and llamas
       if (top) dim.spawnEntity("minecraft:wandering_trader", { x: top.location.x + 0.5, y: top.location.y + 1, z: top.location.z + 0.5 });
       world.getAllPlayers().find((pl) => pl.id === owner)?.sendMessage("§6A caravan trader has stopped by your keep.");
     } catch {

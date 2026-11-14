@@ -6,7 +6,7 @@
 //
 // Other features can add flavour text:  emit("rumorParts", { givers: [...], places: [...], reasons: { camp: [...] } })
 
-import { world, system, ItemStack } from "@minecraft/server";
+import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
@@ -15,9 +15,14 @@ import { payE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { allPlots } from "../plots/claims.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc } from "../core/npc_skins.js";
 
 export const JOBS_PER_POINT = 3;
 const RUMOR_TAG = "siege_rumor";
+const FRIEND_TAG = "siege_rumor_friend";
+const TRAVELLER_TYPE = "minecraft:npc";
+const TRAVELLER_NAME = "Lost Traveller";
+const travellerSkin = (job) => `traveller_${Math.abs(Math.floor((job?.x ?? 0) + (job?.z ?? 0))) % 4}`;
 
 const PARTS = {
   givers: ["A drover", "The miller's wife", "A pedlar", "An old soldier", "A charcoal burner", "A tinker", "A shepherd boy", "The ferryman", "A pilgrim", "A poacher who should not have been there"],
@@ -351,7 +356,9 @@ function setScene(player, job) {
       if (spawnAt(player, job, type, i === 0 ? "Camp Sergeant" : "Camp Raider", dx, dz, "siege_rumor_foe")) made++;
     }
   } else {
-    spawnAt(player, job, "minecraft:villager_v2", "Lost Traveller", 0, 0, "siege_rumor_friend");
+    // The traveller is one of our NPCs in a painted skin, not a vanilla villager (Mateo 2026-11-14: every NPC has a skin)
+    const friend = spawnAt(player, job, TRAVELLER_TYPE, TRAVELLER_NAME, 0, 0, FRIEND_TAG);
+    if (friend) dressNpc(friend, travellerSkin(job), TRAVELLER_NAME);
     for (let i = 0; i < job.need; i++) {
       const [dx, dz] = ring(job.need, i, 4);
       if (spawnAt(player, job, job.tier >= 3 ? "siege:shieldwall_brute" : "siege:hollow_footman", "Captor", dx, dz, "siege_rumor_foe")) made++;
@@ -379,7 +386,7 @@ export function rumorTick() {
     if (dist > 80) continue; // too far to see what is left
     const there = entitiesOf(player, job);
     const foes = there.filter((e) => e.hasTag("siege_rumor_foe"));
-    if (job.type === "rescue" && !there.some((e) => e.hasTag("siege_rumor_friend"))) {
+    if (job.type === "rescue" && !there.some((e) => e.hasTag(FRIEND_TAG))) {
       for (const e of foes) e.remove();
       hero.job = null;
       saveHero(player);
@@ -388,7 +395,7 @@ export function rumorTick() {
     }
     if (foes.length !== job.left) { job.left = foes.length; saveHero(player); }
     if (foes.length === 0) {
-      const friends = there.filter((e) => e.hasTag("siege_rumor_friend"));
+      const friends = there.filter((e) => e.hasTag(FRIEND_TAG));
       if (friends.length) player.sendMessage("§a\"Thank you. I know the way home from here.\"");
       system.runTimeout(() => { for (const f of friends) if (f.isValid) f.remove(); }, 100);
       complete(player);
@@ -412,4 +419,18 @@ world.afterEvents.entityDie.subscribe((event) => {
   if (job.have >= job.need) return complete(killer);
   saveHero(killer);
   killer.onScreenDisplay.setActionBar(`§6Bounty: ${job.have}/${job.need} ${job.name}`);
+});
+
+// The Lost Traveller answers a click with a word instead of Bedrock's empty NPC box (creative + sneak edits it)
+world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
+  const { player, target } = event;
+  if (target.typeId !== TRAVELLER_TYPE || !target.hasTag(FRIEND_TAG)) return;
+  if (player.isSneaking && player.getGameMode() === GameMode.Creative) return;
+  event.cancel = true;
+  system.run(() => {
+    try {
+      const free = !target.dimension.getEntities({ tags: ["siege_rumor_foe"], location: target.location, maxDistance: 24 }).length;
+      player.sendMessage(free ? "§7Lost Traveller: §f\"Is it over? Then I know the way home from here.\"" : "§7Lost Traveller: §f\"They're still out there. Please, don't leave me with them.\"");
+    } catch { /* left */ }
+  });
 });

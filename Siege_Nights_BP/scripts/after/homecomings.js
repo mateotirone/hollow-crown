@@ -55,6 +55,7 @@ function arrive(player, seed) {
   const s = makeStranger(seed ?? Math.floor(Math.random() * 2 ** 31), { names: d.names, last: d.last });
   const v = player.getViewDirection(), l = player.location;
   const at = { x: l.x + v.x * 6, y: l.y, z: l.z + v.z * 6 };
+  // vanilla villager on purpose: one in four strangers is a Returned copy, and must look like any villager (bestiary/returned.js)
   const e = player.dimension.spawnEntity(TYPE, at);
   e.addTag(TAG);
   e.nameTag = s.name;
