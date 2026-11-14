@@ -12,6 +12,7 @@
 // newplayer/act1.js gathers f, quests/rules.js shows the step, lore/npcs.js picks Elspeth's scene by the stage.
 
 import { firstStep } from "./firstnights.js";
+import { SETTLEMENT } from "./mode_rules.js";
 
 export const DUSK = 12000; // time of day: supper, and the ravens on the wall
 export const MIDNIGHT = 18000; // the first raid stops waiting for you
@@ -24,9 +25,16 @@ export const F = {
   ember: "elspeth_ember", wrenMet: "wren_met", wrenLead: "wren_lead", aldous: "aldous_met", mine: "elspeth_mine",
 };
 
+// Settlement Mode (mode_rules.js): the same guide with no story. After the raid Elspeth leads the settlement from
+// Hamlet to Castle; a talk with her opens each tier's step ("talk_grow_<tier>" leaves the flag growFlag(tier)).
+export const growFlag = (tier) => `elspeth_grow_${tier}`;
+export const NEXT_TIER = ["Town", "City", "Castle"];
+
 // Is Act 1 this player's story right now? Not after Sir Aldous, and not for a keep that held sieges before
-// Elspeth existed (old worlds keep the story they were on).
+// Elspeth existed (old worlds keep the story they were on). In Settlement Mode her guide is always on: it is the
+// whole of what leads the player, from landing to Castle.
 export function inAct1(f) {
+  if (f?.mode === SETTLEMENT) return true;
   if (!f || f.morvane || f.flags.includes(F.aldous)) return false;
   if (f.flags.includes(F.met)) return true;
   return (f.sieges ?? 0) === 0 && !f.lost;
@@ -38,7 +46,9 @@ export function inAct1(f) {
 //       asked), station { found }, siegeDay (tonight is this keep's first siege night), time (of day), home (inside
 //       your walls), ember: "none" | "fallen" | "held" (picked up or used), aldousHere,
 //       mine (found the mine shaft), ore (brought back coal and iron), smelted (has smelted iron),
-//       wall (the settlement has a wall), mended (the wall was mended or found whole after the raid) }
+//       wall (the settlement has a wall), mended (the wall was mended or found whole after the raid),
+//       mode: "story" | "settlement", and in Settlement Mode grow: { tier, wins, winsNeed, warlords, warlordsNeed,
+//       build: [names still to raise for this tier's charter] } }
 export function act1Stage(f) {
   if (!inAct1(f)) return undefined;
   const has = (flag) => f.flags.includes(flag);
@@ -67,6 +77,7 @@ export function act1Stage(f) {
   }
   if (!has(F.raid)) return f.lost ? "talk_raid_lost" : "talk_raid_won";
   if (!f.keep) return "rebanner";
+  if (f.mode === SETTLEMENT) return settleStage(f);
   if (f.wall && !f.mended && !has(F.wrenLead)) return "mend";
   if (!has(F.wrenLead)) return mineStage(f) ?? "wren"; // a mine left unfinished on day 2 comes before the long ride
   if (f.ember === "none" || !f.ember) return "ride_home";
@@ -75,6 +86,17 @@ export function act1Stage(f) {
   return f.aldousHere ? "aldous" : "sleep";
 }
 export const WHEAT_GOAL = 16;
+
+// Settlement Mode after the raid: mend the wall, finish the mine if it was left, then grow tier by tier. Each
+// tier opens with a talk at the hearth, so every step still comes from Elspeth.
+function settleStage(f) {
+  const tier = Math.max(0, Math.min(3, f.grow?.tier ?? 0));
+  if (f.wall && !f.mended && tier === 0 && !f.flags.includes(growFlag(0))) return "mend";
+  const mine = mineStage(f);
+  if (mine) return mine;
+  if (!f.flags.includes(growFlag(tier))) return `talk_grow_${tier}`;
+  return tier >= 3 ? "rest" : "grow";
+}
 
 // Day 2's mine: Elspeth tells you of the old shaft, you find it, bring back coal and iron, and smelt the iron
 function mineStage(f) {
@@ -86,7 +108,7 @@ function mineStage(f) {
 }
 
 // The stages where Elspeth holds the next step: the tracker says "Talk to Old Elspeth"
-export const TALK = new Set(["meet", "talk_workshop", "talk_barracks", "talk_wheat", "talk_station", "talk_mine", "talk_sundown", "talk_supper", "talk_raid_won", "talk_raid_lost", "ask_ember"]);
+export const TALK = new Set(["talk_grow_0", "talk_grow_1", "talk_grow_2", "talk_grow_3", "meet", "talk_workshop", "talk_barracks", "talk_wheat", "talk_station", "talk_mine", "talk_sundown", "talk_supper", "talk_raid_won", "talk_raid_lost", "ask_ember"]);
 // The stages whose place is a story place: a light pillar stands over it (act1.js)
 export const PILLAR = new Set(["wren", "find_ember"]);
 
@@ -140,8 +162,30 @@ export function act1Step(stage, f = {}, p = {}) {
     case "find_ember": return step("Find what fell", "Something came down by the gate. It's still glowing.", at("The light by the gate", p.ember));
     case "ask_ember": return talk("Ask Old Elspeth about the Ember", "Elspeth will know what this is.");
     case "sleep": return step("Sleep until morning", "Elspeth said a rider comes at first light. Sleep in your bed.", at("Home", p.keep));
+    // ---- Settlement Mode (after the raid)
+    case "talk_grow_0": return talk("Talk to Old Elspeth", "The wall's whole. She said she'd tell you how a hall becomes a Town.");
+    case "talk_grow_1": return talk("Talk to Old Elspeth", "Your Hamlet is a Town now. She'll want to hear it.");
+    case "talk_grow_2": return talk("Talk to Old Elspeth", "Your Town is a City now. She'll want to hear it.");
+    case "talk_grow_3": return talk("Talk to Old Elspeth", "Your City is a Castle now. Tell her.");
+    case "grow": return growStep(f);
     case "aldous": return step("Talk to Sir Aldous about the Ember", "A knight is waiting at your keep. Hear him out, but give him nothing you haven't read.", at("Sir Aldous", p.aldous ?? p.keep),
       { npc: { tag: "siege_lore_npc_aldous", name: "Sir Aldous" } });
     default: return undefined;
   }
+}
+
+// Settlement Mode's growing step: the next tier, the siege nights still to hold, and what the charter still wants.
+// g = f.grow { tier, wins, winsNeed, warlords, warlordsNeed, build: [names] }
+export function growStep(f = {}) {
+  const g = f.grow ?? {};
+  const tier = Math.max(0, Math.min(2, g.tier ?? 0));
+  const next = NEXT_TIER[tier];
+  const notes = [`Siege nights held: ${Math.min(g.wins ?? 0, g.winsNeed ?? 0)} of ${g.winsNeed ?? 0}.`];
+  if (g.warlordsNeed) notes.push(`Warlords slain: ${Math.min(g.warlords ?? 0, g.warlordsNeed)} of ${g.warlordsNeed}.`);
+  const build = g.build ?? [];
+  notes.push(build.length ? `Still to raise: ${build.join(", ")}.` : "Every building the charter asks for stands.");
+  const hint = build.length
+    ? "Elspeth said: hold your siege nights, and raise what the charter asks on your Plot Markers. Your Plan Book lists it."
+    : "Elspeth said: hold your siege nights. The ravens on the wall tell you when one is coming.";
+  return { id: "act1_grow", title: `Grow to a ${next}`, hint, note: notes.join(" ") };
 }

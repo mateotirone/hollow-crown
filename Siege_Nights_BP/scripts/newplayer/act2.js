@@ -62,7 +62,8 @@ function bookOf(player, p) {
   return { plot, title: lore.tomes[0].title, read: p.read.includes(id) };
 }
 
-// The nearest town with a Moneyer (economy/config.js TOWNS): his NPC carries the marker, the pin is the town
+// The nearest town with a Moneyer (economy/config.js TOWNS): his NPC carries the marker; the pin is his counter where
+// the town gives him one (`at`, every town but Kingsrest, 2026-11-14), else the town
 export function nearestMoneyer(pos) {
   let best;
   for (const t of TOWNS) {
@@ -70,7 +71,8 @@ export function nearestMoneyer(pos) {
     const w = WARDS.find((x) => x.name === t.name);
     if (!w) continue;
     const d = Math.hypot(w.x - pos.x, w.z - pos.z);
-    if (!best || d < best.d) best = { name: t.name, x: w.x, z: w.z, d };
+    const at = t.at?.moneyer;
+    if (!best || d < best.d) best = { name: t.name, x: at?.x ?? w.x, z: at?.z ?? w.z, d };
   }
   return best;
 }
