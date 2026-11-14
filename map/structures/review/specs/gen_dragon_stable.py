@@ -15,7 +15,7 @@ A kasbah stable (regions/emberwaste.md, preset ember_sandstone, flat roofs with 
                    Braziers (siege:hatching_brazier) on a warm sand bed, where eggs are set to hatch.
 
 Frame (settle_buildings.py): front faces south (+z), the front wall on z = 0, the Dragon Roost block just outside
-the arch at (0, 1, 1). The furnishing is dragon_stable_skill.py (what the skill has no part for).
+the arch on the sill (spec (0, 1, 1), the door marker (0, 1, 0) so the export frame starts on that row). The furnishing is dragon_stable_skill.py (what the skill has no part for).
 """
 import json, os
 HERE = os.path.dirname(os.path.abspath(__file__))

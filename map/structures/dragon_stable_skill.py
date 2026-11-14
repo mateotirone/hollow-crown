@@ -167,7 +167,7 @@ def build(region="emberwaste"):
     engine.into_blueprint(bp, spec)
     inside(bp)
     bp.marks.update({f"brazier{i}": b for i, b in enumerate(BRAZIERS)}); bp.marks.update({"aisle": (0, 1, -4), "nursery": (9, 1, -4), "loft": (0, 7, -5)})
-    bp.markers["door"] = (0, 1, 1)
+    bp.markers["door"] = (0, 1, 0)   # the Dragon Roost on the sill in the archway, so the whole build is 11 deep from it (a Dragon plot)
     return finish_detail(bp, None)
 
 if __name__ == "__main__":

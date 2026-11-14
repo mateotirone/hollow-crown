@@ -77,7 +77,7 @@ def main():
     d = export(DS.build()); d["rows"] = drop_stone_air(d); b = d["box"]
     barns["emberwaste"]["dragon_stable"] = d
     if on_stone(d): problems.append("dragon_stable: blocks where the Dragon Roost stands")
-    if b["z0"] < 0 or (b["x1"] - b["x0"] + 1) % 2 == 0 or b["x1"] - b["x0"] + 1 > 23 or b["z1"] > 11:   # the Dragon plot, 23 x 11
+    if b["z0"] < 0 or (b["x1"] - b["x0"] + 1) % 2 == 0 or b["x1"] - b["x0"] + 1 > 23 or b["z1"] > 10:   # the Dragon plot, 23 x 11 counted from the Roost row
         problems.append(f"dragon_stable: box {b}")
     print("emberwaste dragon_stable box", b)
     dest = os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "settle", "barn_data.js")

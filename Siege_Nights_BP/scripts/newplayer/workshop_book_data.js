@@ -97,18 +97,6 @@ export const WORKSHOP_BOOK = [
     "needs": "3 any planks, 3 cobblestone, 2 any logs, 1 iron ingot"
    },
    {
-    "id": "siege:foresters_lodge",
-    "name": "Forester's Lodge",
-    "what": "A grove of your region's trees that regrows by itself.",
-    "needs": "3 any logs, 3 any planks, 2 iron axe, 1 oak sapling"
-   },
-   {
-    "id": "siege:ironworks",
-    "name": "Ironworks",
-    "what": "Makes iron over time.",
-    "needs": "4 cobblestone, 2 iron ingot, 1 iron pickaxe, 1 furnace, 1 barrel"
-   },
-   {
     "id": "siege:writ_of_alliance",
     "name": "Writ of Alliance",
     "what": "Use it on a friend to share your land.",
@@ -119,12 +107,6 @@ export const WORKSHOP_BOOK = [
  {
   "name": "Horses and roads",
   "items": [
-   {
-    "id": "siege:stables",
-    "name": "Stables",
-    "what": "Train, breed and keep horses.",
-    "needs": "3 hay block, 3 any planks, 2 oak fence, 1 saddle"
-   },
    {
     "id": "siege:halter",
     "name": "Halter",
@@ -146,4 +128,4 @@ export const WORKSHOP_BOOK = [
   ]
  }
 ];
-export const WORKSHOP_RECIPES = 259;
+export const WORKSHOP_RECIPES = 255;

@@ -17,7 +17,8 @@ export const SETTLE = {
   plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, smithy: 12, stable: 14,
     house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16,
     barracks: 2, // the Barracks opens with the Hamlet and is cheap: the first guards are what the first siege needs
-    quartermaster_desk: 3 },
+    quartermaster_desk: 3,
+    stables: 8, foresters_lodge: 8, dragon_roost: 14 }, // the big plots (2026-11-14): once crafted blocks, now picked on a plot
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -113,12 +114,14 @@ export const OPENS_AT = {
   smithy: 2, stable: 2, inn: 2, barracks: 0, watchtower: 3,
   // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
   ironworks: 0,
+  stables: 1, foresters_lodge: 2, dragon_roost: 2, // their plots (Barn, Wood, Dragon) open at Town; the stage says when
   quartermaster_desk: 2, // the Quartermaster's Armoury, a City building: every Hamlet plot is taken (the two starting houses, the
   // Library, the Barracks' deep Large, the Works yard) and the Town's Mediums go to the Farmhouse and the Mint (2026-11-14)
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
-// G Great 21x21, W Works 27x17. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+// G Great 21x21, W Works 27x17, B Barn 23x11, D Dragon 23x11 (Emberwaste towns), O Wood 41x29 (the woodlot outside
+// the wall). A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
@@ -128,6 +131,9 @@ export const PLOT_SIZE = {
   market: "S", // the stall is 7 x 5: a Small plot, so every Town has room for it (it asked for a Large until 2026-11-14)
   quartermaster_desk: "M", // the armoury is 11 x 12
   ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
+  stables: "B", // the barn, 23 x 11 with its eaves at every level (horses/barn.js rebuilds it bigger on the same plot)
+  dragon_roost: "D", // the Dragon Stable, 23 x 11
+  foresters_lodge: "O", // the Lodge at the woodlot's gate, its grove filling the 41 x 29 lot (forestry/index.js)
 };
 export const PLOT_ALSO = {
   market: ["M", "ML", "L"], // and any bigger plot
@@ -163,7 +169,7 @@ export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a
 // (buildings.js) and raising blocks without "siege:" (blockdesigns.js). The Ironworks, Stables and Rail Depot keep
 // their own one-a-settlement rules (ironworks/, horses/barn.js, rails/). Homes, farms, wells, markets and the rest
 // stay unlimited.
-export const ONE_EACH = ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"];
+export const ONE_EACH = ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost", "stables", "foresters_lodge"];
 
 // ---------- Stages: what each settlement level builds (Mateo 2026-11-14) ----------
 // "You need to place every building for the settlement stage you're on in order to level up", "every placeable
@@ -193,7 +199,7 @@ export const STAGES = [
       { id: "farmhouse", name: "Farmhouse with its field", step: "act3:farmhouse", from: "your Hamlet Farmer" },
       { id: "mint", name: "Mint", step: "act3:mint", from: "Old Elspeth" },
       { id: "market", name: "Market Stall", step: "act3:market", from: "the caravan trader" },
-      { id: "stables", name: "Stables", step: "act3:stables", from: "a groom", pending: "the 23 x 13 Barn plot the layout thread is adding (still a crafted block)" },
+      { id: "stables", name: "Stables", step: "act3:stables", from: "a groom" },
     ] },
   { tier: 2, name: "City", homes: 6,
     build: [
@@ -202,8 +208,8 @@ export const STAGES = [
       { id: "smithy", name: "Smithy", step: "act4:smithy", from: "the Ironworks foreman" },
       { id: "garden", name: "Kitchen Garden", step: "act4:garden", from: "your Farmer" },
       { id: "well", name: "Well", step: "act4:well", from: "the settlers" },
-      { id: "foresters_lodge", name: "Forester's Lodge", step: "act4:forester", from: "the mason, short of wood", pending: "the 41 x 29 woodlot outside the wall the layout thread is adding (still a crafted block)" },
-      { id: "dragon_roost", name: "Dragon Stable", step: "act4:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the 23 x 13 Dragon plot the layout thread is adding (still a crafted block)" },
+      { id: "foresters_lodge", name: "Forester's Lodge", step: "act4:forester", from: "the mason, short of wood" },
+      { id: "dragon_roost", name: "Dragon Stable", step: "act4:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste" },
     ] },
   { tier: 3, name: "Castle", homes: 0,
     build: [
@@ -218,9 +224,7 @@ export const RAISING_BLOCKS = {
   "siege:stables": "stables", "siege:foresters_lodge": "foresters_lodge", "siege:dragon_roost": "dragon_roost",
   "siege:hall_cornerstone": "", "siege:foundation_stone": "", "siege:rail_depot": "",
 };
-export const CRAFT_LEFT = {
-  "siege:ironworks": "towns laid out before the Works yard (PR 399) have no plot for it; the settlement thread drops the recipe after",
-};
+export const CRAFT_LEFT = {}; // nothing left: the Ironworks recipe went with the Works yards (PR 399), the big plots' with theirs
 // Buildings that stand in no stage on purpose: optional homes (they count toward the homes line)
 export const STAGE_OPTIONAL = ["cottage", "house", "townhouse"];
 
@@ -352,7 +356,7 @@ export const SETTLER_LINES = {
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
   hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "inn"], 4: ["watchtower"] },
-  noPlan: ["barracks", "quartermaster_desk"],
+  noPlan: ["barracks", "quartermaster_desk", "stables", "foresters_lodge", "dragon_roost"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
   lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town
