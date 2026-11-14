@@ -1091,6 +1091,10 @@ def _breeder(region):
     import settle_buildings                # the Breeder's Yard with its post (settlement design, regional style)
     return settle_buildings.town_breeder_yard(region)
 
+def _moneyer(region):
+    import settle_skill                     # the town money-changer on the square (Mateo 2026-11-14): the Mint's shell, grilled counter
+    return settle_skill.town_moneyer(region)
+
 def _story(name):
     import story_builds                    # the story places, built on the skill (story_specs/)
     return story_builds.build(name)
@@ -1098,16 +1102,20 @@ def _story(name):
 CIVIC = {
     "rimehold": [("hall", rimehold_hall), ("stave_chapel", rimehold_chapel),
                  ("inn", lambda: inn("frost")), ("smithy", lambda: smithy("frost")), ("store", lambda: store("frost")),
-                 ("net sheds", lambda: _story("net_sheds")), ("breeder's post", lambda: _breeder("frostmarch"))],
+                 ("net sheds", lambda: _story("net_sheds")), ("breeder's post", lambda: _breeder("frostmarch")),
+                 ("moneyer", lambda: _moneyer("frostmarch"))],
     "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt")),
                    ("chapel", lambda: _story("gulls_chapel")), ("fishmonger's loft", lambda: _story("fishmonger_loft")),
-                   ("breeder's post", lambda: _breeder("saltreach"))],
+                   ("breeder's post", lambda: _breeder("saltreach")),
+                   ("moneyer", lambda: _moneyer("saltreach"))],
     "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store),
                 ("warden's office", lambda: _story("warden_office")), ("library", lambda: _story("sunscar_library")),
                 ("old cistern", lambda: _story("sunscar_cistern")), ("caravan water", lambda: _story("caravan_water")),
-                ("breeder's post", lambda: _breeder("emberwaste"))],
+                ("breeder's post", lambda: _breeder("emberwaste")),
+                ("moneyer", lambda: _moneyer("emberwaste"))],
     "mirelight": [("inn", lambda: inn("fen")), ("smithy", lambda: smithy("fen")), ("store", lambda: store("fen")),
-                  ("breeder's post", lambda: _breeder("blackfen"))],
+                  ("breeder's post", lambda: _breeder("blackfen")),
+                  ("moneyer", lambda: _moneyer("blackfen"))],
 }
 SHORE = {
     "gulls_rest": [("quay", gulls_rest_quay), ("lighthouse", gulls_rest_lighthouse), ("boathouse", gulls_rest_boathouse)],

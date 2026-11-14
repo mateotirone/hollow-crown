@@ -1,0 +1,68 @@
+{
+ "card": {
+  "title": "Moneyer",
+  "sub": "Emberwaste, stone",
+  "region": "emberwaste",
+  "where": "Town square, Medium 11 x 15",
+  "kind": "Work",
+  "blurb": "The town's money-changer: the Mint's stone shell, a grilled counter with scales, a strongbox, stacked iron, and a hanging sign by the door. Sell your iron here."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "frame": "cut_red_sandstone",
+    "infill": {
+     "ladder": [
+      "smooth_red_sandstone",
+      "red_sandstone"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": "moneyer",
+   "chimney": false,
+   "shutters": 0
+  },
+  {
+   "part": "trade_sign",
+   "at": [
+    0,
+    5,
+    0
+   ],
+   "out": "s",
+   "len": 1,
+   "face": "s",
+   "wood": "acacia",
+   "fence": "acacia_fence"
+  }
+ ],
+ "name": "settle_moneyer_emberwaste"
+}

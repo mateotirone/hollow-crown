@@ -153,7 +153,8 @@ class RegionTown(Town):
         hall = HALLS[self.region]
         makers = list(RT.CIVIC.get(self.town, []))          # (the town hall claimed its ground first: hall_first)
         built = [(name, mk()) for name, mk in makers]
-        built.sort(key=lambda t: -len(t[1].cells))
+        # the Moneyer (2026-11-14) goes last: it takes the room that is left, so no story place moves for it
+        built.sort(key=lambda t: (t[0] == "moneyer", -len(t[1].cells)))
         import story_builds
         for name, bp in built:
             bp.kind = "civic"; done = None

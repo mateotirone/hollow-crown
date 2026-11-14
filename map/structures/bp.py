@@ -192,7 +192,7 @@ class Blueprint:
         if "persistent_bit" in st: st["persistent_bit"] = True
         if "extinguished" in st: st["extinguished"] = bool(p.get("out", False))
         if "facing_direction" in st and name in ("barrel",): st["facing_direction"] = 1
-        if "facing_direction" in st and (name.endswith("wall_sign") or name in ("ladder", "frame", "glow_frame") or name.endswith("_button")) and f:
+        if "facing_direction" in st and (name.endswith("wall_sign") or name.endswith("_hanging_sign") or name in ("ladder", "frame", "glow_frame") or name.endswith("_button")) and f:
             st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f]     # the way the sign, ladder, item frame or button faces
             # (an item frame left on 0 hangs from the block above and pops off: the arena racks, 2026-11-13)
         if name == "vine" and p.get("attach") in DIRS:   # bits: 1 south, 2 west, 4 north, 8 east = the side it clings to
