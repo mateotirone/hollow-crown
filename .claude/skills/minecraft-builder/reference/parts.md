@@ -227,18 +227,25 @@ places any local cell list at a point facing e/w/n/s (stairs, doors and log axes
 
 - **`ship`** (`scripts/ship.py`): `at` is the stern's centre on the waterline row (the top water block), `heading`
   where the bow points. The hull is fitted row by row: a keel one block wide, the bilge turning out to the full beam
-  at the deck, an upside-down stair wherever the row below is narrower (so the turn reads round), a blunt bow and a
-  narrower stern. Colour bands by row: tarred dark oak below the water, a spruce boot-top, a dark log wale, oak
-  topsides, a teal stripe (warped planks) along the top of the side, birch fence rails. A quarterdeck over the
-  captain's cabin aft (`aft` 11 long, deck three rows over the waist) and a forecastle over the galley forward
-  (`fore` 9), each with a front wall, a door on the centre line and stairs up both sides. Inside: the great cabin
-  (bed, chart table, lectern, books, chest, a cyan carpet, stern windows and side lights), the galley, and a lower
+  at the deck, an upside-down stair wherever the row below is narrower (so the turn reads round), a bow that runs in
+  to a point (a parabola in plan, not an ellipse, which ends blunt) with the forefoot kept under water, and a
+  narrower stern. Colour bands by row: tarred dark oak below the water, a spruce boot-top, a dark log wale that
+  sweeps up toward both ends (the sheer, so a long side never reads flat), oak topsides, a teal stripe (warped
+  planks) along the top of the side, birch fence rails; a rubbing strake (dark oak top slabs) one out along the
+  wale's straight runs only (on the curves it reads as loose steps), and closed gunport lids on the waist. A tall
+  stern: the quarterdeck over the captain's cabin (`aft` 11 long, deck four rows over the waist) and a poop deck over
+  a chart room at the very stern (`poop` 5), each with a front wall, a door on the centre line and stairs up both
+  sides; two tiers of stern windows, a railed stern gallery outside the cabin's, carved cornices (upside-down stairs)
+  under each deck. A forecastle over the galley forward (`fore` 9), a stem carried down as a cutwater, and a white
+  quartz figurehead with spread wings under the bowsprit. Inside: the great cabin (bed, chart table, lectern, books,
+  chest, a cyan carpet, stern windows and side lights), the chart room, the galley, and a lower
   deck under the whole waist (bunks, chests, a mess table with benches, the hold of barrels and chests, stores aft),
   reached by a solid flight of stairs through a railed hatch, with a 3-wide way down the middle and lanterns hung
   from the deck beams. `masts` `[{"at": u, "top": rows over its deck, "yards": [[y, half span, sail rows]], "nest": y}]`
   (default: mizzen, main with a crow's nest, fore): square sails of white wool with a cyan band, bellied forward,
-  hung from log yards; shrouds from the channels (a slab ledge one out from the side) to under the lowest yard; main
-  and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
+  hung from log yards; the lowest `furl` (1) yards on each mast carry their sail furled, a roll of wool under the
+  yard, as a moored ship would; shrouds of iron chain (fences read as staircases, 2026-11-14) from the channels (a
+  slab ledge one out from the side) to under the lowest yard, each link turned along the line; main and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
   `gangway` opens the bulwark and lays a plank out to the pier. Every cell inside the hull is written, air included,
   so a stamp over the sea leaves no water in the hold; `materials` overrides any role (`SALT` in ship.py).
 - **`pier`**: a deck of `rects` (oak, darker spruce boards over the pile rows) at row `y`; stripped oak piles from
