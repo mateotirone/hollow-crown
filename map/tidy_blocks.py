@@ -25,6 +25,8 @@ SOFT = re.compile(r"(^|:)air$|vine|ladder|lantern|button|sign|frame|torch|carpet
                   r"water|lava|leaves|_pane$|wheat|carrots|potatoes|beetroot|reeds|sugar_cane|leaf_litter|petals|roots$|"
                   r"pressure_plate|flower_pot|_pot$|lily|mushroom|dripleaf|bamboo|cactus|kelp|seagrass|cocoa|moss_carpet")
 HUNG = re.compile(r"(^|:)(glow_)?frame$|(^|:)ladder$|_button$|wall_sign$")
+# groundwork that is not the land's top: crops and plants (STANDS), field fences, water, posts
+GW_NOT_LAND = re.compile(r"(^|:)air$|water|lava|_fence$|(^|:)fence$|_wall$|lantern|chain|torch|_gate$")
 STANDS = re.compile(r"(short_grass|tall_grass|tallgrass|(^|:)fern$|large_fern|deadbush|poppy|dandelion|cornflower|oxeye|bluet|"
                     r"allium|_tulip$|lily_of_the_valley|blue_orchid|wildflowers|pink_petals|leaf_litter|sweet_berry|wheat$|"
                     r"carrots$|potatoes$|beetroot$|sapling$|sugar_cane|reeds$|snow_layer|carpet$|pressure_plate|flower_pot$|"
@@ -53,11 +55,19 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
         if j is None or j in drop: return None
         return pal[blocks[j][3]]["name"]
 
+    # the map grades the land to the groundwork's top where the town lays groundwork (restamp thread 2026-11-14:
+    # Millbrook flowers stood at y76 over stone bricks at y74, the bake's land said 75, the world had air there)
+    gw_top = {}
+    for b in blocks[:d.get("groundwork_blocks") or 0]:
+        nm_ = pal[b[3]]["name"]
+        if not (STANDS.search(nm_) or GW_NOT_LAND.search(nm_)): gw_top[(b[0], b[2])] = max(gw_top.get((b[0], b[2]), b[1]), b[1])
+
     def solid(c):
         nm = name_at(c)
         if nm is not None:
             return not SOFT.search(nm)
         if c in at: return False                                        # dropped: air now
+        if (c[0], c[2]) in gw_top: return c[1] <= gw_top[(c[0], c[2])]
         g = ground(c[0], c[2]) if ground else None
         return g is not None and c[1] <= g
 
@@ -218,7 +228,12 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
                     # in front: the land as it was counts too (ground_hi: a sign by a house at the town's edge faced
                     # the hillside the grading never reached, Rimehold 2026-11-14)
                     g_hi = ground_hi(front[0], front[2]) if ground_hi and name_at(front) is None and front not in at else None
-                    return held and not solid(front) and not (g_hi is not None and front[1] <= g_hi)
+                    # the top rung of a shaft through a floor has the floor in front: the ladder under it leads up to it
+                    # (Gull's Rest lighthouse lost the rung through its deck, restamp thread 2026-11-14)
+                    lb = at.get((cell[0], cell[1] - 1, cell[2]))
+                    shaft = (nm.endswith("ladder") and lb is not None and lb not in drop and entry(lb)["name"].endswith("ladder")
+                             and (entry(lb).get("states") or {}).get("facing_direction") == fd)
+                    return held and (shaft or not solid(front) and not (g_hi is not None and front[1] <= g_hi))
                 if f in BEHIND and ok(f): continue
                 for fd in (2, 3, 4, 5):
                     if ok(fd):
