@@ -63,6 +63,14 @@ addTests("landmarks", {
       assert(R <= REACH_MAX && ops.every((o) => Math.abs(o[0] - 100) <= R && Math.abs(o[2] - 200) <= R), `${id} reaches too far`);
     }
   },
+  "the eased ring round a rigid design never grades another place's wall": () => {
+    const d = DESIGNS.wolfcairn_cairn, b = d.box;
+    const wallAt = (x) => x > b.x1;                       // everything east of the cairn is built (a town wall)
+    const { ops } = planPiece(d, 0, 0, (x) => (x > b.x1 ? 80 : 70), () => undefined, (x) => wallAt(x));
+    assert(!ops.some((o) => o[0] > b.x1), "no op in the built columns");
+    const { ops: free } = planPiece(d, 0, 0, (x) => (x > b.x1 ? 80 : 70));
+    assert(free.some((o) => o[0] > b.x1), "unbuilt ground there is graded");
+  },
   "a rigid design on a slope is filled under and cut into, never floating": () => {
     const d = DESIGNS.wolfcairn_cairn;
     const slope = (x) => 70 + Math.floor(x / 2);

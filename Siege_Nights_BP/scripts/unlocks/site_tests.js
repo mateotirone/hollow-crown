@@ -4,7 +4,7 @@ import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeC
 import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, inIceEdge, ICE_EDGE, inDrownedWater, inAshSand, ASH_SAND, mirelightPlan } from "./plans.js";
 import { socketAnswer } from "./site.js";
 import { stampOps, LANDMARKS } from "./landmarks.js";
-import { treeClearBoxes, CLEAR_MARGIN, CLEAR_ABOVE } from "../core/clearing.js";
+import { treeClearBoxes, CLEAR_MARGIN, CLEAR_ABOVE, looseBranches } from "../core/clearing.js";
 import { inShaft, stairSpotsBelow, stairSteps, WELL as WELL2 } from "./well_plan.js";
 import { inChamber } from "./reeve.js";
 
@@ -28,6 +28,18 @@ addTests("unlocks: sites", {
     assertEqual(cells, (b.x1 - b.x0 + 1 + 2 * CLEAR_MARGIN) * (b.z1 - b.z0 + 1 + 2 * CLEAR_MARGIN));
     assert(LANDMARKS.mirelight?.clear === false && LANDMARKS.reeve?.clear === false, "town squares keep their trees");
     assert(LANDMARKS.mother?.clear !== false, "the Cradle area clears");
+  },
+  "a tree's fence and wall branches go once its trunk is cleared; a fence on the ground stays": () => {
+    const ground = (x, y, z) => y <= 64;
+    // a branch out in the air (its trunk cleared), and a fence post standing on the ground with a rail joined to it
+    const cells = new Set(["3,80,0", "4,80,0", "4,81,1", "0,65,0", "0,66,0", "1,66,0"]);
+    assertEqual(looseBranches(cells, ground).sort(), ["3,80,0", "4,80,0", "4,81,1"]);
+    assertEqual(looseBranches(new Set(["0,65,5"]), ground), []);
+    // a whole tree (crown cells first) on its roots stays; the same tree with its foot cut away goes, every block
+    const tree = new Set(); for (let x = -3; x <= 3; x++) tree.add(`${x},71,0`); for (let y = 65; y <= 70; y++) tree.add(`0,${y},0`);
+    assertEqual(looseBranches(tree, ground), []);
+    tree.delete("0,65,0");
+    assertEqual(looseBranches(tree, ground).length, 12);
   },
   "the hunt: same world same rhyme, every beast once, only the rhyme's order wins": () => {
     assertEqual(makeHunt(99), makeHunt(99));

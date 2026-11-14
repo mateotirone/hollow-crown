@@ -17,6 +17,11 @@ export const TREE_TYPES = [
   "minecraft:mangrove_roots", "minecraft:mangrove_propagule", "minecraft:bee_nest", "minecraft:cocoa",
   ...WOODS.flatMap((w) => [`siege:old_${w}_log`, `siege:old_${w}_wood`, `siege:old_stripped_${w}_log`, `siege:old_stripped_${w}_wood`, `siege:old_${w}_leaves`]),
   "siege:old_azalea_leaves", "siege:old_azalea_leaves_flowered", "siege:old_hollowwood_core", "siege:old_hollowwood_lattice", "siege:pale_ash",
+  // a locked tree's branches (blocks/trees: they look like fences, walls, stairs, slabs and trapdoors, but only trees use them)
+  ...["oak", "spruce", "dark_oak", "mangrove"].map((w) => `siege:old_${w}_fence`),
+  ...["oak", "dark_oak", "mangrove"].flatMap((w) => [`siege:old_${w}_slab`, `siege:old_${w}_trapdoor`]),
+  ...["oak", "spruce", "dark_oak", "mangrove", "tuff", "diorite", "polished_diorite", "mud_brick", "polished_blackstone"].map((m) => `siege:old_${m}_stairs`),
+  ...["tuff", "cobbled_deepslate", "diorite", "mud_brick", "polished_blackstone"].map((m) => `siege:old_${m}_wall`),
 ];
 export const CLEAR_MARGIN = 8;   // a crown reaching in from a trunk just outside goes too
 export const CLEAR_ABOVE = 32;   // the tallest map trees stand about 30 over their roots
@@ -49,9 +54,104 @@ export function* clearTrees(dim, box) {
   let missed = 0;
   const includeTypes = treeTypes();
   if (!includeTypes.length) return 0;
-  for (const { from, to } of treeClearBoxes(box)) {
+  const boxes = treeClearBoxes(box);
+  for (const { from, to } of boxes) {
     try { dim.fillBlocks(new BlockVolume(from, to), "minecraft:air", { blockFilter: { includeTypes } }); } catch { missed++; }
     yield;
+  }
+  missed += yield* clearLooseBranches(dim, boxes);
+  return missed;
+}
+
+// What is left of a tree the fill cut through. The map's trees also branch in fences, walls, stairs, slabs and
+// trapdoors (map/trees/species.py), which the fill must not touch (a build's own fences never go), and a tree whose
+// trunk stood inside the margin can reach past it. So once the fill is done, every tree or branch block in and round
+// the cleared box is grouped (by a face or an edge, the way a stair roof holds), and a group joined to nothing firm
+// goes: no branch or crown is left hanging in the air (Mateo 2026-11-14: nothing floats at a story build). A tree
+// still standing on its roots, a fence on the ground and a build's trapdoor on its wall all hold.
+const BRANCH_WOODS = ["oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "pale_oak"];
+export const BRANCH_TYPES = [
+  ...BRANCH_WOODS.flatMap((w) => [`minecraft:${w}_fence`, `minecraft:${w}_stairs`, `minecraft:${w}_slab`, `minecraft:${w}_trapdoor`]),
+  ...["tuff", "cobbled_deepslate", "diorite", "mud_brick", "polished_blackstone"].map((m) => `minecraft:${m}_wall`),
+  ...["tuff", "diorite", "polished_diorite", "mud_brick", "polished_blackstone"].map((m) => `minecraft:${m}_stairs`),
+  "minecraft:trapdoor", "minecraft:moss_carpet", "minecraft:pale_moss_carpet",
+];
+export const REMNANT_MARGIN = 8;
+// lying on things, holding nothing up: snow, grass, flowers
+const LIGHT = /snow_layer|short_grass|tall_grass|fern|flower|tulip|poppy|dandelion|bluet|allium|daisy|cornflower|lily_of_the_valley|leaf_litter|sweet_berry/; // looked at this far past the cleared box (the widest crowns)
+const N18 = [];
+for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const m = Math.abs(a) + Math.abs(b) + Math.abs(c); if (m > 0 && m < 3) N18.push([a, b, c]); }
+
+// Groups of tree blocks joined to nothing firm. seeds: "x,y,z" cells to start from; part(x, y, z): a tree or branch
+// block there; firm(x, y, z): any other block that holds (not air, not water). Or pass one function as `part` that
+// says which: kind(x, y, z) -> 1 a tree block, 2 firm, 0 nothing (one look at the block instead of two). A group grows past the seeds as far as
+// the tree goes, so a crown reaching out of the looked-at box is judged whole; one bigger than `cap` is left be.
+// A job step: yields now and then, returns the cells to clear.
+export const GROUP_CAP = 20000;
+export function* looseGroups(seeds, part, firm, cap = GROUP_CAP) {
+  const kind = firm ? (x, y, z) => (part(x, y, z) ? 1 : firm(x, y, z) ? 2 : 0) : part;
+  const seen = new Set(), keep = new Set(), out = [];
+  let steps = 0;
+  for (const start of seeds) {
+    if (seen.has(start)) continue;
+    const group = [start]; seen.add(start);
+    let held = false;
+    for (let i = 0; i < group.length && group.length <= cap && !held; i++) {   // held: the rest of it need not be walked
+      const [x, y, z] = group[i].split(",").map(Number);
+      for (const [a, b, c] of N18) {
+        const X = x + a, Y = y + b, Z = z + c, k = `${X},${Y},${Z}`;
+        if (seen.has(k)) { if (keep.has(k)) held = true; continue; }
+        const t = kind(X, Y, Z);
+        if (t === 1) { seen.add(k); group.push(k); } else if (t === 2) held = true;
+      }
+      if (++steps % 100 === 0) yield;
+    }
+    if (group.length > cap) held = true;
+    if (held) for (const k of group) keep.add(k);
+    else out.push(...group);
+  }
+  return out;
+}
+export function looseBranches(cells, firm) {
+  const g = looseGroups(cells, (x, y, z) => cells.has(`${x},${y},${z}`), firm);
+  let r;
+  do { r = g.next(); } while (!r.done);
+  return r.value;
+}
+
+let knownRemnant;
+export function* clearLooseBranches(dim, boxes) {
+  knownRemnant ??= [...treeTypes(), ...BRANCH_TYPES.filter((t) => { try { return !!BlockTypes.get(t); } catch { return false; } })];
+  const cells = new Set();
+  let missed = 0;
+  // the cleared boxes, and the same again round them
+  const xs = boxes.flatMap((b) => [b.from.x, b.to.x]), zs = boxes.flatMap((b) => [b.from.z, b.to.z]);
+  const all = { x0: Math.min(...xs), x1: Math.max(...xs), z0: Math.min(...zs), z1: Math.max(...zs), y0: boxes[0].from.y, y1: boxes[0].to.y };
+  for (const { from, to } of treeClearBoxes(all, REMNANT_MARGIN, 0, 0)) {
+    try {
+      for (const at of dim.getBlocks(new BlockVolume(from, to), { includeTypes: knownRemnant }, true).getBlockLocationIterator()) cells.add(`${at.x},${at.y},${at.z}`);
+    } catch { missed++; }
+    yield;
+  }
+  if (!cells.size) return missed;
+  const remnant = new Set(knownRemnant);
+  const kind = (x, y, z) => {
+    let b;
+    try { b = dim.getBlock({ x, y, z }); } catch { return 2; }   // unloaded: leave it be
+    if (!b) return 2;
+    if (remnant.has(b.typeId)) return 1;
+    return b.isAir || b.isLiquid || LIGHT.test(b.typeId) ? 0 : 2;   // snow lying on a crown does not hold it up
+  };
+  const loose = yield* looseGroups(cells, kind);
+  let n = 0;
+  for (const k of loose) {
+    const [x, y, z] = k.split(",").map(Number);
+    try {
+      dim.getBlock({ x, y, z })?.setType("minecraft:air");
+      const up = dim.getBlock({ x, y: y + 1, z });
+      if (up && LIGHT.test(up.typeId)) up.setType("minecraft:air");   // and the snow or plant that sat on it
+    } catch { missed++; }
+    if (++n % 64 === 0) yield;
   }
   return missed;
 }

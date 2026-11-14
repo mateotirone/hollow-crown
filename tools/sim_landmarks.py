@@ -29,6 +29,7 @@ DIM = "minecraft:overworld"
 tr = level.translation_manager.get_version("bedrock", (1, 21, 0))
 
 SOFT = re.compile(r"leaves|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|log|vine|sapling|mushroom|azalea|dead_bush|torch|reeds|sugar_cane|kelp|seagrass|lily|wood|fence")
+BRANCH = re.compile(r"_wall|stairs|slab|trapdoor")
 _bed = {}
 
 
@@ -87,8 +88,12 @@ for b in need:
             first = next((c for c in col if c[1] != "air"), None)
             if first is not None:
                 if "water" in first[1]: w = first[0]
-                for y, n, st in col[col.index(first):][:48]:
+                rest = col[col.index(first):]
+                for i, (y, n, st) in enumerate(rest[:48]):
                     if n == "air" or "water" in n or "lava" in n or SOFT.search(n): continue
+                    if BRANCH.search(n):   # a tree branch (wall/stairs/slab/trapdoor with nothing firm under it)
+                        un = rest[i + 1][1] if i + 1 < len(rest) else "air"
+                        if un == "air" or "water" in un or "lava" in un or SOFT.search(un) or BRANCH.search(un): continue
                     g, t = y, ["minecraft:" + n, st]; break
             ground.append(g); water.append(w); top.append(t)
     probe[b["key"]] = {"x0": b["x0"], "z0": b["z0"], "nx": b["nx"], "nz": b["nz"], "ground": ground, "water": water, "top": top}
@@ -115,6 +120,9 @@ def logical(n, st):
     return n, p
 
 
+TREE = re.compile(r"^old_|_log$|_wood$|leaves|^vine$|hanging_roots|pale_hanging_moss|mangrove_roots|propagule|bee_nest|cocoa")
+BRANCHB = re.compile(r"^(oak|spruce|birch|jungle|acacia|dark_oak|mangrove|cherry|pale_oak)_(fence|stairs|slab|trapdoor)$|^(tuff|cobbled_deepslate|diorite|mud_brick|polished_blackstone)_wall$|^(tuff|diorite|polished_diorite|mud_brick|polished_blackstone)_stairs$|^(moss_carpet|pale_moss_carpet|trapdoor|cobblestone_wall)$")   # cobblestone_wall: how Amulet reads the old walls
+LIGHT = re.compile(r"snow_layer|short_grass|tall_grass|fern|flower|tulip|poppy|dandelion|bluet|allium|daisy|cornflower|lily_of_the_valley|leaf_litter|sweet_berry")
 N18 = [(a, b, e) for a in (-1, 0, 1) for b in (-1, 0, 1) for e in (-1, 0, 1) if 0 < abs(a) + abs(b) + abs(e) < 3]
 report = {}
 for sid, pieces in plans.items():
@@ -123,21 +131,54 @@ for sid, pieces in plans.items():
     if not ops:
         report[sid] = rep; continue
     xs = [o[0] for o in ops]; zs = [o[2] for o in ops]; ys = [o[1] for o in ops]
-    x0, x1, z0, z1 = min(xs) - 4, max(xs) + 4, min(zs) - 4, max(zs) + 4
-    yb0, yb1 = min(ys) - 6, max(ys) + 2
+    x0, x1, z0, z1 = min(xs) - 30, max(xs) + 30, min(zs) - 30, max(zs) + 30
+    lowest = int(H[x0 - O:x1 - O + 1, z0 - O:z1 - O + 1].min())   # the land round it can lie well below the site
+    yb0, yb1 = min(min(ys), lowest) - 6, max(ys) + 34
     cells = {}
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
             for y, n, st in column(x, z, yb0, yb1):
                 if n != "air": cells[(x, y, z)] = (n, st)
+    # what the game does first (core/clearing.js clearTrees): every tree block round it and over it goes, then what is
+    # left of the trees it cut (tree and branch blocks within 8 more, grouped by face or edge) that holds to nothing
+    cx0, cx1, cz0, cz1, cy0, cy1 = min(xs) - 8, max(xs) + 8, min(zs) - 8, max(zs) + 8, min(ys) - 4, max(ys) + 32
+    inclear = lambda c: cx0 <= c[0] <= cx1 and cz0 <= c[2] <= cz1 and cy0 <= c[1] <= cy1
+    inring = lambda c: cx0 - 8 <= c[0] <= cx1 + 8 and cz0 - 8 <= c[2] <= cz1 + 8 and cy0 <= c[1] <= cy1
+    for c in [c for c, (n, _) in cells.items() if inclear(c) and TREE.search(n)]: del cells[c]
+    part = lambda c: c in cells and (TREE.search(cells[c][0]) or BRANCHB.match(cells[c][0]))
+    inbox = lambda k: x0 <= k[0] <= x1 and z0 <= k[2] <= z1 and yb0 <= k[1] <= yb1
+    def remnants():   # core/clearing.js looseGroups: seeds in the ring, each group followed as far as its tree goes
+        seen, keep = set(), set()
+        for s0 in [c for c in cells if inring(c) and part(c)]:
+            if s0 in seen: continue
+            grp, held = [s0], False; seen.add(s0)
+            i = 0
+            while i < len(grp) and not held and len(grp) <= 20000:
+                c = grp[i]; i += 1
+                for d in N18:
+                    k = (c[0] + d[0], c[1] + d[1], c[2] + d[2])
+                    if k in seen:
+                        if k in keep: held = True
+                        continue
+                    if not inbox(k): held = True
+                    elif part(k): seen.add(k); grp.append(k)
+                    elif k in cells and "water" not in cells[k][0] and "lava" not in cells[k][0] and not LIGHT.search(cells[k][0]): held = True
+            if held or len(grp) > 20000: keep.update(grp)
+            else:
+                for c in grp:
+                    cells.pop(c, None); mine.discard(c)
+                    u = (c[0], c[1] + 1, c[2])
+                    if u in cells and LIGHT.search(cells[u][0]): cells.pop(u)
     mine = set()
+    remnants()
     for x, y, z, n, st in ops:
         n = n.replace("minecraft:", "")
         if n == "air": cells.pop((x, y, z), None); mine.discard((x, y, z))
         else: cells[(x, y, z)] = (n, st); mine.add((x, y, z))
+    remnants()   # landmarks/index.js: again once it stands (a tree on ground it paved or cut away)
     # grounded: reachable (by a face or an edge, so a stair roof stepping down holds) from the bottom layer through anything solid-ish; water holds nothing
     holds = lambda c: c in cells and "water" not in cells[c][0] and "lava" not in cells[c][0]
-    seen = set(c for c in cells if c[1] == yb0 and holds(c))
+    seen = set(c for c in cells if (c[1] == yb0 or c[0] in (x0, x1) or c[2] in (z0, z1)) and holds(c))   # past the box edge: assumed held
     q = deque(seen)
     while q:
         x, y, z = q.popleft()

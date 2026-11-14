@@ -32,7 +32,11 @@ function median(a) {
 
 // height(x, z): world y of the top solid ground block there, or undefined if unknown.
 // water(x, z): world y of the top water block over that ground, or undefined if dry.
-export function planPiece(d, ox, oz, height, water = () => undefined) {
+// built(x, z): true where the ground's top block there is something built (another place's wall, a road's
+// kerb): the eased ring round a rigid design never grades those (2026-11-14: the Cinder Roost's ring cut the top
+// off Sunscar's wall and left its coping hanging over the wall walk).
+export const BUILT_TOP = /(^|:)castle_|bricks|planks|_slab|_stairs|_wall$|fence|glass|wool|concrete|polished|smooth_|cut_|chiseled|tiles|lantern|door|_log$|_wood$/;
+export function planPiece(d, ox, oz, height, water = () => undefined, built = () => false) {
   const cells = cellsOf(d);
   const late = new Set(d.late ?? []);
   const cols = new Map(); // "x,z" -> [cells]
@@ -66,6 +70,7 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
       for (let z = b.z0 - ease; z <= b.z1 + ease; z++) {
         const r = height(ox + x, oz + z) ?? G;
         const out = Math.max(b.x0 - x, x - b.x1, b.z0 - z, z - b.z1, 0); // 0 inside the box
+        if (out > 0 && built(ox + x, oz + z)) continue;
         const t = out === 0 ? G : Math.round(G + (r - G) * (out / (ease + 1)));
         const col = cols.get(`${x},${z}`) ?? [];
         const wet = d.sea ? water(ox + x, oz + z) : undefined; // a design standing in the sea never clears its water

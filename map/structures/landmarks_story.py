@@ -232,6 +232,9 @@ def crownhold_hall():
                     d.put(cxz[0], b + 1 if b < 5 else 5, cxz[1] + a, d.pick(cxz[0], b, cxz[1] + a, STONE_RUIN, 7)) if b < 5 else None
     rubble(d, 14, L + 12, 9, 60, salt=17)
     fallen_bell(d, 26, 0, L + 11, axis="x", n=7, r0=1.6, r1=3.6, salt=1)
+    # inside it, where its open mouth looks back at the Hall: Corvin's ninth book, sealed with the King's wax until
+    # three of the five have fallen (lore/places.js TOME_GATES)
+    d.meta.setdefault("tomes", []).append([27, 1, L + 11, "corv_09"])
     # the empty bell frames down the nave: where the Founding Bell's sisters hung; one bell still on the floor, cracked
     for z in (-15, -5, 5, 15):
         bell_frame(d, 0, 1, z, w=4, tall=9, wood="dark_oak")
@@ -404,6 +407,9 @@ def crownhold_castle(d, W, L):
         for y in range(4, 7): d.put(x, y, 48, "iron_bars")
         d.put(x, 7, 48, "dark_oak_planks")
     for z in range(43, 52, 4): d.put(0, 6, z, "lantern", hanging=True) if z != 48 else None
+    # the guardroom in the west gate tower: the gate wardens' chest, and Chronicle VI on it
+    d.put(-10, 1, 47, "chest", facing="e")
+    d.meta.setdefault("tomes", []).append([-10, 2, 47, "chron_06"])
     # ---- the outer ward: the street from the gate up to the Hall's door, the old well, the stables' footings
     for z in range(32, 46):
         for x in range(-2, 3):
@@ -641,24 +647,8 @@ def bellhollow_seal():
     for y in (12, 13): d.put(17, y, 0, "waxed_exposed_cut_copper")                                  # the crown loop
     for z in (-1, 1): d.put(17, 13, z, "waxed_exposed_cut_copper")
     for z in range(-2, 3): d.put(17, 14, z, "waxed_exposed_cut_copper_slab", half="bottom")
-    d.hollow = 1
-    d.meta["mark"] = [0, 1, 0]
-    return d
-
-
-def bellhollow_frame():
-    """The great bell frame, broken and fallen across the valley, and the pilgrims' shrine by the road with their
-    little bells left outside it."""
-    d = D("bellhollow_frame", "drape", seed=212)
-    # the frame: two great trestles, one standing, one fallen; the beam lying between
-    for k in range(10): d.put(-6, 1 + k, 0, "stripped_dark_oak_log", axis="y"); d.put(-6, 1 + k, 1, "stripped_dark_oak_log", axis="y")
-    for s in (-1, 1):
-        for k in range(6): d.put(-6, 1 + k, s * (2 + k // 2) + (1 if s > 0 else 0), "dark_oak_fence")
-    for k in range(13): d.put(-5 + k, 1, 6 + k // 4, "stripped_dark_oak_log", axis="x")    # the fallen beam
-    for k in range(10): d.put(8 + k // 5, 1, 9 + k, "stripped_dark_oak_log", axis="z")     # the fallen trestle
-    d.put(-6, 11, 0, "dark_oak_slab", half="bottom"); d.put(-6, 10, -1, "iron_chain", axis="y")
     # the shrine: a little stone house, open on the road side
-    sx, sz = 18, -12
+    sx, sz = -4, -12   # 22 west of the frame's centre, just north of the Seal
     for x in range(sx - 2, sx + 3):
         for z in range(sz - 2, sz + 3):
             d.put(x, 0, z, "stone_bricks")
@@ -673,7 +663,38 @@ def bellhollow_frame():
     for k in range(14):
         x, z = sx - 3 + (k % 7), sz + 4 + (k // 7)
         d.put(x, 1, z, "bell", bs={"attachment": "standing", "direction": 0})
-    d.meta["mark"] = [sx, 1, sz + 3]
+    # the old seal chamber under the shrine (seal_08: "beneath the shrine, in the old seal chamber"): a trapdoor in
+    # the shrine's open front, a ladder down, a low deepslate room with the first, smaller seal in its floor
+    for x in range(sx - 3, sx + 4):
+        for z in range(sz - 3, sz + 4):
+            for y in range(-5, 0):
+                edge = abs(x - sx) == 3 or abs(z - sz) == 3 or y == -5
+                if edge: d.put(x, y, z, d.pick(x, y, z, [("deepslate_bricks", 3), ("cracked_deepslate_bricks", 2), ("cobbled_deepslate", 1)], 9))
+                else: d.air(x, y, z)
+    for x in range(sx - 1, sx + 2):
+        for z in range(sz - 2, sz + 1): d.put(x, -5, z, "chiseled_deepslate" if (x, z) != (sx, sz - 1) else "lodestone")
+    for y in range(-4, 0): d.put(sx, y, sz + 2, "ladder", bs={"facing_direction": 2})
+    d.put(sx, 0, sz + 2, "spruce_trapdoor", facing="s", half="top")
+    d.put(sx - 2, -4, sz - 2, "soul_lantern", hanging=False); d.put(sx + 2, -4, sz + 1, "candle", bs={"candles": 2, "lit": True})
+    d.put(sx + 2, -4, sz - 2, "stone_bricks")
+    d.meta["tomes"] = [[sx + 1, 1, sz, "seal_03"],            # in the shrine, among the pilgrims' candles
+                       [sx + 2, -3, sz - 2, "seal_08"]]       # below, on the old stone in the chamber's corner
+    d.hollow = 1
+    d.meta["mark"] = [0, 1, 0]
+    return d
+
+
+def bellhollow_frame():
+    """The great bell frame, broken and fallen across the valley (the pilgrims' shrine is in bellhollow_seal, so it
+    stands level over the old seal chamber)."""
+    d = D("bellhollow_frame", "drape", seed=212)
+    # the frame: two great trestles, one standing, one fallen; the beam lying between
+    for k in range(10): d.put(-6, 1 + k, 0, "stripped_dark_oak_log", axis="y"); d.put(-6, 1 + k, 1, "stripped_dark_oak_log", axis="y")
+    for s in (-1, 1):
+        for k in range(6): d.put(-6, 1 + k, s * (2 + k // 2) + (1 if s > 0 else 0), "dark_oak_fence")
+    for k in range(13): d.put(-5 + k, 1, 6 + k // 4, "stripped_dark_oak_log", axis="x")    # the fallen beam
+    for k in range(10): d.put(8 + k // 5, 1, 9 + k, "stripped_dark_oak_log", axis="z")     # the fallen trestle
+    d.put(-6, 11, 0, "dark_oak_slab", half="bottom"); d.put(-6, 10, -1, "iron_chain", axis="y")
     return d
 
 # ---------------------------------------------------------------- the Ashen Gate
@@ -742,11 +763,19 @@ def ashen_chapterhouse():
             for y in (-4, -3, -2): d.put(x, y, z, d.pick(x, y, z, [("coal_block", 2), ("bookshelf", 1), ("blackstone", 1), ("air", 1)], 6))
     for y in range(-4, 0):                                            # the ladder down, against the north shelves
         d.put(0, y, -5, "deepslate_bricks"); d.put(0, y, -4, "ladder", bs={"facing_direction": 3})
-    d.put(-4, -4, -2, "campfire", bs={"extinguished": True}); d.put(3, -4, -3, "soul_lantern", hanging=False)
-    # the cell, locked from the outside
-    d.put(5, -4, -1, "iron_bars"); d.put(5, -3, -1, "iron_bars"); d.put(4, -4, -1, "iron_bars"); d.put(4, -3, -1, "iron_bars")
+    d.put(-4, -4, -2, "campfire", bs={"extinguished": True}); d.put(1, -4, -3, "soul_lantern", hanging=False)
+    # the cell where Corvin was held, in the south-east corner (x 4..5, z -3..-1): bars on its two open sides, the
+    # door of bars long since forced and gone, his straw pallet, and Corvin's tenth book where he left it
+    for y in (-4, -3, -2):
+        for z in (-3, -1): d.put(3, y, z, "iron_bars")
+        for x in (3, 4, 5): d.put(x, y, -4, "iron_bars")
+    for y in (-3, -2): d.air(3, y, -2)
+    d.put(3, -4, -2, "air")
+    d.put(5, -4, -3, "hay_block"); d.put(5, -4, -2, "brown_carpet")
+    d.put(4, -4, -1, "soul_lantern", hanging=False)
     d.meta["npcs"] = [[2, 1, 2, "cael"]]
-    d.meta["tomes"] = [[1, 2, 0, "chron_10"], [2, 2, 6, "seal_01"], [5, 7, 3, "seal_09"]]   # reading room, door, study desk
+    d.meta["tomes"] = [[1, 2, 0, "chron_10"], [2, 2, 6, "seal_01"], [5, 7, 3, "seal_09"],   # reading room, door, study desk
+                       [5, -3, -3, "corv_10"]]                                              # on his pallet in the cell
     d.meta["mark"] = [0, 1, 8]
     return d
 
