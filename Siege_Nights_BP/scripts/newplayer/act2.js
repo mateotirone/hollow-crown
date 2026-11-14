@@ -36,7 +36,8 @@ import { TOWNS } from "../economy/config.js";
 import { ironworksFacts } from "../ironworks/index.js";
 import { fallen } from "../quests/rules.js";
 import { sfx } from "../core/sfx.js";
-import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT } from "./act2_rules.js";
+import { familyOf, familyDue, startCart, houseFamily } from "./family.js";
+import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT, familyReady } from "./act2_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const CHOSE = "hc:act2_chose"; // absolute time of the choice at the Tree (the voice comes the first night after)
@@ -62,7 +63,8 @@ function bookOf(player, p) {
   return { plot, title: lore.tomes[0].title, read: p.read.includes(id) };
 }
 
-// The nearest town with a Moneyer (economy/config.js TOWNS): his NPC carries the marker, the pin is the town
+// The nearest town with a Moneyer (economy/config.js TOWNS): his NPC carries the marker; the pin is his counter where
+// the town gives him one (`at`, every town but Kingsrest, 2026-11-14), else the town
 export function nearestMoneyer(pos) {
   let best;
   for (const t of TOWNS) {
@@ -70,7 +72,8 @@ export function nearestMoneyer(pos) {
     const w = WARDS.find((x) => x.name === t.name);
     if (!w) continue;
     const d = Math.hypot(w.x - pos.x, w.z - pos.z);
-    if (!best || d < best.d) best = { name: t.name, x: w.x, z: w.z, d };
+    const at = t.at?.moneyer;
+    if (!best || d < best.d) best = { name: t.name, x: at?.x ?? w.x, z: at?.z ?? w.z, d };
   }
   return best;
 }
@@ -90,12 +93,16 @@ export function act2Facts(player) {
     f.haveIngot = carries(player, "minecraft:iron_ingot") > 0;
     f.book = bookOf(player, p);
   }
+  const fam = familyOf(home);
+  f.cart = fam?.state;
+  f.caller = fam?.caller;
   const marked = (() => { try { return markedPlaces(); } catch { return {}; } })();
   const tree = hallOf(home)?.marks?.tree;
   const places = {
     aldous: aldousAt(home) ?? marked.ashen_chapterhouse, tree, chapterhouse: marked.ashen_chapterhouse, mag: marked.mags_hut ?? mirelight(),
     hearth: elspethSpot(home), moneyer: nearestMoneyer(player.location), works: f.ironworks?.at,
     shelf: libraryShelfOf(home), relic: f.book ? PLOT_PLAN.find((x) => x.name === f.book.plot)?.relic : undefined,
+    cart: fam?.cart,
   };
   return { f, places, home };
 }
@@ -130,6 +137,19 @@ on("ironworksTaken", ({ player }) => {
   setFlag(player, F2.collected);
   player.sendMessage("§7Iron you didn't dig yourself. It still looks like iron.");
 });
+// Part 4: the morning after a siege, the family's cart comes up the road (newplayer/family.js); "There's room in the
+// Longhouse" moves them in
+on("siegeEnd", ({ outcome, besieged }) => {
+  if (outcome === "empty") return;
+  const now = world.getAbsoluteTime();
+  for (const player of world.getPlayers()) {
+    const a = act2Of(player, true);
+    if (!a.home || !(besieged ?? []).includes(a.home) || !familyReady(a.f)) continue;
+    familyDue(a.home, now);
+  }
+});
+on("loreFlag", ({ player, flag }) => { if (flag === F2.housed && player) houseFamily(homeId(player)); });
+
 world.afterEvents.playerLeave.subscribe(({ playerId }) => { cache.delete(playerId); scenes.delete(playerId); });
 
 // For the quest tracker (quests/index.js): { on, step }; the step is shown as the main step
@@ -307,6 +327,11 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   if (id !== "siege:act2" || player?.typeId !== "minecraft:player") return;
   const arg = message.trim();
   if (arg === "voice") return speakVoice(player);
+  if (arg === "family") {
+    const home = homeId(player);
+    familyDue(home, 0);
+    return player.sendMessage(startCart(home) ? "§6The family's cart is on the road to your gate." : "§cNo cart: your settlement has no wall with a gate yet.");
+  }
   if (arg === "choose") {
     const tree = hallOf(homeId(player))?.marks?.tree;
     if (!tree) return player.sendMessage("§cYour hall has no Tree of Oaths yet.");
@@ -363,13 +388,26 @@ addTests("act2", {
       assert(PLOT_PLAN.find((x) => x.name === plot)?.relic, `${plot} has a landmark to ride to`);
     }
   },
+  "Act 2: the family at the gate, after the book's place": () => {
+    const base = { flags: [F2.aldous, F2.tree, F2.wait, F2.bills, F2.sold, F2.collected], path: "none", down: 0, now: 99000, ironworks: { standing: true, built: 1 } };
+    assert(familyReady(base), "no book on this plot: the family can come");
+    const book = { plot: "Harrowford", title: "The Ferryman's Tally", read: true };
+    assert(!familyReady({ ...base, book }), "the book's place comes first");
+    assert(familyReady({ ...base, book, flags: [...base.flags, F2.bookSeen] }));
+    assertEqual(act2Stage({ ...base, cart: "due" }), undefined, "nothing to do until the cart is on the road");
+    assertEqual(act2Stage({ ...base, cart: "rolling" }), "meet_cart");
+    assertEqual(act2Stage({ ...base, cart: "here" }), "meet_cart");
+    assertEqual(act2Stage({ ...base, cart: "here", flags: [...base.flags, F2.family] }), "house_family", "heard him out, but no roof yet");
+    assertEqual(act2Stage({ ...base, cart: "housed", flags: [...base.flags, F2.family, F2.housed] }), undefined);
+    assert(!familyReady({ ...base, flags: [...base.flags, F2.housed] }), "they only come once");
+  },
   "Act 2: every step names its source and pins a place": () => {
-    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 } };
+    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 }, cart: { x: 4, z: 4 } };
     const f = { book: { plot: "Harrowford", title: "The Ferryman's Tally", read: true } };
-    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag", "talk_bills", "moneyer", "ironworks", "collect", "read_book", "book_place"]) {
+    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag", "talk_bills", "moneyer", "ironworks", "collect", "read_book", "book_place", "meet_cart", "house_family"]) {
       const s = act2Step(stage, f, p);
       assert(s?.title && s.hint && s.target, `${stage} has a line, a hint and a pin`);
-      assert(/Aldous|Elspeth|Moneyer|morning|night|book|Somebody/.test(s.hint), `${stage} says who sent you`);
+      assert(/Aldous|Elspeth|Moneyer|morning|night|book|Somebody|shout|Tobin/.test(s.hint), `${stage} says who sent you`);
     }
     assert(nearestMoneyer({ x: 0, z: 0 })?.name, "there is a Moneyer to send you to");
     for (const id of ROAD_ORDER) assert(panelText(id).includes(ROADS[id].name) && ROADS[id].confirm.go && MOMENT[id].length, `${id} has a panel, a confirm and a moment`);

@@ -213,7 +213,7 @@ export const ENTRIES = [
     tip: "Your town hall comes with your Hamlet, on the hall ground behind the Plot Stone, and grows with your settlement.",
     page: "Your town hall comes with your Hamlet: when your town is laid out, its §fHall Cornerstone§r is set on the hall ground behind the Plot Stone and the first hall rises by itself. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
-      + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
+      + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fTown Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
   },
   {
@@ -359,7 +359,7 @@ export const ENTRIES = [
     id: "regals", ch: "coin", title: "Regals",
     tip: "This is a Regal, the one coin of Aldmere. Picked up, coins are counted straight into your Regals.",
     page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64.\n\n"
-      + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Rumor Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
+      + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Town Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
       + "All your Regals are one sum. Coins you find are counted in the moment you pick them up, every shop takes from the sum and every reward adds to it, wherever you are. The §fRegals§r button on the Keep menu shows it.\n\n"
       + "The sum is kept in the §fRegal Safe§r in your vault, once you have one. A thief who breaks into your vault can rob it.",
     when: ["carry:siege:coin", "carry:siege:gold_coin"],
@@ -468,7 +468,7 @@ export const ENTRIES = [
     id: "skill_points", ch: "growth", title: "Renown and skill points",
     tip: "You earned a skill point. Spend it at the Tree of Oaths in your town hall.",
     page: "§fRenown§r (levels 1 to 50) comes from almost everything you do: fighting, holding sieges, growing your settlement.\n\n"
-      + "§fSkill points§r come from the first time you kill each kind of creature, every siege you hold, each time your settlement grows, warlords, bosses, finished book collections and every third Rumor Board job.\n\n"
+      + "§fSkill points§r come from the first time you kill each kind of creature, every siege you hold, each time your settlement grows, warlords, bosses, finished book collections and every third Town Board job.\n\n"
       + "Spend them at the §fTree of Oaths§r in your town hall (or from the Keep menu once you have a hall). Deeper rings of the tree open as your hall grows and your Renown rises.",
     when: ["event:siegeReward", "event:tierUp"],
   },
@@ -532,10 +532,10 @@ export const ENTRIES = [
     hidden: true,
   },
   {
-    id: "rumors", ch: "growth", title: "The Rumor Board",
-    tip: "Your hall has a Rumor Board: three jobs a day for Renown and coins.",
-    page: "Open the §fRumor Board§r from your town hall menu. Three rumors come in each day and you take one job at a time. Jobs pay Renown and coins, and every third job pays a skill point.\n\n"
-      + "Every job can be done alone, and the board never gives you the same thing twice in a row.",
+    id: "rumors", ch: "growth", title: "The Town Board",
+    tip: "Your hall has a Town Board: three notices a day from the people round about.",
+    page: "Open the §fTown Board§r from your town hall menu. Three notices go up each day, each pinned there by someone you can go and find: a carter robbed on the road, a shepherd short of sheep, a boy who hasn't come home. Take one, go and talk to them, and the tracker shows you the way. Jobs pay Renown and coins, and every third job pays a skill point.\n\n"
+      + "Every job can be done alone. The everyday ones come round again once you have done the rest of your region, and then the neighbouring regions send their notices too.",
     when: ["event:hallBuilt"],
   },
   {

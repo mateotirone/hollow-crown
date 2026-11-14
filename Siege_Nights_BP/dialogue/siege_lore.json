@@ -190,7 +190,7 @@
       {
         "scene_tag": "siege_lore_elspeth_barracks",
         "npc_name": "Old Elspeth",
-        "text": "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
+        "text": "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall, and send the first of them up the lookout by your gate.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
         "buttons": [
           {
             "name": "I will.",
@@ -304,6 +304,57 @@
             "name": "Thank you.",
             "commands": [
               "/scriptevent siege:lore_say elspeth stuck2_guards 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_post_wait",
+        "npc_name": "Old Elspeth",
+        "text": "One of them up the lookout by your gate. A man up there sees the road before you do, and the road is where trouble comes from.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth post_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth post_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_post",
+        "npc_name": "Old Elspeth",
+        "text": "Your men take orders. Give one.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_post 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_post 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_post",
+        "npc_name": "Old Elspeth",
+        "text": "Click one of your guards, choose Station, and send him up the gate lookout.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_post 0"
             ]
           }
         ]
@@ -9769,6 +9820,256 @@
             "name": "Some other time.",
             "commands": [
               "/scriptevent siege:lore_say carter last 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_first",
+        "npc_name": "Tobin",
+        "text": "Easy, my lord, we're no trouble. Tobin. That's Marta with the cart, and the boy's asleep on the sacks. Let him be.\n\nWe had a hamlet, three days back up the road. We haven't now.",
+        "buttons": [
+          {
+            "name": "What happened?",
+            "commands": [
+              "/scriptevent siege:lore_say tobin first 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_what",
+        "npc_name": "Tobin",
+        "text": "The Order's riders came by after and looked it over. Raiders, they said. Wrote it in their book and rode on.\n\nBut the doors were barred from outside, and nothing was taken. Not a hen. I never heard of raiders who bar you in and leave the hens.",
+        "buttons": [
+          {
+            "name": "How did you get out?",
+            "commands": [
+              "/scriptevent siege:lore_say tobin what 0"
+            ]
+          },
+          {
+            "name": "Where will you go?",
+            "commands": [
+              "/scriptevent siege:lore_say tobin what 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_who",
+        "npc_name": "Tobin",
+        "text": "Marta heard the bar go across and woke me, and we went out the back, through the byre. Nobody else had a byre door.\n\nWe never saw who. We heard them going round the houses, slow, trying each door to see it held. Then the smoke.",
+        "buttons": [
+          {
+            "name": "Where will you go?",
+            "commands": [
+              "/scriptevent siege:lore_say tobin who 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_ask",
+        "npc_name": "Tobin",
+        "text": "That's the question. Nobody wants a family the raiders came for, even raiders who don't take anything.\n\nWe can work. Marta keeps bees, I can thatch, and the boy can carry. We only need a roof.",
+        "buttons": [
+          {
+            "name": "There's room in the Longhouse.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin ask 0"
+            ]
+          },
+          {
+            "name": "Let me think about it.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin ask 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_housed",
+        "npc_name": "Tobin",
+        "text": "...Thank you, my lord. We won't forget it.\n\nMarta! Wake the boy. We're stopping.",
+        "buttons": [
+          {
+            "name": "Go on in.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin housed 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_hub",
+        "npc_name": "Tobin",
+        "text": "My lord.",
+        "buttons": [
+          {
+            "name": "Tell me again about the night it burned.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 0"
+            ]
+          },
+          {
+            "name": "Good day, Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_hub__1",
+        "npc_name": "Tobin",
+        "text": "My lord. The roof doesn't leak. You don't know what that's worth till you've had none.",
+        "buttons": [
+          {
+            "name": "Tell me again about the night it burned.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 0"
+            ]
+          },
+          {
+            "name": "Good day, Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_hub__2",
+        "npc_name": "Tobin",
+        "text": "Marta's found a place for the bees, if your guards will stop poking at the hive.",
+        "buttons": [
+          {
+            "name": "Tell me again about the night it burned.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 0"
+            ]
+          },
+          {
+            "name": "Good day, Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_hub__3",
+        "npc_name": "Tobin",
+        "text": "The boy asks every night if the doors here bar from outside. I tell him no. I check, after.",
+        "buttons": [
+          {
+            "name": "Tell me again about the night it burned.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 0"
+            ]
+          },
+          {
+            "name": "Good day, Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin hub 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tobin_again",
+        "npc_name": "Tobin",
+        "text": "Doors barred from outside. Nothing taken. Raiders, the Order wrote.\n\nI've told it to everyone who'll listen, my lord. You're the only one who's asked twice.",
+        "buttons": [
+          {
+            "name": "Good day, Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say tobin again 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_cart",
+        "npc_name": "Marta",
+        "text": "Talk to Tobin, my lord. He does the talking. I do the remembering.",
+        "buttons": [
+          {
+            "name": "What do you remember?",
+            "commands": [
+              "/scriptevent siege:lore_say marta cart 0"
+            ]
+          },
+          {
+            "name": "Of course.",
+            "commands": [
+              "/scriptevent siege:lore_say marta cart 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_remember",
+        "npc_name": "Marta",
+        "text": "The bar going across. You know that sound your whole life, a bar dropping into its brackets. Only it was on the wrong side of the door.\n\nAnd it was patient. Whatever went round the houses, it was in no hurry at all.",
+        "buttons": [
+          {
+            "name": "I'll talk to Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say marta remember 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_hub",
+        "npc_name": "Marta",
+        "text": "My lord.",
+        "buttons": [
+          {
+            "name": "Rest well, Marta.",
+            "commands": [
+              "/scriptevent siege:lore_say marta hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_hub__1",
+        "npc_name": "Marta",
+        "text": "The bees are settling. They didn't like the road.",
+        "buttons": [
+          {
+            "name": "Rest well, Marta.",
+            "commands": [
+              "/scriptevent siege:lore_say marta hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_hub__2",
+        "npc_name": "Marta",
+        "text": "I sleep by the door. Don't mind me.",
+        "buttons": [
+          {
+            "name": "Rest well, Marta.",
+            "commands": [
+              "/scriptevent siege:lore_say marta hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_marta_hub__3",
+        "npc_name": "Marta",
+        "text": "Your old woman by the fire asked me what it sounded like. Nobody else asked.",
+        "buttons": [
+          {
+            "name": "Rest well, Marta.",
+            "commands": [
+              "/scriptevent siege:lore_say marta hub 0"
             ]
           }
         ]

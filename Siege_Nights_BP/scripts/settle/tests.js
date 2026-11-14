@@ -11,7 +11,7 @@ import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath, allWatchSpots, gateWatchSpot, GATE_WATCH } from "./walldata.js";
 import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
 import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
 import { HAMLET_WALLS } from "./hamlet_walls_data.js";
@@ -53,7 +53,7 @@ addTests("settle", {
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       const radius = t.walls[0];
       for (const level of [1, 2, 6]) {
-        const spots = watchSpots(center, radius, gate, smooth, level);
+        const spots = allWatchSpots(center, radius, gate, smooth, level);
         const at = new Set(wallColumns({ center, radius, level, gateAngle: gate, smooth }).map((c) => `${c.x},${c.z}`));
         for (const s of spots) for (let n = 0; n < WATCH.clear; n++) for (let side = -1; side <= 1; side++) {
           const x = s.origin.x - s.forward.x * n + side * s.forward.z, z = s.origin.z - s.forward.z * n + side * s.forward.x;
@@ -203,7 +203,7 @@ addTests("settle walls", {
       const cols = wallColumns({ center: { x: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth });
       const at = new Set(cols.map((c) => `${c.x},${c.z}`));
       // a watchtower's shaft closes the ring where the wall leaves it open
-      const watch = watchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth, level);
+      const watch = allWatchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth, level);
       for (const t of watch) for (let dx = -t.half; dx <= t.half; dx++) for (let dz = -t.half; dz <= t.half; dz++) at.add(`${t.x + dx},${t.z + dz}`);
       for (const c of cols) {
         if (c.role === "stair" || c.role === "ladder" || c.role === "landing") continue; // steps, landings and ladders stand inside the ring
@@ -245,6 +245,24 @@ addTests("settle walls", {
         const at = new Set(cols.map((c) => `${c.x},${c.z}`));
         for (const s of spots) for (let n = 0; n < WATCH.clear; n++) assert(!at.has(`${s.origin.x - s.forward.x * n},${s.origin.z - s.forward.z * n}`), `level ${level} r${radius}: wall at watchtower ${s.k}'s door`);
       }
+    }
+  },
+  "levels 1-6 have a gate lookout beside the gate, clear of the gateway, its door inside the wall": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, (_, i) => 64 + Math.round(2 * Math.sin(i / 7))));
+    const center = { x: 300, z: -200, shape: Array.from({ length: 72 }, (_, i) => Math.sin(i / 4)) };
+    for (const [radius, gate] of [[36, 1.2], [66, bearingToAngle(180)]]) for (const level of [1, 2, 6, 7]) {
+      const g = gateWatchSpot(center, radius, gate, smooth, level);
+      assertEqual(!!g, hasWatch(level), `level ${level}: a gate lookout only where the corner lookouts are`);
+      if (!g) continue;
+      assertEqual(g.k, GATE_WATCH.k);
+      assertEqual(allWatchSpots(center, radius, gate, smooth, level).length, WATCH.count + 1);
+      const cols = wallColumns({ center, radius, level, gateAngle: gate, smooth });
+      const gateway = cols.filter((c) => c.role === "gate" || c.role === "gap" || c.role === "port");
+      for (const c of gateway) assert(!inWatch([g], c.x, c.z, 1), `level ${level} r${radius}: the gate lookout stands in the gateway at ${c.x},${c.z}`);
+      const out = { x: g.x - center.x, z: g.z - center.z };
+      assert(g.forward.x * out.x + g.forward.z * out.z > 0, "its door faces into the settlement");
+      const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+      for (let n = 0; n < WATCH.clear; n++) assert(!at.has(`${g.origin.x - g.forward.x * n},${g.origin.z - g.forward.z * n}`), `level ${level} r${radius}: wall at the gate lookout's door`);
     }
   },
   "the watchtower and lookout stand designs fit their spots, with a guard on the deck and a way up": () => {

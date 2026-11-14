@@ -19,6 +19,7 @@
 
 import { world, system } from "@minecraft/server";
 import { onTick, isNight, on, addTests, assert, assertEqual } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { WARDS } from "../plots/config.js";
 import { mapMode } from "../plots/claims.js";
 import { TOWNSFOLK } from "./data.js";
@@ -76,6 +77,8 @@ function tend(dim, town, players) {
   const c = centreOf(town);
   if (!c) return;
   const out = !isNight() || forced.has(town);
+  // someone a player has business with (a Town Board job) stays out after dark (townhall/board.js)
+  const keptOut = out ? undefined : applyFilter("townsfolkKeepOut", new Set(), { town });
   const here = new Map();
   for (const e of dim.getEntities({ type: TYPE, location: { x: c.x, y: 80, z: c.z }, maxDistance: c.r + 40 })) {
     const tag = e.getTags().find((t) => t.startsWith("siege_tf_"));
@@ -87,7 +90,7 @@ function tend(dim, town, players) {
     const tag = personTag(town, p.i);
     const e = here.get(tag);
     here.delete(tag);
-    if (!out) {
+    if (!out && !keptOut?.has(tag)) {
       missing.delete(tag);
       if (e && !near(players, e.location, FOLK.homeQuietRange)) e.remove(); // gone indoors, unseen
       continue;
@@ -140,6 +143,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target } = event;
   if (target?.typeId !== TYPE) return;
   event.cancel = true;
+  if (applyFilter("npcClick", false, { player, target })) return; // the Town Board has a job with them (townhall/board.js)
   system.run(() => { if (target.isValid) talk(player, target); });
 });
 

@@ -52,7 +52,7 @@ addTests("economy", {
     }
     for (const good of [...JOBS.hunter.sells, ...JOBS.smith.sells].filter((g) => g.id.startsWith("siege:starter_"))) assert(good.flat && good.price <= 10, good.id);
   },
-  "every town of the map has traders, inside the town, and only Kingsrest has the Moneyer": () => {
+  "every town of the map has traders, inside the town, and a Moneyer at his counter": () => {
     for (const town of TOWNS) {
       const ward = WARDS.find((w) => w.name === town.name);
       assert(ward, `${town.name} is a town on the map`);
@@ -61,7 +61,18 @@ addTests("economy", {
       assertEqual(new Set(town.jobs).size, town.jobs.length);
       assert(TOWN_RING + 2 < ward.r, `${town.name}: traders stand inside the protected town`);
     }
-    assertEqual(TOWNS.filter((t) => t.jobs.includes("moneyer")).map((t) => t.name), ["Kingsrest"]);
+    // every town has a Moneyer (Mateo 2026-11-14); outside Kingsrest he stands behind the counter of his house
+    for (const town of TOWNS) {
+      assert(town.jobs.includes("moneyer"), `${town.name} has a Moneyer`);
+      const ward = WARDS.find((w) => w.name === town.name);
+      for (const [job, at] of Object.entries(town.at ?? {})) {
+        assert(town.jobs.includes(job), `${town.name}: ${job} has a spot but no job`);
+        assert([at.x, at.y, at.z, at.yaw].every(Number.isInteger), `${town.name}: ${job} spot is whole blocks`);
+        assert(Math.hypot(at.x - ward.x, at.z - ward.z) < ward.r, `${town.name}: ${job} stands inside the protected town`);
+      }
+      for (const s of town.signs ?? []) assert(s.text && Math.hypot(s.x - ward.x, s.z - ward.z) < ward.r, `${town.name}: sign`);
+    }
+    assertEqual(TOWNS.filter((t) => !t.at?.moneyer).map((t) => t.name), ["Kingsrest"]);
   },
   "the trade-up ladder only goes up, and buying iron to climb it and selling the top never pays": () => {
     const order = ["minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:diamond", "minecraft:netherite_scrap"];
