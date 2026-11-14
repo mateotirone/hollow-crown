@@ -71,8 +71,8 @@ export const ENTRIES = [
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
       + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
       + "3. §fOpen your founder's chest§r in your house: logs, saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out in the world can't be felled, so plant the saplings.\n"
-      + "4. §fUse the Siege Workshop§r in the Mason's Yard (sneak-click it for its book). Build a §fBarracks§r there from stone bricks, planks and a barrel, then train guards in it (40 Regals each).\n"
-      + "5. §fHold the night.§r The first siege comes on the fifth night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"
+      + "4. §fBuild a Barracks§r: go to your big empty plot, click its §fPlot Marker§r (the post on it), choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its door and train guards (40 Regals each).\n"
+      + "5. §fHold the night.§r The first siege comes on the third night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"
       + "The top-right tracker shows your next step until then. Iron lies under your land: dig down with a pickaxe. Nothing is charged for upkeep until you have held your first siege.",
     when: ["event:keepFounded"],
   },
@@ -100,7 +100,7 @@ export const ENTRIES = [
     tip: "The Siege Workshop is a crafting table for castle things. Open it and check its recipe book: most of this world's items are made here.",
     page: "Every new settlement has one in its Mason's Yard. More can be crafted at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
       + "§fSneak-click§r a Workshop for its book: the main things it makes, what each does and what it takes.\n\n"
-      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Barracks, the Hall Cornerstone, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
+      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
       + "Siege blocks can only be placed inside your own settlement.",
     when: ["place:siege:workshop", "carry:siege:workshop"],
   },
@@ -210,8 +210,8 @@ export const ENTRIES = [
   },
   {
     id: "town_hall", ch: "keep", title: "The town hall",
-    tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
+    tip: "Your town hall comes with your Hamlet, on the hall ground behind the Plot Stone, and grows with your settlement.",
+    page: "Your town hall comes with your Hamlet: when your town is laid out, its §fHall Cornerstone§r is set on the hall ground behind the Plot Stone and the first hall rises by itself. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
@@ -236,7 +236,7 @@ export const ENTRIES = [
     tip: "The Mason sells building blocks for coins. Your own region's materials are cheaper.",
     page: "§fThe Mason§r sells building blocks, so building doesn't mean weeks of quarrying. Your region's own materials are cheaper. Place a §fMason's Bench§r on your land and a mason sets up beside it (two at most). Towns have their own masons. The Mason can also mend your settlement wall.\n\n"
       + "§fA new settlement§r comes with its Mason's Yard (a stone workshop, with the bench out front where the Mason works), the library, and a cottage of your own with a bed kept for you, so you can sleep the first night. Its road runs out through the gate to the nearest road.\n\n"
-      + "§fFoundation Stones§r place ready-made buildings: put one on free ground facing the way the building should run, click it, pick a building, look at the outline, then click again to raise it. You pay in planks and stone you carry, and the Mason makes up any shortfall for coins.\n\n"
+      + "§fReady-made buildings§r go up on your town's plots: click a plot's §fPlot Marker§r, pick a building, look at the outline, then click again to pay and raise it.\n\n"
       + "Or build by hand, anywhere on your land outside the ground kept for your hall.",
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
   },
@@ -314,7 +314,7 @@ export const ENTRIES = [
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Click your Barracks and choose Train soldiers.",
-    page: "Craft a §fBarracks§r at the Siege Workshop (3 stone bricks over planks, a barrel and planks), place it on your land and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
+    page: "Raise a §fBarracks§r from the §fPlot Marker§r on a big plot (15 x 17: every Hamlet has one): click the marker, choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its front door. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them. Men-at-Arms stroll round the Barracks yard and sometimes the town by day, sleep inside the Barracks at night, and turn out at once when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders. The Barracks §fArmoury§r upgrades a whole type at once (the same materials for each soldier), and those trained later wear it too.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
@@ -333,8 +333,8 @@ export const ENTRIES = [
   },
   {
     id: "quartermaster", ch: "keep", title: "The Quartermaster",
-    tip: "Place a Quartermaster's Desk on your land and a quartermaster takes the post.",
-    page: "Place a §fQuartermaster's Desk§r on your land and a quartermaster soon takes the post (an unemployed villager standing by it takes the job first).\n\n"
+    tip: "Raise the Quartermaster's Armoury from a Plot Marker and a quartermaster takes the post at its desk.",
+    page: "Click the §fPlot Marker§r on a Medium plot and choose the §fQuartermaster's Armoury§r (one per settlement). When it stands, a quartermaster soon takes the post at the desk by its front (an unemployed villager standing by it takes the job first).\n\n"
       + "He sells siege gear, weapons, armour and finery for Regals, and more stock opens up the more you trade with him: diamonds from his second level, and netherite scrap and the netherite upgrade template once he is a veteran. Netherite is meant to take a long time.",
     when: ["carry:siege:quartermaster_desk", "click:siege:quartermaster_desk"],
   },
@@ -423,7 +423,7 @@ export const ENTRIES = [
     id: "stations", ch: "travel", title: "Stations and carriages",
     tip: "Click a Station Post to call a carriage, pick where you're going, see the network map or send your horse ahead.",
     page: "Rails join the towns and settlements of Aldmere, all meeting at Kingsrest. Click a §fStation Post§r: call a carriage or a minecart, choose a destination (the bar shows the way and the distance while you ride), see the network map, or use the horse stalls to send your horse ahead.\n\n"
-      + "Build a §fRail Depot§r on your own land to join your settlement to the network.\n\n"
+      + "Your settlement's own §fstation§r rises by itself at the Station Post near your plot when you claim it, and grows with your town.\n\n"
       + "§fTrain Carriage:§r a four-seat wagon. Click it to board and push forward to go. You can craft your own at the Siege Workshop; sneak + click yours with an empty hand to pack it up.",
     when: ["click:hc:station_post", "click:siege:rail_depot", "carry:siege:rail_depot", "carry:siege:train_carriage"],
   },

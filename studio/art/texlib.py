@@ -24,7 +24,9 @@ class Tex:
     def rect(self, x0, y0, x1, y1, c, a=255):       # inclusive
         for y in range(y0, y1 + 1):
             for x in range(x0, x1 + 1): self.set(x, y, c, a)
-    def save(self, path): self.im.save(path)
+    def save(self, path):
+        from hollow_murk import murk  # the Hollow's plants are dimmed on the way out (hollow_murk.py)
+        murk(self.im.copy(), path).save(path)
     def copy(self):
         t = Tex(self.w, self.h); t.im = self.im.copy(); t.px = t.im.load(); t.r = random.Random(self.r.random()); return t
 

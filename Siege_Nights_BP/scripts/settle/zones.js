@@ -14,7 +14,7 @@
 //   zoneAt(player, location)  ->  { zone: "free" | "reserve" | "wilds" | "foreign", owner?, label? }
 
 import { world, system, GameMode, ItemStack, BlockTypes } from "@minecraft/server";
-import { isReady, settlementAt, keepOf, isAlly, onTick, moduleStore } from "../siege/api.js";
+import { isReady, settlementAt, isAlly, homeOf, onTick, moduleStore } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { hallOf } from "../townhall/townhall.js";
 import { mapMode } from "../plots/claims.js";
@@ -73,7 +73,7 @@ export function placeProblem(player, location, dimensionId, typeId) {
     creative, overworld: true, typeId, land, mine,
     reserve: mine ? reserveAt(land, location)?.label : undefined,
     wildsClosed: !land && wildsClosed(),
-    hasKeep: !!keepOf(player.id),
+    hasKeep: !!homeOf(player.id), // own settlement, or one they are a writ ally of
   });
 }
 

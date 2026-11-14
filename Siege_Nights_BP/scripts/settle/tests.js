@@ -11,7 +11,9 @@ import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, hasWatch, watchSpots, inWatch, onWatchPath } from "./walldata.js";
+import { watchPlan, watchCells, SHAFT } from "./wallwatch.js";
+import { WALLWATCH_DESIGNS } from "./wallwatch_data.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -156,6 +158,9 @@ addTests("settle walls", {
     for (const level of [1, 4, 10]) {
       const cols = wallColumns({ center: { x: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth });
       const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+      // a watchtower's shaft closes the ring where the wall leaves it open
+      const watch = hasWatch(level) ? watchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth) : [];
+      for (const t of watch) for (let dx = -WATCH.half; dx <= WATCH.half; dx++) for (let dz = -WATCH.half; dz <= WATCH.half; dz++) at.add(`${t.x + dx},${t.z + dz}`);
       for (const c of cols) {
         if (c.role === "stair" || c.role === "ladder" || c.role === "landing") continue; // steps, landings and ladders stand inside the ring
         let near = 0;
@@ -166,6 +171,48 @@ addTests("settle walls", {
       const open = cols.filter((c) => c.role === "gap" || c.role === "gate" || c.role === "port");
       assert(open.length >= WALLS.gateWidth && open.every((c) => c.z > 40 && Math.abs(c.x) <= 2), `level ${level}: the gate should be due south`);
       assert(cols.every((c) => Math.hypot(c.x, c.z) <= WALLS.radius + 5), "inside the ring");
+    }
+  },
+  "levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, (_, i) => 64 + Math.round(2 * Math.sin(i / 7))));
+    const center = { x: 300, z: -200, shape: Array.from({ length: 72 }, (_, i) => Math.sin(i / 4)) };
+    for (let level = 1; level <= MAX_WALL; level++) assertEqual(hasWatch(level), level <= 6, `level ${level}`);
+    for (const radius of [36, 46, 66]) for (const gate of [0, 1.2, bearingToAngle(180)]) {
+      const spots = watchSpots(center, radius, gate, smooth);
+      assertEqual(spots.length, 4);
+      const stone = wallColumns({ center, radius, level: 7, gateAngle: gate, smooth }).filter((c) => c.role === "tower" && c.mid);
+      for (const s of spots) {
+        assert(stone.some((c) => c.x === s.x && c.z === s.z), `r${radius}: watchtower ${s.k} is where a Watch Wall tower stands`);
+        const out = { x: s.x - center.x, z: s.z - center.z };
+        assert(s.forward.x * out.x + s.forward.z * out.z > 0, "the door faces into the settlement");
+        assertEqual(s.origin.y, s.ground + 1);
+      }
+      for (const level of [1, 3, 6]) {
+        const cols = wallColumns({ center, radius, level, gateAngle: gate, smooth });
+        for (const c of cols) {
+          assert(!inWatch(spots, c.x, c.z), `level ${level}: wall in a watchtower at ${c.x},${c.z}`);
+          if (c.role === "stair" || c.role === "landing") assert(!onWatchPath(spots, c.x, c.z), `level ${level}: steps across a watchtower door`);
+        }
+        // the door opens inside the wall: nothing of the wall on the step or in front of it
+        const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+        for (const s of spots) for (let n = 0; n < WATCH.clear; n++) assert(!at.has(`${s.origin.x - s.forward.x * n},${s.origin.z - s.forward.z * n}`), `level ${level} r${radius}: wall at watchtower ${s.k}'s door`);
+      }
+    }
+  },
+  "the watchtower design fits its spot, with a guard on the deck and a way up": () => {
+    for (const [region, d] of Object.entries(WALLWATCH_DESIGNS)) {
+      assertEqual(d.marks.guard.join(","), `0,${WATCH.guardUp},${WATCH.back + WATCH.guardOut}`, `${region} guard mark`);
+      const p = watchPlan(region);
+      const id = (c) => (c && c.role !== "air" ? d.palette[Number(c.role.split(":").pop())][0] : "air");
+      // the guard's spot: deck under, two free blocks over
+      const [gx, gy, gz] = d.marks.guard;
+      assert(id(p.get(gx, gy - 1, gz)) !== "air" && id(p.get(gx, gy, gz)) === "air" && id(p.get(gx, gy + 1, gz)) === "air", `${region}: the guard stands on the deck`);
+      // a door at the front of the shaft, a ladder inside, a hatch in the deck
+      assert(id(p.get(0, 1, SHAFT.z0)).endsWith("_door"), `${region}: door`);
+      assert([...p.cells.values()].some((c) => id(c) === "minecraft:ladder"), `${region}: ladder`);
+      assert([...p.cells.values()].some((c) => c.y === WATCH.guardUp - 1 && id(c).endsWith("trapdoor")), `${region}: hatch in the deck`);
+      const cells = watchCells(region, { x: 10, y: 70, z: 10 }, { x: 0, z: 1 });
+      assert(cells.length > 200 && cells[0].y >= cells[cells.length - 1].y, `${region}: taken down top first`);
     }
   },
   "steep ground is refused, the wall line is reserved": () => {
@@ -715,7 +762,8 @@ addTests("settle walls", {
 });
 
 // ---------- Rival Lords on the same plots (charters.js lordPick) ----------
-import { lordPick } from "./charters.js";
+import { lordPick, oneEachTaken, oneEachMessage } from "./charters.js";
+import { ONE_EACH } from "./config.js";
 addTests("settle charters", {
   "a lord fills every layout's plots and meets each charter with the designs there are"() {
     const designs = new Set(BUILDINGS.map((b) => b.id));
@@ -735,7 +783,16 @@ addTests("settle charters", {
         if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
       assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+      for (const id of ONE_EACH) assert((counts[id] ?? 0) <= 1, `${name} ${v.label}: a lord raised ${counts[id]} of the one-of-each ${id}`);
     }
+  },
+  "one of each special building per settlement (config.js ONE_EACH)"() {
+    for (const id of ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"]) assert(ONE_EACH.includes(id), `${id} is one per settlement`);
+    for (const id of HOMES) assert(!ONE_EACH.includes(id), `${id} stays unlimited`);
+    assert(!oneEachTaken("mint", {}) && !oneEachTaken("mint", { mint: 0 }), "the first Mint is allowed");
+    assert(oneEachTaken("mint", { mint: 1 }), "a second Mint is refused");
+    assert(!oneEachTaken("cottage", { cottage: 9 }), "homes are unlimited");
+    assert(/already has a Mint/.test(oneEachMessage("Mint")), "the refusal names the building");
   },
 });
 
@@ -809,6 +866,7 @@ import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine,
 import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
 import { needsRoad } from "./founding.js";
+import { REGION_TO_STYLE as REGION_TO_STYLE_T } from "./config.js";
 import { MASON_DESIGNS } from "./mason_data.js";
 
 
@@ -992,5 +1050,32 @@ addTests("settle storehouse", {
     assertEqual(JSON.stringify(crateSpot(post, forward, () => true)), JSON.stringify({ x: 10, y: 64, z: 11 }));
     assertEqual(JSON.stringify(crateSpot(post, forward, (p) => p.z === 10)), JSON.stringify({ x: 9, y: 64, z: 10 }));
     assertEqual(crateSpot(post, forward, () => false), undefined);
+  },
+  // Mateo 2026-11-13: the Barracks unlocks with the Hamlet and goes on a plot that fits it (no crafting)
+  "every layout's Hamlet has a plot the Barracks seats on"() {
+    assertEqual(opensAt("barracks"), 0, "opens with the Hamlet");
+    assert(BUILDING.barracks && PLAN_RULES.noPlan.includes("barracks"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const b = drawBuilding("barracks", style).bounds();
+        const ok = slotsOf(v).some((s) => s.tier === 0 && plotFit("barracks", s).ok && seatOnSlot(s, b));
+        assert(ok, `${name} layout ${i}: no Hamlet plot fits the Barracks`);
+      }
+    }
+  },
+  "every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'"() {
+    assertEqual(opensAt("quartermaster_desk"), 0, "opens with the Hamlet");
+    assert(BUILDING.quartermaster_desk && PLAN_RULES.noPlan.includes("quartermaster_desk"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const qb = drawBuilding("quartermaster_desk", style).bounds(), bb = drawBuilding("barracks", style).bounds();
+        const hamlet = slotsOf(v).filter((s) => s.tier === 0);
+        const forQ = hamlet.filter((s) => plotFit("quartermaster_desk", s).ok && seatOnSlot(s, qb));
+        assert(forQ.length, `${name} layout ${i}: no Hamlet plot fits the armoury`);
+        assert(hamlet.some((s) => plotFit("barracks", s).ok && seatOnSlot(s, bb) && forQ.some((q) => q.id !== s.id)), `${name} layout ${i}: the armoury would take the Barracks' only plot`);
+      }
+    }
   },
 });

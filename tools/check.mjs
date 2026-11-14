@@ -430,7 +430,47 @@ step("Hostile mobs stay out of settlements");
   }
   for (const id of wild) if (!existsSync(join(dir, `bestiary_${id.replace(/^siege:/, "")}.json`))) { bad++; fail(`bestiary/gentle.js WILD lists ${id}, which has no spawn rule.`); }
   if (!/shelteredAt\(at, dim\.id\)/.test(readFileSync(join(SCRIPTS, "bestiary/spawns.js"), "utf8"))) { bad++; fail("bestiary/spawns.js: Hollow things must ask shelteredAt() before they spawn."); }
+  // the sweep (bestiary/sheltered.js) finds strays with families: ["monster"], so every wild hostile body must carry it
+  const { MOBS } = await import(pathToFileURL(join(SCRIPTS, "bestiary/data.js")).href);
+  const wildFamilies = ["wild_hostile", "undead", "hollow"];
+  for (const [id, m] of Object.entries(MOBS)) {
+    if (!wildFamilies.includes(m.family) && !wild.has(id)) continue;
+    const file = join(BP, "entities/bestiary", `${id.replace(/^siege:/, "")}.json`);
+    if (!existsSync(file)) continue;
+    const fam = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components?.["minecraft:type_family"]?.family ?? [];
+    if (!fam.includes("monster")) { bad++; fail(`${rel(file)}: ${id} is a wild hostile but lacks the "monster" family, so the walls sweep can't find it.`); }
+  }
   console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
+}
+
+// ---------- 2b5. creatures take knockback ----------
+// Rule (Mateo 2026-11-13: "When you hit a mob they should knock back like vanilla"). Bedrock rolls
+// minecraft:knockback_resistance as a chance per hit, so anything between 0 and 1 means some blows do nothing at all.
+// Every creature is 0, except bosses (siege_boss) and heavy creatures (siege_heavy), which are 1 and rock back a little
+// by script (bestiary/stagger.js), and creatures built not to move (movement 0). NPCs, guards, mounts, dragons and
+// props are not creatures you fight, so they are left alone.
+step("Creatures take knockback");
+{
+  const NOT_FOES = ["npc", "villager", "inanimate", "siege_dragon", "horse", "player", "siege_guard"];
+  const stagger = existsSync(join(SCRIPTS, "bestiary/stagger.js")) ? readFileSync(join(SCRIPTS, "bestiary/stagger.js"), "utf8") : "";
+  let bad = 0, foes = 0, resisting = 0;
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    let ent;
+    try { ent = parseJson(readFileSync(f, "utf8"))["minecraft:entity"]; } catch { continue; } // step 1 reports it
+    const c = ent?.components ?? {};
+    const fam = c["minecraft:type_family"]?.family ?? [];
+    if (!fam.includes("mob") || fam.some((x) => NOT_FOES.includes(x))) continue;
+    foes++;
+    const allowed = fam.includes("siege_boss") || fam.includes("siege_heavy") || c["minecraft:movement"]?.value === 0;
+    const kbs = [c, ...Object.values(ent.component_groups ?? {})].map((g) => g["minecraft:knockback_resistance"]?.value).filter((v) => v !== undefined);
+    for (const kb of kbs) {
+      if (kb > 0 && kb < 1) { bad++; fail(`${rel(f)}: knockback_resistance ${kb} is a dice roll in Bedrock (some hits don't move it at all). Use 0, or 1 for a boss or siege_heavy creature.`); }
+      else if (kb >= 1 && !allowed) { bad++; fail(`${rel(f)}: ${ent.description?.identifier} shrugs off all knockback. Ordinary creatures take vanilla knockback (0); only siege_boss or siege_heavy creatures resist (studio/bestiary/build.py HEAVY).`); }
+      else if (kb >= 1) resisting++;
+    }
+  }
+  for (const fam of ["siege_boss", "siege_heavy"]) if (!stagger.includes(`"${fam}"`)) { bad++; fail(`bestiary/stagger.js must give ${fam} creatures their small stagger, or they never react to a hit.`); }
+  console.log(bad ? `${bad} problem(s)` : `${foes} creatures take vanilla knockback or a stagger (${resisting} bosses and heavy ones stagger)`);
 }
 
 // ---------- 2b3. every NPC has its own skin ----------

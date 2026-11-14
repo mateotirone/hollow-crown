@@ -17,7 +17,7 @@ import { levelSite, foundationColumns, Groundwork } from "./ground.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
 import { plotAt } from "../plots/claims.js";
-import { SETTLE, REGION_TO_STYLE } from "./config.js";
+import { SETTLE, REGION_TO_STYLE, ONE_EACH } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { footprint, corners, boxesTouch, bill, priceOf, MATERIALS } from "./rules.js";
 import { reservesOf, reserveAt, drawBox } from "./zones.js";
@@ -206,6 +206,7 @@ async function chooseBuilding(player, key, stone) {
     .title("Foundation Stone")
     .body(`Pick a building. It rises in front of this stone, the way you were facing when you set it, in the §f${STYLES[style].name}§r style.\n\n§7Any planks and any building stone will do. The mason supplies what you lack, for a price.`);
   for (const b of BUILDINGS) {
+    if (ONE_EACH.includes(b.id)) { form.button(`§8${b.name}\nOne per settlement: use a Plot Marker`); continue; } // the town counts it there
     const box = drawBuilding(b.id, style).bounds();
     const need = priceOf(drawBuilding(b.id, style));
     form.button(`${b.name}\n§8${box.x1 - box.x0 + 1} x ${box.z1 - box.z0 + 1}, ${need.timber} planks, ${need.stone} stone`);
@@ -215,6 +216,7 @@ async function chooseBuilding(player, key, stone) {
   if (res.canceled) return;
   if (res.selection === BUILDINGS.length) return chooseStyle(player, key, stone, style);
   const building = BUILDINGS[res.selection];
+  if (ONE_EACH.includes(building.id)) return player.sendMessage(`§7The ${building.name} is one per settlement, so it isn't raised from a Foundation Stone. Use the Plot Marker of an empty plot that fits it: the town keeps count there.`);
   stone.pick = building.id;
   stone.style = style;
   stone.pickedAt = system.currentTick;
@@ -237,6 +239,7 @@ async function chooseStyle(player, key, stone, current) {
 
 async function confirmBuilding(player, key, stone) {
   const building = BUILDING[stone.pick];
+  if (ONE_EACH.includes(building.id)) { stone.pick = undefined; store.save(); return chooseBuilding(player, key, stone); } // picked before the rule
   const style = stone.style;
   const problem = siteProblem(stone.owner, boxOf(key, stone, building.id, style), key);
   if (problem) {

@@ -56,7 +56,12 @@
             "Texture.coat_saltreach",
             "Texture.coat_emberwaste",
             "Texture.coat_blackfen",
-            "Texture.coat_crossbred"
+            "Texture.coat_crossbred",
+            "Texture.coat_cob_vale",
+            "Texture.coat_cob_frostmarch",
+            "Texture.coat_cob_saltreach",
+            "Texture.coat_cob_emberwaste",
+            "Texture.coat_cob_blackfen"
           ]
         }
       },

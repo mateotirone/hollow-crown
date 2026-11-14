@@ -51,6 +51,19 @@ export const WALL_LEVELS = [
 ];
 export const MAX_WALL = WALL_LEVELS.length - 1;
 
+// ---------- watchtowers (Mateo, 2026-11-13: "small watchtowers for the guards at the wall in the first wall level") ----------
+// The levels before the Watch Wall have no towers of their own, so four small timber watchtowers (the building skill's
+// design, settle/wallwatch_data.js from map/structures/review/specs/gen_wallwatch.py) stand astride the wall line,
+// exactly where the Watch Wall's four stone towers will stand: at the Watch Wall they come down and the stone towers
+// rise in their place. The wall leaves their 5 x 5 shaft open and butts against it; a guard keeps each lookout
+// (guardposts/posts.js, posts "watch:<k>").
+//   from/to = the wall levels that have them. half = half the shaft's width. back = blocks from the door's front step
+//   (the design's origin) to the middle of the shaft. clear = blocks kept free in front of the door for the way in.
+//   guardUp / guardOut = where the lookout's guard stands: feet this far above the ground under the tower, this far out
+//   from the middle of the shaft (the design's "guard" mark; the self-test checks the two agree).
+export const WATCH = { from: 1, to: 6, count: 4, half: 2, back: 3, clear: 2, guardUp: 11, guardOut: 1 };
+export const hasWatch = (level) => level >= WATCH.from && level <= WATCH.to && !WALL_LEVELS[level]?.towers;
+
 // How strong a wall of this level is, as a Castle Stone armor tier (0 stone, 1 iron, 2 diamond, 3 netherite)
 export const wallArmor = (level) => WALL_LEVELS[level]?.gateArmor ?? 0;
 
@@ -261,13 +274,38 @@ export function groundProblem(ground) {
   return undefined;
 }
 
+// Where the watchtowers stand round a wall line: [{ k, a, x, z, ground, forward, origin }]
+//   x, z = the middle of the shaft (on the line the Watch Wall's towers use: one block in from the outer face).
+//   forward = the way into the tower from its door (a wind, pointing out of the settlement: the door faces in).
+//   origin = the door's front step at feet height, the design's (0, 1, 0) for the build engine (townhall/build.js).
+export function watchSpots(center, radius, gateAngle, smooth) {
+  return Array.from({ length: WATCH.count }, (_, k) => {
+    const a = gateAngle + ((k + 0.5) / WATCH.count) * TAU;
+    const r = radiusAt(center, radius, a);
+    const x = Math.round(center.x + Math.cos(a) * (r - 1)), z = Math.round(center.z + Math.sin(a) * (r - 1));
+    const forward = Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? { x: Math.sign(Math.cos(a)), z: 0 } : { x: 0, z: Math.sign(Math.sin(a)) };
+    const ground = groundAt(smooth, a);
+    return { k, a, x, z, ground, forward, origin: { x: x - forward.x * WATCH.back, y: ground + 1, z: z - forward.z * WATCH.back } };
+  });
+}
+// Is a column inside a watchtower's shaft (pad = blocks round it too)?
+export const inWatch = (spots, x, z, pad = 0) => spots.some((s) => Math.abs(x - s.x) <= WATCH.half + pad && Math.abs(z - s.z) <= WATCH.half + pad);
+// Is a column on the way in to a watchtower's door (the step and the blocks in front of it, a block either side)?
+export const onWatchPath = (spots, x, z) => spots.some((s) => {
+  const along = (x - s.origin.x) * -s.forward.x + (z - s.origin.z) * -s.forward.z; // out from the door
+  const side = (x - s.origin.x) * s.forward.z - (z - s.origin.z) * s.forward.x;
+  return along >= 0 && along < WATCH.clear && Math.abs(side) <= 1;
+});
+
 // Every column of a wall: [{ x, z, base, top, role, d, a }] in the order it is built (round from the gate).
 //   role: "wall" | "walk" (plank walkway behind a thin wall) | "tower" | "gate" and "port" (the gate and portcullis blocks) | "gap" (kept open)
 //   d: 0 = outer face ... thick-1 = inner face (walls only). base/top: the y range of solid wall; the walk is at top.
 export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, smooth }) {
   const L = WALL_LEVELS[level];
   const cols = new Map();
+  const watch = hasWatch(level) ? watchSpots(center, radius, gateAngle, smooth) : [];
   const put = (x, z, col) => {
+    if (watch.length && inWatch(watch, x, z)) return; // a watchtower's shaft: the wall butts against it
     const k = key(x, z), old = cols.get(k);
     const rank = { gap: 6, gate: 5, port: 5, tower: 3, wall: 2, walk: 1 };
     if (!old || rank[col.role] > rank[old.role] || (col.role === old.role && col.d < old.d)) cols.set(k, { x, z, ...col });
@@ -318,7 +356,7 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     if (!cols.has(key(x, z))) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
   }
   // the top step must sit beside the walk: the flight hugs the wall, never through it, a tower or a ladder
-  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) });
+  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) || (watch.length > 0 && (inWatch(watch, x, z, 1) || onWatchPath(watch, x, z))) });
   for (const c of flights) cols.set(key(c.x, c.z), { ...c, d: 9 });
   // where a flight's top step doesn't quite touch the walk, a short solid landing carries on out to it
   const standOn = (x, z) => { const n = cols.get(key(x, z)); return n && (n.role === "walk" || (n.role === "wall" && !L.walk)); };

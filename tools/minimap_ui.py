@@ -54,7 +54,8 @@ X = f"({S} - ('%.8s' * {S}))"                      # C R K | label
 CR = f"('%.2s' * {X})"
 C = f"('%.1s' * {X})"
 ROW = f"({CR} - {C})"
-K = f"(('%.3s' * {X}) - {CR})"
+CRK = f"('%.3s' * {X})"                          # C R K
+K = f"({CRK} - {CR})"
 PIN = 9          # pin cells per side; must match PIN_COLS in scripts/minimap/data.js
 CELL = MAP // PIN
 PIN_SIZE = 7
@@ -97,13 +98,21 @@ for i, letter in enumerate(letters):
 # the quest pin (scripts/minimap/data.js pinCode): one pin per cell, each a direct sibling of hc_minimap_data.
 # Not nested in column panels: a view binding's source_control_name is only found among siblings, so pins one
 # level down could not read the data, stayed visible and drew 81 missing-texture squares (playtest 1.2.1519).
+# The grid came back in playtest 1.2.1619 with the map itself hidden, so the pins' long four-part "and" could not
+# be worked out either. Now each pin starts hidden ("visible": false, so a binding that fails leaves it hidden),
+# its test is one short comparison of the three letters C R K, and its picture is that cut minus its own cell.
 for ci, col in enumerate("abcdefghi"):
     for ri, row in enumerate("jklmnopqr"):
         off = [RIM + CELL * ci + (CELL - PIN_SIZE) / 2, RIM + CELL * ri + (CELL - PIN_SIZE) / 2]
-        box.append({f"hc_minimap_pin_{col}{row}": image("#texture", [PIN_SIZE, PIN_SIZE], off, 3, [
-            view(f"({ON} and (not ({K} = '_')) and ({C} = '{col}') and ({ROW} = '{row}'))", "#visible"),
-            view(f"('{TEX}p' + {K})", "#texture"),
-        ])})
+        cell = col + row
+        shown = f"(({CRK} = '{cell}g') or (({CRK} = '{cell}e') or ({CRK} = '{cell}t')))"
+        pin = image("#texture", [PIN_SIZE, PIN_SIZE], off, 3, [
+            view(shown, "#visible"),
+            view(f"('{TEX}p' + ({CRK} - '{cell}'))", "#texture"),
+        ])
+        pin["visible"] = False
+        pin["property_bag"] = {"#texture": TEX + "p_"}
+        box.append({f"hc_minimap_pin_{cell}": pin})
 box.append({"hc_minimap_north": {
     "type": "label", "text": "N", "color": [0.93, 0.78, 0.42], "shadow": True, "layer": 5,
     "font_scale_factor": 0.75, "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 0],

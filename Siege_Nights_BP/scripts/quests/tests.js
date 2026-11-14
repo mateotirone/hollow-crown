@@ -24,13 +24,22 @@ addTests("quests", {
   "a new settlement's first Regals: sell wheat to your own Farmer, until 16 are sold": () => {
     const farmer = { at: { x: 23, z: 2 }, sold: 0, tag: "siege_hamlet_farmer_me" };
     const f = base({ farmer, first: { keep: true, days: 4 } });
-    assertEqual(ids(f).slice(0, 3).join(","), "first_tools,farmer,wren");
+    assertEqual(ids(f).slice(0, 3).join(","), "first_barracks,farmer,wren");
     const q = questsFor(f).find((x) => x.id === "farmer");
     assertEqual(q.target.name, "Your Farmer");
     assertEqual(talkOf(questsFor(f)).tag, "siege_hamlet_farmer_me", "the Farmer gets the gold mark");
     assertEqual(questsFor(base({ farmer: { ...farmer, sold: 8 } })).find((x) => x.id === "farmer").note, "8 of 16 sold.");
     assert(!ids(base({ farmer: { ...farmer, sold: 16 } })).includes("farmer"), "done at 16");
     assert(!ids(base()).includes("farmer"), "no settlement, no Farmer step");
+  },
+  "the starter horse is pointed out until it is first ridden": () => {
+    const cob = { name: "Biscuit", at: { x: 10, z: -4 }, dim: OVERWORLD };
+    const q = questsFor(base({ cob })).find((x) => x.id === "cob");
+    assertEqual(q.title, "Ride Biscuit, your horse");
+    assertEqual(q.target.name, "Biscuit");
+    assert(!ids(base()).includes("cob"), "no cob (or already ridden), no step");
+    assert(!questsFor(base({ cob, dim: UNDERTOW })).some((x) => x.id === "cob"), "not in the Hollow");
+    assertEqual(questsFor(base({ cob: { ...cob, dim: UNDERTOW } })).find((x) => x.id === "cob").target, undefined, "no arrow to another world");
   },
   "the story starts with Sister Wren, and a settlement to found": () => {
     assertEqual(ids(base({ keep: false })), ["wren", "keep"]);

@@ -18,7 +18,7 @@ import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@min
 import { onTick } from "../core/loop.js";
 import { on } from "../core/events.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
-import { keepOf } from "../siege/api.js";
+import { keepOf, homeOf } from "../siege/api.js";
 import { allSites } from "../trains/station_sites.js";
 import { stationById, hasFound } from "../rails/index.js";
 import { STAGE_NAMES } from "../trains/stations.js";
@@ -32,6 +32,7 @@ import { hasCartsong, carterStation, stationSpot } from "../undertow/story.js";
 import { WARDS } from "../plots/config.js";
 import { firstFacts } from "../newplayer/firstnights.js";
 import { farmerFacts } from "../economy/api.js";
+import { cobFacts } from "../horses/starter.js";
 import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import { markTalk, talkSpot, forget } from "./marks.js";
 import "./tests.js";
@@ -52,7 +53,7 @@ function plotName(player) {
   try {
     const held = plotOf(player.id)?.name;
     if (held) return held;
-    const keep = keepOf(player.id);
+    const keep = keepOf(homeOf(player.id) ?? player.id); // own keep, or the one they are a writ ally of
     if (keep) return plotAt(keep)?.name;
   } catch { /* plots not ready */ }
   return undefined;
@@ -100,7 +101,7 @@ function factsOf(player) {
   let carter;
   if (inHollow) { try { carter = stationSpot(carterStation()); } catch { /* the Hollow isn't laid out yet */ } }
   let keep = false;
-  try { keep = !!keepOf(player.id); } catch { /* siege state not ready */ }
+  try { keep = !!homeOf(player.id); } catch { /* siege state not ready */ }
   return {
     flags: p.flags, solved: p.solved, got: p.got, plot, mystery, keep,
     items: itemsOf(player),
@@ -112,6 +113,7 @@ function factsOf(player) {
     first: (() => { try { return firstFacts(player); } catch { return undefined; } })(),
     station: (() => { try { return stationFacts(player); } catch { return undefined; } })(),
     farmer: (() => { try { return farmerFacts(player); } catch { return undefined; } })(),
+    cob: (() => { try { return cobFacts(player); } catch { return undefined; } })(),
   };
 }
 

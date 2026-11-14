@@ -262,6 +262,17 @@ function inn(p) {
   p.set(-2, 1, 8, "barrel"); p.set(2, 1, 8, "barrel");
 }
 
+// The Barracks and the Quartermaster's Armoury: designs from blockdesigns.js, raised on a plot from the Plot Marker
+// like any building (Mateo 2026-11-13: "it should just unlock and you place it on a plot that fits it"; 2026-11-14:
+// "I never want to use blocks to place buildings"). The working block (Barracks, Quartermaster's Desk) goes at the
+// front when it stands (raised.js). blockdesigns.js imports this file, so it hands its designs over (useBlockDesign)
+// rather than being imported here.
+const blockDesigns = {};
+export const useBlockDesign = (id, draw) => { blockDesigns[id] = draw; };
+const designOf = (id) => (styleId) => {
+  if (!blockDesigns[id]) throw new Error("settle/blockdesigns.js is not loaded");
+  return blockDesigns[id](styleId);
+};
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
@@ -276,6 +287,8 @@ export const BUILDINGS = [
   { id: "farmhouse", name: "Farmhouse", blurb: "A long low farmhouse with an open lean-to behind for hay and the woodpile.", draw: farmhouse },
   { id: "inn", name: "Inn", blurb: "A tap room with the bar, tables and a hearth, and bedrooms above for travellers.", draw: inn },
   { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
+  { id: "barracks", name: "Barracks", blurb: "A stone guardhouse with bunks, a weapons corner and a walled yard. Click the Barracks block at its front to train guards.", plan: designOf("barracks") },
+  { id: "quartermaster_desk", name: "Quartermaster's Armoury", blurb: "An open shop front with the Quartermaster's Desk as its counter and stores behind. A quartermaster takes the post and sells siege gear.", plan: designOf("quartermaster_desk") },
 ];
 // Nothing waiting now: the farmhouse, inn and mint joined BUILDINGS when the 2026-11-13 layouts made room for them.
 export const WAITING = [];

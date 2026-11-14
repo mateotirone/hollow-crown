@@ -399,7 +399,8 @@ const pay = (player, cost) => {
 export function crownStatus(viewer) {
   const c = crown();
   const r = c.ruler;
-  if (!r) return [c.vacant ? `§5${CROWN.relicName} waits in the Hollow for someone to win it.` : "No one has beaten the Hollow yet. The High Throne stands empty.", "", ...annalLines().slice(0, 6)];
+  // No ruler: just the one line. Callers add the Annals themselves (they used to be added here too, so they showed twice).
+  if (!r) return [c.vacant ? `§5${CROWN.relicName} waits in the Hollow for someone to win it.` : "The High Throne stands empty."];
   const lines = [
     `§l${rulerLabel()}§r of ${citadelName()}${r.restored ? " §7(restored)" : ""}`,
     `Reigning since day ${r.sinceDay} (${world.getDay() - r.sinceDay} days)`,
@@ -412,6 +413,13 @@ export function crownStatus(viewer) {
     lines.push("", isCourt(viewer.id) ? "§6You are in the Court." : `Your Claim: §5${claimOf(viewer.id)}§r of ${claimNeeded(r.hollowing)}`);
   }
   return lines;
+}
+
+// Has the High Throne come into the story yet? Not until someone has won the Heart at least once.
+// Before that, nothing on the keep menu may name it: it gives away the Hollow (Mateo, 2026-11-14).
+export function throneKnown(playerId) {
+  const c = crown();
+  return !!(c.ruler || c.vacant || c.pendingCrown || c.annals?.length || (playerId && c.exiles?.[playerId]));
 }
 
 export function annalLines() {

@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle walls: levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand",
   "settle base: the founder's cottage has room for a bed indoors",
   "settle base: every map plot has a road out from its gate to the map's roads, starting where each layout's gate road ends",
   "undertow: the Needlehold: its tiles hold every block once, each inside its own tile, all inside its site",
@@ -29,6 +30,9 @@ export const OFFLINE_ONLY = new Set([
   "undertow: the arrival: an old world has the first box and ramp taken away",
   "undertow: the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds",
   "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
+  "settle towns: a building seated on a slot stays inside it, front on the door side",
+  "settle storehouse: every layout's Hamlet has a plot the Barracks seats on",
+  "settle storehouse: every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'",
   "undertow: a chunk built under the low roof has it taken away and the high roof built",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
   "after: Deep: the halls are open where players and the Host stand, with floor under them",
@@ -59,6 +63,7 @@ export const OFFLINE_ONLY = new Set([
   "horses: the stable grows with the Stables and keeps odd sizes",
   "horses: every level has as many stalls as the Stables holds",
   "settle: the Barracks and Quartermaster's buildings draw in every style behind their block",
+  "undertow: thin places: every seam is known from the map's data before its cave is built, exactly where building puts it",
   "undertow: thin places: each cave shows exactly Fennick's features for it",
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
   "undertow: thin places: every cave is walkable from the mouth down to its chamber, one step at a time",

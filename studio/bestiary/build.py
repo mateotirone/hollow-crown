@@ -22,6 +22,11 @@ FAMILIES = {
     "order": ["mob", "ashen_order"], "boss": ["monster", "mob", "hollow", "siege_boss"], "boss_add": ["monster", "mob", "hollow", "siege_boss_add"],
     "boss_prop": ["inanimate", "siege_boss_prop"], "omen": ["inanimate", "siege_omen"], "seep": ["inanimate", "siege_seep"], "champion": ["mob", "siege_champion"], "projectile": ["inanimate"],
 }
+# Knockback (Mateo 2026-11-13: "When you hit a mob they should knock back like vanilla"). Bedrock reads
+# minecraft:knockback_resistance as a dice roll, not a fraction: 0.6 means six hits in ten don't move it at all. So every
+# creature is 0 (full vanilla knockback) except the heavy ones below and bosses, which are 1 and get a small scripted
+# stagger instead on every hit (scripts/bestiary/stagger.js, family siege_heavy / siege_boss). tools/check.mjs holds the rule.
+HEAVY = {"siege_ogre", "gatebreaker", "dune_wyrm", "shieldwall_brute", "stone_vigil", "oswin_reflection"}
 # mobs whose abilities are run by scripts/bestiary/mobs.js
 SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
             "dune_wyrm", "bog_hag", "mire_toad", "inquisitor"}
@@ -112,6 +117,10 @@ def entity_bp(m):
     families = list(FAMILIES[fam])
     if m.get("raider"): families.append("siege_raider")
     if mid in SCRIPTED: families.append("siege_scripted")
+    if m.get("kb") and not m.get("boss") and mid not in HEAVY:
+        raise SystemExit(f"{mid}: kb {m['kb']} would make it shrug off your blows (Bedrock rolls knockback_resistance as a chance); only bosses and HEAVY creatures resist")
+    heavy = mid in HEAVY and not m.get("static")
+    if heavy: families.append("siege_heavy")
     w, h = m.get("collision", (0.6, 1.9)); sc = m.get("scale", 1)
     desc = {"identifier": "siege:" + mid, "is_spawnable": bool(m.get("egg")), "is_summonable": True, "is_experimental": False}
     if m.get("projectile"):
@@ -129,7 +138,7 @@ def entity_bp(m):
         "minecraft:nameable": {},
         "minecraft:physics": {},
         "minecraft:pushable": {"is_pushable": not m.get("static") and not m.get("boss"), "is_pushable_by_piston": not m.get("static")},
-        "minecraft:knockback_resistance": {"value": 1 if m.get("static") else m.get("kb", 0)},
+        "minecraft:knockback_resistance": {"value": 1 if m.get("static") or m.get("boss") or heavy else 0},
     }
     if sc != 1: c["minecraft:scale"] = {"value": sc}
     c.update(sensor_for(m))

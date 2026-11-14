@@ -13,12 +13,14 @@
 //   pretenders.js  generated claimants who rise in the Hollow after Morvane falls (events: siege:pretender_risen / _marching / _fallen)
 //   sheltered.js nothing hostile spawns inside a settlement's walls or a town (shelteredAt); sieges still come from outside
 //   gentle.js    the gentle start: a new player's first days are free of our wild monsters, then they come in step by step
+//   sands.js     the Emberwaste stays sparse: only some wyrm and scarab herds are kept, far fewer near roads and towns
 //   gloam.js     Gloamwings: flyers that build up the longer a visitor stays in the Hollow
 //   champions.js NPC stand-ins for players that fight like one (spawnChampion, setStance)
 //   anim.js      boss moves: wind-up pose while the warning is up, strike when the hit lands, rage at each phase
 //   moves.js     GENERATED list of boss move animations (from studio/bestiary/anims.py, which makes every mob's animations)
 //   bodies.js    the dead fall and lie on the field until the fight is over, then sink away
 //   showcase.js  our exhibits in the /scriptevent siege:showcase test world
+//   stagger.js   bosses and heavy creatures rock back a little when hit (everything else gets vanilla knockback)
 //
 // Other features hear from us by script event:
 //   siege:boss_defeated       {"boss","x","y","z","dimension","players":[ids],"temper"?}
@@ -45,6 +47,8 @@ import "./ravens.js";
 import "./pretenders.js";
 import "./gloam.js";
 import "./gentle.js";
+import "./sands.js";
 import "./champions.js";
 import "./bodies.js";
 import "./showcase.js";
+import "./stagger.js";

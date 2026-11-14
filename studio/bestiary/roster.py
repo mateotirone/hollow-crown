@@ -255,7 +255,7 @@ def m_mirror(m):
     shield(m, size=(8, 12), shield="mirror", trim="trim", kite=True)
 mob(id="mirror_knight", name="Mirror Knight", family="hollow", model=m_mirror,
     pal=P(mirror={"c": (200, 214, 226), "style": "metal"}, trim={"c": (120, 140, 160), "style": "metal"}),
-    hp=45, speed=0.3, dmg=7, kb=0.5, groups="mirror", egg=("#c8d6e2", "#788ca0"),
+    hp=45, speed=0.3, dmg=7, groups="mirror", egg=("#c8d6e2", "#788ca0"),
     lore="Whatever you hit it with last, it learns. Shoot it and it shoots back. Strike it and it parries. Change it up.")
 
 def m_shade(m):
@@ -333,7 +333,7 @@ def m_scarab(m):
 mob(id="ash_scarab", name="Ash Scarab", family="wild_hostile", model=m_scarab, plan="bug",
     pal=P(shell={"c": (60, 40, 30), "style": "metal"}, leg=(40, 30, 24), eye=(255, 120, 30)),
     hp=6, speed=0.4, dmg=2, collision=(0.5, 0.35), resist=dict(fire=True), region="Emberwaste", egg=("#3c281e", "#ff781e"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(3, 5), weight=8, density=3, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(2, 3), weight=4, density=2, pop="monster"),  # sparse (Mateo 2026-11-14; scripts/bestiary/sands.js thins more)
     lore="One is nothing. They are never one. Their bites smoulder, and their shells are half glass.")
 
 def m_wyrm(m):
@@ -354,7 +354,7 @@ def m_wyrm(m):
 mob(id="dune_wyrm", name="Dune Wyrm", family="wild_hostile", model=m_wyrm, plan="wyrm",
     pal=P(scale={"c": (196, 160, 100), "style": "stone"}, plate={"c": (160, 120, 70), "style": "metal"}, tooth=(240, 230, 210), eye=(30, 20, 10)),
     hp=90, speed=0.28, dmg=7, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, density=1, pop="monster"),  # one at a time (Mateo 2026-11-14)
     lore="The sand ripples. Then the sand stands up. It hunts by the shake of your footsteps, so stand still or run.")
 
 def m_hag(m):
@@ -429,7 +429,7 @@ def m_knight(m):
     shield(m, size=(10, 13), shield="shield", trim="plate", kite=True)
 mob(id="ashen_knight", name="Ashen Knight", family="order", model=m_knight,
     pal=P(plate={"c": (178, 182, 190), "style": "metal"}, tabard={"c": (210, 206, 198), "style": "cloth"}, plume=(160, 30, 30), steel=IRON, shield={"c": (90, 90, 96), "style": "metal"}, eye=(30, 30, 40)),
-    hp=44, speed=0.29, dmg=8, kb=0.6, resist=dict(projectile=0.5), egg=("#b2b6be", "#a01e1e"),
+    hp=44, speed=0.29, dmg=8, resist=dict(projectile=0.5), egg=("#b2b6be", "#a01e1e"),
     lore="Sworn to the Ashen Gate. An honest blade. Ask what the Gate guards and the conversation ends.")
 
 def m_inquisitor(m):
@@ -723,7 +723,7 @@ mob(id="grey_spearman", name="Grey Host Shield-bearer", family="raider", model=m
 mob(id="grey_bowman", name="Grey Host Bowman", family="raider", model=m_grey_bow, pal=P(**GREYHOST),
     hp=22, speed=0.3, dmg=3, ranged_def=("minecraft:arrow", None), egg=("#606c74", "#aac8d7"), lore="Draws, looses, draws. He was told to hold this line and nobody has ever told him otherwise.")
 mob(id="grey_serjeant", name="Vorlund's Guard", family="raider", model=m_grey_serjeant, pal=P(**GREYHOST),
-    hp=52, speed=0.28, dmg=9, kb=0.5, collision=(0.8, 2.1), egg=("#606c74", "#787054"), lore="Carries the colours of a company that was swallowed whole. The others still form up on him.")
+    hp=52, speed=0.28, dmg=9, collision=(0.8, 2.1), egg=("#606c74", "#787054"), lore="Carries the colours of a company that was swallowed whole. The others still form up on him.")
 
 # ---------- soldiers of the Hollow itself. Not men, and not copies of men. The first real look at what is down there. ----------
 HOLLOWKIN = dict(stone={"c": (58, 40, 78), "style": "stone"}, dark={"c": (34, 24, 48), "style": "stone"}, vein={"c": (230, 70, 200), "style": "glow"},
@@ -820,7 +820,7 @@ for _age, _name, _pal, _lore in (
 # Warlords that aren't the King also get their own body now
 mob(id="hollow_warlord", name="Grey Warlord", family="raider", model=m_king,
     pal=P(skin=SKIN, plate={"c": (80, 70, 66), "style": "metal"}, crown={"c": (120, 100, 70), "style": "metal"}, shard={"c": (120, 100, 70), "style": "metal"}, cape={"c": (70, 50, 40), "style": "cloth"}, steel=IRON, eye=(255, 140, 60)),
-    hp=60, speed=0.3, dmg=9, kb=0.6, collision=(1.0, 2.8), egg=("#50463f", "#ff8c3c"),
+    hp=60, speed=0.3, dmg=9, collision=(1.0, 2.8), egg=("#50463f", "#ff8c3c"),
     lore="A named war-chief who heard the bell louder than the rest.")
 
 # ---------- stationary fight props (entities, so fights never edit the map's blocks) ----------
@@ -887,7 +887,7 @@ def m_champ_retainer(m):
     m.box("body", [-4.5, 12, -2.5], [9, 9, 5], "tabard", inflate=0.1); m.box("body", [-4.5, 8, -2.5], [9, 4, 5], "tabard")
     hold(m, "spear", bone="blade", haft="wood", blade="steel", long=30)
     shield(m, size=(9, 11), shield="shield", trim="trim")
-_CH = dict(family="champion", kb=0.5, lore_kind="champion")
+_CH = dict(family="champion", lore_kind="champion")
 mob(id="champion_knight", name="Rival Knight", model=m_champ_knight, anim_extra=champ_anim(),
     pal=P(skin=SKIN, plate={"c": (160, 164, 172), "style": "metal"}, tabard={"c": (150, 40, 36), "style": "cloth"}, steel=IRON, hilt=GOLD, wood=WOOD,
           shield={"c": (150, 40, 36), "style": "wood"}, trim=GOLD, potion={"c": (220, 70, 110), "style": "glow"}, eye=(60, 44, 30), belt=(70, 50, 36)),
@@ -942,7 +942,7 @@ def m_seep(m):
 mob(id="seep", name="Seep", family="seep", model=m_seep, plan="none", material="entity_alphablend",
     pal=P(light={"c": (176, 140, 236), "style": "glow"}, dark={"c": (26, 22, 40, 235), "style": "stone"}, stain={"c": (40, 34, 60, 150), "style": "stone"}),
     hp=60, static=True, collision=(1.0, 2.4), egg=("#1a1628", "#b08cec"),
-    lore="A place where the Hollow is pushing through. Things come out of it. Left alone, it widens.")
+    lore="A place where something below is pushing through. Things come out of it. Left alone, it widens.")
 
 def m_bolt(m):
     m.bone("root", [0, 0, 0]); m.box("root", [-1.5, 0, -1.5], [3, 3, 3], "orb")

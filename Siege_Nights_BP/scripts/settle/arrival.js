@@ -168,7 +168,7 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
 }
 
 const LAID_OUT = "§6Your settlement is laid out.§7 Roads run to the gate, a Longhouse is rising behind the Plot Stone, the town's library is going up on the square, a mason has set up beside it, and a Plot Marker stands on every plot you can build on. Use one to see what fits there.";
-const LAID = `${LAID_OUT} Put a Foundation Stone on a signpost to raise that building.`;
+const LAID = LAID_OUT; // (no Foundation Stones any more: buildings go up from a Plot Marker, Mateo 2026-11-14)
 const ARRIVAL_SAY_AT = 110; // ticks after the plot is picked: after the plot's past (3 s), before "raise your Keep Banner" (8 s)
 
 // The plots thread's welcome hall: the moment a plot is picked, lay it out so the first building is

@@ -7,6 +7,7 @@ import "./core/clickable.js";
 import "./core/gamerules.js";
 import "./core/noraids.js";
 import "./core/nomonsters.js";
+import "./core/noxpbar.js"; // the vanilla XP bar and level number are hidden
 import "./core/firstjoin.js";
 import "./core/npc_skins.js";
 import "./core/storyteller.js";

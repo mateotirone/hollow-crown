@@ -25,7 +25,7 @@ import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
-import { charterCheck, charterText, charterKeeps } from "./charters.js";
+import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
@@ -492,6 +492,21 @@ export function markerSpot(town, slot) {
 }
 
 // A plot that is gone for good: the level-4 or level-5 town hall took its ground (hallmove.js)
+// Where a player should go to raise building `id` (the first-nights tracker's pin): its plot if one is rising or
+// stands, else the nearest open, empty plot it fits. -> { x, z, state: "free" | "rising" | "built", slotId } or undefined.
+// x, z: the plot's door step, where its Plot Marker stands.
+export function plotFor(owner, id) {
+  const town = townOf(owner);
+  if (!town) return undefined;
+  const slots = slotsOf(layoutOf(town));
+  const at = (s, state) => ({ x: town.x + s.step.x, z: town.z + s.step.z, state, slotId: s.id });
+  const mine = slots.find((s) => town.slots?.[s.id]?.building === id && !town.slots[s.id].broken);
+  if (mine) return at(mine, town.slots[mine.id].done === false ? "rising" : "built");
+  const free = slots.filter((s) => s.tier <= (town.tier ?? 0) && !town.slots?.[s.id]?.building && !town.slots?.[s.id]?.base && !slotClosed(owner, s) && plotFit(id, s).ok);
+  free.sort((a, b) => Math.hypot(a.step.x, a.step.z) - Math.hypot(b.step.x, b.step.z));
+  return free[0] && at(free[0], "free");
+}
+
 export function slotClosed(owner, slot) {
   const town = townOf(owner);
   if (town?.slots[slot.id]?.closed) return true;
@@ -633,6 +648,16 @@ export function builtCounts(owner) {
   for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1;
   return counts;
 }
+// What stands or is going up in a town, for the one-of-each rule (config.js ONE_EACH): plot buildings rising,
+// finished or hand-built (a hand-built one missing something still stands), and block buildings rising or finished
+export function standingCounts(owner) {
+  const counts = { ...raisedCounts(owner, { rising: true }) };
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  return counts;
+}
+// Why `id` can't be raised again in this settlement, or undefined
+export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(owner));
+
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);

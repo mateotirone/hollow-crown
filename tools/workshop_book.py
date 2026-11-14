@@ -7,11 +7,10 @@ BP, RP = os.path.join(ROOT, "Siege_Nights_BP"), os.path.join(ROOT, "Siege_Nights
 OUT = os.path.join(BP, "scripts", "newplayer", "workshop_book_data.js")
 
 # [category, [(result id, what it does)]]
+# Buildings are never crafted (Mateo 2026-11-14): they go on plots from the Plot Marker, so none of them is here.
 BOOK = [
     ("Army and defence", [
-        ("siege:barracks", "Raises a guardhouse. Click it to train guards (40 Regals each)."),
         ("siege:ballista", "Shoots monsters within 16 blocks by itself, even through Arrow Slits."),
-        ("siege:quartermaster_desk", "A quartermaster takes the post and sells siege gear."),
         ("siege:guard_helmet", "Castle Guard armour, in your banner colour."),
         ("siege:war_horn", "Blow it at night to call a siege early, for more pay."),
     ]),
@@ -29,8 +28,6 @@ BOOK = [
         ("siege:breaching_charge", "Blows a hole in a wall after 4 seconds."),
     ]),
     ("Your settlement", [
-        ("siege:foundation_stone", "Places a ready-made building."),
-        ("siege:hall_cornerstone", "Raises a town hall (one comes free with a map plot)."),
         ("siege:mason_bench", "A mason sets up beside it and sells blocks."),
         ("siege:foresters_lodge", "A grove of your region's trees that regrows by itself."),
         ("siege:ironworks", "Makes iron over time."),
@@ -41,7 +38,6 @@ BOOK = [
         ("siege:halter", "Use it on a tamed horse to make it your steed."),
         ("siege:riding_crop", "Gallop while riding."),
         ("siege:horse_whistle", "Calls your horse from up to 64 blocks."),
-        ("siege:rail_depot", "Joins your settlement to the rail network."),
     ]),
 ]
 

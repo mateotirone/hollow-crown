@@ -61,8 +61,9 @@ def main():
     goal().save(os.path.join(UI, "pg.png"))
     edge().save(os.path.join(UI, "pe.png"))
     talk().save(os.path.join(UI, "pt.png"))
+    Image.new("RGBA", (14, 14), (0, 0, 0, 0)).save(os.path.join(UI, "p_.png"))  # no pin: what a pin shows if its binding fails
     talk(16).save(os.path.join(PARTICLE, "hc_quest_mark.png"))
-    print("wrote pins pg, pe, pt and particle hc_quest_mark")
+    print("wrote pins pg, pe, pt, p_ and particle hc_quest_mark")
 
 
 if __name__ == "__main__":

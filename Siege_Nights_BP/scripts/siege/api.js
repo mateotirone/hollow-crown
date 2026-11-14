@@ -4,10 +4,10 @@
 import { addFilter } from "../core/events.js";
 
 // ----- state -----
-export { isReady, getState, saveState, saveTracked } from "./state.js";
+export { isReady, getState, saveState, saveTracked, trackMachine } from "./state.js";
 
 // ----- settlements -----
-export { settlementAt, landRadius, tierOf, TIERS, MAX_RADIUS, isAlly, foreignSettlement, colorTaken, freeColor, recordWin } from "./territory.js";
+export { settlementAt, landRadius, tierOf, TIERS, MAX_RADIUS, isAlly, canManage, homeOf, homeAt, foreignSettlement, colorTaken, freeColor, recordWin } from "./territory.js";
 export { keepCenter, keepBlock, keepHealth, heartsOf, raiseKeepHeart, keepFallen } from "./keep.js";
 import { getState } from "./state.js";
 export const keepOf = (owner) => getState().keeps[owner];
