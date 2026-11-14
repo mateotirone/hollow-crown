@@ -81,7 +81,7 @@ export const hash = (text) => [...String(text)].reduce((h, c) => (Math.imul(h, 3
 export const blankMemory = () => ({ done: {}, round: {}, inRound: {}, last: undefined, day: -1, taken: [], job: null, jobsDone: 0, keepsakes: [], debts: 0 });
 
 // ---------- what can be offered ----------
-// ctx = { story: Story Mode on, siegesWon, town: has reached Town tier, night }
+// ctx = { story: Story Mode on, siegesWon, town: has reached Town tier, night, firstJob: a story job offered alone }
 export function whenOk(job, ctx = {}) {
   const w = job.when ?? {};
   if (job.story && !ctx.story) return false;
@@ -102,7 +102,7 @@ function chainOk(job, mem) {
 export function openIn(region, mem, ctx) {
   const round = mem.round[region] ?? 0;
   const inRound = new Set(mem.inRound[region] ?? []);
-  return allJobs().filter((j) => j.region === region && (!j.shared || sharedHome(j, mem) === region) && whenOk(j, ctx) && chainOk(j, mem)
+  return allJobs().filter((j) => j.region === region && !j.first && (!j.shared || sharedHome(j, mem) === region) && whenOk(j, ctx) && chainOk(j, mem)
     && (repeats(j) ? !inRound.has(j.id) && (round > 0 || !(mem.done[doneKey(j)] > 0)) : !(mem.done[doneKey(j)] > 0)));
 }
 
@@ -138,6 +138,8 @@ export function poolFor(home, mem, ctx) {
 // Today's notices: up to three, never the kind you did last, three different givers, own region first.
 // moods: the Storyteller's choice of moods for today (["fight", "quiet", "mystery"]), when it made one.
 export function noticesFor(day, playerId, home, mem, ctx, moods) {
+  // a story job that must come first (ctx.firstJob, Act 2's family chest): it is the only notice until it is done
+  if (ctx?.firstJob) { const first = jobById(ctx.firstJob); if (first && !(mem.done[first.id] > 0)) return [first]; }
   const roll = dice(hash(`${day}:${playerId}:board`));
   const { own, near } = poolFor(home, mem, ctx);
   const shuffled = (list) => list.map((j) => [roll(), j]).sort((a, b) => a[0] - b[0]).map(([, j]) => j);
@@ -203,7 +205,7 @@ export function payFor(job, tier) {
 
 // ---------- words ----------
 export const giverOf = (job) => GIVERS[job.giver];
-export const whoAt = (g) => (g.kind === "trader" ? g.name : `${g.name} in ${g.town}`);
+export const whoAt = (g) => (g.kind === "trader" ? g.name : `${g.name} in ${g.town ?? g.where}`);
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const placeName = (job) => PLACES[job.place]?.name ?? "the place";
 
@@ -236,7 +238,7 @@ export const offerLine = (job, run) => (run.again && job.lines.again ? job.lines
 export function noticeOf(job, mem) {
   const g = giverOf(job);
   const again = repeats(job) && (mem?.done?.[doneKey(job)] ?? 0) > 0;
-  return { title: job.title + (again ? " (again)" : ""), from: g.kind === "trader" ? cap(g.name) : `${g.name}, ${g.town}`, text: job.lines.notice };
+  return { title: job.title + (again ? " (again)" : ""), from: g.kind === "trader" ? cap(g.name) : `${g.name}, ${g.town ?? g.where}`, text: job.lines.notice };
 }
 
 // Remember a finished job: counts, the round, the kind just done

@@ -21,7 +21,7 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { addFilter } from "../core/events.js";
+import { addFilter, applyFilter } from "../core/events.js";
 import { heroOf, grantPoints, grantRenown } from "./hero.js";
 import { payE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
@@ -47,6 +47,7 @@ const SHEEP_TAG = "siege_board_sheep";
 const flockOf = (job) => job.animal ? `minecraft:${job.animal}` : undefined;
 const FOLK_TYPE = "siege:townsfolk";
 const TRADER_TYPE = "siege:job_npc";
+const STORY_TYPE = "minecraft:npc"; // a story person (lore/npcs.js) who gives a story job: Tobin in your Longhouse
 const SPAWN_NEAR = 72; // foes and people come out when you are this close (inside the loaded ground)
 const LOOK_NEAR = 7;
 const WATCH_NEAR = 28; // stay this close all night
@@ -82,7 +83,10 @@ const storyOn = (player) => { try { return player.getDynamicProperty("hc:mode") 
 function ctxOf(player) {
   let raid = false;
   try { raid = isSiegeNight(); } catch { /* no siege state */ }
-  return { story: storyOn(player), siegesWon: heroOf(player).siegesHeld ?? 0, night: api.isNight(), raid };
+  // a story job that must come first (Act 2's family chest, newplayer/act2.js): offered alone while it is the step
+  let firstJob;
+  try { firstJob = storyOn(player) ? applyFilter("boardFirstJob", undefined, { player }) : undefined; } catch { /* no story */ }
+  return { story: storyOn(player), siegesWon: heroOf(player).siegesHeld ?? 0, night: api.isNight(), raid, firstJob };
 }
 // Your home region: where your keep stands, else where you are; off the map, the Vale
 function homeRegion(player) {
@@ -176,6 +180,7 @@ function isGiver(entity, key) {
   if (!g) return false;
   try {
     if (g.kind === "folk") return entity.typeId === FOLK_TYPE && entity.hasTag(folkTag(g) ?? "-");
+    if (g.kind === "story") return entity.typeId === STORY_TYPE && entity.hasTag(g.tag);
     return entity.typeId === TRADER_TYPE && entity.hasTag(`siege_job_${g.job}`) && entity.hasTag(townTag(g.town));
   } catch { return false; }
 }
@@ -607,8 +612,15 @@ world.afterEvents.entityDie.subscribe((event) => {
 });
 
 // ---------- the tracker ----------
-// The quest tracker's step for a running job: { id, title, hint, target, npc } (quests/rules.js shows it)
+// The quest tracker's step for a running job: { id, title, hint, target, npc } (quests/rules.js shows it). A story
+// job's step is the story's main step instead (newplayer/act2.js reads boardStep), so it is not shown twice.
 export function boardQuest(player) {
+  const run = memOf(player).job, job = run && jobById(run.id);
+  if (!job || job.story) return undefined;
+  return boardStep(player);
+}
+// The running job's step, story or not: { id, job, step, title, hint, target, npc }
+export function boardStep(player) {
   const run = memOf(player).job, job = run && jobById(run.id);
   if (!job) return undefined;
   const t = trackerStep(job, run);
@@ -619,7 +631,7 @@ export function boardQuest(player) {
   const target = person
     ? (town ? { name: person.town, x: town.x, z: town.z, dim: OVERWORLD } : undefined)
     : run.x !== undefined ? { name: PLACES[job.place]?.name ?? job.title, x: run.x, z: run.z, dim: OVERWORLD } : undefined;
-  return { id: `board_${job.id}_${run.step}`, title: t.title, hint: t.hint, target, npc: person ? { tag: giverTag(person === g ? job.giver : job.to), name: person.name } : undefined };
+  return { id: `board_${job.id}_${run.step}`, job: job.id, step, title: t.title, hint: t.hint, target, npc: person ? { tag: giverTag(person === g ? job.giver : job.to), name: person.name } : undefined };
 }
 
 // The quest marks find people by one tag: givers a player needs get theirs while that player is near
@@ -629,7 +641,7 @@ api.onTick("board_giver_tags", 40, () => {
     if (!job) continue;
     for (const key of [job.giver, job.to].filter(Boolean)) {
       const g = GIVERS[key];
-      const type = g.kind === "folk" ? FOLK_TYPE : TRADER_TYPE;
+      const type = g.kind === "folk" ? FOLK_TYPE : g.kind === "story" ? STORY_TYPE : TRADER_TYPE;
       let list = [];
       try { list = player.dimension.getEntities({ type, location: player.location, maxDistance: 96 }); } catch { continue; }
       for (const e of list) if (isGiver(e, key) && !e.hasTag(giverTag(key))) try { e.addTag(giverTag(key)); } catch { /* gone */ }

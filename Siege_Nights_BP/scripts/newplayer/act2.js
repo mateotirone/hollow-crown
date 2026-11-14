@@ -20,7 +20,7 @@
 import { world, system } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { on, addFilter } from "../core/events.js";
-import { onTick, homeOf, getState, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, homeOf, keepOf, getState, addTests, assert, assertEqual } from "../siege/api.js";
 import { progressOf, setFlag } from "../lore/player.js";
 import { addLoreContext } from "../lore/npcs.js";
 import { aldousAt, aldousWitness, aldousRidesOn, elspethSpot } from "../lore/places.js";
@@ -37,7 +37,10 @@ import { ironworksFacts } from "../ironworks/index.js";
 import { fallen } from "../quests/rules.js";
 import { sfx } from "../core/sfx.js";
 import { familyOf, familyDue, startCart, houseFamily } from "./family.js";
-import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT, familyReady } from "./act2_rules.js";
+import { boardStep, memOf } from "../townhall/board.js";
+import { jobById } from "../townhall/board_rules.js";
+import { regionAt } from "../minimap/data.js";
+import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT, familyReady, FIRST_JOBS, NOTICE_LINE } from "./act2_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const CHOSE = "hc:act2_chose"; // absolute time of the choice at the Tree (the voice comes the first night after)
@@ -96,15 +99,31 @@ export function act2Facts(player) {
   const fam = familyOf(home);
   f.cart = fam?.state;
   f.caller = fam?.caller;
+  f.housedAt = fam?.housedAt;
+  if (fam?.state === "housed") f.board = firstJobOf(player, home);
   const marked = (() => { try { return markedPlaces(); } catch { return {}; } })();
   const tree = hallOf(home)?.marks?.tree;
   const places = {
     aldous: aldousAt(home) ?? marked.ashen_chapterhouse, tree, chapterhouse: marked.ashen_chapterhouse, mag: marked.mags_hut ?? mirelight(),
     hearth: elspethSpot(home), moneyer: nearestMoneyer(player.location), works: f.ironworks?.at,
     shelf: libraryShelfOf(home), relic: f.book ? PLOT_PLAN.find((x) => x.name === f.book.plot)?.relic : undefined,
-    cart: fam?.cart,
+    cart: fam?.cart, tobin: fam?.tobin, board: hallOf(home)?.marks?.board,
   };
   return { f, places, home };
+}
+
+// Part 5: Act 2's first Town Board job (the family's chest), by home region: { id, taken, done, step }
+export function firstJobId(home) {
+  let at;
+  try { at = keepOf(home); } catch { /* no keep */ }
+  return at ? FIRST_JOBS[regionAt(at.x, at.z)] ?? FIRST_JOBS["Aldmere Vale"] : FIRST_JOBS["Aldmere Vale"];
+}
+function firstJobOf(player, home) {
+  const id = firstJobId(home);
+  let mem;
+  try { mem = memOf(player); } catch { return undefined; }
+  const taken = mem.job?.id === id;
+  return { id, taken, done: (mem.done?.[id] ?? 0) > 0, step: taken ? boardStep(player) : undefined };
 }
 
 const STAGE_EVERY = 40;
@@ -149,6 +168,14 @@ on("siegeEnd", ({ outcome, besieged }) => {
   }
 });
 on("loreFlag", ({ player, flag }) => { if (flag === F2.housed && player) houseFamily(homeId(player)); });
+// Part 5: while Tobin's notice is this player's step, it is the only notice on the board (townhall/board.js)
+addFilter("boardFirstJob", (id, { player }) => {
+  if (id || !player) return id;
+  const a = act2Of(player);
+  return a.stage === "read_notice" || a.stage === "board_job" ? a.f?.board?.id : undefined;
+});
+on("boardJob", ({ player }) => forget(player));
+on("boardJobDone", ({ player }) => forget(player));
 
 world.afterEvents.playerLeave.subscribe(({ playerId }) => { cache.delete(playerId); scenes.delete(playerId); });
 
@@ -317,6 +344,7 @@ onTick("act2", 20, () => {
       if (!a.f) continue;
       if (a.on && PILLAR2.has(a.stage)) pillar(player, { chapterhouse: a.places?.chapterhouse, mag: a.places?.mag, book_place: a.places?.relic }[a.stage]);
       if (a.stage === "book_place") bookPlace(player, a);
+      if (a.stage === "read_notice" && !a.f.flags.includes(F2.notice)) { say(player, "Old Elspeth", NOTICE_LINE); setFlag(player, F2.notice); }
       if (scenes.has(player.id) || player.dimension.id !== OVERWORLD) continue;
       if (voiceDue(a.f, world.getAbsoluteTime(), world.getTimeOfDay()) && !getState().active) { speakVoice(player); forget(player); }
     } catch (e) { console.warn(`[Act 2] ${e}`); }
@@ -401,10 +429,25 @@ addTests("act2", {
     assertEqual(act2Stage({ ...base, cart: "housed", flags: [...base.flags, F2.family, F2.housed] }), undefined);
     assert(!familyReady({ ...base, flags: [...base.flags, F2.housed] }), "they only come once");
   },
+  "Act 2: the morning after they move in, Tobin's notice and the family's chest": () => {
+    const housed = { flags: [F2.aldous, F2.tree, F2.wait, F2.bills, F2.sold, F2.collected, F2.family, F2.housed], path: "none", down: 0, ironworks: { standing: true, built: 1 }, cart: "housed", housedAt: 100000 };
+    const board = { id: "vale_family_chest", taken: false, done: false };
+    assertEqual(act2Stage({ ...housed, now: 110000, board }), undefined, "the notice waits for the morning after");
+    assertEqual(act2Stage({ ...housed, now: 121000, board }), "read_notice");
+    const step = { id: "board_vale_family_chest_1", step: "go", title: "Find the family's chest at Brackenfold", hint: "", target: { name: "Brackenfold", x: 75, z: 6 } };
+    assertEqual(act2Stage({ ...housed, now: 121000, board: { ...board, taken: true, step } }), "board_job");
+    assertEqual(act2Stage({ ...housed, now: 121000, board: { ...board, done: true } }), undefined, "done: the board opens normally");
+    const s = act2Step("board_job", { board: { ...board, taken: true, step } }, { tobin: { x: 1, z: 1 } });
+    assertEqual(s.target.x, 75, "out at the hamlet, the pin is the hamlet");
+    assert(/Tobin/.test(s.hint), "Tobin's words");
+    const back = act2Step("board_job", { board: { ...board, taken: true, step: { ...step, step: "back", title: "Go back to Tobin in your Longhouse" } } }, { tobin: { x: 1, z: 1 } });
+    assertEqual(back.target.name, "Tobin", "coming back, the pin is Tobin");
+    for (const id of Object.values(FIRST_JOBS)) assert(jobById(id)?.first && jobById(id).story && jobById(id).giver === "tobin", `${id} is Tobin's story job`);
+  },
   "Act 2: every step names its source and pins a place": () => {
-    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 }, cart: { x: 4, z: 4 } };
+    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 }, cart: { x: 4, z: 4 }, board: { x: 5, z: 5 } };
     const f = { book: { plot: "Harrowford", title: "The Ferryman's Tally", read: true } };
-    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag", "talk_bills", "moneyer", "ironworks", "collect", "read_book", "book_place", "meet_cart", "house_family"]) {
+    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag", "talk_bills", "moneyer", "ironworks", "collect", "read_book", "book_place", "meet_cart", "house_family", "read_notice"]) {
       const s = act2Step(stage, f, p);
       assert(s?.title && s.hint && s.target, `${stage} has a line, a hint and a pin`);
       assert(/Aldous|Elspeth|Moneyer|morning|night|book|Somebody|shout|Tobin/.test(s.hint), `${stage} says who sent you`);

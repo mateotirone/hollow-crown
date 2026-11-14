@@ -28,6 +28,7 @@ export const F2 = {
   bookSeen: "act2_book_seen", // you rode to the place it names and saw it for yourself
   family: "family_met", // you heard Tobin out at the cart
   housed: "family_housed", // you gave the family a place in the Longhouse
+  notice: "act2_notice_told", // Elspeth told you there's a notice up you'll want to read
 };
 export const ELSPETH_TAG = "siege_lore_npc_elspeth";
 export const MONEYER_TAG = "siege_job_moneyer";
@@ -64,7 +65,11 @@ export function act2Stage(f) {
     if (f.cart !== "rolling" && f.cart !== "here") return undefined;
     return has(F2.family) ? "house_family" : "meet_cart";
   }
-  return undefined;
+  // part 5: the first Town Board job, the morning after they move in: Tobin's notice, the chest from the burned hamlet.
+  // f.board = { taken (the job is yours), done, step (the board's own step, townhall/board.js boardStep) }
+  if (!f.board || !morningAfter(f.housedAt, f.now ?? 0)) return undefined;
+  if (f.board.done) return undefined;
+  return f.board.taken ? "board_job" : "read_notice";
 }
 // Part 1: Aldous, the Tree, and the road you chose; "done" once that is behind you (or you said "Not yet")
 function roadStage(f, has) {
@@ -88,6 +93,9 @@ export const FAMILY_TAGS = { tobin: "siege_lore_npc_tobin", marta: "siege_lore_n
 // The morning after a siege: the cart sets off once it is day (time of day) and the lord is home
 export const CART_FROM = 1000, CART_TO = 11000;
 // Ready for the family: every earlier Act 2 step is behind this player (the cart is all that is missing)
+// Act 2's first board job, by your home region (townhall/board_data.js: the hamlet the family fled)
+export const FIRST_JOBS = { "Aldmere Vale": "vale_family_chest", Frostmarch: "frost_family_chest", Saltreach: "salt_family_chest", Emberwaste: "ember_family_chest", Blackfen: "fen_family_chest" };
+export const NOTICE_LINE = "There's a notice up you'll want to read.";
 export const familyReady = (f) => act2Stage({ ...f, cart: "here" }) === "meet_cart";
 export const cartDue = (due, now, time) => due !== undefined && now >= due && time >= CART_FROM && time < CART_TO;
 
@@ -124,8 +132,17 @@ export function act2Step(stage, f = {}, p = {}) {
       at("The cart", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
     case "house_family": return step("Give them a place in the Longhouse", "Tobin said: we can work, we only need a roof. Tell him there's room in the Longhouse.",
       at("Tobin", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
+    case "read_notice": return step("Read the notice on the Town Board", `Elspeth said: "${NOTICE_LINE}"`, at("Town Board", p.board));
+    case "board_job": return boardJobStep(f.board?.step, p);
     default: return undefined;
   }
+}
+// The board's own step for the family's chest, said the story's way: Tobin's words, and Tobin pinned in the Longhouse
+function boardJobStep(b, p) {
+  if (!b) return undefined;
+  const tobin = p.tobin ? { name: "Tobin", x: p.tobin.x, z: p.tobin.z, dim: "minecraft:overworld" } : b.target;
+  const hint = { talk: "His notice is on the Town Board. He's in your Longhouse.", go: "Tobin said: the last house on the lane, by what's left of the table.", back: "Tobin is waiting in your Longhouse." }[b.step] ?? b.hint;
+  return { id: `act2_${b.id}`, title: b.title, hint, target: b.step === "go" ? b.target : tobin, ...(b.npc ? { npc: b.npc } : {}) };
 }
 const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 
