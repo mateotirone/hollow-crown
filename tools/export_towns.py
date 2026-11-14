@@ -163,7 +163,7 @@ def starter_hamlet(v, st):
         deep = box[3] - box[1] + 1 if door["side"] in "ns" else box[2] - box[0] + 1
         design = ar.get("design")
         size = ar.get("size") or ("Small" if wide <= 9 else "Medium" if deep <= 15 and wide <= 13 else "Large")
-        size = {"S": "Small", "M": "Medium", "L": "Large"}.get(size, size)
+        size = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works"}.get(size, size)
         hall = ["hall4"] if boxes_meet(box, hall4) else ["hall5"] if boxes_meet(box, hall5) else []   # ground the hall takes back
         tags = ["starter"] + (["library", "square"] if design == "library" else []) + hall
         if design == "house" and not any("founder" in q["tags"] for q in v["slots"]):

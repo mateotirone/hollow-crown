@@ -457,6 +457,17 @@ addTests("settle towns", {
       }
     }
   },
+  "every layout sets up a Works yard at Hamlet, for the Ironworks (Mateo 2026-11-14)": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const w = slotsOf(layout).filter((s) => s.size === "W" && s.tier === 0);
+        assert(w.length === 1, `${key} ${layout.label}: ${w.length} Hamlet Works plots`);
+        const { x0, z0, x1, z1 } = w[0].box;
+        const dims = [x1 - x0 + 1, z1 - z0 + 1].sort((a, b) => a - b).join("x");
+        assertEqual(dims, "17x27", `${key} ${layout.label}: Works plot is 27 x 17`);
+      }
+    }
+  },
   "slots open by tier, have a door side and stand inside the Castle wall": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
       for (const layout of town.variants) {
@@ -566,7 +577,7 @@ addTests("settle ground", {
 
 // ---------- plot rules and charters (charters.js, config.js) ----------
 import { plotFit, charterCheck, charterKeeps, slotClass, opensAt } from "./charters.js";
-import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST } from "./config.js";
+import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST, STAGES as STAGE_LIST } from "./config.js";
 import { townNames as allTownNames, townFor as townByName, slotsOf as slotsOfLayout } from "./towns.js";
 import { BLOCK_BUILDS as BLOCK_BUILD_LIST } from "./blockdesigns.js";
 
@@ -581,7 +592,7 @@ addTests("settle charters", {
     const S = { size: "S", tags: [] }, M = { size: "M", tags: [] }, ML = { size: "M", long: true, tags: [] }, L = { size: "L", tags: [] };
     assertEqual(slotClass(ML), "ML");
     assert(plotFit("cottage", S).ok && !plotFit("cottage", M).ok, "cottage takes Small only");
-    assert(plotFit("market", L).ok && plotFit("market", ML).ok && !plotFit("market", M).ok, "market: Large or long Medium");
+    assert(plotFit("market", S).ok && plotFit("market", M).ok && plotFit("market", L).ok, "market: the 7 x 5 stall takes any plot, Small up");
     assert(!plotFit("barracks", M, new Set(["M", "S"])).ok && !plotFit("barracks", ML).ok, "barracks: never a Medium (the guardhouse is 15 x 17)");
     const deep = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 16 }, door: { x: 0, z: -1 } };
     const flat = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 14 }, door: { x: 0, z: -1 } };
@@ -596,17 +607,22 @@ addTests("settle charters", {
     assert(plotFit("watchtower", { size: "S", tags: ["wall"] }).ok, "watchtower by the wall");
     assert(plotFit("well", { size: "S", tags: ["square"] }).tagged, "well on the square is a good spot");
   },
-  "charters: Hamlet free, Town needs homes and a market, missing designs are skipped"() {
-    const known = new Set(["cottage", "market", "barracks", "smithy"]);
-    assert(charterCheck(0, {}, known).met, "Hamlet charter is empty");
-    const short = charterCheck(1, { cottage: 2, market: 1 }, known);
-    assert(!short.met, "two homes are not enough");
-    assert(short.lines.find((l) => l.what === "Mint").skipped, "the Mint is skipped until it exists");
-    assert(charterCheck(1, { cottage: 3, market: 1 }, known).met, "three homes and a market");
-    const city = charterCheck(2, { cottage: 6, market: 1, barracks: 1 }, known);
-    assert(!city.met, "City needs one more work building");
-    assertEqual(city.lines.find((l) => l.more).need, 3);
-    assert(charterCheck(2, { cottage: 6, market: 1, barracks: 1, smithy: 1 }, known).met, "one more work building of any size");
+  "charters are the stages: every building of the stage, plus the homes, missing designs and other regions skipped"() {
+    const known = new Set(["cottage", "house", "barracks", "ironworks", "farmhouse", "mint", "market", "inn", "smithy", "garden", "well", "quartermaster_desk", "watchtower", "dragon_roost"]);
+    assert(!charterCheck(0, {}, known).met, "the Hamlet needs its Barracks and Ironworks to become a Town");
+    assert(charterCheck(0, { barracks: 1, ironworks: 1 }, known).met, "Barracks and Ironworks");
+    assert(charterCheck(0, { barracks: 1 }, new Set(["barracks"])).met, "an old layout with no Works yard skips the Ironworks");
+    const town = { house: 2, farmhouse: 1, mint: 1, market: 1 };
+    assert(!charterCheck(1, town, known).met, "two homes are not enough");
+    assert(charterCheck(1, { ...town, cottage: 1 }, known).met, "three homes, the Farmhouse, the Mint and the Market");
+    assert(!charterCheck(1, { ...town, cottage: 1, market: 0 }, known).met, "every building of the stage, not most of them");
+    const city = { house: 2, cottage: 4, quartermaster_desk: 1, inn: 1, smithy: 1, garden: 1, well: 1 };
+    assert(charterCheck(2, city, known).met, "the City's list");
+    assert(!charterCheck(2, { ...city, well: 0 }, known).met, "the Well too");
+    for (const t of [0, 1, 2, 3]) {
+      const lines = CHARTER_LIST[t].map((l) => l.ids.join(","));
+      for (const b of STAGE_LIST[t].build) assertEqual(lines.includes(b.id), !b.pending, `${b.id}: a charter line at ${STAGE_LIST[t].name} exactly when it has a plot`);
+    }
     assertEqual(CHARTER_LIST.length, 4);
   },
   "every building has a plot it may take in every charter-passing layout"() {
@@ -790,11 +806,11 @@ addTests("settle charters", {
     const slots = slotsOfLayout(v);
     // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use
     const used = new Set(slots.filter((s) => s.start || s.tags.includes("library")).map((s) => s.id)); // standing from the start
-    const take = (id) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
-    const farm = take("farmhouse"), mint = take("mint"), market = take("market"), homes = [take("cottage"), take("cottage"), take("cottage")];
+    const take = (id, size) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && (!size || q.size === size) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
+    const farm = take("farmhouse"), mint = take("mint"), market = take("market", "S"), homes = [take("cottage"), take("cottage")];
     assert(farm && mint && market && homes.every(Boolean), "gullcliff has a plot for each Town charter building");
     const free = [farm, mint, market, ...homes];
-    const counts = { library: 1, house: 2 };
+    const counts = { library: 1, house: 2, barracks: 1 }; // the Hamlet's stage is built (its Ironworks isn't a plot design here)
     const kept = charterKeeps(free, 0, counts, known, mint, "house");
     assert(kept, "a house on the Mint's only Medium would leave the Town charter without a plot");
     assert(kept.ids.length && kept.ids.every((id) => plotFit(id, mint).ok), "it names what may go there");
@@ -904,7 +920,7 @@ addTests("settle plans", {
           continue;
         }
         for (const id of line.ids) {
-        if (PLAN_RULES.noPlan.includes(id)) continue;
+        if (PLAN_RULES.noPlan.includes(id) || !BUILDINGS.some((b) => b.id === id)) continue; // the Works machines need no plan
         assert(known.has(id), `the ${TIER_NAMES_T[tier]} charter needs ${id}, so a level ${tier + 1} hall (or the basics) must teach it`);
         }
       }
@@ -922,14 +938,14 @@ addTests("settle plans", {
     const by = Object.fromEntries(cards.map((c) => [c.id, c]));
     assert(by.cottage.home && by.cottage.texture.endsWith("cottage_saltreach"), "a basic shows bright in the town's style");
     assert(!by.smithy.home && by.smithy.known && by.smithy.texture.endsWith("smithy_frostmarch"), "a foreign-only plan shows in its own style");
-    assert(!by.stable.known && by.stable.texture.endsWith("stable_saltreach_dim"), "an unfound plan is greyed");
-    assertEqual(whereFrom("stable").short, "Hall level 3");
+    assert(!by.inn.known && by.inn.texture.endsWith("inn_saltreach_dim"), "an unfound plan is greyed");
+    assertEqual(whereFrom("inn").short, "Hall level 3");
     assert(whereFrom("cottage").short.length <= 14, "card hints are short");
   },
 });
 
 import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
-import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
+import { pickBaseSlot, bedSpot, bedSpots, hasFurnace, furnaceSpots, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
 import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
 import { needsRoad } from "./founding.js";
@@ -967,6 +983,19 @@ addTests("settle base", {
         const all = bedSpots(drawBuilding(id, region));
         assert(all.length >= 2 && all[0].x === at.x && all[0].z === at.z, `${region} ${id} has a second spot for when the first is taken`);
       }
+    }
+  },
+  "the founder's house has a furnace: the cottage's own, or a spot by the bed in the starter village's house"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      assert(hasFurnace(drawBuilding("cottage", region)), `${region} cottage has its own furnace`);
+      const plan = drawBuilding("house", region);
+      if (hasFurnace(plan)) continue;
+      const bed = bedSpot(plan);
+      const spots = furnaceSpots(plan, bed);
+      assert(spots.length >= 2, `${region} house has room for a furnace`);
+      const f = spots[0];
+      assert(f.y === bed.y && !(Math.abs(f.x - bed.x) <= 1 && f.z >= bed.z - 1 && f.z <= bed.z + 2), `${region} house furnace is on the bed's floor, clear of the bed`);
+      assert(Math.abs(f.face.x) + Math.abs(f.face.z) === 1, `${region} house furnace faces one way`);
     }
   },
   "the base buildings take the nearest free Small plot, never the library's"() {
@@ -1131,18 +1160,57 @@ addTests("settle storehouse", {
       }
     }
   },
-  "every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'"() {
-    assertEqual(opensAt("quartermaster_desk"), 0, "opens with the Hamlet");
+  "the Quartermaster's Armoury is a City plot building that needs no plan"() {
+    assertEqual(opensAt("quartermaster_desk"), 2, "opens with the City: every Hamlet plot is taken, the Town's Mediums are the Farmhouse's and the Mint's");
     assert(BUILDING.quartermaster_desk && PLAN_RULES.noPlan.includes("quartermaster_desk"), "a plot building that needs no plan");
+  },
+});
+
+// ---------- the stages: every building has its stage, its plot and its story step (config.js STAGES, stages.js) ----------
+// Mateo 2026-11-14: "every place able building needs a plot", "you need to place every building for the settlement
+// stage you're on in order to level up", "the story (tutorial) takes you through this". Build the next act or
+// re-run the town generator and these say what is missing.
+import { seatStages, stageEntries } from "./stages.js";
+import { STAGE_OPTIONAL } from "./config.js";
+import { WORKS } from "./buildings.js";
+import { ACT_STEPS, parseStep } from "../quests/acts.js";
+
+addTests("settle stages", {
+  "every stage building has a plot of its own, open by its stage, in every town layout (all of a stage at once)"() {
+    const bounds = {};
+    const fits = (id, s) => {
+      if (!plotFit(id, s, new Set(["none"])).ok) return false;
+      if (!BUILDING[id] || WORKS.some((w) => w.id === id)) return true; // a Works machine fills its yard exactly
+      bounds[id] ??= drawBuilding(id, "vale").bounds();
+      return !!seatOnSlot(s, bounds[id]);
+    };
+    const bad = [];
     for (const [name, town] of Object.entries(TOWNS)) {
       for (const [i, v] of town.variants.entries()) {
-        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
-        const qb = drawBuilding("quartermaster_desk", style).bounds(), bb = drawBuilding("barracks", style).bounds();
-        const hamlet = slotsOf(v).filter((s) => s.tier === 0);
-        const forQ = hamlet.filter((s) => plotFit("quartermaster_desk", s).ok && seatOnSlot(s, qb));
-        assert(forQ.length, `${name} layout ${i}: no Hamlet plot fits the armoury`);
-        assert(hamlet.some((s) => plotFit("barracks", s).ok && seatOnSlot(s, bb) && forQ.some((q) => q.id !== s.id)), `${name} layout ${i}: the armoury would take the Barracks' only plot`);
+        if (v.charter === false) continue; // never picked (towns.js pickLayout)
+        for (const m of seatStages(v, { fits })) bad.push(`${name} layout ${i}, ${m.stage}: no plot for the ${m.what}`);
       }
+    }
+    assert(!bad.length, `${bad.length} missing:\n${bad.slice(0, 12).join("\n")}`);
+  },
+  "every building a player can raise is in a stage (or is an optional home)"() {
+    const staged = new Set([...stageEntries().map((b) => b.id), ...STAGE_OPTIONAL, "library"]);
+    const raisable = [...BUILDINGS.map((b) => b.id), ...WORKS.map((w) => w.id), ...Object.keys(BLOCK_BUILD_LIST).map((t) => t.replace(/^siege:/, ""))];
+    for (const id of raisable) assert(staged.has(id), `${id} can be raised but stands in no stage (config.js STAGES)`);
+  },
+  "every stage building has a plot size, opens by its stage and names its story step and who sends you"() {
+    for (const b of stageEntries()) {
+      assert(b.pending || PSIZE[b.id], `${b.id} has no PLOT_SIZE`);
+      assert(b.pending || opensAt(b.id) <= b.tier, `${b.id} is a ${b.stage} building but opens at tier ${opensAt(b.id)}`);
+      assert(parseStep(b.step), `${b.id}: step "${b.step}" should read "act<n>:<step>"`);
+      assert(b.from && b.name, `${b.id}: who sends you (from) and its name`);
+    }
+  },
+  "every written act has a step for each building it sends you to build"() {
+    for (const b of stageEntries()) {
+      const { act, name } = parseStep(b.step) ?? {};
+      if (!ACT_STEPS[act]) continue; // not written yet: tools/check.mjs lists it
+      assert(ACT_STEPS[act](name), `${act} is written but has no "${name}" step for the ${b.name} (${b.stage})`);
     }
   },
 });

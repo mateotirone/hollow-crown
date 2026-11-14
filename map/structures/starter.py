@@ -50,8 +50,12 @@ AREAS = [
     # The open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
     ("slot",      "Empty plot",       (-38, -22, 1, 15),  "r+", {"size": "L"}),
     ("pen",       "Pen",              (-30, -22, 18, 26), "r+", {}),
-    ("woodyard",  "Woodyard",         (22, 32, 1, 11),    "r-", {}),
-    ("field",     "Common field",     (22, 34, 14, 24),   "r-", {}),
+    # the Works yard (27 along its lane x 17 deep): the Ironworks opens at Hamlet, so its plot is set up from day one
+    # (Mateo 2026-11-14, settlement thread: "they should have their plots already done. Not done, but set up")
+    ("slot",      "Works yard",       (21, 37, -1, 25),   "r-", {"size": "W"}),
+    # the woodyard and the common field sit out front, past the library and the left house, off a walk from the main lane
+    ("woodyard",  "Woodyard",         (-35, -25, -28, -18), "r+", {}),
+    ("field",     "Common field",     (-37, -25, -14, -4),  "r+", {}),
     ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),   # the hall's own green: the hall grows over it
     # the Storehouse's ground (15 x 15, door on its lane side): the game raises it on arrival and rebuilds it bigger
     # at every tier on the same ground (Storehouse thread, 2026-11-13); a walk runs to it beside the Mason's yard
@@ -64,7 +68,7 @@ LANES = [
     ("lane", 3, [(5, -4), (9, 0), (19, 0), (19, 27)]),
 ]
 WALKS = [  # 1-wide paths from a lane or the square to a door or gate
-    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 6), (22, 6)], [(20, 19), (22, 19)], [(-20, 22), (-22, 22)], [(20, -1), (20, -10), (22, -10)],
+    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 12), (21, 12)], [(-3, -15), (-24, -15), (-24, -23), (-25, -23)], [(-24, -15), (-24, -9), (-25, -9)], [(-20, 22), (-22, 22)], [(20, -1), (20, -10), (22, -10)],
 ]
 HALL_REACH = 21                    # the widest level-5 hall (Blackfen) with its 2 clear: r = -21 .. 21 behind the square
 WALL_BASE = 36                     # the Hamlet wall ring (outer face). Rings 36/54/60/66 (Mateo 2026-11-13: the Town ring moved
@@ -212,6 +216,43 @@ class Starter:
             m, _ = self.lay_lane(kind, w, pts, 2); self.lane_masks.append(m)
         for pts in WALKS:
             self.lay_lane("walk", 1, pts, 1)
+        self.lay_aprons()
+
+    def area_boxes(self):
+        """(kind, box, door box, side) of every area: the ground it takes, and the box its door is on (the building's own
+        for a building, so the door is where the game puts it)."""
+        for kind, label, box, side, extra in AREAS:
+            door_box = box
+            if kind == "building":
+                door_box = self.design_box(box, side, extra["design"]); full = extra.get("slot", door_box)
+                box = (min(full[0], door_box[0]), max(full[1], door_box[1]), min(full[2], door_box[2]), max(full[3], door_box[3]))
+            yield kind, box, door_box, side
+
+    def lay_aprons(self):
+        """Every door and gate gets a path as wide as it is (Mateo 2026-11-14, Oakmere's Store Shed: "Got to fix this
+        path generation"). A walk is 1 wide, but doors, door steps and gates are 3: the walk widens to 3 for the last
+        blocks to the door, so the steps land on paving, not grass. And a walk stops at the edge of the ground it
+        leads to, so the steps stand on that ground's full blocks, never on a sunk slab."""
+        for kind, box, door_box, side in self.area_boxes():
+            inside = self.boxmask(box) & (self.KIND == 1)
+            self.K[inside] = -1; self.KIND[inside] = 0
+            dr, da = self.door_cell(door_box, side)
+            (fr, fa), (cr, ca) = {"r-": ((-1, 0), (0, 1)), "r+": ((1, 0), (0, 1)), "a-": ((0, -1), (1, 0)), "a+": ((0, 1), (1, 0))}[side]
+            # out from the door: the first path the middle of the door meets (a walk, a lane or the square)
+            join = None
+            for n in range(1, 6):
+                r, a = dr + fr * n, da + fa * n
+                i, j = self.ij(*self.world(r, a))
+                if self.K[i, j] >= 0: join = (n, int(self.K[i, j])); break
+                if self.KIND[i, j] != 0: break
+            if not join: continue
+            n, k = join
+            for m in range(1, n + 2):        # on to the row the path runs in, so the apron meets it square
+                for w in (-1, 0, 1):
+                    r, a = dr + fr * m + cr * w, da + fa * m + ca * w
+                    i, j = self.ij(*self.world(r, a))
+                    if self.KIND[i, j] == 0 and not self.boxmask(box)[i, j]:
+                        self.K[i, j] = k; self.KIND[i, j] = 1
 
     # ---- 2. levelled areas
     def path_y_near(self, box, side):
@@ -331,7 +372,34 @@ class Starter:
         top = np.floor(s - 1.0 + 0.5).astype(np.int32)      # free ground: nearest whole block
         top[area] = self.LEVEL[area]
         top[path] = (self.K[path] - 1) // 2                 # block the path slab (or full block) sits in
-        self.TOP = top
+        self.TOP = self.fill_pits(top, path, area)
+
+    def fill_pits(self, top, path, area):
+        """No pits: a little patch of free ground left lower than all the free ground and paths round it (a strip
+        squeezed between a yard, a plot and a walk rounds down while its neighbours round up) comes up to the lowest
+        of them. A yard or plot beside it is its own levelled ground behind a fence or border, so it doesn't count.
+        Ground beside a path never sits below the block the path's slab is in."""
+        free = ~path & ~area & self.INSIDE
+        nb = ((1, 0), (-1, 0), (0, 1), (0, -1))
+        for _ in range(4):
+            changed = False
+            seen = np.zeros(top.shape, bool)
+            for i0, j0 in np.argwhere(free):
+                if seen[i0, j0]: continue
+                h = top[i0, j0]; comp = [(i0, j0)]; seen[i0, j0] = True; edge = []; q = 0
+                while q < len(comp) and len(comp) <= 6:
+                    i, j = comp[q]; q += 1
+                    for di, dj in nb:
+                        a, b = i + di, j + dj
+                        if not (0 <= a < self.n and 0 <= b < self.n) or area[a, b]: continue
+                        if free[a, b] and top[a, b] == h:
+                            if not seen[a, b]: seen[a, b] = True; comp.append((a, b))
+                        else: edge.append(top[a, b])
+                if len(comp) <= 6 and edge and min(edge) > h:
+                    for c in comp: top[c] = min(edge)
+                    changed = True
+            if not changed: break
+        return top
 
     # ---- 5. blocks
     def surface(self, x, z):
@@ -471,6 +539,10 @@ class Starter:
                         for k in range(2 if rr != r1 - 3 else 1):
                             x, y, z = self.at(rr, a); self.put(x, y + 1 + k, z, f"{W}_log", {"axis": "x" if self.F[0] else "z"})
                             x, y, z = self.at(rr, a + 1); self.put(x, y + 1 + k, z, f"{W}_log", {"axis": "x" if self.F[0] else "z"})
+                # a lantern on the middle pile: the piles shade the ground behind them from the lane's posts, which
+                # left the back of the yard at light 0-3 (town audit 2026-11-14); from up here the gaps get 9 or more
+                piles = list(range(a0 + 1, a1, 4))
+                x, y, z = self.at(r1 - 2, piles[len(piles) // 2]); self.put(x, y + 3, z, "lantern")
                 x, y, z = self.at(r0 + 3, da); self.put(x, y + 1, z, f"stripped_{W}_log", {"axis": "y"})
                 x, y, z = self.at(r0 + 2, a1 - 1); self.put(x, y + 1, z, "barrel")
                 x, y, z = self.at(r0 + 3, a1 - 1); self.put(x, y + 1, z, "barrel")

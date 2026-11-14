@@ -27,7 +27,7 @@ import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
 import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
-import { BUILDINGS } from "./buildings.js";
+import { BUILDINGS, WORKS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
 import { ROAD_BLOCKS, WEAK_ROAD, ROAD_JOIN_PATHY, gateDir, roadEnd, roadLine, joinRoute, routeSides, gradeRoute, joinSurface } from "./basedata.js";
@@ -698,7 +698,16 @@ export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(own
 
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
-export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
+// What this settlement's charters may ask for: what the game can raise (the Works machines join when their feature
+// loads) and has a plot for in this town's layout, so an old layout with no Works yard, or a building of another
+// region, is skipped rather than holding the town back for good (config.js STAGES)
+function charterKnown(owner) {
+  const town = townOf(owner), base = town?.lord ? DESIGNED : new Set([...KNOWN, ...WORKS.map((w) => w.id)]);
+  const slots = town ? slotsOf(layoutOf(town)) : [];
+  if (!slots.length) return base;
+  return new Set([...base].filter((id) => slots.some((s) => plotFit(id, s, new Set(["none"])).ok)));
+}
+export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), charterKnown(owner), townOf(owner)?.style);
 
 // Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
 // Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"

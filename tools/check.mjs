@@ -856,6 +856,41 @@ if (loaded) {
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
 }
 
+// ---------- 6b. every building on a plot (Mateo 2026-11-14) ----------
+// No building is placed with a block, every stage building has a plot (the self-tests seat them on every layout),
+// you level up by building all of your stage, and the story sends you to each one (settle/config.js STAGES).
+if (loaded) {
+  step("Every building on a plot, in a stage, with a story step");
+  const C = await import(pathToFileURL(join(SCRIPTS, "settle/config.js")).href);
+  const { ACT_STEPS, parseStep } = await import(pathToFileURL(join(SCRIPTS, "quests/acts.js")).href);
+  const entries = C.STAGES.flatMap((s) => s.build.map((b) => ({ ...b, stage: s.name })));
+  const byId = new Map(entries.map((b) => [b.id, b]));
+  for (const file of walk(join(BP, "recipes"), ".json")) {
+    let out = [];
+    try {
+      const r = Object.values(parseJson(readFileSync(file, "utf8")))[1] ?? {};
+      out = [r.result].flat().filter(Boolean).map((x) => (typeof x === "string" ? x : x.item));
+    } catch { continue; }
+    for (const id of out) {
+      if (!(id in C.RAISING_BLOCKS)) continue;
+      const entry = byId.get(C.RAISING_BLOCKS[id]);
+      if (entry?.pending) warnings.push(`${rel(file)} still crafts ${id}: the ${entry.name} waits for ${entry.pending}`);
+      else if (C.CRAFT_LEFT[id]) warnings.push(`${rel(file)} still crafts ${id}: ${C.CRAFT_LEFT[id]}`);
+      else fail(`${rel(file)} crafts ${id}, a block that raises a building: buildings are only picked at a Plot Marker`);
+    }
+  }
+  const toWrite = {};
+  for (const b of entries) {
+    const st = parseStep(b.step);
+    if (st && !ACT_STEPS[st.act]) (toWrite[st.act] ??= []).push(`${b.name} (${b.stage}, from ${b.from})`);
+    if (b.pending) warnings.push(`${b.stage} stage: the ${b.name} has no plot yet (${b.pending}); the level-up skips it until it does`);
+  }
+  for (const [act, list] of Object.entries(toWrite)) warnings.push(`${act} is not written yet; it must send the player to build: ${list.join(", ")}`);
+  const ex = spawnSync(process.execPath, [join(TOOLS, "export_stages.mjs"), "--check"], { encoding: "utf8" });
+  if (ex.status !== 0) fail((ex.stdout || ex.stderr || "tools/export_stages.mjs --check failed").trim());
+  console.log(`${entries.length} stage buildings, ${entries.filter((b) => b.pending).length} waiting for a plot, ${Object.values(toWrite).flat().length} story steps still to write`);
+}
+
 // ---------- 7. terraform: the game's copy gives the same ground as the map's ----------
 {
   step("Terraform: settle/terraform.js against map/structures/terraform_cases.json");
