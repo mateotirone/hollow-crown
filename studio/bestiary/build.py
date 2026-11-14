@@ -183,6 +183,12 @@ def entity_bp(m):
     dist = 40 if m.get("boss") else 24
     if mid == "echo_hound": dist = 10
     tgt = roster.targets(filt, dist) if filt else {}
+    # Loud Sorcerers first (Resonance 70+, player tag siege_resonant): tools/build_sorcerer_fx.py writes the same goal
+    if filt and "hollow" in FAMILIES.get(fam, []) and fam not in ("boss", "boss_add"):
+        tgt["minecraft:behavior.nearest_attackable_target"]["priority"] = 3
+        tgt["minecraft:behavior.nearest_prioritized_attackable_target"] = {"priority": 2, "must_see": False, "reselect_targets": True, "within_radius": 32, "entity_types": [{"filters": {"all_of": [
+            roster.fam("player"), {"test": "has_tag", "subject": "other", "operator": "==", "value": "siege_resonant"},
+            {"test": "has_tag", "subject": "other", "operator": "!=", "value": "siege_hollow_ruler"}]}, "max_dist": 32, "priority": 0}]}
     fight = {}
     if m.get("ranged_def"):
         fight.update(roster.ranged(m["ranged_def"][0], aux=m["ranged_def"][1], radius=18 if m.get("boss") else 14))

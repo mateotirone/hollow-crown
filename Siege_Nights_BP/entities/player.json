@@ -24,6 +24,15 @@
           ],
           "default": 0,
           "client_sync": true
+        },
+        "hc:mark": {
+          "type": "int",
+          "range": [
+            0,
+            5
+          ],
+          "default": 0,
+          "client_sync": true
         }
       }
     },

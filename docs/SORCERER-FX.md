@@ -35,3 +35,35 @@ The Ember smoulders (`arc_smoulder`, rate from Resonance) while it or a spell is
 `arc_halo`. Moves play with `playAnimation` on their own controller (`siege_cast`) so they add on top of the
 vanilla and PR #127 moves; in first person only a quarter of the move shows. Cues are in `core/sfx_cues.js`
 (layered vanilla sounds, no recordings needed).
+
+## The spell pass (2026-11-14)
+
+Mateo asked for every weak note in the Ember Spellbook review to be fixed (preview: https://claude.ai/artifact/9P2HjzjRspFyGBjqrqMZtZ).
+`tools/build_sorcerer_fx.py` now also writes:
+
+- **`siege:arc_fx`**: one effect entity, six models picked by the `siege:form` property (spawn it as `siege:arc_fx<siege:form_bell>`
+  so the right model shows from the first frame): `shard`, `ward` (3 plates, `siege:count` shows 0-3), `chains` (3 loops, same),
+  `bell` (toll with `playAnimation("animation.siege.arc_fx.toll")`), `rift` (`rift_close` before removing), `ghost` (the Blink
+  afterimage, sinks away by itself). Helpers in `marked_fx.js`: `spawnFx`, `moveFx`, `removeFx`, `playFx`, `setFxCount`.
+  A 30 s timer removes any the script forgot.
+- Particles `arc_streak`, `arc_brand`, `arc_paleburn`, `arc_shatter`, `arc_shimmer`, `arc_note`, `arc_thread`, `arc_hum`, `arc_crown`.
+- Fog `siege:arc_echo` (pushed as `hc_echo` while Echo Sight lasts).
+- Move `cast.crescendo`. In first person every move now plays at half size (was a quarter).
+- **The Marked layer**: player property `hc:mark` (0 not Marked, 1-5 the stage from `markStage`), three render controllers in
+  `hc_marked.render_controllers.json` (default skin, Looking Glass look, first-person arm), material `entity_emissive_alpha` so
+  the veins give their own light. Source art: `art/marked_layer/`.
+- **Loud**: every Hollow creature that picks its own fights (not bosses or their adds) gets
+  `nearest_prioritized_attackable_target` for players tagged `siege_resonant` within 32 blocks, one step above its usual
+  target goal. `studio/bestiary/build.py` writes the same goal.
+
+| Power | Now |
+| --- | --- |
+| Ember Bolt | 0.1 s draw, then a shard flies 2 blocks a tick; walls stop it. Hit: brand, 0.4 push. Lv 3 Paleburn (1 a second for 3 s, no fire). Bound target: +40% and the chains break. Cooldown 0.8 s. |
+| Ward | Shield = the Absorption; plates break at each third lost (entityHurt); the last pushes 2.5 blocks. |
+| Blink | Lean first, jump 2 ticks later; afterimage 1.2 s; dense streak. |
+| Echo Sight | Night Vision plus the violet fog; a pulse every 2 s (ring at the real range, `echoPulse` event for other features); doors, hatches, gates and seals within 12 blocks hum for the caster (`DOOR_BLOCK`). |
+| Bind | Slowness 255 and Weakness 255 (Weakness II on bosses); chains for the whole root, a loop breaks at each third. |
+| Halfstep | Armour, offhand and held item go into a satchel for the step and come back (also after a death or a log-off); shimmer every 7 ticks; return push 1.5 blocks. |
+| Choir's Call | Bell above you, tolls three times with a ring at the real radius; each raider is struck by the next so it turns on it; threads and cracked notes. |
+| Veilstep | 0.8 s channel with the rift in front of you; 4 damage in the channel stops it and refunds the cost; the rift stays 3 s at both ends. |
+| Crescendo / Overwhelmed | Crescendo pose every 2 s and a crown of sparks; Overwhelmed: 1 damage a second for 3 s with a camera shake instead of Wither. |
