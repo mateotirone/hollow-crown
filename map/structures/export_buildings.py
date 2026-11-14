@@ -65,7 +65,9 @@ def main():
         for name, make in SB.HORSE_BUILDERS.items():
             d = export(make(region)); d["rows"] = drop_stone_air(d); barns[region][name] = d; b = d["box"]
             if on_stone(d): problems.append(f"{region} {name}: blocks where the Stables block stands")
-            if b["z0"] < 0 or max(-b["x0"], b["x1"]) > 8: problems.append(f"{region} {name}: box {b}")
+            wide = 11 if name.startswith("stables_") else 8   # the Barn plot is 23 x 13 with the eaves (2026-11-14)
+            if b["z0"] < 0 or max(-b["x0"], b["x1"]) > wide or (name.startswith("stables_") and b["z1"] > 12):
+                problems.append(f"{region} {name}: box {b}")
             if name.startswith("stables_") and prev and not (b["x0"] <= prev["x0"] and b["x1"] >= prev["x1"] and b["z1"] >= prev["z1"]):
                 problems.append(f"{region} {name} does not contain the level before")
             if name.startswith("stables_"): prev = b

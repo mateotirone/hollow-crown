@@ -1,9 +1,11 @@
 // The Stables raises a real stable (Mateo, 2026-11-11): place the Stables block on your land and a barn in
 // your region's style rises behind it, running away from you. The block stays at the front door and still
 // opens the horse menu. Each Stables upgrade rebuilds the barn bigger over the same spot:
-//   level 1   3 stalls and a tack corner        (11 x 9)
-//   level 2   5 stalls and a tack corner        (11 x 13)
-//   level 3   8 stalls and a tack room behind   (11 x 21)
+//   level 1   3 stalls, a tack and a feed corner                (13 x 11)
+//   level 2   5 stalls, tack and feed corners, two open bays    (21 x 11)
+//   level 3   8 stalls, a tack corner and a hayloft             (21 x 11, taller)
+// Gable-on to the lane, so it fits a town's Barn plot (23 x 13 with the eaves, 2026-11-14). The plain fallback
+// (barndesign.js plainBarn, used only when a region has no design) is still the old long barn.
 // Free: the Stables block and its upgrades are the price. It needs room on your own land, clear of ground
 // kept for your hall; if there isn't any, the Stables still works as a plain block and says why.
 //
@@ -136,14 +138,17 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
 addTests("horses", {
   "the stable grows with the Stables and keeps odd sizes": () => {
-    let last = 0;
+    let last = null;
     for (const lv of [1, 2, 3]) for (const id of STYLE_IDS) {
       const plan = drawBarn(lv, id);
       for (const c of plan.cells.values()) assert(plan.style.roles[c.role], `level ${lv} (${id}) uses unknown role ${c.role}`);
       const b = plan.bounds();
       assert(b.z0 >= 0 && !plan.get(0, 1, 0), "the barn must rise behind the Stables block");
       assertEqual((b.x1 - b.x0 + 1) % 2, 1, "odd width");
-      if (id === "vale") { assert(b.z1 > last, `level ${lv} is longer than the last`); last = b.z1; }
+      if (id === "vale") { // each level holds the one before (wider or as wide, never shallower)
+        if (last) assert(b.x0 <= last.x0 && b.x1 >= last.x1 && b.z1 >= last.z1 && (b.x1 - b.x0 > last.x1 - last.x0 || lv === 3), `level ${lv} holds the last`);
+        last = b;
+      }
     }
   },
   "the breeder's yard draws in every style behind its post": () => {
