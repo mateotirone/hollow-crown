@@ -388,8 +388,13 @@ def audit(path, plan=None, centre_hint=None, radius=None):
             d = b.get("door")
             if not d or b.get("kind") in ("lamp", "tree", "square", "stall"): continue
             gy = b.get("ground_y", 0)
+            if b.get("door_block"):                         # the bake names the door block itself (towngen, 2026-11-14)
+                d = b["door_block"]; gy = d[1] - 1
             ok = any(abs(x - d[0]) <= 2 and abs(z - d[1]) <= 2 and abs(y - gy) <= 8 for x, y, z in [S.w(i, j, k) for i, j, k, *_ in doors])
             ok = ok or any(abs(x - d[0]) <= 2 and abs(z - d[1]) <= 2 for x, y, z in door_spots)
+            if not ok and b.get("door_block"):              # a yard's gate is its door
+                gi, gj, gk = d[0] - S.o[0], d[1] - S.o[1], d[2] - S.o[2]
+                ok = 0 <= gi < S.shape[0] and 0 <= gj < S.shape[1] and 0 <= gk < S.shape[2] and "fence_gate" in nm(gi, gj, gk)
             if not ok:
                 # an open archway counts: walkable cell at the door spot under cover
                 i, k = d[0] - S.o[0], d[1] - S.o[2]

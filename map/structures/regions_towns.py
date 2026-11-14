@@ -329,16 +329,20 @@ def fen_house(seed, rnd, tier, roof=None, stilt=None):
         for z in (-1, D + 1):
             if h3(x, 0, z, seed) < 0.3: bp.setif(x, 0, z, "mangrove_roots")
     dx = W // 2
-    for x in range(dx - 1, dx + 2): bp.set(x, stilt, D + 1, "mangrove_planks")
-    for i in range(stilt):
-        bp.set(dx, stilt - i, D + 2 + i, "mangrove_stairs", facing="n")
-        bp.set(dx, stilt - i - 1, D + 2 + i, "mangrove_planks") if stilt - i - 1 >= 1 else None
-    bp.set(dx - 1, stilt + 1, D + 1, "mangrove_fence"); bp.set(dx + 1, stilt + 1, D + 1, "mangrove_fence")
-    bp.set(dx + 1, stilt + 2, D + 1, "iron_bars"); bp.set(dx + 1, stilt + 3, D + 1, "verdant_froglight" if h3(seed, 0, 0, 3) < 0.6 else "ochre_froglight")
-    bp.set(dx - 1, stilt + 2, D + 1, "flower_pot", plant="fern")
+    # the front deck is level with the door's sill (the house's own floor sits a plinth above the stilt deck; the
+    # town audit 2026-11-14 found the deck a block below every Mirelight door), then a stair down to the ground
+    dys = [y for (x, y, z), v in bp.cells.items() if x == dx and z == D and v[0].endswith("_door")]
+    top = min(dys) - 1 if dys else stilt
+    for x in range(dx - 1, dx + 2): bp.set(x, top, D + 1, "mangrove_planks")
+    for i in range(top):
+        bp.set(dx, top - i, D + 2 + i, "mangrove_stairs", facing="n")
+        bp.set(dx, top - i - 1, D + 2 + i, "mangrove_planks") if top - i - 1 >= 1 else None
+    bp.set(dx - 1, top + 1, D + 1, "mangrove_fence"); bp.set(dx + 1, top + 1, D + 1, "mangrove_fence")
+    bp.set(dx + 1, top + 2, D + 1, "iron_bars"); bp.set(dx + 1, top + 3, D + 1, "verdant_froglight" if h3(seed, 0, 0, 3) < 0.6 else "ochre_froglight")
+    bp.set(dx - 1, top + 2, D + 1, "flower_pot", plant="fern")
     for (x, y, z), v in list(bp.cells.items()):
         if v[0] == "keep": del bp.cells[(x, y, z)]
-    door_marker(bp, dx, 1, D + 2 + stilt)
+    door_marker(bp, dx, 1, D + 2 + top)
     bp.markers["stilt"] = (0, stilt, 0)
     if roof: recolour_roof(bp, "fen", roof, seed)
     bp.kind = "house"
@@ -388,7 +392,7 @@ def ember_house(seed, rnd, tier, roof=None):
     colour = rnd.choice(["orange", "red", "yellow", "white"])
     for i, x in enumerate(range(W // 2 - 1, W // 2 + 2)):        # striped awning on posts over the door
         bp.set(x, 4, D + 1, f"{colour}_wool" if i % 2 == 0 else "white_wool")
-        bp.set(x, 4, D + 2, f"{colour}_carpet" if i % 2 == 0 else "white_carpet")
+        bp.set(x, 4, D + 2, f"{colour}_wool" if i % 2 == 0 else "white_wool")
     for x in (W // 2 - 1, W // 2 + 1):
         for y in range(1, 4): bp.set(x, y, D + 2, "acacia_fence")
     for x in range(1, W, 2):                                       # projecting roof beams (vigas)
@@ -507,7 +511,7 @@ def ember_granary(seed, rnd):
     for y in (1, 2, 3): bp.set(xd, y, D - 4, "air")
     for x in range(1, 4):
         for y in (1, 2): bp.set(x, y, D - 3, "hay_block", axis="y")
-    for x in range(0, 5): bp.set(x, 4, D - 3, "orange_carpet" if x % 2 else "white_carpet")
+    for x in range(0, 5): bp.set(x, 4, D - 3, "orange_wool" if x % 2 else "white_wool")
     for x in range(1, W, 2): bp.set(x, 4, D - 3, "spruce_log", axis="z")
     bp.set(W - 1, 1, D - 2, "decorated_pot"); bp.set(W - 2, 1, D - 2, "barrel")
     door_marker(bp, xd, 1, D + 1)
@@ -868,7 +872,7 @@ def mirelight_stilt_house(seed=51, tier=1, roof="moss"):
     lo, hi = bp.bounds()
     W = hi[0] if hi[0] < 10 else 8
     stilt = bp.markers["stilt"][1]
-    D = bp.markers["door"][2] - 2 - stilt
+    D = max(z for (x, y, z), v in bp.cells.items() if x == bp.markers["door"][0] and v[0].endswith("_door"))   # the front wall
     for x in range(1, 4):                     # mooring platform behind, a ladder down to the water
         bp.set(x, stilt - 2, -1, "mangrove_slab", half="top"); bp.set(x, stilt - 2, -2, "mangrove_slab", half="top")
     for y in range(-3, stilt - 2): bp.set(1, y, -2, "mangrove_log", axis="y"); bp.set(3, y, -2, "mangrove_log", axis="y")
@@ -994,7 +998,7 @@ def sunscar_inn(seed=63):
             for z in range(0, 3): bp.set(x, y, z, "air")
     bp.set(6, 3, 0, "smooth_sandstone_stairs", facing="e", half="top"); bp.set(8, 3, 0, "smooth_sandstone_stairs", facing="w", half="top")
     for i, x in enumerate(range(5, 10)):
-        bp.set(x, 4, 13, "orange_wool" if i % 2 == 0 else "white_wool"); bp.set(x, 4, 14, "orange_carpet" if i % 2 == 0 else "white_carpet")
+        bp.set(x, 4, 13, "orange_wool" if i % 2 == 0 else "white_wool"); bp.set(x, 4, 14, "orange_wool" if i % 2 == 0 else "white_wool")
     for x in (5, 9):
         for y in range(1, 4): bp.set(x, y, 14, "acacia_fence")
     # tapering corner tower
@@ -1067,7 +1071,7 @@ def sunscar_store(seed=67):
     for x in (1, 7): bp.set(x, 3, 10, "smooth_sandstone_stairs", facing="e" if x == 1 else "w", half="top")
     cols = ["red", "white"]
     for x in range(-1, 10):
-        bp.set(x, 4, 11, f"{cols[x % 2]}_wool"); bp.set(x, 4, 12, f"{cols[x % 2]}_carpet")
+        bp.set(x, 4, 11, f"{cols[x % 2]}_wool"); bp.set(x, 4, 12, f"{cols[x % 2]}_wool")
     for x in (-1, 9):
         for y in (1, 2, 3): bp.set(x, y, 12, "acacia_fence")
     for x in (2, 6): lattice_window(B, x, 6, 10, "s"); lattice_window(B, x, 6, 0, "n")
@@ -1076,7 +1080,7 @@ def sunscar_store(seed=67):
     for x in range(2, 7): bp.set(x, 1, 7, "acacia_planks")
     bp.set(1, 1, 2, "barrel"); bp.set(1, 2, 2, "barrel"); bp.set(7, 1, 2, "chest", facing="w")
     for x in range(1, 5):
-        for z in range(6, 9): bp.set(x, 11, z, "yellow_carpet" if (x + z) % 2 else "white_carpet")
+        for z in range(6, 9): bp.set(x, 11, z, "yellow_wool" if (x + z) % 2 else "white_wool")
     for (x, z) in ((1, 6), (4, 6), (1, 8), (4, 8)):
         for y in (10,): bp.set(x, y, z, "acacia_fence")
     F.stair_flight(bp, 7, 8, 1, 4, "n")
