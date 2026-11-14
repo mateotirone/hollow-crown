@@ -41,6 +41,15 @@ done.
 | Against a building | The tower rises **at least one full stage clear of the highest ridge** next to it |
 | Beside a dome or a taller centre | Corner towers stay lower than the centre and frame it. They never compete with it. |
 
+**Small wall watchtowers** (Mateo, 2026-11-13, the settlement wall's levels 1-6; `review/specs/gen_wallwatch.py`): a 5 x 5
+shaft of two storeys (stone ground storey, the region's timber above, slits only up top), a string course at the floor
+line, an open lookout one out all round on a corbel ring with a fence rail, and the region's roof from section 5. The
+shaft is only 2 times its width because the tower stands astride a wall at most 6 high and must stay "small"; the
+lookout and roof carry the height instead, so the outline still changes four times. Use it for any watch post on a
+low wall. On the lowest wall (the Low Palisade, 2 high) even that is too big (Mateo, 2026-11-14): use the 3 x 3 lookout
+stand (`wallstand_<region>.json`): log posts to a railed deck 3 over the wall, fence posts above it, a little pyramid of
+the region's roof (Emberwaste: a flat sandstone top with horns), a ladder up a middle post to a hatch.
+
 ## 3. Building it, stage by stage
 
 1. **Base.** Plinth 2, a battered or stepped first course on big towers, the door on a bay centre (05), and

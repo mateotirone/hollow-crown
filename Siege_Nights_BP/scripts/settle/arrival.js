@@ -5,7 +5,8 @@
 // It runs when walls are automatic (a map with Plot Stones). Test anywhere:
 //   /scriptevent siege:settle_arrive      lay your settlement out round your keep now
 
-import { world, system } from "@minecraft/server";
+import { world, system, BlockPermutation } from "@minecraft/server";
+import { signToward } from "../core/signs.js";
 import { isReady, keepOf, on, onTick, TIERS, addTests, assertEqual } from "../siege/api.js";
 import { buildFor } from "../townhall/build.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
@@ -33,13 +34,18 @@ function standY(dim, x, z) {
   }
 }
 
-function signpost(dim, at, text) {
+// A signpost turned to face rot (ground_sign_direction). One laid out before is turned round if it faces
+// another way (they all faced south before, so most stood edge-on or backwards to the keep).
+function signpost(dim, at, text, rot = 0) {
   try {
     const below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z });
-    if (below?.typeId === "minecraft:standing_sign") return below.getComponent("minecraft:sign")?.setText(text); // laid out before
+    if (below?.typeId === "minecraft:standing_sign") {
+      if (below.permutation.getState("ground_sign_direction") !== rot) below.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: rot }));
+      return below.getComponent("minecraft:sign")?.setText(text); // laid out before
+    }
     const block = dim.getBlock(at);
     if (!block || !SOFT.test(block.typeId)) return; // something already stands here
-    block.setType("minecraft:standing_sign");
+    block.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: rot }));
     block.getComponent("minecraft:sign")?.setText(text);
   } catch {
     // signs are a nicety
@@ -156,13 +162,13 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
       continue;
     }
     const when = slot.tier === 0 ? "Open now" : `Opens: ${TIERS[slot.tier]?.name ?? "later"}`;
-    signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`);
+    signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`, signToward(spot, center)); // facing the keep
   }
   return fresh ? true : "already";
 }
 
 const LAID_OUT = "§6Your settlement is laid out.§7 Roads run to the gate, a Longhouse is rising behind the Plot Stone, the town's library is going up on the square, a mason has set up beside it, and a Plot Marker stands on every plot you can build on. Use one to see what fits there.";
-const LAID = `${LAID_OUT} Put a Foundation Stone on a signpost to raise that building.`;
+const LAID = LAID_OUT; // (no Foundation Stones any more: buildings go up from a Plot Marker, Mateo 2026-11-14)
 const ARRIVAL_SAY_AT = 110; // ticks after the plot is picked: after the plot's past (3 s), before "raise your Keep Banner" (8 s)
 
 // The plots thread's welcome hall: the moment a plot is picked, lay it out so the first building is

@@ -19,7 +19,8 @@
        "siege:summon_warlord_king",
        "siege:summon_choir",
        "siege:summon_morvane",
-       "siege:summon_pretender"
+       "siege:summon_pretender",
+       "siege:summon_bell_wife"
       ]
      },
      {
@@ -44,6 +45,126 @@
        "siege:guardgear_4_chestplate",
        "siege:guardgear_4_helmet",
        "siege:guardgear_4_leggings"
+      ]
+     },
+     {
+      "group_identifier": {
+       "icon": "siege:aldrics_sickle",
+       "name": "siege:itemGroup.name.codex_equipment"
+      },
+      "items": [
+       "siege:aldrics_sickle",
+       "siege:barrow_coin",
+       "siege:bogsilver_sickle",
+       "siege:cairn_axe",
+       "siege:cairn_helm",
+       "siege:chapel_clapper",
+       "siege:claimants_mace",
+       "siege:eddas_mercy",
+       "siege:fenlight_boots",
+       "siege:fenlight_chestplate",
+       "siege:fenlight_helmet",
+       "siege:fenlight_leggings",
+       "siege:founders_slag",
+       "siege:frostvein_shard",
+       "siege:hex_lantern",
+       "siege:holts_debt",
+       "siege:hrodas_pick",
+       "siege:lighthouse_harpoon",
+       "siege:lists_gauntlet",
+       "siege:lords_signet",
+       "siege:maelis_clapper",
+       "siege:oathsworn_boots",
+       "siege:oathsworn_chestplate",
+       "siege:oathsworn_helmet",
+       "siege:oathsworn_leggings",
+       "siege:oathsworn_sword",
+       "siege:quarry_mark",
+       "siege:regents_seal_ring",
+       "siege:rime_axe",
+       "siege:rime_spear",
+       "siege:rimeforged_boots",
+       "siege:rimeforged_chestplate",
+       "siege:rimeforged_helmet",
+       "siege:rimeforged_leggings",
+       "siege:saltglass_prism",
+       "siege:second_moon_bow",
+       "siege:sedges_thorn",
+       "siege:seers_glass",
+       "siege:sextons_spade",
+       "siege:sunbrand_sabre",
+       "siege:sunscale_boots",
+       "siege:sunscale_bow",
+       "siege:sunscale_chestplate",
+       "siege:sunscale_helmet",
+       "siege:sunscale_leggings",
+       "siege:tidesteel_cutlass",
+       "siege:tidewrought_boots",
+       "siege:tidewrought_chestplate",
+       "siege:tidewrought_helmet",
+       "siege:tidewrought_leggings",
+       "siege:usurpers_edge",
+       "siege:watch_crossbow",
+       "siege:watchmans_glaive",
+       "siege:watchward_boots",
+       "siege:watchward_chestplate",
+       "siege:watchward_helmet",
+       "siege:watchward_leggings",
+       "siege:wennas_line",
+       "siege:wisp_bow",
+       "siege:witchroot_knot",
+       "siege:ysolts_lance"
+      ]
+     }
+    ]
+   },
+   {
+    "category_name": "items",
+    "groups": [
+     {
+      "group_identifier": {
+       "icon": "siege:ashglass_lantern",
+       "name": "siege:itemGroup.name.codex_items"
+      },
+      "items": [
+       "siege:ashglass_lantern",
+       "siege:bogsilver",
+       "siege:caravan_banner",
+       "siege:caravan_rations",
+       "siege:caravan_saddle",
+       "siege:choir_shard_bride",
+       "siege:choir_shard_huntsman",
+       "siege:choir_shard_mother",
+       "siege:choir_shard_reeve",
+       "siege:choir_shard_seneschal",
+       "siege:codex",
+       "siege:corvins_lodestone",
+       "siege:desert_rose",
+       "siege:ember_tea",
+       "siege:fair_champions_barding",
+       "siege:hatching_brazier",
+       "siege:map_of_lost_things",
+       "siege:mirage_flask",
+       "siege:rime_steel",
+       "siege:sandglass_of_nights",
+       "siege:sunsteel",
+       "siege:tidesteel",
+       "siege:watchsteel",
+       "siege:wayfarers_compass"
+      ]
+     }
+    ]
+   },
+   {
+    "category_name": "nature",
+    "groups": [
+     {
+      "group_identifier": {
+       "icon": "siege:far_coast_seeds",
+       "name": "siege:itemGroup.name.codex_nature"
+      },
+      "items": [
+       "siege:far_coast_seeds"
       ]
      }
     ]

@@ -5,12 +5,13 @@ import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { applyFilter, emit } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
-import { isAlly, settlementAt, tierOf } from "./territory.js";
+import { canManage, isAlly, settlementAt, tierOf } from "./territory.js";
 import { overworld, takeItems, attackable } from "./util.js";
 import { fundsE, chargeE, robBank, giveCoins } from "../economy/coins.js";
 import { worth, fromEmeralds, coins } from "../economy/rules.js";
 import { moduleStore } from "../core/store.js";
 import { sfx } from "../core/sfx.js";
+import { fightingNear, leashFor, mendGuard } from "./guardcare.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
 // Bring an unemployed villager to your Barracks and click it with coins in hand (40 Regals) to recruit a
@@ -71,14 +72,15 @@ export const guardLimit = (owner) => applyFilter("guardLimit",
   GUARD_LIMIT[tierOf(state.keeps[owner]).name] + (state.keeps[owner].sovereign ? 4 : 0), { owner });
 
 export function recruitGuard(block, player, item, chosenType) {
-  if (settlementAt(block.location) !== player.id) {
-    return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can recruit here.");
+  const owner = settlementAt(block.location);
+  if (!canManage(owner, player.id)) {
+    return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner and their allies can recruit here.");
   }
   if (fundsE(player) < GUARD_COST && player.getGameMode() !== GameMode.Creative) {
     return player.onScreenDisplay.setActionBar(`§7Bring an unemployed villager here and ${worth(GUARD_COST)}.`);
   }
-  const limit = guardLimit(player.id);
-  if (guardCount(player.id) >= limit) {
+  const limit = guardLimit(owner);
+  if (guardCount(owner) >= limit) {
     return player.onScreenDisplay.setActionBar(`§cYour settlement can only keep ${limit} guards. Grow it to recruit more.`);
   }
   const dim = block.dimension;
@@ -93,9 +95,9 @@ export function recruitGuard(block, player, item, chosenType) {
   recruit.remove();
   const guard = dim.spawnEntity(type, at);
   if (name) guard.nameTag = name;
-  enlist(guard, player.id, type === "siege:archer" ? at : block.location);
+  enlist(guard, owner, type === "siege:archer" ? at : block.location);
   guard.setDynamicProperty("siege:barracks", JSON.stringify({ x: block.location.x, y: block.location.y, z: block.location.z }));
-  state.guards[player.id] = guardCount(player.id) + 1;
+  state.guards[owner] = guardCount(owner) + 1;
   saveState();
   sfx(dim, "random.levelup", at, { volume: 0.6 });
   dim.spawnParticle("minecraft:villager_happy", { x: at.x, y: at.y + 1.8, z: at.z });
@@ -113,10 +115,10 @@ world.afterEvents.playerInteractWithEntity.subscribe((event) => {
     const held = event.beforeItemStack ?? event.itemStack;
     const next = GUARD_ARMOR[armorTier(target) + 1];
     if (next && held?.typeId === next.item) return upgradeGuard(target, player, held);
-    if (guardOwner(target) === player.id && applyFilter("guardMenu", false, { guard: target, player })) return;
+    if (canManage(guardOwner(target), player.id) && applyFilter("guardMenu", false, { guard: target, player })) return;
     return upgradeGuard(target, player, held);
   }
-  if (guardOwner(target) !== player.id) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
+  if (!canManage(guardOwner(target), player.id)) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
   if (!GUARD_TYPES[target.typeId]) return player.onScreenDisplay.setActionBar("§7This soldier can't be carried. Give them a post from the Barracks instead.");
   emit("guardRemoved", { id: target.id, owner: guardOwner(target) });
   const item = new ItemStack(GUARD_TYPES[target.typeId], 1);
@@ -135,22 +137,22 @@ world.afterEvents.entitySpawn.subscribe((event) => {
   const player = guard.dimension.getPlayers({ location: guard.location, maxDistance: 8, closest: 1 })[0];
   const land = guard.dimension.id === "minecraft:overworld" ? settlementAt(guard.location) : undefined;
   if (!GUARD_TYPES[guard.typeId]) return; // Barracks-only soldiers are enlisted where they are trained
-  if (!player || land !== player.id) {
+  if (!player || !canManage(land, player.id)) { // the owner or a writ ally, and the guard serves the land's owner
     const token = new ItemStack(GUARD_TYPES[guard.typeId], 1);
     guard.remove();
     if (player) {
       player.getComponent("minecraft:inventory").container.addItem(token);
-      player.onScreenDisplay.setActionBar("§cGuards can only be placed inside your own settlement.");
+      player.onScreenDisplay.setActionBar("§cGuards can only be placed inside your own settlement or an ally's.");
     }
     return;
   }
-  const at = guard.typeId === "siege:archer" ? guard.location : nearestBarracks(player.id, guard.dimension, guard.location);
+  const at = guard.typeId === "siege:archer" ? guard.location : nearestBarracks(land, guard.dimension, guard.location);
   if (!at) {
     guard.remove();
     player.getComponent("minecraft:inventory").container.addItem(new ItemStack(GUARD_TYPES[guard.typeId], 1));
     return player.onScreenDisplay.setActionBar("§cBuild a Barracks first. Men-at-Arms need somewhere to wait.");
   }
-  enlist(guard, player.id, at);
+  enlist(guard, land, at);
   const placed = placingTier.get(player.id);
   if (placed && system.currentTick - placed.tick < 20) equipGuard(guard, placed.tier);
   placingTier.delete(player.id);
@@ -206,6 +208,13 @@ world.afterEvents.entityDie.subscribe((event) => {
   keeper?.sendMessage(`§cOne of your guards has fallen. ${coins(fee)} went to retrain them at the Barracks.`);
 }, { entityTypes: Object.keys(GUARD_TYPES) });
 
+// Forget queued retrains that match (the battle test clearing its soldiers, battletest/)
+export function dropRetrain(match) {
+  const before = retrain.data.queue.length;
+  retrain.data.queue = retrain.data.queue.filter((r) => !match(r));
+  if (retrain.data.queue.length !== before) retrain.save();
+}
+
 // Retrained guards come back at their Barracks (or their post, for guards hired before Barracks were remembered)
 system.runInterval(() => {
   if (!state) return;
@@ -255,7 +264,7 @@ export function equipGuard(guard, tier) {
 }
 
 export function upgradeGuard(guard, player, item) {
-  if (guardOwner(guard) !== player.id) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
+  if (!canManage(guardOwner(guard), player.id)) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
   const tier = armorTier(guard);
   const next = GUARD_ARMOR[tier + 1];
   if (!next) return player.onScreenDisplay.setActionBar("§6This guard already wears Royal Guard Plate, the best there is.");
@@ -308,7 +317,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
 export function underAttack(owner) {
   if (state.active && state.besieged.includes(owner)) return true;
   for (const [id, w] of wanted) if (w.owner === owner && w.until > system.currentTick && world.getPlayers().some((p) => p.id === id)) return true;
-  return false;
+  return !!applyFilter("underAttack", false, { owner }); // a War Writ assault calls them out even with no attacker online (warwrit/)
 }
 
 export function guardTick() {
@@ -329,9 +338,11 @@ export function guardTick() {
         const keep = state.keeps[owner];
         if (!owner) continue;
         // Nobody can hurt your guards while you're away, same as your walls
-        if (!attackable(owner)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
+        // (soldiers marching to war are in the field, owner online or not: fair game)
+        if (!attackable(owner) && !guard.hasTag(MARCHING_TAG)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
         if (keep?.sovereign) guard.addEffect("strength", 60, { amplifier: 0, showParticles: false }); // royal guard
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
+        mendGuard(guard); // heals while left alone (guardcare.js)
 
         if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
         if (guard.hasTag(MARCHING_TAG)) continue; // marching to war with its owner (warwrit/army.js)
@@ -340,12 +351,14 @@ export function guardTick() {
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;
         const loc = guard.location;
+        const fighting = guard.typeId !== "siege:archer" && fightingNear(guard); // a creature near: finish the fight first (guardcare.js)
         const away = post.stand ? Math.hypot(loc.x - post.x, loc.z - post.z) : Math.hypot(loc.x - (post.x + 0.5), loc.z - (post.z + 0.5));
+        const fell = post.stand && post.y - loc.y > 2.5; // off its lookout or wall walk (knocked off, or jumped down to fight)
         if (guard.typeId === "siege:archer") {
-          if (away > 1.5) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
+          if (away > 1.5 || fell) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
         } else if (post.stand) { // a stationed Man-at-Arms keeps to the post, and chases only so far from it in a fight
-          if (away > (underAttack(owner) ? STATION_LEASH : 2.5)) guard.teleport({ x: post.x, y: post.y, z: post.z });
-        } else if (!underAttack(owner) ? away > 5 : !keep || settlementAt(loc) !== owner) {
+          if (away > leashFor(underAttack(owner) ? STATION_LEASH : 2.5, fighting) || (fell && !fighting)) guard.teleport({ x: post.x, y: post.y, z: post.z });
+        } else if (!underAttack(owner) ? away > leashFor(5, fighting) : !keep || settlementAt(loc) !== owner) {
           guard.teleport({ x: post.x + 0.5, y: post.y + 1, z: post.z + 0.5 }); // back to the Barracks
         }
       } catch {

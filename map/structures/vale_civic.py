@@ -73,25 +73,48 @@ def guildhall(seed=3):
     return finish_doctrine(bp)
 
 
-def _skill_spec(fname, name):
-    """Build a review spec on the skill (the one engine) for a map stamp."""
+def _skill_spec(fname, name, bells=True):
+    """Build a review spec on the skill (the one engine) for a map stamp. bells=False takes every bell down:
+    each belfry keeps its beam and a bare chain (Millbrook: "they have taken down every bell", the story)."""
     import json, os, sys
     here = os.path.dirname(os.path.abspath(__file__))
     sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
     if sk not in sys.path: sys.path.insert(0, sk)
     import engine
     spec = json.load(open(os.path.join(here, "review", "specs", fname)))
+    if not bells:
+        for part in spec.get("parts", []):
+            if part.get("part") == "belfry" and part.get("bell", True): part["bell"] = "empty"
     bp = Blueprint(name); engine.into_blueprint(bp, spec)
     return bp
 
 
-def chapel(seed=5, name="kingsrest_chapel"):
+def chapel(seed=5, name="kingsrest_chapel", bells=True, healer=False):
     """Stone chapel on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py): a buttressed nave with
     lancets, a front tower in three stages with the door at its foot, a louvred belfry and a broach spire
-    (build-instructions/towers/README.md), a lower chancel at the back."""
-    bp = _skill_spec("kingsrest_chapel.json", name)
+    (build-instructions/towers/README.md), a lower chancel at the back. bells=False: the belfry stands empty."""
+    bp = _skill_spec("kingsrest_chapel.json", name, bells)
     bp.markers["door"] = (5, 2, 24); bp.markers["priest"] = (5, 2, 3)
+    if healer: _healers_corner(bp)
     return bp.finish()
+
+
+def _healers_corner(bp):
+    """Sister Wren's chapel (Millbrook, story-critical; story-builds thread 2026-11-14): the three pew rows nearest the
+    chancel step go, and her healer's corner stands on the north side of the aisle there. Local z is the row counted
+    back from the chancel arch (0), x 5 the aisle; in the plan's turn (90) local +z is west and local -x is north.
+    Wren stands in the aisle at (5, 2, 2): the bed's head beside her, its foot one row back, the water cauldron
+    between the bed and the aisle, a stair chair, a barrel with a flower pot at the bed's foot."""
+    for z in (1, 3, 5):
+        for x in (3, 4, 6, 7):
+            if (x, 2, z) in bp.cells and bp.cells[(x, 2, z)][0].endswith("_stairs"): bp.set(x, 2, z, "air")
+    bp.set(2, 2, 2, "bed", facing="n", head=True)       # head to the east (towards the altar)
+    bp.set(2, 2, 3, "bed", facing="n", head=False)
+    bp.set(3, 2, 2, "cauldron", water=True)
+    bp.set(3, 2, 4, "spruce_stairs", facing="w")        # back to the north wall: sits facing the aisle
+    bp.set(2, 2, 5, "barrel", facing="up")
+    bp.set(2, 3, 5, "flower_pot")
+    bp.markers["wren"] = (5, 2, 2)
 
 
 def station(seed=9):
@@ -131,12 +154,12 @@ def station(seed=9):
     return finish_doctrine(bp)
 
 
-def clock_tower(seed=13, name="millbrook_clock_tower"):
+def clock_tower(seed=13, name="millbrook_clock_tower", bells=False):
     """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot), on the skill
     (review/specs/millbrook_clock_tower.json, gen_millbrook.py, build-instructions/towers/README.md): a stone
     shaft in three stages, a jettied timber clock stage with a framed 5 x 5 clock on every face, a steep slate
-    helm and an open bell lantern."""
-    bp = _skill_spec("millbrook_clock_tower.json", name)
+    helm and an open bell lantern. Its bell is down (bells=False) like every bell in Millbrook (the story)."""
+    bp = _skill_spec("millbrook_clock_tower.json", name, bells)
     bp.markers["door"] = (3, 2, 5); bp.markers["arena"] = (3, 0, 12)
     return bp.finish()
 

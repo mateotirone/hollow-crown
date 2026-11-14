@@ -9,6 +9,8 @@
 //   - a siege on its settlement: it runs (Speed), and a guard further than WALK.far blocks away is put on its spot
 //     straight away so the wall is never bare
 //   - no closer for WALK.stuck seconds (no way through): it is put on its spot
+//   - a watchtower lookout (dest.climb): at the foot of the tower it is put up on the deck (the ladder is inside)
+//   - leaving a lookout (down = the foot of its ladder): it is put down at the foot of the tower first, then walks
 // No marker slot free (more than WALK.slots guards walking at once) also puts it straight on its spot.
 
 import { world, system } from "@minecraft/server";
@@ -23,6 +25,7 @@ export const WALK = {
   calm: 3,
   far: 80,
   stuck: 20,
+  climb: 4.5, // a post up a ladder (a watchtower's lookout, dest.climb): this close to it on the ground, the guard climbs up
   every: 10, // ticks between checks
 };
 
@@ -34,6 +37,9 @@ const dim = () => world.getDimension("minecraft:overworld");
 const entityById = (id) => { try { return world.getEntity(id); } catch { return undefined; } };
 export const isWalking = (guard) => walkers.has(guard.id);
 export const walkingCount = () => walkers.size;
+
+// Pure: is a guard at `loc` up on the lookout whose ladder comes down at `foot` (beside it, well above it)?
+export const upAbove = (loc, foot) => !!foot && loc.y - foot.y > 2.5 && Math.hypot(loc.x - foot.x, loc.z - foot.z) <= WALK.climb + 1;
 
 // Pure: where the marker goes, `lead` blocks from the guard toward the destination (or the destination itself)
 export function leadPoint(from, to, lead = WALK.lead) {
@@ -66,10 +72,12 @@ function stopWalking(guard, w, arrived) {
 // arrival). The caller has already set its post (siege:post) to dest. Returns false if it was put there at once.
 // noJump (soldiers at war, warwrit/army.js): never put it there by teleport. With no slot free it doesn't start,
 // and stuck or far it just stops where it is.
-export function walkTo(guard, owner, dest, { salute = false, done, noJump = false } = {}) {
+// down: the foot of the ladder of the lookout it is leaving ({ x, y, z }); up there, it climbs down first.
+export function walkTo(guard, owner, dest, { salute = false, done, noJump = false, down } = {}) {
   const old = walkers.get(guard.id);
   if (old) stopWalking(guard, old, false);
-  const loc = guard.location;
+  let loc = guard.location;
+  if (upAbove(loc, down)) { setOn(guard, { ...down, yaw: dest.yaw }); loc = down; }
   const d = Math.hypot(loc.x - dest.x, loc.z - dest.z);
   if (d <= WALK.arrive + 0.5) { setOn(guard, dest); done?.(true); return false; }
   const slot = slotOwner.indexOf(null);
@@ -145,6 +153,8 @@ function step(id, w) {
     try { guard.triggerEvent(`siege:walk_${w.slot}`); } catch { /* fine */ }
   }
   if (besieged || underAttack(w.owner)) try { guard.addEffect("speed", WALK.every + 10, { amplifier: 1, showParticles: false }); } catch { /* fine */ }
+  // at the foot of a watchtower: up the ladder and out through the hatch onto the lookout
+  if (w.dest.climb && d <= WALK.climb && w.dest.y - loc.y > 2.5) return stopWalking(guard, w, true);
   if (d < w.best - 1) { w.best = d; w.bestTick = now; }
   else if (now - w.bestTick > WALK.stuck * 20) return stopWalking(guard, w, !w.noJump);
   // keep the marker ahead, on the ground

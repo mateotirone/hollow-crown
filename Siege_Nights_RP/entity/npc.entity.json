@@ -1,0 +1,127 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:npc",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "commoner": "textures/entity/siege/npc_skins/commoner",
+        "mason": "textures/entity/siege/npc_skins/mason",
+        "lore_wren": "textures/entity/siege/npc_skins/lore_wren",
+        "lore_aldous": "textures/entity/siege/npc_skins/lore_aldous",
+        "lore_mag": "textures/entity/siege/npc_skins/lore_mag",
+        "lore_elias": "textures/entity/siege/npc_skins/lore_elias",
+        "lore_sage": "textures/entity/siege/npc_skins/lore_sage",
+        "lore_cael": "textures/entity/siege/npc_skins/lore_cael",
+        "lore_sigrun": "textures/entity/siege/npc_skins/lore_sigrun",
+        "lore_isolde": "textures/entity/siege/npc_skins/lore_isolde",
+        "lore_nessa": "textures/entity/siege/npc_skins/lore_nessa",
+        "lore_jorund": "textures/entity/siege/npc_skins/lore_jorund",
+        "lore_tilly": "textures/entity/siege/npc_skins/lore_tilly",
+        "lore_hesper": "textures/entity/siege/npc_skins/lore_hesper",
+        "lore_corvin": "textures/entity/siege/npc_skins/lore_corvin",
+        "lore_kesh": "textures/entity/siege/npc_skins/lore_kesh",
+        "lore_ulla": "textures/entity/siege/npc_skins/lore_ulla",
+        "lore_ottilie": "textures/entity/siege/npc_skins/lore_ottilie",
+        "lore_nell": "textures/entity/siege/npc_skins/lore_nell",
+        "lore_carter": "textures/entity/siege/npc_skins/lore_carter",
+        "settler_0": "textures/entity/siege/npc_skins/settler_0",
+        "settler_1": "textures/entity/siege/npc_skins/settler_1",
+        "settler_2": "textures/entity/siege/npc_skins/settler_2",
+        "settler_3": "textures/entity/siege/npc_skins/settler_3",
+        "settler_4": "textures/entity/siege/npc_skins/settler_4",
+        "settler_5": "textures/entity/siege/npc_skins/settler_5",
+        "settler_6": "textures/entity/siege/npc_skins/settler_6",
+        "settler_7": "textures/entity/siege/npc_skins/settler_7",
+        "fair_vale": "textures/entity/siege/npc_skins/fair_vale",
+        "fair_frostmarch": "textures/entity/siege/npc_skins/fair_frostmarch",
+        "fair_saltreach": "textures/entity/siege/npc_skins/fair_saltreach",
+        "fair_emberwaste": "textures/entity/siege/npc_skins/fair_emberwaste",
+        "fair_blackfen": "textures/entity/siege/npc_skins/fair_blackfen",
+        "mummer_0": "textures/entity/siege/npc_skins/mummer_0",
+        "mummer_1": "textures/entity/siege/npc_skins/mummer_1",
+        "mummer_2": "textures/entity/siege/npc_skins/mummer_2",
+        "keeper_great_lighthouse": "textures/entity/siege/npc_skins/keeper_great_lighthouse",
+        "keeper_high_watch": "textures/entity/siege/npc_skins/keeper_high_watch",
+        "keeper_rimeforge_hall": "textures/entity/siege/npc_skins/keeper_rimeforge_hall",
+        "keeper_sun_gate": "textures/entity/siege/npc_skins/keeper_sun_gate",
+        "keeper_lantern_spire": "textures/entity/siege/npc_skins/keeper_lantern_spire",
+        "keeper_great_horse_fair": "textures/entity/siege/npc_skins/keeper_great_horse_fair",
+        "traveller_0": "textures/entity/siege/npc_skins/traveller_0",
+        "traveller_1": "textures/entity/siege/npc_skins/traveller_1",
+        "traveller_2": "textures/entity/siege/npc_skins/traveller_2",
+        "traveller_3": "textures/entity/siege/npc_skins/traveller_3",
+        "clock_0": "textures/entity/siege/npc_skins/clock_0",
+        "clock_1": "textures/entity/siege/npc_skins/clock_1",
+        "clock_2": "textures/entity/siege/npc_skins/clock_2",
+        "clock_3": "textures/entity/siege/npc_skins/clock_3",
+        "clock_4": "textures/entity/siege/npc_skins/clock_4",
+        "warden_sigga": "textures/entity/siege/npc_skins/warden_sigga",
+        "mire_0": "textures/entity/siege/npc_skins/mire_0",
+        "mire_1": "textures/entity/siege/npc_skins/mire_1",
+        "mire_2": "textures/entity/siege/npc_skins/mire_2",
+        "mire_3": "textures/entity/siege/npc_skins/mire_3",
+        "mire_4": "textures/entity/siege/npc_skins/mire_4",
+        "lord_vale_knight": "textures/entity/siege/npc_skins/lord_vale_knight",
+        "lord_vale_marked": "textures/entity/siege/npc_skins/lord_vale_marked",
+        "lord_frostmarch_knight": "textures/entity/siege/npc_skins/lord_frostmarch_knight",
+        "lord_frostmarch_marked": "textures/entity/siege/npc_skins/lord_frostmarch_marked",
+        "lord_saltreach_knight": "textures/entity/siege/npc_skins/lord_saltreach_knight",
+        "lord_saltreach_marked": "textures/entity/siege/npc_skins/lord_saltreach_marked",
+        "lord_emberwaste_knight": "textures/entity/siege/npc_skins/lord_emberwaste_knight",
+        "lord_emberwaste_marked": "textures/entity/siege/npc_skins/lord_emberwaste_marked",
+        "lord_blackfen_knight": "textures/entity/siege/npc_skins/lord_blackfen_knight",
+        "lord_blackfen_marked": "textures/entity/siege/npc_skins/lord_blackfen_marked",
+        "guest_0": "textures/entity/siege/npc_skins/guest_0",
+        "guest_1": "textures/entity/siege/npc_skins/guest_1",
+        "guest_2": "textures/entity/siege/npc_skins/guest_2",
+        "guest_3": "textures/entity/siege/npc_skins/guest_3",
+        "guest_4": "textures/entity/siege/npc_skins/guest_4",
+        "guest_5": "textures/entity/siege/npc_skins/guest_5",
+        "guest_6": "textures/entity/siege/npc_skins/guest_6",
+        "guest_7": "textures/entity/siege/npc_skins/guest_7",
+        "guest_8": "textures/entity/siege/npc_skins/guest_8",
+        "guest_9": "textures/entity/siege/npc_skins/guest_9",
+        "guest_10": "textures/entity/siege/npc_skins/guest_10",
+        "guest_11": "textures/entity/siege/npc_skins/guest_11",
+        "hollow_foreman": "textures/entity/siege/npc_skins/hollow_foreman",
+        "hollow_miner_0": "textures/entity/siege/npc_skins/hollow_miner_0",
+        "hollow_miner_1": "textures/entity/siege/npc_skins/hollow_miner_1",
+        "hollow_miner_2": "textures/entity/siege/npc_skins/hollow_miner_2",
+        "envoy_bell": "textures/entity/siege/npc_skins/envoy_bell",
+        "envoy_salt": "textures/entity/siege/npc_skins/envoy_salt",
+        "envoy_lamp": "textures/entity/siege/npc_skins/envoy_lamp",
+        "envoy_root": "textures/entity/siege/npc_skins/envoy_root",
+        "envoy_tide": "textures/entity/siege/npc_skins/envoy_tide",
+        "lore_elspeth": "textures/entity/siege/npc_skins/lore_elspeth"
+      },
+      "geometry": {
+        "default": "geometry.humanoid.custom"
+      },
+      "scripts": {
+        "pre_animation": [
+          "variable.tcos0 = (Math.cos(query.modified_distance_moved * 38.17) * query.modified_move_speed / 1.0) * 57.3;"
+        ],
+        "animate": [
+          "humanoid_base_pose",
+          "look_at_target_default",
+          "move"
+        ]
+      },
+      "animations": {
+        "humanoid_base_pose": "animation.humanoid.base_pose",
+        "look_at_target_default": "animation.humanoid.look_at_target.default",
+        "move": "animation.humanoid.move"
+      },
+      "render_controllers": [
+        "controller.render.siege_npc"
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 35
+      }
+    }
+  }
+}

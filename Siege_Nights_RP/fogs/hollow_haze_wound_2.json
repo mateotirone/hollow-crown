@@ -1,0 +1,36 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:hollow_haze_wound_2"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 2,
+        "fog_end": 48,
+        "fog_color": "#271436",
+        "render_distance_type": "fixed"
+      },
+      "water": {
+        "fog_start": 0,
+        "fog_end": 10,
+        "fog_color": "#120b1a",
+        "render_distance_type": "fixed"
+      },
+      "weather": {
+        "fog_start": 2,
+        "fog_end": 48,
+        "fog_color": "#271436",
+        "render_distance_type": "fixed"
+      }
+    },
+    "volumetric": {
+      "density": {
+        "air": {
+          "max_density": 0.6,
+          "uniform": true
+        }
+      }
+    }
+  }
+}

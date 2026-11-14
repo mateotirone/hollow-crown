@@ -1,4 +1,6 @@
-// The Barracks and the Quartermaster's Desk raise their building when placed on your land (designs in
+// Old worlds only: no block raises a building any more (Mateo 2026-11-14), the Barracks, Quartermaster's Armoury and
+// the rest go on plots from the Plot Marker. Blocks already in a pack or placed still work: the Barracks, the
+// Quartermaster's Desk and the Dragon Roost raise their building when placed on your land (designs in
 // blockdesigns.js), in your settlement's style, running away from where you stood. Free: the block is the
 // price. No room (land edge, ground kept for your hall, another building rising)? The block still works on
 // its own and says why. A build cut short by the world closing carries on when it loads again.
@@ -8,15 +10,15 @@
 //
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
-import { world, system } from "@minecraft/server";
-import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter, keepOf } from "../siege/api.js";
+import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { onTick, on, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter, keepOf, trackMachine } from "../siege/api.js";
 import { COLORS } from "../siege/constants.js";
 import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
 import { siteProblem, styleOf } from "./plans.js";
 import { footprint } from "./rules.js";
-import { levelSite, foundationColumns, groundTop } from "./ground.js";
+import { levelSite, foundationColumns, groundTop, Groundwork } from "./ground.js";
 import { frameFor, toWorld } from "../townhall/halls.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
@@ -32,11 +34,23 @@ export function raisedBuildings() {
 }
 export function forgetRaised(key) { if (store.data.built?.[key]) { delete store.data.built[key]; store.save(); } }
 
-// Finished block buildings on a settlement's land, by building id ("siege:barracks" -> "barracks")
-export function raisedCounts(owner) {
+// Finished block buildings on a settlement's land, by building id ("siege:barracks" -> "barracks").
+// rising: count the ones still going up too (the one-of-each rule, oneeach.js)
+export function raisedCounts(owner, { rising = false } = {}) {
   const out = {};
-  for (const b of Object.values(store.data.built ?? {})) if (b.owner && b.owner === owner) { const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
+  const all = [...Object.values(store.data.built ?? {}), ...(rising ? Object.values(store.data.pending ?? {}) : [])];
+  for (const b of all) if (b.owner && b.owner === owner && !b.plot) { // (a plot-built one counts as its plot)
+    const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
   return out;
+}
+// The raising blocks of this type on a settlement's land, built or going up: ["x,y,z"] (oneeach.js checks they still stand)
+export const raisedKeys = (owner, type) => ["built", "pending"].flatMap((k) => Object.entries(store.data[k] ?? {})
+  .filter(([, b]) => b.owner === owner && b.type === type && !b.plot).map(([key]) => key));
+// A raising block that is gone without a break event (blown up, /setblock): forget it
+export function forgetRaisedBlock(key) {
+  let changed = false;
+  for (const k of ["built", "pending"]) if (store.data[k]?.[key]) { delete store.data[k][key]; changed = true; }
+  if (changed) store.save();
 }
 const keyOf = (l) => `${l.x},${l.y},${l.z}`;
 const locOf = (k) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z }; };
@@ -102,15 +116,18 @@ function start(key, job) {
   const plan = planFor(job.type, job.style);
   const at = locOf(key);
   const forward = { x: job.fx, z: job.fz };
-  // on the highest ground under it, never half buried (ground.js); measured once so a restart keeps the height.
+  // on a terraformed pad, never half buried (ground.js); measured once so a restart keeps the height (and skips
+  // the regrading, which was done the first time).
   // The block itself stays where it was placed and the building leaves it alone.
   const dim = world.getDimension(OVERWORLD);
-  if (!Number.isFinite(job.lift)) { job.lift = levelSite(dim, plan, at, forward).lift; store.save(); }
+  const fresh = !Number.isFinite(job.lift);
+  if (fresh) { job.lift = levelSite(dim, plan, at, forward, { terraform: true }).lift; store.save(); }
   const origin = { ...at, y: at.y + job.lift };
   const gaps = yardGaps(plan, origin, forward, job.lift, pathAt(dim, origin.y + 2));
   const b = startBuild({
     id: `raised:${key}`, dimensionId: OVERWORLD, origin: { ...at, y: at.y + job.lift }, forward,
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
+    ...(fresh ? { ground: new Groundwork(plan, origin, forward, job.style) } : {}),
     skip: (x, y, z) => (x === at.x && y === at.y && z === at.z) || gaps.cells.has(`${x},${y},${z}`),
     onDone() {
       colourCloth(dim, plan, origin, forward, job.owner);
@@ -124,18 +141,52 @@ function start(key, job) {
   if (gaps.cols.size) b.columns = b.columns.filter((c) => !gaps.cols.has(`${c.x},${c.z}`));
 }
 
+// A Barracks or Quartermaster's Armoury raised on a plot from its Plot Marker (or a Foundation Stone): the working
+// block goes at its front, where a placed block would have stood, and the building is remembered like a block-raised
+// one (the Barracks yard for the off-duty soldiers, guard posts) without counting twice for the charter (plot: the
+// plot counts it).
+const PLOT_BLOCKS = {
+  barracks: { type: "siege:barracks", said: "§6Your Barracks stands.§7 Click the Barracks block at its front and choose §fTrain soldiers§7: 40 Regals each, and a Hamlet keeps 4." },
+  quartermaster_desk: { type: "siege:quartermaster_desk", said: "§6Your Quartermaster's Armoury stands.§7 A quartermaster soon takes the post at the desk by its front: click them to buy siege gear." },
+};
+on("settleBuilt", ({ owner, building, style, origin, forward, box }) => {
+  const made = PLOT_BLOCKS[building];
+  if (!made) return;
+  const dim = world.getDimension(OVERWORLD);
+  try { dim.getBlock(origin)?.setType(made.type); } catch { return; }
+  trackMachine(OVERWORLD, origin, made.type);
+  (store.data.built ??= {})[keyOf(origin)] = { type: made.type, fx: forward.x, fz: forward.z, style, owner, box, lift: 0, plot: true };
+  store.save();
+  world.getPlayers().find((p) => p.id === owner)?.sendMessage(made.said);
+});
+
+// Asked before a placed block raises anything: (owner, typeId, "x,y,z") -> why not, or undefined (oneeach.js: one of
+// each special building per settlement). Refused, the block comes back out and goes back in the player's pack.
+let raiseCheck = () => undefined;
+export const useRaiseCheck = (fn) => { raiseCheck = fn; };
+
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const build = BLOCK_BUILDS[block.typeId];
   if (!build || !isReady() || block.dimension.id !== OVERWORLD) return;
   const owner = settlementAt(block.location);
   if (!owner) return; // Siege Nights has already refused it off your land
+  const refused = raiseCheck(owner, block.typeId, keyOf(block.location));
+  if (refused) {
+    const typeId = block.typeId;
+    block.setType("minecraft:air");
+    if (player.getGameMode() !== GameMode.Creative) player.getComponent("minecraft:inventory")?.container?.addItem(new ItemStack(typeId, 1));
+    return player.sendMessage(refused);
+  }
   const f = cardinal(player.getViewDirection());
   let style = "vale";
   try { style = styleOf(owner, block); } catch { /* no hall or plot: Vale */ }
   const key = keyOf(block.location);
   const box = footprint(block.location, f, planFor(block.typeId, style).bounds());
   const problem = siteProblem(owner, box);
-  if (problem) return player.sendMessage(`§7No room for a ${build.name} here: ${problem} §8The block works on its own.`);
+  if (problem) {
+    const bb = planFor(block.typeId, style).bounds();
+    return player.sendMessage(`§7No room for a ${build.name} here: ${problem} §7It needs open ground ${bb.x1 - bb.x0 + 1} wide and ${bb.z1 - bb.z0 + 1} deep beyond the block, the way you face. Break it and set it down somewhere clearer. §8The block works on its own meanwhile.`);
+  }
   store.data.pending[key] = { type: block.typeId, fx: f.x, fz: f.z, style, owner };
   store.save();
   start(key, store.data.pending[key]);

@@ -36,9 +36,21 @@ dragon cries at night. It is grand and dangerous rather than gloomy.
 | Light | harsh white-gold sun, deep shadows under awnings and arcades; warm lanterns and campfires in courtyards at night |
 | Feel | dust, heat, red rock, shade as a luxury |
 
-Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. Walls are thick with
+Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. On a house part's flat roof pass `"beams": "stripped_acacia_log"`: the default spruce beams read as black stripes from above (Cinder Roost, 2026-11-13). Walls are thick with
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
 drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
+
+- **Cliffs and mesas are real** (Mateo, 2026-11-12: "Is there a real cliff and wall where this story happens?"):
+  when a place is said to stand on a cliff or mesa, raise one in the land. Sheer faces of banded terracotta
+  (orange, terracotta, red, yellow, brown, light grey) about 20 high, an uneven rim and ledges partway down, scree
+  heaped at the foot, red sand with a little red sandstone and coarse dirt on top, and a cut path up the side
+  facing the town. The worked example is the Cinder Roost in `map/structures/story_areas.py`.
+- **Statues** (Mateo, 2026-11-12: the old avenue statues "read like posts"; 2026-11-13: "3D entities of the statues
+  instead of built blocks"): robed, hooded figures with a blank smooth-quartz face (never a carved face), worn and
+  chipped, some broken or fallen, each holding something different (a staff, a sword, a bowl, folded hands). The
+  figure is the 3D entity `siege:faceless_statue`; only its stepped sandstone plinth is blocks. Bake the plinths with
+  `map/structures/faceless_statues.py` and write each figure into a statue-spot list (`write_spots`, format in that
+  file's docstring); the game stands the figures. Never build a statue figure out of blocks.
 
 ## Towns and paths
 
@@ -65,6 +77,7 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 | Smithy | a walled forge yard behind a flat-roofed workshop, an open forge under a beam-and-awning shade, a squat chimney |
 | Spice and cloth store | two storeys, flat roof, a deep arched shopfront under a long striped awning, pots and barrels out front, a roof terrace with a cloth shade |
 | Towers | tapering kasbah towers with corner horns (the corners rise above the parapet) |
+| Dragon Stable | raised by the Dragon Roost on a settlement's land (Mateo, 2026-11-13: "a custom building for settlements in emberwaste as a dragon stable ... an attached nursery ... where the dragon hatching blocks are"): a 15 x 15 two-storey hall with a 5-wide round-angle arch in a proud red sandstone surround (a grown dragon walks in), stalls 4 deep off a 5-wide aisle, the hall's corners rising as horns; the nursery a lower 7 x 11 wing on the east under a small blue-green dome, three Hatching Braziers on a red sandstone floor. Built the Emberwaste way wherever it stands (`map/structures/dragon_stable_skill.py`) |
 
 **From the ground up:**
 - **Base:** a thick sandstone base flush with the wall; raised terraces in front of homes.
@@ -164,6 +177,10 @@ Full table: `build-instructions/palettes/emberwaste.md`; ladders EMB-01 to EMB-0
 still look too round, as flagged in the tree thread.
 
 **Smaller plants:** dead bush, cactus in pots, a palm in each courtyard. No grass.
+
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is thick sandstone walls under a flat vigas roof with a crenel parapet (the two- and three-storey levels have a hatch up to the roof terrace); inside, `cut_sandstone` pillars with `smooth_sandstone` beams. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
 
 ## Building it with the skill
 

@@ -576,8 +576,8 @@
         "value": 14
       },
       "minecraft:health": {
-        "value": 30,
-        "max": 30
+        "value": 60,
+        "max": 60
       },
       "minecraft:movement": {
         "value": 0.32

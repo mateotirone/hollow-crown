@@ -8,6 +8,8 @@ import { Plan } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
 import { drawData } from "../townhall/designs.js";
 import { BUILDING_DESIGNS } from "./designs_data.js";
+import { MASON_DESIGNS } from "./mason_data.js";
+import { STOREHOUSE_DESIGNS } from "./storehouse_data.js";
 
 const W = (...ids) => ids.map((id) => `minecraft:${id}`);
 
@@ -199,8 +201,10 @@ function garden(p) {
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { p.set(x, 1, z, "pillar", { axis: "y" }); p.set(x, 2, z, "light"); }
 }
 
-// The town's library: two storeys of books round a reading table, with eight Archive Shelves on the
-// back wall (marks shelf0..shelf7, lower row first) and a lectern (mark "lectern") in front of them.
+// The town's library: two storeys of books round a reading table, with eight two-high bookcases of Archive Shelves
+// (each half its own shelf, siege:half lower/upper, Mateo 2026-11-14): four on the back wall (marks shelf0..shelf7,
+// lower row first) and two on each side wall (shelf8..shelf15, each case lower then upper), and a lectern (mark
+// "lectern") in front of them. (The regions' own designs, designs_data.js, have the same marks.)
 // The lore feature fills the shelves with this town's own books when the library is built.
 function library(p) {
   const x0 = -4, x1 = 4, z0 = 1, z1 = 9, H = 5;
@@ -215,7 +219,11 @@ function library(p) {
   for (const x of [x0 + 1, x1 - 1]) for (const z of [2, 4, 6, 8]) p.fill(x, 1, z, x, H - 1, z, "bookshelf");
   // the Archive Shelves, two rows of four, either side of the middle of the back wall
   let n = 0;
-  for (const y of [1, 2]) for (const x of [-2, -1, 1, 2]) { p.set(x, y, z1 - 1, "archive"); p.mark(`shelf${n++}`, x, y, z1 - 1); }
+  const half = (y) => ({ "siege:half": y === 1 ? "lower" : "upper" });
+  for (const y of [1, 2]) for (const x of [-2, -1, 1, 2]) { p.set(x, y, z1 - 1, "archive", { dir: "-z", st: half(y) }); p.mark(`shelf${n++}`, x, y, z1 - 1); }
+  for (const [x, dir] of [[x0 + 1, "+x"], [x1 - 1, "-x"]]) for (const z of [4, 6]) for (const y of [1, 2]) {
+    p.set(x, y, z, "archive", { dir, st: half(y) }); p.mark(`shelf${n++}`, x, y, z); // in place of the low bookshelves
+  }
   p.fill(0, 1, z1 - 1, 0, 2, z1 - 1, "bookshelf");
   for (const x of [-2, -1, 0, 1, 2]) p.set(x, 3, z1 - 1, "bookshelf");
   p.set(0, 1, z1 - 3, "lectern"); p.mark("lectern", 0, 1, z1 - 3);
@@ -260,36 +268,75 @@ function inn(p) {
   p.set(-2, 1, 8, "barrel"); p.set(2, 1, 8, "barrel");
 }
 
+// The Barracks and the Quartermaster's Armoury: designs from blockdesigns.js, raised on a plot from the Plot Marker
+// like any building (Mateo 2026-11-13: "it should just unlock and you place it on a plot that fits it"; 2026-11-14:
+// "I never want to use blocks to place buildings"). The working block (Barracks, Quartermaster's Desk) goes at the
+// front when it stands (raised.js). blockdesigns.js imports this file, so it hands its designs over (useBlockDesign)
+// rather than being imported here.
+const blockDesigns = {};
+export const useBlockDesign = (id, draw) => { blockDesigns[id] = draw; };
+const designOf = (id) => (styleId) => {
+  if (!blockDesigns[id]) throw new Error("settle/blockdesigns.js is not loaded");
+  return blockDesigns[id](styleId);
+};
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
   { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
-  { id: "storehouse", name: "Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
-  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
+  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight two-high Archive Shelf bookcases for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
   { id: "house", name: "House", blurb: "One storey and a tall attic under a steep gable, with a chimney. About four beds.", draw: house },
   { id: "townhouse", name: "Townhouse", blurb: "A taller house: stone below, a jettied floor over the road, a high attic. About six beds.", draw: townhouse },
-];
-// Drawn and exported, but not offered yet: with them in play the charters need more plots than some layouts open
-// in time (the Farmhouse at Town in lanternbog Market Street, the Mint at Town in dunehold Crossroads, the Inn at
-// City in dunehold Twin Rings). They join BUILDINGS once the layouts or the charters make room.
-export const WAITING = [
   { id: "farmhouse", name: "Farmhouse", blurb: "A long low farmhouse with an open lean-to behind for hay and the woodpile.", draw: farmhouse },
   { id: "inn", name: "Inn", blurb: "A tap room with the bar, tables and a hearth, and bedrooms above for travellers.", draw: inn },
   { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
+  { id: "barracks", name: "Barracks", blurb: "A stone guardhouse with bunks, a weapons corner and a walled yard. Click the Barracks block at its front to train guards.", plan: designOf("barracks") },
+  { id: "quartermaster_desk", name: "Quartermaster's Armoury", blurb: "An open shop front with the Quartermaster's Desk as its counter and stores behind. A quartermaster takes the post and sells siege gear.", plan: designOf("quartermaster_desk") },
 ];
-export const BUILDING = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));
+// Nothing waiting now: the farmhouse, inn and mint joined BUILDINGS when the 2026-11-13 layouts made room for them.
+export const WAITING = [];
+// Raised by the game itself, never offered on a plot or in the Plan Book: the Mason's Yard every new base gets
+// (basebuilds.js; Mateo's playtest 2026-11-12). Designed on the building skill (map/structures/export_mason.py).
+export const FIXED_BUILDINGS = [
+  { id: "mason_yard", name: "Mason's Yard", blurb: "The mason's workshop, with a yard in front where he cuts and sells blocks.", draw: (p) => floor(p, -4, 4, 1, 9), designs: MASON_DESIGNS },
+  // The Storehouse at its four levels, one per town tier (storehouse.js; Mateo 2026-11-13). Designed on the
+  // building skill (map/structures/storehouse_skill.py): walls of sideways chests in 3 x 3 bays between stone pillars.
+  ...[["Store Shed", 4, 9], ["Storehouse", 5, 11], ["Storehouse", 6, 13], ["Great Storehouse", 6, 13]].map(([name, half, deep], i) => ({
+    id: `storehouse_${i + 1}`, name, blurb: "The settlement's storage: chests in bays between stone pillars. It grows with the town.",
+    draw: (p) => floor(p, -half, half, 1, deep), designs: STOREHOUSE_DESIGNS,
+  })),
+];
+// No longer offered, kept so a settlement that raised one before still knows what stands on its plot: the old
+// Castle-tier plot Storehouse, replaced by the Storehouse every settlement gets with its Hamlet (2026-11-13)
+export const RETIRED_BUILDINGS = [
+  { id: "storehouse", name: "Old Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
+];
+export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS, ...RETIRED_BUILDINGS].map((b) => [b.id, b]));
+
+// The machines of the town's Works plots (the Ironworks; Mateo 2026-11-12: the town generator makes the plots, the
+// player picks one and the machine builds itself there). They are raised and knocked down like any plot building,
+// but only ever on a Works plot: never from a Foundation Stone, a plan or by a Rival Lord, so they stay out of
+// BUILDINGS. A feature adds its own:
+//   addWorks({ id, name, blurb, coins, plan(styleId) -> Plan, dig?, taken?(owner) -> why not, or undefined })
+// coins: the price of the first stage. dig: how far it digs below the plot (filled in again when knocked down).
+// Its plot size, tier and tags are in config.js (PLOT_SIZE "W", OPENS_AT, PLOT_TAGS) like every building's.
+export const WORKS = [];
+export function addWorks(entry) {
+  if (!BUILDING[entry.id]) WORKS.push(entry);
+  BUILDING[entry.id] = entry;
+}
 
 const plans = new Map();
 export function drawBuilding(id, styleId) {
+  if (BUILDING[id]?.plan) return BUILDING[id].plan(styleId);
   const key = `${id}|${styleId}`;
   if (!plans.has(key)) {
     const style = styleFor(styleId);
     const p = new Plan(style);
-    const d = BUILDING_DESIGNS[style.id]?.[id];
+    const d = (BUILDING[id]?.designs ?? BUILDING_DESIGNS)[style.id]?.[id] ?? BUILDING[id]?.designs?.[style.id];
     if (d) {
       // the region's own design (map/structures/settle_buildings.py); its blocks become roles on this style
       const prefix = `bd:${style.id}:${id}`;

@@ -12,6 +12,7 @@ The Seat (HEART): the floating ring where Morvane waits. Origin = HEART.center: 
     (r 7, top y = -1) and on the ring (r 11..30). Seven Singer pillars at r 22 on the angles i/7 (as before), the
     throne just south of the middle, Morvane's spot (z + 3.5) left clear. Everything beyond r 7 stays between
     y -8 and y +34, the band dropHeartBand() clears; the disc's root hangs below it and never falls.
+The approach (HEART): the way from the cliff at z 2330 to the Seat, see approach(). Origin = HEART.center.
 
 Each design carries v (2: the first redesign) and clear: the cells the old fill-op look (builder.js before
 2026-11-12) stood on that the new one leaves empty, so a world that built the old look is cleared and stamped again.
@@ -21,6 +22,8 @@ import argparse, json, math, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import export_landmarks as X  # noqa: E402  (the skill's compute)
 from landmarks import D  # noqa: E402
+from engine import spilling_water  # noqa: E402  (the skill: water that would run out of its basin)
+import emit, lighting  # noqa: E402  (the skill: connections, the light stage)
 
 VEIN = [("siege:veinstone_bricks", 6), ("siege:cracked_veinstone_bricks", 2), ("polished_blackstone_bricks", 2)]
 SEA = [("dark_prismarine", 6), ("prismarine_bricks", 3), ("siege:cracked_veinstone_bricks", 1)]
@@ -48,12 +51,12 @@ def court():
                 elif 17 <= dd < 24 and (x // 2 + z // 2) % 2 == 0: b = "dark_prismarine"
                 else: b = d.pick(x, -1, z, [("dark_prismarine", 14), ("prismarine_bricks", 3), ("siege:cracked_veinstone_bricks", 1)])
                 d.put(x, -1, z, b)
-    for k in range(8):                     # eight channels between the rings, knee deep
+    for k in range(8):                     # eight channels between the rings, sunk one row into the floor
         a = math.radians(k * 45 + 22.5)
         for s in range(10, 24):
             if 15.5 <= s <= 16.5: continue
             x, z = round(math.cos(a) * s), round(math.sin(a) * s)
-            d.put(x, -1, z, "water"); d.put(x, 0, z, "water")
+            d.put(x, -1, z, "water")       # never at y 0 too: open on every side there, it ran over the whole floor (v3)
     # the round wall: two thick, coursed, its top broken where the water brought it down
     for x in range(-R - 1, R + 2):
         for z in range(-R - 1, R + 2):
@@ -314,6 +317,9 @@ def seat():
             d.put(px + ax, 3, pz + az, "polished_blackstone_brick_stairs", facing={(1, 0): "w", (-1, 0): "e", (0, 1): "n", (0, -1): "s"}[(ax, az)])
             d.put(px + ax, 13, pz + az, "siege:hollowwood_lattice")
         d.put(px, 14, pz, "amethyst_block"); d.put(px, 15, pz, "siege:hollowwood_core")
+    # the landing: a lip on the ring's north edge where the approach (below) comes in
+    for x in range(-2, 3):
+        d.put(x, -2, -31, "siege:veinstone"); d.put(x, -1, -31, "polished_blackstone_bricks" if abs(x) < 2 else "siege:cracked_veinstone_bricks")
     seat_detail(d)
     return d
 
@@ -411,9 +417,227 @@ def old_seat():
     return cells
 
 
-def export(d, old, keep_out=()):
-    blocks = X.compute(d.spec())
+# ---------------------------------------------------------------- the approach to the Seat
+
+EDGE_Z, EDGE_Y = -70, 3      # the story path's spur ends at z 2330 with its top block at y 123 (terrain.js heartEdge)
+ROCK = [("siege:veinstone", 58), ("blackstone", 24), ("basalt", 10), ("cobbled_deepslate", 8)]
+TOP = [("siege:undertow_moss", 40), ("siege:undertow_moss_deep", 22), ("tuff", 16), ("cobbled_deepslate", 14), ("siege:pale_ash", 8)]
+PAVE = [("cobbled_deepslate", 58), ("polished_blackstone_bricks", 24), ("tuff", 12), ("siege:cracked_veinstone_bricks", 6)]
+# The way across: the Last Step (a shelf hanging off the cliff), five islands, the Seat's landing. (x, z, radius, depth)
+STOPS = [(0, -70, 7.5, 13), (7, -56, 5.5, 15), (15, -46, 3.2, 7), (5, -41, 4.6, 11), (-7, -42, 3.0, 9), (-1, -35, 2.6, 6)]
+WAY = [(0, -70), (0, -64), (7, -56), (15, -46), (5, -41), (-7, -42), (-4, -37), (0, -34), (0, -32)]
+# Broken rock adrift in the fog, none of it on the way: (x, y of its top, z, radius, depth, what stands on it)
+DRIFT = [(-24, 6, -53, 6.4, 17, "veilcap"), (27, -4, -60, 4.2, 11, "pillar"), (-14, -9, -61, 2.4, 6, None), (33, 9, -44, 3.0, 9, "shard"),
+         (-38, 1, -63, 3.4, 10, "pillar"), (-33, -12, -44, 4.4, 12, "shard"), (22, -14, -52, 2.2, 5, None), (46, 2, -57, 5.0, 14, "veilcap"),
+         (-52, 11, -50, 3.0, 8, None), (58, -7, -64, 2.6, 7, None), (-19, 13, -40, 1.8, 4, None), (38, -11, -39, 2.0, 5, None),
+         (-58, -5, -62, 4.0, 11, "shard"), (17, 12, -66, 1.6, 4, None), (-44, 14, -38, 2.2, 6, None), (64, 8, -47, 3.6, 10, "pillar"),
+         (-9, -15, -52, 1.6, 4, None), (51, -15, -41, 3.0, 8, None)]
+
+
+def way_cells():
+    """The walk across as floor cells in order: [(x, y, z)], three wide round a centre line, dropping from the
+    cliff (y 3) to the Seat's ring (y -1) a block at a time, each drop out on a span between two islands."""
+    pts, total = [], 0.0
+    for (ax, az), (bx, bz) in zip(WAY, WAY[1:]):
+        n = max(1, int(math.hypot(bx - ax, bz - az) * 4))
+        for i in range(n): pts.append((ax + (bx - ax) * i / n, az + (bz - az) * i / n))
+    pts.append(WAY[-1])
+    drops = [0.27, 0.45, 0.63, 0.83]                    # fractions of the way where it steps down
+    centre, seen = [], set()
+    for i, (x, z) in enumerate(pts):
+        c = (round(x), round(z))
+        if c in seen: continue
+        seen.add(c)
+        if centre and abs(c[0] - centre[-1][0]) == 1 and abs(c[1] - centre[-1][2]) == 1:   # no diagonal squeezes
+            mid = (c[0], centre[-1][2])
+            if mid not in seen: seen.add(mid); centre.append((mid[0], None, mid[1], i / len(pts)))
+        centre.append((c[0], None, c[1], i / len(pts)))
+    return [(x, EDGE_Y - sum(1 for q in drops if t >= q), z) for x, _, z, t in centre]
+
+
+def approach():
+    """The way to the Seat (Mateo, 2026-11-12: "the most important part of the game... built out correctly and
+    thoroughly"). Origin = HEART.center. Nothing here is inside r 32, so none of it falls with the Seat's ring, and
+    nothing is north of z -70, where the land ends (terrain.js heartEdge). Walked on foot: no jump is needed."""
+    d = D("seat_approach", "rigid", seed=977)
+    way = way_cells()
+    level = {}                                             # (x, z) -> floor y, three wide
+    for x, y, z in way:
+        for ax in (-1, 0, 1):
+            for az in (-1, 0, 1):
+                if math.hypot(x + ax, z + az) >= 32 and z + az >= EDGE_Z: level[(x + ax, z + az)] = min(y, level.get((x + ax, z + az), 99))
+    for x, y, z in way: level[(x, z)] = y
+
+    def wob(a, seed):                                      # a smooth wobble round an outline, 0.72 .. 1.22
+        return 0.97 + 0.13 * math.sin(a * 2 + seed * 1.7) + 0.08 * math.sin(a * 3 + seed * 4.1) + 0.05 * math.sin(a * 5 + seed * 2.3)
+
+    def rock(cx, top, cz, r, depth, seed, half=False):
+        """A floating rock: a ragged plate on top, tapering under it to a point that hangs off centre."""
+        tx, tz = cx + (h(seed, 1) - 0.5) * r * 0.9, cz + (h(seed, 2) - 0.5) * r * 0.9
+        R = int(r * 1.3) + 2
+        for x in range(round(cx) - R, round(cx) + R + 1):
+            for z in range(round(cz) - R, round(cz) + R + 1):
+                if half and z < EDGE_Z: continue
+                dd = math.hypot(x - cx, z - cz); rr = r * wob(math.atan2(z - cz, x - cx), seed)
+                if dd > rr or math.hypot(x, z) < 32: continue
+                t = min(1.0, math.hypot(x - tx, z - tz) / (r * 1.25))
+                low = top - max(1, round(depth * (1 - t) ** 1.35 + d.r(x, seed, z) * 1.6))
+                y1 = top - (1 if dd > rr - 1.1 and d.r(x, seed + 3, z) < 0.3 and (x, z) not in level else 0)   # a crumbled rim
+                for y in range(low, y1 + 1):
+                    d.put(x, y, z, d.pick(x, y, z, TOP if y == y1 else ROCK) if d.r(x, y, z, 7) > 0.025 else "siege:choir_ore")
+                under(x, low, z, seed)
+        return tx, tz
+
+    def under(x, low, z, seed):
+        k = d.r(x, seed + 11, z)
+        if k < 0.13:
+            for y in range(low - 1, low - 2 - int(d.r(x, seed + 12, z) * 5), -1): d.put(x, y, z, "siege:veilmoss_strands")
+        elif k < 0.2:
+            for y in range(low - 1, low - 3 - int(d.r(x, seed + 13, z) * 6), -1): d.put(x, y, z, "siege:hollowwood_lattice")
+        elif k < 0.23: d.put(x, low - 1, z, "siege:glimbulb")
+
+    def h(seed, k): return d.r(seed * 31 + k, 5, seed * 7)
+
+    def lantern_chain(x, y, z, n):                         # a chain hanging under a rock, soul light at its end
+        for i in range(n): d.put(x, y - i, z, "chain", axis="y")
+        d.put(x, y - n, z, "soul_lantern", hanging=True)
+
+    def bottom(x, z):
+        ys = [c[1] for c in d.cells if c[0] == x and c[2] == z and d.cells[c][0] in dict(ROCK + TOP) | {"siege:choir_ore": 1}]
+        return min(ys) if ys else None
+
+    # ---- the rocks of the way, each at the level the walk has there
+    tips = []
+    for i, (cx, cz, r, depth) in enumerate(STOPS):
+        top = level.get((cx, max(cz, EDGE_Z)), EDGE_Y)
+        tips.append((rock(cx, top, cz, r, depth, 40 + i, half=(i == 0)), top, depth))
+    # ---- broken rock adrift: nothing within 6 of the walk
+    for i, (cx, top, cz, r, depth, what) in enumerate(DRIFT):
+        assert all(math.hypot(cx - x, cz - z) > r + 6 for x, _, z in way), (cx, cz)
+        tx, tz = rock(cx, top, cz, r, depth, 70 + i)
+        if what == "veilcap":
+            hh = 7 + int(h(i, 3) * 4); rr = 3
+            for y in range(top + 1, top + hh + 1): d.put(cx, y, cz, "siege:veilcap_stem")
+            for ax in range(-rr - 1, rr + 2):
+                for az in range(-rr - 1, rr + 2):
+                    q = math.hypot(ax, az)
+                    if q <= rr - 0.6: d.put(cx + ax, top + hh + 1, cz + az, "siege:veilcap_cap")
+                    if rr - 1.4 < q <= rr + 0.4: d.put(cx + ax, top + hh, cz + az, "siege:veilcap_cap")
+                    if rr - 0.6 < q <= rr + 0.4 and d.r(ax, i, az) < 0.3: d.put(cx + ax, top + hh - 1, cz + az, "siege:glimbulb")
+        elif what == "pillar":                             # a Singer pillar that broke away with its ground
+            hh = 4 + int(h(i, 4) * 5); lean = 1 if h(i, 5) < 0.5 else -1
+            for ax in (-1, 0, 1):
+                for az in (-1, 0, 1): d.put(cx + ax, top + 1, cz + az, "polished_blackstone_bricks" if (ax or az) else "polished_basalt")
+            for y in range(top + 2, top + 2 + hh): d.put(cx + (lean if y > top + 1 + hh // 2 else 0), y, cz, "polished_basalt" if y < top + 4 else "siege:hollowwood_lattice", axis="y")
+            d.put(cx + lean, top + 2 + hh, cz, "amethyst_block")
+        elif what == "shard":                              # a crystal growth, tall and off true
+            hh = 5 + int(h(i, 6) * 5)
+            for y in range(top + 1, top + 1 + hh):
+                w = 1 if y < top + 1 + hh // 3 else 0
+                sx = cx + (1 if y > top + hh // 2 else 0)
+                for ax in range(-w, w + 1):
+                    for az in range(-w, w + 1):
+                        if abs(ax) + abs(az) <= w: d.put(sx + ax, y, cz + az, "budding_amethyst" if d.r(ax, y, az, i) < 0.15 else "amethyst_block")
+        b = bottom(round(tx), round(tz))
+        if b is not None and r >= 3: lantern_chain(round(tx), b - 1, round(tz), 2 + int(h(i, 8) * 5))
+
+    # ---- the walk: paved three wide over the rocks, root spans between them, a half step at each drop
+    onrock = {(x, z) for (x, y, z) in d.cells}
+    for (x, z), y in sorted(level.items()):
+        col = [c for c in d.cells if c[0] == x and c[2] == z]
+        for c in col:
+            if c[1] > y and d.cells[c][0] not in ("siege:veilmoss_strands", "siege:hollowwood_lattice", "siege:glimbulb"): del d.cells[c]
+        if (x, z) in onrock:
+            lo = min((c[1] for c in col), default=y)
+            for yy in range(lo, y): d.cells.setdefault((x, yy, z), (d.pick(x, yy, z, ROCK), {}))
+            d.put(x, y, z, d.pick(x, y, z, PAVE))
+        else:                                              # a span: hollowwood roots grown across, ragged at one edge
+            centre = any((x, z) == (wx, wz) for wx, _, wz in way)
+            near = min(math.hypot(x - wx, z - wz) for wx, _, wz in way)
+            if centre or near <= 1.0 or d.r(x, 21, z) < 0.62:
+                d.put(x, y, z, "siege:hollowwood_lattice" if not centre or d.r(x, 22, z) < 0.5 else "dark_oak_planks")
+                if d.r(x, 23, z) < 0.22: d.put(x, y - 1, z, "siege:hollowwood_lattice")
+                if d.r(x, 24, z) < 0.1:
+                    for yy in range(y - 2, y - 3 - int(d.r(x, 25, z) * 4), -1): d.put(x, yy, z, "siege:veilmoss_strands")
+    for (x, z), y in level.items():                        # half steps: a slab on the low side of every drop
+        if (x, y, z) not in d.cells: continue
+        if any(level.get((x + ax, z + az)) == y + 1 and (x + ax, y + 1, z + az) in d.cells for ax, az in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            d.put(x, y + 1, z, "polished_blackstone_brick_slab", half="bottom")
+
+    # ---- the Last Step: a broken gate on the shelf, two pylons that no longer match
+    def pylon(px, pz, hh, lean, broken):
+        for ax in (-1, 0, 1):
+            for az in (-1, 0, 1):
+                d.put(px + ax, EDGE_Y + 1, pz + az, "polished_blackstone_bricks")
+                for y in range(EDGE_Y, EDGE_Y - 3, -1): d.cells.setdefault((px + ax, y, pz + az), (d.pick(px + ax, y, pz + az, ROCK), {}))
+        cut = EDGE_Y + 2 + (hh * 3) // 5
+        for y in range(EDGE_Y + 2, EDGE_Y + 2 + hh):
+            ox = lean if y >= cut else 0                    # the upper part sits one block off, in one clean step
+            for ax in (-1, 0, 1):
+                for az in (-1, 0, 1):
+                    if abs(ax) + abs(az) == 2:
+                        if y % 4 == 1 or (broken and y > EDGE_Y + hh - 1 and d.r(ax, y, az) < 0.6): continue   # notched corners
+                        d.put(px + ox + ax, y, pz + az, "polished_blackstone_wall")
+                    else: d.put(px + ox + ax, y, pz + az, d.pick(px + ax, y, pz + az, VEIN) if (ax or az) else "siege:hollowwood_core" if y % 5 == 2 else "polished_blackstone")
+        t = EDGE_Y + 2 + hh
+        if broken:
+            for ax, az in ((0, 0), (1, 0), (0, 1)):
+                if d.r(ax, t, az) < 0.7: d.put(px + lean + ax, t, pz + az, "siege:cracked_veinstone_bricks")
+            for ax, az, b in ((2, 1, "siege:cracked_veinstone_bricks"), (-2, 2, "polished_blackstone_bricks"), (2, 3, "siege:veinstone_bricks")):   # what fell
+                if (px + ax, EDGE_Y, pz + az) in d.cells: d.put(px + ax, EDGE_Y + 1, pz + az, b)
+        else:
+            for ax, az, f in ((1, 0, "w"), (-1, 0, "e"), (0, 1, "n"), (0, -1, "s")): d.put(px + lean + ax, t, pz + az, "polished_blackstone_brick_stairs", facing=f)
+            for y in range(t, t + 3): d.put(px + lean, y, pz, "polished_blackstone")
+            d.put(px + lean, t + 3, pz, "polished_blackstone_wall"); d.put(px + lean, t + 4, pz, "amethyst_cluster")
+            arm = 1 if px < 0 else -1                       # an arm out over the way, a soul lantern on a chain
+            for k in (2, 3): d.put(px + lean + arm * k, t - 2, pz, "siege:hollowwood_lattice")
+            d.put(px + lean + arm * 3, t - 3, pz, "chain", axis="y"); d.put(px + lean + arm * 3, t - 4, pz, "soul_lantern", hanging=True)
+    pylon(-5, -68, 15, 1, False)
+    pylon(5, -67, 7, -1, True)
+
+    # ---- light and life on the stops: lantern posts off the walk, never two alike
+    for i, (cx, cz, r, depth) in enumerate(STOPS[1:], 1):
+        top = level.get((cx, cz), EDGE_Y)
+        spots = sorted(((x, z) for (x, y, z) in d.cells if y == top and (x, z) not in level and math.hypot(x - cx, z - cz) <= r - 1
+                        and (x, top + 1, z) not in d.cells and all(level.get((x + ax, z + az)) is None or abs(ax) + abs(az) > 0 for ax in (-1, 0, 1) for az in (-1, 0, 1))),
+                       key=lambda c: d.r(c[0], 60 + i, c[1]))
+        if spots:
+            x, z = spots[0]; n = 1 + (i % 3)
+            for y in range(top + 1, top + 1 + n): d.put(x, y, z, "cobbled_deepslate_wall")
+            d.put(x, top + 1 + n, z, "soul_lantern", hanging=False)
+        for x, z in spots[1:1 + int(r)]:
+            d.put(x, top + 1, z, d.pick(x, 3, z, [("siege:glint_cluster", 3), ("amethyst_cluster", 2), ("siege:glimbulb", 2)]))
+    (tx, tz), top, depth = tips[1]
+    b = bottom(round(tx), round(tz))
+    if b is not None: lantern_chain(round(tx), b - 1, round(tz), 6)
+    (tx, tz), top, depth = tips[3]
+    b = bottom(round(tx), round(tz))
+    if b is not None: lantern_chain(round(tx), b - 1, round(tz), 3)
+    for x, y, z in way:                                    # headroom over the whole walk
+        for yy in range(y + 1, y + 4):
+            if d.cells.get((x, yy, z), ("",))[0].endswith("_slab") and yy == y + 1: continue
+            d.cells.pop((x, yy, z), None)
+    d.way = way
+    return d
+
+
+def old_stones():
+    """The six stepping stones builder.js used to place (before 2026-11-12), as offsets from HEART.center."""
+    cells, start = set(), 124
+    for k in range(6):
+        z = 2334 + k * 6 - 2400; y = round(start + ((119 - start) * (k + 1)) / 7) - 120; x = round(math.sin(k) * 3)
+        cells |= {(x + a, y + b, z + c) for a in (-1, 0, 1) for b in (-1, 0) for c in (-1, 0, 1)}
+    return cells
+
+
+def export(d, old, keep_out=(), v=2):
+    spec = dict(d.spec()); spec["light"] = False
+    blocks = X.compute(spec)
     for c in d.airs(): blocks[c] = ("air", {})
+    # every build lit (Mateo 2026-11-13): soul light, hung overhead or from walls, nothing on the fight floor
+    lighting.light(blocks, kind="hollow", posts=False, avoid=list(keep_out)); emit.connect(blocks)
+    spill = spilling_water(blocks)
+    if spill: raise SystemExit(f"{d.name}: {len(spill)} water block(s) would spill, first at {spill[0]}")
     pal, idx, cells = [], {}, {}
     for c, (n, p) in blocks.items():
         q = {k: v for k, v in p.items() if k in ("facing", "half", "axis", "hanging", "open", "upper", "hinge", "corner", "conn")}
@@ -431,19 +655,22 @@ def export(d, old, keep_out=()):
 
     gone = {c for c in old if c not in cells and c not in keep_out}
     xs = [c[0] for c in cells]; ys = [c[1] for c in cells]; zs = [c[2] for c in cells]
-    return {"palette": pal, "rows": runs(cells), "v": 2, "clear": runs(gone, val=True),
+    return {"palette": pal, "rows": runs(cells), "v": v, "clear": runs(gone, val=True),
             "box": {"x0": min(xs), "x1": max(xs), "y0": min(ys), "y1": max(ys), "z0": min(zs), "z1": max(zs)}}
 
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--scenes"); ap.add_argument("--no-write", action="store_true"); a = ap.parse_args()
     gate = {(x, y, z) for x in range(-3, 4) for y in range(0, 9) for z in (31, 32)}
-    designs = {"COURT_DESIGN": export(court(), old_court(), gate), "SEAT_DESIGN": export(seat(), old_seat())}
+    ap_d = approach()
+    designs = {"COURT_DESIGN": export(court(), old_court(), gate, v=4), "SEAT_DESIGN": export(seat(), old_seat(), v=4),
+               "APPROACH_DESIGN": export(ap_d, old_stones(), v=2)}   # v +1 2026-11-13: lit
+    designs["APPROACH_DESIGN"]["way"] = [list(c) for c in ap_d.way]
     for k, v in designs.items():
         print(k, sum(r[3] for r in v["rows"]), "blocks,", sum(r[3] for r in v["clear"]), "to clear,", v["box"])
     dest = os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "undertow", "arenas_data.js")
     js = ("// Generated by map/structures/hollow_arenas.py. Do not edit by hand.\n"
-          "// The Drowned Court and the Seat: palette [id, logical props], rows [y, z, x0, count, palette index] as offsets\n"
+          "// The Drowned Court, the Seat and the approach to it (way = the walk's floor cells in order): palette [id, logical props], rows [y, z, x0, count, palette index] as offsets\n"
           "// from COURT.center at COURT.floorY and from HEART.center; clear = cells the old look stood on that this one leaves empty.\n"
           + "".join(f"export const {k} = " + json.dumps(v, separators=(",", ":")) + ";\n" for k, v in designs.items()))
     if not a.no_write: open(dest, "w").write(js)

@@ -7,8 +7,8 @@ import { LOCAL_TOMES, LOCAL_COLLECTIONS, LOCAL_THREADS } from "./data/plots.js";
 import { COLLECTIONS, SITE_FEATURES, SITE_IDS, SURVEY_LINES, THREADS, MILESTONES } from "./data/world.js";
 
 export const TOMES = [...TOMES_A, ...TOMES_B, ...TOMES_C];
-// The 74 tomes are TOMES. Each settlement plot also has three local books (data/plots.js): they can be read,
-// shelved and solved like any other, but they never count toward the 74, the 16 mysteries or Library rank.
+// The 75 tomes are TOMES. Each settlement plot also has three local books (data/plots.js): they can be read,
+// shelved and solved like any other, but they never count toward the 75, the 16 mysteries or Library rank.
 export const ALL_TOMES = [...TOMES, ...LOCAL_TOMES];
 export const ALL_THREADS = [...THREADS, ...LOCAL_THREADS];
 export const isLocal = (id) => String(id).startsWith("loc_") || String(id).startsWith("local_");
@@ -76,6 +76,7 @@ export function holds(cond, p, ctx = {}) {
   if (cond.startsWith("!")) return !holds(cond.slice(1), p, ctx);
   const [kind, value] = [cond.slice(0, cond.indexOf(":")), cond.slice(cond.indexOf(":") + 1)];
   if (cond === "night") return !!ctx.night;
+  if (cond === "raided") return ctx.raided !== false; // Act 1: this player's first raid is behind them (unknown counts as yes)
   switch (kind) {
     case "flag": return p.flags.includes(value);
     case "read": return p.read.includes(value);
@@ -85,6 +86,7 @@ export function holds(cond, p, ctx = {}) {
     case "path": return ctx.path === value || (value === "marked" && ctx.path === "sorcerer"); // the magic role, either name
     case "resonance": return (ctx.resonance ?? 0) >= Number(value);
     case "shelved": return (ctx.shelved ?? 0) >= Number(value);
+    case "act1": return ctx.act1 === value; // newplayer/act1_rules.js act1Stage
     default: return false;
   }
 }

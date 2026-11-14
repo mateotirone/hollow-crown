@@ -50,15 +50,41 @@ export const ENTRIES = [
     when: [],
   },
   {
+    id: "eating", ch: "start", title: "Food and healing",
+    tip: "Eat on a full hunger bar and food heals you at once: half a heart every half second while the meal lasts.",
+    page: "Food heals §ffast§r here. While your hunger bar is §ffull§r and the meal you ate still has something left in it, you get half a heart back every half second. Top the bar up in a fight and the hearts follow in a few seconds.\n\n"
+      + "Rich food lasts longest: a steak or a cooked porkchop is worth about four hearts, cooked cod or bread about two. Once the meal is used up you heal slowly again, half a heart every four seconds, and not at all below nine drumsticks.\n\n"
+      + "Bread comes from any Farmer, cooked cod from a Fisher and cooked beef from a Hunter, in the six towns. Or grow, fish and raise your own.",
+    when: ["carry:minecraft:bread", "carry:minecraft:cooked_beef", "carry:minecraft:cooked_cod", "carry:minecraft:cooked_porkchop", "carry:minecraft:cooked_chicken", "carry:minecraft:cooked_mutton", "carry:minecraft:baked_potato"],
+  },
+  {
+    id: "starter_clothes", ch: "start", title: "Your starting clothes",
+    tip: "These are your region's working clothes and tool. They keep the weather off, not a sword: a Smith sells real armour.",
+    page: "Everyone starts out dressed in the working clothes of the region they arrive in, with that region's tool for a weapon: a straw hat, jerkin and §fbillhook§r in the Vale, a fur-trimmed hood, quilted coat and §fhatchet§r in Frostmarch, a knit cap, striped smock and §fcutlass§r in Saltreach, a sun wrap, sand tunic and §fsickle-sword§r in the Emberwaste, an oilskin hat, coat, waders and §freed spear§r in Blackfen. Start in Kingsrest and you get the Vale's.\n\n"
+      + "They protect about as well as leather and wear out as fast, and the weapon hits like a wooden sword. Mend the clothes with leather and the weapon with iron nuggets at an anvil, or buy spares cheaply: each region's §fHunter§r sells its clothes and its §fSmith§r its weapon.\n\n"
+      + "Your first real armour is a big step up. Any Smith sells his region's Castle Guard armour.",
+    when: ["carry:siege:starter_*"],
+  },
+  {
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
-      + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement and makes the land around it yours.\n"
-      + "3. §fCraft a Siege Workshop§r at a crafting table and put it on your land. Nearly everything in this book is made there.\n"
-      + "4. §fBuild walls and a shelter before your first siege night.§r Click your Keep Banner to see when it is due.\n"
-      + "5. §fHold the night.§r Each siege you survive is a win, and wins grow your settlement.\n\n"
-      + "After that, the land is yours to read. People in the towns talk, and books lie where you would not expect them.",
+      + "2. §fClick your Plot Stone§r and choose §fRaise your banner here§r. That founds your settlement: its wall, Longhouse, Mason's Yard, library and your own house go up by themselves.\n"
+      + "3. §fOpen your founder's chest§r in your house: logs, saplings, a stone pickaxe and axe, bread, torches and a few Regals. The old trees out in the world can't be felled, so plant the saplings.\n"
+      + "4. §fBuild a Barracks§r: go to your big empty plot, click its §fPlot Marker§r (the post on it), choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its door and train guards (40 Regals each).\n"
+      + "5. §fHold the night.§r The first siege comes on the third night. Stay online, kill every raider and keep your banner standing. Each siege you hold is a win, and wins grow your settlement.\n\n"
+      + "The top-right tracker shows your next step until then. Iron lies under your land: dig down with a pickaxe. Nothing is charged for upkeep until you have held your first siege.",
     when: ["event:keepFounded"],
+  },
+  {
+    id: "quests", ch: "start", title: "Your next step",
+    tip: "",
+    page: "The lines in the top-right corner, under your minimap, are your §fquest tracker§r. They are always up, and they show the step of the story you are on now: what it is, a hint, and, when it is somewhere you know of, how far away it is and which way to turn (ahead, left, right, behind you).\n\n"
+      + "It changes by itself as you go: when you meet someone, solve a mystery in your Ledger, pick up something that opens a door, or see a great foe fall. Now and then a second line shows something else worth doing alongside.\n\n"
+      + "It only points at towns and places you have already been told about or been to. Some places are hidden on purpose: for those it tells you where to look, and your Ledger's leads say roughly where they are.\n\n"
+      + "Everyone sees their own steps, so friends on the same world can be at different points.\n\n"
+      + "To hide it, type §f/siege:quests§r. Type it again to bring it back. Hiding the minimap (§f/siege:minimap§r) moves the tracker up into its place.",
+    when: [],
   },
   {
     id: "land", ch: "start", title: "Land and protection",
@@ -72,15 +98,16 @@ export const ENTRIES = [
   {
     id: "workshop", ch: "start", title: "The Siege Workshop",
     tip: "The Siege Workshop is a crafting table for castle things. Open it and check its recipe book: most of this world's items are made here.",
-    page: "Craft it at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
-      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Barracks, the Hall Cornerstone, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
+    page: "Every new settlement has one in its Mason's Yard. More can be crafted at a normal crafting table: an iron ingot on top, then stone bricks, a crafting table and stone bricks.\n\n"
+      + "§fSneak-click§r a Workshop for its book: the main things it makes, what each does and what it takes.\n\n"
+      + "Open it like a crafting table. Its recipe book lists everything it makes: Castle Stone and its kin, gates and portcullises, ballistas, trebuchets, rams, Breaching Charges, the Mason's Bench, Archive Shelves, horse gear, the Writ of Alliance and much more.\n\n"
       + "Siege blocks can only be placed inside your own settlement.",
     when: ["place:siege:workshop", "carry:siege:workshop"],
   },
   {
-    id: "no_elytra", ch: "start", title: "No wings, and the edge of the map",
-    tip: "Nobody flies in Aldmere. Elytra crumble and pay you 3 Gold Regals instead.",
-    page: "Aldmere is crossed by road, rail and horse. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
+    id: "no_elytra", ch: "start", title: "No elytra, and the edge of the map",
+    tip: "Elytra don't work in Aldmere. They crumble and pay you 3 Gold Regals instead.",
+    page: "Aldmere is crossed by road, rail and horse, and by dragon for those who earn one. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
       + "The map has an edge: you can't go more than 1,250 blocks from its centre.",
     when: ["carry:minecraft:elytra"],
   },
@@ -118,7 +145,7 @@ export const ENTRIES = [
     id: "keep_heart", ch: "siege", title: "Holding the keep",
     tip: "Raiders go for your Keep Banner. Its health floats above it: if it reaches zero, your banner falls.",
     page: "Raiders head for your Keep Banner and its health floats over it. Kill them before they get there.\n\n"
-      + "If the banner falls it is destroyed, and you will have to raise a new one to found your settlement again. On the Aldmere map your plot is held for you for 3 days.\n\n"
+      + "If the banner falls it drops to the ground and the raiders leave. Pick it up and raise it again: your buildings and walls are untouched, you keep your tier, and only one win is lost. On the Aldmere map your plot is held for you for 3 days.\n\n"
       + "Another player can also carry off your Keep Banner while you are online, which topples your settlement. Guard it.",
     when: ["event:siegeStart"],
   },
@@ -183,8 +210,8 @@ export const ENTRIES = [
   },
   {
     id: "town_hall", ch: "keep", title: "The town hall",
-    tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
+    tip: "Your town hall comes with your Hamlet, on the hall ground behind the Plot Stone, and grows with your settlement.",
+    page: "Your town hall comes with your Hamlet: when your town is laid out, its §fHall Cornerstone§r is set on the hall ground behind the Plot Stone and the first hall rises by itself. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
@@ -208,7 +235,8 @@ export const ENTRIES = [
     id: "building_rules", ch: "keep", title: "The Mason and ready-made buildings",
     tip: "The Mason sells building blocks for coins. Your own region's materials are cheaper.",
     page: "§fThe Mason§r sells building blocks, so building doesn't mean weeks of quarrying. Your region's own materials are cheaper. Place a §fMason's Bench§r on your land and a mason sets up beside it (two at most). Towns have their own masons. The Mason can also mend your settlement wall.\n\n"
-      + "§fFoundation Stones§r place ready-made buildings: put one on free ground facing the way the building should run, click it, pick a building, look at the outline, then click again to raise it. You pay in planks and stone you carry, and the Mason makes up any shortfall for coins.\n\n"
+      + "§fA new settlement§r comes with its Mason's Yard (a stone workshop, with the bench out front where the Mason works), the library, and a cottage of your own with a bed kept for you, so you can sleep the first night. Its road runs out through the gate to the nearest road.\n\n"
+      + "§fReady-made buildings§r go up on your town's plots: click a plot's §fPlot Marker§r, pick a building, look at the outline, then click again to pay and raise it.\n\n"
       + "Or build by hand, anywhere on your land outside the ground kept for your hall.",
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
   },
@@ -216,7 +244,7 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes (cottages, houses or townhouses), a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Any of them can also be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {
@@ -225,6 +253,55 @@ export const ENTRIES = [
     page: "§fYour own buildings:§r build by hand on an empty plot, then use its Plot Marker and pick §fI built here myself§r. It counts as a building if it has what that building needs: a home needs a bed and a door under a roof, a smithy an anvil and a furnace, a library 8 bookshelves, a stable hay and stalls, a storehouse 6 chests or barrels, a farmhouse a composter and 9 farmland, a mint 2 chests and an anvil, an inn 3 beds and 2 chests. Take those away and it stops counting until you put them back.\n\n"
       + "§fSettlers:§r every settler needs a bed in a home, one bed for every 12 blocks of covered floor. At dawn, if a home has a free bed, someone moves in: a worker for each finished work building first, then settlers for the homes. They go to bed at dusk. A worker whose building is knocked down stays, idle, until it is back.",
     when: ["event:settlerArrived", "click:siege:plot_marker"],
+  },
+  {
+    id: "townsfolk", ch: "keep", title: "Townsfolk in the lords' towns",
+    tip: "Rival Lords' towns have townsfolk too. Take the town and they stay, beds, jobs and all.",
+    page: "A Rival Lord's town fills up the way yours does: the lord's builders put beds in every home they finish, and at dawn a newcomer arrives if there is a free bed, workers first. Their townsfolk talk the way their lord rules: a proud lord's people are stiff with strangers, a kind lord's people are friendly.\n\n"
+      + "When you lay siege to a lord, the townsfolk go to their beds and stay out of the fight. If the lord falls and you take the town, they stay on and work for you, though they are wary of you for a few days.",
+    when: ["event:townAdopted", "event:rivalBesieged"],
+  },
+  {
+    id: "town_events", ch: "keep", title: "Town events",
+    tip: "Something's happening in town. Things like this come every few days; none of them are chores.",
+    page: "Every few days something happens in a settlement: a market fair with traders from another region, travelling players on the square at dusk, a wedding, a traveller who asks to stay, harvest day, a cart of spare timber. Now and then something odder. Rival Lords' towns have their fairs and players too, so it can be worth riding over.\n\n"
+      + "Nothing happens on a siege night or the day after, and the same thing never comes twice in a row. Ignoring one costs you nothing.",
+    when: ["event:townEvent"],
+  },
+  {
+    id: "settler_requests", ch: "keep", title: "Settler requests",
+    tip: "A settler with \"(a request)\" by their name wants a word. Talk to them to hear it.",
+    page: "Now and then one of your settlers asks for something: a well on the square, another home, hay for the winter, a book for the library, a bed for their sister. Their name shows §e(a request)§r. Talk to them to hear it, and talk to them again once it is done (carry anything they asked you to bring).\n\n"
+      + "A request stays open 7 days. Done in time, it pays Renown, and some pay coins. Let it go and nothing bad happens; someone will ask for something else in a few days.",
+    when: ["event:settlerRequestDone", "talk:tag:siege_settler"],
+  },
+  {
+    id: "wonders", ch: "keep", title: "Wonders",
+    tip: "Six wonders stand waiting to be raised across the realm. Talk to a wonder's keeper to see what it gives its holder.",
+    page: "There are six wonders, one site each, out in the open country: the Great Lighthouse on the Saltreach cliffs, the High Watch in the Vale, Rimeforge Hall in the Frostmarch snows, the Sun Gate Caravanserai in the Emberwaste, the Lantern Spire over the Blackfen pools and the Great Horse Fair in the Vale meadows. Each site has a keeper.\n\n"
+      + "A City (or bigger) can claim a free wonder and pay for it in six stages, about 2,000 Regals in all. The crew raises each stage while someone is nearby, one wonder at a time per settlement. Once all six stages stand, the holder and their allies get its gift: better prices at the traders, the Smith or the railway, cheaper grooms, a tougher keep heart, or more newcomers each dawn.\n\n"
+      + "Rival Lords race for wonders too. Anyone with a City can challenge for a wonder held by someone else: its guards come out and you have ten minutes to cut them all down. A wonder held by a player can only be challenged while they are in the realm. Beat a lord and take their town, and their wonder comes with it. Inside a finished wonder: lost travellers wait at the Lantern Spire each morning, free to take on; the Great Horse Fair runs races round its track and jousts against its champion, for a purse.",
+    when: ["event:tierUp", "event:wonderClaimed", "event:wonderRaised", "event:wonderTaken"],
+  },
+  {
+    id: "codex", ch: "growth", title: "The Codex",
+    tip: "Your Codex draws every rare thing you pick up. Open it to see what's still out there.",
+    page: "The §fCodex§r is a book of every rare thing in the realm: the arms of the five regions, the boss relics, the mythical weapons and tools, the caravan goods and the charms. Anything in it that you hold in your pack, even for a moment, is drawn in full with what it does. Anything you haven't held shows only its shape and a hint about where it is. A green dot marks a page you haven't read yet.\n\n"
+      + "Open it by using the book, from your Keep menu, or by typing §f/siege:codex§r. Every ten things you find, the Kingsrest clerks send 50 Regals. Fill a whole chapter for a title. Lost the book? Craft another from a book and an item frame.",
+    when: ["carry:siege:codex", "event:codexFound"],
+  },
+  {
+    id: "region_arms", ch: "growth", title: "Regional arms and Kin-Writs",
+    tip: "Regional armour only answers to those who live in its region, or carry its Kin-Writ.",
+    page: "Five of the wonders have a forge: the Rime Anvil at Rimeforge Hall (Frostmarch), the Armoury at the High Watch (Aldmere Vale), the Lamp Room at the Great Lighthouse (Saltreach), the Caravan Smithy at the Sun Gate (Emberwaste) and the Lamplighter's Kiln at the Lantern Spire (Blackfen). Talk to the wonder's keeper and pick the forge. First make the region's alloy from a diamond and that region's trophies, then turn a diamond piece and four ingots into the region's armour or weapons. A wonder held by a Rival Lord still forges, at double the price.\n\n"
+      + "Each region's arms only answer to people whose settlement stands in that region. Wear them anywhere else and the land turns on you: a warning, then you're slowed, then it hurts, until you take them off. To wear another region's arms you need its §fKin-Writ§r. The wonder's holder, or anyone settled in that region, can give one (or take it back) at the forge. Playing alone, the keeper will write you one for ten of the region's trophies, or sell you one for 200 Regals if a lord holds the wonder.",
+    when: ["event:codexForge"],
+  },
+  {
+    id: "caravan_market", ch: "coin", title: "The caravan market",
+    tip: "The Sun Gate's caravan market sells four goods you can't get anywhere else. The stalls change every three days.",
+    page: "Inside the finished Sun Gate Caravanserai, Caravan-Master Idris keeps a market of goods from past the end of every road: four at a time, and new stalls every three days, the same for everyone. Ember tea and caravan rations come four to a purchase. Hang a §fCaravan Banner§r inside your own settlement and a caravan trader stops by your keep once a week.",
+    when: ["event:codexCaravan"],
   },
   {
     id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
@@ -237,7 +314,7 @@ export const ENTRIES = [
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Click your Barracks and choose Train soldiers.",
-    page: "Build a §fBarracks§r and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
+    page: "Raise a §fBarracks§r from the §fPlot Marker§r on a big plot (15 x 17: every Hamlet has one): click the marker, choose Barracks and Raise it. When it stands, click the §fBarracks block§r by its front door. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them. Men-at-Arms stroll round the Barracks yard and sometimes the town by day, sleep inside the Barracks at night, and turn out at once when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders. The Barracks §fArmoury§r upgrades a whole type at once (the same materials for each soldier), and those trained later wear it too.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
@@ -256,8 +333,8 @@ export const ENTRIES = [
   },
   {
     id: "quartermaster", ch: "keep", title: "The Quartermaster",
-    tip: "Bring an unemployed villager to your Quartermaster's Desk and they take the job.",
-    page: "Place a §fQuartermaster's Desk§r on your land and bring an unemployed villager to it: they become your Quartermaster.\n\n"
+    tip: "Raise the Quartermaster's Armoury from a Plot Marker and a quartermaster takes the post at its desk.",
+    page: "Click the §fPlot Marker§r on a Medium plot and choose the §fQuartermaster's Armoury§r (one per settlement). When it stands, a quartermaster soon takes the post at the desk by its front (an unemployed villager standing by it takes the job first).\n\n"
       + "He sells siege gear, weapons, armour and finery for Regals, and more stock opens up the more you trade with him: diamonds from his second level, and netherite scrap and the netherite upgrade template once he is a veteran. Netherite is meant to take a long time.",
     when: ["carry:siege:quartermaster_desk", "click:siege:quartermaster_desk"],
   },
@@ -272,7 +349,7 @@ export const ENTRIES = [
   {
     id: "old_trees", ch: "keep", title: "The old trees",
     tip: "The old trees of Aldmere can't be felled. Plant your own, or build a Forester's Lodge.",
-    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Plant saplings of your own for wood, or build a Forester's Lodge on your land for a grove that regrows by itself.",
+    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Your founder's chest holds logs and saplings to start with; Woodcutters in the towns sell more saplings and planks. Plant saplings of your own for wood, or build a Forester's Lodge on your land for a grove that regrows by itself.",
     when: ["hit:siege:old_*"],
     needs: "siege:old_oak_log",
   },
@@ -297,12 +374,22 @@ export const ENTRIES = [
   },
 
   {
+    id: "upkeep", ch: "coin", title: "Upkeep",
+    tip: "Upkeep is paid at dawn: a sum for your town's size, a little for each building and a wage for each guard.",
+    page: "A settlement costs Regals to keep. Each §fdawn§r you are in the world for, your upkeep is taken from your Regals and the screen says how much: §fUpkeep paid: 46 Regals§r.\n\n"
+      + "It is a sum for your town's size (nothing for a Hamlet, 8 for a Town, 24 for a City, 48 for a Castle), 2 for every building that stands and 3 for every guard. A new settlement pays nothing until it has held its first siege (and never in its first three days), and days you are away are never charged.\n\n"
+      + "If you can't pay it all, what you have is taken and the rest is forgiven. Nothing is ever knocked down. But until a dawn is paid in full, guards who fall are §fnot retrained§r: they wait at the Barracks.\n\n"
+      + "The Regals leave the kingdom. If another player wears the Crown, a fifth of what you pay goes to them.",
+    when: ["event:upkeepPaid"],
+  },
+
+  {
     id: "regional_armour", ch: "coin", title: "Regional armour",
     tip: "This armour is cut in a region's style. Any Smith can reforge your armour in his own region's look.",
     page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
       + "Iron, chainmail, diamond and netherite all come in every region's look. A regional piece protects exactly as much as the plain one: only the look changes.\n\n"
       + "§fAt a Smith:§r choose Reforge armour, and he reforges any piece you wear or carry in his region's style for a few Regals. It keeps its enchantments, its wear and its name. Armour trims come off in the forge.\n\n"
-      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone).\n\n"
+      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone). The recipe book only lists the region you are standing in; walk into another region and its pieces show instead. You can still craft any region's piece by placing the items yourself.\n\n"
       + "Upgrading regional diamond to netherite at a smithing table keeps the region.",
     when: ["iron", "chainmail", "diamond", "netherite", "choirsteel"].flatMap((m) => ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"].map((r) => `carry:siege:${m}_${r}_*`)),
   },
@@ -329,14 +416,14 @@ export const ENTRIES = [
   {
     id: "breeder", ch: "travel", title: "Breeder's Posts",
     tip: "A Breeder's Post sells foals of its region's breed.",
-    page: "Breeder's Posts stand in the towns. Each sells foals of its own region's breed, and every region's horses are good at something different. A foal is yours from the start; ride it to raise it.",
+    page: "Breeder's Posts stand in the towns, at the breeder's yard. Each sells foals of its own region's breed (192 Regals, one every three days), and every region's horses are good at something different. A foal is yours from the start and grows up in a day; ride it to raise it.\n\nOr go without Regals: tame a wild horse and use a §fHalter§r on it.",
     when: ["click:hc:breeder_post"],
   },
   {
     id: "stations", ch: "travel", title: "Stations and carriages",
     tip: "Click a Station Post to call a carriage, pick where you're going, see the network map or send your horse ahead.",
     page: "Rails join the towns and settlements of Aldmere, all meeting at Kingsrest. Click a §fStation Post§r: call a carriage or a minecart, choose a destination (the bar shows the way and the distance while you ride), see the network map, or use the horse stalls to send your horse ahead.\n\n"
-      + "Build a §fRail Depot§r on your own land to join your settlement to the network.\n\n"
+      + "Your settlement's own §fstation§r rises by itself at the Station Post near your plot when you claim it, and grows with your town.\n\n"
       + "§fTrain Carriage:§r a four-seat wagon. Click it to board and push forward to go. You can craft your own at the Siege Workshop; sneak + click yours with an empty hand to pack it up.",
     when: ["click:hc:station_post", "click:siege:rail_depot", "carry:siege:rail_depot", "carry:siege:train_carriage"],
   },
@@ -525,6 +612,18 @@ export const ENTRIES = [
     when: ["near:siege:body"],
   },
   {
+    id: "weather", ch: "wild", title: "Weather",
+    tip: "Every region has its own weather. Thick weather is easier to sit out under a roof.",
+    page: "Each region has weather of its own, on top of the ordinary rain.\n\n"
+      + "§fBlackfen:§r mist comes up off the water, most of all at dusk, at night and in the rain. Some nights small lights move out over the fen.\n"
+      + "§fSaltreach:§r a hard wind off the sea carries spray inland, and at first light a white sea fret can roll in over the cliffs.\n"
+      + "§fEmberwaste:§r the wind lifts the sand into a haze, and now and then into a sandstorm you can barely see through.\n"
+      + "§fFrostmarch:§r snow blows down off the peaks, and blizzards close the passes, most of all when the sky is already snowing.\n"
+      + "§fAldmere Vale:§r rain like anywhere else, and mist lying in the low ground some mornings.\n\n"
+      + "Weather builds up slowly and thins out again after a few minutes. It is only weather: it doesn't hurt you. Under a roof it thins to a grey light, and down in a cave or cellar it can't reach you. Your action bar says when something is coming in.",
+    when: ["event:weatherMet"],
+  },
+  {
     id: "beasts", ch: "wild", title: "Beasts and trophies",
     tip: "A trophy from this region's beasts. The Hunter buys them, and the Siege Workshop's recipe book knows other uses.",
     page: "Every region has its own beasts, and they leave trophies: wight dust, pale antlers, rime pelts, brine scales, wyrm scales, toad venom and more. The Hunter in the towns buys them, and some are worth far more made into something else. Look through the Siege Workshop's recipe book with one in your pack.",
@@ -549,9 +648,10 @@ export const ENTRIES = [
   {
     id: "ironworks", ch: "growth", title: "The Ironworks",
     tip: "An Ironworks. Click it for its storeroom, its charcoal and its next stage.",
-    page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
-      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
-      + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+    page: "Your town has a §fWorks plot§r: a big plot kept for a works. Use its marker and pick the §fIronworks§r (160 Regals). The whole plot is fenced, an §fOre Pit§r is dug, and its worker digs about 16 raw iron a day into the storeroom. Click the §fIronworks block§r in the yard to take it. You choose the plot; the works builds itself.\n\n"
+      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals) from the block: it rises on the same plot and smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
+      + "Once you are a §fCity§r, with water by the plot, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+      + "§8An older town with no Works plot: craft the Ironworks at the Siege Workshop and place it on your land instead.§r\n\n"
       + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",
@@ -603,6 +703,14 @@ export const ENTRIES = [
     when: ["event:workingEntered"],
   },
   {
+    id: "plot_caves", ch: "wild", title: "Your mine",
+    tip: "Your plot's mine. Dig what you like: tonight the cave puts itself back, with the ore in new places.",
+    page: "Every plot has a §fmine shaft§r out past its wall, with a headframe over it and a ladder down to a cave. Dig anything down there, ore and stone alike.\n\n"
+      + "Each night, while nobody is inside, the cave goes back to the shape it had, and the ore comes back §fsomewhere else§r. So it is never in the same place two days running. A Hamlet's mine has about §f12 iron§r a night, with coal and copper.\n\n"
+      + "The deeper levels are behind §fcave-ins§r. Each time your settlement grows (Town, City, Castle), the next cave-in comes down and a deeper level opens, with more iron. Gold starts at City, and diamonds lie in the deepest level at Castle.",
+    when: ["event:plotCaveEntered"],
+  },
+  {
     id: "seeps", ch: "wild", title: "Seeps",
     tip: "A Seep. Kill what guards it, then break it, or it will widen.",
     page: "Now and then a §fSeep§r opens in the ground near someone. Things climb out of it and guard it. Kill them, then break the Seep to close it.\n\n"
@@ -619,13 +727,13 @@ export const ENTRIES = [
   },
   {
     id: "dragons", ch: "wild", title: "Dragons",
-    tip: "Set a Dragon Egg on a Dragon Roost in your own settlement and keep it warm. It hatches in two days.",
+    tip: "Set a Dragon Egg in a Hatching Brazier in your Dragon Stable's nursery. It hatches in two days.",
     page: "Dragons live only in the Emberwaste, and only people who settle there can raise one.\n\n"
-      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in, take an egg from the clutch and set it on a §fDragon Roost§r in your settlement. It hatches in two days.\n"
+      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in and take an egg from the clutch. Place a §fDragon Roost§r on your land and a §fDragon Stable§r rises behind it, with a nursery of §fHatching Braziers§r: set the egg in one. It hatches in two days, and you see it crack before it does.\n"
       + "§fRaising it:§r feed it raw meat or fish and spend time with it to build its bond. A fledgling can carry you on foot with a Dragon Saddle; a grown dragon flies.\n"
       + "§fHandling:§r an empty hand always pets it. Click a saddled dragon holding any item to climb on. Sneak + click with an empty hand for its sheet. Spend its training points at the Roost.\n\n"
       + "Flights are short bursts. Ballistas and archers of settlements that aren't yours can shoot a dragon down, and a dragon that dies is gone for good. On a siege night no dragon will fly from three until half past three in the morning: she lands and waits it out.",
-    when: ["click:hc:dragon_nest", "carry:siege:dragon_egg", "carry:siege:dragon_roost"],
+    when: ["click:hc:dragon_nest", "carry:siege:dragon_egg", "carry:siege:dragon_roost", "click:siege:hatching_brazier"],
     hidden: true,
   },
   {

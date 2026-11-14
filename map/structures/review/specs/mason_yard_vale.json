@@ -1,0 +1,282 @@
+{
+ "name": "mason_yard_vale",
+ "card": {
+  "title": "Mason's Yard",
+  "sub": "Vale, workshop and yard",
+  "region": "vale",
+  "where": "Every new base, beside the square",
+  "kind": "Work",
+  "blurb": "The mason's workshop: a small stone shop with his tools inside, and a yard in front where he cuts and sells blocks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "cobbled_deepslate"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    -3,
+    -7,
+    3,
+    -3
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1,
+    "overhang": 1
+   },
+   "interior": {
+    "use": "shop",
+    "rooms": [
+     "shop"
+    ]
+   },
+   "chimney": [
+    [
+     2,
+     -5
+    ]
+   ],
+   "shutters": 0.3,
+   "bushes": false
+  }
+ ],
+ "place": [
+  [
+   -4,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   -4,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   -4,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   -3,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   -3,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   -3,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   -2,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   -2,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   -2,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   -1,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   -1,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   -1,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   0,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   0,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   0,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   1,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   1,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   1,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   2,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   2,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   2,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   3,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   3,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   3,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   4,
+   0,
+   -2,
+   "gravel"
+  ],
+  [
+   4,
+   0,
+   -1,
+   "gravel"
+  ],
+  [
+   4,
+   0,
+   0,
+   "gravel"
+  ],
+  [
+   -3,
+   1,
+   -1,
+   "stonecutter_block",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   3,
+   1,
+   -2,
+   "stone_bricks"
+  ],
+  [
+   3,
+   2,
+   -2,
+   "stone_bricks"
+  ],
+  [
+   4,
+   1,
+   -2,
+   "cobblestone"
+  ],
+  [
+   4,
+   1,
+   -1,
+   "cobblestone"
+  ],
+  [
+   -4,
+   1,
+   -1,
+   "cobblestone_slab",
+   {
+    "half": "bottom"
+   }
+  ],
+  [
+   -4,
+   1,
+   -2,
+   "barrel"
+  ]
+ ],
+ "marks": {
+  "bench": [
+   1,
+   1,
+   -1
+  ]
+ }
+}

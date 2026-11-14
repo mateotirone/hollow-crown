@@ -7,11 +7,12 @@ import { funds, charge } from "../economy/coins.js";
 import {
   HORSE_SETTINGS as S, STATS, STAT_NAMES, SPEED_BPS, JUMP_BLOCKS, HEALTH_VALUES, gallopTicks, MAX_TRAINED, TRAIN_COST,
   TRAITS, PERKS, SHOES, SADDLES, SPECIALS, STABLES_LEVELS, rosterCap, trainCap, xpToNext, effectiveStats, bonusesOf,
-  breedFoal, newRecord, costText, CAPARISON, BREEDS, randomName,
+  breedFoal, newRecord, costText, CAPARISON, BREEDS, randomName, COB, isCob, cobBack, countsToRoster,
 } from "./data.js";
 import { horsesOf, saveRecord, deleteRecord, newUid, meta, stablesLevelFor } from "./store.js";
 import { entityOf, spawnSteed, stallSteed, refresh } from "./steed.js";
 import { sfx } from "../core/sfx.js";
+import { withArticle } from "../core/grammar.js";
 
 export const isBuilder = (player) => player.getGameMode() === GameMode.Creative;
 
@@ -40,14 +41,33 @@ const pathOf = (player) => {
 };
 
 const statLine = (rec, stat, eff, bonus) => {
-  const meaning = stat === "speed" ? `${SPEED_BPS[eff[stat] - 1]} blocks/s`
-    : stat === "jump" ? `${JUMP_BLOCKS[eff[stat] - 1]} blocks`
+  const meaning = stat === "speed" ? `${eff[stat] ? SPEED_BPS[eff[stat] - 1] : COB.bps} blocks/s`
+    : stat === "jump" ? `${eff[stat] ? JUMP_BLOCKS[eff[stat] - 1] : COB.jumpBlocks} blocks`
       : stat === "health" ? `${HEALTH_VALUES[eff[stat] - 1] / 2} hearts`
         : `${gallopTicks(eff[stat]) / 20}s gallop`;
+  if (isCob(rec)) return `§f${STAT_NAMES[stat]} §8(${meaning})`;
   return `§f${STAT_NAMES[stat]} §e${rec.stats[stat]}§7/5${bonus[stat] ? ` §a+${bonus[stat]}` : ""} §8(${meaning})`;
 };
 
+// A fallen cob is on its feet again (status "fallen" until it is next whistled for)
+const cobRecovered = (rec) => cobBack(rec, world.getAbsoluteTime());
+
+function cobSheet(rec) {
+  const eff = effectiveStats(rec);
+  const state = rec.status !== "fallen" ? STATUS[rec.status] : cobRecovered(rec) ? "§atired but home: blow your Horse Whistle" : "§cresting after a fall, back in a day";
+  return [
+    `§6${rec.name}§7, ${rec.breedName} · ${state}`,
+    "§7Your starter horse: steady and sure, but slow, and too weak a jump for a fence.",
+    "",
+    ...STATS.map((s) => statLine(rec, s, eff, {})),
+    "",
+    "§7Always answers your Horse Whistle, from anywhere. A cob can't be trained or shod; for a faster horse,",
+    "§7buy a foal at a Breeder's Post or use a Halter on a tamed horse. The cob never takes a stall.",
+  ].join("\n");
+}
+
 export function sheetText(rec) {
+  if (isCob(rec)) return cobSheet(rec);
   const eff = effectiveStats(rec);
   const bonus = bonusesOf(rec);
   const special = SPECIALS[rec.special]?.name;
@@ -121,7 +141,7 @@ export async function horseMenu(player, rec, ctx) {
   const mine = rec.owner === player.id;
   const cap = ctx?.trainCap ?? 0;
   const entries = [];
-  if (mine && ctx && rec.status !== "fallen" && !rec.foal) {
+  if (mine && ctx && rec.status !== "fallen" && !rec.foal && !isCob(rec)) {
     for (const stat of STATS) {
       const next = rec.stats[stat] + 1;
       if (next > MAX_TRAINED) continue;
@@ -133,18 +153,18 @@ export async function horseMenu(player, rec, ctx) {
     if (rec.pp > 0 && cap > 0) entries.push({ label: `§5Choose a perk (${rec.pp})`, action: () => perkMenu(player, rec, again) });
   }
   if (mine && ctx) {
-    if (rec.status === "stabled") entries.push({ label: "Bring out of the stalls", action: () => bringOut(player, rec, ctx) });
+    if (rec.status === "stabled" || cobRecovered(rec)) entries.push({ label: "Bring out of the stalls", action: () => bringOut(player, rec, ctx) });
     if (rec.status === "out") {
       entries.push({ label: "Put in the stalls", action: () => putAway(player, rec, ctx) });
       entries.push({ label: "Send a groom to fetch it\n§832 Regals", action: () => fetch(player, rec) });
     }
-    if (rec.status === "fallen") {
+    if (rec.status === "fallen" && !isCob(rec)) {
       entries.push({
         label: ctx.level >= 2 ? `§dRevive\n§8${costText(S.reviveCost)}` : "§8Revive\nneeds a level 2 Stables",
         action: () => revive(player, rec, ctx),
       });
     }
-    if (ctx.level >= 3 && rec.special === "none" && rec.status !== "fallen") {
+    if (ctx.level >= 3 && rec.special === "none" && rec.status !== "fallen" && !isCob(rec)) {
       const key = pathOf(player) === "knight" ? "warhorse" : pathOf(player) === "marked" ? "hollow" : undefined;
       if (key) entries.push({ label: `§dRite: ${SPECIALS[key].name}`, action: () => rite(player, rec, key, again) });
     }
@@ -152,7 +172,7 @@ export async function horseMenu(player, rec, ctx) {
   if (mine) {
     entries.push({ label: "Rename", action: () => rename(player, rec).then(again) });
     if (rec.caparison) entries.push({ label: "Take off the Caparison", action: () => { rec.caparison = 0; refresh(rec); give(player, CAPARISON); } });
-    entries.push({ label: "§cRelease this horse", action: () => release(player, rec) });
+    if (!isCob(rec)) entries.push({ label: "§cRelease this horse", action: () => release(player, rec) }); // the cob stays yours
   }
   await menu(player, rec.name, sheetText(rec), entries, ctx?.back);
 }
@@ -216,7 +236,7 @@ async function rite(player, rec, key, back) {
   if (!pay(player, special.cost)) return player.sendMessage(`§cThe rite needs ${costText(special.cost)}.`);
   rec.special = key;
   refresh(rec);
-  world.sendMessage(`§d${player.name}'s ${rec.name} has become a ${special.name}.`);
+  world.sendMessage(`§d${player.name}'s ${rec.name} has become ${withArticle(special.name)}.`);
   sfx(player, "random.totem");
 }
 
@@ -235,7 +255,7 @@ async function release(player, rec) {
 
 // ---------- Roster, stalls and the Stables ----------
 
-const rosterLabel = (rec) => `${rec.name} §8Lv ${rec.level}\n${STATUS[rec.status]}§8 · ${rec.breedName.slice(0, 28)}`;
+const rosterLabel = (rec) => `${rec.name} §8${isCob(rec) ? "starter" : `Lv ${rec.level}`}\n${STATUS[rec.status]}§8 · ${rec.breedName.slice(0, 28)}`;
 
 // Stalls only (rail stations and depots): put a horse away or bring one out
 export async function stallMenu(player, at, label, back) {
@@ -255,7 +275,7 @@ export async function stablesMenu(player, owner, at, ownerName) {
   const next = STABLES_LEVELS[level + 1];
   const body = [
     `§6${ownerName}'s Stables §7· level §f${level}`,
-    `§7Your horses: §f${mine.length}§7/${rosterCap(Math.max(level, stablesLevelFor(player.id)))} · trains stats up to §f${info.trainCap}`,
+    `§7Your horses: §f${mine.filter(countsToRoster).length}§7/${rosterCap(Math.max(level, stablesLevelFor(player.id)))} · trains stats up to §f${info.trainCap}`,
     next ? `§7Level ${next.level}: ${next.unlocks} (${costText(next.cost)})` : "§7Fully upgraded.",
   ].join("\n");
   const entries = mine.map((rec) => ({ label: rosterLabel(rec), action: () => horseMenu(player, rec, ctx) }));
@@ -279,11 +299,11 @@ export async function stablesMenu(player, owner, at, ownerName) {
 
 async function breedMenu(player, ctx) {
   const now = world.getAbsoluteTime();
-  const ready = horsesOf(player.id).filter((r) => !r.foal && r.status !== "fallen" && now - r.lastBred >= S.breedCooldownTicks);
+  const ready = horsesOf(player.id).filter((r) => !r.foal && !isCob(r) && r.status !== "fallen" && now - r.lastBred >= S.breedCooldownTicks);
   if (ready.length < 2) {
     return menu(player, "Breeding", "§7You need two grown horses that haven't bred today.", [], ctx.back);
   }
-  if (horsesOf(player.id).length >= rosterCap(Math.max(ctx.level, stablesLevelFor(player.id)))) {
+  if (horsesOf(player.id).filter(countsToRoster).length >= rosterCap(Math.max(ctx.level, stablesLevelFor(player.id)))) {
     return menu(player, "Breeding", "§7Your stalls are full. Upgrade the Stables or release a horse first.", [], ctx.back);
   }
   const pickOne = (list, prompt, then) => menu(player, "Breeding", prompt,
@@ -314,6 +334,6 @@ export function buyFoal(player, breed, at) {
   rec.grownAt = world.getAbsoluteTime() + S.foalGrowTicks;
   spawnSteed(rec, at.dimension, at.location);
   sfx(player, "random.levelup");
-  player.sendMessage(`§6You bought §f${rec.name}§6, a ${BREEDS[breed].name} foal. ${TRAITS[BREEDS[breed].trait].name}: ${TRAITS[BREEDS[breed].trait].desc}`);
+  player.sendMessage(`§6You bought §f${rec.name}§6, ${withArticle(BREEDS[breed].name)} foal. ${TRAITS[BREEDS[breed].trait].name}: ${TRAITS[BREEDS[breed].trait].desc}`);
   return rec;
 }

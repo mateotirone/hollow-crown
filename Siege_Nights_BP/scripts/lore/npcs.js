@@ -3,6 +3,9 @@
 // it by tools/build_lore.py. This file picks which scene a player sees and applies what a
 // conversation gives: tomes, clues, leads, skill points.
 //
+// Where they stand on a generated map, without any command: Wren opening/millbrook.js; Mag, Cael, Kesh, Ulla, Nell the
+// landmark designs; the Carter undertow/story.js; everyone else places.js (towns, town halls, the chapterhouse, the Hollow).
+//
 // Builder commands (creative / operators):
 //   /scriptevent siege:lore_npc <id>     spawn that character where you stand (wren, aldous, mag, elias, sage, cael, sigrun, isolde)
 //   /scriptevent siege:lore_npc list     list the characters and where each belongs
@@ -15,11 +18,17 @@ import { NPCS } from "./data/dialogue.js";
 import { progressOf, saveProgress, contextOf, grantTome, learnClues, learnLeads, awardPoints, setFlag, giveItem, landOwnerAt } from "./player.js";
 import { libraryCount } from "./library.js";
 import { sfx } from "../core/sfx.js";
+import { NPC_VOICES } from "./data/npc_voices.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const NPC_TYPE = "minecraft:npc";
 const NPC = Object.fromEntries(NPCS.map((n) => [n.id, n]));
 const tagOf = (id) => `siege_lore_npc_${id}`;
 const npcIdOf = (entity) => entity.getTags().find((t) => t.startsWith("siege_lore_npc_"))?.slice("siege_lore_npc_".length);
+
+// Other features add to what a scene's conditions can see (Act 1 adds { act1: stage, raided }): fn(player) -> object
+const contextHooks = [];
+export const addLoreContext = (fn) => contextHooks.push(fn);
 
 function contextFor(player) {
   // "shelved" counts the Library of the land you stand on, else your own
@@ -28,7 +37,27 @@ function contextFor(player) {
     const block = player.dimension.getBlock(player.location);
     owner = block && landOwnerAt(block);
   } catch {}
-  return contextOf(player, libraryCount(owner ?? player.id));
+  const ctx = contextOf(player, libraryCount(owner ?? player.id));
+  for (const hook of contextHooks) { try { Object.assign(ctx, hook(player)); } catch (e) { console.warn(`[Lore] context: ${e}`); } }
+  return ctx;
+}
+
+// The recording of a greeting (tools/install_npc_voices.py), or undefined. A line whose words were rewritten since it
+// was recorded goes quiet rather than saying something else.
+export function voiceLine(npcId, node, v) {
+  const rec = NPC_VOICES[`${npcId}/${node}/${v}`];
+  const n = NPC[npcId]?.nodes[node];
+  if (!rec || !n) return undefined;
+  return rec.text === (v ? n.greets?.[v - 1] : n.text) ? rec.id : undefined;
+}
+
+function speak(player, npcId, node, v) {
+  const id = voiceLine(npcId, node, v);
+  if (!id) return;
+  try {
+    const npc = player.dimension.getEntities({ type: NPC_TYPE, tags: [tagOf(npcId)], location: player.location, closest: 1, maxDistance: 24 })[0];
+    sfx(player, id, npc?.location ?? player.location); // only this player hears it, from the character
+  } catch {}
 }
 
 const lastGreet = new Map(); // player/npc/node -> wording last shown
@@ -39,6 +68,7 @@ function openScene(player, npcId, node) {
     const v = pickGreet(greetCount(NPC[npcId]?.nodes[node]), lastGreet.get(key), Math.random());
     lastGreet.set(key, v);
     player.runCommand(`dialogue open ${selector} @s ${variantTag(npcId, node, v)}`);
+    speak(player, npcId, node, v);
   } catch (e) {
     console.warn(`[Lore] dialogue ${npcId}/${node}: ${e}`);
   }
@@ -108,6 +138,7 @@ function apply(player, effect, npcId) {
   else if (kind === "sp") awardPoints(player, Number(value), "story", Number(value) * 15);
   else if (kind === "item") giveItem(player, new ItemStack(value, 1));
   else if (kind === "slip") startSlip(player, value, npcId);
+  else if (kind === "emit") emit(value, { player, npc: npcId });
 }
 
 export function choose(player, npcId, node, index) {
@@ -136,11 +167,14 @@ export function spawnNpc(dimension, location, id) {
   try {
     const component = entity.getComponent("minecraft:npc");
     component.name = NPC[id].name;
-    component.skinIndex = NPCS.indexOf(NPC[id]) * 5;
     component.defaultScene = sceneTag(id, NPC[id].start[NPC[id].start.length - 1][1]);
   } catch {}
+  dressNpc(entity, `lore_${id}`);
   return entity;
 }
+
+// Story people placed before they carried a skin tag wear theirs by their lore tag
+addNpcLook((e) => { const id = npcIdOf(e); return id && NPC[id] ? { key: `lore_${id}`, name: NPC[id].name } : undefined; });
 
 // Clicking a story NPC opens the right scene for this player
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {

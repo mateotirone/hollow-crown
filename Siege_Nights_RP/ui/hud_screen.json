@@ -1,5 +1,256 @@
 {
   "namespace": "hud",
+  "hc_regals": {
+    "type": "panel",
+    "controls": [
+      {
+        "hc_regals_box": {
+          "type": "panel",
+          "size": [
+            92,
+            10
+          ],
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_left",
+          "offset": [
+            96,
+            -6
+          ],
+          "controls": [
+            {
+              "hc_regals_data": {
+                "type": "panel",
+                "size": [
+                  0,
+                  0
+                ],
+                "$update_string": "hcr:",
+                "property_bag": {
+                  "#preserved_text": ""
+                },
+                "bindings": [
+                  {
+                    "binding_name": "#hud_title_text_string"
+                  },
+                  {
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#preserved_text",
+                    "binding_condition": "visibility_changed"
+                  },
+                  {
+                    "binding_type": "view",
+                    "target_property_name": "#visible",
+                    "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_regals_coin": {
+                "type": "image",
+                "texture": "textures/ui/hc/coin",
+                "size": [
+                  8,
+                  8
+                ],
+                "offset": [
+                  0,
+                  1
+                ],
+                "layer": 4,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcr:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcr:')) = '_s'))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_regals_amount": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  0.85,
+                  0.35
+                ],
+                "shadow": true,
+                "layer": 5,
+                "text_alignment": "left",
+                "localize": false,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  11,
+                  0
+                ],
+                "size": [
+                  80,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcr:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcr:')) = '_s'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcr:') - '_s') - '_h')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "hc_quests": {
+    "type": "panel",
+    "controls": [
+      {
+        "hc_quests_box": {
+          "type": "panel",
+          "size": [
+            168,
+            200
+          ],
+          "anchor_from": "top_right",
+          "anchor_to": "top_right",
+          "offset": [
+            -4,
+            3
+          ],
+          "controls": [
+            {
+              "hc_quests_data": {
+                "type": "panel",
+                "size": [
+                  0,
+                  0
+                ],
+                "$update_string": "hcq:",
+                "property_bag": {
+                  "#preserved_text": ""
+                },
+                "bindings": [
+                  {
+                    "binding_name": "#hud_title_text_string"
+                  },
+                  {
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#preserved_text",
+                    "binding_condition": "visibility_changed"
+                  },
+                  {
+                    "binding_type": "view",
+                    "target_property_name": "#visible",
+                    "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_quests_below": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "shadow": true,
+                "layer": 5,
+                "font_scale_factor": 0.75,
+                "text_alignment": "right",
+                "localize": false,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  0,
+                  94
+                ],
+                "size": [
+                  168,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcq:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcq:')) = '_b'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcq:') - '_b') - '_t')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_quests_top": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "shadow": true,
+                "layer": 5,
+                "font_scale_factor": 0.75,
+                "text_alignment": "right",
+                "localize": false,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  0,
+                  0
+                ],
+                "size": [
+                  168,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcq:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcq:')) = '_t'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_quests_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcq:') - '_b') - '_t')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "hc_minimap": {
     "type": "panel",
     "controls": [
@@ -633,6 +884,3003 @@
               }
             },
             {
+              "hc_minimap_pin_aj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ajg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ajt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'aj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ak": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'akg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ake') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'akt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ak'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_al": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'alg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ale') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'alt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'al'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_am": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'amg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ame') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'amt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'am'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_an": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ang') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ane') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ant')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'an'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ao": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ao'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ap": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'apg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ape') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'apt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ap'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_aq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'aqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'aq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ar": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  4.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'arg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'are') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'art')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ar'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bjt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bk": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bkt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bk'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'blg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ble') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'blt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bo": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'boe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bo'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_bq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'bq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_br": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  12.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'brg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'bre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'brt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'br'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cjt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ck": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ckg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ckt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ck'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'clg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'clt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_co": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'coe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'co'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_cr": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  20.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'crg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'cre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'crt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'cr'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'djg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'djt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dk": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dkt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dk'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dlg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dlt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_do": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'doe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'do'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_dr": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  28.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'drg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'dre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'drt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'dr'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ej": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ejg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ejt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ej'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ek": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ekg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ekt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ek'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_el": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'elg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ele') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'elt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'el'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_em": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'emg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'emt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'em'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_en": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ene') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ent')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'en'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_eo": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'eo'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ep": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'epg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'epe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ept')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ep'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_eq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'eqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'eq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_er": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  36.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'erg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ere') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ert')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'er'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fjt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fk": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fkt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fk'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'flg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'flt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fo": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'foe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fo'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_fr": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  44.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'frg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'fre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'frt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'fr'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gjt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gk": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gkt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gk'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'glg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'glt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_go": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'goe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'got')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'go'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_gr": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  52.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'grg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'gre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'grt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'gr'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hj": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hjg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hje') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hjt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hj'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hk": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hkg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hke') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hkt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hk'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hl": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hlg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hle') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hlt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hl'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hm": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hmg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hme') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hmt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hm'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hn": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hng') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hne') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hnt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hn'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ho": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hoe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ho'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hp": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hpt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hp'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_hr": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  60.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hrg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hre') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'hrt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'hr'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ij": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  4.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ijg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ije') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ijt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ij'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ik": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  12.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ikg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ike') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ikt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ik'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_il": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  20.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ilg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ile') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ilt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'il'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_im": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  28.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'img') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ime') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'imt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'im'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_in": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  36.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ing') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ine') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'int')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'in'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_io": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  44.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iog') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ioe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iot')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'io'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ip": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  52.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ipt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ip'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_iq": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  60.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqe') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'iqt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'iq'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
+              "hc_minimap_pin_ir": {
+                "type": "image",
+                "texture": "#texture",
+                "size": [
+                  7,
+                  7
+                ],
+                "offset": [
+                  68.5,
+                  68.5
+                ],
+                "layer": 3,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'irg') or ((('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'ire') or (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) = 'irt')))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_minimap_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "('textures/ui/hc/minimap/p' + (('%.3s' * ((#preserved_text - 'hcm:') - ('%.8s' * (#preserved_text - 'hcm:')))) - 'ir'))",
+                    "target_property_name": "#texture"
+                  }
+                ],
+                "visible": false,
+                "property_bag": {
+                  "#texture": "textures/ui/hc/minimap/p_"
+                }
+              }
+            },
+            {
               "hc_minimap_north": {
                 "type": "label",
                 "text": "N",
@@ -701,7 +3949,7 @@
                     "binding_type": "view",
                     "source_control_name": "hc_minimap_data",
                     "resolve_sibling_scope": true,
-                    "source_property_name": "((#preserved_text - 'hcm:') - ('%.9s' * (#preserved_text - 'hcm:')))",
+                    "source_property_name": "((#preserved_text - 'hcm:') - ('%.12s' * (#preserved_text - 'hcm:')))",
                     "target_property_name": "#text"
                   }
                 ]
@@ -720,6 +3968,20 @@
         "value": {
           "hc_minimap@hud.hc_minimap": {}
         }
+      },
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": {
+          "hc_quests@hud.hc_quests": {}
+        }
+      },
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": {
+          "hc_regals@hud.hc_regals": {}
+        }
       }
     ]
   },
@@ -732,7 +3994,7 @@
       {
         "binding_type": "view",
         "target_property_name": "#visible",
-        "source_property_name": "((#hud_title_text_string - 'hcm:') = #hud_title_text_string)"
+        "source_property_name": "(((#hud_title_text_string - 'hcm:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcq:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcr:') = #hud_title_text_string))"
       }
     ]
   },

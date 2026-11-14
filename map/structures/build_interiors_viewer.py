@@ -56,8 +56,10 @@ def main():
         if a.only and not re.search(a.only, key): continue
         spec = json.load(open(f)); meta = spec.get("card", {})
         region = meta.get("region", "vale")
-        sid = "settle-" + region if key.startswith("settle_") else "kingsrest"
-        title = {"kingsrest": "Kingsrest and Millbrook"}.get(sid, "Settlement plots · " + region.capitalize())
+        sid = ("settle-" + region if key.startswith("settle_") else "mason" if key.startswith("mason_yard")
+               else "storehouse-" + region if key.startswith("storehouse_") else "kingsrest")
+        title = {"kingsrest": "Kingsrest and Millbrook", "mason": "Mason's Yard (every new base)"}.get(
+            sid, ("Storehouse · " if sid.startswith("storehouse") else "Settlement plots · ") + region.capitalize())
         sec = secs.setdefault(sid, {"id": sid, "title": title, "cards": []})
         lv, attic = levels_of(spec)
         I = next((p.get("interior") for p in spec["parts"] if p.get("part") == "house"), None)
@@ -67,10 +69,11 @@ def main():
                 "cut": (lv[-1] + 3) if lv else None}
         sec["cards"].append((card, f, REGION_GROUND.get(region)))
     items = []
-    for sid in ["kingsrest"] + [f"settle-{r}" for r in ("vale", "frostmarch", "saltreach", "emberwaste", "blackfen")]:
+    regions = ("vale", "frostmarch", "saltreach", "emberwaste", "blackfen")
+    for sid in ["mason", "kingsrest"] + [f"settle-{r}" for r in regions] + [f"storehouse-{r}" for r in regions]:
         if sid not in secs: continue
         sec = secs[sid]
-        cards = sorted(sec["cards"], key=lambda c: next((i for i, o in enumerate(ORDER) if f"_{o}_" in c[1]), 9))
+        cards = sorted(sec["cards"], key=lambda c: (next((i for i, o in enumerate(ORDER) if f"_{o}_" in c[1]), 9), c[0]["key"]))
         for card, f, ground in cards:
             items.append((sec, card, (lambda f=f: from_spec(f)), ground, None))
     write_viewer(items, a.out, a.textures)

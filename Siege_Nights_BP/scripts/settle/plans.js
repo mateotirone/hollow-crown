@@ -4,7 +4,7 @@
 // supplies for emeralds. The stone comes back to you when the building is done.
 //
 // Events: emit("settleBuilt", { owner, player, building, style, origin, forward, box, marks })
-//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf7, lectern, portrait0..2, painting0
+//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf15, lectern, portrait0..2, painting0
 //   a library also sends portraitYaw and paintingYaw: the way those pictures face (0 south, 90 west, 180 north, -90 east)
 // Test: /scriptevent siege:settle_build <building> [style]   raise one where you stand, free
 
@@ -12,12 +12,12 @@ import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
 import { purse, charge, coins, lot } from "./wallet.js";
-import { startBuild, buildFor, worldMarks, resolveRole } from "../townhall/build.js";
-import { levelSite, foundationColumns } from "./ground.js";
+import { startBuild, buildFor, worldMarks, resolveRole, clearBoxFor } from "../townhall/build.js";
+import { levelSite, foundationColumns, Groundwork } from "./ground.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
 import { plotAt } from "../plots/claims.js";
-import { SETTLE, REGION_TO_STYLE } from "./config.js";
+import { SETTLE, REGION_TO_STYLE, ONE_EACH } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { footprint, corners, boxesTouch, bill, priceOf, MATERIALS } from "./rules.js";
 import { reservesOf, reserveAt, drawBox } from "./zones.js";
@@ -110,11 +110,15 @@ export function raise(key, stone, buildingId, style, { quiet = false, onDone: af
   const plan = drawBuilding(buildingId, style);
   const stoneAt = locOf(key);
   const forward = { x: stone.fx, z: stone.fz };
-  // on the highest ground under it, with foundation below (ground.js); the stone keeps its own spot
+  // on a terraformed pad (ground.js, terraform.js: cut in at most 3, the land round it blended), with foundation
+  // below; the stone keeps its own spot
   // a build picked up again after a restart keeps the height it started at
-  const { origin, lift } = stone.building === buildingId && Number.isFinite(stone.lift)
+  // on a town plot the floor goes on the plot's levelled pad, never lifted onto a bump of grass the groundwork left;
+  // anything natural standing in its box is cleared first (Mateo's playtest 2026-11-12: a library on a dirt shelf)
+  const resumed = stone.building === buildingId && Number.isFinite(stone.lift);
+  const { origin, lift } = resumed
     ? { origin: { ...stoneAt, y: stoneAt.y + stone.lift }, lift: stone.lift }
-    : levelSite(world.getDimension(OVERWORLD), plan, stoneAt, forward);
+    : stone.slot ? { origin: stoneAt, lift: 0 } : levelSite(world.getDimension(OVERWORLD), plan, stoneAt, forward, { terraform: true });
   stone.building = buildingId;
   stone.style = style;
   stone.lift = lift;
@@ -122,6 +126,8 @@ export function raise(key, stone, buildingId, style, { quiet = false, onDone: af
   store.save();
   const job = startBuild({
     id: jobId(key), dimensionId: OVERWORLD, origin, forward, plan, style: styleFor(style),
+    ...(stone.slot && !resumed ? { clearBox: clearBoxFor(plan, origin, forward, 0) } : {}),
+    ...(!stone.slot && !resumed ? { ground: new Groundwork(plan, origin, forward, style) } : {}),
     perTick: Math.max(4, Math.ceil(plan.cells.size / SETTLE.riseTicks)),
     onDone() {
       const dim = world.getDimension(OVERWORLD);
@@ -200,6 +206,7 @@ async function chooseBuilding(player, key, stone) {
     .title("Foundation Stone")
     .body(`Pick a building. It rises in front of this stone, the way you were facing when you set it, in the §f${STYLES[style].name}§r style.\n\n§7Any planks and any building stone will do. The mason supplies what you lack, for a price.`);
   for (const b of BUILDINGS) {
+    if (ONE_EACH.includes(b.id)) { form.button(`§8${b.name}\nOne per settlement: use a Plot Marker`); continue; } // the town counts it there
     const box = drawBuilding(b.id, style).bounds();
     const need = priceOf(drawBuilding(b.id, style));
     form.button(`${b.name}\n§8${box.x1 - box.x0 + 1} x ${box.z1 - box.z0 + 1}, ${need.timber} planks, ${need.stone} stone`);
@@ -209,6 +216,7 @@ async function chooseBuilding(player, key, stone) {
   if (res.canceled) return;
   if (res.selection === BUILDINGS.length) return chooseStyle(player, key, stone, style);
   const building = BUILDINGS[res.selection];
+  if (ONE_EACH.includes(building.id)) return player.sendMessage(`§7The ${building.name} is one per settlement, so it isn't raised from a Foundation Stone. Use the Plot Marker of an empty plot that fits it: the town keeps count there.`);
   stone.pick = building.id;
   stone.style = style;
   stone.pickedAt = system.currentTick;
@@ -231,6 +239,7 @@ async function chooseStyle(player, key, stone, current) {
 
 async function confirmBuilding(player, key, stone) {
   const building = BUILDING[stone.pick];
+  if (ONE_EACH.includes(building.id)) { stone.pick = undefined; store.save(); return chooseBuilding(player, key, stone); } // picked before the rule
   const style = stone.style;
   const problem = siteProblem(stone.owner, boxOf(key, stone, building.id, style), key);
   if (problem) {

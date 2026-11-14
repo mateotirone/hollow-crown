@@ -2,10 +2,11 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS } from "./sites.js";
-import { planPiece, seekSpot, cellsOf, AIR, KEEP_TOP } from "./plan.js";
+import { planPiece, seekSpot, cellsOf, reachOf, REACH_MAX, AIR, KEEP_TOP } from "./plan.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { PLACES } from "../lore/data/world.js";
 import { NPCS } from "../lore/data/dialogue.js";
+import { TOME } from "../lore/logic.js";
 
 const idsOf = (piece) => (piece.turns ? (piece.face ? [piece.face] : ["n", "e", "s", "w"]).map((f) => `${piece.d}@${f}`) : [piece.d]);
 
@@ -25,6 +26,21 @@ addTests("landmarks", {
       });
     }
   },
+  "tomes laid in designs are real tomes, each laid once, each on something solid": () => {
+    const seen = new Set();
+    for (const [id, d] of Object.entries(DESIGNS)) {
+      if (!d.tomes?.length) continue;
+      const solid = new Set();
+      for (const [y, z, x0, n, pi] of d.rows) if (d.palette[pi][0] !== "minecraft:air") for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+      for (const [x, y, z, t] of d.tomes) {
+        assert(TOME[t], `${id}: no tome ${t}`);
+        assert(!seen.has(t) || id.includes("@"), `${t} laid twice`);
+        seen.add(t);
+        assert(solid.has(`${x},${y - 1},${z}`), `${id}: ${t} at ${x},${y},${z} has nothing under it`);
+      }
+    }
+    assert(seen.has("chron_09") && seen.has("corv_08") && seen.has("seal_09"), "the story rooms' tomes are laid");
+  },
   "story sites point the Ledger at real places, and their people are real lore characters": () => {
     for (const s of LANDMARKS) if (s.place) assert(PLACES[s.place], `${s.id}: no place ${s.place}`);
     for (const [id, d] of Object.entries(DESIGNS)) for (const n of d.npcs ?? []) assert(NPCS.some((c) => c.id === n[3]), `${id}: no npc ${n[3]}`);
@@ -43,8 +59,17 @@ addTests("landmarks", {
       assertEqual(G, 70, id);
       const placed = new Map(ops.filter((o) => o[3] !== AIR).map((o) => [`${o[0]},${o[1]},${o[2]}`, o[3]]));
       for (const [x, y, z, i] of cellsOf(d)) assertEqual(placed.get(`${100 + x},${70 + y},${200 + z}`), i, `${id} ${x},${y},${z}`);
-      assert(ops.every((o) => Math.abs(o[0] - 100) <= 44 && Math.abs(o[2] - 200) <= 44), `${id} reaches too far`);
+      const R = reachOf(d);
+      assert(R <= REACH_MAX && ops.every((o) => Math.abs(o[0] - 100) <= R && Math.abs(o[2] - 200) <= R), `${id} reaches too far`);
     }
+  },
+  "the eased ring round a rigid design never grades another place's wall": () => {
+    const d = DESIGNS.wolfcairn_cairn, b = d.box;
+    const wallAt = (x) => x > b.x1;                       // everything east of the cairn is built (a town wall)
+    const { ops } = planPiece(d, 0, 0, (x) => (x > b.x1 ? 80 : 70), () => undefined, (x) => wallAt(x));
+    assert(!ops.some((o) => o[0] > b.x1), "no op in the built columns");
+    const { ops: free } = planPiece(d, 0, 0, (x) => (x > b.x1 ? 80 : 70));
+    assert(free.some((o) => o[0] > b.x1), "unbuilt ground there is graded");
   },
   "a rigid design on a slope is filled under and cut into, never floating": () => {
     const d = DESIGNS.wolfcairn_cairn;
@@ -82,5 +107,29 @@ addTests("landmarks", {
     assert(s && s.face === "e" && s.x >= 28 && s.x <= 30, JSON.stringify(s));
     const e = seekSpot({ x: 0, z: 0 }, { kind: "edge", bearing: 270, spread: 20, max: 80 }, (x) => (x < -40 ? 60 : 90));
     assert(e && e.face === "w" && e.x <= -36 && e.x >= -41, JSON.stringify(e));
+  },
+  "the door in the Hallowmere ice: walls before the water is cleared, a full moon hatch on the ice": () => {
+    const d = DESIGNS.hallowmere_ice_door;
+    assert(d.mode === "carve" && d.dry, "carve and dry");
+    const { ops, G } = planPiece(d, 40, -1120, () => 112);
+    assertEqual(G, 112);
+    const lastSolid = ops.reduce((m, o, i) => (o[3] !== AIR && !(d.late ?? []).includes(o[3]) ? i : m), -1);
+    const firstAir = ops.findIndex((o) => o[3] === AIR);
+    assert(firstAir > lastSolid, `air at ${firstAir} before the last wall at ${lastSolid}`);
+    const [[dx, dy, dz, carving, wide, tall, long]] = d.doors;
+    assertEqual(carving, "full");
+    const site = LANDMARKS.find((s) => s.id === "hallowmere_shrine");
+    assert(site && site.after === "huntsman" && site.place === "frozen_lake", "placed in the Huntsman's area, after it");
+    for (let i = 0; i < wide; i++) for (let k = 0; k < long; k++) {
+      const op = ops.find((o) => o[0] === 40 + dx + i && o[1] === 112 + dy && o[2] === -1120 + dz + k);
+      assert(op && d.palette[op[3]][0] === "minecraft:ice", `hatch cell ${i},${k} is ice`);
+    }
+    assert(tall === 1, "it lies flat");
+  },
+  "the border watchtower holds the chest Chronicle II is found in": () => {
+    const d = DESIGNS.frost_watchtower;
+    const [mx, my, mz] = d.mark;
+    assert(cellsOf(d).some(([x, y, z, i]) => x === mx && y === my && z === mz && d.palette[i][0] === "minecraft:chest"), "a chest at the mark");
+    assert(LANDMARKS.some((s) => s.place === "frost_watchtower"), "placed on the map");
   },
 });

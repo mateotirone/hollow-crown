@@ -10,10 +10,11 @@ import { stationMenuExtras } from "../rails/index.js";
 import { isBuilder, give } from "../horses/menus.js";
 import { callCarriage, hasUnlocked, unlock } from "./index.js";
 import { allSites } from "./station_sites.js";
-import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd, isNatural } from "./routes.js";
+import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
 import { addSwitch } from "./switches.js";
+import { layBed, trackFits, seatTrack, clearBody, applyWorkColumn, clearTreesInColumn, builtColumns, layCrossing } from "./rail_bed.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
@@ -38,83 +39,51 @@ export const builtRoutes = () => built();
 export const reachableFrom = (owner) => reachable(ROUTES, built(), homeStop(owner));
 
 // ---------- the bed ----------
-// The world has no rail beds (Mateo, 2026-11-12): each piece grades its own as it goes down. A corridor 3 wide is
-// cleared to 4 above the track (a cutting, or a tunnel through a hill); under it goes gravel ballast on a fill of
-// dirt down to the ground, or, where the ground is too far down or under water, a stone brick deck with a pier every
-// few blocks.
-const AIR = BlockPermutation.resolve("minecraft:air");
-const BALLAST = BlockPermutation.resolve("minecraft:gravel");
-const FILL = BlockPermutation.resolve("minecraft:dirt");
-const DECK = BlockPermutation.resolve("minecraft:stone_bricks");
-const SOFT = /leaves|grass$|tall_grass|fern|flower|sapling|bush|vine|snow_layer|dandelion|poppy|tulip|orchid|allium|bluet|daisy|cornflower|lily|azure|kelp|seagrass|mushroom|torch/;
-const firm = (b) => !!b && !b.isAir && !b.isLiquid && !SOFT.test(b.typeId);
+// The world has no rail beds (Mateo, 2026-11-12): each piece grades its own as it goes down, with the shared bed
+// code in rail_bed.js (graded banks, trees felled whole, level crossings, buildings left standing). The same code is
+// tested on the real map by tools/rail_lay_test.mjs.
+// Permutations are resolved on first use: BlockPermutation.resolve can't run while scripts load (early execution),
+// and a throw there stopped every script in the pack from loading.
+const perms = {};
+const perm = (id) => (perms[id] ??= BlockPermutation.resolve(id));
 const isTrack = (b) => b?.typeId === TRACK;
-const GATED = /iron_bars|portcullis/;
+let builtCols;
+const worksCols = () => (builtCols ??= builtColumns(ROUTES));
 
-// How far below `y` the ground is at (x, z): 0 when (x, y, z) itself is firm, up to `max`, or Infinity
-function dropAt(dim, x, y, z, max) {
-  for (let d = 0; d <= max; d++) if (firm(dim.getBlock({ x, y: y - d, z }))) return d;
-  return Infinity;
+// rail_bed.js reads and writes blocks through this: undefined where the ground isn't loaded
+function blocksOf(dim) {
+  return {
+    get(x, y, z) {
+      try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; }
+    },
+    set(x, y, z, id, states) {
+      try { dim.getBlock({ x, y, z })?.setPermutation(states ? BlockPermutation.resolve(id, states) : perm(id)); } catch { /* out of the world */ }
+    },
+  };
 }
 
 // A building in the way of a stretch: left standing, and the buyer told once the stretch is down
-function blocked(segId, b) {
+function blocked(segId, at) {
   const list = ((store.data.blocked ??= {})[segId] ??= []);
-  const at = { x: b.location.x, y: b.location.y, z: b.location.z };
   if (!list.some((q) => Math.hypot(q.x - at.x, q.z - at.z) < 8)) list.push(at);
 }
 
-function layBed(dim, p, i, segId) {
-  if (!dim.getBlock(p)) return false; // not loaded
-  // clear the corridor, keeping other track and the ballast under it
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dz = -1; dz <= 1; dz++) {
-      const centre = !dx && !dz;
-      for (let y = p.y + (centre ? 1 : 0); y <= p.y + ROUTE.clearUp; y++) {
-        const b = dim.getBlock({ x: p.x + dx, y, z: p.z + dz });
-        if (!b || b.isAir || isTrack(b)) continue;
-        if (GATED.test(b.typeId)) continue; // a town's rail gate: it opens for trains (gates.js), so the bed leaves it shut
-        if (!isNatural(b.typeId)) { blocked(segId, b); continue; } // somebody's building: never torn down
-        if (y === p.y && isTrack(dim.getBlock({ x: p.x + dx, y: y + 1, z: p.z + dz }))) continue;
-        b.setPermutation(AIR);
-      }
-    }
-  }
-  // the ground under the middle decides: an embankment or a bridge
-  const drop = dropAt(dim, p.x, p.y - 1, p.z, ROUTE.fillDepth);
-  const bridge = drop === Infinity;
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dz = -1; dz <= 1; dz++) {
-      const x = p.x + dx, z = p.z + dz, top = { x, y: p.y - 1, z };
-      if (isTrack(dim.getBlock({ x, y: p.y, z: z })) && (dx || dz)) continue; // another line's track beside us
-      const under = dim.getBlock(top);
-      if (under && !under.isAir && !under.isLiquid && !isNatural(under.typeId)) { if (dx || dz) continue; blocked(segId, under); continue; }
-      if (bridge) { under?.setPermutation(DECK); continue; }
-      const d = dropAt(dim, x, p.y - 1, z, ROUTE.fillDepth);
-      for (let k = Math.min(d, ROUTE.fillDepth); k >= 1; k--) {
-        const b = dim.getBlock({ x, y: p.y - 1 - k, z });
-        if (b && !firm(b)) b.setPermutation(FILL);
-      }
-      dim.getBlock(top)?.setPermutation(BALLAST);
-    }
-  }
-  if (bridge && i % ROUTE.pierEvery === 0) {
-    for (let y = p.y - 2, n = 0; n < ROUTE.pierDepth; y--, n++) {
-      const b = dim.getBlock({ x: p.x, y, z: p.z });
-      if (!b || firm(b)) break;
-      b.setPermutation(DECK);
-    }
-  }
-  return true;
-}
-
-// Put one piece down, bed first. true when it's there (or was already), false when its ground isn't loaded.
-function layPiece(dim, p, i = 0, segId = "") {
+// Put piece i of a stretch down, bed first. true when it's there (or was already), false when its ground isn't loaded.
+function layPiece(dim, seg, all, i) {
+  const p = all[i];
   try {
     const block = dim.getBlock(p);
     if (!block) return false;
-    if (block.typeId !== TRACK && !p.works && !layBed(dim, p, i, segId)) return false;
-    if (block.typeId !== TRACK && !block.isAir && !block.isLiquid && !isNatural(block.typeId)) { blocked(segId, block); return true; } // never over a building
+    const w = blocksOf(dim), hit = (x, y, z) => blocked(seg.id, { x, y, z });
+    if (block.typeId !== TRACK) {
+      if (p.works) {
+        // the map's works built this stretch of bed: keep the train's body clear and the track seated on it
+        if (!clearBody(w, p, hit, worksCols())) return false;
+        seatTrack(w, p);
+        layBed(w, all, i, hit, worksCols(), true);
+      } else if (!layBed(w, all, i, hit, worksCols())) return false;
+    }
+    if (block.typeId !== TRACK && !trackFits(w, p)) { blocked(seg.id, { x: p.x, y: p.y, z: p.z }); return true; } // never over a building
     if (block.typeId !== TRACK) block.setPermutation(BlockPermutation.resolve(TRACK, { "siege:kind": p.kind, "siege:dir": p.dir }));
     else {
       // another line already lies here: where the two part, this block becomes a switch holding both shapes
@@ -128,30 +97,28 @@ function layPiece(dim, p, i = 0, segId = "") {
 }
 
 function startLaying(seg) {
-  store.data.laying.push({ seg: seg.id, i: 0, w: 0 });
+  store.data.laying.push({ seg: seg.id, i: 0, w: 0, t: 0 });
   store.save();
 }
 
 // The map's own earthworks for a stretch (cuttings, embankments, viaducts, tunnels), if it has them:
-// works [[x, z, y0, y1, palette index], ...] applied in order before the track. Without them each piece grades a
-// plain bed (layBed).
-const worksPalette = (seg) => (seg._perms ??= (seg.works_palette ?? []).map((e, i) => (i === 0 ? AIR : BlockPermutation.resolve(e.name, e.states ?? {}))));
-function applyWork(dim, seg, w) {
-  const [x, z, y0, y1, i] = seg.works[w];
-  const perm = worksPalette(seg)[i];
-  if (!perm) return true;
-  try {
-    if (!dim.getBlock({ x, y: y0, z })) return false;
-    for (let y = y0; y <= y1; y++) {
-      const b = dim.getBlock({ x, y, z });
-      if (!b || isTrack(b)) continue;
-      if (!b.isAir && !b.isLiquid && !isNatural(b.typeId)) { blocked(seg.id, b); continue; } // never over a building
-      b.setPermutation(perm);
-    }
-    return true;
-  } catch {
-    return false;
+// works [[x, z, y0, y1, palette index], ...] applied in order before the track, after every tree standing in them
+// has been felled (so a bridge never builds against a tree). Without them each piece grades a plain bed.
+const worksPalette = (seg) => (seg._ids ??= (seg.works_palette ?? []).map((e, i) => (i === 0 ? "minecraft:air" : e.name)));
+const worksStates = (seg) => (seg._states ??= (seg.works_palette ?? []).map((e) => e.states && Object.keys(e.states).length ? e.states : undefined));
+function applyWork(dim, seg, k, treesOnly) {
+  const [x, z, y0, y1, i] = seg.works[k];
+  const w = blocksOf(dim), hit = (bx, by, bz) => blocked(seg.id, { x: bx, y: by, z: bz });
+  if (treesOnly) return clearTreesInColumn(w, x, z, y0, y1, hit);
+  const id = worksPalette(seg)[i], states = worksStates(seg)[i];
+  if (!id) return true;
+  if (states) {
+    // a block with states (stairs, slabs, walls): rail_bed decides where it may go, then it goes in with its states
+    const p = BlockPermutation.resolve(id, states);
+    const marked = { get: w.get, set: (bx, by, bz, v) => { try { const b = dim.getBlock({ x: bx, y: by, z: bz }); if (b) b.setPermutation(v === id ? p : perm(v)); } catch { /* out of the world */ } } };
+    return applyWorkColumn(marked, x, z, y0, y1, id, hit, worksCols());
   }
+  return applyWorkColumn(w, x, z, y0, y1, id, hit, worksCols());
 }
 
 // Every other tick: lay the next pieces of whatever stretch is going down
@@ -161,6 +128,14 @@ function layTick() {
   const job = store.data.laying[0];
   const seg = segById(job.seg);
   if (!seg) { store.data.laying.shift(); store.save(); return; }
+  if (seg.works && (job.t ?? 0) < seg.works.length) {
+    // first the trees standing where the works go
+    job.t ??= 0;
+    const stop = Math.min(seg.works.length, job.t + ROUTE.worksPerTick);
+    for (; job.t < stop; job.t++) applyWork(dim, seg, job.t, true); // (unloaded: the works pass fells them later)
+    store.save();
+    return;
+  }
   if (seg.works && (job.w ?? 0) < seg.works.length) {
     job.w ??= 0;
     const stop = Math.min(seg.works.length, job.w + ROUTE.worksPerTick);
@@ -171,7 +146,14 @@ function layTick() {
   const all = pieces(seg);
   const end = Math.min(all.length, job.i + ROUTE.layPerTick);
   for (; job.i < end; job.i++) {
-    if (!layPiece(dim, all[job.i], job.i, seg.id)) (store.data.missed[seg.id] ??= []).push(job.i);
+    if (!layPiece(dim, seg, all, job.i)) (store.data.missed[seg.id] ??= []).push(job.i);
+  }
+  if (job.i >= all.length && (job.c ?? 0) < (seg.crossings?.length ?? 0)) {
+    // then the level crossings, one a tick, on the ground the bed has graded
+    crossingTick(dim, seg, job.c ?? 0);
+    job.c = (job.c ?? 0) + 1;
+    store.save();
+    return;
   }
   if (job.i >= all.length) {
     store.data.laying.shift();
@@ -183,12 +165,24 @@ function layTick() {
 }
 onTick("route_lay", 2, layTick);
 
-// Every two seconds: try again the pieces that were out of loaded ground
+// A level crossing (map/railcross.py, rail_bed.js layCrossing): waits while a piece near it is still unlaid
+// (unloaded ground), so it always sits on graded ground
+function crossingTick(dim, seg, c) {
+  const near = (store.data.missed[seg.id] ?? []).some((i) => Math.abs(i - seg.crossings[c].at) <= 10);
+  if (near || !layCrossing(blocksOf(dim), seg.crossings[c], (bx, by, bz) => blocked(seg.id, { x: bx, y: by, z: bz }))) {
+    const list = ((store.data.missedCross ??= {})[seg.id] ??= []);
+    if (!list.includes(c)) list.push(c);
+    return false;
+  }
+  return true;
+}
+
+// Twice a second: try again the pieces that were out of loaded ground (the far-track area below loads them)
 function missedTick() {
   if (!isReady()) return;
   const dim = world.getDimension("minecraft:overworld");
   // laying costs budget; looking at unloaded ground is cheap, so a long unloaded stretch can't starve the rest
-  let budget = ROUTE.layPerTick, looks = ROUTE.missedLooks, changed = false;
+  let budget = ROUTE.layPerTick * 2, looks = ROUTE.missedLooks, changed = false;
   store.data.missedWorks ??= {};
   // earthworks first: a piece of track whose works haven't gone in yet waits for them
   const waiting = new Set();
@@ -207,14 +201,85 @@ function missedTick() {
     if (waiting.has(id)) continue;
     const all = pieces(seg);
     for (let k = list.length - 1; k >= 0 && budget > 0 && looks > 0; k--, looks--) {
-      if (layPiece(dim, all[list[k]], list[k], id)) { list.splice(k, 1); budget--; changed = true; }
+      if (layPiece(dim, seg, all, list[k])) { list.splice(k, 1); budget--; changed = true; }
     }
     if (!list.length) delete store.data.missed[id];
     if (budget <= 0 || looks <= 0) break;
   }
+  for (const [id, list] of Object.entries(store.data.missedCross ?? {})) {
+    const seg = segById(id);
+    if (!seg?.crossings) { delete store.data.missedCross[id]; changed = true; continue; }
+    for (let k = list.length - 1; k >= 0 && looks > 0; k--, looks--) {
+      const c = list[k]; list.splice(k, 1); changed = true;
+      crossingTick(dim, seg, c); // puts it back if it still can't go down
+    }
+    if (!store.data.missedCross[id]?.length) delete store.data.missedCross[id];
+  }
   if (changed) store.save();
 }
-onTick("route_missed", 40, missedTick);
+onTick("route_missed", 10, missedTick);
+
+// ---------- far track ----------
+// A stretch is hundreds of blocks long, and on a Realm only the ground round players is loaded, so a bought stretch
+// used to go down only near the buyer and stop in the grass: a short stub with the rest "waiting" (playtest
+// 2026-11-13). Now one ticking area walks along whatever is still waiting, holding that ground loaded until its
+// pieces, earthworks and crossings are down, then moves on, and is taken away when nothing waits.
+const FAR = { name: "hc_rail_lay", half: 32, giveUp: 60 }; // area 65 x 65 round the next waiting piece; checks (2 s each) before skipping it
+const runCmd = (dim, cmd) => { try { return dim.runCommand(cmd); } catch { return undefined; } };
+
+// The next spot something waits on: { x, z, key } or undefined. The stretch going down comes first, then earthworks,
+// then pieces, then crossings (they wait on the pieces near them).
+export function nextWaiting(data = store.data, segOf = segById) {
+  const job = data.laying?.[0], seg = job && segOf(job.seg);
+  for (const [id, list] of Object.entries(data.missedWorks ?? {})) {
+    const s = segOf(id), k = list?.at(-1);
+    if (s?.works && k !== undefined && s.works[k]) return { x: s.works[k][0], z: s.works[k][1], key: `w:${id}:${k}` };
+  }
+  for (const [id, list] of Object.entries(data.missed ?? {})) {
+    const s = segOf(id), k = list?.at(-1);
+    if (s && k !== undefined && s.blocks[k]) return { x: s.blocks[k][0], z: s.blocks[k][2], key: `p:${id}:${k}` };
+  }
+  for (const [id, list] of Object.entries(data.missedCross ?? {})) {
+    const s = segOf(id), c = list?.at(-1);
+    const at = s?.crossings?.[c] && s.blocks[s.crossings[c].at];
+    if (at) return { x: at[0], z: at[2], key: `c:${id}:${c}` };
+  }
+  if (seg && job.i < seg.blocks.length) { const b = seg.blocks[job.i]; return { x: b[0], z: b[2], key: `l:${seg.id}:${job.i}` }; }
+  return undefined;
+}
+
+function farTick() {
+  if (!isReady()) return;
+  const dim = world.getDimension("minecraft:overworld");
+  const far = (store.data.far ??= {});
+  const at = nextWaiting();
+  if (!at) {
+    if (far.x !== undefined) { runCmd(dim, `tickingarea remove ${FAR.name}`); store.data.far = {}; store.save(); }
+    return;
+  }
+  if (far.key === at.key) {
+    if (++far.tries < FAR.giveUp) return;
+    // the same spot has waited two minutes with its ground held loaded: it can't go down (out of the world, or
+    // something keeps refusing it). Drop it from the lists so the rest of the line isn't held up behind it.
+    const [kind, id, k] = at.key.split(":"), n = Number(k);
+    const lists = { w: store.data.missedWorks, p: store.data.missed, c: store.data.missedCross };
+    const list = lists[kind]?.[id];
+    if (list) { const j = list.lastIndexOf(n); if (j >= 0) list.splice(j, 1); }
+    console.warn(`[Hollow Crown] rail: gave up on ${at.key} at ${at.x}, ${at.z}`);
+    store.data.far = {};
+    store.save();
+    return;
+  }
+  const inside = far.x !== undefined && Math.abs(at.x - far.x) <= FAR.half - 8 && Math.abs(at.z - far.z) <= FAR.half - 8;
+  if (!inside) {
+    runCmd(dim, `tickingarea remove ${FAR.name}`);
+    runCmd(dim, `tickingarea add ${at.x - FAR.half} 0 ${at.z - FAR.half} ${at.x + FAR.half} 0 ${at.z + FAR.half} ${FAR.name} true`);
+    far.x = at.x; far.z = at.z;
+  }
+  far.key = at.key; far.tries = 0;
+  store.save();
+}
+onTick("route_far", 40, farTick);
 
 async function buyMenu(player, station, back) {
   const owner = ownerOf(player);

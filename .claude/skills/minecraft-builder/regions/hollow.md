@@ -49,6 +49,9 @@ Build for the dark. Light is the material here: warm froglight windows mean peop
 everything else. The storm never rains or snows, so there are no drip lines or snow caps. Damp and age show as
 cracked veinstone and moss.
 
+Drowned and flooded places (the Drowned Court, the drowned city) show their water as channels and pools sunk a row
+into the floor, walled and floored all round; never water standing on the floor players walk, which floods the room.
+
 ## Towns and paths
 
 **Villages:**
@@ -89,6 +92,78 @@ cracked veinstone and moss.
 - The plinth and the ground storey stay true.
 - The offset storey's posts still sit on the beam below.
 - The windows move with their storey.
+
+## Cliffs, floating rock and the way to the Seat (Mateo, 2026-11-12)
+
+- **No straight edges.** Where the land ends it breaks off ragged: bays bitten well back, blunt spurs between
+  them, single-block jags. Never a ruler line (`terrain.js` `heartEdge`).
+- **Floating rock:** a ragged plate on top that tapers underneath to a point hanging off centre. Veilmoss
+  strands, hollowwood roots and glimbulbs hang under it, and a soul lantern on a chain under the bigger ones.
+  No two the same size or height.
+- **A way across open air is walked, never jumped:** three wide, half steps (a bottom slab) at every drop, spans
+  of hollowwood roots between rocks, two blocks of headroom. A self-test walks it.
+- **The Seat's approach** (`hollow_arenas.py` `approach()`): the Last Step's broken gate (two pylons that do not
+  match), five rocks curving to the ring's landing, broken rock adrift round it. Nothing of it stands inside
+  the ring that falls in the fight (r 32 from the Seat's middle).
+- **Under the Seat is the chasm** (`undertow/chasm.js`), about 70 blocks down: a pool over glimmerflow, shoals,
+  falls of light springing from the cliffs, crooked crystal spires (rock below, amethyst above, one clean
+  one-block step off true). Nothing in it rises above y 84. Its rim over the void is ragged too. It is not land:
+  `heightAt` stays null there and a fall into it kills.
+- **The Seat's cavern is closed.** Outside the pool's rim the pit is walled in: rock from the floor to the cave
+  roof, at least three thick, leaning inward as it climbs until it is the roof (`chasm.js` `inWall`,
+  `vaultFrom`). No void is visible from the Seat. The wall stays more than 15 blocks clear of the Seat's rock.
+
+## Stairs, ledges and the way down from them (Mateo, 2026-11-13)
+
+Mateo, of the first arrival ledge (a box of one block 29 by 21 and 34 high, with a strip of rock down its front
+for a ramp): "use stairs whenever applicable instead of just straight blocks. I mean, it looks temporary here ...
+It's one of the most important parts of the map." The rules that came out of it (`undertow/arrival.js`,
+`wound.js` `planArrival`, self-tests "the arrival: ..."):
+
+- **Every step a player climbs is a stair block.** A change of one block in a built way is a stair, facing the
+  way you climb, on a solid block. Full blocks stepping down a block (or two) at a time read as unfinished.
+  Slopes of natural ground are the only exception.
+- **A long way down is flights and landings, never one ramp.** Eight to eleven steps, then a landing, and a turn
+  at the landing. The first flight is the widest (five); the rest are three.
+- **Every open side of a stair or landing has a kerb and a low wall**, left off only where rock already stands
+  higher beside it. Soul lanterns stand on the wall at every turn.
+- **A ledge is never a box.** Its edge is rounded and wobbles, and the rock under it falls away in short faces
+  and benches of the cliff's own beds (`cragDrop`), never one sheer side and never a smooth slope.
+- **A retaining wall is built like a wall of a building:** bays set back between pilasters, arch heads of
+  upside-down stairs, a corbel course under the kerb, something in each bay (a hanging lantern, a shrine light).
+- **No trees or landmarks within six blocks of a built way down**, and an old world has the first version's rock
+  cleared before the new land is planned over it (`planArrivalClear`).
+
+## The Wound and any wall that closes the world (Mateo, 2026-11-12)
+
+Mateo, of a screenshot of the first Wound: "This definitely needs a lot of work." It was a crack pasted on a flat
+slab of one block, 49 wide, with the void either side and above it, so the sky showed round it under a roof that
+looked like a floating slab. The rules that came out of it (`terrain.js` `backWall`, `wound.js`, self-tests
+"the Wound: ..."):
+
+- **A set piece is never pasted on a bare face.** A tear, a gate or a door sits in a place made for it: a mouth,
+  a throat, a chamber, a back wall. The Rift's tear is always at the back of a cave, runs from the floor to the
+  roof, and opens on the black void (`planCrack` with `deep`), in the Hollow the same as on land.
+- **A wall that ends the world runs right across everything a player can see and up into the roof.** Nothing a
+  player can look at from a place they can stand ends in the void or the sky. Check it with rays from the
+  standing places, not by eye.
+- **No face is a plane and no face is one block.** The foot wanders, the top steps back in ledges, ribs of rock
+  stand one to three blocks out of it, and the rock is laid in beds of mixed stone (`backRock`).
+- **Look at it from where the player stands** (the arrival point, the ledge, the valley floor) before showing it,
+  not only from above.
+- **A change to land already built only adds rock,** so an old world can plan the chunks again over what stands
+  there (`builder.js` `planAgain`), and the roof is still hung over the first land so it never moves.
+
+## The Needlehold and any build too big to stamp at once (2026-11-13)
+
+- **The stronghold** (`map/structures/hollow_stronghold.py`, exported by `export_stronghold.py`) stands at (-380, 76, 2160)
+  in the wood country west of the Long Climb, on a flattened pad (`roads.js` SITES, r 104) with a road to its south gate.
+  The roof is lifted over it (`terrain.js` tallThings) and nothing hangs from the roof into it.
+- **A build wider than about 64 blocks is stamped in tiles** (`undertow/stronghold.js` `strongholdTiles`, 32 x 32 columns),
+  each once its land is built and loaded, never in one go: one layer of it alone spans more chunks than a Realm keeps loaded.
+- **A change that takes land away** (a new flat pad where land already stands) clears those chunks and builds them again
+  from scratch (`builder.js` `buildFresh`), the way the old generator's chunks are; `planAgain` only adds rock.
+- **Every tower floor is a room:** furniture against the inner face, clear of the spiral and the slits (`furnish_rooms`).
 
 ## Roofs
 
@@ -179,6 +254,10 @@ strands over cliffs.
 - **Leaning towers:** `"lean": {"dir": "e", "steps": 2}` on a `keep` (round, `"cap": "cone"`) or a `house`:
   the whole tower leans in two or three clean one-block steps, with brackets under each step.
 - **Curved roofs** on halls: `"roof": {"type": "curved"}`.
+
+**Sites under the floor:** below y 40 the Hollow is void, so a site hung there (the Deep, `map/structures/hollow_deep.py`)
+carries its own two-block shell: dressed veinstone on the inside face, `siege:veil_rock` behind it. Write no air (the void
+is air already), and keep the whole site within about 60 blocks of where players enter it so it loads while it is stamped.
 
 ## Never
 

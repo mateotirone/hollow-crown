@@ -45,6 +45,11 @@ These rules hold in every region unless the region's page says otherwise. They a
   region's flavour (woods, rugs, lights: `build-instructions/08-interiors` step 5).
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Ground is a mix, never one block** (Mateo, 2026-11-12, of the Cradle Tree's ground: "that needs to be
+  everywhere"): any ground you lay round a build or an area speckles the region's grounds block by block (Blackfen:
+  grass 7, moss 3, podzol 2, mud 1, muddy roots 1; Vale: grass with coarse dirt, podzol, moss; Saltreach: grass 3,
+  gravel 2, coarse dirt 1, stone 1; snow: snow 12, stone 1, gravel 1, never packed ice). The map generator does the
+  same (`map/genworld.py`, `sprinkle`).
 - **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor
   windows and at some corners, never a strip; on by default in the skill (`bushes`), none in the Emberwaste
   and the Hollow.
@@ -102,3 +107,29 @@ given here.
   Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
   roofs (`moss`, `thatch`). Also in the skill now: Blackfen boardwalks (`boardwalk`), Hollow leaning towers (`lean`), curved roofs (`"type": "curved"`), galleries and round towers joined into a house (`keep` with `"cap": "cone"`).
 
+
+## Windmills and the Breeder's Yard in towns (2026-11-13)
+
+- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot):
+  `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
+- Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
+  in the region's style; the post sells the foal of the region it stands in.
+
+## The plot mine in every region (Mateo 2026-11-14: "retexture the mine and redo the 3D build of the mine")
+
+Every plot's mine is a story build (Act 1 day 2 sends every player there). One design, every region's look:
+
+- **Pithead** (`map/structures/pithead/spec.py`, 25 x 15, front towards the Plot Stone): a 5 x 5 headframe of the
+  region's log braced at two girts, a head deck one wider all round with a rail, and the sheave wheel (radius 3, the
+  region's dark planks, fence spokes, an iron hub) standing open above it; the winding drum under an open shelter, the
+  rope straight up from it to the wheel's rim; the winding house is the region's timber preset (interior "storage").
+  Ore bin, spoil heap, pit bell and lamp post round it. The headframe stays timber in every region (Emberwaste acacia,
+  Saltreach birch, Blackfen mangrove, Frostmarch dark oak, the Vale spruce).
+- **Underground** (`Siege_Nights_BP/scripts/plotcaves/mine.js`): mine timber is the same wood as the pithead. Timber
+  sets are two posts and a cap, every 4 blocks of a haulage way, a lantern hung from every second cap, and no stretch of
+  road longer than 7 without a lantern.
+- **The rock is retextured by region** (`STRATA`): bands about 3 deep that wave with the ground, each mixed a little
+  into the next. Vale stone, andesite, tuff, mossy cobble; Frostmarch stone, calcite, diorite, packed ice; Saltreach
+  sandstone, diorite, calcite; Emberwaste red sandstone and the mesa terracottas; Blackfen tuff, packed mud, mud bricks,
+  clay. Below 0 every region is deepslate with tuff and smooth basalt (Emberwaste blackstone and basalt). Never a block
+  that falls (sand, gravel) in a wall or a roof.

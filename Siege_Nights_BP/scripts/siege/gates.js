@@ -143,6 +143,11 @@ const AIR = () => BlockPermutation.resolve("minecraft:air");
 // Swing a closed Castle Gate open. Returns "" when it moved, or why it could not.
 function swingOpen(block, opener) {
   const dim = block.dimension;
+  // Read the kind now: a Block is only a spot, so once the leaf has moved block.typeId is "minecraft:air". The first
+  // build saved that as the leaf's kind, so shutting found nothing to move, forgot the leaf and claimed it had
+  // shut; the next click then shut it where it hung, turned a quarter, and every open after that walked it further
+  // from its gateway (Mateo's playtest 2026-11-13: "now it's like 5 blocks away").
+  const type = block.typeId;
   const facing = block.permutation.getState("minecraft:cardinal_direction") ?? "north";
   const cells = joined(block, false);
   const plan = planSwing(cells.map((b) => b.location), facing, block.location, opener, (p) => freeAt(dim, p));
@@ -155,7 +160,7 @@ function swingOpen(block, opener) {
     dim.getBlock(m.to).setPermutation(perms[i].withState("siege:open", true).withState("minecraft:cardinal_direction", plan.face));
   });
   moveDamage(plan.moves.map((m) => [m.from, m.to]));
-  const leaf = { dim: dim.id, type: block.typeId, facing, cells: plan.moves.map((m) => [m.from.x, m.from.y, m.from.z, m.to.x, m.to.y, m.to.z]) };
+  const leaf = { dim: dim.id, type, facing, cells: plan.moves.map((m) => [m.from.x, m.from.y, m.from.z, m.to.x, m.to.y, m.to.z]) };
   const id = spot(dim.id, plan.moves[0].from);
   leaves()[id] = leaf;
   indexLeaf(id, leaf);
@@ -167,7 +172,10 @@ function swingOpen(block, opener) {
 function swingShut(dim, id) {
   const leaf = leaves()[id];
   const cells = leaf.cells.map(([fx, fy, fz, tx, ty, tz]) => ({ from: { x: fx, y: fy, z: fz }, to: { x: tx, y: ty, z: tz } }));
-  const present = cells.filter((c) => dim.getBlock(c.to)?.typeId === leaf.type);
+  // leaves saved by the first build have "minecraft:air" for their kind: any Castle Gate where they hang will do
+  const isLeaf = CASTLE_GATES.includes(leaf.type) ? (t) => t === leaf.type : (t) => CASTLE_GATES.includes(t);
+  const present = cells.filter((c) => isLeaf(dim.getBlock(c.to)?.typeId));
+  if (!present.length) { dropLeaf(id); return "The gate is no longer where it swung to."; }
   if (present.some((c) => !freeAt(dim, c.from))) return "Something is standing in the gateway.";
   const perms = present.map((c) => dim.getBlock(c.to).permutation);
   for (const c of present) dim.getBlock(c.to).setPermutation(AIR());

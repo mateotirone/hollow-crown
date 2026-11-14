@@ -146,7 +146,7 @@ function expose(v, player) {
   sound(dim, "mob.villager.no", v.location, 0.5, 1);
   particle(dim, "minecraft:knockback_roar_particle", { x: v.location.x, y: v.location.y + 1, z: v.location.z });
   for (const p of dim.getPlayers({ location: v.location, maxDistance: 24 })) {
-    p.sendMessage(`§7At the sound of the bell ${d?.name ? `§f${d.name}§7` : "one of them"} stops, quite still. Then it turns toward the Hollow and starts to walk.` + (taken.length ? " §7It is not walking alone." : ""));
+    p.sendMessage(`§7At the sound of the bell ${d?.name ? `§f${d.name}§7` : "one of them"} stops, quite still. Then it turns away from you all and starts to walk.` + (taken.length ? " §7It is not walking alone." : ""));
   }
   announce("siege:returned_exposed", { ...facts(v, d), player: player?.id });
 }
@@ -246,6 +246,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     const v = villagersNear(dim, src.location, 16).sort((a, b) => flat(a.location, src.location) - flat(b.location, src.location))[0];
     if (v && markReturned(v, { name: v.nameTag || undefined })) src.sendMessage?.("§7The nearest villager is now one of the Returned. It will not look any different.");
   } else if (event.id === "siege:returned_spawn") {
+    // vanilla villager on purpose: a Returned IS a vanilla villager, so nothing but its tells gives it away
     try { markReturned(dim.spawnEntity(RETURNED.type, src.location)); src.sendMessage?.("§7A villager has come back. It will not look any different."); } catch { /* no room */ }
   } else if (event.id === "siege:returned_reveal") {
     for (const v of villagersNear(dim, src.location, 48)) {

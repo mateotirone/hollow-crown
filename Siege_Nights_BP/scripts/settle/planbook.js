@@ -14,8 +14,9 @@
 // Test: /scriptevent siege:plans [list | scroll <id> [style] | learn <id> [style] | forget]
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 import { ActionFormData } from "@minecraft/server-ui";
-import { isReady, on, emit, moduleStore } from "../siege/api.js";
+import { isReady, on, emit, moduleStore, homeOf } from "../siege/api.js";
 import { hallOf, hallMenuExtras } from "../townhall/townhall.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLANS, REGION_TO_STYLE, PLOT_SIZE, PLOT_TAGS, TAG_WORDS, SETTLERS, CHARTERS, HOMES, HAND_NAMES } from "./config.js";
@@ -96,7 +97,7 @@ export function randomPlanScroll(player, from = DESIGNS.map((id) => ({ id, style
 world.afterEvents.itemUse.subscribe(({ source: player, itemStack }) => {
   if (player?.typeId !== "minecraft:player" || !isReady() || !itemStack) return;
   if (itemStack.typeId === PLAN_SCROLL) return readScroll(player, itemStack);
-  if (itemStack.typeId === PLAN_BOOK) system.run(() => openPlanScreen(player).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
+  if (itemStack.typeId === PLAN_BOOK) system.run(() => openPlanScreen(player, homeOf(player.id) ?? player.id).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
 });
 
 function readScroll(player, item) {
@@ -207,18 +208,24 @@ function copyPlan(player, p) {
 
 hallMenuExtras.push({ label: "Plan Book\n§8buildings you can raise, and where to find more", icon: "textures/items/siege_plan_book", action: (player, owner) => openPlanScreen(player, owner) });
 
-// Every new town's owner gets a Plan Book once
-on("townLaidOut", ({ owner, tier }) => {
-  if (tier !== 0 || store.data.books[owner]) return;
-  const player = world.getPlayers().find((p) => p.id === owner);
-  if (!player) return;
+// Every new town's owner gets a Plan Book once. In Act 1 on a map Old Elspeth hands it over with the Barracks step
+// instead (newplayer/act1.js, filter "planBookByStory", event "elspethPlanBook" -> givePlanBook).
+export function givePlanBook(player, owner = player.id, note = "§6A Plan Book is in your pack.§7 It lists the buildings you can raise on your plots.") {
+  if (store.data.books[owner]) return false;
   store.data.books[owner] = true;
   store.save();
   try {
     const left = player.getComponent("minecraft:inventory").container.addItem(new ItemStack(PLAN_BOOK, 1));
     if (left) player.dimension.spawnItem(left, player.location);
-    player.sendMessage("§6A Plan Book is in your pack.§7 It lists the buildings you can raise on your plots.");
+    player.sendMessage(note);
   } catch { /* they can craft one */ }
+  return true;
+}
+on("townLaidOut", ({ owner, tier }) => {
+  if (tier !== 0 || store.data.books[owner]) return;
+  const player = world.getPlayers().find((p) => p.id === owner);
+  if (!player || applyFilter("planBookByStory", false, { player })) return;
+  givePlanBook(player, owner);
 });
 
 // ---------- where plans come from ----------

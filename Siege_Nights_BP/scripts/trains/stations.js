@@ -27,16 +27,24 @@ export const STATION = {
   perTick: 48, // blocks placed per tick while it rises
 };
 
+// The end of the line (a stop only one stretch of the railway reaches: Oakmere, Wolfcairn, Frosthelm): the track
+// stops at a buffer, not in the grass. Counted out from the last rail at the dead end of the platform: a timber
+// buffer beam across the track (dx 1) with a lantern on it, and a low wall in the region's stone behind it (dx 2).
+export const BUFFER = { beamAt: 1, wallAt: 2, beamHalf: 1, wallHalf: 1, wallUp: 2 }; // the wall only as wide as the track bed, so a road to the platform end gets past it
+
 export const regionOf = (style) => (STATION_DESIGNS[style] ? style : "vale");
 
 const plans = new Map();
 
 // The plan for one region's station at one stage: the design, a bed under the line and clear air above it.
-// plan.line = { x0, x1 }: where the track goes (local x, at y 1, z 0).
-export function stationPlan(style, stage) {
+// plan.line = { x0, x1 }: where the track goes (local x, at y 1, z 0). `end` is the side of the platform (local x,
+// +1 or -1) where the line stops at a terminus, which gets a buffer and an end wall; 0 (the default) for a through
+// station.
+export function stationPlan(style, stage, end = 0) {
   const region = regionOf(style);
   if (!STATION_DESIGNS[region][stage]) stage = "halt";
-  const key = `${region}|${stage}`;
+  end = Math.sign(end || 0);
+  const key = `${region}|${stage}|${end}`;
   if (plans.has(key)) return plans.get(key);
   const st = styleFor(region);
   const d = STATION_DESIGNS[region][stage];
@@ -44,6 +52,9 @@ export function stationPlan(style, stage) {
   d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = spellings(id); });
   const p = new Plan(st);
   drawData(p, d, prefix);
+  // every column of the building stands on footings down to the ground (a station on a slope never hangs in the air:
+  // Mateo's Grand Station, playtest 2026-11-13); the Groundwork stage (station_sites.js) cuts and blends the land round it
+  for (const c of p.cells.values()) if (c.y === 0 && c.role !== "air" && !p.columns.has(`${c.x},${c.z}`)) p.column(c.x, c.z, "foundation");
   const x0 = d.box.x0 - STATION.runOn, x1 = d.box.x1 + STATION.runOn;
   for (let x = x0; x <= x1; x++) {
     if (!p.get(x, 0, 0)) p.set(x, 0, 0, "foundation");
@@ -69,9 +80,36 @@ export function stationPlan(style, stage) {
       }
     }
   }
+  p.end = end;
+  if (end) drawBuffer(p, end);
   p.design = d;
   plans.set(key, p);
   return p;
+}
+
+// The buffer and end wall past the dead end of the line (see BUFFER)
+function drawBuffer(p, end) {
+  const xe = end > 0 ? p.line.x1 : p.line.x0;
+  const B = BUFFER, beam = xe + end * B.beamAt, wall = xe + end * B.wallAt;
+  p.style.roles["sd:buffer:beam"] ??= ["minecraft:stripped_dark_oak_log", "minecraft:dark_oak_log"];
+  p.style.roles["sd:buffer:lamp"] ??= ["minecraft:lantern"];
+  for (let z = -B.beamHalf; z <= B.beamHalf; z++) {
+    p.set(beam, 0, z, "foundation");
+    p.column(beam, z, "foundation");
+    p.set(beam, 1, z, "sd:buffer:beam", { axis: "z" });
+  }
+  p.set(beam, 2, 0, "sd:buffer:lamp");
+  for (let z = -B.wallHalf; z <= B.wallHalf; z++) {
+    p.set(wall, 0, z, "foundation");
+    p.column(wall, z, "foundation");
+    for (let y = 1; y <= B.wallUp; y++) p.set(wall, y, z, "wallLow");
+  }
+  // clear air over both, so nothing grows or hangs there
+  for (const x of [beam, wall]) {
+    for (let z = -B.wallHalf; z <= B.wallHalf; z++) {
+      for (let y = 1; y <= STATION.clearUp; y++) if (!p.get(x, y, z)) p.set(x, y, z, "air");
+    }
+  }
 }
 
 // World offset of a local (x, z) for a forward direction (same maths as the build engine's frame)

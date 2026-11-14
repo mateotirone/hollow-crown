@@ -13,11 +13,14 @@ import { STATION, STAGE_NAMES, STAGES, stageFor, stationPlan, siteFor, lineBlock
 import { TRACK } from "./data.js";
 import { reader } from "./index.js";
 import { addSwitch } from "./switches.js";
+import { Groundwork } from "../settle/ground.js";
 import { ROUTES } from "./routes_data.js";
-import { stopSite } from "./routes.js";
+import { stopSite, deadEndAt } from "./routes.js";
 
 // sites: [{ id (the station's id), owner, dim, post {x,y,z}, facing {x,z}, style, stage (wanted), built (stage up, or null),
-//           origin?, forward? (set once the ground was loaded and it was lined up) }]
+//           origin?, forward? (set once the ground was loaded and it was lined up),
+//           end? (the platform side where the line stops at a terminus, 0 for a through station; stations.js BUFFER),
+//           builtEnd? (the end the standing building was raised with, so the right one is taken down) }]
 const store = moduleStore("siege:station_sites", () => ({ sites: [] }));
 const sites = () => store.data.sites;
 const jobId = (site) => `station:${site.id}`;
@@ -51,6 +54,7 @@ function lineUp(site, dim) {
   const found = siteFor(site.post, reader(dim), site.facing);
   site.origin = found.origin;
   site.forward = found.forward;
+  site.end = deadEndAt(ROUTES, site.origin, site.forward);
   store.save();
   return true;
 }
@@ -104,6 +108,7 @@ function finish(site, plan) {
   }
   const was = site.built;
   site.built = site.stage;
+  site.builtEnd = plan.end;
   store.save();
   const name = `${STAGE_NAMES[site.stage]}${station ? ` at ${station.name}` : ""}`;
   tell(site.owner, was ? `§6Your station has grown into a ${name}.` : `§6Your ${name} is built. Lay Track from its platform to the line.`);
@@ -112,11 +117,15 @@ function finish(site, plan) {
 function raise(site) {
   const dim = world.getDimension(site.dim);
   if (!lineUp(site, dim)) return;
-  const plan = stationPlan(site.style, site.stage);
-  const remove = site.built && site.built !== site.stage ? worldCells(stationPlan(site.style, site.built), site.origin, site.forward) : undefined;
+  site.end ??= deadEndAt(ROUTES, site.origin, site.forward); // sites lined up before ends were known
+  const plan = stationPlan(site.style, site.stage, site.end);
+  const remove = site.built && site.built !== site.stage ? worldCells(stationPlan(site.style, site.built, site.builtEnd ?? 0), site.origin, site.forward) : undefined;
   startBuild({
     id: jobId(site), dimensionId: site.dim, origin: site.origin, forward: site.forward, plan, style: plan.style,
     perTick: STATION.perTick, remove, onDone: () => finish(site, plan),
+    // on a pad at the platform's level: the hill cut away over it, the land blended round it (settle/ground.js), so
+    // a bigger station never rises into a hillside or over a drop
+    ground: new Groundwork(plan, site.origin, site.forward, regionOf(site.style)),
   });
 }
 
@@ -188,6 +197,7 @@ function stationOnStop(player, keep, c) {
   if (!site) return;
   site.origin = origin;
   site.forward = forward;
+  site.end = deadEndAt(ROUTES, origin, forward);
   store.save();
   player.sendMessage(`§6A Halt is rising at ${stop.name}, on the planned railway. It has no line yet: buy the first stretch at the station to start travelling.`);
 }

@@ -1,0 +1,1088 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a full-screen 3D diorama of the plot; a ledger card top-left (where the town stands), an orders card on the
+   right (what you can do next), a plot card that opens where you click, and a pace bar along the bottom. */
+:root {
+  --sky: #9fc3dc; --ink: #1f2420; --muted: #5d665e; --panel: rgba(247, 244, 236, 0.94); --line: #d6cfbd;
+  --accent: #8a5a1e; --accent-ink: #fff8ec; --good: #3d7a3a; --warn: #a6741a; --bad: #a2402e; --chip: #ece5d4;
+  --display: "Alegreya Sans SC", "Trebuchet MS", system-ui, sans-serif; --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --shadow: 0 6px 24px rgba(30, 25, 15, 0.18);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --sky: #2b3946; --ink: #ece7da; --muted: #a9a593; --panel: rgba(28, 31, 30, 0.93); --line: #3d423d;
+  --accent: #d79a48; --accent-ink: #1d1407; --good: #7fbf6e; --warn: #e2b04f; --bad: #e07a63; --chip: #2f3431; color-scheme: dark;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+} }
+:root[data-theme="dark"] {
+  --sky: #2b3946; --ink: #ece7da; --muted: #a9a593; --panel: rgba(28, 31, 30, 0.93); --line: #3d423d;
+  --accent: #d79a48; --accent-ink: #1d1407; --good: #7fbf6e; --warn: #e2b04f; --bad: #e07a63; --chip: #2f3431; color-scheme: dark;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--sky); color: var(--ink); font-family: var(--body); font-size: 15px; overflow: hidden; }
+#scene { position: fixed; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+.card { position: fixed; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: 0.02em; }
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.02rem; }
+h3 { font-size: 0.82rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
+#ledger { top: calc(12px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: min(330px, calc(100vw - 24px)); padding: 12px 14px; display: grid; gap: 8px; }
+#ledger .sub { color: var(--muted); font-size: 0.86rem; }
+#ledger .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+#plot-pick { font: inherit; font-size: 0.86rem; border-radius: 7px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 4px 6px; max-width: 55%; }
+#plot-pick[hidden] { display: none; }
+.rows { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; font-size: 0.92rem; }
+.rows .k { color: var(--muted); }
+.rows .v { font-weight: 600; min-width: 0; }
+.pips { display: flex; gap: 3px; }
+.pip { width: 9px; height: 9px; border-radius: 2px; background: var(--chip); border: 1px solid var(--line); }
+.pip.on { background: var(--accent); border-color: var(--accent); }
+.pip.busy { background: var(--warn); border-color: var(--warn); animation: pulse 0.9s infinite alternate; }
+@keyframes pulse { from { opacity: 0.45; } to { opacity: 1; } }
+#charter { font-size: 0.86rem; display: grid; gap: 2px; }
+#charter .ok { color: var(--good); }
+#charter .no { color: var(--muted); }
+#orders { top: calc(12px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: 280px; padding: 12px; display: grid; gap: 8px; max-height: calc(100% - 110px); overflow: auto; }
+button { font: inherit; cursor: pointer; border-radius: 7px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 7px 10px; text-align: left; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+button .why { display: block; font-size: 0.78rem; opacity: 0.8; font-weight: 400; }
+.btns { display: grid; gap: 6px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+#log { font-size: 0.8rem; color: var(--muted); display: grid; gap: 2px; max-height: 120px; overflow: auto; border-top: 1px solid var(--line); padding-top: 6px; }
+#log div:first-child { color: var(--ink); }
+#pace { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); padding: 7px 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 24px); }
+#pace label { font-size: 0.82rem; color: var(--muted); }
+#pace input[type=range] { width: 120px; accent-color: var(--accent); }
+#pace .num { font-family: var(--mono); font-size: 0.78rem; min-width: 4.5em; font-variant-numeric: tabular-nums; }
+#pace button { padding: 5px 9px; }
+#plotcard { width: 300px; padding: 12px; display: grid; gap: 8px; max-height: min(70vh, 520px); overflow: auto; z-index: 5; }
+#plotcard .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.tag { font-size: 0.74rem; background: var(--chip); border: 1px solid var(--line); border-radius: 99px; padding: 1px 7px; }
+.offer .price { float: right; font-family: var(--mono); font-size: 0.78rem; }
+.offer.good { border-color: var(--good); }
+#close { position: absolute; top: 6px; right: 6px; padding: 2px 8px; }
+#tip { position: fixed; pointer-events: none; font-size: 0.8rem; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 3px 7px; z-index: 6; box-shadow: var(--shadow); }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 1.2rem; color: var(--ink); background: var(--sky); z-index: 9; }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+#mini { display: none; }
+#siege { left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(70px + env(safe-area-inset-bottom, 0px)); width: min(330px, calc(100vw - 24px)); padding: 12px 14px; display: grid; gap: 8px; max-height: calc(100% - 330px); min-height: 180px; overflow: auto; z-index: 4; }
+#siege .ctl { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 10px; align-items: center; font-size: 0.88rem; }
+#siege .ctl label { color: var(--muted); }
+#siege input[type=range] { accent-color: var(--bad); width: 100%; }
+#siege select { font: inherit; border-radius: 7px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 4px 6px; grid-column: 2 / 4; min-width: 0; }
+#siege .plan { font-size: 0.86rem; display: grid; gap: 4px; }
+#siege .plan b { font-weight: 700; }
+#siege .twist { color: var(--warn); }
+#siege .waves { display: grid; gap: 3px; font-size: 0.82rem; }
+#siege .wave { border-top: 1px solid var(--line); padding-top: 3px; }
+#siege .wave.now { color: var(--bad); font-weight: 600; }
+#siege .note { color: var(--muted); font-size: 0.8rem; }
+#siege .num { font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+button.horn { background: var(--bad); color: #fff8ec; border-color: var(--bad); font-weight: 700; }
+@media (max-width: 760px) {
+  #siege { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; max-height: 45vh; min-height: 0; z-index: 6; }
+  #orders { top: auto; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: auto; max-height: 38vh; }
+  #orders.folded > :not(.head) { display: none; }
+  #ledger { width: auto; right: max(12px, env(safe-area-inset-right, 0px)); }
+  #ledger .rows, #ledger #charter, #ledger .legend { display: none; }
+  #mini { display: inline-block; }
+  #pace { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); transform: none; max-width: none; flex-wrap: nowrap; gap: 6px; justify-content: space-between; }
+  #pace label { display: none; }
+  #pace input[type=range] { width: auto; flex: 1; min-width: 60px; }
+  #pace .num { min-width: 3.6em; }
+  #plotcard { left: max(12px, env(safe-area-inset-left, 0px)) !important; right: max(12px, env(safe-area-inset-right, 0px)); width: auto; top: 80px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .pip.busy { animation: none; } }
+</style>
+
+<canvas id="scene"></canvas>
+<div id="loading">Laying out the plot…</div>
+
+<section id="ledger" class="card" aria-label="Where the settlement stands">
+  <div>
+    <div class="head"><h1 id="t-name">Oakmere</h1><select id="plot-pick" aria-label="Plot" hidden></select></div>
+    <div class="sub" id="t-sub"></div>
+  </div>
+  <div class="rows">
+    <span class="k">Settlement</span><span class="v" id="r-tier">Not founded</span><span class="pips" id="p-tier"></span>
+    <span class="k">Town hall</span><span class="v" id="r-hall">None</span><span class="pips" id="p-hall"></span>
+    <span class="k">Wall</span><span class="v" id="r-wall">None</span><span class="pips" id="p-wall"></span>
+    <span class="k">Station</span><span class="v" id="r-station">None</span><span class="pips" id="p-station"></span>
+    <span class="k" id="k-store" hidden>Storehouse</span><span class="v" id="r-store" hidden>None</span><span id="x-store" hidden></span>
+    <span class="k">Plots</span><span class="v" id="r-plots">0 built</span><span></span>
+  </div>
+  <div>
+    <h3 id="charter-h">Charter</h3>
+    <div id="charter"></div>
+  </div>
+  <div class="legend">
+    <span><span class="sw" style="background:#e9b949"></span>Open plot</span>
+    <span><span class="sw" style="background:#8fd17a"></span>Building</span>
+    <span><span class="sw" style="background:#9aa3ad"></span>Opens later</span>
+  </div>
+</section>
+
+<section id="orders" class="card" aria-label="Orders">
+  <div class="head" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2>Orders</h2>
+    <button id="mini" type="button" aria-label="Show or hide the orders">Hide</button>
+  </div>
+  <div class="btns" id="btns"></div>
+  <div id="log" aria-live="polite"></div>
+</section>
+
+<div id="pace" class="card">
+  <button id="pause" type="button">Pause</button>
+  <label for="speed">Pace</label>
+  <input id="speed" type="range" min="0" max="8" step="1" value="3">
+  <span class="num" id="speed-v">1× game</span>
+  <button id="cam-top" type="button">Bird's-eye</button>
+  <button id="cam-follow" type="button" aria-pressed="true">Follow builds</button>
+</div>
+
+<section id="plotcard" class="card" hidden aria-label="Plot"></section>
+<section id="siege" class="card" hidden aria-label="Siege night">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2>Siege night</h2>
+    <button id="siege-close" type="button" aria-label="Close the siege night">✕</button>
+  </div>
+  <div class="ctl">
+    <label for="siege-n">Siege</label><input id="siege-n" type="range" min="1" max="12" step="1" value="1"><span class="num" id="siege-n-v">1st</span>
+    <label for="siege-def">Defences</label><select id="siege-def"></select>
+  </div>
+  <div class="plan" id="siege-plan"></div>
+  <div class="btns"><button id="siege-go" type="button" class="horn">Sound the horn<span class="why">Play the night: every wave where the game spawns it</span></button></div>
+  <div class="waves" id="siege-waves"></div>
+  <div class="note">Played by the game's own siege code for this town at its size and wall. Raiders come at the side with the fewest ballistas and archers, from just outside the wall. Every night is one real roll of the dice, the same each time you pick it.</div>
+</section>
+<div id="tip" hidden></div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script id="data" type="application/octet-stream">__DATA__</script>
+<script id="plots" type="application/json">__PLOTS__</script>
+<script id="home" type="application/json">__HOME__</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// ---------------- data ----------------
+// The page carries one plot; the others sit beside it as plots/<id>.txt (mkpage.py). The pick lives in the address
+// (#plot=id) and, as a convenience, in this browser's storage.
+const PLOTS = JSON.parse(document.getElementById("plots").textContent || "[]");
+const HOME = JSON.parse(document.getElementById("home").textContent || "\"\"");
+function wantedPlot() {
+  let id = new URLSearchParams(location.hash.slice(1)).get("plot");
+  if (!id) try { id = localStorage.getItem("town-sim-plot"); } catch { /* storage off */ }
+  return PLOTS.some((p) => p.id === id) ? id : HOME;
+}
+async function loadData() {
+  let b64 = document.getElementById("data").textContent.trim();
+  const want = wantedPlot();
+  if (want !== HOME) {
+    document.getElementById("loading").textContent = `Fetching ${PLOTS.find((p) => p.id === want).name}…`;
+    try {
+      const r = await fetch(`plots/${want}.txt`);
+      if (r.ok) b64 = (await r.text()).trim();
+    } catch { /* stay on the plot the page carries */ }
+  }
+  const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return JSON.parse(await new Response(stream).text());
+}
+const D = await loadData();
+const R = new Function(`${D.rules}; return { charterCheck, lordPick, plotFit, opensAt, slotClass, charterKeeps, CLASS_NAMES, TAG_WORDS, CHARTERS };`)();
+
+const NP = D.palette.length;
+const FULL = Uint8Array.from(D.full), SOFT = Uint8Array.from(D.soft);
+const GROUPS = D.groups.map((g, i, a) => (g ? a.indexOf(g) + 1 : 0));
+const NAMES = D.names;
+const KIND = new Uint8Array(NP); // 1 fence 2 wall 3 pane 4 fence gate 5 water 6 cornerstone 7 marker
+NAMES.forEach((n, i) => {
+  if (D.joins[i]) KIND[i] = { fence: 1, wall: 2, pane: 3 }[D.joins[i].kind];
+  else if (/fence_gate/.test(n)) KIND[i] = 4;
+  else if (/water$/.test(n)) KIND[i] = 5;
+  else if (n === "siege:hall_cornerstone") KIND[i] = 6;
+  else if (n === "siege:plot_marker") KIND[i] = 7;
+});
+const AVG = D.avg;
+const [AW, AH] = D.atlasSize;
+
+// quads with atlas uvs: { tex, cull, flags, v: Float32Array(20) [x y z u v] x4 }
+function prepModel(quads) {
+  return quads.map(([tex, cull, flags, v]) => {
+    const [rx, ry] = D.rects[tex], f = new Float32Array(20);
+    for (let k = 0; k < 4; k++) {
+      f[k * 5] = v[k * 5]; f[k * 5 + 1] = v[k * 5 + 1]; f[k * 5 + 2] = v[k * 5 + 2];
+      f[k * 5 + 3] = (rx + Math.min(1, Math.max(0, v[k * 5 + 3])) * 16) / AW;
+      f[k * 5 + 4] = 1 - (ry + (1 - Math.min(1, Math.max(0, v[k * 5 + 4]))) * 16) / AH;
+    }
+    return { tex, cull, flags, v: f, avg: AVG[tex] };
+  });
+}
+const MODELS = D.models.map(prepModel);
+const JOINS = {};
+for (const [k, j] of Object.entries(D.joins)) JOINS[k] = j.m.map(prepModel);
+
+// ops: flat [kind, ...] lists (kind 0 set x y z p, 1 fill x y z p, 2 clear x0 y0 z0 x1 y1 z1)
+const OPLEN = [5, 5, 7];
+
+// ---------------- the block world ----------------
+const G = D.ground, NX = G.n, X0 = G.x0, Z0 = G.z0;
+let gmin = 999, gmax = -999;
+for (const h of G.h) { if (h < gmin) gmin = h; if (h > gmax) gmax = h; }
+const YMIN = gmin - 7, YMAX = gmax + 80, HY = YMAX - YMIN + 1;
+const vox = new Uint16Array(NX * NX * HY);
+const idx = (x, y, z) => ((x - X0) * NX + (z - Z0)) * HY + (y - YMIN);
+const inside = (x, y, z) => x >= X0 && x < X0 + NX && z >= Z0 && z < Z0 + NX && y >= YMIN && y <= YMAX;
+function get(x, y, z) {
+  if (y < YMIN) return 3; // below the diorama: count it as stone so no bottom faces are drawn
+  if (!inside(x, y, z)) return 0;
+  return vox[idx(x, y, z)];
+}
+const pGrass = 1, pDirt = 2, pStone = 3; // dump.mjs puts these first
+for (let i = 0; i < NX; i++) for (let j = 0; j < NX; j++) {
+  const h = G.h[i * NX + j], x = X0 + i, z = Z0 + j;
+  for (let y = YMIN; y <= h; y++) vox[idx(x, y, z)] = y === h ? pGrass : y >= h - 3 ? pDirt : pStone;
+}
+
+const CS = 16, NC = Math.ceil(NX / CS);
+const chunks = [];
+for (let c = 0; c < NC * NC; c++) chunks.push({ cx: Math.floor(c / NC), cz: c % NC, dirty: true, solid: null, water: null });
+const chunkOf = (x, z) => chunks[Math.floor((x - X0) / CS) * NC + Math.floor((z - Z0) / CS)];
+const born = new Map(); // voxel index -> time it should start falling in
+let clock = 0;
+const dust = []; // removed blocks: little puffs
+
+function markDirty(x, z) {
+  const c = chunkOf(x, z); if (c) c.dirty = true;
+  const lx = (x - X0) % CS, lz = (z - Z0) % CS;
+  if (lx === 0) { const n = chunkOf(x - 1, z); if (n) n.dirty = true; }
+  if (lx === CS - 1) { const n = chunkOf(x + 1, z); if (n) n.dirty = true; }
+  if (lz === 0) { const n = chunkOf(x, z - 1); if (n) n.dirty = true; }
+  if (lz === CS - 1) { const n = chunkOf(x, z + 1); if (n) n.dirty = true; }
+}
+function setBlock(x, y, z, p, animate = true) {
+  if (!inside(x, y, z)) return;
+  const i = idx(x, y, z), old = vox[i];
+  if (old === p) return;
+  vox[i] = p;
+  if (animate && p && !SOFT[p]) born.set(i, clock);
+  else born.delete(i);
+  if (animate && !p && old && !SOFT[old] && dust.length < 1500) dust.push({ x, y, z, t: clock, c: MODELS[old][0]?.avg ?? [150, 150, 150] });
+  markDirty(x, z);
+}
+
+// ---------------- meshing ----------------
+const DIRS = [null, [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+const SHADE = [1, 0.8, 0.8, 1, 0.55, 0.9, 0.7]; // by cull direction (Minecraft's face light)
+function shadeFor(nx, ny, nz) { if (ny > 0.5) return 1; if (ny < -0.5) return 0.55; if (Math.abs(nx) > 0.5) return 0.8; return nz > 0 ? 0.9 : 0.7; }
+const occ = (x, y, z) => FULL[get(x, y, z)] ? 1 : 0;
+function joinOf(p, x, y, z) {
+  const k = KIND[p];
+  const ok = (q) => {
+    if (!q) return false;
+    if (FULL[q]) return true;
+    if (k === 1) return KIND[q] === 1 || KIND[q] === 4;
+    if (k === 2) return KIND[q] === 2;
+    return KIND[q] === 3 || KIND[q] === 2;
+  };
+  const n = ok(get(x, y, z - 1)), s = ok(get(x, y, z + 1)), e = ok(get(x + 1, y, z)), w = ok(get(x - 1, y, z));
+  const bits = (n ? 1 : 0) | (s ? 2 : 0) | (e ? 4 : 0) | (w ? 8 : 0);
+  if (k !== 2) return JOINS[p][bits];
+  const straight = (n && s && !e && !w) || (e && w && !n && !s);
+  const post = !straight || get(x, y + 1, z) !== 0;
+  return JOINS[p][bits * 2 + (post ? 0 : 1)];
+}
+// ambient occlusion for one corner of a full block's face
+function aoCorner(x, y, z, d, vx, vy, vz) {
+  const [dx, dy, dz] = DIRS[d];
+  const ox = x + dx, oy = y + dy, oz = z + dz;
+  const sx = vx > 0.5 ? 1 : -1, sy = vy > 0.5 ? 1 : -1, sz = vz > 0.5 ? 1 : -1;
+  let a, b, c;
+  if (dx) { a = occ(ox, oy + sy, oz); b = occ(ox, oy, oz + sz); c = occ(ox, oy + sy, oz + sz); }
+  else if (dy) { a = occ(ox + sx, oy, oz); b = occ(ox, oy, oz + sz); c = occ(ox + sx, oy, oz + sz); }
+  else { a = occ(ox + sx, oy, oz); b = occ(ox, oy + sy, oz); c = occ(ox + sx, oy + sy, oz); }
+  const n = a && b ? 3 : a + b + c;
+  return [1, 0.82, 0.68, 0.55][n];
+}
+const BOUT = { solid: null, water: null };
+function newBuf() { return { p: [], uv: [], c: [], b: [], i: [] }; }
+function meshChunk(ch) {
+  const S = newBuf(), W = newBuf();
+  const xa = X0 + ch.cx * CS, za = Z0 + ch.cz * CS;
+  const xb = Math.min(xa + CS, X0 + NX), zb = Math.min(za + CS, Z0 + NX);
+  for (let x = xa; x < xb; x++) for (let z = za; z < zb; z++) {
+    const base = ((x - X0) * NX + (z - Z0)) * HY;
+    for (let yy = 0; yy < HY; yy++) {
+      const p = vox[base + yy];
+      if (!p) continue;
+      const y = yy + YMIN;
+      const quads = KIND[p] >= 1 && KIND[p] <= 3 ? joinOf(p, x, y, z) : MODELS[p];
+      const full = FULL[p], grp = GROUPS[p];
+      const bt = born.get(base + yy) ?? -100;
+      for (const q of quads) {
+        if (q.cull) {
+          const [dx, dy, dz] = DIRS[q.cull];
+          const nb = get(x + dx, y + dy, z + dz);
+          if (FULL[nb]) continue;
+          if (full && grp && GROUPS[nb] === grp) continue;
+          if (q.flags & 2 && nb === p) continue;
+          if (KIND[p] === 5 && KIND[nb] === 5) continue;
+        }
+        const out = q.flags & 2 ? W : S;
+        const v = q.v, n0 = out.p.length / 3;
+        let shade;
+        if (q.cull) shade = SHADE[q.cull];
+        else {
+          const ax = v[5] - v[0], ay = v[6] - v[1], az = v[7] - v[2], bx = v[10] - v[0], by = v[11] - v[1], bz = v[12] - v[2];
+          let nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx; const L = Math.hypot(nx, ny, nz) || 1;
+          shade = shadeFor(nx / L, ny / L, nz / L);
+        }
+        if (q.flags & 4) shade = 1.15;
+        for (let k = 0; k < 4; k++) {
+          const vx = v[k * 5], vy = v[k * 5 + 1], vz = v[k * 5 + 2];
+          out.p.push(x + vx, y + vy, z + vz);
+          out.uv.push(v[k * 5 + 3], v[k * 5 + 4]);
+          const ao = full && q.cull ? aoCorner(x, y, z, q.cull, vx, vy, vz) : 1;
+          const s = shade * ao;
+          out.c.push(s, s, s);
+          out.b.push(bt);
+        }
+        out.i.push(n0, n0 + 1, n0 + 2, n0, n0 + 2, n0 + 3);
+      }
+    }
+  }
+  for (const [key, buf, mat] of [["solid", S, solidMat], ["water", W, waterMat]]) {
+    if (ch[key]) { scene.remove(ch[key]); ch[key].geometry.dispose(); ch[key] = null; }
+    if (!buf.i.length) continue;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(buf.p, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(buf.uv, 2));
+    g.setAttribute("color", new THREE.Float32BufferAttribute(buf.c, 3));
+    g.setAttribute("aBorn", new THREE.Float32BufferAttribute(buf.b, 1));
+    g.setIndex(buf.p.length / 3 > 65535 ? new THREE.Uint32BufferAttribute(buf.i, 1) : new THREE.Uint16BufferAttribute(buf.i, 1));
+    const m = new THREE.Mesh(g, mat);
+    m.position.y = -D.base; m.matrixAutoUpdate = false; m.updateMatrix();
+    if (key === "water") m.renderOrder = 2;
+    scene.add(m);
+    ch[key] = m;
+  }
+  ch.dirty = false;
+}
+
+// ---------------- three.js ----------------
+const canvas = document.getElementById("scene");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+const scene = new THREE.Scene();
+const skyCss = () => getComputedStyle(document.documentElement).getPropertyValue("--sky").trim() || "#9fc3dc";
+function applySky() { const c = new THREE.Color(skyCss()); scene.background = c; scene.fog = new THREE.Fog(c, 260, 620); }
+applySky();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySky);
+new MutationObserver(applySky).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+const camera = new THREE.PerspectiveCamera(40, 1, 0.5, 2000);
+camera.position.set(72, 118, 98);
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(-8, 2, 0);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 15; controls.maxDistance = 520;
+
+const tex = await new THREE.TextureLoader().loadAsync(D.atlas);
+tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false; tex.colorSpace = THREE.SRGBColorSpace;
+const uTime = { value: 0 };
+function fallIn(mat) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = uTime;
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute float aBorn;\nuniform float uTime;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nfloat fallK = clamp((uTime - aBorn) / 0.32, 0.0, 1.0);\ntransformed.y += (1.0 - fallK) * (1.0 - fallK) * 2.2;");
+  };
+  return mat;
+}
+const solidMat = fallIn(new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide }));
+const waterMat = fallIn(new THREE.MeshBasicMaterial({ map: tex, vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false }));
+
+// dust puffs for blocks taken down
+const dustGeo = new THREE.BufferGeometry();
+const DUSTMAX = 1500;
+dustGeo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(DUSTMAX * 3), 3));
+dustGeo.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(DUSTMAX * 3), 3));
+const dustPts = new THREE.Points(dustGeo, new THREE.PointsMaterial({ size: 0.7, vertexColors: true, transparent: true, opacity: 0.85, depthWrite: false }));
+dustPts.position.y = -D.base; dustPts.frustumCulled = false;
+scene.add(dustPts);
+function updateDust() {
+  for (let i = dust.length - 1; i >= 0; i--) if (clock - dust[i].t > 0.9) dust.splice(i, 1);
+  const P = dustGeo.attributes.position.array, C = dustGeo.attributes.color.array;
+  let n = 0;
+  for (const d of dust) {
+    const k = (clock - d.t) / 0.9;
+    P[n * 3] = d.x + 0.5 + Math.sin(d.x * 3.1 + d.z) * k * 0.6; P[n * 3 + 1] = d.y + 0.5 + k * 1.2 - k * k * 2.2; P[n * 3 + 2] = d.z + 0.5 + Math.cos(d.z * 2.7 + d.y) * k * 0.6;
+    C[n * 3] = d.c[0] / 255; C[n * 3 + 1] = d.c[1] / 255; C[n * 3 + 2] = d.c[2] / 255; n++;
+  }
+  dustGeo.setDrawRange(0, n);
+  dustGeo.attributes.position.needsUpdate = true; dustGeo.attributes.color.needsUpdate = true;
+}
+
+// ---------------- plot outlines ----------------
+const plotGroup = new THREE.Group(); plotGroup.position.y = -D.base; scene.add(plotGroup);
+const pickables = [];
+const COL = { open: 0xe9b949, rising: 0x8fd17a, later: 0x9aa3ad, closed: 0xa2402e };
+const slotById = Object.fromEntries(D.slots.map((s) => [s.id, s]));
+function outline(s) {
+  const y = D.base + s.dy + 1.06, { x0, z0, x1, z1 } = s.box;
+  const pts = [[x0, z0], [x1 + 1, z0], [x1 + 1, z1 + 1], [x0, z1 + 1], [x0, z0]].map(([x, z]) => new THREE.Vector3(x, y, z));
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: COL.open, transparent: true, opacity: 0.95 }));
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0 + 1, z1 - z0 + 1), new THREE.MeshBasicMaterial({ color: COL.open, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }));
+  plane.rotation.x = -Math.PI / 2; plane.position.set((x0 + x1 + 1) / 2, y - 0.02, (z0 + z1 + 1) / 2);
+  plane.userData.slot = s.id; line.userData.slot = s.id;
+  plotGroup.add(line, plane); pickables.push(plane);
+  s.view = { line, plane };
+}
+D.slots.forEach(outline);
+
+// ---------------- the settlement state ----------------
+const T = {
+  founded: false, tier: -1, hall: 0, wall: 0, station: -1, ring: 0, busy: new Set(),
+  slots: Object.fromEntries(D.slots.map((s) => [s.id, { building: null, rising: false, closed: false }])),
+  knownIds: new Set(Object.keys(D.buildings).filter((k) => k !== "mason_yard")),
+};
+const designable = new Set(D.slots.flatMap((s) => s.offers.map((o) => o.id)));
+for (const op of D.initial) setBlock(op[1], op[2], op[3], op[4], false);
+for (const tree of D.forest) for (let i = 0; i < tree.length; i += 5) setBlock(tree[i + 1], tree[i + 2], tree[i + 3], tree[i + 4], false);
+
+// ---------------- jobs (the game's build jobs, played at its pace) ----------------
+const jobs = [];
+let speed = 1, paused = false;
+function job(label, ops, { perSec, focus, after, min = 0 } = {}) {
+  return new Promise((resolve) => {
+    const total = countOps(ops);
+    const rate = Math.max(perSec, min ? total / min : 0);
+    const j = { label, ops, i: 0, acc: 0, rate, focus, pending: [], resolve: () => { after?.(); resolve(); }, total, done: 0 };
+    jobs.push(j);
+    T.busy.add(label);
+    refresh();
+  });
+}
+function countOps(ops) { let n = 0; for (let i = 0; i < ops.length; i += OPLEN[ops[i]]) n++; return n; }
+function stepJobs(dt) {
+  for (let k = jobs.length - 1; k >= 0; k--) {
+    const j = jobs[k];
+    j.acc += j.rate * speed * dt;
+    if (speed >= 64) j.acc = 1e9;
+    let guard = 0;
+    while (j.acc >= 1 && guard++ < 60000) {
+      if (j.pending.length) { const [x, y, z] = j.pending.pop(); setBlock(x, y, z, 0); j.acc -= 1; continue; }
+      if (j.i >= j.ops.length) break;
+      const o = j.ops, i = j.i, kind = o[i];
+      if (kind === 0) { setBlock(o[i + 1], o[i + 2], o[i + 3], o[i + 4]); j.acc -= 1; j.lastAt = [o[i + 1], o[i + 2], o[i + 3]]; }
+      else if (kind === 1) { fillDown(o[i + 1], o[i + 2], o[i + 3], o[i + 4]); j.acc -= 0.5; }
+      else { clearBox(j, o[i + 1], o[i + 2], o[i + 3], o[i + 4], o[i + 5], o[i + 6]); }
+      j.i += OPLEN[kind]; j.done++;
+    }
+    if (j.i >= j.ops.length && !j.pending.length) { jobs.splice(k, 1); T.busy.delete(j.label); j.resolve(); refresh(); }
+    else if (speed >= 64) j.acc = 0;
+  }
+}
+function fillDown(x, y, z, p) {
+  for (let d = 0; d < 16; d++) { const q = get(x, y - d, z); if (q && !SOFT[q] && q !== p) break; setBlock(x, y - d, z, p); }
+}
+function clearBox(j, x0, y0, z0, x1, y1, z1) { // top layer first (build.js clearLayer), never the cornerstone
+  const list = [];
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) { const q = get(x, y, z); if (q && KIND[q] !== 6) list.push([x, y, z]); }
+  for (const v of list) j.pending.push(v); // popped from the end: the top layer goes first
+}
+
+// pace: blocks per second at the game's own speed (20 ticks a second)
+const PACE = D.pace;
+const perSecPlan = (cells, ticks) => Math.max(4, Math.ceil(cells / ticks)) * 20;
+
+// ---------------- what the settlement can do ----------------
+const log = (text) => { const el = document.getElementById("log"); const d = document.createElement("div"); d.textContent = text; el.prepend(d); while (el.children.length > 40) el.lastChild.remove(); };
+const nameOf = (id) => D.buildings[id]?.name ?? id;
+function centreOf(ops) {
+  let sx = 0, sz = 0, sy = 0, n = 0;
+  for (let i = 0; i < ops.length && n < 4000; i += OPLEN[ops[i]]) { if (ops[i] === 0) { sx += ops[i + 1]; sy += ops[i + 2]; sz += ops[i + 3]; n++; } }
+  return n ? [sx / n, sy / n - D.base, sz / n] : null;
+}
+
+function designOps(id, offer) {
+  const d = D.designs[id], face = d.faces[`${offer.f[0]},${offer.f[1]}`];
+  const [ox, oy, oz] = offer.o, F = { x: offer.f[0], z: offer.f[1] }, Rr = { x: -F.z, z: F.x };
+  const at = (x, y, z) => [ox + x * Rr.x + z * F.x, oy - 1 + y, oz + x * Rr.z + z * F.z];
+  const ops = [2, ...offer.clear];
+  for (let i = 0; i < face.cols.length; i += 4) { const [x, y, z] = at(face.cols[i], face.cols[i + 1], face.cols[i + 2]); ops.push(1, x, y, z, face.cols[i + 3]); }
+  for (let i = 0; i < face.cells.length; i += 4) {
+    const [x, y, z] = at(face.cells[i], face.cells[i + 1], face.cells[i + 2]);
+    if (x === ox && y === oy && z === oz) continue;
+    ops.push(0, x, y, z, face.cells[i + 3]);
+  }
+  return { ops, cells: face.cells.length / 4 };
+}
+
+async function raise(slotId, id, { free = false } = {}) {
+  const s = slotById[slotId] ?? (slotId === "mason_yard" ? D.masonSlot : slotId === D.store?.slot.id ? D.store.slot : null);
+  const offer = s === D.masonSlot ? D.masonSlot.seat : D.store?.levels.find((l) => l.id === id)?.seat ?? s.offers.find((o) => o.id === id);
+  const st = T.slots[slotId] ?? (T.slots[slotId] = { building: null });
+  st.building = id; st.rising = true; st.offer = offer;
+  refreshPlots();
+  const { ops, cells } = designOps(id, offer);
+  log(`${nameOf(id)} rising on plot ${slotId}${free ? " (free)" : ""}`);
+  await job(`${nameOf(id)} (${slotId})`, ops, { perSec: perSecPlan(cells, PACE.riseTicks), focus: [offer.o[0], offer.o[1] - D.base, offer.o[2]] });
+  st.rising = false;
+  log(`${nameOf(id)} built`);
+  refreshPlots(); refresh();
+}
+
+async function knockDown(slotId, why = "knocked down") {
+  const st = T.slots[slotId];
+  if (!st?.building) return;
+  const { ops } = designOps(st.building, st.offer);
+  const out = [];
+  for (let i = 0; i < ops.length; i += OPLEN[ops[i]]) if (ops[i] === 0 && ops[i + 4]) out.push(ops[i + 1], ops[i + 2], ops[i + 3]);
+  const rev = [];
+  for (let i = out.length - 3; i >= 0; i -= 3) rev.push(0, out[i], out[i + 1], out[i + 2], 0);
+  const was = st.building;
+  log(`${nameOf(was)} on plot ${slotId} ${why}`);
+  st.rising = true;
+  await job(`Taking down ${nameOf(was)}`, rev, { perSec: 1200, min: 1.5 });
+  st.building = null; st.rising = false; st.offer = null;
+  if (!st.closed) { const s = slotById[slotId]; setBlock(s.marker[0], s.marker[1], s.marker[2], D.palette.findIndex((p) => p[0] === "siege:plot_marker")); }
+  refreshPlots(); refresh();
+}
+
+const tierOps = (t, k) => D.tiers[t][k] ?? [];
+function treeOpsFor(tier) { const out = []; for (const t of D.treeOps) if (t.tier === tier) for (const v of t.ops) out.push(v); return out; }
+
+async function wallTo(level) {
+  const ring = D.tiers[T.ring].ring;
+  const L = D.wallLevelNames[level];
+  T.wallRising = level; refresh();
+  const ops = [];
+  if (T.wall > 0) { // what the old level had that the new one doesn't (old steps, ladders) comes down first
+    const want = new Set(), fresh = ring.fresh[level];
+    for (let i = 0; i < fresh.length; i += 5) want.add(`${fresh[i + 1]},${fresh[i + 2]},${fresh[i + 3]}`);
+    const old = ring.fresh[T.wall];
+    for (let i = 0; i < old.length; i += 5) if (old[i] === 0 && old[i + 4] && !want.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`)) ops.push(0, old[i + 1], old[i + 2], old[i + 3], 0);
+  }
+  for (const v of ring.fresh[level]) ops.push(v);
+  log(`Wall level ${level}: ${L} rising`);
+  await job(`Wall: ${L}`, ops, { perSec: PACE.wall * 20, focus: null });
+  T.wall = level; T.wallRising = 0;
+  log(`${L} complete`);
+  refresh();
+}
+
+async function hallTo(level) {
+  const h = D.halls[level];
+  T.hallRising = level; refresh();
+  // the bigger halls take the plots kept for them: the building comes down, full price back (hallmove.js)
+  const taking = D.hallTakes.filter(([, at]) => at <= level).map(([id]) => id).filter((id) => !T.slots[id].closed);
+  for (const id of taking) {
+    T.slots[id].closed = true;
+    if (T.slots[id].building) await knockDown(id, `comes down for the ${h.name} (full price back, a free plot of its size)`);
+    else { const s = slotById[id]; setBlock(s.marker[0], s.marker[1], s.marker[2], 0); log(`Plot ${id} is taken by the ${h.name}`); }
+    refreshPlots();
+  }
+  log(`Town hall level ${level}: the ${h.name} rising`);
+  const cells = countOps(h.ops);
+  await job(`Hall: ${h.name}`, h.ops, { perSec: perSecPlan(cells, PACE.hallRise[level]), focus: centreOf(h.ops) });
+  T.hall = level; T.hallRising = 0;
+  log(`The ${h.name} is complete`);
+  refresh();
+}
+
+async function stationTo(i) {
+  const s = D.stations[i];
+  if (!s) return;
+  T.stationRising = i; refresh();
+  log(`Station: the ${s.name} rising by the line`);
+  await job(`Station: ${s.name}`, s.ops, { perSec: PACE.station * 20, focus: centreOf(s.ops) });
+  T.station = i; T.stationRising = -1;
+  log(`The ${s.name} is open`);
+  refresh();
+}
+
+async function laySet(label, ops, focus) { if (ops.length) await job(label, ops, { perSec: PACE.groundwork * 20, min: Math.min(3, ops.length / 800), focus }); }
+
+async function found() {
+  if (T.founded) return;
+  T.founded = true; T.tier = 0; T.ring = 0; refresh();
+  log(`${D.plot} claimed: the Hamlet is laid out`);
+  const ev = Object.fromEntries(D.events.map((e) => [e.id, e]));
+  const wall = wallTo(1);
+  const station = stationTo(0);
+  const ground = (async () => {
+    await laySet("Groundwork", ev.gw0.ops, [0, 0, 0]);
+    await laySet("Blending the land", ev.blend0.ops);
+    await laySet("Gate road", ev.road0.ops);
+    await laySet("Lamps and the well", [...ev.fix0.ops, ...treeOpsFor(0)]);
+    await laySet("Plot Markers", ev.markers0.ops);
+  })();
+  await ground;
+  const hall = hallTo(1);
+  const base = Promise.all(D.baseBuilds.map((b, k) => new Promise((r) => setTimeout(r, k * 150)).then(() => raise(b.slot, b.id, { free: true }))));
+  await Promise.all([wall, station, hall, base]);
+}
+
+// storehouse.js: when the town grows a tier the Storehouse comes down and rises again on the same ground, a level up
+// (in the game its stock waits at the door in keepers and goes back chest for chest)
+async function rebuildStore(t) {
+  const L = D.store?.levels[t], id = D.store?.slot.id, st = id && T.slots[id];
+  if (!L?.seat || !st?.building || st.building === L.id) return;
+  const { ops } = designOps(st.building, st.offer), out = [], rev = [];
+  for (let i = 0; i < ops.length; i += OPLEN[ops[i]]) if (ops[i] === 0 && ops[i + 4]) out.push(ops[i + 1], ops[i + 2], ops[i + 3]);
+  for (let i = out.length - 3; i >= 0; i -= 3) rev.push(0, out[i], out[i + 1], out[i + 2], 0);
+  log(`The ${nameOf(st.building)} comes down: its stock waits at the door`);
+  st.rising = true; refresh();
+  await job(`Taking down the ${nameOf(st.building)}`, rev, { perSec: 1200, min: 1.5 });
+  await raise(id, L.id, { free: true });
+  log(`The ${L.name} holds ${L.chests} chests, the stock carried back in`);
+}
+
+async function growTo(t) {
+  if (t <= T.tier || t > 3) return;
+  const name = D.tierNames[t];
+  log(`The settlement grows to a ${name}`);
+  T.growing = t; refresh();
+  // the old ring comes down first (moveWall), then the new ring rises at the same level while the band is laid
+  const level = T.wall || 1;
+  const old = D.tiers[T.ring].ring.fresh[level], down = [];
+  for (let i = old.length - 5; i >= 0; i -= 5) if (old[i] === 0 && old[i + 4]) down.push(0, old[i + 1], old[i + 2], old[i + 3], 0);
+  await job("Old wall coming down", down, { perSec: PACE.wall * 20 });
+  T.tier = t; T.ring = t; T.wall = 0;
+  const wall = wallTo(level);
+  const ground = (async () => {
+    await laySet(`${name} groundwork`, tierOps(t, "ground"), [0, 0, 0]);
+    await laySet("Blending the land", tierOps(t, "blend"));
+    await laySet("Lamps and trees", [...tierOps(t, "fixtures"), ...treeOpsFor(t)]);
+    await laySet("Plot Markers", tierOps(t, "markers"));
+  })();
+  const stage = D.stages.indexOf(D.tiers[t].stage);
+  const station = stage > T.station ? stationTo(stage) : null;
+  await Promise.all([wall, ground, station, rebuildStore(t)]);
+  T.growing = null;
+  log(`${D.plot} is a ${name}`);
+  refresh(); refreshPlots();
+}
+
+// ---------------- plots: the game's rules (charters.js, shipped as its own source) ----------------
+function counts({ rising = true } = {}) {
+  const c = {};
+  for (const st of Object.values(T.slots)) if (st.building && (rising || !st.rising) && st.building !== "mason_yard" && !/^storehouse_\d$/.test(st.building)) c[st.building] = (c[st.building] ?? 0) + 1;
+  return c;
+}
+const openEmpty = () => D.slots.filter((s) => s.tier <= T.tier && !T.slots[s.id].building && !T.slots[s.id].closed);
+const comingEmpty = () => D.slots.filter((s) => !T.slots[s.id].building && !T.slots[s.id].closed);
+function keptFor(s, id) {
+  const k = R.charterKeeps(comingEmpty(), Math.max(0, T.tier), counts(), T.knownIds, s, id);
+  return k && `Kept for the ${k.what} (${D.tierNames[k.tier]} charter)`;
+}
+function offersFor(s) {
+  const free = new Set(openEmpty().filter((x) => x.id !== s.id).map(R.slotClass));
+  return s.offers.map((o) => {
+    const rule = R.plotFit(o.id, s, free);
+    const open = R.opensAt(o.id) <= T.tier;
+    const kept = rule.ok && open ? keptFor(s, o.id) : undefined;
+    const why = !rule.ok ? rule.why : !open ? `opens at ${D.tierNames[R.opensAt(o.id)]}` : kept ?? "";
+    return { ...o, open: open && rule.ok && !kept, why, tagged: rule.tagged && rule.ok };
+  }).filter((o) => o.ok || o.tagged).sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged));
+}
+function lordNext() { // the Rival Lords' own pick (charters.js lordPick): charter first, then fill the open plots
+  const slots = openEmpty().filter((s) => !s.offers.every((o) => o.id === "ironworks"));
+  return R.lordPick(slots, T.tier, counts(), designable, (id, s) => s.offers.some((o) => o.id === id), D.plot, comingEmpty());
+}
+async function fillPlots({ untilCharter = false } = {}) {
+  for (let n = 0; n < 40; n++) {
+    if (untilCharter && R.charterCheck(T.tier, counts(), T.knownIds).met) return;
+    const pick = lordNext();
+    if (!pick) return;
+    const p = raise(pick.slot.id, pick.id);
+    const second = lordNext();
+    if (second) await Promise.all([p, raise(second.slot.id, second.id)]); else await p;
+  }
+}
+
+// ---------------- the whole story ----------------
+let story = false;
+async function playStory() {
+  if (story) return;
+  story = true; refresh();
+  try {
+    if (!T.founded) await found();
+    for (let t = Math.max(0, T.tier); t <= 3; t++) {
+      if (t > T.tier) await growTo(t);
+      const tasks = [];
+      if (T.hall < D.tiers[t].hallMax) tasks.push((async () => { for (let l = T.hall + 1; l <= Math.min(5, t === 3 ? 5 : D.tiers[t].hallMax); l++) await hallTo(l); })());
+      tasks.push((async () => { for (let L = T.wall + 1; L <= D.tiers[t].cap; L++) await wallTo(L); })());
+      tasks.push(fillPlots());
+      await Promise.all(tasks);
+      await fillPlots();
+    }
+    log("The whole story is played: Hamlet to Castle");
+  } finally { story = false; refresh(); }
+}
+
+// ---------------- interface ----------------
+const $ = (id) => document.getElementById(id);
+$("t-name").textContent = D.plot;
+if (PLOTS.length > 1) {
+  const pick = $("plot-pick");
+  const regions = [...new Set(PLOTS.map((p) => p.region ?? "Other"))];
+  for (const region of regions) {
+    const g = document.createElement("optgroup"); g.label = region;
+    for (const p of PLOTS.filter((x) => (x.region ?? "Other") === region)) g.append(new Option(p.name, p.id, false, p.name === D.plot));
+    pick.append(g);
+  }
+  pick.hidden = false;
+  pick.addEventListener("change", () => {
+    try { localStorage.setItem("town-sim-plot", pick.value); } catch { /* storage off */ }
+    location.hash = `plot=${pick.value}`;
+    location.reload();
+  });
+}
+$("t-sub").textContent = `${D.region} · layout "${D.layout}" · gate to the ${D.gate} · real map ground`;
+function pips(el, n, on, busy = -1) { el.innerHTML = ""; for (let i = 1; i <= n; i++) { const s = document.createElement("span"); s.className = "pip" + (i <= on ? " on" : "") + (i === busy ? " busy" : ""); el.append(s); } }
+function btn(label, why, fn, { primary = false, disabled = false } = {}) {
+  const b = document.createElement("button"); b.type = "button"; b.disabled = disabled; if (primary) b.className = "primary";
+  b.innerHTML = `${label}${why ? `<span class="why">${why}</span>` : ""}`;
+  b.addEventListener("click", () => { fn(); });
+  return b;
+}
+function refresh() {
+  const tier = T.tier, tn = tier >= 0 ? D.tierNames[tier] : "Not founded";
+  $("r-tier").textContent = T.growing != null ? `${tn} → ${D.tierNames[T.growing]}` : tn;
+  pips($("p-tier"), 4, tier + 1, T.growing != null ? T.growing + 1 : -1);
+  $("r-hall").textContent = T.hallRising ? `${D.halls[T.hallRising].name} (rising)` : T.hall ? D.halls[T.hall].name : "None";
+  pips($("p-hall"), 5, T.hall, T.hallRising || -1);
+  $("r-wall").textContent = T.wallRising ? `${D.wallLevelNames[T.wallRising]} (rising)` : T.wall ? D.wallLevelNames[T.wall] : "None";
+  pips($("p-wall"), 10, T.wall, T.wallRising || -1);
+  $("r-station").textContent = T.stationRising >= 0 && T.stationRising !== undefined ? `${D.stations[T.stationRising].name} (rising)` : T.station >= 0 ? D.stations[T.station].name : "None";
+  pips($("p-station"), 4, T.station + 1, T.stationRising >= 0 && T.stationRising !== undefined ? T.stationRising + 1 : -1);
+  const built = Object.values(T.slots).filter((s) => s.building && !s.rising).length;
+  const rising = Object.values(T.slots).filter((s) => s.building && s.rising).length;
+  if (D.store) {
+    for (const k of ["k-store", "r-store", "x-store"]) $(k).hidden = false;
+    const st = T.slots[D.store.slot.id], L = D.store.levels.find((l) => l.id === st?.building);
+    $("r-store").textContent = L ? `${L.name} · ${L.chests} chests${st.rising ? " (rising)" : ""}` : "None";
+  }
+  $("r-plots").textContent = `${built} built${rising ? `, ${rising} rising` : ""} · ${openEmpty().length} open`;
+  // charter
+  const ch = $("charter"); ch.innerHTML = "";
+  if (tier >= 0) {
+    const check = R.charterCheck(tier, counts({ rising: false }), T.knownIds);
+    $("charter-h").textContent = tier < 3 ? `${tn} charter, to grow to a ${D.tierNames[tier + 1]}` : "Castle charter";
+    if (!check.lines.length) ch.innerHTML = `<div class="ok">Nothing beyond the library it starts with</div>`;
+    for (const l of check.lines) { const d = document.createElement("div"); d.className = l.skipped || l.have >= l.need ? "ok" : "no"; d.textContent = `${l.have >= l.need || l.skipped ? "✓" : "○"} ${l.more ? `${l.more} ${l.what}` : l.what}: ${l.have}/${l.need}`; ch.append(d); }
+  } else { $("charter-h").textContent = "Charter"; ch.innerHTML = `<div class="no">Found the Hamlet to begin</div>`; }
+  // orders
+  const B = $("btns"); B.innerHTML = "";
+  const busy = (k) => [...T.busy].some((l) => l.startsWith(k));
+  if (!T.founded) {
+    B.append(btn("Found the Hamlet", "Claim the plot: groundwork, Low Palisade, Longhouse, Mason's Yard, library, your cottage and the Halt", found, { primary: true }));
+    B.append(btn("Play the whole story", "Founding to Castle: every hall, wall and station level, plots filled the way a Rival Lord fills them", playStory));
+  } else {
+    const nextHall = T.hall + 1, hallMax = tier === 3 ? 5 : D.tiers[tier].hallMax;
+    if (nextHall <= 5) B.append(btn(`Raise the ${D.halls[nextHall].name}`, nextHall > hallMax ? `Needs a ${D.halls[nextHall].settlement}` : nextHall === 5 ? "Hall level 5 (the game asks for the Grand Siege won)" : `Hall level ${nextHall}`, () => hallTo(nextHall), { disabled: nextHall > hallMax || busy("Hall") || story }));
+    const nextWall = T.wall + 1, cap = D.tiers[tier].cap;
+    if (nextWall <= 10) B.append(btn(`Raise the ${D.wallLevelNames[nextWall]}`, nextWall > cap ? `A ${tn} wall stops at level ${cap}` : `Wall level ${nextWall}`, () => wallTo(nextWall), { disabled: nextWall > cap || busy("Wall") || busy("Old wall") || story }));
+    if (tier < 3) {
+      const check = R.charterCheck(tier, counts({ rising: false }), T.knownIds);
+      const name = D.tierNames[tier + 1];
+      B.append(btn(`Grow to a ${name}`, check.met ? `Wall moves out to radius ${D.tiers[tier + 1].radius}, new plots, ${D.stations[D.stages.indexOf(D.tiers[tier + 1].stage)].name}` : "The charter isn't met yet (fill the plots first)", () => growTo(tier + 1), { primary: check.met, disabled: !check.met || T.growing != null || story || busy("Wall") }));
+      if (!check.met) B.append(btn(`Grow anyway`, "Skips the charter, like the /scriptevent test", () => growTo(tier + 1), { disabled: T.growing != null || story || busy("Wall") }));
+    }
+    const pick = lordNext();
+    B.append(btn("Fill the open plots for me", pick ? `Next: ${nameOf(pick.id)} on ${pick.slot.id}, the way a Rival Lord picks` : "No open plot takes anything yet", () => fillPlots(), { disabled: !pick || story }));
+    B.append(btn("Play the rest of the story", "Every level to the Castle", playStory, { disabled: story }));
+  }
+  B.append(btn("Siege night", sg.open ? "Open below" : "Watch a siege come for this town: who comes, from where, wave by wave", openSiege, { disabled: sg.open }));
+  const row = document.createElement("div"); row.className = "split";
+  row.append(btn("Start over", "", reset), btn("Finish now", "", () => { speed = 64; $("speed").value = 8; showSpeed(); }));
+  B.append(row);
+}
+
+function refreshPlots() {
+  for (const s of D.slots) {
+    const st = T.slots[s.id], v = s.view;
+    const visible = T.founded && !st.closed && s.tier <= T.tier; // a plot shows once its tier opens it
+    v.line.visible = v.plane.visible = visible && !(st.building && !st.rising);
+    const c = st.rising ? COL.rising : s.tier > T.tier ? COL.later : COL.open;
+    v.line.material.color.setHex(c); v.plane.material.color.setHex(c);
+    v.plane.material.opacity = s.tier > T.tier ? 0.07 : 0.16;
+  }
+}
+
+// plot card
+const card = $("plotcard");
+function openPlot(id, sx, sy) {
+  const s = slotById[id], st = T.slots[id];
+  const later = s.tier > T.tier;
+  const size = `${s.box.x1 - s.box.x0 + 1} × ${s.box.z1 - s.box.z0 + 1}`;
+  card.innerHTML = "";
+  const close = btn("✕", "", () => { card.hidden = true; }); close.id = "close"; close.setAttribute("aria-label", "Close");
+  const head = document.createElement("div");
+  head.innerHTML = `<h2>${R.CLASS_NAMES[R.slotClass(s)] ?? s.size} plot ${s.id}</h2><div class="sub" style="color:var(--muted);font-size:.85rem">${size} blocks · door to the road · opens at ${D.tierNames[s.tier]}${s.takenAt ? ` · the level ${s.takenAt} hall takes it` : ""}</div>`;
+  const tags = document.createElement("div"); tags.className = "tags";
+  for (const t of s.tags) { const e = document.createElement("span"); e.className = "tag"; e.textContent = R.TAG_WORDS[t] ?? t; tags.append(e); }
+  card.append(close, head, tags);
+  if (st.building) {
+    card.append(btn(`${nameOf(st.building)}${st.rising ? " (rising)" : ""}`, D.buildings[st.building]?.blurb ?? "", () => {}, { disabled: true }));
+    if (!st.rising) card.append(btn("Knock it down", "Half the price back (the plot marker comes back)", () => { card.hidden = true; knockDown(id); }));
+  } else if (later) {
+    card.append(Object.assign(document.createElement("div"), { textContent: `This plot opens when the settlement is a ${D.tierNames[s.tier]}.`, style: "color:var(--muted);font-size:.9rem" }));
+  } else {
+    const list = document.createElement("div"); list.className = "btns";
+    for (const o of offersFor(s)) {
+      const b = btn(`${nameOf(o.id)}${o.tagged ? " · good spot" : ""}<span class="price">${o.price} R</span>`, o.open ? D.buildings[o.id]?.blurb ?? "" : o.why, () => { card.hidden = true; raise(id, o.id); }, { disabled: !o.open });
+      b.classList.add("offer"); if (o.tagged && o.open) b.classList.add("good");
+      list.append(b);
+    }
+    if (!list.children.length) list.textContent = "Nothing we can raise fits this plot yet.";
+    card.append(list);
+  }
+  card.hidden = false;
+  const w = card.offsetWidth, h = card.offsetHeight;
+  card.style.left = `${Math.min(window.innerWidth - w - 12, Math.max(12, sx + 14))}px`;
+  card.style.top = `${Math.min(window.innerHeight - h - 70, Math.max(12, sy - 20))}px`;
+}
+
+// picking
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let downAt = null;
+canvas.addEventListener("pointerdown", (e) => { downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", (e) => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
+  const hit = pick(e);
+  if (hit) openPlot(hit, e.clientX, e.clientY); else card.hidden = true;
+});
+function pick(e) {
+  mouse.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(pickables.filter((p) => p.visible || (T.slots[p.userData.slot].building && T.founded)), false);
+  if (hits.length) return hits[0].object.userData.slot;
+  // a built plot: pick the building's own box
+  for (const s of D.slots) {
+    const st = T.slots[s.id]; if (!st.building || st.rising) continue;
+    const b = new THREE.Box3(new THREE.Vector3(s.box.x0, s.dy + 0.5, s.box.z0), new THREE.Vector3(s.box.x1 + 1, s.dy + 22, s.box.z1 + 1));
+    if (ray.ray.intersectsBox(b)) return s.id;
+  }
+  return null;
+}
+const tip = $("tip");
+canvas.addEventListener("pointermove", (e) => {
+  if (e.buttons) { tip.hidden = true; return; }
+  const id = pick(e);
+  if (!id) { tip.hidden = true; return; }
+  const s = slotById[id], st = T.slots[id];
+  tip.textContent = st.building ? `${nameOf(st.building)} · plot ${id}` : `${R.CLASS_NAMES[R.slotClass(s)]} plot ${id}${s.tier > T.tier ? ` · opens at ${D.tierNames[s.tier]}` : " · click to build"}`;
+  tip.style.left = `${e.clientX + 12}px`; tip.style.top = `${e.clientY + 12}px`; tip.hidden = false;
+});
+
+// pace bar
+const SPEEDS = [0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 64];
+function showSpeed() { const v = SPEEDS[+$("speed").value]; speed = v; $("speed-v").textContent = v >= 64 ? "instant" : `${v}× game`; }
+$("speed").addEventListener("input", showSpeed); showSpeed();
+$("pause").addEventListener("click", () => { paused = !paused; $("pause").textContent = paused ? "Play" : "Pause"; });
+let follow = true;
+$("cam-follow").addEventListener("click", () => { follow = !follow; $("cam-follow").setAttribute("aria-pressed", String(follow)); $("cam-follow").textContent = follow ? "Follow builds" : "Free camera"; });
+const BIRD = { pos: new THREE.Vector3(72, 118, 98), target: new THREE.Vector3(-8, 2, 0) };
+let flyTo = null;
+$("cam-top").addEventListener("click", () => { flyTo = { pos: BIRD.pos.clone(), target: BIRD.target.clone() }; });
+if (matchMedia("(max-width: 760px)").matches) { $("orders").classList.add("folded"); $("mini").textContent = "Show"; }
+$("mini").addEventListener("click", () => { const o = $("orders"); o.classList.toggle("folded"); $("mini").textContent = o.classList.contains("folded") ? "Show" : "Hide"; });
+
+function reset() { location.reload(); }
+
+// ---------------- siege night (siege_night.mjs: the game's own siege code, one seeded night per choice) ----------------
+const SG = D.sieges, sg = { open: false, playing: false, units: [], t: 0, wave: -1, night: null };
+const ordinal = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+for (const p of SG.presets) $("siege-def").append(Object.assign(document.createElement("option"), { value: p.id, textContent: p.label }));
+const unitName = (t) => SG.names[t] ?? t;
+function surfaceY(x, z) {
+  for (let y = YMAX; y > YMIN; y--) { const b = get(x, y, z); if (b && !SOFT[b]) return y + 1; }
+  return D.base + 1;
+}
+// raiders as figures: a body and a head, coloured by what they are
+const UNIT_COL = { raider: 0xb23a2a, hollow: 0x5e6f86, sapper: 0xd9822b, ram: 0x7a4b25, warlord: 0x6b2d8f };
+const sgGroup = new THREE.Group(); sgGroup.position.y = -D.base; sgGroup.visible = false; scene.add(sgGroup);
+const bodyGeo = new THREE.BoxGeometry(0.8, 1.4, 0.6), headGeo = new THREE.BoxGeometry(0.62, 0.62, 0.62), ramGeo = new THREE.BoxGeometry(1.5, 1.4, 2.4);
+const MAXU = 400;
+const bodies = new THREE.InstancedMesh(bodyGeo, new THREE.MeshBasicMaterial(), MAXU), heads = new THREE.InstancedMesh(headGeo, new THREE.MeshBasicMaterial(), MAXU), rams = new THREE.InstancedMesh(ramGeo, new THREE.MeshBasicMaterial(), 16);
+for (const m of [bodies, heads, rams]) { m.count = 0; m.frustumCulled = false; sgGroup.add(m); }
+const heart = new THREE.Mesh(new THREE.OctahedronGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0xff4f6d }));
+sgGroup.add(heart);
+const ballistaGeo = new THREE.BoxGeometry(1.2, 0.9, 1.2), ballistaMesh = new THREE.InstancedMesh(ballistaGeo, new THREE.MeshBasicMaterial({ color: 0x6b4a2b }), 8);
+ballistaMesh.count = 0; ballistaMesh.frustumCulled = false; sgGroup.add(ballistaMesh);
+const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S1 = new THREE.Vector3(1, 1, 1), C1 = new THREE.Color();
+
+const sgTier = () => Math.max(0, T.tier);
+const nightKey = () => `${$("siege-n").value}|${sgTier()}|${$("siege-def").value}`;
+function siegeDefault() { // a town that has won its way to this size: Hamlet 1st siege, Town 4th, City 7th, Castle 11th
+  $("siege-n").value = [1, 4, 7, 11][sgTier()];
+}
+function countsOf(units) {
+  const c = new Map();
+  for (const u of units) { const k = u.kind === "raider" ? unitName(u.type) : u.kind === "ram" ? `Battering Ram (${unitName(u.type)})` : u.kind === "sapper" ? `Sapper (${unitName(u.type)})` : u.name ?? unitName(u.type); c.set(k, (c.get(k) ?? 0) + 1); }
+  return [...c].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(", ");
+}
+function showNight() {
+  const n = +$("siege-n").value; $("siege-n-v").textContent = ordinal(n);
+  const night = SG.nights[nightKey()];
+  const P = $("siege-plan"), W = $("siege-waves"); P.innerHTML = ""; W.innerHTML = "";
+  if (!night) { P.textContent = "No siege comes to this town."; return; }
+  const sideName = (a) => { const d = ((a - gateAngle) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI; return Math.abs(d) < 0.8 ? "the gate side" : Math.abs(d) > 2.4 ? "behind the town" : d > 0 ? "the left flank" : "the right flank"; };
+  const line = (html) => { const d = document.createElement("div"); d.innerHTML = html; P.append(d); };
+  line(`<b>${night.faction}</b> · threat ${night.budget}${night.grand ? " · <b>the Grand Siege</b>" : ""}`);
+  line(`They come from ${[...new Set(night.sides.map(sideName))].join(" and ")}.`);
+  for (const m of night.modifiers) line(`<span class="twist">${m.name}:</span> ${m.note}`);
+  if (night.warlord) line(`Led by <b>${night.warlord}</b> in the last wave.`);
+  if (night.counterNote) line(`<span class="note">${night.counterNote}</span>`);
+  night.waves.forEach((w, i) => { const d = document.createElement("div"); d.className = "wave" + (sg.playing && sg.night === night && sg.wave === i ? " now" : ""); d.textContent = `Wave ${i + 1}: ${w.length ? countsOf(w) : "none"}`; W.append(d); });
+  placeBallistas(); markSides(night);
+}
+// where they come from: a red band on the ground at the distance they appear
+const sideMat = new THREE.MeshBasicMaterial({ color: 0xe0503a, transparent: true, opacity: 0.25, depthTest: false, side: THREE.DoubleSide });
+const sideBands = [];
+function markSides(night) {
+  for (const m of sideBands) { sgGroup.remove(m); m.geometry.dispose(); }
+  sideBands.length = 0;
+  const all = night.waves.flat().filter((u) => u.kind === "raider");
+  if (!all.length) return;
+  const d = all.reduce((a, u) => a + Math.hypot(u.x, u.z), 0) / all.length;
+  for (const a of night.sides) {
+    const m = new THREE.Mesh(new THREE.RingGeometry(d - 4, d + 4, 24, 1, -(a + 0.42), 0.84), sideMat);
+    m.rotation.x = -Math.PI / 2; m.position.set(0.5, D.base + 1.3, 0.5); m.renderOrder = 5;
+    sgGroup.add(m); sideBands.push(m);
+  }
+}
+const gateAngle = Math.atan2(...(() => { const g = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0] }[D.gate] ?? [0, 1]; return [g[1], g[0]]; })());
+function placeBallistas() {
+  const id = $("siege-def").value, r = D.tiers[sgTier()].radius;
+  const sides = { none: [], some: [0, 0], full: [0, Math.PI / 2, Math.PI, -Math.PI / 2] }[id] ?? [];
+  ballistaMesh.count = sides.length;
+  sides.forEach((a0, i) => { const a = gateAngle + a0 + i * 0.15, x = Math.round(Math.cos(a) * (r - 3)), z = Math.round(Math.sin(a) * (r - 3)); M4.compose(V.set(x + 0.5, surfaceY(x, z) + 0.45, z + 0.5), Q.identity(), S1); ballistaMesh.setMatrixAt(i, M4); });
+  ballistaMesh.instanceMatrix.needsUpdate = true;
+}
+function openSiege() {
+  card.hidden = true; sg.open = true; $("siege").hidden = false; sgGroup.visible = true;
+  siegeDefault(); showNight();
+  heart.position.set(0.5, D.base + 2.2, 0.5);
+  flyTo = { pos: new THREE.Vector3(0, 95 + D.tiers[sgTier()].radius, 75 + D.tiers[sgTier()].radius), target: new THREE.Vector3(0, 0, 0) };
+}
+function closeSiege() { endNight(); sg.open = false; $("siege").hidden = true; sgGroup.visible = false; }
+function nightLight(on) {
+  for (const m of [solidMat, waterMat]) m.color.setHex(on ? 0x7482ac : 0xffffff);
+  if (on) { scene.background = new THREE.Color(0x1a2236); scene.fog = new THREE.Fog(0x1a2236, 200, 520); } else applySky();
+}
+function endNight() { sg.playing = false; sg.units = []; bodies.count = heads.count = rams.count = 0; nightLight(false); $("siege-go").innerHTML = `Sound the horn<span class="why">Play the night: every wave where the game spawns it</span>`; showNight(); }
+// game time: the first wave 5 s after the horn, then one every 30 s (siege/settings.js); raiders walk ~2.5 blocks a second
+const FIRST = 5, BETWEEN = 30, WALK = 2.5;
+function soundHorn() {
+  if (sg.playing) return endNight();
+  const night = SG.nights[nightKey()]; if (!night) return;
+  Object.assign(sg, { playing: true, night, units: [], t: 0, wave: -1 });
+  nightLight(true);
+  $("siege-go").innerHTML = `End the night<span class="why">Clear the field</span>`;
+  log(`Siege night: the ${night.faction} marches on ${D.plot}`);
+}
+function stepSiege(dt) {
+  if (!sg.playing) return;
+  sg.t += dt * Math.min(speed, 8);
+  const night = sg.night, r = T.wall > 0 ? D.tiers[T.ring].radius : 3;
+  while (sg.wave + 1 < night.waves.length && sg.t >= FIRST + (sg.wave + 1) * BETWEEN) {
+    sg.wave++;
+    for (const u of night.waves[sg.wave]) sg.units.push({ ...u, px: u.x + 0.5, pz: u.z + 0.5, born: sg.t, phase: Math.random() * 6 });
+    log(`Wave ${sg.wave + 1} of ${night.waves.length}: ${night.waves[sg.wave].length} raiders`);
+    showNight();
+  }
+  // march on the keep; stop at the wall (rams make for the gate) and press against it
+  let nb = 0, nr = 0;
+  for (const u of sg.units) {
+    // a ram walks in to just outside the wall, then round it to the gate
+    let tx = 0, tz = 0;
+    if (u.kind === "ram") {
+      const ring = r + 3, a = Math.atan2(u.pz, u.px), off = ((gateAngle - a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+      const na = Math.hypot(u.px, u.pz) > ring + 1 ? a : a + Math.sign(off) * Math.min(Math.abs(off), 0.25);
+      tx = Math.cos(na) * ring; tz = Math.sin(na) * ring;
+      if (Math.abs(off) < 0.05) { tx = Math.cos(gateAngle) * (r + 2); tz = Math.sin(gateAngle) * (r + 2); }
+    }
+    const dx = tx - u.px, dz = tz - u.pz, d = Math.hypot(dx, dz), fromKeep = Math.hypot(u.px, u.pz);
+    const stop = u.kind === "ram" ? 0.5 : fromKeep <= r + 1.5;
+    if (!(stop === true || (u.kind === "ram" && d <= 0.5))) { const step = Math.min(d, WALK * (u.kind === "ram" ? 0.6 : 1) * dt * Math.min(speed, 8)); u.px += (dx / d) * step; u.pz += (dz / d) * step; u.yaw = Math.atan2(dx, dz); }
+    const bx = Math.floor(u.px), bz = Math.floor(u.pz), y = surfaceY(bx, bz);
+    const bob = stop === true || d <= 0.5 ? Math.abs(Math.sin(sg.t * 4 + u.phase)) * 0.25 : 0;
+    const rise = Math.min(1, (sg.t - u.born) / 0.6);
+    Q.setFromAxisAngle(V.set(0, 1, 0), u.yaw ?? 0);
+    const hollow = u.type.startsWith("siege:") && u.kind === "raider";
+    C1.setHex(UNIT_COL[hollow ? "hollow" : u.kind] ?? UNIT_COL.raider);
+    const big = u.kind === "warlord" ? 1.5 : 1;
+    if (u.kind === "ram") {
+      if (nr >= 16) continue;
+      M4.compose(V.set(u.px, y + 0.7 + bob - (1 - rise) * 2, u.pz), Q, S1); rams.setMatrixAt(nr, M4); rams.setColorAt(nr, C1); nr++;
+    } else {
+      if (nb >= MAXU) continue;
+      M4.compose(V.set(u.px, y + 0.65 * big + bob - (1 - rise) * 2, u.pz), Q, V.clone().set(big, big, big)); bodies.setMatrixAt(nb, M4); bodies.setColorAt(nb, C1);
+      M4.compose(V.set(u.px, y + 1.6 * big + bob - (1 - rise) * 2, u.pz), Q, V.clone().set(big, big, big)); heads.setMatrixAt(nb, M4); heads.setColorAt(nb, C1.offsetHSL(0, 0, 0.12)); nb++;
+    }
+  }
+  bodies.count = heads.count = nb; rams.count = nr;
+  for (const m of [bodies, heads, rams]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+  heart.rotation.y += dt * 2;
+}
+$("siege-n").addEventListener("input", () => { if (sg.playing) endNight(); showNight(); });
+$("siege-def").addEventListener("change", () => { if (sg.playing) endNight(); showNight(); });
+$("siege-go").addEventListener("click", soundHorn);
+$("siege-close").addEventListener("click", closeSiege);
+
+// ---------------- loop ----------------
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+window.addEventListener("resize", resize); resize();
+for (const ch of chunks) meshChunk(ch);
+$("loading").hidden = true;
+refresh(); refreshPlots();
+
+let last = performance.now();
+const focusV = new THREE.Vector3();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (!paused) { clock += dt; stepJobs(dt); stepSiege(dt); }
+  uTime.value = clock;
+  // remesh dirty chunks, a few a frame (nearest the camera's target first)
+  const dirty = chunks.filter((c) => c.dirty);
+  if (dirty.length) {
+    const t0 = performance.now();
+    dirty.sort((a, b) => dist(a) - dist(b));
+    for (const c of dirty) { meshChunk(c); if (performance.now() - t0 > 12) break; }
+  }
+  if (born.size > 20000) for (const [k, t] of born) if (clock - t > 1) born.delete(k);
+  updateDust();
+  // camera
+  if (flyTo) {
+    camera.position.lerp(flyTo.pos, 0.06); controls.target.lerp(flyTo.target, 0.06);
+    if (camera.position.distanceTo(flyTo.pos) < 1) flyTo = null;
+  } else if (follow && jobs.length) {
+    const j = jobs.find((x) => x.focus) ?? jobs[0];
+    const f = j.focus ?? (j.lastAt ? [j.lastAt[0], j.lastAt[1] - D.base, j.lastAt[2]] : null);
+    if (f) { focusV.set(f[0], Math.max(0, f[1]), f[2]); const d = focusV.clone().sub(controls.target); controls.target.addScaledVector(d, 0.02); camera.position.addScaledVector(d, 0.02); }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+function dist(c) { const x = X0 + c.cx * CS + 8 - controls.target.x, z = Z0 + c.cz * CS + 8 - controls.target.z; return x * x + z * z; }
+requestAnimationFrame(frame);
+window.__sim = { T, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, openSiege, soundHorn, sg, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
+</script>

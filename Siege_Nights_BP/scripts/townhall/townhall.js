@@ -148,7 +148,7 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
     if (!owner || !api.keepOf(owner)) return giveBack(player, placed);
     const old = hallOf(owner);
     if (old && !old.lost && old.hidden && old.level > 0) {
-      player.sendMessage("§cThis settlement already has a town hall. To move it, choose §fMove the town hall§c in the Town Hall menu first.");
+      player.sendMessage("§cThis settlement already has a town hall. It stays on the hall ground your town laid out.");
       return giveBack(player, placed);
     }
     if (old && !old.lost) {
@@ -288,6 +288,27 @@ export function tidyCornerstone(owner) {
   if (!hall || hall.lost || hall.building || !(hall.level > 0)) return;
   if (!hall.hidden) hideCornerstone(owner);
   if (!hall.marks?.board) addBoard(owner);
+  else turnBoard(owner);
+}
+
+// A Town Board set down before it was turned to face the aisle is turned round where it stands
+function turnBoard(owner) {
+  const hall = hallOf(owner);
+  const plan = drawHall(hall.level, STYLES[hall.style]);
+  const spot = plan.marks.board;
+  if (!spot) return;
+  const forward = { x: hall.fx, z: hall.fz };
+  const at = worldMarks(plan, hall, forward).board;
+  if (!at || at.x !== hall.marks.board.x || at.y !== hall.marks.board.y || at.z !== hall.marks.board.z) return;
+  try {
+    const block = world.getDimension("overworld").getBlock(at);
+    if (block?.typeId !== BOARD) return;
+    const want = resolveRole(STYLES[hall.style], frameFor(forward), "board", plan.cells.get(`${spot.x},${spot.y},${spot.z}`)?.o);
+    const dir = want.getState("minecraft:cardinal_direction");
+    if (want.type.id === BOARD && dir && block.permutation.getState("minecraft:cardinal_direction") !== dir) block.setPermutation(want);
+  } catch {
+    // not loaded: next time
+  }
 }
 
 // Halls raised before the Town Board existed get one now, where a new hall of that size would have it
@@ -311,25 +332,6 @@ function addBoard(owner) {
   } catch (e) {
     console.warn(`[Town Hall] could not add the Town Board: ${e}`);
   }
-}
-
-// Moving the hall: the standing building stays, the Tree sleeps, and you get a cornerstone to place again
-function moveHall(player, owner) {
-  new MessageFormData().title("Move the town hall")
-    .body("You get a Hall Cornerstone back to place somewhere else in your land. The building that stands now stays where it is, but it stops being your town hall and the Tree of Oaths sleeps until the new hall rises. Levels you already paid for are free to raise again.")
-    .button1("Keep it here").button2("Move it")
-    .show(player).then((r) => {
-      if (r.canceled || r.selection !== 1) return hallMenu(player, owner);
-      const hall = hallOf(owner);
-      if (!hall || buildFor(owner)) return;
-      hall.lost = true;
-      hall.building = null;
-      hall.level = 0;
-      hall.hidden = false;
-      saveHalls();
-      player.getComponent("minecraft:inventory")?.container?.addItem(new ItemStack(CORNERSTONE, 1));
-      player.sendMessage("§7You have a Hall Cornerstone. Place it where the new front door should be, facing the way the hall should run.");
-    }).catch(() => {});
 }
 
 // The Tree of Oaths shows a banner tree for a Knight's hall and an ember-root for a Marked one
@@ -371,10 +373,10 @@ export function hallMenu(player, owner) {
   const hall = hallOf(owner);
   const keep = api.keepOf(owner);
   if (!keep) return;
-  const mine = owner === player.id;
+  const mine = api.canManage(owner, player.id); // the owner or a writ ally (Mateo, 2026-11-13)
   if (!hall || hall.lost) {
     return player.sendMessage(mine
-      ? "§7You have no town hall yet. Craft a §fHall Cornerstone§7 at the Siege Workshop and place it where the front door should be, facing the way the hall should run."
+      ? "§7You have no town hall yet. A town laid out from its map plot gets its Hall Cornerstone with the Hamlet; if you still carry one from before, place it where the front door should be, facing the way the hall should run."
       : "§7This settlement has no town hall yet.");
   }
   tidyCornerstone(owner);
@@ -416,8 +418,6 @@ export function hallMenu(player, owner) {
     if (hall.level > 0) {
       form.button("Repair the hall\n§8puts every block back", "textures/items/iron_pickaxe");
       actions.push(() => confirmBuild(player, owner, hall.level, hall.style, [], true));
-      form.button("Move the town hall\n§8get the cornerstone back", "textures/items/siege_hall_cornerstone");
-      actions.push(() => moveHall(player, owner));
     }
   }
   if (hall.level >= 1) for (const extra of hallMenuExtras) {
@@ -490,7 +490,7 @@ function sageMenu(player, owner) {
   const hall = hallOf(owner);
   const keep = api.keepOf(owner);
   const tips = [];
-  if (hero.path === "none") tips.push(hero.ember === "fallen" ? "\"That pale ember you found. Hold it and decide: take it into your hand, or carry it to the Tree and swear it away. I would not sleep near it either way.\"" : "\"Hold your keep through a siege night. They say something falls from the sky for those who do.\"");
+  if (hero.path === "none") tips.push(hero.ember === "fallen" ? "\"That pale ember you found. Hold it and decide: take it into your hand, or carry it to the Tree and swear it away. I would not sleep near it either way.\"" : "\"Old Elspeth by your hearth hears more than I read. If anything ever comes down near your gate, take it to her before you take it to anyone.\"");
   if (hero.points > 0) tips.push(`"You carry ${hero.points} unspent oath${hero.points === 1 ? "" : "s"}. The Tree is listening."`);
   if (hall.level < allowedLevel(keep)) tips.push("\"Your settlement has outgrown this hall. The cornerstone will take a bigger one.\"");
   else if (hall.level < 5) tips.push(`"A ${HALL_TIERS[hall.level + 1].name} wants a ${HALL_TIERS[hall.level + 1].settlement}. Win your sieges and the land will follow."`);

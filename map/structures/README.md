@@ -105,6 +105,23 @@ facing away from it, with a footpath to the street; Mirelight decks over water b
 Besides the usual outputs it writes `<key>-blocks.json` (hollow-crown-worldblocks/1, the same format as
 Kingsrest's), which genworld stamps through GW_BLOCKS. towngen.py writes the same file for named towns.
 
+### The starter village is every plot's Hamlet (starter.py, starter_all.py)
+
+Mateo, 2026-11-13: a player arriving on a map plot gets the starter village (`starter.py`), and the town layout
+grows round it from Town up. The pipeline for all twelve plots:
+
+1. `python3 starter_all.py MAP_DIR hollow-crown-full-map-heights-pretown.npy sizes.json OUT` bakes every plot's
+   village (`studio/starter_preview/sizes.mjs` writes sizes.json from the game's designs; each slice gets the
+   world's pre-town ground through `slice_heights.py`).
+2. `python3 towngen_settle.py PLOT OUT/<plot>.npz lines.json SETTLEMENTS --starter OUT/<plot>.json --walls 36,54,60,66
+   --templates crossroads,market_street,spokes --tries 8 [--trees ...]` plans the Town, City and Castle bands round
+   the village (its paths kept, its plots and yards taken, a ring lane round it on the old Hamlet wall line,
+   every ring following the village's wall outline). The Town wall sits at 54, not 46, so the Town's plots fit
+   round the village (Mateo's pick, 2026-11-13).
+3. `python3 tools/export_towns.py SETTLEMENTS --starter OUT` writes the game's towns_data.js with the village as
+   the Hamlet band: its ground and blocks, its plots (the library's, two houses that stand from the start, one
+   of them the founder's, and an open deep Large for the Barracks), the Mason's yard and the wall outline.
+
 ### Settlement layouts (towngen_settle.py)
 
 `python3 towngen_settle.py PLOT slice.npz lines.json OUT [--templates crossroads,twin_rings,market_street] [--tries 3]`
@@ -129,3 +146,11 @@ Output `<plot>.json` (format `hollow-crown-settlement/1`): per variant `slots`, 
 level, `rings`, `gates` per tier, `fixtures`, `roads` rows `[dx, dz, y, slab|full, kind, tier]` and
 `groundwork` rows `[dx, y, dz, palette, tier]` (place a tier's rows when it opens), all relative to the
 Plot Stone on world axes, y absolute. Plus `<plot>-<template>.png` plans coloured by opening tier.
+
+### Works plot machines (export_machines.py)
+
+`python3 export_machines.py` writes the Ironworks (ironworks/spec.py, every region, three stages) to
+`Siege_Nights_BP/scripts/ironworks/designs_data.js` for the town's Works plots (size letter `W`, 27 wide along the
+road x 17 deep: the 25 x 15 yard plus a block all round for the eaves). Stage 1 is the whole plot; stages 2 and 3
+hold only what changes. The game seats it on a slot like any plot building (settle/buildings.js `addWorks`).
+The Gold Sluice and Deep Shaft go into `MACHINES` the same way once their game code exists.

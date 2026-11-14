@@ -25,10 +25,16 @@ def targets(filters, dist=24, priority=2, must_see=False):
     return {"minecraft:behavior.nearest_attackable_target": {"priority": priority, "must_see": must_see, "reselect_targets": True,
             "within_radius": dist, "entity_types": [{"filters": filters, "max_dist": dist}]}}
 
-def melee(dmg, speed=1.2, effect=None):
+def melee(dmg, speed=1.2, effect=None, cooldown=None):
     a = {"damage": dmg}
     if effect: a.update(effect)
-    return {"minecraft:attack": a, "minecraft:behavior.melee_attack": {"priority": 3, "speed_multiplier": speed, "track_target": True}}
+    m = {"priority": 3, "speed_multiplier": speed, "track_target": True}
+    if cooldown: m["cooldown_time"] = cooldown          # big hitters swing slower, so there is a gap to step in or back off
+    return {"minecraft:attack": a, "minecraft:behavior.melee_attack": m}
+
+# No creature outside a boss fight may kill a full-health (20 hp) player with one bite, even on Hard, where Bedrock
+# multiplies melee by 1.5 (Mateo 2026-11-13: "the dune wyrm is one shooting people"). 12 x 1.5 = 18 leaves a heart.
+MAX_MOB_MELEE = 12
 
 def ranged(projectile, interval=(1.5, 2.5), radius=16, aux=None, priority=3):
     s = {"def": projectile}
@@ -129,7 +135,7 @@ def m_ogre(m):
     m.bone("seat", [0, 34, 2], "body")
 mob(id="siege_ogre", name="Siege Ogre", family="raider", model=m_ogre,
     pal=P(skin=(120, 128, 92), hide={"c": (110, 84, 60), "style": "fur"}, belt=(60, 40, 26), pants=(70, 56, 40), tusk=(230, 220, 190), log=WOOD, ironcap=DARKIRON, eye=(250, 220, 80)),
-    hp=120, speed=0.22, dmg=14, kb=1.0, collision=(1.6, 3.0), rideable=True, egg=("#78805c", "#6e543c"),
+    hp=120, speed=0.22, dmg=11, melee_cooldown=1.5, kb=1.0, collision=(1.6, 3.0), rideable=True, egg=("#78805c", "#6e543c"),
     lore="Carries a whole tree trunk as a ram. Walls crack where it walks.")
 
 def m_crowmage(m):
@@ -249,7 +255,7 @@ def m_mirror(m):
     shield(m, size=(8, 12), shield="mirror", trim="trim", kite=True)
 mob(id="mirror_knight", name="Mirror Knight", family="hollow", model=m_mirror,
     pal=P(mirror={"c": (200, 214, 226), "style": "metal"}, trim={"c": (120, 140, 160), "style": "metal"}),
-    hp=45, speed=0.3, dmg=7, kb=0.5, groups="mirror", egg=("#c8d6e2", "#788ca0"),
+    hp=45, speed=0.3, dmg=7, groups="mirror", egg=("#c8d6e2", "#788ca0"),
     lore="Whatever you hit it with last, it learns. Shoot it and it shoots back. Strike it and it parries. Change it up.")
 
 def m_shade(m):
@@ -327,7 +333,7 @@ def m_scarab(m):
 mob(id="ash_scarab", name="Ash Scarab", family="wild_hostile", model=m_scarab, plan="bug",
     pal=P(shell={"c": (60, 40, 30), "style": "metal"}, leg=(40, 30, 24), eye=(255, 120, 30)),
     hp=6, speed=0.4, dmg=2, collision=(0.5, 0.35), resist=dict(fire=True), region="Emberwaste", egg=("#3c281e", "#ff781e"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(4, 7), weight=8, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(2, 3), weight=4, density=2, pop="monster"),  # sparse (Mateo 2026-11-14; scripts/bestiary/sands.js thins more)
     lore="One is nothing. They are never one. Their bites smoulder, and their shells are half glass.")
 
 def m_wyrm(m):
@@ -347,8 +353,8 @@ def m_wyrm(m):
     m.box("seg5", [-1, 2, 72], [2, 3, 6], "tooth")                                                                             # tail spike
 mob(id="dune_wyrm", name="Dune Wyrm", family="wild_hostile", model=m_wyrm, plan="wyrm",
     pal=P(scale={"c": (196, 160, 100), "style": "stone"}, plate={"c": (160, 120, 70), "style": "metal"}, tooth=(240, 230, 210), eye=(30, 20, 10)),
-    hp=90, speed=0.28, dmg=10, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, pop="monster"),
+    hp=90, speed=0.28, dmg=7, melee_cooldown=1.5, kb=1.0, collision=(1.8, 1.5), groups="wyrm", region="Emberwaste", egg=("#c4a064", "#a07846"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(1, 1), weight=1, density=1, pop="monster"),  # one at a time (Mateo 2026-11-14)
     lore="The sand ripples. Then the sand stands up. It hunts by the shake of your footsteps, so stand still or run.")
 
 def m_hag(m):
@@ -381,8 +387,8 @@ def m_toad(m):
 mob(id="mire_toad", name="Mire Toad", family="wild_hostile", model=m_toad, plan="quad",
     pal=P(skin={"c": (90, 110, 50), "style": "stone"}, wart=(160, 90, 40), eye=(250, 200, 40)),
     hp=16, speed=0.3, dmg=3, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
-    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 3), weight=6, pop="monster"),
-    lore="Its tongue reaches six blocks. Its skin is poison, so punching it is a mistake.")
+    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=6, density=2, pop="monster"),
+    lore="It sits so still it looks like a stone in the mud. Its skin is poison, so punching it is a mistake.")
 
 def m_wight(m):
     biped(m, mats={"head": "bone", "body": "mail", "arm": "bone", "leg": "mail", "shoulder": "mail", "bracer": "crown", "belt": "crown"}, face="glow", nose=False)
@@ -423,7 +429,7 @@ def m_knight(m):
     shield(m, size=(10, 13), shield="shield", trim="plate", kite=True)
 mob(id="ashen_knight", name="Ashen Knight", family="order", model=m_knight,
     pal=P(plate={"c": (178, 182, 190), "style": "metal"}, tabard={"c": (210, 206, 198), "style": "cloth"}, plume=(160, 30, 30), steel=IRON, shield={"c": (90, 90, 96), "style": "metal"}, eye=(30, 30, 40)),
-    hp=44, speed=0.29, dmg=8, kb=0.6, resist=dict(projectile=0.5), egg=("#b2b6be", "#a01e1e"),
+    hp=44, speed=0.29, dmg=8, resist=dict(projectile=0.5), egg=("#b2b6be", "#a01e1e"),
     lore="Sworn to the Ashen Gate. An honest blade. Ask what the Gate guards and the conversation ends.")
 
 def m_inquisitor(m):
@@ -445,6 +451,7 @@ BOSSES = []
 # Boss heights in blocks are Mateo's picks (2026-11-11; a player is 1.8): Reeve 7, Huntsman 5, Bride 2.2, Seneschal 3, Mother 3,
 # Warlord King 4. collision height = the model's own height (top cube / 16) and scale = target / that, since minecraft:scale
 # grows the model and the hitbox together.
+# Keep the scaled hitbox under 2 blocks wide (a ravager is 1.95): at 3.2 wide the Reeve could never stand on a path point and ran in circles.
 def boss(**kw): kw["boss"] = True; BOSSES.append(kw); MOBS.append(kw); return kw
 
 def m_reeve(m, small=False):
@@ -471,7 +478,7 @@ def m_reeve(m, small=False):
         m.box(nm, [s * 4 - 3, 6, -3], [6, 2, 6], "gear", mirror=s > 0); m.box(nm, [s * 4 - 3.5, 0, -5], [7, 2, 9], "brass", mirror=s > 0)                      # knee collar, cast foot
 REEVE_PAL = P(brass=GOLD, iron=DARKIRON, wood=WOOD, gear={"c": (184, 140, 60), "style": "metal"})
 boss(id="clockwork_reeve", name="The Clockwork Reeve", region="Aldmere Vale", model=m_reeve, pal=REEVE_PAL,
-     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(1.4, 3.06), scale=2.286, egg=("#dab046", "#46464f"),
+     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(0.8, 3.06), scale=2.286, egg=("#dab046", "#46464f"),
      anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*90"]), ("gear1", "rotation", ["0", "0", "-query.life_time*120"]),
                  ("gear2", "rotation", ["0", "0", "query.life_time*160"]), ("hand_minute", "rotation", ["0", "0", "-query.life_time*360"]),
                  ("hand_hour", "rotation", ["0", "0", "-query.life_time*30"]), ("pendulum", "rotation", ["0", "0", "math.sin(query.life_time*180)*25"])],
@@ -716,7 +723,7 @@ mob(id="grey_spearman", name="Grey Host Shield-bearer", family="raider", model=m
 mob(id="grey_bowman", name="Grey Host Bowman", family="raider", model=m_grey_bow, pal=P(**GREYHOST),
     hp=22, speed=0.3, dmg=3, ranged_def=("minecraft:arrow", None), egg=("#606c74", "#aac8d7"), lore="Draws, looses, draws. He was told to hold this line and nobody has ever told him otherwise.")
 mob(id="grey_serjeant", name="Vorlund's Guard", family="raider", model=m_grey_serjeant, pal=P(**GREYHOST),
-    hp=52, speed=0.28, dmg=9, kb=0.5, collision=(0.8, 2.1), egg=("#606c74", "#787054"), lore="Carries the colours of a company that was swallowed whole. The others still form up on him.")
+    hp=52, speed=0.28, dmg=9, collision=(0.8, 2.1), egg=("#606c74", "#787054"), lore="Carries the colours of a company that was swallowed whole. The others still form up on him.")
 
 # ---------- soldiers of the Hollow itself. Not men, and not copies of men. The first real look at what is down there. ----------
 HOLLOWKIN = dict(stone={"c": (58, 40, 78), "style": "stone"}, dark={"c": (34, 24, 48), "style": "stone"}, vein={"c": (230, 70, 200), "style": "glow"},
@@ -767,7 +774,7 @@ mob(id="shardcaster", name="Shardcaster", family="raider", model=m_shardcaster, 
     hp=28, speed=0.27, dmg=4, keep_distance=True, hollow_bolts=True, collision=(0.7, 2.4), resist=dict(fire=True), egg=("#3a284e", "#78beff"),
     lore="It stays at the back and the air around its head is full of knives. It does not touch the ground.")
 mob(id="gatebreaker", name="Gatebreaker", family="raider", model=m_gatebreaker, pal=P(**HOLLOWKIN),
-    hp=130, speed=0.22, dmg=15, kb=1.0, collision=(1.7, 3.2), resist=dict(fire=True, projectile=0.5), egg=("#221830", "#e646c8"),
+    hp=130, speed=0.22, dmg=12, melee_cooldown=1.5, kb=1.0, collision=(1.7, 3.2), resist=dict(fire=True, projectile=0.5), egg=("#221830", "#e646c8"),
     lore="Walls were built to keep out things that climb, or dig, or burn. Nobody built one for this.")
 
 # ---------- the reveal scene: one pose, three ages (stand-ins until the art pass) ----------
@@ -813,7 +820,7 @@ for _age, _name, _pal, _lore in (
 # Warlords that aren't the King also get their own body now
 mob(id="hollow_warlord", name="Grey Warlord", family="raider", model=m_king,
     pal=P(skin=SKIN, plate={"c": (80, 70, 66), "style": "metal"}, crown={"c": (120, 100, 70), "style": "metal"}, shard={"c": (120, 100, 70), "style": "metal"}, cape={"c": (70, 50, 40), "style": "cloth"}, steel=IRON, eye=(255, 140, 60)),
-    hp=60, speed=0.3, dmg=9, kb=0.6, collision=(1.0, 2.8), egg=("#50463f", "#ff8c3c"),
+    hp=60, speed=0.3, dmg=9, collision=(1.0, 2.8), egg=("#50463f", "#ff8c3c"),
     lore="A named war-chief who heard the bell louder than the rest.")
 
 # ---------- stationary fight props (entities, so fights never edit the map's blocks) ----------
@@ -880,7 +887,7 @@ def m_champ_retainer(m):
     m.box("body", [-4.5, 12, -2.5], [9, 9, 5], "tabard", inflate=0.1); m.box("body", [-4.5, 8, -2.5], [9, 4, 5], "tabard")
     hold(m, "spear", bone="blade", haft="wood", blade="steel", long=30)
     shield(m, size=(9, 11), shield="shield", trim="trim")
-_CH = dict(family="champion", kb=0.5, lore_kind="champion")
+_CH = dict(family="champion", lore_kind="champion")
 mob(id="champion_knight", name="Rival Knight", model=m_champ_knight, anim_extra=champ_anim(),
     pal=P(skin=SKIN, plate={"c": (160, 164, 172), "style": "metal"}, tabard={"c": (150, 40, 36), "style": "cloth"}, steel=IRON, hilt=GOLD, wood=WOOD,
           shield={"c": (150, 40, 36), "style": "wood"}, trim=GOLD, potion={"c": (220, 70, 110), "style": "glow"}, eye=(60, 44, 30), belt=(70, 50, 36)),
@@ -935,9 +942,27 @@ def m_seep(m):
 mob(id="seep", name="Seep", family="seep", model=m_seep, plan="none", material="entity_alphablend",
     pal=P(light={"c": (176, 140, 236), "style": "glow"}, dark={"c": (26, 22, 40, 235), "style": "stone"}, stain={"c": (40, 34, 60, 150), "style": "stone"}),
     hp=60, static=True, collision=(1.0, 2.4), egg=("#1a1628", "#b08cec"),
-    lore="A place where the Hollow is pushing through. Things come out of it. Left alone, it widens.")
+    lore="A place where something below is pushing through. Things come out of it. Left alone, it widens.")
 
 def m_bolt(m):
     m.bone("root", [0, 0, 0]); m.box("root", [-1.5, 0, -1.5], [3, 3, 3], "orb")
 mob(id="hollow_bolt", name="Veilbolt", family="projectile", model=m_bolt, plan="none",
     pal=P(orb={"c": (170, 100, 255), "style": "glow"}), hp=1, projectile=True, collision=(0.3, 0.3), egg=None, no_loot=True, lore="")
+
+# ---------- the Deep (scripts/after/deep.js): where the rest of the Host still stands, after Morvane falls ----------
+def m_bell_wife(m):
+    """Ulfa Ice-Tongue: she rang the bell under the ice that called the Host south, and she is still ringing it."""
+    greyhost_base(m, heavy=True)
+    top = m.d["top"]
+    m.box("head", [-5, top - 5, -5], [10, 2, 10], "rime"); m.box("head", [-4.5, top - 9, 3], [9, 6, 2], "rime")      # a frost hood over the helm
+    m.box("body", [-5.5, 0, -3.5], [11, 12, 7], "surcoat"); m.box("body", [-5.5, 11, -3.6], [11, 1, 1], "bronze")     # long skirts to the floor
+    for x in (-3.5, -0.5, 2.5): m.box("body", [x, 1, -3.7], [1, 9, 1], "rime")                                        # icicles hanging from the hem
+    cloak(m, "surcoat", length=26, width=12)
+    hold(m, "staff", bone="pole", haft="wood", long=34)
+    m.bone("bell", [-6, 35, -3.5], "pole")
+    m.box("bell", [-6.5, 33, -4], [1, 2, 1], "wood"); m.box("bell", [-8, 30, -5.5], [4, 3, 4], "bronze"); m.box("bell", [-9.5, 24, -7], [7, 6, 7], "bronze")
+    m.box("bell", [-10, 23, -7.5], [8, 1, 8], "bronze"); m.box("bell", [-6.5, 21, -4], [1, 2, 1], "rime")             # a great bronze bell, and its frozen clapper
+boss(id="bell_wife", name="Ulfa, the Bell-Wife", region="The Deep, after the story", model=m_bell_wife,
+     pal=P(**GREYHOST), hp=480, speed=0.26, dmg=10, kb=1.0, collision=(1.1, 2.7), scale=1.25, egg=("#606c74", "#78705a"),
+     anim_extra=[("bell", "rotation", ["0", "0", "math.sin(query.life_time*240)*14"])],
+     lore="She rang the bell under the ice that called the Host south. Three hundred years later she has not stopped, and they have not stopped standing.")

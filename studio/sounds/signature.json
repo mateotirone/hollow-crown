@@ -46,13 +46,136 @@
    "id": "siege.sig.rift_open",
    "path": "sounds/siege/sig/rift_open",
    "name": "The Rift opening",
-   "seconds": 8,
+   "seconds": 14,
    "kind": "one-shot",
    "channels": 1,
    "category": "ambient",
-   "where": "When the crack in the cave tears open (it takes about 5 seconds). Heard by everyone nearby, from the Rift itself.",
-   "prompt": "Solid rock slowly splitting open from the middle outward over five seconds: deep grinding and cracking stone and a rising low rumble, then a hollow rush of air being drawn inward like a held breath let go, with one faint low bell tone inside the rush. Ends with a few falling pebbles. Heavy, close, physical. No explosion, no scream, no music.",
+   "where": "The tear of the 40-second Rift opening (undertow/rift.js, at 20 s): rock splitting floor to ceiling, then widening. Played from the crack.",
+   "prompt": "A huge slab of solid rock slowly breaking apart in a cave: long deep creaking and groaning of stone under enormous strain, sharp loud cracks splitting upward one after another, gravel and rock chunks falling and clattering on the floor, grinding as the halves scrape apart, then a final heavy low crack-boom as it splits open. Loud, close, dry and physical. No wind or air rush, no voices, no music.",
    "max_distance": 64
+  },
+  {
+   "file": "rift_answer",
+   "id": "siege.sig.rift_answer",
+   "path": "sounds/siege/sig/rift_answer",
+   "name": "The Rift answers",
+   "seconds": 5,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "Rift opening, 2 s: after the Tuning Fork is struck, the note comes back from inside the rock.",
+   "prompt": "One clear struck metal tuning note answered from deep inside solid rock: the same note comes back a moment late, lower in pitch and muffled, like a bronze bell rung behind a thick stone wall, ringing softly and fading slowly. Quiet, eerie, calm. No voices, no music, ends in silence."
+  },
+  {
+   "file": "rift_stir",
+   "id": "siege.sig.rift_stir",
+   "path": "sounds/siege/sig/rift_stir",
+   "name": "The rock stirs",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "Rift opening, 7 to 18 s: played every 2 seconds, getting louder. Three variants.",
+   "prompt": "Cave stone groaning and ticking under heavy strain, small cracks popping, fine grit and pebbles falling onto rock, and one faint glassy ring as if crystal inside the stone were humming. Close, dry, uneasy. No voices, no music.",
+   "variants": 3
+  },
+  {
+   "file": "rift_hush",
+   "id": "siege.sig.rift_hush",
+   "path": "sounds/siege/sig/rift_hush",
+   "name": "The hush",
+   "seconds": 2,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "Rift opening, 18 s: just before the tear, all sound is sucked away.",
+   "prompt": "All the sound in a cave suddenly drawn away into silence: a soft low pressure drop like ears popping on a mountain, a muffled inward hush, then complete silence. Subtle, not loud. No voices, no music."
+  },
+  {
+   "file": "rift_breath",
+   "id": "siege.sig.rift_breath",
+   "path": "sounds/siege/sig/rift_breath",
+   "name": "The Rift breathes",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "Rift opening, 30 s: the new crack draws its first breath.",
+   "prompt": "One long, slow draw of cold air inward through a narrow crack in rock, like a huge calm breath being taken in, with one faint low bell tone hidden inside the rush of air. Soft, cold, uneasy. No voices, no music, ends in silence."
+  },
+  {
+   "file": "rift_loop",
+   "id": "siege.sig.rift_loop",
+   "path": "sounds/siege/sig/rift_loop",
+   "name": "The open Rift",
+   "seconds": 7,
+   "kind": "loop",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 24,
+   "where": "The open Rift at rest, looped for as long as it stays open. Replayed so the fades overlap, like the choir hum.",
+   "prompt": "A low, steady breathing draught of cold air moving through a deep crack in a cave wall, slow and even, with a very faint detuned hum underneath that never changes. Calm, constant, the same volume throughout. No voices, no music, no sudden sounds.",
+   "exact": true,
+   "fade": 1.5,
+   "ask_seconds": 15,
+   "note": "Ask for 15 seconds or more; the installer cuts the steadiest 7 seconds from the middle and fades both ends."
+  },
+  {
+   "file": "rift_refuse",
+   "id": "siege.sig.rift_refuse",
+   "path": "sounds/siege/sig/rift_refuse",
+   "name": "The veil refuses",
+   "seconds": 2,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "When the veil pushes back a player who has not beaten all five bosses. Played to that player.",
+   "prompt": "A dull, soft thud of displaced air, like a heavy curtain of pressure pushing someone back, followed by a short low hum that falls in pitch and fades. Soft, not violent. No voices, no music."
+  },
+  {
+   "file": "rift_cross",
+   "id": "siege.sig.rift_cross",
+   "path": "sounds/siege/sig/rift_cross",
+   "name": "Crossing the Rift",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "max_distance": 64,
+   "where": "Stepping through the open Rift into the Hollow. Played to the player.",
+   "prompt": "The sound of a cave smearing and slowing down as it drops in pitch, like hearing the world through water, then a held breath and complete silence. Smooth and dreamlike, uneasy, not scary. No voices, no music."
+  },
+  {
+   "file": "seep_creep",
+   "id": "siege.sig.seep_creep",
+   "path": "sounds/siege/sig/seep_creep",
+   "name": "The seep creeps",
+   "seconds": 2,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 16,
+   "where": "Where a seep vein grows across the ground while the Rift is open. Quiet. Three variants.",
+   "prompt": "Ground slowly turning to something else: a quiet wet crackle of stone and soil, like frost spreading through damp rock, with one faint glassy tick. Very quiet and close. No voices, no music.",
+   "variants": 3
+  },
+  {
+   "file": "thin_draught",
+   "id": "siege.sig.thin_draught",
+   "path": "sounds/siege/sig/thin_draught",
+   "name": "Thin place draught",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "ambient",
+   "max_distance": 12,
+   "where": "A tell at any thin place before the Rift opens there.",
+   "prompt": "A slight cold draught whistling very softly through a hairline crack in rock, with a barely audible low hum underneath. Very quiet, subtle, eerie but calm. No voices, no music."
   },
   {
    "file": "hollow_ambience",
@@ -185,7 +308,7 @@
    "channels": 2,
    "category": "ambient",
    "where": "Once per world, at 3:17 on the night something walks up between the soldiers that is not one of them.",
-   "prompt": "Night on a castle wall during a battle that suddenly goes quiet: the wind drops, the distant fighting fades to nothing, and in the silence come slow, even, unhurried footsteps on wet ground getting closer, with a very faint low choir note under them and one slow deep pulse like a heartbeat. It stops before anything happens. Quiet, tense, patient. No sting, no loud hit, no scream, no music."
+   "prompt": "Close, clear footsteps: one person walking slowly and evenly over wet gravel and mud toward the listener, every step distinct and easy to hear, boots squelching, getting closer and louder over ten seconds. Under them a low steady choir note and one slow deep heartbeat thud every two seconds. A faint night wind at the very start that dies away. The steps stop right next to you. Tense and patient, not loud. No sting, no scream, no music."
   },
   {
    "file": "bell_tongue",
@@ -234,6 +357,102 @@
    "category": "player",
    "where": "When a Fen Mother's hexes all land at once, and at Morvane stage 6 when the fen lends the party a moment.",
    "prompt": "A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence."
+  },
+  {
+   "file": "gate_open",
+   "id": "siege.sig.gate_open",
+   "path": "sounds/siege/sig/gate_open",
+   "name": "The castle gate opens",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a settlement's great timber gate swings open. Heard by everyone near the gate.",
+   "prompt": "A massive medieval oak castle gate, iron-banded, swinging open on huge iron hinges: a deep slow groaning creak of old timber and rusted iron pivots, a heavy wooden thud as the bar lifts at the start, and the low scrape of the gate's foot over stone. Close-miked, outdoor stone courtyard, slight echo. No music, no voices."
+  },
+  {
+   "file": "gate_close",
+   "id": "siege.sig.gate_close",
+   "path": "sounds/siege/sig/gate_close",
+   "name": "The castle gate shuts",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When the great timber gate swings shut. Heard by everyone near the gate.",
+   "prompt": "A massive iron-banded oak castle gate swinging shut: a short groaning hinge creak, then a deep heavy boom as it meets the stone frame, a rattle of iron fittings, and a heavy wooden bar dropping into its brackets with a solid thunk. Outdoor stone courtyard, short echo. No music, no voices."
+  },
+  {
+   "file": "portcullis_open",
+   "id": "siege.sig.portcullis_open",
+   "path": "sounds/siege/sig/portcullis_open",
+   "name": "The portcullis rises",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a portcullis is winched up. Heard by everyone near the gate.",
+   "prompt": "A heavy iron portcullis being winched up into a stone gatehouse: a wooden ratchet winch clacking steadily, thick iron chain rattling and grinding over a wheel, the iron grille scraping up stone grooves, ending with the click of the pawl catching. Medieval, heavy, mechanical, stone-room echo. No music, no voices."
+  },
+  {
+   "file": "portcullis_close",
+   "id": "siege.sig.portcullis_close",
+   "path": "sounds/siege/sig/portcullis_close",
+   "name": "The portcullis drops",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a portcullis comes down. Heard by everyone near the gate.",
+   "prompt": "A heavy iron portcullis slamming down: one quick, hard, metallic crash like an iron anvil dropped onto stone, a short sharp clang with a brief ringing rattle of iron bars, then silence. Fast and punchy, close and dry, no chain run-out, no echo, no music."
+  },
+  {
+   "file": "crowd_murmur",
+   "id": "siege.sig.crowd_murmur",
+   "path": "sounds/siege/sig/crowd_murmur",
+   "name": "The arena crowd talking among itself (loop)",
+   "seconds": 8,
+   "kind": "loop",
+   "channels": 2,
+   "category": "ambient",
+   "where": "Loops from the middle of the arena while a fight is on. Heard across the arena.",
+   "prompt": "A large medieval crowd of a few hundred people seated in a huge open-air stone arena, waiting and watching: a steady warm murmur of many indistinct voices talking at once, scattered shouts and whistles, a few claps, feet shuffling on stone benches. Even and continuous from start to end so it can loop, no peaks, no single clear words, no music."
+  },
+  {
+   "file": "crowd_cheer",
+   "id": "siege.sig.crowd_cheer",
+   "path": "sounds/siege/sig/crowd_cheer",
+   "name": "The arena crowd cheers",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When the gates lift, a big hit lands, a beast falls or someone wins. Heard across the arena.",
+   "prompt": "A big medieval crowd in a stone arena erupting into a cheer: a sudden roar of hundreds of voices, whistles, stamping feet and fists pounding on wooden barriers, swelling for two seconds and then settling back down. Excited and joyful, open-air with a little stone echo, no single clear words, no music."
+  },
+  {
+   "file": "crowd_groan",
+   "id": "siege.sig.crowd_groan",
+   "path": "sounds/siege/sig/crowd_groan",
+   "name": "The arena crowd groans as a fighter falls",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When a fighter falls. Heard across the arena.",
+   "prompt": "A big medieval crowd in a stone arena reacting as a fighter goes down: a loud collective 'ohhh' of sympathy and shock from hundreds of voices, falling in pitch, followed by scattered murmurs. Open-air with a little stone echo, no single clear words, no music."
+  },
+  {
+   "file": "arena_fanfare",
+   "id": "siege.sig.arena_fanfare",
+   "path": "sounds/siege/sig/arena_fanfare",
+   "name": "Horns as the arena gates lift, or for the winner",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When the arena gates lift, and for the winner. Heard across the arena.",
+   "prompt": "A short medieval tournament fanfare: two long brass herald trumpets playing a bold rising three-note call together, the last note held, ringing out over a huge open-air stone arena with a natural echo. Proud and bright, no drums, no voices, no crowd."
   }
  ],
  "dragons": [
@@ -250,7 +469,8 @@
    "signature": true,
    "species": "Cinderwing",
    "where": "The Cinderwing's roar.",
-   "prompt": "The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "cinderwing_idle",
@@ -370,7 +590,8 @@
    "signature": true,
    "species": "Ashen Wyvern",
    "where": "The Ashen Wyvern's roar.",
-   "prompt": "The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "wyvern_idle",
@@ -490,7 +711,8 @@
    "signature": true,
    "species": "Dune Drake",
    "where": "The Dune Drake's roar.",
-   "prompt": "The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "drake_idle",
@@ -610,7 +832,8 @@
    "signature": true,
    "species": "Glass Wyrm",
    "where": "The Glass Wyrm's roar.",
-   "prompt": "The voice of a long glass-scaled wyrm whose voice is two tones at once, a fifth apart, with a ringing glassy edge, so it never sounds like a single animal. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "A humpback whale's long moaning call and a bull elk's bugle heard together, two deep tones at once that rise and fall, warm and breathy, with a slow wet breath underneath. Real wildlife field recording made close up with a good microphone: natural, organic, unprocessed, one living animal with real air and wet throat noise. No synth, no growl effects, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "wyrm_idle",

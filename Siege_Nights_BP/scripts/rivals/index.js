@@ -36,7 +36,7 @@ import { startBuild, buildFor, worldCells } from "../townhall/build.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
-import { REGION_TO_STYLE } from "../settle/config.js";
+import { REGION_TO_STYLE, HOMES } from "../settle/config.js";
 import { drawBuilding, styleFor, BUILDING } from "../settle/buildings.js";
 import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from "../settle/walls.js";
 import { WALL_LEVELS } from "../settle/walldata.js";
@@ -45,10 +45,11 @@ import { foundTown, townOf, layoutOf, growTown, slotClosed, builtCounts, saveTow
 import { townFor, slotsOf, seatOnSlot, seatedBox } from "../settle/towns.js";
 import { lordPick } from "../settle/charters.js";
 import { BUILDINGS } from "../settle/buildings.js";
-import { levelSite, foundationColumns } from "../settle/ground.js";
+import { levelSite, foundationColumns, Groundwork } from "../settle/ground.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 import "./court.js"; // what lords do: marches, feuds, trade, oaths
 
 const OVERWORLD = "minecraft:overworld";
@@ -197,12 +198,14 @@ function buildTick() {
     const style = styleOfLord(lord);
     lord.gateDir ??= gateDirFor(lord);
     if (piece.hall) {
+      let fresh = false;
       if (!lord.hallAt) {
         const spot = hallSpot(lord, lord.gateDir);
         const y = surface(dim, spot.x, spot.z, lord.y + 1);
         if (y === undefined) continue;
-        lord.hallAt = levelSite(dim, drawHall(piece.hall, STYLES[style]), { x: spot.x, y, z: spot.z }, spot.forward).origin; // never half buried
-        lord.hallF = spot.forward;
+        // the one terraform pass, like a player's building (ground.js): a pad cut in at most 3, the land blended round it
+        lord.hallAt = levelSite(dim, drawHall(piece.hall, STYLES[style]), { x: spot.x, y, z: spot.z }, spot.forward, { terraform: true }).origin;
+        lord.hallF = spot.forward; fresh = true;
       }
       const plan = drawHall(piece.hall, STYLES[style]);
       let remove;
@@ -213,6 +216,7 @@ function buildTick() {
       }
       startBuild({
         id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: lord.hallF, plan, style: STYLES[style], remove,
+        ...(fresh ? { ground: new Groundwork(plan, lord.hallAt, lord.hallF, style) } : {}),
         perTick: Math.max(8, Math.ceil(plan.cells.size / 1200)),
         onDone() { lord.built.hall = piece.hall; save(); },
       }).columns.unshift(...foundationColumns(plan));
@@ -221,14 +225,17 @@ function buildTick() {
       const plan = drawBuilding(piece.part.building, style);
       const pk = partKey(piece.tier, piece.i);
       lord.partY ??= {};
-      if (lord.partY[pk] === undefined) { // measured once, so a build picked up again keeps its height
+      let fresh = false;
+      if (lord.partY[pk] === undefined) { // measured once, so a build picked up again keeps its height (and isn't regraded)
         const y = surface(dim, spot.x, spot.z, lord.y + 1);
         if (y === undefined) continue;
-        lord.partY[pk] = levelSite(dim, plan, { x: spot.x, y, z: spot.z }, spot.forward).origin.y; // never half buried
-        save();
+        lord.partY[pk] = levelSite(dim, plan, { x: spot.x, y, z: spot.z }, spot.forward, { terraform: true }).origin.y; // terraformed pad
+        save(); fresh = true;
       }
+      const at = { x: spot.x, y: lord.partY[pk], z: spot.z };
       startBuild({
-        id, dimensionId: OVERWORLD, origin: { x: spot.x, y: lord.partY[pk], z: spot.z }, forward: spot.forward, plan, style: styleFor(style),
+        id, dimensionId: OVERWORLD, origin: at, forward: spot.forward, plan, style: styleFor(style),
+        ...(fresh ? { ground: new Groundwork(plan, at, spot.forward, style) } : {}),
         perTick: Math.max(4, Math.ceil(plan.cells.size / 200)),
         onDone() { lord.built.parts.push(pk); delete lord.partY[pk]; save(); },
       }).columns.unshift(...foundationColumns(plan));
@@ -246,6 +253,7 @@ function townTick(dim, lord, id) {
     foundTown(key, plot, { x: lord.x, y: lord.y, z: lord.z }, { lord: true, style });
     return;
   }
+  if (town.temper !== lord.temperament) { town.temper = lord.temperament; saveTowns(); } // their townsfolk talk the lord's way
   if (lord.built.hall < town.tier + 1) {
     if (!town.hallSeat) return; // the roads are still going down
     const level = lord.built.hall + 1;
@@ -273,7 +281,8 @@ function townTick(dim, lord, id) {
   if (!job) {
     const open = slots.filter((s) => s.tier <= town.tier && town.laid[s.tier] && !town.slots[s.id]?.building && !slotClosed(key, s));
     const fits = (bid, s) => !!seatOnSlot(s, drawBuilding(bid, style).bounds());
-    const pick = lordPick(open, town.tier, builtCounts(key), DESIGNS, fits, lord.id);
+    const coming = slots.filter((s) => !town.slots[s.id]?.building && !slotClosed(key, s));
+    const pick = lordPick(open, town.tier, builtCounts(key), DESIGNS, fits, lord.id, coming);
     if (!pick) return;
     job = lord.plotJob = { slot: pick.slot.id, building: pick.id };
     save();
@@ -296,6 +305,7 @@ function townTick(dim, lord, id) {
           box: { x0: t.x + box.x0, z0: t.z + box.z0, x1: t.x + box.x1, z1: t.z + box.z1 } };
         saveTowns();
         emit("settleCharter", { owner: key }); // a lord's town grows past a tier on the same charter
+        if (HOMES.includes(job.building)) emit("lordHomeBuilt", { owner: key, slot: job.slot }); // the crew puts beds in it (settle/lordfolk.js)
       }
       lord.built.parts.push(`plot:${job.slot}`);
       delete lord.plotJob;
@@ -318,6 +328,14 @@ function wallTick() {
   }
 }
 
+// A lord dresses for their region and their oath: lord_<style>_<knight|marked>
+const lordSkin = (lord) => `lord_${REGION_TO_STYLE[lord?.region] ?? "vale"}_${lord?.role === "marked" ? "marked" : "knight"}`;
+addNpcLook((e) => {
+  if (!e.hasTag(LORD_TAG)) return undefined;
+  const lord = lords().find((l) => e.hasTag(lordTag(l)));
+  return lord ? { key: lordSkin(lord), name: lord.name } : undefined;
+});
+
 function keepLordHome(dim, lord) {
   try {
     if (dim.getEntities({ type: NPC_TYPE, tags: [lordTag(lord)] }).length) return;
@@ -328,13 +346,8 @@ function keepLordHome(dim, lord) {
     npc.addTag(LORD_TAG);
     npc.addTag(lordTag(lord));
     npc.nameTag = lord.name;
-    try {
-      const c = npc.getComponent("minecraft:npc");
-      c.name = lord.name;
-      c.skinIndex = 20 + (lords().indexOf(lord) % 10) * 2;
-    } catch {
-      // looks are optional
-    }
+    try { npc.getComponent("minecraft:npc").name = lord.name; } catch { /* looks are optional */ }
+    dressNpc(npc, lordSkin(lord));
   } catch {
     // not loaded yet
   }
@@ -401,7 +414,7 @@ function laySiege(player, lord) {
       spawned++;
     } else {
       try {
-        const e = dim.spawnEntity(i % 3 === 0 ? "minecraft:pillager" : "minecraft:vindicator", at); // plain soldiers if champions are missing
+        const e = dim.spawnEntity(i % 3 === 0 ? "siege:hollow_footman" : "siege:shieldwall_brute", at); // our own raiders if champions are missing
         for (const t of tags) e.addTag(t);
         e.nameTag = name;
         spawned++;

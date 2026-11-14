@@ -14,7 +14,8 @@
      "monster",
      "mob",
      "beast",
-     "siege_scripted"
+     "siege_scripted",
+     "siege_heavy"
     ]
    },
    "minecraft:health": {
@@ -33,6 +34,11 @@
    },
    "minecraft:knockback_resistance": {
     "value": 1.0
+   },
+   "minecraft:ambient_sound_interval": {
+    "value": 12,
+    "range": 20,
+    "event_name": "ambient"
    },
    "minecraft:movement": {
     "value": 0.28
@@ -95,12 +101,13 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 10
+    "damage": 7
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,
     "speed_multiplier": 1.25,
-    "track_target": true
+    "track_target": true,
+    "cooldown_time": 1.5
    },
    "minecraft:despawn": {
     "despawn_from_distance": {}

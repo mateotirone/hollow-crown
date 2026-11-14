@@ -10,13 +10,14 @@ export const SETTLE = {
   localBonus: 1.5, // your own region's materials: this many times more blocks per lot
   maxSpend: 32, // most lots one purchase can buy
   maxBenches: 2, // Mason's Benches per settlement
-  stonePrice: 4, // lots for a Foundation Stone at the mason (it can also be crafted)
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
-  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14,
-    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16 },
+  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, smithy: 12, stable: 14,
+    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16,
+    barracks: 2, // the Barracks opens with the Hamlet and is cheap: the first guards are what the first siege needs
+    quartermaster_desk: 3 },
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -101,7 +102,7 @@ export const MASON_LINES = {
     "You hear that? No. Nor did I. What do you need?",
     "Walls first, I'd say, on a night like this. But it's your coin.",
   ],
-  noLand: "You've no land to lay it on yet. Raise a Keep Banner on a Plot Stone and come back. I'll sell to you all the same.",
+  noLand: "You've no land to lay it on yet. Click a free Plot Stone, raise your banner and come back. I'll sell to you all the same.",
 };
 
 // ---------- Town plots and charters (Plot Markers, charters.js) ----------
@@ -109,25 +110,35 @@ export const MASON_LINES = {
 // old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
-  smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+  smithy: 2, stable: 2, inn: 2, barracks: 0, watchtower: 3,
+  // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
+  ironworks: 0,
+  quartermaster_desk: 0, // the Quartermaster's Armoury: a plot building since 2026-11-14 (no block raises buildings)
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
-// G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+// G Great 21x21, W Works 27x17. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
-  stable: "ML", storehouse: "ML", library: "ML",
+  stable: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
+  quartermaster_desk: "M", // the armoury is 11 x 12
+  ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
-  barracks: ["ML"],
-  library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
+  farmhouse: ["ML"],
+  house: ["ML"],
+  library: ["L"], stable: ["L"], townhouse: ["L"],
+  quartermaster_desk: ["ML"], // never a Large: the Hamlet's one Large is the Barracks'
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
-export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
+export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
+// The smallest plot box a building stands on: [width along the door side, depth]. The guardhouse (every region,
+// barn_data.js) is 15 x 17, so only a deep Large holds it (the town generator gives every layout one by the City).
+export const PLOT_MIN_BOX = { barracks: [15, 17] };
 
 // Where on the map a building wants to be, from the plot's tags (wall, corner, square, gate, road_front,
 // field_edge, hall, library). needs: the plot must have one of them. prefer: listed first in the menu.
@@ -138,13 +149,22 @@ export const PLOT_TAGS = {
   garden: { prefer: ["field_edge"] },
   farmhouse: { prefer: ["field_edge"] },
   library: { prefer: ["library", "square"] },
+  ironworks: { prefer: ["water"] }, // its last stage turns a waterwheel
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall5: "on ground the hall will need at level 5" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
-export const HOMES = ["cottage"];
-export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
+// One of each per settlement (Mateo 2026-11-14: "only one of special buildings can be built"). A second can't be
+// picked at a Plot Marker, counted as hand-built, raised by a Rival Lord, or set down as a block on the same
+// settlement's land; writ allies building in a shared settlement share the limit. Ids are plot buildings
+// (buildings.js) and raising blocks without "siege:" (blockdesigns.js). The Ironworks, Stables and Rail Depot keep
+// their own one-a-settlement rules (ironworks/, horses/barn.js, rails/). Homes, farms, wells, markets and the rest
+// stay unlimited.
+export const ONE_EACH = ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"];
+
+export const HOMES = ["cottage", "house", "townhouse"];
+export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1", "storehouse_2", "storehouse_3", "storehouse_4", "farmhouse", "mint", "inn", "barracks"];
 
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now).
 // Siege wins still decide the tier; a charter that isn't met holds the town at its tier until it is.
@@ -207,8 +227,10 @@ export const FLOOR_PER_BED = 12;
 // worker first, then the homes fill up. They stand about by day and go to their bed at dusk.
 export const SETTLERS = {
   perDawn: 1,
-  skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
-  workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
+  lordRange: 96, // a Rival Lord's town looks after its townsfolk while a player is this close (as their crews build)
+  lordCatchUp: 3, // most newcomers a lord's town takes at once after nobody has been near for days
+  waryDays: 3, // townsfolk are wary this many days after their town changes hands
+  workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", storehouse_1: "Storekeeper", storehouse_2: "Storekeeper", storehouse_3: "Storekeeper", storehouse_4: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
   names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
 };
 // What a settler says when you talk to them (hand-written; {town} is the settlement's name)
@@ -226,6 +248,49 @@ export const SETTLER_LINES = {
     "Don't stand out here long. It's colder than it ought to be.",
   ],
   idle: "My work's gone. Put it back up and I'll go back to it.",
+  // In a Rival Lord's town: how the lord's temper shows in their people
+  lord: {
+    proud: [
+      "His lordship doesn't care for strangers on the green. Say your piece and go.",
+      "Our walls were raised by a proper lord. Not everyone can say that.",
+      "Mind the banner. Folk have been fined for less.",
+    ],
+    grasping: [
+      "Everything here has a price, friend. Even the well, if he hears of it.",
+      "Taxed on bread, taxed on boots. We pay and we keep quiet.",
+      "If you've coin, the lord will want to meet you. If you haven't, he won't.",
+    ],
+    devout: [
+      "We keep the old prayers here. You're welcome to them.",
+      "The lord says grace before every meal, even the small ones.",
+      "Light a candle before you leave. It costs nothing.",
+    ],
+    wary: [
+      "We don't open the door after the second bell. Don't knock.",
+      "You came by the north road? Nobody comes by the north road.",
+      "Keep your voice down. Sound carries at night here.",
+    ],
+    bold: [
+      "Our lord's ridden out against worse than you. Twice.",
+      "We'll stand on that wall when the horn goes. Every one of us.",
+      "Fancy a wrestle on the green? No? Pity.",
+    ],
+    kind: [
+      "Hungry? There's bread by the hall door. The lord leaves it out.",
+      "You're welcome here. Most are.",
+      "Our lord knows every name in this town. Even the children's.",
+    ],
+    steady: [
+      "Quiet enough here, most days.",
+      "We keep our heads down and our roofs mended.",
+    ],
+  },
+  // For a few days after a player takes a lord's town
+  wary: [
+    "New banner on the hall. We'll see how it suits.",
+    "The old lord kept the well clean. I hope you will.",
+    "I'll work, same as before. Just don't ask me to cheer.",
+  ],
 };
 
 // ---------- The Plan Book (planbook.js, plandata.js) ----------
@@ -236,11 +301,11 @@ export const SETTLER_LINES = {
 //   isn't your town's own costs foreignMul times as much to raise.
 //   Rule: a player always gets what a charter needs. Every home and every building a charter names is taught by
 //   basics or by the hall level that tier reaches (hall level = tier + 1), never only by a lucky scroll (tested).
-//   noPlan: charter buildings raised from their own block item, which need no plan.
+//   noPlan: buildings every player may raise on a fitting plot without a plan (no Plan Book card).
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
-  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["storehouse", "watchtower"] },
-  noPlan: ["barracks"],
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["watchtower"] },
+  noPlan: ["barracks", "quartermaster_desk"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
   lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town

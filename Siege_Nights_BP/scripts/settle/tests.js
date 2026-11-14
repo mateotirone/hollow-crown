@@ -3,19 +3,65 @@ import { BlockTypes } from "@minecraft/server";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
-import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
+import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
 import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
 import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS, isStructural } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { wallCost, nearGate } from "./walls.js";
+import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath } from "./walldata.js";
+import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
+import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
+import { HAMLET_WALLS } from "./hamlet_walls_data.js";
+import { planLaneLamps } from "./lanelamps.js";
+import { slotsOf as layoutSlots } from "./towns.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
 addTests("settle", {
+  "every hanging lantern in a hall or plot building hangs from something (a chain up to the roof)": () => {
+    const hung = (p, label) => {
+      for (const c of p.cells.values()) {
+        const ids = p.style.roles[c.role] ?? [];
+        if (!c.o?.hanging || !ids.some((id) => /lantern$/.test(id))) continue;
+        const up = p.cells.get(`${c.x},${c.y + 1},${c.z}`);
+        assert(up && up.role !== "air", `${label}: lantern at ${c.x},${c.y},${c.z} hangs on air`);
+      }
+    };
+    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) hung(drawHall(level, STYLES[id]), `${id} hall ${level}`);
+    for (const b of BUILDINGS) for (const id of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      try { hung(drawBuilding(b.id, id), `${b.id} ${id}`); } catch (e) { if (/lantern/.test(String(e))) throw e; }
+    }
+  },
+  "lane lamps: every Hamlet's lanes get posts on the verge, never on a plot, the same every time": () => {
+    for (const [key, t] of Object.entries(TOWNS)) {
+      const L = t.variants[0];
+      const a = planLaneLamps(L, 0, t.walls[0]), b = planLaneLamps(L, 0, t.walls[0]);
+      assertEqual(JSON.stringify(a), JSON.stringify(b), `${key}: same posts every time`);
+      for (const s of layoutSlots(L)) for (const q of a) assert(!(q.x >= s.box.x0 && q.x <= s.box.x1 && q.z >= s.box.z0 && q.z <= s.box.z1), `${key}: post ${q.x},${q.z} on plot ${s.id}`);
+      assert(a.length < 40, `${key}: ${a.length} posts`);
+    }
+  },
+  "watchtowers on every map plot's wall line: nothing of the wall on the way in to a door": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
+    for (const [key, t] of Object.entries(TOWNS)) {
+      if (!t.outline?.radii?.length) continue;
+      const tight = HAMLET_WALLS[key] ?? HAMLET_WALLS[t.name?.toLowerCase()];
+      const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) };
+      const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
+      const radius = t.walls[0];
+      for (const level of [1, 2, 6]) {
+        const spots = watchSpots(center, radius, gate, smooth, level);
+        const at = new Set(wallColumns({ center, radius, level, gateAngle: gate, smooth }).map((c) => `${c.x},${c.z}`));
+        for (const s of spots) for (let n = 0; n < WATCH.clear; n++) for (let side = -1; side <= 1; side++) {
+          const x = s.origin.x - s.forward.x * n + side * s.forward.z, z = s.origin.z - s.forward.z * n + side * s.forward.x;
+          assert(!at.has(`${x},${z}`), `${key} level ${level}: wall at ${x},${z} in front of watchtower ${s.k}'s door`);
+        }
+      }
+    }
+  },
   "the reserve covers every hall tier in every style": () => {
     for (const id of STYLE_IDS) {
       const reach = hallReach(id);
@@ -101,6 +147,13 @@ addTests("settle walls", {
     assert(!nearGate(g, { x: 9, y: 64, z: 0 }, WALLS.gateGreet));
     assert(!nearGate(g, { x: 0, y: 72, z: 0 }, WALLS.gateGreet));
   },
+  "the guard opens the gate once as you arrive, and a gate you shut by hand stays shut": () => {
+    assertEqual(gateGuardStep({ friendNear: true, greeted: false, opened: false, guards: 2 }), "open");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: true, opened: false, guards: 2 }), "wait", "you shut it yourself: he leaves it");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: true, opened: true, guards: 2 }), "wait");
+    assertEqual(gateGuardStep({ friendNear: false, greeted: true, opened: true, guards: 2 }), "shut");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: false, opened: false, guards: 0 }), "wait", "no guard, no doorman");
+  },
   "log walls are stripped logs in every timber": () => {
     for (const t of WALL_TIMBER) assert(/^minecraft:stripped_\w+_log$/.test(WALL_LOG[t] ?? ""), `${t} log wall is ${WALL_LOG[t]}`);
   },
@@ -149,6 +202,9 @@ addTests("settle walls", {
     for (const level of [1, 4, 10]) {
       const cols = wallColumns({ center: { x: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth });
       const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+      // a watchtower's shaft closes the ring where the wall leaves it open
+      const watch = watchSpots({ x: 0, z: 0 }, WALLS.radius, bearingToAngle(180), smooth, level);
+      for (const t of watch) for (let dx = -t.half; dx <= t.half; dx++) for (let dz = -t.half; dz <= t.half; dz++) at.add(`${t.x + dx},${t.z + dz}`);
       for (const c of cols) {
         if (c.role === "stair" || c.role === "ladder" || c.role === "landing") continue; // steps, landings and ladders stand inside the ring
         let near = 0;
@@ -159,6 +215,71 @@ addTests("settle walls", {
       const open = cols.filter((c) => c.role === "gap" || c.role === "gate" || c.role === "port");
       assert(open.length >= WALLS.gateWidth && open.every((c) => c.z > 40 && Math.abs(c.x) <= 2), `level ${level}: the gate should be due south`);
       assert(cols.every((c) => Math.hypot(c.x, c.z) <= WALLS.radius + 5), "inside the ring");
+    }
+  },
+  "levels 1-6 have four watchtowers astride the line, where the Watch Wall's towers will stand": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, (_, i) => 64 + Math.round(2 * Math.sin(i / 7))));
+    const center = { x: 300, z: -200, shape: Array.from({ length: 72 }, (_, i) => Math.sin(i / 4)) };
+    for (let level = 1; level <= MAX_WALL; level++) {
+      assertEqual(hasWatch(level), level <= 6, `level ${level}`);
+      assertEqual(watchKind(level), level === 1 ? "stand" : level <= 6 ? "tower" : undefined, `level ${level}: the Low Palisade gets the small stand`);
+    }
+    for (const radius of [36, 46, 66]) for (const gate of [0, 1.2, bearingToAngle(180)]) {
+      const spots = watchSpots(center, radius, gate, smooth);
+      assertEqual(spots.length, 4);
+      const stone = wallColumns({ center, radius, level: 7, gateAngle: gate, smooth }).filter((c) => c.role === "tower" && c.mid);
+      for (const s of spots) {
+        assert(stone.some((c) => c.x === s.x && c.z === s.z), `r${radius}: watchtower ${s.k} is where a Watch Wall tower stands`);
+        const out = { x: s.x - center.x, z: s.z - center.z };
+        assert(s.forward.x * out.x + s.forward.z * out.z > 0, "the door faces into the settlement");
+        assertEqual(s.origin.y, s.ground + 1);
+      }
+      for (const level of [1, 2, 3, 6]) {
+        const spots = watchSpots(center, radius, gate, smooth, level);
+        const cols = wallColumns({ center, radius, level, gateAngle: gate, smooth });
+        for (const c of cols) {
+          assert(!inWatch(spots, c.x, c.z), `level ${level}: wall in a watchtower at ${c.x},${c.z}`);
+          if (c.role === "stair" || c.role === "landing") assert(!onWatchPath(spots, c.x, c.z), `level ${level}: steps across a watchtower door`);
+        }
+        // the door opens inside the wall: nothing of the wall on the step or in front of it
+        const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+        for (const s of spots) for (let n = 0; n < WATCH.clear; n++) assert(!at.has(`${s.origin.x - s.forward.x * n},${s.origin.z - s.forward.z * n}`), `level ${level} r${radius}: wall at watchtower ${s.k}'s door`);
+      }
+    }
+  },
+  "the watchtower and lookout stand designs fit their spots, with a guard on the deck and a way up": () => {
+    for (const [kind, designs] of [["tower", WALLWATCH_DESIGNS], ["stand", WALLSTAND_DESIGNS]]) for (const [region, d] of Object.entries(designs)) {
+      const K = WATCH_KINDS[kind], SHAFT = shaftOf(kind);
+      assertEqual(d.marks.guard.join(","), `0,${K.guardUp},${K.back + K.guardOut}`, `${region} ${kind} guard mark`);
+      assert(d.box.x0 >= -K.half - 2 && d.box.x1 <= K.half + 2, `${region} ${kind}: as wide as its spot`);
+      if (kind === "stand") assert(d.box.y1 <= 9, `${region}: the stand stays small (top at ${d.box.y1})`);
+      const p = watchPlan(region, kind);
+      const id = (c) => (c && c.role !== "air" ? d.palette[Number(c.role.split(":").pop())][0] : "air");
+      // the guard's spot: deck under, two free blocks over
+      const [gx, gy, gz] = d.marks.guard;
+      assert(id(p.get(gx, gy - 1, gz)) !== "air" && id(p.get(gx, gy, gz)) === "air" && id(p.get(gx, gy + 1, gz)) === "air", `${region}: the guard stands on the deck`);
+      // a door at the front of the shaft, a ladder inside, a hatch in the deck
+      assert(kind === "stand" ? id(p.get(0, 1, SHAFT.z0)) === "minecraft:ladder" : id(p.get(0, 1, SHAFT.z0)).endsWith("_door"), `${region} ${kind}: door or ladder at the front`);
+      assert([...p.cells.values()].some((c) => id(c) === "minecraft:ladder"), `${region}: ladder`);
+      assert([...p.cells.values()].some((c) => c.y === K.guardUp - 1 && id(c).endsWith("trapdoor")), `${region} ${kind}: hatch in the deck`);
+      const cells = watchCells(region, { x: 10, y: 70, z: 10 }, { x: 0, z: 1 }, kind);
+      assert(cells.length > (kind === "stand" ? 40 : 200) && cells[0].y >= cells[cells.length - 1].y, `${region} ${kind}: taken down top first`);
+    }
+  },
+  "the Hamlet wall is drawn tight round its village, never outside the starter's line, and the later rings keep the full outline": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      const tight = HAMLET_WALLS[key];
+      assert(tight?.length === town.outline.radii.length, `${key} has a tight Hamlet line`);
+      const c = { x: 0, z: 0, radii: town.outline.radii, radiiAt: town.outline.radiiAt, tight };
+      let cut = 0;
+      for (let i = 0; i < tight.length; i++) {
+        const a = (i / tight.length) * Math.PI * 2;
+        const h = radiusAt(c, 36, a), full = radiusAt({ ...c, tight: undefined }, 36, a);
+        assert(h <= full + 1e-6 && h >= 22, `${key}: Hamlet line ${h.toFixed(1)} at ${i}`);
+        cut = Math.max(cut, full - h);
+        assert(Math.abs(radiusAt(c, 54, a) - radiusAt({ ...c, tight: undefined }, 54, a)) < 1e-9, `${key}: the Town ring keeps the outline`);
+      }
+      assert(cut >= 2, `${key}: the Hamlet line pulls in somewhere (${cut.toFixed(1)})`);
     }
   },
   "steep ground is refused, the wall line is reserved": () => {
@@ -174,7 +295,7 @@ addTests("settle walls", {
       const boxes = STYLE_IDS.map((style) => hallReserve({ x: hallAt.x, z: hallAt.z, fx: hallAt.forward.x, fz: hallAt.forward.z, style }, 1));
       assert(!boxes.some((b) => inBox(b, center)), `${gateDir}: the hall would cover the Keep Banner`);
       for (const slot of SLOTS) {
-        assert(BUILDINGS.some((b) => b.id === slot.building), slot.building);
+        assert(BUILDING[slot.building], slot.building); // the old fixed layout still names the retired plot Storehouse
         const at = place(center, gateDir, slot);
         const box = footprint(at, at.forward, drawBuilding(slot.building, "vale").bounds());
         for (const hall of boxes) assert(!boxesTouch(box, hall), `${gateDir}: ${slot.id} stands where the hall grows`);
@@ -296,11 +417,12 @@ addTests("settle towns", {
   "every building has a price on a town plot": () => {
     for (const b of BUILDINGS) assert(SETTLE.plotPrices[b.id] > 0, b.id);
   },
-  "every map plot has three town layouts, with walls at 36, 46, 56 and 66": () => {
+  "every map plot has three town layouts, with walls at 36, 54, 60 and 66 that follow its starter village's outline": () => {
     assertEqual(townNames().length, 12);
     for (const [key, town] of Object.entries(TOWNS)) {
       assertEqual(town.variants.length, 3, key);
-      assertEqual(town.walls.join(","), "36,46,56,66", key);
+      assertEqual(town.walls.join(","), "36,54,60,66", key); // the Town ring moved out so its plots fit round the village (Mateo 2026-11-13)
+      assert(town.outline?.radii?.length >= 48 && town.outline.radiiAt === 36, `${key} has the starter village's wall outline`);
       assertEqual(wallRadius(town, 0), 36);
       assertEqual(wallRadius(town, 9), 66);
       assertEqual(wallRadius(town, 3), WALLS.radius); // the Castle ring is the biggest wall the land is sized for
@@ -343,7 +465,8 @@ addTests("settle towns", {
         for (const s of slots) {
           assert(s.tier >= 0 && s.tier <= 3 && s.door, `${key} ${s.id}`);
           for (const [x, z] of [[s.box.x0, s.box.z0], [s.box.x1, s.box.z1], [s.box.x0, s.box.z1], [s.box.x1, s.box.z0]]) {
-            assert(Math.hypot(x, z) < wallRadius(town, s.tier), `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
+            const wall = town.outline ? radiusAt(town.outline, wallRadius(town, s.tier), Math.atan2(z, x)) : wallRadius(town, s.tier);
+            assert(Math.hypot(x, z) < wall, `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
           }
         }
       }
@@ -382,7 +505,7 @@ addTests("settle towns", {
   },
 });
 
-import { levelSite, foundationColumns, MAX_LIFT } from "./ground.js";
+import { levelSite, foundationColumns, MAX_LIFT, Groundwork } from "./ground.js";
 
 addTests("settle ground", {
   "a building's floor goes on the highest ground under it, and every footprint column gets foundation": () => {
@@ -406,6 +529,35 @@ addTests("settle ground", {
     assertEqual(foundationColumns(plan).length, (b.x1 - b.x0 + 1) * (b.z1 - b.z0 + 1));
     assert(MAX_LIFT >= 4);
   },
+  "terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it": () => {
+    // a 1 in 1 slope rising to the east
+    const ground = (x) => 64 + Math.max(-6, Math.min(12, x));
+    const set = new Map();
+    const fake = {
+      getBlock: ({ x, y, z }) => {
+        const k = `${x},${y},${z}`;
+        const typeId = set.has(k) ? set.get(k) : y <= ground(x) ? "minecraft:grass_block" : "minecraft:air";
+        return { typeId, location: { x, y, z }, permutation: null, below() { return fake.getBlock({ x, y: y - 1, z }); },
+          setPermutation(p) { set.set(k, String(p)); } };
+      },
+      getTopmostBlock: ({ x, z }) => fake.getBlock({ x, y: ground(x), z }),
+    };
+    const plan = drawBuilding("cottage", "vale");
+    const b = plan.bounds();
+    const { origin } = levelSite(fake, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 }, { terraform: true });
+    const high = Math.max(...[b.x0, b.x1].map((x) => ground(-x))); // forward +z: plan x runs to world -x
+    assert(origin.y - 1 <= high && origin.y - 1 >= high - 3, `floor ${origin.y - 1}, high ${high}`);
+    const g = new Groundwork(plan, origin, { x: 0, z: 1 }, "vale");
+    let r, n = 0;
+    while ((r = g.step(fake, 400)) !== "done" && n++ < 200) assert(r !== "wait");
+    assertEqual(r, "done");
+    assert(g.todo.length > 0, "nothing regraded on a slope");
+    assert(g.todo.every((t) => Math.abs(t.x) <= 20 && Math.abs(t.z) <= 20), "regraded too far out");
+    // the door landing: 4 out and 3 wide in front of the door (world -z here), level with the floor
+    assertEqual(g.landing.length, 12);
+    assert(g.landing.every(([x, z]) => z < 0 && Math.abs(x) <= 1), "landing not in front of the door");
+    for (const [x, z] of g.landing) assertEqual(g.T[x - g.x0][z - g.z0], g.floor, `landing ${x},${z}`);
+  },
   "the level 1 wall is a low log palisade, not a fence": () => {
     assertEqual(WALL_LEVELS[1].body, "log");
     assert(WALL_LEVELS[1].h >= 2);
@@ -413,7 +565,7 @@ addTests("settle ground", {
 });
 
 // ---------- plot rules and charters (charters.js, config.js) ----------
-import { plotFit, charterCheck, slotClass, opensAt } from "./charters.js";
+import { plotFit, charterCheck, charterKeeps, slotClass, opensAt } from "./charters.js";
 import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST } from "./config.js";
 import { townNames as allTownNames, townFor as townByName, slotsOf as slotsOfLayout } from "./towns.js";
 import { BLOCK_BUILDS as BLOCK_BUILD_LIST } from "./blockdesigns.js";
@@ -430,8 +582,12 @@ addTests("settle charters", {
     assertEqual(slotClass(ML), "ML");
     assert(plotFit("cottage", S).ok && !plotFit("cottage", M).ok, "cottage takes Small only");
     assert(plotFit("market", L).ok && plotFit("market", ML).ok && !plotFit("market", M).ok, "market: Large or long Medium");
-    assert(!plotFit("barracks", M, new Set(["L"])).ok, "barracks waits for the free Large");
-    assert(plotFit("barracks", M, new Set(["M", "S"])).ok, "barracks takes a plain Medium when no Large or long Medium is free");
+    assert(!plotFit("barracks", M, new Set(["M", "S"])).ok && !plotFit("barracks", ML).ok, "barracks: never a Medium (the guardhouse is 15 x 17)");
+    const deep = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 16 }, door: { x: 0, z: -1 } };
+    const flat = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 14 }, door: { x: 0, z: -1 } };
+    const side = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 16, z1: 14 }, door: { x: -1, z: 0 } };
+    assert(plotFit("barracks", deep).ok && plotFit("barracks", side).ok, "barracks on a 15 x 17 Large, either way round");
+    assert(!plotFit("barracks", flat).ok && plotFit("market", flat).ok, "a 15 x 15 Large is too shallow for the barracks only");
     assert(plotFit("library", ML).ok, "library on the long Medium");
   },
   "location tags: the watchtower needs the wall, good spots are marked"() {
@@ -522,18 +678,136 @@ addTests("settle census", {
   },
 });
 
-// ---------- the level-5 hall takes its plots (hallmove.js) ----------
-import { HALL_TAKES_AT } from "./hallmove.js";
+// ---------- a lord's crew furnishes the homes it finishes (census.js bedPlaces) ----------
+import { bedPlaces } from "./census.js";
+addTests("settle census", {
+  "a lord's crew fits beds that count, clear of the door and of each other"() {
+    const door = [{ x: 3, y: 1, z: 0, id: "minecraft:spruce_door" }, { x: 3, y: 2, z: 0, id: "minecraft:spruce_door", upper: true }];
+    const cells = hut(door);
+    const cap = bedCap(tally(cells));
+    const beds = bedPlaces(cells, cap);
+    assertEqual(beds.length, cap);
+    const placed = beds.flatMap((b) => [{ ...b.head, id: "minecraft:bed", head: true }, { ...b.foot, id: "minecraft:bed" }]);
+    assertEqual(bedsCounted(tally([...cells, ...placed])), cap, "every bed it places counts");
+    const STEP = [[0, 1], [-1, 0], [0, -1], [1, 0]];
+    for (const b of beds) {
+      assertEqual(b.head.x - b.foot.x, STEP[b.dir][0]); assertEqual(b.head.z - b.foot.z, STEP[b.dir][1]);
+      for (const p of [b.foot, b.head]) assert(Math.abs(p.x - 3) > 2 || Math.abs(p.z) > 2, "clear of the door");
+    }
+    const cellsOf = beds.flatMap((b) => [b.foot, b.head]);
+    for (let i = 0; i < beds.length; i++) for (let j = i + 1; j < beds.length; j++)
+      for (const p of [beds[i].foot, beds[i].head]) for (const q of [beds[j].foot, beds[j].head]) assert(Math.abs(p.x - q.x) + Math.abs(p.z - q.z) > 1, "beds don't touch");
+    assertEqual(new Set(cellsOf.map((p) => `${p.x},${p.z}`)).size, cellsOf.length);
+  },
+  "no roof or no room, no beds"() {
+    assertEqual(bedPlaces(hut([], { roof: false }), 2).length, 0);
+    assertEqual(bedPlaces(hut(), 0).length, 0);
+  },
+});
+
+// ---------- townsfolk in Rival Lords' towns (folk.js, census.js lordArrivals) ----------
+import { lineFor } from "./folk.js";
+import { lordArrivals } from "./census.js";
+import { SETTLER_LINES, SETTLERS as FOLK } from "./config.js";
+addTests("settle settlers", {
+  "a lord's townsfolk talk the lord's way, and every temper has lines"() {
+    for (const t of ["proud", "grasping", "devout", "wary", "bold", "kind", "steady"]) assert(SETTLER_LINES.lord[t]?.length >= 2, t);
+    const proud = new Set(Array.from({ length: 9 }, (_, d) => lineFor({ n: 1 }, { day: d, temper: "proud" })));
+    assert([...proud].some((l) => SETTLER_LINES.lord.proud.includes(l)), "proud lines heard");
+    assert(SETTLER_LINES.lord.steady.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })) || SETTLER_LINES.day.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })));
+    assert(SETTLER_LINES.wary.includes(lineFor({ n: 2 }, { day: 3, temper: "kind", wary: true })), "wary after a takeover");
+    assertEqual(lineFor({ n: 2, idle: true }, { temper: "kind" }), SETTLER_LINES.idle);
+    assert(SETTLER_LINES.night.includes(lineFor({ n: 4 }, { night: true, temper: "bold" })), "night is night everywhere");
+  },
+  "a lord's town takes one newcomer a dawn it missed, up to the catch-up cap"() {
+    assertEqual(lordArrivals(undefined, 10), 1);
+    assertEqual(lordArrivals(9, 10), 1);
+    assertEqual(lordArrivals(8, 10), 2);
+    assertEqual(lordArrivals(0, 40), FOLK.lordCatchUp);
+    assertEqual(lordArrivals(10, 10), 1);
+  },
+});
+
+// ---------- town events and settler requests (events_rules.js) ----------
+import { OPENS_AT } from "./config.js";
+import { eventsFor, requestsFor, gap, quietDay, buildDone, fill } from "./events_rules.js";
+import { TOWN_EVENTS, REQUESTS, SITE_EVENTS, EVENTS } from "./events_data.js";
+addTests("settle events", {
+  "events and requests: unique ids, a kind each, words for each"() {
+    const kinds = new Set(["fight", "mystery", "journey", "quiet", "social", "build"]);
+    for (const list of [TOWN_EVENTS, REQUESTS, SITE_EVENTS]) assertEqual(new Set(list.map((e) => e.id)).size, list.length);
+    for (const e of TOWN_EVENTS) assert(kinds.has(e.kind) && e.name && e.start, e.id);
+    for (const r of REQUESTS) {
+      assert(kinds.has(r.kind) && r.ask && r.thanks && ["build", "bring", "bed"].includes(r.type), r.id);
+      if (r.type === "bring") assert(r.item && r.count > 0, r.id);
+      if (r.type === "build") assert(r.ids.every((id) => OPENS_AT[id] !== undefined), r.id);
+    }
+    for (const t of [...TOWN_EVENTS.map((e) => e.start), ...REQUESTS.map((r) => r.ask)]) assert(!/hollow/i.test(t), "nothing names the Hollow");
+  },
+  "what can happen depends on the town"() {
+    const bare = { tier: 0, counts: {}, settlers: 0, freeBeds: 0 };
+    const ev = eventsFor(bare);
+    assert(ev.includes("market_fair") && !ev.includes("wedding") && !ev.includes("harvest_day"), ev.join());
+    const busy = { tier: 2, counts: { farmhouse: 1, library: 1 }, settlers: 4, freeBeds: 1 };
+    assert(["wedding", "harvest_day", "lost_traveller", "supper_miscount"].every((id) => eventsFor(busy).includes(id)));
+    const lord = eventsFor({ ...busy, lord: true });
+    assert(lord.includes("market_fair") && !lord.includes("harvest_day"), "lords get the public ones");
+    assertEqual(requestsFor({ ...busy, lord: true }).length, 0);
+    const asks = requestsFor(bare, (id) => OPENS_AT[id] ?? 3);
+    assert(asks.includes("well_square") && !asks.includes("watchtower") && !asks.includes("kin") && !asks.includes("book"), asks.join());
+    assert(requestsFor(busy, (id) => OPENS_AT[id] ?? 3).includes("book"), "book once there's a library");
+  },
+  "pacing: gaps in range, quiet round sieges, build requests need one more"() {
+    for (let i = 0; i < 20; i++) { const g = gap(EVENTS.eventGap, () => i / 20); assert(g >= EVENTS.eventGap[0] && g <= EVENTS.eventGap[1], g); }
+    assert(quietDay(10, { siegeTonight: true }));
+    assert(quietDay(10, { lastSiege: 9 }));
+    assert(!quietDay(10, { lastSiege: 7 }));
+    const well = REQUESTS.find((r) => r.id === "well_square");
+    assert(!buildDone(well, { well: 1 }, { well: 1 }));
+    assert(buildDone(well, { well: 1 }, { well: 2 }));
+    assertEqual(fill("{a} in {town} {x}", { a: "Maud", town: "Oakmere" }), "Maud in Oakmere {x}");
+  },
+});
+
+// ---------- the level-4 and level-5 halls take their plots (hallmove.js) ----------
+import { HALL_TAKES_AT, takenAt } from "./hallmove.js";
 addTests("settle charters", {
-  "some layouts have hall5 plots, and the hall takes them at level 5"() {
-    assertEqual(HALL_TAKES_AT, 5);
-    let total = 0;
+  "layouts have hall4 and hall5 plots, and the hall takes them at levels 4 and 5"() {
+    assertEqual(HALL_TAKES_AT, 4);
+    assertEqual(takenAt({ tags: ["hall4"] }), 4);
+    assertEqual(takenAt({ tags: ["corner", "hall5"] }), 5);
+    assertEqual(takenAt({ tags: ["corner"] }), undefined);
+    const total = { 4: 0, 5: 0 };
     for (const name of allTownNames()) for (const v of townByName(name).variants) {
       if (v.charter === false) continue;
-      const n = slotsOfLayout(v).filter((s) => (s.tags ?? []).includes("hall5")).length;
-      total += n;
+      for (const s of slotsOfLayout(v)) if (takenAt(s)) total[takenAt(s)]++;
     }
-    assert(total > 0, "some layouts have hall5 plots");
+    assert(total[4] > 0 && total[5] > 0, "some passing layouts have hall4 and hall5 plots");
+  },
+  "a plot that is the last one a charter need can use is kept for it, for players and lords alike"() {
+    const known = new Set(BUILDINGS.map((b) => b.id));
+    const v = townByName("gullcliff").variants.find((x) => x.charter !== false);
+    const slots = slotsOfLayout(v);
+    // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use
+    const used = new Set(slots.filter((s) => s.start || s.tags.includes("library")).map((s) => s.id)); // standing from the start
+    const take = (id) => { const s = slots.find((q) => q.tier <= 1 && !used.has(q.id) && plotFit(id, q).ok); if (s) used.add(s.id); return s; };
+    const farm = take("farmhouse"), mint = take("mint"), market = take("market"), homes = [take("cottage"), take("cottage"), take("cottage")];
+    assert(farm && mint && market && homes.every(Boolean), "gullcliff has a plot for each Town charter building");
+    const free = [farm, mint, market, ...homes];
+    const counts = { library: 1, house: 2 };
+    const kept = charterKeeps(free, 0, counts, known, mint, "house");
+    assert(kept, "a house on the Mint's only Medium would leave the Town charter without a plot");
+    assert(kept.ids.length && kept.ids.every((id) => plotFit(id, mint).ok), "it names what may go there");
+    assert(!charterKeeps(free, 0, counts, known, mint, kept.ids[0]), "the building it is kept for is allowed");
+    assert(!charterKeeps([...free, ...slots.filter((s) => s.size === "S" && !used.has(s.id))], 0, counts, known, homes[0], "cottage"), "a cottage on a Small plot is fine");
+    assert(!charterKeeps(free, 0, { ...counts, cottage: 9, farmhouse: 1, mint: 1, market: 1, inn: 1, barracks: 1, smithy: 1 }, known, mint, "house"), "nothing is kept once the charters are met");
+  },
+  "every passing layout reserves a Mason's yard by the forecourt"() {
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const f = fixturesOf(v, 0).find((x) => x.kind === "mason_yard");
+      assert(f && "nsew".includes(f.rotation), `${name} ${v.label} has a mason_yard fixture with a side`);
+    }
   },
 });
 
@@ -555,7 +829,8 @@ addTests("settle walls", {
 });
 
 // ---------- Rival Lords on the same plots (charters.js lordPick) ----------
-import { lordPick } from "./charters.js";
+import { lordPick, oneEachTaken, oneEachMessage } from "./charters.js";
+import { ONE_EACH } from "./config.js";
 addTests("settle charters", {
   "a lord fills every layout's plots and meets each charter with the designs there are"() {
     const designs = new Set(BUILDINGS.map((b) => b.id));
@@ -563,25 +838,36 @@ addTests("settle charters", {
       if (v.charter === false) continue;
       const slots = slotsOfLayout(v);
       const counts = {};
-      const taken = new Set();
+      const taken = new Set(); const dbg = [];
       for (let tier = 0; tier <= 3; tier++) {
         for (let n = 0; n < 80; n++) {
           const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
-          const pick = lordPick(open, tier, counts, designs, () => true, name);
+          const pick = lordPick(open, tier, counts, designs, () => true, name, slots.filter((s) => !taken.has(s.id)));
           if (!pick) break;
           taken.add(pick.slot.id);
-          counts[pick.id] = (counts[pick.id] ?? 0) + 1;
+          counts[pick.id] = (counts[pick.id] ?? 0) + 1; dbg.push(pick.slot.id + ":" + pick.id);
         }
-        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)}`);
+        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
       assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+      for (const id of ONE_EACH) assert((counts[id] ?? 0) <= 1, `${name} ${v.label}: a lord raised ${counts[id]} of the one-of-each ${id}`);
     }
+  },
+  "one of each special building per settlement (config.js ONE_EACH)"() {
+    for (const id of ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"]) assert(ONE_EACH.includes(id), `${id} is one per settlement`);
+    for (const id of HOMES) assert(!ONE_EACH.includes(id), `${id} stays unlimited`);
+    assert(!oneEachTaken("mint", {}) && !oneEachTaken("mint", { mint: 0 }), "the first Mint is allowed");
+    assert(oneEachTaken("mint", { mint: 1 }), "a second Mint is refused");
+    assert(!oneEachTaken("cottage", { cottage: 9 }), "homes are unlimited");
+    assert(/already has a Mint/.test(oneEachMessage("Mint")), "the refusal names the building");
   },
 });
 
 // ---------- the Plan Book (plandata.js) ----------
 import { knownPlans, planChoices, unknownOf, planKey, parsePlan, planCards, whereFrom } from "./plandata.js";
 import { PLANS as PLAN_RULES, HOMES, CHARTERS } from "./config.js";
+import { planCardsHash } from "./plancards.js";
+import { CARDS_DRAWN_FROM } from "./plancards_data.js";
 const TIER_NAMES_T = ["Hamlet", "Town", "City", "Castle"];
 addTests("settle plans", {
   "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
@@ -624,6 +910,9 @@ addTests("settle plans", {
       }
     });
   },
+  "the Plan Book card pictures match the buildings as they are designed now"() {
+    assertEqual(planCardsHash(), CARDS_DRAWN_FROM, "a building design changed: run  python3 studio/build_plans.py  to redraw the Plan Book cards");
+  },
   "the Plan Book cards: bright when found, greyed with a hint when not"() {
     const designs = BUILDINGS.map((b) => b.id);
     const styles = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
@@ -636,5 +925,224 @@ addTests("settle plans", {
     assert(!by.stable.known && by.stable.texture.endsWith("stable_saltreach_dim"), "an unfound plan is greyed");
     assertEqual(whereFrom("stable").short, "Hall level 3");
     assert(whereFrom("cottage").short.length <= 14, "card hints are short");
+  },
+});
+
+import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
+import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
+import { ROAD_JOINS } from "./roadjoin_data.js";
+import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
+import { needsRoad } from "./founding.js";
+import { REGION_TO_STYLE as REGION_TO_STYLE_T } from "./config.js";
+import { MASON_DESIGNS } from "./mason_data.js";
+
+
+addTests("settle base", {
+  "attached blocks go in after every solid block, and door halves go in together"() {
+    const plan = drawBuilding("cottage", "vale");
+    const order = buildOrder(plan);
+    const kinds = order.map((c) => ATTACHED.test(String(blockOf(plan, c))));
+    const firstAttached = kinds.indexOf(true);
+    assert(firstAttached > 0, "the cottage has a door or a lantern");
+    assert(!kinds.slice(firstAttached).includes(false), "no solid block is placed after an attached one");
+    for (let i = 0; i < order.length; i++) if (order[i].pair) {
+      const a = order[i], b = order[i + 1];
+      assert(b && b.x === a.x && b.z === a.z && b.y === a.y + 1, "a door's upper half follows its lower half");
+    }
+  },
+  "every region has a 9 x 9 Mason's Yard with a bench in its front yard"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      const b = MASON_DESIGNS[region].box;
+      assert(b.x1 - b.x0 + 1 === 9 && b.z1 - b.z0 + 1 === 9 && b.z0 === 1, `${region} Mason's Yard is 9 x 9 behind its front row (${JSON.stringify(b)})`);
+      assert(drawBuilding("mason_yard", region).bounds().y1 > 4, `${region} Mason's Yard draws its design`);
+      assert(MASON_DESIGNS[region]?.marks?.bench, `${region} Mason's Yard marks the bench`);
+      assert(!BUILDINGS.some((x) => x.id === "mason_yard"), "the Mason's Yard is never offered on a plot");
+    }
+  },
+  "the founder's cottage has room for a bed indoors"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      for (const id of ["cottage", "house", "townhouse", "farmhouse"]) {
+        const at = bedSpot(drawBuilding(id, region));
+        assert(at && at.z >= 2, `${region} ${id} has a bed spot away from the door`);
+        const all = bedSpots(drawBuilding(id, region));
+        assert(all.length >= 2 && all[0].x === at.x && all[0].z === at.z, `${region} ${id} has a second spot for when the first is taken`);
+      }
+    }
+  },
+  "the base buildings take the nearest free Small plot, never the library's"() {
+    const slots = [
+      { id: "a", size: "S", tier: 0, tags: ["library"], box: { x0: 0, z0: 0, x1: 8, z1: 8 } },
+      { id: "b", size: "S", tier: 0, tags: [], box: { x0: 20, z0: 0, x1: 28, z1: 8 } },
+      { id: "c", size: "S", tier: 0, tags: [], box: { x0: 40, z0: 0, x1: 48, z1: 8 } },
+      { id: "d", size: "S", tier: 1, tags: [], box: { x0: 2, z0: 0, x1: 10, z1: 8 } },
+    ];
+    assertEqual(pickBaseSlot(slots, new Set(), { x: 0, z: 0 })?.id, "b");
+    assertEqual(pickBaseSlot(slots, new Set(["b"]), { x: 0, z: 0 })?.id, "c");
+  },
+  "the road out to the map's roads: the way out, the end, a joined line, an even grade"() {
+    assertEqual(JSON.stringify(gateDir(0)), JSON.stringify({ x: 0, z: -1 }));
+    assertEqual(gateDir(90).x, 1);
+    assertEqual(roadEnd([{ x: 3, z: 0 }, { x: 30, z: 1 }, { x: 30, z: 9 }], { x: 1, z: 0 }).z, 1);
+    const line = roadLine({ x: 0, z: 0 }, { x: 7, z: -4 });
+    assertEqual(line.length, 12);
+    for (let i = 1; i < line.length; i++) assertEqual(Math.abs(line[i].x - line[i - 1].x) + Math.abs(line[i].z - line[i - 1].z), 1, "each step joins along a side");
+    const h = gradeLine(70, 64, 11);
+    for (let i = 1; i < h.length; i++) assert(Math.abs(h[i] - h[i - 1]) <= 1, "never more than 1 a block");
+    assertEqual(h[0], 70); assertEqual(h[11], 64);
+  },
+  "the worked-out road out: corner to corner along sides, graded to the ground at most 1 a block, in the map's road blocks"() {
+    const join = { from: [0, -49], path: [[0, -49], [0, -72], [-20, -80]] };
+    const cells = joinRoute(join, { x: 0, z: -49 });
+    assertEqual(JSON.stringify(cells[0]), JSON.stringify({ x: 0, z: -49 }));
+    assertEqual(JSON.stringify(cells[cells.length - 1]), JSON.stringify({ x: -20, z: -80 }));
+    for (let i = 1; i < cells.length; i++) assertEqual(Math.abs(cells[i].x - cells[i - 1].x) + Math.abs(cells[i].z - cells[i - 1].z), 1, "each step joins along a side");
+    const moved = joinRoute(join, { x: 2, z: -47 });
+    assertEqual(JSON.stringify(moved[0]), JSON.stringify({ x: 2, z: -47 }), "a gate road ending elsewhere is led to the route first");
+    assertEqual(JSON.stringify(routeSides(cells, 5)), JSON.stringify({ x: 1, z: 0 }), "across a road running north is east-west");
+    const ground = [70, 70, 75, 76, 74, 66, 65, 65, 64, 64, 64, 64];
+    const g = gradeRoute(ground, 70, 64);
+    assertEqual(g[0], 70); assertEqual(g[g.length - 1], 64);
+    for (let i = 1; i < g.length; i++) assert(Math.abs(g[i] - g[i - 1]) <= 1, "never more than 1 a block");
+    for (const region of ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", undefined]) for (let x = 0; x < 30; x++) {
+      assert(JOIN_ROAD_BLOCKS.test(joinSurface(region, x, x * 7)), `${region} road block ${joinSurface(region, x, x * 7)} is one the joiner knows as road`);
+    }
+    assert(needsRoad({ laid: [true], roadJoined: "none" }), "a town whose road never joined gets it");
+    assert(needsRoad({ laid: [true], roadJoined: { x: 1, z: 2, length: 30 } }), "a road joined the old way (with its gap) is laid again");
+    assert(!needsRoad({ laid: [false] }), "not before the Hamlet is laid out");
+  },
+  "every map plot has a road out from its gate to the map's roads, starting where each layout's gate road ends"() {
+    for (const plot of JOIN_PLOTS) {
+      const key = plot.name.toLowerCase(), join = ROAD_JOINS[key], tw = townByName(key);
+      assert(join, `${plot.name} has a road out`);
+      const dir = gateDir(tw.gate);
+      for (const v of tw.variants) {
+        const tops = new Map();
+        for (const [dx, dy, dz, p] of groundwork(v, 0)) { const id = v.pal[p]?.[0] ?? "", k = `${dx},${dz}`; if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id }); }
+        const end = roadEnd([...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), dir);
+        assertEqual(`${end.x},${end.z}`, join.from.join(), `${plot.name} ${v.label}: the route starts at the gate road's end`);
+      }
+      const cells = joinRoute(join);
+      const far = cells[cells.length - 1];
+      assert(Math.hypot(far.x, far.z) >= JOIN_SETTLEMENT.landRadius - 4, `${plot.name}: the road reaches past the settlement land (${far.x},${far.z})`);
+      assert(join.wet === 0, `${plot.name}: the road keeps out of water`);
+      // straight out along the gate line first, so the later tiers' gate road lies on it
+      const side = { x: -dir.z, z: dir.x };
+      for (const c of cells) if (Math.hypot(c.x, c.z) < JOIN_SETTLEMENT.landRadius - 2) assert(Math.abs(c.x * side.x + c.z * side.z) <= 2, `${plot.name}: inside the settlement land the road keeps to the gate line`);
+    }
+  },
+});
+
+import { layoutOf as townLayoutOf, layoutKey } from "./founding.js";
+addTests("settle layouts saved", {
+  "a saved town keeps its layout when the layouts are re-exported, and a bad index falls back"() {
+    const vs = townByName("dunehold").variants;
+    const last = vs.length - 1;
+    const moved = { plot: "dunehold", layout: 0, layoutKey: layoutKey(vs[last]) };
+    assertEqual(townLayoutOf(moved), vs[last], "found again by its key");
+    assertEqual(moved.layout, last, "and its index is put right");
+    const past = { plot: "dunehold", layout: 99 };
+    assertEqual(townLayoutOf(past), vs[0], "an index past the end falls back to the first layout");
+    assertEqual(past.layoutKey, layoutKey(vs[0]), "and remembers it from then on");
+    const old = { plot: "dunehold", layout: 1 };
+    assertEqual(townLayoutOf(old), vs[1], "a town saved before keys keeps its index");
+    assert(new Set(vs.map(layoutKey)).size === vs.length, "every layout of a plot has its own key");
+  },
+});
+
+import { STOREHOUSE_DESIGNS } from "./storehouse_data.js";
+import { STORE, levelFor, levelOf, storeId, chestOrder, fixtureBox, pickStoreSlot, crateSpot } from "./storehouse_rules.js";
+import { SETTLERS as SETTLER_CFG } from "./config.js";
+
+addTests("settle storehouse", {
+  "every settlement's Storehouse has four levels in every region, each holding more chests than the last": () => {
+    for (const region of STYLE_IDS.filter((s) => STOREHOUSE_DESIGNS[s])) {
+      let last = 0;
+      for (let level = 1; level <= STORE.levels; level++) {
+        const d = STOREHOUSE_DESIGNS[region][storeId(level)];
+        assert(d, `${region} level ${level}`);
+        const n = chestOrder(d).length;
+        assertEqual(n, d.chests, `${region} level ${level}: chest count`);
+        assert(n > last, `${region} level ${level}: ${n} chests, not more than ${last}`);
+        assert(d.marks.goods, `${region} level ${level}: the goods spot`);
+        last = n;
+      }
+    }
+    assertEqual(Object.keys(STOREHOUSE_DESIGNS).length, 5);
+  },
+  "a level follows the town's tier and is raised as a fixed building with a Storekeeper": () => {
+    assertEqual([0, 1, 2, 3, 9].map(levelFor).join(), "1,2,3,4,4");
+    assertEqual(levelOf("storehouse_3"), 3); assertEqual(levelOf("storehouse"), 0); assertEqual(levelOf(undefined), 0);
+    for (let level = 1; level <= STORE.levels; level++) {
+      assert(BUILDING[storeId(level)], storeId(level));
+      assert(!BUILDINGS.some((b) => b.id === storeId(level)), "never offered on a plot");
+      assertEqual(SETTLER_CFG.workers[storeId(level)], "Storekeeper");
+    }
+    assert(!BUILDINGS.some((b) => b.id === "storehouse") && BUILDING.storehouse, "the old plot Storehouse is retired, not forgotten");
+  },
+  "every level sits on the village's 15 x 15 ground with its front on the walk, whichever way the door faces": () => {
+    for (const [side, out] of Object.entries({ s: { x: 0, z: 1 }, n: { x: 0, z: -1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } })) {
+      const f = { x: 30, z: -10 };
+      const box = fixtureBox(f, out);
+      const slot = { id: "storehouse", size: "L", tier: 0, dy: 0, door: out, box };
+      const origins = new Set();
+      for (const region of Object.keys(STOREHOUSE_DESIGNS)) {
+        for (let level = 1; level <= STORE.levels; level++) {
+          const plan = drawBuilding(storeId(level), region);
+          const seat = seatOnSlot(slot, plan.bounds());
+          assert(seat, `${side} ${region} level ${level} doesn't fit the ground`);
+          origins.add(`${seat.origin.dx},${seat.origin.dz}`);
+          const sb = seatedBox(seat, plan.bounds());
+          assert(sb.x0 >= box.x0 && sb.x1 <= box.x1 && sb.z0 >= box.z0 && sb.z1 <= box.z1, `${side} ${region} level ${level} spills`);
+        }
+      }
+      assertEqual(origins.size, 1, `${side}: every level stands on the same spot, so a rebuild covers the last one`);
+    }
+  },
+  "chests keep their order across a rebuild: the old level's chests are the first of the new one's count": () => {
+    const d = STOREHOUSE_DESIGNS.vale.storehouse_2;
+    const a = chestOrder(d), b = chestOrder(d);
+    assertEqual(JSON.stringify(a), JSON.stringify(b));
+    for (let i = 1; i < a.length; i++) assert(a[i - 1][1] < a[i][1] || (a[i - 1][1] === a[i][1] && (a[i - 1][2] < a[i][2] || (a[i - 1][2] === a[i][2] && a[i - 1][0] < a[i][0]))), "sorted");
+  },
+  "with no Storehouse ground it takes a free long Medium before a Large, never the Barracks' deep Large": () => {
+    const s = (id, size, w, d, tier = 0, x = 20) => ({ id, size, tier, box: { x0: x, z0: 0, x1: x + w - 1, z1: d - 1 } });
+    const slots = [s("deep", "L", 15, 17), s("big", "L", 15, 15, 0, 10), s("long", "ML", 13, 15, 0, 40), s("later", "ML", 13, 15, 1, 5)];
+    assertEqual(pickStoreSlot(slots, new Set(), 0).id, "long");
+    assertEqual(pickStoreSlot(slots, new Set(["long"]), 0).id, "big");
+    assertEqual(pickStoreSlot(slots, new Set(["long", "big"]), 0), undefined);
+    assertEqual(pickStoreSlot(slots, new Set(["long", "big"]), 1).id, "later");
+  },
+  "a station's Goods Crate goes beside the post, away from the track first": () => {
+    const post = { x: 10, y: 64, z: 10 }, forward = { x: 0, z: 1 };
+    assertEqual(JSON.stringify(crateSpot(post, forward, () => true)), JSON.stringify({ x: 10, y: 64, z: 11 }));
+    assertEqual(JSON.stringify(crateSpot(post, forward, (p) => p.z === 10)), JSON.stringify({ x: 9, y: 64, z: 10 }));
+    assertEqual(crateSpot(post, forward, () => false), undefined);
+  },
+  // Mateo 2026-11-13: the Barracks unlocks with the Hamlet and goes on a plot that fits it (no crafting)
+  "every layout's Hamlet has a plot the Barracks seats on"() {
+    assertEqual(opensAt("barracks"), 0, "opens with the Hamlet");
+    assert(BUILDING.barracks && PLAN_RULES.noPlan.includes("barracks"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const b = drawBuilding("barracks", style).bounds();
+        const ok = slotsOf(v).some((s) => s.tier === 0 && plotFit("barracks", s).ok && seatOnSlot(s, b));
+        assert(ok, `${name} layout ${i}: no Hamlet plot fits the Barracks`);
+      }
+    }
+  },
+  "every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'"() {
+    assertEqual(opensAt("quartermaster_desk"), 0, "opens with the Hamlet");
+    assert(BUILDING.quartermaster_desk && PLAN_RULES.noPlan.includes("quartermaster_desk"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const qb = drawBuilding("quartermaster_desk", style).bounds(), bb = drawBuilding("barracks", style).bounds();
+        const hamlet = slotsOf(v).filter((s) => s.tier === 0);
+        const forQ = hamlet.filter((s) => plotFit("quartermaster_desk", s).ok && seatOnSlot(s, qb));
+        assert(forQ.length, `${name} layout ${i}: no Hamlet plot fits the armoury`);
+        assert(hamlet.some((s) => plotFit("barracks", s).ok && seatOnSlot(s, bb) && forQ.some((q) => q.id !== s.id)), `${name} layout ${i}: the armoury would take the Barracks' only plot`);
+      }
+    }
   },
 });

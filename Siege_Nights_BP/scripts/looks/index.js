@@ -13,6 +13,7 @@ import { on, addKeepMenuButtons, addJoinStep } from "../siege/api.js";
 import { LOOKS } from "./data.js";
 import "./tests.js";
 import { sfx } from "../core/sfx.js";
+import { hasWings, takeOffWings } from "../wings/index.js";
 
 export const LOOKING_GLASS = "hc:looking_glass";
 const PROP = "hc:look";
@@ -54,6 +55,8 @@ export async function chooseLook(player) {
     .body("Pick who you are in this world. Everyone here sees you this way. You can change at any Looking Glass.");
   for (const l of mine) form.button(`${l.name}${l.player ? "\n§8made for you" : l === wearing ? "\n§8wearing now" : ""}`);
   form.button("My own skin");
+  const wings = hasWings(player);
+  if (wings) form.button("Take off the Everwake Wings\n§8they go back in your pack");
   let res;
   try {
     res = await form.show(player);
@@ -62,6 +65,10 @@ export async function chooseLook(player) {
   }
   if (res.canceled && res.cancelationReason === "UserBusy") return "busy";
   if (res.canceled || res.selection === undefined) return false;
+  if (wings && res.selection === mine.length + 1) {
+    if (takeOffWings(player)) sfx(player, "armor.equip_elytra");
+    return true;
+  }
   const look = mine[res.selection];
   if (!setLook(player, look)) {
     player.sendMessage("§cLooks are not working in this world. Tell whoever runs it that the player file from the add-on is missing.");

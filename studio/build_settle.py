@@ -193,6 +193,12 @@ write_json(os.path.join(BP, "blocks", "settle", "plot_marker.json"), {
             "minecraft:light_dampening": 0,
             "minecraft:map_color": "#7a5a38",
         },
+        # the board turns to face the street (settle/founding.js setMarkerBlock)
+        "permutations": [
+            {"condition": f"q.block_state('minecraft:cardinal_direction') == '{d}'",
+             "components": {"minecraft:transformation": {"rotation": [0, r, 0]}}}
+            for d, r in (("north", 0), ("west", 90), ("south", 180), ("east", 270))
+        ],
     },
 })
 def marker_terrain(data):

@@ -7,7 +7,8 @@
         "default": "entity_alphatest",
         "cape": "entity_alphatest",
         "animated": "player_animated",
-        "spectator": "player_spectator"
+        "spectator": "player_spectator",
+        "everwake_wings": "entity_alphatest"
       },
       "textures": {
         "default": "textures/entity/steve",
@@ -19,12 +20,14 @@
         "hc_look_5": "textures/entity/looks/farron_sandys",
         "hc_look_6": "textures/entity/looks/hawise_barleycorn",
         "hc_look_7": "textures/entity/looks/bram_meadows",
-        "hc_look_8": "textures/entity/looks/ridley_stagg"
+        "hc_look_8": "textures/entity/looks/ridley_stagg",
+        "everwake_wings": "textures/entity/everwake_wings"
       },
       "geometry": {
         "default": "geometry.humanoid.custom",
         "cape": "geometry.cape",
-        "hc_look": "geometry.hc.jointed"
+        "hc_look": "geometry.hc.jointed",
+        "everwake_wings": "geometry.siege.everwake_wings"
       },
       "scripts": {
         "scale": "0.9375",
@@ -90,7 +93,7 @@
           "variable.hc_draw = variable.hc_drawing ? math.clamp(query.life_time - variable.hc_draw_start, 0.0, 1.0) : 0.0;",
           "variable.hc_shake = variable.hc_drawing ? math.clamp((query.life_time - variable.hc_draw_start - 1.5) / 3.0, 0.0, 1.0) : 0.0;",
           "variable.hc_release = (variable.hc_release_pow > 0.3 && variable.hc_bow) ? math.clamp(1.0 - (query.life_time - variable.hc_release_at) / 0.35, 0.0, 1.0) * variable.hc_release_pow : 0.0;",
-          "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding;",
+          "variable.hc_in_air = !query.is_on_ground && !query.is_riding && !query.is_in_water && variable.swim_amount <= 0.0 && !query.is_gliding && (query.has_property('siege:wings') ? query.property('siege:wings') < 2 : 1);",
           "variable.hc_landed = !variable.hc_in_air && variable.hc_was_air && query.life_time - variable.hc_air_start > 0.35;",
           "variable.hc_land_pow = variable.hc_landed ? math.clamp((query.life_time - variable.hc_air_start) / 1.2, 0.35, 1.0) : variable.hc_land_pow;",
           "variable.hc_land_at = variable.hc_landed ? query.life_time : variable.hc_land_at;",
@@ -113,10 +116,13 @@
           "variable.hc_fidk = math.mod(math.floor(math.max(variable.hc_idle_for - 6.0, 0.0) / 7.0), 3.0);",
           "variable.hc_fid = variable.hc_idle_for > 6.0 ? math.sin(variable.hc_fidt / 7.0 * 180.0) : 0.0;",
           "variable.hc_mounted = query.is_riding && (query.has_property('hc:look') ? query.is_riding_any_entity_of_type('minecraft:horse', 'minecraft:donkey', 'minecraft:mule', 'minecraft:skeleton_horse', 'minecraft:zombie_horse', 'minecraft:camel', 'siege:steed', 'siege:dragon') : 0.0);",
-          "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);"
+          "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);",
+          "variable.hc_rbend = query.has_property('hc:look') ? !query.is_item_equipped(0) : 1.0;",
+          "variable.hc_lbend = query.has_property('hc:look') ? !query.is_item_equipped(1) : 1.0;"
         ],
         "animate": [
           "root",
+          "everwake_wings",
           "hc_actions"
         ],
         "variables": {
@@ -235,7 +241,14 @@
         "hc_light_off": "animation.hc.player.light_off",
         "hc_read": "animation.hc.player.read",
         "hc_reins": "animation.hc.player.reins",
-        "hc_flinch": "animation.hc.player.flinch"
+        "hc_flinch": "animation.hc.player.flinch",
+        "everwake_wings": "controller.animation.siege.everwake_wings",
+        "everwake_folded": "animation.siege.everwake_wings.folded",
+        "everwake_open": "animation.siege.everwake_wings.open",
+        "everwake_glide": "animation.siege.everwake_wings.glide",
+        "everwake_boost": "animation.siege.everwake_wings.boost",
+        "everwake_dive": "animation.siege.everwake_wings.dive",
+        "everwake_flare": "animation.siege.everwake_wings.flare"
       },
       "render_controllers": [
         {
@@ -246,6 +259,9 @@
         },
         {
           "controller.render.player.first_person": "(variable.is_first_person && !query.is_spectator) && (query.has_property('hc:look') ? query.property('hc:look') : 0) < 1"
+        },
+        {
+          "controller.render.hc_look.item_carrier": "!query.is_spectator && !variable.map_face_icon && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
         },
         {
           "controller.render.hc_look.first_person": "(variable.is_first_person && !query.is_spectator) && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
@@ -261,6 +277,9 @@
         },
         {
           "controller.render.hc_look.map": "(variable.map_face_icon) && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
+        },
+        {
+          "controller.render.siege.everwake_wings": "!variable.is_first_person && !variable.map_face_icon && !query.is_spectator && (query.has_property('siege:wings') ? query.property('siege:wings') : 0) >= 1"
         }
       ],
       "enable_attachables": true

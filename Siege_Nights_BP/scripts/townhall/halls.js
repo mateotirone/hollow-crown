@@ -260,7 +260,8 @@ export function drawHall(level, style) {
 
 // The Town Board: a big notice board inside every hall that opens the Town Hall menu (Mateo, 2026-11-12:
 // "a big bulletin board-style thing that's inside the Town Hall"). It stands on the floor just inside the
-// front door, off the centre aisle, under the roof, facing the way in. Its wide frame may tuck into a wall.
+// front door, off the centre aisle, under the roof. Its face turns to the aisle (Mateo's playtest 2026-11-13: facing
+// the door it stood edge-on to everyone in the room), so you read it as you walk in and from the hall itself.
 export function boardSpot(p) {
   const tree = p.marks.tree;
   if (!tree) return undefined;
@@ -288,10 +289,13 @@ export function boardSpot(p) {
   return undefined;
 }
 
+// The Town Board faces the centre aisle: toward -x on the right of it, +x on the left
+export const boardDir = (x) => (x > 0 ? "-x" : "+x");
+
 function placeBoard(p) {
   const s = boardSpot(p);
   if (!s) return;
-  p.set(s.x, s.y, s.z, "board", { dir: "-z" });
+  p.set(s.x, s.y, s.z, "board", { dir: boardDir(s.x) });
   p.mark("board", s.x, s.y, s.z);
 }
 
@@ -299,6 +303,13 @@ function placeBoard(p) {
 
 const CARDINAL = { "1,0": "east", "-1,0": "west", "0,1": "south", "0,-1": "north" };
 const WEIRDO = { east: 0, west: 1, south: 2, north: 3 };
+// Blocks that hang on a wall spell their facing as facing_direction (the way their face looks: ladders, wall signs,
+// item frames, buttons), beds, bells and decorated pots as direction (0 south, 1 west, 2 north, 3 east), the same
+// numbers the skill's emit.py writes. Without these the builder fell through to no states at all, so every ladder,
+// wall sign and frame went in facing down (and popped off or stood sideways) and every bed lay south with two foot
+// halves (Mateo's playtest 2026-11-13: "signs and boards are sideways"; town audit 2026-11-14).
+const FACING_DIRECTION = { north: 2, south: 3, west: 4, east: 5 };
+const DIRECTION = { south: 0, west: 1, north: 2, east: 3 };
 
 // forward = unit vector {x, z} pointing from the cornerstone into the hall
 export function frameFor(forward) {
@@ -328,9 +339,13 @@ export function statesFor(frame, role, o = {}) {
   if (o.dir) {
     const d = worldDir(frame, o.dir);
     const upside = o.half === "top";
+    if (o.wallHung) out.push({ facing_direction: FACING_DIRECTION[d] });
+    if (o.legacyDir) out.push({ direction: DIRECTION[d] });
     out.push({ weirdo_direction: WEIRDO[d], upside_down_bit: upside });
     out.push({ "minecraft:cardinal_direction": d, upside_down_bit: upside });
     out.push({ "minecraft:cardinal_direction": d }); // add-on blocks that only turn (vault doors and locks)
+    out.push({ facing_direction: FACING_DIRECTION[d] }); // anything else that hangs on a wall (a hand-made template's ladder)
+    out.push({ direction: DIRECTION[d] });
   } else if (o.axis) {
     const axis = o.axis === "y" ? "y" : (o.axis === "x" ? frame.R : frame.F).x !== 0 ? "x" : "z";
     out.push({ pillar_axis: axis });
@@ -344,11 +359,37 @@ export function statesFor(frame, role, o = {}) {
     out.unshift({ direction: WEIRDO[worldDir(frame, o.dir)], upside_down_bit: o.half === "top" });
   }
   if (o.st) for (const s of out) Object.assign(s, o.st);
+  if (o.st && !out.length) out.push({ ...o.st }); // states with no facing (a bell hung from its beam)
   out.push({});
   return out;
 }
 
-// Order cells for a nice rising build: bottom layer first, then up, centre outwards.
+// Blocks that hang from, stand on or stick to another block and pop off (dropping as items) if it isn't there yet
+// (Mateo's playtest 2026-11-12: doors and hanging lanterns broke as buildings rose)
+export const ATTACHED = /(_door|^door|lantern|chain|torch|_sign|^sign|banner|_button|ladder|carpet|bell|lever|candle|flower_pot|vine|_bed|^bed|pressure_plate|rail|hanging_roots|snow_layer|pointed_dripstone|amethyst_cluster|_bud|item_frame|(^|:)frame$|glow_frame|tripwire_hook|sapling|propagule|azalea$)/;
+const HANGS = /chain|hanging_roots|vine/;
+export const blockOf = (plan, c) => (c.role === "door" ? "door" : plan.style?.roles?.[c.role]?.[0] ?? c.role);
+const centreOut = (a, b) => Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z));
+
+// Order cells for a nice rising build: bottom layer first, then up, centre outwards. Everything that needs a block to
+// hold it comes last, once all its supports stand: hanging things (chains, hanging lanterns) from the top down, then
+// the rest from the bottom up, and each door's two halves one right after the other (pair: placed in the same tick).
 export function buildOrder(plan) {
-  return [...plan.cells.values()].sort((a, b) => a.y - b.y || Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z)));
+  const solid = [], hang = [], doors = [], rest = [];
+  for (const c of plan.cells.values()) {
+    const id = blockOf(plan, c);
+    if (!ATTACHED.test(id)) solid.push(c);
+    else if (c.o?.hanging || c.o?.st?.hanging || HANGS.test(id)) hang.push(c);
+    else if (/_door$|^door$/.test(id)) doors.push(c);
+    else rest.push(c);
+  }
+  solid.sort((a, b) => a.y - b.y || centreOut(a, b));
+  hang.sort((a, b) => b.y - a.y || centreOut(a, b));
+  rest.sort((a, b) => a.y - b.y || centreOut(a, b));
+  doors.sort((a, b) => a.x - b.x || a.z - b.z || a.y - b.y);
+  const paired = doors.map((c, i) => {
+    const n = doors[i + 1];
+    return n && n.x === c.x && n.z === c.z && n.y === c.y + 1 ? { ...c, pair: true } : c;
+  });
+  return [...solid, ...hang, ...rest, ...paired];
 }

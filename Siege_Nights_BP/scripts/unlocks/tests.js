@@ -1,13 +1,24 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
 import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
-import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
-import { porchBlocks } from "../opening/millbrook.js";
+import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE, commonest, FLOOR_RING, inHeldNight, HELD_NIGHT } from "./reeve.js";
+import { CHAPEL } from "../opening/millbrook.js";
+import { bakedFor, bakedState } from "./baked.js";
+import { BAKED_SITES } from "./baked_sites.js";
 
 const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const key = (o) => `${o.dx},${o.dy},${o.dz}`;
 
 addTests("unlocks", {
+  "Millbrook is in the Reeve's long night by day until he falls, and only inside the town": () => {
+    const { x, z } = MILLBROOK_SQUARE;
+    assert(inHeldNight(x, z, 6000, 0), "noon in the square, the minute held");
+    assert(inHeldNight(x + HELD_NIGHT.radius - 1, z, 1000, 0), "the edge of the town");
+    assert(!inHeldNight(x + HELD_NIGHT.radius + 5, z, 6000, 0), "outside the town the day is ordinary");
+    assert(!inHeldNight(x, z, 18000, 0), "after dark Minecraft's own night does it");
+    assert(inHeldNight(x, z, 23800, 0), "the dawn never comes");
+    assert(!inHeldNight(x, z, 6000, 1), "the Reeve has fallen: the minute ended");
+  },
   "the keepers' puzzle always has exactly one answer, and it is the planted one": () => {
     for (let seed = 1; seed <= 60; seed++) {
       const p = makePuzzle(seed * 2654435761);
@@ -105,16 +116,19 @@ addTests("unlocks", {
     assert(inChamber({ x: MILLBROOK_SQUARE.x + 3, y: 100 + WELL.floorY + 1, z: MILLBROOK_SQUARE.z }, { ...MILLBROOK_SQUARE, y: 100 }));
     assert(!inChamber({ x: MILLBROOK_SQUARE.x + 3, y: 101, z: MILLBROOK_SQUARE.z }, { ...MILLBROOK_SQUARE, y: 100 }), "standing in the square is not below");
   },
-  "the set piece keeps clear of Wren's porch, stays in Millbrook, and is an odd size": () => {
+  "the set piece keeps clear of Wren's chapel, stays in Millbrook, and is an odd size": () => {
     const plan = fullPlan(makePuzzle(7));
-    const porch = new Set(porchBlocks().map((b) => key({ dx: b.dx, dy: b.dy, dz: b.dz })));
+    const inChapel = (o) => {
+      const x = MILLBROOK_SQUARE.x + o.dx, z = MILLBROOK_SQUARE.z + o.dz;
+      return x >= CHAPEL.x0 && x <= CHAPEL.x1 && z >= CHAPEL.z0 && z <= CHAPEL.z1;
+    };
     for (const o of plan.ops) {
       if (o.dy < 0) continue;
-      assert(!porch.has(key(o)), `touches Wren's porch at ${key(o)}`);
+      assert(!inChapel(o), `touches Wren's chapel at ${key(o)}`);
       assert(Math.hypot(o.dx, o.dz) < 60, "inside Millbrook");
     }
     for (const post of plan.posts) {
-      assert(!porch.has(key({ ...post.keeper, dy: 1 })), "a keeper stands in the porch");
+      assert(!inChapel(post.keeper), "a keeper stands in the chapel");
       assertEqual(faceToCenter(post.clock.dx, post.clock.dz), post.face);
     }
     const xs = wellOps().map((o) => o.dx);
@@ -128,5 +142,27 @@ addTests("unlocks", {
     assertEqual(TOWER_POST, CLOCKTOWER.post);
     const tower = postOps(0, true, "x");
     assert(tower.ops.some((o) => o.dy === 7), "the Tower clock stands taller");
+  },
+  "a baked site is adopted only where its check cells really stand": () => {
+    const bake = { anchor: { x: 1, z: 2 }, center: { x: 10, y: 60, z: 20 }, check: [[0, 0, 0, "a"], [1, 0, 0, "b"], [2, 0, 0, "c"]] };
+    const world = { "10,60,20": "a", "11,60,20": "b", "12,60,20": "c" };
+    const at = (w) => (x, y, z) => w[`${x},${y},${z}`];
+    assertEqual(bakedState(bake, at(world)), "yes");
+    assertEqual(bakedState(bake, at({ ...world, "12,60,20": "minecraft:air" })), "yes", "one cell may differ");
+    assertEqual(bakedState(bake, at({ "10,60,20": "a" })), "wait", "not loaded yet");
+    assertEqual(bakedState(bake, () => "minecraft:grass_block"), "no", "an older world without the bake");
+    assertEqual(bakedState(undefined, at(world)), "no");
+    for (const [id, b] of Object.entries(BAKED_SITES)) {
+      assertEqual(bakedFor(id, b.anchor), b);
+      assertEqual(bakedFor(id, { x: b.anchor.x + 1, z: b.anchor.z }), undefined, "a moved anchor is not adopted");
+      assert(b.check.length >= 3, `${id} has check cells`);
+    }
+    assertEqual(bakedFor("reeve", MILLBROOK_SQUARE)?.anchor ?? MILLBROOK_SQUARE, MILLBROOK_SQUARE);
+  },
+  "the Millbrook square's floor is read round the middle, not off the town's well": () => {
+    assertEqual(commonest([78, 78, 78, 82, undefined, 78, 79, 78]), 78);
+    assertEqual(commonest([79, 78, 79, 78]), 78, "a tie takes the lower floor");
+    assertEqual(commonest([undefined, undefined]), undefined);
+    assert(FLOOR_RING.every(([dx, dz]) => Math.hypot(dx, dz) >= 3), "never the middle, where the well stands");
   },
 });

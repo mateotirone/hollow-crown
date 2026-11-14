@@ -42,9 +42,9 @@ export const COLLECTIONS = [
     reward: { sp: 2, renown: 40, flag: "col_testimony", text: "Wrong hand. Faces the wall. Fears a bell. You know how to tell the Returned now, and so do your guards: Lost Villagers and Changelings near your keep are marked for you." },
   },
   {
-    id: "fallen", name: "The Fallen", color: "§4", count: 7,
+    id: "fallen", name: "The Fallen", color: "§4", count: 8,
     blurb: "The last words of the great enemies of the land, taken from them when they fell.",
-    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Seven enemies, seven confessions. Not one of them chose to be what they became. Remember that at the throne." },
+    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Eight enemies, eight confessions. Not one of them chose to be what they became. Remember that at the throne." },
   },
 ];
 
@@ -55,7 +55,7 @@ export const MILESTONES = [
   { at: 25, name: "Library", items: ["siege:mirror_glass"], sp: 2, text: "Twenty-five tomes. A sliver of Tide Glass falls out of a binding. Carry it and the Hollow's right-to-left writing reads plainly." },
   { at: 40, name: "Archive", items: [], sp: 2, text: "Forty tomes. Scholars would cross the kingdom for this, if there were any scholars left." },
   { at: 60, name: "Great Archive", items: [], sp: 3, text: "Sixty tomes. The Order's own archive holds fewer." },
-  { at: 74, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
+  { at: 75, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
 ];
 
 // ---------- Places the lore points at ----------
@@ -72,16 +72,17 @@ export const PLACES = {
   bellhollow: { name: "Bellhollow", region: "Aldmere Vale", charted: false, desc: "A valley with a broken bell frame and a roadside shrine where pilgrims leave their bells outside." },
   ashen_chapterhouse: { name: "Chapterhouse of the Ashen Gate", region: "Aldmere Vale", charted: true, desc: "The last house of the Order. Grey banners, cold hearths." },
   burned_archive: { name: "The Burned Archive", region: "Aldmere Vale", charted: false, desc: "Somewhere under the chapterhouse. Brother Cael knows the way, if he decides to trust you." },
+  frost_watchtower: { name: "The Old Border Watchtower", region: "Frostmarch", charted: false, desc: "A ruined watchtower over the pass where the Vale road climbs into the Frostmarch. Half of it has fallen." },
   hollowfast: { name: "Rimehold", region: "Frostmarch", charted: true, desc: "A northern longhouse village, half empty for three hundred years." },
   frozen_lake: { name: "The Lake at Rimehold", region: "Frostmarch", charted: false, desc: "Footprints led out to the middle and stopped. A shrine on the shore is carved with a full moon." },
   gulls_rest: { name: "Gull's Rest", region: "Saltreach", charted: true, desc: "A fishing village under a lighthouse whose lamp has never gone out." },
   lighthouse: { name: "The Lighthouse at Gull's Rest", region: "Saltreach", charted: false, desc: "The keeper is in the lamp room. He is always in the lamp room." },
   sunken_chapel: { name: "Chapel of Saint Brannoc", region: "Saltreach", charted: false, desc: "Under the sea off Gull's Rest. Its tower shows above the water only when the moon is dark." },
   sunscar: { name: "Sunscar", region: "Emberwaste", charted: true, desc: "A desert fortress town where every statue has had its face removed." },
-  faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Under Sunscar. It opens for someone who can rebuild a king's face." },
+  faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Down a stair in a sunken courtyard among the dunes south of Sunscar. Five statues of one king guard its door, their faces cut away. It opens for someone who can put his life in order." },
   mirelight: { name: "Mirelight", region: "Blackfen", charted: true, desc: "Huts on stilts and hanging lanterns. Some of the villagers have lost days." },
   mags_hut: { name: "Old Mag's Hut", region: "Blackfen", charted: false, desc: "Past the last lantern of Mirelight, where the frogs stop singing." },
-  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. The caves under the sunken chapel of Saint Brannoc, up on the chalk cliffs of the north coast, a long way west of Rimehold." },
+  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. A chapel the sea took long ago, its caves cut into the chalk cliffs of the north coast, a long way west of Rimehold. Nobody remembers whose it was." },
   bellfounders_mine: { name: "The Bellfounders' Mine", region: "Frostmarch", charted: false, desc: "A thin place. Where Queen Maelis dug the bronze for the Founding Bell, up where the Vale climbs into the snow, far east of Millbrook." },
   kings_barrow: { name: "King's Barrow", region: "Blackfen", charted: false, desc: "A thin place. The royal burial mound, with birches growing over it, where the Vale gives way to the fen, south and a little east of Kingsrest." },
   saltglass_grotto: { name: "The Saltglass Grotto", region: "Emberwaste", charted: false, desc: "A thin place. A cave of fused salt out on the flats, south-east of Sunscar." },
@@ -168,7 +169,7 @@ export const THREADS = [
     id: "where_was_i", name: "Where Was I?", need: 2,
     intro: "For nine heartbeats you were somewhere else.",
     clues: {
-      slip_first: "In Sister Wren's house, the house went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
+      slip_first: "In Sister Wren's chapel, the chapel went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
       undertow_named: "Quill: the mage warned of \"the Hollow beneath, which he said lay under Aldmere as cold water lies under ice, and was no part of our world at all.\"",
       undertow_mirror: "Corvin: \"It is not a copy of ours. Its streets are black water and its towers lean. Its people stand facing the walls. I call it the Hollow.\"",
       lost_face_walls: "Corvin: a returned shape \"turns and faces the wall, toward wherever the Hollow is seeping in nearest.\"",
@@ -456,11 +457,12 @@ export const THREADS = [
       named_by_them: "Sigrun: those below have no names. If there is a name down there, they made it for somebody who came to them having lost his own.",
       walked_in: "Old Mag, who was there: \"She didn't throw him. He asked them to cut the rope, and he walked in. Upright. No scream. No fall.\"",
       leader_is_oswin: "\"I was the only one of yours who had ever kept his word to them, so they made me their voice.\"",
+      conductor_chair_sent_five: "The Choir's Conductor: \"The one in the Chair sent five up the long stair to kill you. Every one of them carried a piece of a key, and he let you take them.\"",
     },
     kind: "text",
     question: "Who was Morvane, before the Hollow gave him that name?",
     accept: ["oswin", "kingoswin", "oswinthelast", "kingoswinthelast", "thelastking", "theoverthrownking", "oswinsonofaldric"],
-    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his.",
+    solved: "Morvane was Oswin, the last King of Aldmere. His daughter threw him into the Hollow alive, and the Hollow crowned its one faithful human and gave him a new name. Every siege for three hundred years has been his, and so were the five who kept the Gate: he sent them up to kill you, and when they could not, every shard you took from them became his key.",
     sp: 5,
   },
   {

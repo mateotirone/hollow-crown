@@ -1,5 +1,6 @@
 """Steed coats in the vanilla horse2 layout (64x64, geometry.horse.v2 from studio/vmobs/geo_horse_v2.json):
-five regional breeds, the crossbred piebald, the Glimstrider, and two overlay layers (Knight Warhorse barding, caparison).
+five regional breeds, the crossbred piebald, the Glimstrider, two overlay layers (Knight Warhorse barding, caparison),
+and the five regional starter cobs every new rider is given (plain working coats under a saddle blanket in the region's cloth).
 python3 build_steeds.py [repo root]      Sheet: art/steeds.png
 Not wired: the horses thread adds the paths to entity/steed.entity.json."""
 import json, os, sys
@@ -16,7 +17,7 @@ def faces(c):
             'west': (u + d + w, v + d, d, h), 'south': (u + 2 * d + w, v + d, w, h)}
 BONES = {b['name']: faces(b['cubes'][0]) for b in GEO['bones'] if b['name'] in ORDER}
 
-def coat(name, base, mane, sock=None, blaze=False, dapple=None, patches=None, feather=False, shaggy=False, hoof=(40, 34, 30), alpha=255, eye=(24, 18, 16)):
+def coat(name, base, mane, sock=None, blaze=False, dapple=None, patches=None, feather=False, shaggy=False, hoof=(40, 34, 30), alpha=255, eye=(24, 18, 16), blanket=None):
     R = ramp_of(base); M = ramp_of(mane); S = ramp_of(sock) if sock else None; D = ramp_of(dapple) if dapple else None; Pt = ramp_of(patches) if patches else None
     im = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
     def put(r, x, y, c, a=None):
@@ -42,7 +43,11 @@ def coat(name, base, mane, sock=None, blaze=False, dapple=None, patches=None, fe
                         if feather and y >= 7 and x in (0, w - 1): t += 1
                         if y >= h - 2: rp = ramp_of(hoof); t = 2 if y == h - 1 else 3
                     if bn == 'Leg1A' and f == 'down': rp = ramp_of(hoof); t = 1
-                    put(r, x, y, rp[max(0, min(5, t))])
+                    c = rp[max(0, min(5, t))]
+                    if blanket and bn == 'Body' and f != 'down':
+                        b = blanket_px(blanket, f, x, y, w, h)
+                        if b: c = b
+                    put(r, x, y, c)
     Hd, Mu, Er = BONES['Head'], BONES['UMouth'], BONES['Ear1']
     for f in ('east', 'west'):                                                            # eyes on the sides of the head
         r = Hd[f]; ex = 2 if f == 'west' else r[2] - 3
@@ -57,6 +62,22 @@ def coat(name, base, mane, sock=None, blaze=False, dapple=None, patches=None, fe
         for y in range(3): put(Mu['north'], 1, y, W); put(Mu['north'], 2, y, W)
         for z in range(2, 7): put(Hd['up'], 2, z, W); put(Hd['up'], 3, z, W)
     os.makedirs(OUT, exist_ok=True); im.save(OUT + f'steed_{name}.png'); return im
+
+def blanket_px(spec, f, x, y, w, h):
+    """A working saddle blanket over the middle of the back: spec = (cloth, second colour, pattern)."""
+    cloth, second, pattern = spec
+    if f == 'up': u, v, inside = x, y, 6 <= y <= 15                       # across the back (10 wide, 22 long)
+    elif f in ('east', 'west'): u, v, inside = x, y, 6 <= x <= 15 and y <= 6   # hanging down each flank
+    else: return None
+    if not inside: return None
+    edge = (f == 'up' and y in (6, 15)) or (f != 'up' and (x in (6, 15) or y == 6))
+    if edge: return tuple(max(0, c - 40) for c in cloth)                   # bound edge
+    k = v if f != 'up' else u
+    if pattern == 'check': pick = second if ((u // 2) + (v // 2)) % 2 else cloth
+    elif pattern == 'stripe': pick = second if k % 4 == 1 else cloth
+    elif pattern == 'zigzag': pick = second if (v + abs((u % 4) - 2)) % 4 == 0 else cloth
+    else: pick = second if _h(u, v, 17) < 0.25 else cloth                  # sacking: a rough weave
+    return tuple(pick)
 
 def overlay(name, rules):
     """rules: {bone: fn(face, x, y, w, h) -> colour or None}"""
@@ -78,6 +99,11 @@ ims = [
  ('Emberwaste Sandstrider', coat('emberwaste', (214, 180, 112), (240, 226, 190), sock=(70, 50, 34), hoof=(60, 44, 30))),
  ('Blackfen Mire-Pony', coat('blackfen', (48, 38, 34), (24, 20, 20), shaggy=True, feather=True, sock=(66, 54, 46), hoof=(20, 18, 18))),
  ('Crossbred', coat('crossbred', (120, 74, 44), (40, 30, 26), patches=(236, 230, 218), sock=(236, 230, 218))),
+ ('Vale Plough-Cob', coat('cob_vale', (122, 82, 52), (52, 36, 26), sock=(96, 66, 44), blanket=((70, 112, 58), (222, 210, 172), 'check'))),
+ ('Frostmarch Sledge-Cob', coat('cob_frostmarch', (150, 136, 116), (70, 62, 54), sock=(214, 208, 196), feather=True, shaggy=True, blanket=((168, 44, 40), (232, 228, 220), 'stripe'))),
+ ('Saltreach Cart-Cob', coat('cob_saltreach', (112, 108, 104), (190, 186, 176), hoof=(54, 52, 56), blanket=((44, 62, 104), (226, 222, 210), 'stripe'))),
+ ('Emberwaste Pack-Cob', coat('cob_emberwaste', (176, 142, 98), (86, 62, 40), sock=(120, 90, 60), blanket=((196, 112, 40), (88, 40, 28), 'zigzag'))),
+ ('Blackfen Peat-Cob', coat('cob_blackfen', (70, 56, 44), (36, 30, 26), feather=True, shaggy=True, sock=(84, 70, 56), hoof=(24, 20, 18), blanket=((88, 100, 56), (122, 96, 62), 'sack'))),
  ('Glimstrider', coat('hollow', (176, 206, 240), (236, 246, 255), alpha=170, eye=(10, 8, 20), hoof=(120, 150, 200), dapple=(226, 240, 255))),
 ]
 ST = ramp_of((150, 154, 168)); GD = ramp_of((204, 164, 60))
@@ -104,6 +130,6 @@ ims.append(('Caparison (tinted by the banner)', overlay('caparison', {
     'Neck': lambda f, x, y, w, h: cloth(f, x, y, w, h, f in ('east', 'west', 'north') and y >= 4),
     'Head': lambda f, x, y, w, h: cloth(f, x, y, w, h, f == 'up' or (f in ('east', 'west') and y == 0)),
 })))
-sh = Image.new('RGBA', (5 * 200 + 8, 2 * 200 + 8), (88, 92, 100, 255))
+sh = Image.new('RGBA', (5 * 200 + 8, 3 * 200 + 8), (88, 92, 100, 255))
 for i, (n, im) in enumerate(ims): sh.alpha_composite(im.resize((192, 192), Image.NEAREST), (8 + (i % 5) * 200, 8 + (i // 5) * 200))
 sh.save(ROOT + 'art/steeds.png'); print('ok', len(ims))

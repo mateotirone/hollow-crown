@@ -48,7 +48,7 @@ class TownPlots(Town):
         n = SIZES[size]; w, d = self.rng.choice([(n, n), (n + 2, n), (n, n + 2)])
         return slot_box(w, d, size)
 
-    SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK")
+    SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK", "LANDK")
     def place_square_buildings(self):
         """Civic plots claim their ground round the square before the streets are laid (so the
         streets find their way round them), but are only levelled once the streets are down, so
@@ -150,7 +150,7 @@ class TownPlots(Town):
         self.streets(); self.relax(); self.grade_verges()
         self.level_civic()
         self.portions()
-        self.houses(); self.relax()
+        self.houses(); self.relax(); self.terraform()
         self.field_paths(); self.fences(); self.fields()
         self.dress()
         self.path_blocks(); self.ground_blocks(); self.banks(); self.outline(); self.finish_bridges()

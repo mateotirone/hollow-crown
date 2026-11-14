@@ -18,7 +18,7 @@ GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
          "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
-TEX_ALIAS = {"chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
+TEX_ALIAS = {"bricks": "brick", "light_blue_stained_glass": "glass_light_blue", "target": "target_side", "cocoa": "cocoa_stage_2", "chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
              "planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
@@ -48,7 +48,7 @@ def siege_tex(n):
                     if not isinstance(v, dict) or v.get("texture") not in td: continue
                     t = td[v["texture"]]["textures"]; t = t[0] if isinstance(t, list) else t
                     if isinstance(t, dict): t = t.get("path") or t["variations"][0]["path"]
-                    out[face] = os.path.join(_REPO, "Siege_Nights_RP", t)
+                    out[face] = os.path.join(_REPO, "Siege_Nights_RP", t) + ("" if os.path.splitext(t)[1] else ".png")
                 if out: _SIEGE[b["description"]["identifier"]] = out
         except Exception as e: print("siege textures:", e)
     t = _SIEGE.get(n, {})
@@ -165,10 +165,14 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate",
-       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks"}
+       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks",
+       "cracked_deepslate_tiles": "deepslate/cracked_deepslate_tiles"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
+for _c in ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "cyan", "purple", "blue", "brown", "green", "red", "black"):
+    MAT[_c + "_stained_glass"] = "glass_" + _c                   # full stained glass blocks (the Everwake gate's portal stand-in)
+MAT["light_gray_stained_glass"] = "glass_silver"
 
 def base_material(n):
     for suf in ("_stairs", "_slab", "_wall", "_fence"):
@@ -201,6 +205,7 @@ def cube_tex(n, p):
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
               "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "stonecutter_block": {"top": "stonecutter2_top", "bottom": "stonecutter2_bottom", "side": "stonecutter2_side"},
               "bone_block": {"top": "bone_block_top", "bottom": "bone_block_top", "side": "bone_block_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
@@ -214,6 +219,7 @@ def cube_tex(n, p):
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
               "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
               "barrel": {"top": "barrel_top", "bottom": "barrel_bottom", "side": "barrel_side"},
+              "stonecutter_block": {"top": "stonecutter2_top", "bottom": "stonecutter2_bottom", "side": "stonecutter2_side"},
               "crafting_table": {"top": "crafting_table_top", "side": "crafting_table_side", "bottom": "planks_oak"},
               "oak_leaves": {"side": "leaves_oak.tga#foliage"}, "spruce_leaves": {"side": "leaves_spruce.tga#spruce"},
               "dark_oak_leaves": {"side": "leaves_big_oak.tga#foliage"}, "birch_leaves": {"side": "leaves_birch.tga#birch"},
@@ -234,6 +240,7 @@ def cube_tex(n, p):
     if n in simple: return simple[n]
     if n.endswith("_glazed_terracotta"): return {"side": "glazed_terracotta_" + n[:-18].replace("light_gray", "silver")}
     if n == "scaffolding": return {"side": "scaffolding_side", "top": "scaffolding_top", "bottom": "scaffolding_bottom"}
+    if n == "terracotta": return {"side": "hardened_clay"}
     if n.endswith("_terracotta") and not n.startswith("glazed"):
         c = n[:-11].replace("light_gray", "silver")
         return {"side": "hardened_clay_stained_" + c if c else "hardened_clay"}
@@ -256,11 +263,13 @@ def cull_group(n):
     if n == "water": return "water"
     return None
 
-PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
+PLANTS = {"cave_vines": "cave_vines_body", "cave_vines_body_with_berries": "cave_vines_body_berries", "cave_vines_head_with_berries": "cave_vines_head_berries",
+          "cave_vines_head": "cave_vines_head", "azalea": "azalea_plant", "flowering_azalea": "potted_flowering_azalea_bush_plant", "pointed_dripstone": "pointed_dripstone_down_tip",
+          "poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
+          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "deadbush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}
@@ -318,6 +327,7 @@ def track_preview(kind, d):
 def model(n, p):
     """-> list of (box, texdict, flags)."""
     if n.startswith("minecraft:"): n = n[10:]          # tree stamps carry full ids
+    if n == "fence_gate": n = "oak_fence_gate"            # Bedrock's id for the oak gate
     if n == "siege:track_preview": return track_preview(p.get("kind", 0), p.get("dir", 0))
     if is_stairs(n): t = {"side": base_material(n)}; return [(b, t, {}) for b in stair_boxes(p)]
     if is_slab(n):
@@ -348,7 +358,7 @@ def model(n, p):
                                 "e": (9 / 16, 0, 7 / 16, 1, 1, 9 / 16), "w": (0, 0, 7 / 16, 7 / 16, 1, 9 / 16)}[d], t, {"cut": 1}))
         return out
     if n.endswith("trapdoor"):
-        w = wood_of(n); t = {"side": f"{w}_trapdoor" if w != "oak" else "trapdoor"}
+        w = wood_of(n); t = {"side": "iron_trapdoor" if n == "iron_trapdoor" else f"{w}_trapdoor" if w != "oak" else "trapdoor"}
         if p.get("open"):
             side = {"n": "s", "s": "n", "e": "w", "w": "e"}[p.get("facing", "n")]
             return [(thin_plate(side), t, {"cut": 1})]
@@ -419,7 +429,7 @@ def model(n, p):
         if m: return m
     if n.startswith("siege:") and siege_cutout(n): return [((0, 0, 0, 1, 1, 1), siege_tex(n), {"cut": 1})]
     if n == "vine":
-        bits = p.get("raw", {}).get("vine_direction_bits", 0); out = []
+        bits = p.get("raw", {}).get("vine_direction_bits", {"s": 1, "w": 2, "n": 4, "e": 8}.get(p.get("attach"), 0)); out = []
         for bit, side in ((1, "s"), (2, "w"), (4, "n"), (8, "e")):
             if bits & bit: out.append((thin_plate(side, 1 / 16), {"side": "vine#foliage"}, {"cut": 1}))
         return out

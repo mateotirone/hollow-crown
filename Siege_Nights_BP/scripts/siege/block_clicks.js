@@ -10,12 +10,13 @@ import { saveState, state } from "./state.js";
 import { colorTaken, foreignSettlement } from "./territory.js";
 import { workOnWall } from "./walls.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 
 // ---------- Clicking blocks: gates and banner dyeing ----------
 
 export const GATE_SOUNDS = Object.fromEntries([
-  ...PORTCULLISES.map((id) => [id, { open: "random.door_open", close: "random.anvil_land" }]),
-  ...CASTLE_GATES.map((id) => [id, { open: "random.door_open", close: "random.door_close" }]),
+  ...PORTCULLISES.map((id) => [id, { open: "sig.portcullis_open", close: "sig.portcullis_close" }]),
+  ...CASTLE_GATES.map((id) => [id, { open: "sig.gate_open", close: "sig.gate_close" }]),
 ]);
 
 
@@ -42,6 +43,8 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     const here = dim.getBlock(at);
     if (!here || !GATE_SOUNDS[here.typeId]) return;
     if (workOnWall(here, player, item)) return;
+    const locked = applyFilter("gateLock", undefined, { player, block: here });
+    if (locked) return player.onScreenDisplay.setActionBar(`§7${locked}`);
     if (mayWorkGate(player, here)) toggleGate(here, player);
     else player.onScreenDisplay.setActionBar(`§cThe gate is barred. Only ${state.keeps[foreignSettlement(player, here.location, here.dimension.id)]?.name ?? "the owner"}'s people can open it.`);
   });
@@ -67,7 +70,9 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
 
 // A settlement's gates and portcullises answer only to its owner and their allies (Mateo, 2026-11-11);
 // the owner's guards open them for friends (settle/walls.js). Anyone may work a gate out in the wild.
+// A feature can lock a gate outright with addFilter("gateLock", (why, { player, block }) => why ?? "reason") (the arena does).
 export function mayWorkGate(player, block) {
+  if (applyFilter("gateLock", undefined, { player, block })) return false;
   if (player.getGameMode() === GameMode.Creative) return true;
   return !foreignSettlement(player, block.location, block.dimension.id);
 }

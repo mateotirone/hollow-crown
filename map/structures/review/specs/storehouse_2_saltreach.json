@@ -1,0 +1,73 @@
+{
+ "name": "storehouse_2_saltreach",
+ "card": {
+  "title": "Storehouse",
+  "sub": "Saltreach, level 2 (Town)",
+  "region": "saltreach",
+  "where": "Every settlement, on the starter village's Storehouse ground (15 x 15); rebuilt bigger at each tier",
+  "kind": "Work",
+  "blurb": "Walls of chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay: the settlement's storage, growing with the town."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_atlantean",
+    "roof": "dark_prismarine"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "storey_style": [],
+   "door": {
+    "side": "s",
+    "kind": "large",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     }
+    ],
+    "n": [],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "chimney": false,
+   "interior": {
+    "use": "storehouse",
+    "attic": false,
+    "pillar": "prismarine_bricks",
+    "beam": "smooth_quartz"
+   },
+   "vines": 0,
+   "bushes": false
+  }
+ ]
+}

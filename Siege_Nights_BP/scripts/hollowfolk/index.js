@@ -21,6 +21,7 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { applyFilter } from "../core/events.js";
 import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerDeck, storyPick, note, markDone } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
@@ -41,6 +42,7 @@ import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
 import { setHollowAir } from "./ambience.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 export { setHollowAir } from "./ambience.js";
 
 const RAW = "siege:raw_choir_ore";
@@ -211,16 +213,24 @@ function staffVillage(v) {
   try { here = dim.getEntities({ type: NPC, tags: [TAG, `hollowfolk_${v.id}`] }); } catch { return; }
   if (here.length >= FOLK_SPOTS.length) return;
   for (const e of here) try { e.remove(); } catch { /* gone */ }
-  for (const s of FOLK_SPOTS) {
+  FOLK_SPOTS.forEach((s, i) => {
     try {
       const e = dim.spawnEntity(NPC, { x: c.x + s.dx + 0.5, y: c.y, z: c.z + s.dz + 0.5 });
       e.addTag(TAG);
       e.addTag(`hollowfolk_${v.id}`);
       if (s.foreman) e.addTag(TAG_FOREMAN);
       e.nameTag = s.foreman ? `§bForeman of ${v.name}` : "§7Miner";
+      dressNpc(e, s.foreman ? "hollow_foreman" : `hollow_miner_${(i - 1 + 3) % 3}`);
     } catch { /* the chunk is not loaded yet; the next pass tries again */ }
-  }
+  });
 }
+// Foremen and miners from before skin tags: miners get one of three faces from their id
+addNpcLook((e) => {
+  if (e.hasTag(TAG_FOREMAN)) return "hollow_foreman";
+  if (!e.hasTag(TAG)) return undefined;
+  const n = [...String(e.id)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0);
+  return `hollow_miner_${n % 3}`;
+});
 
 function buildVault() {
   const dim = hollow(), v = VAULT;
@@ -242,8 +252,8 @@ function buildVault() {
   store.save();
 }
 
-// The Deep Door: a sealed arch in the Vault's north wall. It does not open. It is a hook for a later
-// expansion (the Deep), so nothing may depend on what is behind it yet.
+// The Deep Door: a sealed arch in the Vault's north wall. It does not open until Morvane falls; then the filter
+// "deepDoor" (false, { player }) lets after/deep.js take the player down instead (return true when handled).
 const DEEP_LINES = [
   "Sealed stone, colder than the rest of the wall. It does not open.",
   "You press your ear to it. Far below, something answers your breathing a moment late.",
@@ -361,7 +371,7 @@ function arrive(player, v) {
     note(player, "quiet");
   } else if (h.id === "seam_mites") {
     const c = villageSpot(v.id);
-    for (let i = 0; i < 3; i++) try { hollow().spawnEntity("minecraft:endermite", { x: c.x - 11 + i, y: c.y + 1, z: c.z + 9 }); } catch { /* chunk not ready */ }
+    for (let i = 0; i < 3; i++) try { hollow().spawnEntity("siege:ash_scarab", { x: c.x - 11 + i, y: c.y + 1, z: c.z + 9 }); } catch { /* chunk not ready */ }
     say(player, `§cA shout from the seam at ${v.name}: the picks have broken into a nest. Things are coming out of the rock.`);
     note(player, "fight");
   } else if (h.id === "bound_scrap") {
@@ -572,6 +582,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   if (e.block.typeId !== B.seal || e.block.dimension.id !== UNDERTOW_ID || !deepDoorAt(e.block.location)) return;
   if (e.isFirstEvent === false) return;
   e.cancel = true;
+  if (applyFilter("deepDoor", false, { player: e.player })) return; // after Morvane falls the Deep opens (after/deep.js)
   const player = e.player, n = deepTries.get(player.id) ?? 0;
   deepTries.set(player.id, n + 1);
   system.run(() => say(player, `§8${DEEP_LINES[Math.min(n, DEEP_LINES.length - 1)]}`));
@@ -650,6 +661,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     const e = dim.spawnEntity(NPC, { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
     e.addTag("siege_showcase");
     e.nameTag = "§bForeman";
+    dressNpc(e, "hollow_foreman");
   } catch { /* entity missing */ }
   label(at, "Mining village\nForeman");
   const b = nextSpot();

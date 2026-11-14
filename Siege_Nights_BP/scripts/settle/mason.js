@@ -13,8 +13,9 @@ import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pi
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
 import { purse, charge, coins, coinName, coinIcon, lot } from "./wallet.js";
-import { styleOf, FOUNDATION } from "./plans.js";
+import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const BENCH = "siege:mason_bench";
 export const MASON_TAG = "siege_mason";
@@ -24,6 +25,8 @@ const OVERWORLD = "minecraft:overworld";
 // benches: [{ x, y, z, owner }]
 const store = moduleStore("siege:settle_masons", () => ({ benches: [] }));
 const benches = () => store.data.benches;
+// The settlement's first Mason's Bench (the mason stands by it): where the Act 1 "Mend the wall" step points
+export const benchOf = (owner) => { const b = benches().find((x) => x.owner === owner); return b ? { x: b.x, y: b.y, z: b.z } : undefined; };
 const benchTag = (b) => `siege_mason_at_${b.x}_${b.y}_${b.z}`;
 const same = (a, b) => a.x === b.x && a.y === b.y && a.z === b.z;
 
@@ -132,18 +135,14 @@ export async function openShop(player, mason) {
   const all = shelves(styleId);
   const form = new ActionFormData().title("Mason").body(`§o"${line}"§r\n\nYou carry ${coins(purse(player))}.`);
   for (const shelf of all) form.button(shelf.name, shelf.icon);
-  form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice * lot())}`);
   if (home) form.button("Mend the wall\n§8The masons survey it and name a price");
   if (home) form.button("Choose what the wall is built in\n§8Any stone, any region's timber. Free");
   const res = await form.show(player);
   if (res.canceled) return;
   if (res.selection < all.length) return openShelf(player, all[res.selection], mason);
-  if (res.selection === all.length + 1) return emit("wallRepair", { owner: home, player }); // repair.js
-  if (res.selection === all.length + 2) return chooseWallLook(player, home); // walls.js
-  const stonePrice = SETTLE.stonePrice * lot();
-  if (purse(player) < stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(stonePrice)}.`);
-  hand(player, FOUNDATION, 1);
-  player.sendMessage("§7Mason: §fSet it where the front should be, facing the way the building runs. Click it and choose. You get the stone back after.");
+  // (no Foundation Stones any more, Mateo 2026-11-14: buildings go on plots from the Plot Marker)
+  if (res.selection === all.length) return emit("wallRepair", { owner: home, player }); // repair.js
+  if (res.selection === all.length + 1) return chooseWallLook(player, home); // walls.js
 }
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
@@ -158,8 +157,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 
 // ---------- masons and their benches ----------
 
-const MASON_SKIN = 12;
-// Name and skin. A freshly spawned NPC can reset these as it finishes spawning, so they are set again a moment
+// Name (the skin is dressNpc's: core/npc_skins.js). A freshly spawned NPC can reset these as it finishes spawning, so they are set again a moment
 // later, and the bench check puts them back on any mason that lost them.
 export function dressMason(mason) {
   try {
@@ -168,7 +166,6 @@ export function dressMason(mason) {
     const npc = mason.getComponent("minecraft:npc");
     if (!npc) return;
     if (npc.name !== "Mason") npc.name = "Mason";
-    if (npc.skinIndex !== MASON_SKIN) npc.skinIndex = MASON_SKIN;
   } catch (e) {
     console.warn(`[Hollow Crown] mason looks: ${e}`);
   }
@@ -178,18 +175,23 @@ export function spawnMason(dim, location, bench) {
   const mason = dim.spawnEntity(NPC_TYPE, location);
   mason.addTag(MASON_TAG);
   if (bench) mason.addTag(benchTag(bench));
+  dressNpc(mason, "mason");
   dressMason(mason);
   system.runTimeout(() => dressMason(mason), 10);
   return mason;
 }
 
+addNpcLook((e) => (e.hasTag(MASON_TAG) ? { key: "mason", name: "Mason" } : undefined));
+
 const masonsOf = (dim, bench) => dim.getEntities({ type: NPC_TYPE, tags: [benchTag(bench)] });
 
-export function registerBench(block, owner) {
+// stand: where the mason stands (beside the bench in the Mason's Yard); without it, on the bench
+const standOf = (b) => (b.stand ? { x: b.stand.x + 0.5, y: b.stand.y, z: b.stand.z + 0.5 } : { x: b.x + 0.5, y: b.y + 1, z: b.z + 0.5 });
+export function registerBench(block, owner, stand) {
   const at = { x: block.location.x, y: block.location.y, z: block.location.z };
-  if (!benches().some((b) => same(b, at))) benches().push({ ...at, owner });
+  if (!benches().some((b) => same(b, at))) benches().push({ ...at, owner, ...(stand ? { stand } : {}) });
   store.save();
-  if (!masonsOf(block.dimension, at).length) spawnMason(block.dimension, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 }, at);
+  if (!masonsOf(block.dimension, at).length) spawnMason(block.dimension, standOf({ ...at, stand }), at);
 }
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
@@ -247,7 +249,7 @@ function benchTick() {
     else {
       const n = (missing.get(tag) ?? 0) + 1;
       missing.set(tag, n);
-      if (n >= MISSING_CHECKS) { missing.delete(tag); spawnMason(dim, { x: bench.x + 0.5, y: bench.y + 1, z: bench.z + 0.5 }, bench); }
+      if (n >= MISSING_CHECKS) { missing.delete(tag); spawnMason(dim, standOf(bench), bench); }
     }
     return true;
   });

@@ -149,7 +149,7 @@ const describe = (it) => ({
   yours: `§aYour settlement.§7 ${it.region ? it.region + ". " : ""}Its banner is ${it.color.replace("_", " ")}.`,
   held: `§fHeld by ${it.who}.§7 ${it.region ? it.region + ". " : ""}Banner: ${it.color.replace("_", " ")}.`,
   npc: `§cHeld by ${it.who}, a rival lord.§7 ${it.region ?? ""}`,
-  plot: `§7Unclaimed plot in ${it.region}. A Keep Banner on its Plot Stone claims it.`,
+  plot: `§7Unclaimed plot in ${it.region}. Click its Plot Stone and raise your banner to claim it.`,
   town: "§7A town. Anyone may trade and rest here.",
   place: `§7${it.text ?? "A place your people have found."}`,
 })[it.kind];

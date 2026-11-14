@@ -22,7 +22,7 @@ import { onTick } from "../core/loop.js";
 import { on, emit, isReady, getState } from "../siege/api.js";
 import { activeFights } from "../bestiary/bossCore.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L } from "./layout.js";
-import { isBuilt } from "./builder.js";
+import { arrivalReady } from "./builder.js";
 import { runCmd, say } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
@@ -41,6 +41,8 @@ const P_COUNT = "hc:slips"; // on the player: how many Slips they have had
 
 const active = new Map(); // player id -> slip
 export const isSlipping = (player) => active.has(player.id);
+const flickering = new Set();
+export const isFlickering = (player) => flickering.has(player.id);
 
 // Where a Slip lands: on the Wound's ledge (always loaded and built), a little apart from the
 // arrival point and facing out over the valley, away from the return crack.
@@ -77,7 +79,7 @@ export function canSlip(player) {
 export function startSlip(playerOrId, opts = {}) {
   const player = resolvePlayer(playerOrId);
   const id = opts.id ?? "slip";
-  const why = canSlip(player) ?? (isBuilt(0, 0) && isBuilt(-1, 0) ? undefined : "the Hollow is not ready yet");
+  const why = canSlip(player) ?? (arrivalReady() ? undefined : "the Hollow is not ready yet");
   if (why) {
     emit("slipRefused", { player: player?.id, id, why });
     return false;
@@ -201,6 +203,7 @@ export function flicker(playerOrId, seconds = 3) {
   const p = resolvePlayer(playerOrId);
   if (!p || canSlip(p)) return false;
   const ticks = Math.round(Math.max(2, Math.min(5, seconds)) * 20);
+  flickering.add(p.id);
   runCmd(p, `fog @s push ${FLICKER_FOG} hc_flicker`); // the old thick Hollow fog: a Flicker is only a glimpse
   try {
     p.addEffect("darkness", ticks, { amplifier: 0, showParticles: false });
@@ -216,7 +219,7 @@ export function flicker(playerOrId, seconds = 3) {
       } catch { /* gone */ }
     }, t);
   }
-  system.runTimeout(() => runCmd(p, "fog @s remove hc_flicker"), ticks);
+  system.runTimeout(() => { flickering.delete(p.id); runCmd(p, "fog @s remove hc_flicker"); }, ticks);
   emit("flickered", { player: p.id, seconds: ticks / 20 });
   return true;
 }

@@ -116,6 +116,9 @@
   "siege_b_mire_heart": {
    "textures": "textures/items/bestiary/mire_heart"
   },
+  "siege_b_last_note": {
+   "textures": "textures/items/bestiary/last_note"
+  },
   "siege_b_warlords_brand": {
    "textures": "textures/items/bestiary/warlords_brand"
   },
@@ -1009,6 +1012,393 @@
   },
   "siege_choirsteel_blackfen_boots": {
    "textures": "textures/items/siege_choirsteel_blackfen_boots"
+  },
+  "siege_guardgear_1_helmet": {
+   "textures": "textures/items/siege_guardgear_1_helmet"
+  },
+  "siege_guardgear_2_helmet": {
+   "textures": "textures/items/siege_guardgear_2_helmet"
+  },
+  "siege_guardgear_3_helmet": {
+   "textures": "textures/items/siege_guardgear_3_helmet"
+  },
+  "siege_guardgear_4_helmet": {
+   "textures": "textures/items/siege_guardgear_4_helmet"
+  },
+  "siege_guardgear_1_chestplate": {
+   "textures": "textures/items/siege_guardgear_1_chestplate"
+  },
+  "siege_guardgear_2_chestplate": {
+   "textures": "textures/items/siege_guardgear_2_chestplate"
+  },
+  "siege_guardgear_3_chestplate": {
+   "textures": "textures/items/siege_guardgear_3_chestplate"
+  },
+  "siege_guardgear_4_chestplate": {
+   "textures": "textures/items/siege_guardgear_4_chestplate"
+  },
+  "siege_guardgear_1_leggings": {
+   "textures": "textures/items/siege_guardgear_1_leggings"
+  },
+  "siege_guardgear_2_leggings": {
+   "textures": "textures/items/siege_guardgear_2_leggings"
+  },
+  "siege_guardgear_3_leggings": {
+   "textures": "textures/items/siege_guardgear_3_leggings"
+  },
+  "siege_guardgear_4_leggings": {
+   "textures": "textures/items/siege_guardgear_4_leggings"
+  },
+  "siege_guardgear_1_boots": {
+   "textures": "textures/items/siege_guardgear_1_boots"
+  },
+  "siege_guardgear_2_boots": {
+   "textures": "textures/items/siege_guardgear_2_boots"
+  },
+  "siege_guardgear_3_boots": {
+   "textures": "textures/items/siege_guardgear_3_boots"
+  },
+  "siege_guardgear_4_boots": {
+   "textures": "textures/items/siege_guardgear_4_boots"
+  },
+  "siege_summon_bell_wife": {
+   "textures": "textures/items/creative/summon_bell_wife"
+  },
+  "siege_everwake_wings": {
+   "textures": "textures/items/everwake_wings"
+  },
+  "siege_starter_vale_helmet": {
+   "textures": "textures/items/siege_starter_vale_helmet"
+  },
+  "siege_starter_vale_chestplate": {
+   "textures": "textures/items/siege_starter_vale_chestplate"
+  },
+  "siege_starter_vale_leggings": {
+   "textures": "textures/items/siege_starter_vale_leggings"
+  },
+  "siege_starter_vale_boots": {
+   "textures": "textures/items/siege_starter_vale_boots"
+  },
+  "siege_starter_vale_weapon": {
+   "textures": "textures/items/siege_starter_vale_weapon"
+  },
+  "siege_starter_frostmarch_helmet": {
+   "textures": "textures/items/siege_starter_frostmarch_helmet"
+  },
+  "siege_starter_frostmarch_chestplate": {
+   "textures": "textures/items/siege_starter_frostmarch_chestplate"
+  },
+  "siege_starter_frostmarch_leggings": {
+   "textures": "textures/items/siege_starter_frostmarch_leggings"
+  },
+  "siege_starter_frostmarch_boots": {
+   "textures": "textures/items/siege_starter_frostmarch_boots"
+  },
+  "siege_starter_frostmarch_weapon": {
+   "textures": "textures/items/siege_starter_frostmarch_weapon"
+  },
+  "siege_starter_saltreach_helmet": {
+   "textures": "textures/items/siege_starter_saltreach_helmet"
+  },
+  "siege_starter_saltreach_chestplate": {
+   "textures": "textures/items/siege_starter_saltreach_chestplate"
+  },
+  "siege_starter_saltreach_leggings": {
+   "textures": "textures/items/siege_starter_saltreach_leggings"
+  },
+  "siege_starter_saltreach_boots": {
+   "textures": "textures/items/siege_starter_saltreach_boots"
+  },
+  "siege_starter_saltreach_weapon": {
+   "textures": "textures/items/siege_starter_saltreach_weapon"
+  },
+  "siege_starter_emberwaste_helmet": {
+   "textures": "textures/items/siege_starter_emberwaste_helmet"
+  },
+  "siege_starter_emberwaste_chestplate": {
+   "textures": "textures/items/siege_starter_emberwaste_chestplate"
+  },
+  "siege_starter_emberwaste_leggings": {
+   "textures": "textures/items/siege_starter_emberwaste_leggings"
+  },
+  "siege_starter_emberwaste_boots": {
+   "textures": "textures/items/siege_starter_emberwaste_boots"
+  },
+  "siege_starter_emberwaste_weapon": {
+   "textures": "textures/items/siege_starter_emberwaste_weapon"
+  },
+  "siege_starter_blackfen_helmet": {
+   "textures": "textures/items/siege_starter_blackfen_helmet"
+  },
+  "siege_starter_blackfen_chestplate": {
+   "textures": "textures/items/siege_starter_blackfen_chestplate"
+  },
+  "siege_starter_blackfen_leggings": {
+   "textures": "textures/items/siege_starter_blackfen_leggings"
+  },
+  "siege_starter_blackfen_boots": {
+   "textures": "textures/items/siege_starter_blackfen_boots"
+  },
+  "siege_starter_blackfen_weapon": {
+   "textures": "textures/items/siege_starter_blackfen_weapon"
+  },
+  "siege_rimeforged_helmet": {
+   "textures": "textures/items/siege_rimeforged_helmet"
+  },
+  "siege_rimeforged_chestplate": {
+   "textures": "textures/items/siege_rimeforged_chestplate"
+  },
+  "siege_rimeforged_leggings": {
+   "textures": "textures/items/siege_rimeforged_leggings"
+  },
+  "siege_rimeforged_boots": {
+   "textures": "textures/items/siege_rimeforged_boots"
+  },
+  "siege_rime_axe": {
+   "textures": "textures/items/siege_rime_axe"
+  },
+  "siege_rime_spear": {
+   "textures": "textures/items/siege_rime_spear"
+  },
+  "siege_rime_steel": {
+   "textures": "textures/items/siege_rime_steel"
+  },
+  "siege_cx_watchward_helmet": {
+   "textures": "textures/items/codex/watchward_helmet"
+  },
+  "siege_cx_watchward_chestplate": {
+   "textures": "textures/items/codex/watchward_chestplate"
+  },
+  "siege_cx_watchward_leggings": {
+   "textures": "textures/items/codex/watchward_leggings"
+  },
+  "siege_cx_watchward_boots": {
+   "textures": "textures/items/codex/watchward_boots"
+  },
+  "siege_cx_watchmans_glaive": {
+   "textures": "textures/items/codex/watchmans_glaive"
+  },
+  "siege_cx_watch_crossbow": {
+   "textures": "textures/items/codex/watch_crossbow"
+  },
+  "siege_cx_tidewrought_helmet": {
+   "textures": "textures/items/codex/tidewrought_helmet"
+  },
+  "siege_cx_tidewrought_chestplate": {
+   "textures": "textures/items/codex/tidewrought_chestplate"
+  },
+  "siege_cx_tidewrought_leggings": {
+   "textures": "textures/items/codex/tidewrought_leggings"
+  },
+  "siege_cx_tidewrought_boots": {
+   "textures": "textures/items/codex/tidewrought_boots"
+  },
+  "siege_cx_lighthouse_harpoon": {
+   "textures": "textures/items/codex/lighthouse_harpoon"
+  },
+  "siege_cx_tidesteel_cutlass": {
+   "textures": "textures/items/codex/tidesteel_cutlass"
+  },
+  "siege_cx_sunscale_helmet": {
+   "textures": "textures/items/codex/sunscale_helmet"
+  },
+  "siege_cx_sunscale_chestplate": {
+   "textures": "textures/items/codex/sunscale_chestplate"
+  },
+  "siege_cx_sunscale_leggings": {
+   "textures": "textures/items/codex/sunscale_leggings"
+  },
+  "siege_cx_sunscale_boots": {
+   "textures": "textures/items/codex/sunscale_boots"
+  },
+  "siege_cx_sunbrand_sabre": {
+   "textures": "textures/items/codex/sunbrand_sabre"
+  },
+  "siege_cx_sunscale_bow": {
+   "textures": "textures/items/codex/sunscale_bow"
+  },
+  "siege_cx_fenlight_helmet": {
+   "textures": "textures/items/codex/fenlight_helmet"
+  },
+  "siege_cx_fenlight_chestplate": {
+   "textures": "textures/items/codex/fenlight_chestplate"
+  },
+  "siege_cx_fenlight_leggings": {
+   "textures": "textures/items/codex/fenlight_leggings"
+  },
+  "siege_cx_fenlight_boots": {
+   "textures": "textures/items/codex/fenlight_boots"
+  },
+  "siege_cx_wisp_bow": {
+   "textures": "textures/items/codex/wisp_bow"
+  },
+  "siege_cx_bogsilver_sickle": {
+   "textures": "textures/items/codex/bogsilver_sickle"
+  },
+  "siege_cx_watchsteel": {
+   "textures": "textures/items/codex/watchsteel"
+  },
+  "siege_cx_tidesteel": {
+   "textures": "textures/items/codex/tidesteel"
+  },
+  "siege_cx_sunsteel": {
+   "textures": "textures/items/codex/sunsteel"
+  },
+  "siege_cx_bogsilver": {
+   "textures": "textures/items/codex/bogsilver"
+  },
+  "siege_cx_fair_champions_barding": {
+   "textures": "textures/items/codex/fair_champions_barding"
+  },
+  "siege_cx_oathsworn_helmet": {
+   "textures": "textures/items/codex/oathsworn_helmet"
+  },
+  "siege_cx_oathsworn_leggings": {
+   "textures": "textures/items/codex/oathsworn_leggings"
+  },
+  "siege_cx_oathsworn_chestplate": {
+   "textures": "textures/items/codex/oathsworn_chestplate"
+  },
+  "siege_cx_oathsworn_boots": {
+   "textures": "textures/items/codex/oathsworn_boots"
+  },
+  "siege_cx_oathsworn_sword": {
+   "textures": "textures/items/codex/oathsworn_sword"
+  },
+  "siege_cx_usurpers_edge": {
+   "textures": "textures/items/codex/usurpers_edge"
+  },
+  "siege_cx_seers_glass": {
+   "textures": "textures/items/codex/seers_glass"
+  },
+  "siege_cx_claimants_mace": {
+   "textures": "textures/items/codex/claimants_mace"
+  },
+  "siege_cx_lists_gauntlet": {
+   "textures": "textures/items/codex/lists_gauntlet"
+  },
+  "siege_cx_hex_lantern": {
+   "textures": "textures/items/codex/hex_lantern"
+  },
+  "siege_cx_lords_signet": {
+   "textures": "textures/items/codex/lords_signet"
+  },
+  "siege_cx_cairn_helm": {
+   "textures": "textures/items/codex/cairn_helm"
+  },
+  "siege_cx_regents_seal_ring": {
+   "textures": "textures/items/codex/regents_seal_ring"
+  },
+  "siege_cx_choir_shard_reeve": {
+   "textures": "textures/items/codex/choir_shard_reeve"
+  },
+  "siege_cx_choir_shard_huntsman": {
+   "textures": "textures/items/codex/choir_shard_huntsman"
+  },
+  "siege_cx_choir_shard_bride": {
+   "textures": "textures/items/codex/choir_shard_bride"
+  },
+  "siege_cx_choir_shard_seneschal": {
+   "textures": "textures/items/codex/choir_shard_seneschal"
+  },
+  "siege_cx_choir_shard_mother": {
+   "textures": "textures/items/codex/choir_shard_mother"
+  },
+  "siege_cx_maelis_clapper": {
+   "textures": "textures/items/codex/maelis_clapper"
+  },
+  "siege_cx_cairn_axe": {
+   "textures": "textures/items/codex/cairn_axe"
+  },
+  "siege_cx_holts_debt": {
+   "textures": "textures/items/codex/holts_debt"
+  },
+  "siege_cx_ysolts_lance": {
+   "textures": "textures/items/codex/ysolts_lance"
+  },
+  "siege_cx_sedges_thorn": {
+   "textures": "textures/items/codex/sedges_thorn"
+  },
+  "siege_cx_second_moon_bow": {
+   "textures": "textures/items/codex/second_moon_bow"
+  },
+  "siege_cx_eddas_mercy": {
+   "textures": "textures/items/codex/eddas_mercy"
+  },
+  "siege_cx_hrodas_pick": {
+   "textures": "textures/items/codex/hrodas_pick"
+  },
+  "siege_cx_sextons_spade": {
+   "textures": "textures/items/codex/sextons_spade"
+  },
+  "siege_cx_aldrics_sickle": {
+   "textures": "textures/items/codex/aldrics_sickle"
+  },
+  "siege_cx_wennas_line": {
+   "textures": "textures/items/codex/wennas_line"
+  },
+  "siege_cx_corvins_lodestone": {
+   "textures": "textures/items/codex/corvins_lodestone"
+  },
+  "siege_cx_chapel_clapper": {
+   "textures": "textures/items/codex/chapel_clapper"
+  },
+  "siege_cx_founders_slag": {
+   "textures": "textures/items/codex/founders_slag"
+  },
+  "siege_cx_barrow_coin": {
+   "textures": "textures/items/codex/barrow_coin"
+  },
+  "siege_cx_saltglass_prism": {
+   "textures": "textures/items/codex/saltglass_prism"
+  },
+  "siege_cx_frostvein_shard": {
+   "textures": "textures/items/codex/frostvein_shard"
+  },
+  "siege_cx_quarry_mark": {
+   "textures": "textures/items/codex/quarry_mark"
+  },
+  "siege_cx_witchroot_knot": {
+   "textures": "textures/items/codex/witchroot_knot"
+  },
+  "siege_cx_wayfarers_compass": {
+   "textures": "textures/items/codex/wayfarers_compass"
+  },
+  "siege_cx_sandglass_of_nights": {
+   "textures": "textures/items/codex/sandglass_of_nights"
+  },
+  "siege_cx_caravan_saddle": {
+   "textures": "textures/items/codex/caravan_saddle"
+  },
+  "siege_cx_ember_tea": {
+   "textures": "textures/items/codex/ember_tea"
+  },
+  "siege_cx_far_coast_seeds": {
+   "textures": "textures/items/codex/far_coast_seeds"
+  },
+  "siege_cx_hatching_brazier": {
+   "textures": "textures/items/codex/hatching_brazier"
+  },
+  "siege_cx_map_of_lost_things": {
+   "textures": "textures/items/codex/map_of_lost_things"
+  },
+  "siege_cx_caravan_rations": {
+   "textures": "textures/items/codex/caravan_rations"
+  },
+  "siege_cx_ashglass_lantern": {
+   "textures": "textures/items/codex/ashglass_lantern"
+  },
+  "siege_cx_desert_rose": {
+   "textures": "textures/items/codex/desert_rose"
+  },
+  "siege_cx_mirage_flask": {
+   "textures": "textures/items/codex/mirage_flask"
+  },
+  "siege_cx_caravan_banner": {
+   "textures": "textures/items/codex/caravan_banner"
+  },
+  "siege_cx_codex": {
+   "textures": "textures/items/codex/codex"
   }
  }
 }

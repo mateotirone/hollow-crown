@@ -10,18 +10,194 @@
 //             "shelved:N" (your Library holds N tomes) "path:marked" "path:knight" "resonance:60" "night"
 // Effects:    "flag:x" "tome:tome_id" "clue:id" "lead:place_id" "sp:1" "item:siege:cipher_wheel"
 //             "slip:first" (the player Slips into the Hollow for a few seconds; see npcs.js)
+//             "emit:eventName" (sends that game event with { player, npc })
+// Conditions also: "act1:<stage>" (newplayer/act1_rules.js act1Stage; Old Elspeth opens on it)
 // "next node" may also be a list like start, to send the player different ways: [[conditions, node], ...]
 // Every effect only ever happens once per player.
 
 import { MENTOR_NPCS } from "./mentors.js"; // the four regional role mentors
 
 export const NPCS = [
+  // ------------------------------------------------------------------ Old Elspeth, at every hall's hearth
+  // Act 1's guide (story-and-gameplay pass, Mateo 2026-11-14; script approved line by line). She opens on the
+  // player's Act 1 stage (newplayer/act1_rules.js, condition "act1:<stage>"). Every step she gives has two
+  // "I'm stuck" hints. Secretly Edda, Saint Ashe (LORE-BIBLE "Old Elspeth"): she never says so, or who Morvane is,
+  // before the Rift opens.
+  {
+    id: "elspeth", name: "Old Elspeth", where: "Beside the hearth in every player's hall, on a stool (placed by newplayer/act1.js). Blind, very old, reads the ash.",
+    start: [
+      [["act1:meet"], "meet"],
+      [["act1:banner"], "banner"],
+      [["act1:chest"], "chest"],
+      [["act1:talk_workshop"], "workshop"],
+      [["act1:workshop"], "workshop_wait"],
+      [["act1:talk_barracks"], "barracks"],
+      [["act1:barracks"], "barracks_wait"],
+      [["act1:guards"], "guards_wait"],
+      [["act1:talk_wheat"], "wheat"],
+      [["act1:sell"], "sell_wait"],
+      [["act1:bread"], "bread_wait"],
+      [["act1:talk_station"], "station"],
+      [["act1:station"], "station_wait"],
+      [["act1:talk_mine"], "mine"],
+      [["act1:mine"], "mine_wait"],
+      [["act1:ore"], "ore_wait"],
+      [["act1:smelt"], "smelt_wait"],
+      [["act1:rest"], "rest"],
+      [["act1:talk_sundown"], "sundown"],
+      [["act1:home"], "home_wait"],
+      [["act1:talk_supper"], "supper"],
+      [["act1:defend"], "defend"],
+      [["act1:talk_raid_won"], "raid_won"],
+      [["act1:talk_raid_lost"], "raid_lost"],
+      [["act1:rebanner"], "rebanner_wait"],
+      [["act1:mend"], "mend_wait"],
+      [["act1:wren"], "wren_wait"],
+      [["act1:ride_home"], "home_again"],
+      [["act1:find_ember"], "ember_wait"],
+      [["act1:ask_ember"], "ember"],
+      [["act1:sleep"], "sleep"],
+      [["act1:aldous"], "aldous_wait"],
+      [[], "hub"],
+    ],
+    nodes: {
+      // ---- day 1
+      meet: {
+        text: "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nThe cob tied by your gate is yours too. Slow, and no jumper, but it knows the roads. Blow the whistle in your pack and it comes from anywhere.\n\nNow go and touch the Plot Stone outside. Raise your banner, and this place is yours.",
+        opts: [["Thank you.", "end", ["flag:elspeth_met", "emit:elspethPurse"]]],
+      },
+      banner: { text: "The stone's still waiting for your hand. Go on.", opts: [["I'm stuck.", "stuck_banner"], ["I'll go.", "end"]] },
+      stuck_banner: { text: "The stone outside wants a hand on it.", opts: [["Still stuck.", "stuck2_banner"], ["Thank you.", "end"]] },
+      stuck2_banner: { text: "The grey stone by your gate. Touch it and raise your banner.", opts: [["Thank you.", "end"]] },
+      chest: { text: "Someone left more than a purse for you. Go and look.", opts: [["I'm stuck.", "stuck_chest"], ["I'll go.", "end"]] },
+      stuck_chest: { text: "Someone left you more than a purse.", opts: [["Still stuck.", "stuck2_chest"], ["Thank you.", "end"]] },
+      stuck2_chest: { text: "There's a chest in your house. Open it.", opts: [["Thank you.", "end"]] },
+      workshop: {
+        text: "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.\n\nThe Store Shed beside it keeps what you can't carry. Use it. A lord with full pockets walks slow.",
+        opts: [["I'll find it.", "end", ["flag:elspeth_workshop"]], ["I'm stuck.", "stuck_workshop", ["flag:elspeth_workshop"]]],
+      },
+      workshop_wait: { text: "The Workshop. Nothing gets built without it.", opts: [["I'm stuck.", "stuck_workshop"], ["I'll go.", "end"]] },
+      stuck_workshop: { text: "Builders need a bench.", opts: [["Still stuck.", "stuck2_workshop"], ["Thank you.", "end"]] },
+      stuck2_workshop: { text: "Your Workshop stands in the Mason's Yard, beside the bench. It costs nothing. Open it.", opts: [["Thank you.", "end"]] },
+      // ---- day 2
+      barracks: {
+        text: "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
+        opts: [["I will.", "end", ["flag:elspeth_barracks", "emit:elspethPlanBook"]], ["I'm stuck.", "stuck_barracks", ["flag:elspeth_barracks", "emit:elspethPlanBook"]]],
+      },
+      barracks_wait: { text: "A Barracks first. Men want a roof before they'll guard you.", opts: [["I'm stuck.", "stuck_barracks"], ["I'll go.", "end"]] },
+      stuck_barracks: { text: "Men want a roof before they'll guard you.", opts: [["Still stuck.", "stuck2_barracks"], ["Thank you.", "end"]] },
+      stuck2_barracks: { text: "Click a Plot Marker and choose the Barracks. Sixteen Regals.", opts: [["Thank you.", "end"]] },
+      guards_wait: { text: "A roof with nobody under it. Hire your men.", opts: [["I'm stuck.", "stuck_guards"], ["I'll go.", "end"]] },
+      stuck_guards: { text: "An empty Barracks guards nothing.", opts: [["Still stuck.", "stuck2_guards"], ["Thank you.", "end"]] },
+      stuck2_guards: { text: "Go into the Barracks and hire a guard. Forty Regals a head.", opts: [["Thank you.", "end"]] },
+      wheat: {
+        text: "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.\n\nAnd mind the two cows in the pen. Feed them wheat and you'll have calves. Nobody sends you more.",
+        opts: [["I will.", "end", ["flag:elspeth_wheat"]], ["I'm stuck.", "stuck_sell", ["flag:elspeth_wheat"]]],
+      },
+      sell_wait: { text: "Sixteen sheaves to the Farmer. Then bread.", opts: [["I'm stuck.", "stuck_sell"], ["I'll go.", "end"]] },
+      stuck_sell: { text: "The Farmer's been watching your field.", opts: [["Still stuck.", "stuck2_sell"], ["Thank you.", "end"]] },
+      stuck2_sell: { text: "Cut the wheat and take sixteen to the Farmer by the field.", opts: [["Thank you.", "end"]] },
+      bread_wait: { text: "Bread. I can smell when there's none in a house.", opts: [["I'm stuck.", "stuck_bread"], ["I'll go.", "end"]] },
+      stuck_bread: { text: "Your belly will thank you.", opts: [["Still stuck.", "stuck2_bread"], ["Thank you.", "end"]] },
+      stuck2_bread: { text: "Three wheat at a crafting table makes a loaf.", opts: [["Thank you.", "end"]] },
+      station: {
+        text: "The rail runs past here. Find the station. You'll want roads that don't tire your horse.\n\nThere's a Goods Crate on the platform. Whatever you put in it finds its way home to your Store Shed.",
+        opts: [["I'll find it.", "end", ["flag:elspeth_station"]], ["I'm stuck.", "stuck_station", ["flag:elspeth_station"]]],
+      },
+      station_wait: { text: "The station. Roads that don't tire your horse.", opts: [["I'm stuck.", "stuck_station"], ["I'll go.", "end"]] },
+      stuck_station: { text: "Listen for the rails.", opts: [["Still stuck.", "stuck2_station"], ["Thank you.", "end"]] },
+      stuck2_station: { text: "Follow the pin on your map to the station.", opts: [["Thank you.", "end"]] },
+      mine: {
+        text: "You found the rails. Good. Now take that pickaxe from the chest.\n\nThere's an old shaft past your wall. The ore comes back every night. Nobody knows why, and nobody asks.\n\nBring back coal and iron. There's a furnace in your house. Smelt the iron, and the Moneyer will buy every ingot you make.",
+        opts: [["I'll find it.", "end", ["flag:elspeth_mine"]], ["I'm stuck.", "stuck_mine", ["flag:elspeth_mine"]]],
+      },
+      mine_wait: { text: "The old shaft, past your wall. It won't come to you.", opts: [["I'm stuck.", "stuck_mine"], ["I'll go.", "end"]] },
+      stuck_mine: { text: "Listen for the wheel. It creaks when the wind's up.", opts: [["Still stuck.", "stuck2_mine"], ["Thank you.", "end"]] },
+      stuck2_mine: { text: "Follow the pin on your map to the headframe. There's a ladder down.", opts: [["Thank you.", "end"]] },
+      ore_wait: { text: "Coal and iron. Your pockets are still light.", opts: [["I'm stuck.", "stuck_ore"], ["I'll go.", "end"]] },
+      stuck_ore: { text: "The rock tells you where to swing, if you look.", opts: [["Still stuck.", "stuck2_ore"], ["Thank you.", "end"]] },
+      stuck2_ore: { text: "Coal is black-flecked stone. Iron is speckled tan. Mine both with the pickaxe.", opts: [["Thank you.", "end"]] },
+      smelt_wait: { text: "Iron's no use as rock. The furnace.", opts: [["I'm stuck.", "stuck_smelt"], ["I'll go.", "end"]] },
+      stuck_smelt: { text: "Fire does the work. You only feed it.", opts: [["Still stuck.", "stuck2_smelt"], ["Thank you.", "end"]] },
+      stuck2_smelt: { text: "The furnace in your house. Iron in the top, coal underneath.", opts: [["Thank you.", "end"]] },
+      rest: {
+        greets: ["Walk your walls. Learn your people's names. The ash has nothing else for you today.", "Sit a while, if you like. I don't get many who sit.", "The fire's low. Put a log on it on your way out."],
+        text: "Nothing in the ash for you today. Rest your feet.",
+        opts: [["Thank you.", "end"]],
+      },
+      // ---- day 3
+      sundown: {
+        text: "Do what you like today, but be home by sundown. I'll have supper on. A lord's first supper in his own hall is a thing you keep.",
+        opts: [["I'll be home.", "end", ["flag:elspeth_sundown"]]],
+      },
+      home_wait: { text: "Supper's when the sun goes down. Not a moment after.", opts: [["I'm stuck.", "stuck_home"], ["I'll be here.", "end"]] },
+      stuck_home: { text: "The sun won't wait for you.", opts: [["Still stuck.", "stuck2_home"], ["Thank you.", "end"]] },
+      stuck2_home: { text: "Whistle for your cob and ride home.", opts: [["Thank you.", "end"]] },
+      supper: {
+        text: "Sit. Eat. ...Hush a moment.\n\nDo you see the ravens? On the wall. I can hear them, but I want you to look.",
+        opts: [["Why?", "supper2"]],
+      },
+      supper2: {
+        text: "I've seen this before. Long ago. They gather before something comes for a hall. Shut your gate. Put your men on the wall. Don't go out to meet it.",
+        opts: [["I'll go to the wall.", "end", ["flag:elspeth_ravens"]]],
+      },
+      defend: { text: "Go. Your men need you on the wall, not at my fire.", opts: [["Going.", "end"]] },
+      // ---- after the raid
+      raid_won: {
+        text: "You're still breathing. Good. So am I, which surprises nobody anymore.",
+        opts: [["What were those things?", "raid_won2"]],
+      },
+      raid_won2: {
+        text: "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nSee to your wall before you go. The Mason will mend it, for a price. And mind your purse: win a night and the town starts costing you. Every dawn.\n\nThen take your cob. Stay on the road.",
+        opts: [["I'll ride to Millbrook.", "end", ["flag:elspeth_raid"]]],
+      },
+      raid_lost: {
+        text: "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, and have the Mason see to your wall. Then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.\n\nWhen you do win a night, the town starts costing you. Every dawn. Keep some coin back.",
+        opts: [["I will.", "end", ["flag:elspeth_raid"]]],
+      },
+      rebanner_wait: { text: "Banners go back up. The stone's waiting.", opts: [["I'm stuck.", "stuck_rebanner"], ["I'll go.", "end"]] },
+      stuck_rebanner: { text: "The stone outside wants a hand on it.", opts: [["Still stuck.", "stuck2_rebanner"], ["Thank you.", "end"]] },
+      stuck2_rebanner: { text: "The grey stone by your gate. Touch it and raise your banner again.", opts: [["Thank you.", "end"]] },
+      mend_wait: { text: "Your wall's still open. The Mason, before the road.", opts: [["I'm stuck.", "stuck_mend"], ["I'll go.", "end"]] },
+      stuck_mend: { text: "Masons mend. That's the whole of their trade.", opts: [["Still stuck.", "stuck2_mend"], ["Thank you.", "end"]] },
+      stuck2_mend: { text: "The Mason stands by his bench in the yard. Ask him to mend the wall.", opts: [["Thank you.", "end"]] },
+      wren_wait: { text: "Millbrook. Sister Wren. Go on, before the road gets any longer.", opts: [["I'm stuck.", "stuck_wren"], ["I'll go.", "end"]] },
+      stuck_wren: { text: "Millbrook's down the road, where it's always night.", opts: [["Still stuck.", "stuck2_wren"], ["Thank you.", "end"]] },
+      stuck2_wren: { text: "Follow the pin. Look for the light over the chapel.", opts: [["Thank you.", "end"]] },
+      home_again: { text: "You've been a long way. Sit by the fire tonight.", opts: [["I will.", "end"]] },
+      ember_wait: { text: "Something came down by your gate. I heard it. Go and look.", opts: [["I'm stuck.", "stuck_ember"], ["I'll go.", "end"]] },
+      stuck_ember: { text: "It came down near the gate.", opts: [["Still stuck.", "stuck2_ember"], ["Thank you.", "end"]] },
+      stuck2_ember: { text: "Look for the glow just outside your gate.", opts: [["Thank you.", "end"]] },
+      ember: {
+        text: "Put it in my hands. ...Warm. Still warm.\n\nI held one like it once.",
+        opts: [["When?", "ember2"]],
+      },
+      ember2: {
+        text: "Longer ago than I'll tell you tonight. Nobody stumbles on one of these. It was sent to you, on purpose.\n\nKeep it close and keep it covered. The ash says a rider comes at first light, one of the King's knights, Sir Aldous. Hear him out. Remember what your Sister told you: give him nothing you haven't read.",
+        opts: [["I'll keep it close.", "end", ["flag:elspeth_ember", "emit:elspethEmber"]]],
+      },
+      sleep: { text: "Sleep. He'll be at your gate at first light.", opts: [["I'm stuck.", "stuck_sleep"], ["Good night.", "end"]] },
+      stuck_sleep: { text: "Morning comes sooner in a bed.", opts: [["Still stuck.", "stuck2_sleep"], ["Thank you.", "end"]] },
+      stuck2_sleep: { text: "Sleep in your bed, in your house. He comes in the morning.", opts: [["Thank you.", "end"]] },
+      aldous_wait: { text: "He's at your keep. Hear him out. Give him nothing you haven't read.", opts: [["I'm stuck.", "stuck_aldous"], ["I'll go.", "end"]] },
+      stuck_aldous: { text: "Knights don't come in. They wait by the banner.", opts: [["Still stuck.", "stuck2_aldous"], ["Thank you.", "end"]] },
+      stuck2_aldous: { text: "Sir Aldous stands by your Keep Banner. Follow the pin.", opts: [["Thank you.", "end"]] },
+      // ---- after Act 1: she stays at the hearth
+      hub: {
+        greets: ["Sit, if you're staying. The fire likes company.", "You smell of the road. Sit.", "The ash is quiet tonight. That's not always good news."],
+        text: "Still here. I usually am.",
+        opts: [["Thank you.", "end"]],
+      },
+    },
+  },
   // ------------------------------------------------------------------ Sister Wren, Millbrook
   {
     id: "wren", name: "Sister Wren", where: "Millbrook, in or outside the chapel. Healer, about 60 (in a village where the night never ends, nobody is sure).",
     start: [
       [["flag:morvane_fallen", "!flag:wren_boy"], "boy"],
       [["flag:slipped_first", "!flag:wren_slip_talked"], "slipback"],
+      [["flag:slipped_first", "!flag:wren_lead", "act1:wren"], "lead"],
+      [["!flag:wren_met", "!raided"], "early"],
       [["solved:lost_days"], "after"],
       [["flag:wren_trust"], "hub2"],
       [["flag:wren_met"], "hub"],
@@ -33,13 +209,23 @@ export const NPCS = [
         opts: [["Thank you, Sister.", "end", ["flag:wren_boy"]]],
       },
       first: {
-        text: "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? You have that look. Like someone who has started counting to three.",
+        text: "Mind the step. It's been dark here since before I was born. You're from one of the new holds, and you've just had your first third night. I can see it on you.\n\nI'm Sister Wren. I patch people up.",
         opts: [
-          ["Counting to three?", "three", ["flag:wren_met"]],
+          ["Who attacked us?", "three", ["flag:wren_met"]],
           ["Why is it always night?", "night", ["flag:wren_met"]],
           ["I have an old journal. Do you know it?", "journal", ["flag:wren_met"]],
           ["I should go.", "end", ["flag:wren_met"]],
         ],
+      },
+      // Act 1: someone who rides in before their first raid meets her, but the story has not started for them yet
+      early: {
+        text: "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? Come back if you ever need patching.",
+        opts: [["I will.", "end"]],
+      },
+      // Act 1's end with her: the lead home (story-and-gameplay pass, Mateo 2026-11-14)
+      lead: {
+        text: "Go home. Whatever stood on your land before you, someone wrote it down. Find what they wrote.\n\nAnd if the knights come asking, and they will, don't give them anything you haven't read first.",
+        opts: [["I'll go home.", "end", ["flag:wren_lead"]], ["Tell me about Tobin.", "tobin1", ["flag:wren_lead"]]],
       },
       journal: {
         text: "Let me see. Red leather, the royal seal... and the name cut off the cover. Put that away. Now, please.\n\nThe knights burned every book that king ever touched, and his son's after him. Whoever put that one in your pack wanted it to outlive them.\n\nI won't ask where you got it. I notice you don't know either.",
@@ -57,7 +243,7 @@ export const NPCS = [
         ],
       },
       three: {
-        text: "Every third night they come for your walls. You've noticed. Everyone with walls notices.\n\nNobody here will tell you why, because nobody here knows. The knights know. Ask a knight and watch his face go smooth as a plate.",
+        text: "Nobody here knows. Every third night they come for whoever's walls are brightest. You've noticed. Everyone with walls notices.\n\nThe knights know why. Ask a knight and watch his face go smooth as a plate.",
         opts: [
           ["Where are the knights?", "knights"],
           ["Why is it always night?", "night"],
@@ -89,6 +275,7 @@ export const NPCS = [
       slipwhere: {
         text: "Don't tell me what you saw. I can see it on you. It wasn't anywhere, was it? Nowhere on any map of ours. I can smell the water on you.\n\nI don't have a name for it. I think the knights do, and I think they've spent three hundred years making sure nobody else does.\n\nAll I know is that it let go of you. It didn't let go of Tobin. Stay away from the well tonight.",
         opts: [
+          ["What do I do now?", "lead"],
           ["Tell me about Tobin.", "tobin1"],
           ["I need some air.", "end"],
         ],
@@ -96,6 +283,7 @@ export const NPCS = [
       slipfine: {
         text: "You are not fine. Your sleeves are dripping and you're holding that cup in your left hand. You came in here right-handed.\n\n...There. It's passing. You've switched back. Saints, I hoped I'd never watch that happen twice.\n\nIt let go of you. It didn't let go of my brother. I'd like to know why, and so should you.",
         opts: [
+          ["What do I do now?", "lead"],
           ["Tell me about Tobin.", "tobin1"],
           ["I need some air.", "end"],
         ],
@@ -263,7 +451,7 @@ export const NPCS = [
         opts: [["I'll find them.", "end", ["lead:corvins_tower"]]],
       },
       commander: {
-        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nOne thing the Rule never needed to say, so I'll say it. Every one of those things we've buried came up the same season the knocking got louder. Somebody is sending them, and they keep sending them at you. I'd like to know who before they stop needing to.\n\nWhatever you call us now. The name matters less than I thought it would.",
         opts: [["Then hold the wall with me.", "end", ["flag:aldous_commander", "sp:2"]]],
       },
       after: {
@@ -348,7 +536,7 @@ export const NPCS = [
         opts: [["I'll pick something.", "hub", ["flag:mag_adept", "sp:1"]]],
       },
       adept3: {
-        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.\n\nOne more thing. If it ever speaks to you kindly, by name, like it's glad of you, come straight here. It never once spoke kindly to him.",
         opts: [["I'll remember.", "hub", ["flag:mag_adept", "sp:1"]]],
       },
       saw: {
@@ -546,7 +734,7 @@ export const NPCS = [
     start: [
       [["flag:morning_after", "flag:pell_met", "!flag:sage_saw"], "saw"],
       [["flag:heard_no_body", "flag:heard_named", "flag:heard_walked_in", "!flag:pell_summed"], "sum"],
-      [["shelved:74"], "all"],
+      [["shelved:75"], "all"],
       [["flag:pell_met"], "hub"],
       [[], "first"],
     ],
@@ -880,7 +1068,7 @@ export const NPCS = [
         ],
       },
       fragments: {
-        text: "My father was warden before me. He used to say a careful man scatters things where he can find them again.\n\nA brow under the old cistern. A jaw in the east tower. An eye where the caravans water. I don't know the rest, and I don't know that, either, officially.",
+        text: "My father was warden before me. He used to say the statues remember better than people do. Every one of them has a line cut under it, about when it was carved: the boy, the crowning, the war, and on to an old man.\n\nPut his life in order and turn them that way, youngest first. That's the whole secret. I don't know that, either, officially.",
         opts: [["Back.", "hub2", ["lead:faceless_vault"]]],
       },
       seneschal: {
@@ -888,7 +1076,7 @@ export const NPCS = [
         opts: [["Back.", "hub2"]],
       },
       riddle: {
-        text: "There's a heraldry riddle on the vault door under the fortress. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's instructions.",
+        text: "There's a heraldry riddle on the vault door out in the dunes. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's him. The king on all those statues, before they took his face off.",
         opts: [["Back.", "hub2", ["lead:faceless_vault"]]],
       },
       after: {

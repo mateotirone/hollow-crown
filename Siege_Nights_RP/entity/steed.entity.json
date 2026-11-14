@@ -34,6 +34,11 @@
         "coat_emberwaste": "textures/entity/siege/steed_emberwaste",
         "coat_blackfen": "textures/entity/siege/steed_blackfen",
         "coat_crossbred": "textures/entity/siege/steed_crossbred",
+        "coat_cob_vale": "textures/entity/siege/steed_cob_vale",
+        "coat_cob_frostmarch": "textures/entity/siege/steed_cob_frostmarch",
+        "coat_cob_saltreach": "textures/entity/siege/steed_cob_saltreach",
+        "coat_cob_emberwaste": "textures/entity/siege/steed_cob_emberwaste",
+        "coat_cob_blackfen": "textures/entity/siege/steed_cob_blackfen",
         "glimstrider": "textures/entity/siege/steed_hollow",
         "barding": "textures/entity/siege/steed_warhorse",
         "caparison": "textures/entity/siege/steed_caparison"

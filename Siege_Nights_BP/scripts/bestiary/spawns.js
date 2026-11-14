@@ -1,20 +1,21 @@
 // Where the new mobs come from, beyond the natural spawns in spawn_rules/:
-//   1. Sieges: as a settlement survives more sieges, the Choir's own raiders replace the vanilla ones.
+//   1. Sieges: every raider is one of ours, from the first siege (Mateo, 2026-11-13: no vanilla monster is ever
+//      sent, rams and sappers included). The siege code still plans in vanilla ids; the swap below turns each one
+//      into a Choir raider, a Grey Host soldier or a Hollow soldier as the siege count (or the raids feature) says.
 //   2. Hollow things: they walk the night once the first boss has fallen, and haunt the Undertow.
 
 import { world, system } from "@minecraft/server";
-import { addRaiderTypeHook, on, getState, keepOf, isNight, settlementAt, onTick, RAM_TAG, SAPPER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
+import { addRaiderTypeHook, FACTIONS, on, getState, keepOf, isNight, onTick, RAM_TAG, SAPPER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { bestiaryStore } from "./bossCore.js";
 import { warlordBody } from "./bosses.js";
 import { heroOf, pickOne } from "./util.js";
 import { MOBS } from "./data.js";
+import { shareFor } from "./gentle.js";
+import { shelteredAt } from "./sheltered.js";
 const MOBS_HAVE = (id) => !!MOBS[id];
 
 export const SPAWN_SETTINGS = {
-  choirFromSiege: 3, // Choir raiders start appearing in a settlement's 3rd siege...
-  choirPerSiege: 0.15, // ...and replace 15% more of the army each siege after that...
-  choirMax: 0.85, // ...up to 85%
   // First guesses only. The "Deepen the third-night siege raids" thread owns when each kind appears: setTroopPlan().
   greyFromSiege: 6, greyShare: 0.4, // the Grey Host: this share of the swapped raiders, from this siege on
   watcherSieges: 3, // for this many sieges before they come forward, one stands at the back of the raid and only watches
@@ -79,21 +80,17 @@ let troopPlan = ({ sieges }) => defaultTroopMix(sieges);
 export function setTroopPlan(fn) { troopPlan = fn ?? (({ sieges }) => defaultTroopMix(sieges)); }
 export const troopKind = (mix, pick) => (pick < (mix?.hollow ?? 0) ? "hollow" : pick < (mix?.hollow ?? 0) + (mix?.grey ?? 0) ? "grey" : "choir");
 
-export const choirShare = (sieges) => (sieges < SPAWN_SETTINGS.choirFromSiege ? 0
-  : Math.min(SPAWN_SETTINGS.choirMax, (sieges - SPAWN_SETTINGS.choirFromSiege + 1) * SPAWN_SETTINGS.choirPerSiege));
-
-// Pure, so the self-test can check it. `roll` is a random number from 0 to 1.
+// Pure, so the self-test can check it. `roll` is a random number from 0 to 1 (which of a kind's options).
 // `pick` (0 to 1) and `mix` decide which kind of troop takes the place: Choir raider, Grey Host or Hollow soldier.
+// Every vanilla raider the siege code plans is swapped. mix.swap === 0 (after the story, "only ordinary people come")
+// sends Choir raiders only: no Grey Host and nothing from the Hollow.
 export function choirSwap(type, tags, sieges, roll = Math.random(), pick = Math.random(), mix = defaultTroopMix(sieges)) {
-  // mix.swap overrides how much of the army is swapped at all. swap: 0 = swap nothing (after the story, only people raid).
-  const share = typeof mix?.swap === "number" ? mix.swap : choirShare(sieges);
-  if (mix?.swap === 0) return undefined;
   const lord = warlordBody(type, tags);
   if (lord) return lord;
-  if (tags.includes(SAPPER_TAG)) return undefined; // sappers keep their job (and their charge)
-  if (!CHOIR[type] || roll >= share) return undefined;
-  const options = TROOPS[troopKind(mix, pick)][type] ?? CHOIR[type];
-  return options[Math.floor((roll / share) * options.length) % options.length];
+  if (!CHOIR[type]) return undefined; // not a raider we plan for: left as it is
+  const kind = mix?.swap === 0 ? "choir" : troopKind(mix, pick);
+  const options = TROOPS[kind][type] ?? CHOIR[type];
+  return options[Math.floor(roll * options.length) % options.length];
 }
 
 addRaiderTypeHook((type, { tags = [] }) => {
@@ -171,13 +168,14 @@ function hollowTick() {
       const hero = heroOf(p);
       const kind = hollowFor({ undertow, marked: hero.path === "marked", resonance: hero.resonance ?? 0, awake: bestiaryStore.data.hollowAwake, roll: Math.random() });
       if (!kind) continue;
+      if (kind === "night" && Math.random() >= shareFor(p)) continue; // a new player's first nights are left alone (gentle.js)
       if (dim.getEntities({ families: ["hollow"], location: p.location, maxDistance: 48 }).length >= SPAWN_SETTINGS.hollowNearbyCap) continue;
       const a = Math.random() * Math.PI * 2, d = 18 + Math.random() * 10;
       const x = Math.floor(p.location.x + Math.cos(a) * d), z = Math.floor(p.location.z + Math.sin(a) * d);
       const ground = dim.getTopmostBlock({ x, z });
       if (!ground || ground.isLiquid) continue;
       const at = { x: x + 0.5, y: ground.location.y + 1, z: z + 0.5 };
-      if (!undertow && settlementAt(at)) continue; // never inside someone's walls
+      if (shelteredAt(at, dim.id)) continue; // never inside someone's walls or a town
       const type = kind === "hound" ? "siege:echo_hound" : pickOne(kind === "undertow" ? UNDERTOW_HOLLOW : NIGHT_HOLLOW);
       dim.spawnEntity(type, at);
       if (kind === "hound") dim.spawnEntity(type, at); // they hunt in pairs
@@ -189,18 +187,27 @@ function hollowTick() {
 onTick("bestiary_hollow", SPAWN_SETTINGS.hollowEverySeconds * 20, hollowTick);
 
 addTests("bestiary", {
-  "early sieges stay vanilla, later ones turn Hollow": () => {
-    assertEqual(choirShare(1), 0);
-    assertEqual(choirShare(3), 0.15);
-    assertEqual(choirShare(40), 0.85);
-    assertEqual(choirSwap("minecraft:zombie", [], 1, 0), undefined);
-    assertEqual(choirSwap("minecraft:zombie", [], 10, 0.01, 0.99), "siege:hollow_footman");
-    assertEqual(choirSwap("minecraft:zombie", [], 10, 0.99), undefined);
+  "no siege ever sends a vanilla monster, from the first night": () => {
+    for (const type of Object.keys(CHOIR)) {
+      for (const sieges of [0, 1, 2, 3, 6, 10, 40]) {
+        for (const tags of [[], [RAM_TAG], [SAPPER_TAG]]) {
+          for (const roll of [0, 0.5, 0.99]) {
+            for (const mix of [undefined, { grey: 0, hollow: 0, swap: 0 }, { grey: 1, hollow: 0 }, { grey: 0, hollow: 1 }]) {
+              const got = choirSwap(type, tags, sieges, roll, roll, mix ?? defaultTroopMix(sieges));
+              assert(got && got.startsWith("siege:") && MOBS_HAVE(got), `${type} ${JSON.stringify(tags)} at siege ${sieges} stays ${got}`);
+            }
+          }
+        }
+      }
+    }
+    // every vanilla creature a siege faction can plan has a swap
+    for (const f of Object.values(FACTIONS)) for (const id of [...f.units.map((u) => u.type), f.ram, f.sapper, f.warlord].filter(Boolean)) assert(CHOIR[id], `${id} (${f.name}) has no swap`);
+    assertEqual(choirSwap("minecraft:zombie", [], 1, 0, 0.99), "siege:hollow_footman", "the first siege already sends the Choir");
     assertEqual(choirSwap("minecraft:creeper", [], 10, 0), undefined);
   },
-  "rams become ogres, sappers keep their job, warlords get their bodies": () => {
-    assertEqual(choirSwap("minecraft:ravager", [RAM_TAG], 10, 0, 0.99), "siege:siege_ogre");
-    assertEqual(choirSwap("minecraft:vindicator", [SAPPER_TAG], 10, 0), undefined);
+  "rams become ogres, sappers are ours too, warlords get their bodies": () => {
+    assertEqual(choirSwap("minecraft:ravager", [RAM_TAG], 1, 0, 0.99), "siege:siege_ogre");
+    assert(choirSwap("minecraft:vindicator", [SAPPER_TAG], 1, 0, 0.99).startsWith("siege:"), "a sapper is one of ours, and keeps its tag (siege.js adds it)");
     assertEqual(choirSwap("minecraft:vindicator", [WARLORD_TAG], 1, 0.99), "siege:hollow_warlord");
     assertEqual(choirSwap("minecraft:vindicator", [KING_TAG], 1, 0.99), "siege:warlord_king");
   },
@@ -214,13 +221,13 @@ addTests("bestiary", {
     assertEqual(choirSwap("minecraft:skeleton", [], 10, 0.01, 0.5, { grey: 1, hollow: 0 }), "siege:grey_bowman");
     assertEqual(choirSwap("minecraft:ravager", [RAM_TAG], 10, 0, 0, { grey: 0, hollow: 1 }), "siege:gatebreaker");
     assertEqual(choirSwap("minecraft:ravager", [], 10, 0.01, 0.5, { grey: 1, hollow: 0 }), "siege:siege_ogre", "the Grey Host has no beast: a Choir raider fills in");
-    assertEqual(choirSwap("minecraft:zombie", [], 1, 0, 0, { grey: 0, hollow: 1 }), undefined, "nothing is swapped before the third siege");
     for (const set of Object.values(TROOPS)) for (const list of Object.values(set)) for (const id of list) assert(MOBS_HAVE(id), `${id} is not a mob`);
   },
-  "the raids feature can turn the swapping up, or off": () => {
-    assertEqual(choirSwap("minecraft:zombie", [], 10, 0.01, 0.99, { grey: 0, hollow: 0, swap: 0 }), undefined);
-    assertEqual(choirSwap("minecraft:vindicator", [WARLORD_TAG], 10, 0.01, 0.99, { swap: 0 }), undefined, "not even the warlord");
-    assertEqual(choirSwap("minecraft:zombie", [], 1, 0.5, 0, { grey: 0, hollow: 1, swap: 1 }), "siege:veinsworn", "swap overrides the siege count");
+  "after the story (swap 0) only the Choir comes: no Grey Host, nothing from the Hollow": () => {
+    assertEqual(choirSwap("minecraft:zombie", [], 10, 0.01, 0, { grey: 0, hollow: 1, swap: 0 }), "siege:hollow_footman");
+    assertEqual(choirSwap("minecraft:skeleton", [], 10, 0.01, 0, { grey: 1, hollow: 0, swap: 0 }), "siege:hollow_footman");
+    assertEqual(choirSwap("minecraft:vindicator", [WARLORD_TAG], 10, 0.01, 0.99, { swap: 0 }), "siege:hollow_warlord");
+    assertEqual(choirSwap("minecraft:zombie", [], 1, 0.5, 0, { grey: 0, hollow: 1 }), "siege:veinsworn", "the mix decides the kind at any siege");
   },
   "one of them watches for three sieges before they come forward": () => {
     assert(!watcherDue(6) && watcherDue(7) && watcherDue(9) && !watcherDue(10));

@@ -40,7 +40,18 @@ Custom first- and third-person moves for every player. Written by `tools/build_p
 
 - writes `geometry.hc.jointed` (`models/entity/hc_jointed.geo.json`): the 64x64 player body with forearm and
   shin bones (`rightForearm`, `leftForearm`, `rightShin`, `leftShin`, with `...Sleeve`/overlay halves). Held
-  items ride the forearm.
+  items hang on the UPPER arm (`rightItem` under `rightArm`), the same bone path as vanilla.
+- **Never move `rightItem`/`leftItem` off the upper arm.** Bedrock only attaches held items when every player
+  geometry keeps vanilla's path (`waist > body > rightArm > rightItem`). PR #165 put them under the forearm and
+  every held item floated at the chest or face (playtest 1.2.1116, book at the chest, sword at the face).
+  `node tools/check.mjs` now fails on it. So that items stay in the hand, `fold_elbows` in
+  `build_player_anims.py` drops a forearm's bend while that hand holds something (adding it to the shoulder instead, as first tried, swung chambered arms up and back so blades pointed into the chest and face for every skin: playtest 1.2.1616)
+  (`variable.hc_rbend` / `hc_lbend`); empty hands still bend at the elbow.
+- **Held items are placed from the player's default (skin) geometry, not the look's.** With only the look drawn,
+  the default model was never posed, so items stayed still while the arm swung (playtest 1.2.1519).
+  `build_player_joints.py` adds `controller.render.hc_look.item_carrier`: the default geometry with every part
+  hidden, drawn before the look's controllers, so the same animations pose it and the item follows. check.mjs
+  fails if it is missing or comes after the look controllers (re-run the tool after `studio/build_looks.mjs`).
 - uses it for the Looking Glass looks only. Players on their own skin keep Bedrock's skin model (the game
   swaps it in for every player; slim and Character Creator skins don't fit a fixed layout), so they get the
   same moves with straight limbs. The bend channels simply do nothing on a body without those bones.

@@ -1,6 +1,8 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { hudString, readHud, arrowDir, placeName, regionAt, cleanLabel, ORIGIN, TILE, TILES, PLACES } from "./data.js";
+import { hudString, readHud, arrowDir, placeName, regionAt, cleanLabel, pinCode, ORIGIN, TILE, TILES, PLACES, PIN_COLS, PIN_ROWS, PIN } from "./data.js";
 import { REGION_ROWS, REGION_CELL } from "./regions.js";
+import { hollowHud, hollowTile, hollowPlace, HOLLOW_MAP } from "./hollow.js";
+import { HOLLOW_TILES } from "./hollow_tiles.js";
 
 addTests("minimap", {
   "the arrow points the way the player faces": () => {
@@ -49,5 +51,53 @@ addTests("minimap", {
   "the region grid covers the whole map": () => {
     assertEqual(REGION_ROWS.length, (TILES * TILE) / REGION_CELL);
     assert(REGION_ROWS.every((r) => r.length === REGION_ROWS.length));
+  },
+  "a quest pin inside the view sits in its own cell": () => {
+    const x0 = ORIGIN + 20 * TILE, z0 = ORIGIN + 20 * TILE; // the middle tile; the view starts one tile west and north
+    const r = readHud(hudString({ x: x0 + 10, z: z0 + 10, yaw: 0, pin: { x: x0 - TILE + 1, z: z0 + 2 * TILE - 1, kind: "goal" } }));
+    assertEqual([r.col, r.row, r.kind], ["a", "r", PIN.goal], "south-west corner of the view");
+    const mid = readHud(hudString({ x: x0 + 10, z: z0 + 10, yaw: 0, pin: { x: x0 + 32, z: z0 + 32, kind: "talk" } }));
+    assertEqual([mid.col, mid.row, mid.kind], ["e", "n", PIN.talk], "middle of the view");
+    assertEqual(mid.label, cleanLabel(placeName(x0 + 10, z0 + 10)), "the label still reads back");
+    assertEqual(readHud(hudString({ x: x0, z: z0, yaw: 0 })).kind, PIN.none, "no pin");
+  },
+  "a quest pin further away is held on the rim, the way it lies": () => {
+    const x0 = ORIGIN + 20 * TILE, z0 = ORIGIN + 20 * TILE, x = x0 + 32, z = z0 + 32;
+    const code = (dx, dz) => pinCode(x, z, 20, 20, { x: x + dx, z: z + dz });
+    assertEqual(code(5000, 0), "i" + "n" + PIN.edge, "far east: east rim, middle row");
+    assertEqual(code(0, -5000), "e" + "j" + PIN.edge, "far north: top rim, middle column");
+    assertEqual(code(-5000, 5000), "a" + "r" + PIN.edge, "far south-west: that corner");
+    for (const [dx, dz] of [[300, 77], [-120, -900], [999, 999], [-1, 4000]]) {
+      const c = code(dx, dz);
+      assert(PIN_COLS.includes(c[0]) && PIN_ROWS.includes(c[1]) && c[2] === PIN.edge, c);
+      assert(c[0] === "a" || c[0] === "i" || c[1] === "j" || c[1] === "r", `on the rim: ${c}`);
+    }
+  },
+  "another map's grid passes its own origin": () => {
+    const o = { x: -704, z: -64 };
+    assertEqual(pinCode(o.x + 96, o.z + 96, 1, 1, { x: o.x + 1, z: o.z + 1 }, o), "a" + "j" + PIN.goal);
+  },
+  "pin letters never clash with the HUD's cutting": () => {
+    for (const ch of PIN_COLS) assert(!PIN_ROWS.includes(ch), ch);
+    assertEqual(readHud(hudString({ x: 0, z: 0, yaw: 0, off: true, pin: { x: 5, z: 5 } })).tile, "off___");
+    assertEqual(readHud(hudString({ x: 0, z: 0, yaw: 0, charted: false, pin: { x: 5, z: 5 } })).label, "Uncharted");
+  },
+  "the Hollow has its own map: the HUD reads it the same way, void and Slips are uncharted": () => {
+    assert(HOLLOW_TILES.length > 400, `only ${HOLLOW_TILES.length} Hollow tiles`);
+    const arrive = readHud(hollowHud({ x: 0.5, z: 0.5, yaw: 0 }));
+    const t = hollowTile(0.5, 0.5);
+    assert(t && arrive.tile === t.code && arrive.tile.length === 6 && arrive.tile.startsWith("h"), arrive.tile);
+    assert("abcdefghijklmnop".includes(arrive.spot) && arrive.spot.length === 1 && arrive.dir === "u", JSON.stringify(arrive));
+    assertEqual(arrive.label, "The Wound");
+    assertEqual(hollowPlace(-380, 2160), "The Needlehold");
+    assertEqual(hollowPlace(-349, 343), "Glimwade");
+    assertEqual(readHud(hollowHud({ x: 0, z: 0, yaw: 0, hidden: true })).label, "Uncharted", "no map during a Slip");
+    assertEqual(readHud(hollowHud({ x: 5000, z: 0, yaw: 0 })).tile, "none__");
+    const M = HOLLOW_MAP;
+    assertEqual(readHud(hollowHud({ x: M.x0 + 20 * M.tile + 63, z: M.z0 + 2 * M.tile + 63, yaw: 0 })).spot, "p");
+    for (const code of HOLLOW_TILES) assert(/^h\d\dz\d\d$/.test(code), code);
+    const near = readHud(hollowHud({ x: 0.5, z: 0.5, yaw: 0, pin: { x: 0.5, z: 0.5, kind: "talk" } }));
+    assertEqual([near.tile, near.kind, near.label], [t.code, PIN.talk, "The Wound"], "a quest pin on the Hollow map");
+    assertEqual(readHud(hollowHud({ x: 0.5, z: 0.5, yaw: 0, pin: { x: 0, z: 2400 } })).kind, PIN.edge, "the Seat, far south, waits on the rim");
   },
 });

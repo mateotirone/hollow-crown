@@ -11,13 +11,9 @@ export const ROUTE = {
   basePrice: 160, // Regals for any stretch
   perBlock: 1, // and this much per block of it
   homeRange: 140, // a settlement's home stop is the nearest stop this close to its banner
-  layPerTick: 12, // track pieces (each grading its own bed) laid every other tick while a stretch goes down
+  layPerTick: 6, // track pieces (each grading its own bed and banks, rail_bed.js) laid every other tick
   missedLooks: 2000, // pieces checked every two seconds for ground that has loaded since
-  clearUp: 6, // air cleared above the track, 3 wide (6 so tree trunks and low leaves don't hang over it)
-  fillDepth: 6, // ground further down than this (or water) gets a bridge deck instead of an embankment
-  pierEvery: 4, // a bridge pier under every 4th piece
-  pierDepth: 48,
-  worksPerTick: 40, // earthwork columns (from the map's works list) set every other tick
+  worksPerTick: 30, // earthwork columns (from the map's works list) set every other tick
 };
 
 export const priceOf = (seg) => ROUTE.basePrice + Math.ceil(ROUTE.perBlock * (seg.length ?? seg.blocks.length));
@@ -51,6 +47,24 @@ export function stopSite(data, c, range = ROUTE.homeRange) {
   const side = (v) => (v < 0 ? -1 : 1);
   const forward = along_x ? { x: 0, z: side(c.z - stop.z) } : { x: side(c.x - stop.x), z: 0 };
   return { stop, origin: { x: stop.x, y: stop.y, z: stop.z }, forward };
+}
+
+// Which end of a station's platform is the end of the line. The station stands on `origin` with its building toward
+// `forward`; if the stop there is reached by only one stretch, the answer is the side (local x, +1 or -1, x running to
+// the right of `forward`) away from that stretch, where the track stops. 0 for a through station or no stop near.
+export function deadEndAt(data, origin, forward, range = 12) {
+  const stop = nearestStop(data, origin.x, origin.z, range);
+  if (!stop) return 0;
+  const segs = data.segments.filter((s) => s.from === stop.id || s.to === stop.id);
+  if (segs.length !== 1) return 0;
+  const blocks = segs[0].blocks;
+  if (blocks.length < 2) return 0;
+  // the stop's end of the stretch, and a block a little way along it
+  const d0 = Math.hypot(blocks[0][0] - stop.x, blocks[0][2] - stop.z), d1 = Math.hypot(blocks.at(-1)[0] - stop.x, blocks.at(-1)[2] - stop.z);
+  const k = Math.min(4, blocks.length - 1), along = d0 <= d1 ? blocks[k] : blocks[blocks.length - 1 - k];
+  const rx = -Math.sign(forward.z), rz = Math.sign(forward.x);
+  const side = Math.sign((along[0] - origin.x) * rx + (along[2] - origin.z) * rz);
+  return -side;
 }
 
 // Ground and growing things the rail bed may dig through or fill over. Anything else (planks, bricks, glass,

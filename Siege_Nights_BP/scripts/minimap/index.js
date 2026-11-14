@@ -1,14 +1,20 @@
-// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow and
-// the name of the place they are in. No Beta features: the map pictures are pre-painted from the
+// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow, the
+// name of the place they are in, and a pin for their quest (quests/index.js questPin). No Beta features: the map pictures are pre-painted from the
 // generated world (tools/minimap_tiles.py) and the HUD (Siege_Nights_RP/ui/hud_screen.json, made by
 // tools/minimap_ui.py) is told what to show through a hidden title that starts with "hcm:".
 //
 // Each player can hide it: /siege:minimap (any player, no cheats needed), or
 // /scriptevent siege:minimap on|off|toggle.
 
-import { world, system, ScreenDisplay, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
+import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
-import { KEY, hudString } from "./data.js";
+import { sendHidden, titleBusy } from "../core/hudtitle.js";
+import { hudString } from "./data.js";
+import { hollowHud } from "./hollow.js";
+import { UNDERTOW_ID } from "../undertow/layout.js";
+import { isSlipping } from "../undertow/slips.js";
+import { emit } from "../core/events.js";
+import { questPin } from "../quests/index.js";
 import "./tests.js";
 
 const OFF = "siege:minimap_off";
@@ -17,46 +23,27 @@ const EVERY = 4;           // ticks between position checks
 const RESEND = 200;        // ticks: send the same title again now and then, in case the HUD was rebuilt
 
 const lastSent = new Map();  // player id -> { text, at }
-let busyAll = 0;             // a real title is on screen until this tick (for a player we could not tell)
-const busyFor = new Map();   // player id -> tick
 
-// Real titles from the rest of the add-on must not be cut short by the map's hidden ones, so note how
-// long each one stays up and wait until it has gone before sending the map again.
-try {
-  const proto = ScreenDisplay?.prototype;
-  const original = proto?.setTitle;
-  if (typeof original === "function" && !original.hcMinimap) {
-    const wrapped = function (title, options) {
-      const text = typeof title === "string" ? title : "";
-      if (!text.startsWith(KEY)) {
-        const o = options ?? {};
-        const until = system.currentTick + (o.fadeInDuration ?? 10) + (o.stayDuration ?? 70) + (o.fadeOutDuration ?? 20) + 2;
-        const owner = world.getAllPlayers().find((p) => p.onScreenDisplay === this);
-        if (owner) busyFor.set(owner.id, until);
-        else busyAll = until;
-      }
-      return original.call(this, title, options);
-    };
-    wrapped.hcMinimap = true;
-    proto.setTitle = wrapped;
-  }
-} catch {
-  // the map then only risks cutting a title short; nothing else depends on this
-}
+// Real titles from the rest of the add-on are never cut short: core/hudtitle.js waits for them to fade
+// and takes turns with the other HUD panels (the quest tracker).
 
 const isOff = (player) => player.getDynamicProperty(OFF) === true;
 
 function send(player, force = false) {
   const now = system.currentTick;
-  if (now < busyAll || now < (busyFor.get(player.id) ?? 0)) return;
+  if (titleBusy(player)) return;
   const loc = player.location;
-  const text = hudString({
-    x: loc.x, z: loc.z, yaw: player.getRotation().y,
-    charted: player.dimension.id === OVERWORLD, off: isOff(player),
-  });
+  // Down in the Hollow its own map (hollow.js); none during a Slip, when they shouldn't know where they are.
+  const pin = questPin(player);
+  const text = player.dimension.id === UNDERTOW_ID && !isOff(player)
+    ? hollowHud({ x: loc.x, z: loc.z, yaw: player.getRotation().y, hidden: isSlipping(player), pin })
+    : hudString({
+      x: loc.x, z: loc.z, yaw: player.getRotation().y,
+      charted: player.dimension.id === OVERWORLD, off: isOff(player), pin,
+    });
   const last = lastSent.get(player.id);
   if (!force && last && last.text === text && now - last.at < RESEND) return;
-  player.onScreenDisplay.setTitle(text, { fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
+  sendHidden(player, text);
   lastSent.set(player.id, { text, at: now });
 }
 
@@ -67,13 +54,14 @@ onTick("minimap", EVERY, () => {
 });
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => lastSent.delete(player.id));
-world.afterEvents.playerLeave.subscribe(({ playerId }) => { lastSent.delete(playerId); busyFor.delete(playerId); });
+world.afterEvents.playerLeave.subscribe(({ playerId }) => lastSent.delete(playerId));
 
 export function setMinimap(player, on) {
   player.setDynamicProperty(OFF, on ? undefined : true);
   lastSent.delete(player.id);
   player.sendMessage(on ? "§7Minimap shown. §8/siege:minimap hides it." : "§7Minimap hidden. §8/siege:minimap shows it again.");
   send(player, true);
+  emit("minimapToggled", { player, on });
 }
 
 system.afterEvents.scriptEventReceive.subscribe((e) => {

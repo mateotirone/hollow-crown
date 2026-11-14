@@ -31,7 +31,7 @@ import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
-import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
+import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, WAYSTONE_SIGN_ROT, fallbackOf } from "./miniature.js";
 import { addMenuLabel } from "../core/labels.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
@@ -130,12 +130,23 @@ function writeSign(dim, x, y, z, rot, text) {
   try {
     let block = dim.getBlock({ x, y, z });
     if (!block) return;
-    if (block.typeId !== "minecraft:standing_sign") block = put(dim, x, y, z, "minecraft:standing_sign", { ground_sign_direction: rot });
+    // A sign that is missing, or stands turned the wrong way (worlds built before the Waystone signs were turned to
+    // face the arrival spot), is set down again facing rot; that can wipe its words, so they are written after.
+    if (block.typeId !== "minecraft:standing_sign" || block.permutation.getState("ground_sign_direction") !== rot) {
+      block = put(dim, x, y, z, "minecraft:standing_sign", { ground_sign_direction: rot });
+    }
     const sign = block?.getComponent("minecraft:sign");
     if (sign && sign.getText() !== text) sign.setText(text);
   } catch {
     // a sign is a nicety
   }
+}
+
+// The two signs either side of the Waystone, turned to face the arrival spot (WAYSTONE_SIGN_ROT, miniature.js)
+function waystoneSigns(dim, o) {
+  const w = waystoneSpot();
+  writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, WAYSTONE_SIGN_ROT, "The Waystone\nClick it to hear\nhow things stand");
+  writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz - 1, WAYSTONE_SIGN_ROT, "The glowing stones\non the map are the\nplaces to start.\nOne each.");
 }
 
 // A block for the miniature, trying an older id if this game version doesn't know the new one
@@ -214,9 +225,7 @@ export function raiseHall(o, then, old) {
       }
       store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
       store.save();
-      const w = waystoneSpot();
-      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, 0, "The Waystone\nClick it to hear\nhow things stand");
-      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz - 1, 8, "The glowing stones\non the map are the\nplaces to start.\nOne each.");
+      waystoneSigns(dim, o);
       refreshHall();
       try {
         world.setDefaultSpawnLocation(arrivalPoint(o));
@@ -316,9 +325,7 @@ addMenuLabel({ block: HALL_WAYSTONE, name: "Waystone", hint: "Click: how things 
 const PAGES = [
   ["How things stand",
     "This is Aldmere. It is an old land and a quiet one, by day.\n\n"
-    + "Every third night something comes against the settlements. Walls are tested, banners fall, and by morning the people rebuild. "
-    + "Nobody alive can tell you why it is every third night. The priests have one answer, the old soldiers another, and the Order of the Ashen Gate says it is handled.\n\n"
-    + "Lately there is more. Wells that taste of salt far from any sea. Nights that run long. People who went missing and came back not quite themselves.\n\n"
+    + "Lately the quiet has gone odd. Wells that taste of salt far from any sea. Nights that run long. People who went missing and came back not quite themselves.\n\n"
     + "There is a journal in your pack. You did not put it there. It was written by someone who saw all this begin and understood none of it. Read it or don't."],
   ["Where you start",
     "You arrive as nobody: no title, no oath, no land. What you become depends on where you settle and what you do there.\n\n"
@@ -328,7 +335,8 @@ const PAGES = [
     + "§fSaltreach§r, the western coast, ships and trade.\n"
     + "§fEmberwaste§r, the desert in the east, and what nests there.\n"
     + "§fBlackfen§r, the southern marsh, brews and things better left alone.\n\n"
-    + "Kingsrest, the crossroads town, sits in the middle, below the ruins of the old capital. Rails and roads run from it to everywhere. Nobody flies here."],
+    + "Kingsrest, the crossroads town, sits in the middle. Crownhold, the ruined old capital, stands on the rise to its north-west. "
+    + "Rails and roads run from Kingsrest to everywhere. The only wings over Aldmere belong to the dragons of the Emberwaste and the few riders they let up."],
   ["Choosing a home",
     "This hall is all of Aldmere in miniature. The twelve glowing stones on it are the places a settlement can stand, each on the spot where its land really lies.\n\n"
     + "Click a stone to read about the place. If it is free you can take it: you will be set down beside its Plot Stone and it is yours to found. "
@@ -463,11 +471,11 @@ function pick(player, plan) {
     if (other.id !== player.id) other.sendMessage(`§6${player.name} has chosen ${status.plot.name} in ${status.plot.region}.`);
   }
   // Chat order on arrival: the plot's past (lore, at once), then what has been laid out (settlement), then this
-  // one clear next step, last, so it is the line left on screen.
-  const plotName = status.plot.name;
+  // one thought, last, so it is the line left on screen. Every step comes from someone (Mateo 2026-11-14): the first
+  // is Old Elspeth's, by the hearth in your hall (Act 1), so the thought sends you to her.
   const toward = compass(status.plot, KINGSREST);
   system.runTimeout(() => {
-    if (player.isValid) player.sendMessage(`§6Next: raise your Keep Banner on the Plot Stone beside you to found ${plotName}. Kingsrest lies ${toward}.`);
+    if (player.isValid) player.sendMessage(`§7§oSomeone here should know what to do with this place. There's smoke from the hall. §r§8(Kingsrest lies ${toward}.)`);
   }, 160);
   player.onScreenDisplay.setTitle(`§6${status.plot.name}`, { subtitle: status.plot.region, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
   refreshHall();
@@ -531,6 +539,17 @@ function toHall(player) {
 const mustChoose = (player) =>
   hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
 
+/** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
+export function inWelcomeHall(player) {
+  try {
+    if (!player?.isValid) return false;
+    if (player.hasTag(ARRIVING) || mustChoose(player)) return true;
+    return player.dimension.id === OVERWORLD && inHall(player.location);
+  } catch {
+    return false;
+  }
+}
+
 // First join, step 20 of the join sequence (after the look picker, before the journal): up to the hall.
 addJoinStep(20, "welcome hall", async (player, { wait }) => {
   if (!isReady() || !player.isValid || !mapMode()) return;
@@ -543,7 +562,7 @@ addJoinStep(20, "welcome hall", async (player, { wait }) => {
     player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
   } else if (!hallBuilt() && !plotOf(player.id)) {
     const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
-    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
+    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a free Plot Stone, click it and raise your banner.`);
   }
 }, { when: "first" });
 
@@ -567,6 +586,7 @@ onTick("plots_welcome_signs", 100, () => {
   if (!hallBuilt()) return;
   if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
   refreshHall();
+  waystoneSigns(overworld(), store.data.hall); // turns signs in halls built before the fix to face the arrival spot
 });
 
 // A faint coloured beam over each stone a newcomer can still choose (green free, amber run by a lord), so they are

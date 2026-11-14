@@ -154,7 +154,8 @@ def well(region):
     return finish(bp, (0, 1, 0), P=P)
 
 def library(region):
-    """Two storeys of books: eight Archive Shelves for the town's own lore, a lectern, portraits. 11 x 11."""
+    """Two storeys of books: eight two-high bookcases of Archive Shelves (16 halves) for the town's lore (the 75
+    tomes and the plot's own books), a lectern, portraits. 11 x 11."""
     bp, B, P, k, L = new("library", region)
     rect = (-5, -10, 5, 0); lift = stilts(bp, P, grow(rect, "ew"), 1, region)
     B.foundation(rect, lift); B.floor(rect, lift)
@@ -175,11 +176,19 @@ def library(region):
     # the shelves: back wall, two rows of four; lectern in front of them; portraits above
     zb = -9; n = 0
     for y in (lift + 1, lift + 2):
-        for x in (-2, -1, 1, 2): bp.set(x, y, zb, "siege:archive_shelf"); bp.marks[f"shelf{n}"] = (x, y, zb); n += 1
+        for x in (-2, -1, 1, 2):
+            bp.set(x, y, zb, "siege:archive_shelf", facing="s", upper=(y == lift + 2)); bp.marks[f"shelf{n}"] = (x, y, zb); n += 1
     bp.set(0, lift + 1, zb + 2, "lectern", facing="s"); bp.marks["lectern"] = (0, lift + 1, zb + 2)
     for i, x in enumerate((-2, 0, 2)): bp.marks[f"portrait{i}"] = (x, lift + 4, zb)
     bp.marks["painting0"] = (0, lift + 3, -1)
     for z in range(-8, -1): bp.set(-4, lift + 1, z, "bookshelf"); bp.set(4, lift + 1, z, "bookshelf")
+    # two more bookcases on each side wall, between the windows, facing into the room (Mateo 2026-11-14: a bookcase
+    # is two blocks tall like a door, each half its own shelf of 6 slots, siege:half lower/upper): shelf8..shelf15,
+    # each case lower half then upper half. 16 halves in all, 96 slots for the 75 tomes and the plot's own books.
+    for x, sd in ((-4, "e"), (4, "w")):
+        for z in (-6, -5):
+            for y in (lift + 1, lift + 2):
+                bp.set(x, y, z, "siege:archive_shelf", facing=sd, upper=(y == lift + 2)); bp.marks[f"shelf{n}"] = (x, y, z); n += 1
     return finish(bp, step_up(bp, lift), P=P)
 
 def market(region):
@@ -305,7 +314,7 @@ def watchtower(region):
     for y in (4, 7):
         for (x, z) in ((2, -2), (-2, -2), (0, -4)): bp.set(x, y, z, P["pane"])
     B.door(0, 1, 0, "s", canopy=False, lanterns=True, frame=k("stone"))
-    for y in range(1, 10): bp.set(1, y, -3, "ladder", facing="n")
+    for y in range(1, 10): bp.set(1, y, -3, "ladder", facing="s")   # faces away from the north wall it hangs on (emit.py)
     # the lookout platform overhangs the shaft by one all round
     for x in range(-3, 4):
         for z in range(-5, 2): bp.set(x, 9, z, P["floor"])
@@ -431,6 +440,17 @@ def breeder_yard(region):
         bp.set(x, 1, z, ["poppy", "dandelion", "cornflower", "oxeye_daisy"][(x * 7 + z) % 4] if region in ("vale", "blackfen") else "short_grass")
     bp.set(3, 1, -5, "cauldron")
     return finish(bp, (0, 1, 0), P=P)
+
+def town_breeder_yard(region):
+    """The towns' Breeder's Post (Mateo 2026-11-13: the guide says the posts stand in the towns): the same
+    Breeder's Yard the settlements raise, with the hc:breeder_post block beside its gate, out on the street side.
+    The game sells the foal of the region the post stands in (horses/index.js, PR #190)."""
+    bp = breeder_yard(region)
+    bp.set(2, 0, 1, bp.get(2, 0, 0)[0])   # its own footing (the town clears the footprint's ground it doesn't stamp)
+    bp.set(2, 1, 1, "hc:breeder_post")
+    bp.markers["door"] = (0, 1, 1)     # the step outside the gate: the town keeps it flat and walks it to a street
+    bp.kind = "civic"
+    return bp
 
 def quartermaster(region):
     """The Quartermaster's armoury: a small strong store, 9 x 9, with a serving hatch under a striped awning,

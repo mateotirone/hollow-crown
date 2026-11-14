@@ -1,7 +1,10 @@
-// The Strongroom vault (Mateo, 2026-11-12). The town hall board's "Vault" button: pay, get the Vault Key, then use
-// the key on the ground where the stairs should start, facing the way they go down. The staircase is carved, the
-// entrance hall and the Wooden Strongroom are built underground, the Vault Lock sits in the wall beside the 3x3
-// door. Rooms: rooms_data.js (map/structures/export_vaults.py). Numbers: data.js.
+// The Strongroom vault (Mateo, 2026-11-12). The town hall board's "Vault" button: pay and get the Vault Key, and
+// the vault is dug out as an add-on to the town hall (Mateo, 2026-11-12: "when you buy it, it automatically builds
+// it, you don't place where it goes"). The stairs go down through the hall's own floor (seat.js finds the spot in
+// every hall design), to the entrance hall and the Wooden Strongroom underground; the Vault Lock sits in the wall
+// beside the 3x3 door. When the hall is rebuilt bigger the stairs are laid again, and if the new hall has its
+// Tree or its furniture where they were, the vault moves to a spot that fits (relics move with it). Vaults placed
+// by hand before this keep their spot. Rooms: rooms_data.js (map/structures/export_vaults.py). Numbers: data.js.
 //
 // The key on the lock swings the 3x3 door open the way gates swing (siege/gates.js planSwing), and shut again.
 // Keys are cut for one vault: owner and allies open with any key, anyone else only with a key cut for it.
@@ -20,7 +23,7 @@
 // guards fight harder. Any login starts the day again; a break-in already under way carries on.
 //
 // What other features can use:
-//   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
+//   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, hall, lock: {x,y,z} } or undefined   hall: under the town hall
 //   on("vaultBuilt", ({ owner, tier, lock, from }))   from: the tier it was reinforced from (undefined when new)
 //   on("relicTaken", ({ owner, by, kind }))   someone outside the settlement took a relic off a vault stand
 //   on("vaultDrilled", ({ owner, by })) / on("vaultBreached", ({ owner, by }))   a break-in started / the door fell
@@ -30,13 +33,14 @@
 
 import { world, system, GameMode, ItemStack, BlockPermutation } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, settlementAt, onTick, moduleStore, emit, isAlly, keepOf, addMenuLabel } from "../siege/api.js";
+import { isReady, settlementAt, onTick, moduleStore, emit, on, isAlly, keepOf, addMenuLabel } from "../siege/api.js";
 import { planSwing, SWEPT } from "../siege/gates.js";
 import { startBuild, buildFor } from "../townhall/build.js";
-import { Plan } from "../townhall/halls.js";
+import { Plan, drawHall } from "../townhall/halls.js";
+import { STYLES } from "../townhall/styles.js";
 import { styleFor, drawDesigned } from "../settle/buildings.js";
-import { siteProblem } from "../settle/plans.js";
-import { hallMenuExtras, countMatching, takeMatching } from "../townhall/townhall.js";
+import { hallMenuExtras, countMatching, takeMatching, hallOf } from "../townhall/townhall.js";
+import { spotSearch, spotProblem, vaultFrameAt, spotOfVault } from "./seat.js";
 import { sfx } from "../core/sfx.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
 import { WINDOW, awayState, SAFE, safeBlow, safeCells } from "./data.js";
@@ -52,7 +56,8 @@ import { registerDamageable, hitWall, workOnWall } from "../siege/walls.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
-// vaults: { ownerId: { paid, x, y, z, fx, fz, tier, layout, built, pending } }
+// vaults: { ownerId: { paid, hall, x, y, z, fx, fz, tier, layout, built, pending, moveFrom } }
+//   hall: dug under the town hall (moves with it); moveFrom: { x, y, z, fx, fz, tier, layout } the room it is leaving
 const store = moduleStore("siege:vault", () => ({ vaults: {} }));
 const vaults = () => store.data.vaults;
 const jobId = (owner) => `vault:${owner}`;
@@ -83,6 +88,19 @@ export function vaultOf(owner) {
   return { ...v, lock: worldOf(v, ...d.marks.lock) };
 }
 
+// Dig a vault for a settlement straight away, free (the battle test, battletest/): the stairs start at `at` and go
+// down the way `forward` points. Replaces any vault the owner had on record. false if one is already being dug.
+export function raiseVaultFor(owner, at, forward, tier = "iron") {
+  if (buildFor(jobId(owner)) || !TIERS.includes(tier)) return false;
+  const v = vaults()[owner] = { paid: true, x: at.x, y: at.y, z: at.z, fx: forward.x, fz: forward.z, layout: LAYOUT[tier] ?? "treasury" };
+  store.save();
+  start(owner, v, tier);
+  return true;
+}
+// An owner's vault record as saved, and putting one back (or forgetting it, with none). The blocks stay.
+export const vaultRecord = (owner) => vaults()[owner];
+export function setVaultRecord(owner, record) { if (record) vaults()[owner] = record; else delete vaults()[owner]; store.save(); }
+
 const plans = new Map();
 function planFor(tier, layout) {
   const key = `${tier}|${layout}`;
@@ -110,18 +128,54 @@ function leftOver(from, to, layout) {
   return [...keys(roomOf(from, layout), true)].filter((k) => !now.has(k)).map((k) => k.split(",").map(Number));
 }
 
+// Every block of a room in the world, with its height in the room's frame (fy)
+function roomCells(v, tier, layout) {
+  const out = [];
+  for (const [y, z, x0, n] of roomOf(tier, layout).rows) for (let x = x0; x < x0 + n; x++) out.push({ ...worldOf(v, x, y, z), fy: y });
+  return out;
+}
+
+// A vault moving to a new spot under the hall: the old room's blocks the new one does not cover. Underground they
+// are filled in with stone (no hollow left under the town); the old stairs' hole in the floor gets earth unless
+// the hall has already laid its floor over it; anything higher stays as the hall left it.
+function movedLeftover(old, v, tier) {
+  const now = new Set(roomCells(v, tier, v.layout).map((c) => `${c.x},${c.y},${c.z}`));
+  return roomCells(old, old.tier, old.layout).filter((c) => !now.has(`${c.x},${c.y},${c.z}`) && c.fy <= 0).sort((a, b) => b.y - a.y);
+}
+const STONE = () => BlockPermutation.resolve("minecraft:stone");
+const EARTH = () => BlockPermutation.resolve("minecraft:dirt");
+const fillMoved = (at, block) => (at.fy < 0 ? STONE() : block.isAir || block.typeId.endsWith("_stairs") ? EARTH() : null);
+
+// Laying a room again as it stands (the hall was rebuilt over its stairs): the door, the lock and the safe keep
+// whatever state they are in (open, broken, cracked)
+function keepAsIs(v) {
+  const keep = new Set();
+  const add = (p) => keep.add(`${p.x},${p.y},${p.z}`);
+  const d = roomOf(v.built, v.layout);
+  doorCells(v).forEach(add);
+  add(worldOf(v, ...d.marks.lock));
+  for (const [, , , tx, ty, tz] of v.open ?? []) add({ x: tx, y: ty, z: tz });
+  if (d.marks.safe) safeCells(d.marks.safe).forEach((c) => add(worldOf(v, ...c)));
+  return (x, y, z) => keep.has(`${x},${y},${z}`);
+}
+
 function start(owner, v, tier) {
   if (buildFor(jobId(owner))) return;
   const plan = planFor(tier, v.layout);
   const from = v.built && v.built !== tier ? v.built : undefined;
+  const moved = v.moveFrom;
+  const again = !from && !moved && v.built === tier; // the same room laid again where it is
   v.pending = tier;
   store.save();
+  let remove, removeAs, skip;
+  if (from) remove = leftOver(from, tier, v.layout).map(([x, y, z]) => worldOf(v, x, y, z));
+  if (moved) { remove = movedLeftover(moved, v, tier); removeAs = fillMoved; }
+  if (again) skip = keepAsIs(v);
   startBuild({
     id: jobId(owner), dimensionId: OVERWORLD, origin: { x: v.x, y: v.y, z: v.z }, forward: { x: v.fx, z: v.fz },
-    plan, style: plan.style, perTick: Math.max(6, Math.ceil(plan.cells.size / 200)),
-    remove: from ? leftOver(from, tier, v.layout).map(([x, y, z]) => worldOf(v, x, y, z)) : undefined,
+    plan, style: plan.style, perTick: Math.max(6, Math.ceil(plan.cells.size / 200)), remove, removeAs, skip,
     onProgress(fraction) {
-      if (!v.built) return;
+      if (!from) return;
       // reinforcing: the lock hums and sparks while the room grows round it
       try {
         const dim = world.getDimension(OVERWORLD), at = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
@@ -131,21 +185,102 @@ function start(owner, v, tier) {
     },
     onDone() {
       v.built = tier;
-      v.safe = undefined; // a new safe comes with the new room
-      v.broken = false; // a rebuild hangs a whole new door and lock
+      if (!again) {
+        v.safe = undefined; // a new safe comes with the new room
+        v.broken = false; // a rebuild hangs a whole new door and lock
+      }
       v.pending = undefined;
+      v.moveFrom = undefined;
       store.save();
       const lock = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
-      if (from) moveStands(v, from, tier);
-      emit("vaultBuilt", { owner, tier, lock, from });
+      if (from) moveStands(v, from, v, tier);
+      if (moved) moveStands(moved, moved.tier, v, tier);
+      if (!again) emit("vaultBuilt", { owner, tier, lock, from });
       const player = world.getPlayers().find((p) => p.id === owner);
-      if (player) {
-        say(player, from ? `§6Your vault is reinforced: it is a ${TIER_NAME[tier]} now.` : `§6Your ${TIER_NAME[tier]} is finished. Go down the stairs; the Vault Lock is in the wall beside the door.`);
+      if (player && !again) {
+        say(player, from ? `§6Your vault is reinforced: it is a ${TIER_NAME[tier]} now.`
+          : moved ? "§6Your vault has moved to fit the new town hall: the stairs down are inside the hall. Relics on their stands came with it; barrels were rebuilt empty."
+            : `§6Your ${TIER_NAME[tier]} is finished. The stairs down are inside your town hall; the Vault Lock is in the wall beside the door at the bottom.`);
         sfx(player, "random.levelup", { volume: 0.5 });
       }
     },
   });
 }
+
+// ---------- an add-on to the town hall: where the stairs go down ----------
+
+const hallPlans = new Map();
+function hallPlan(style, level) {
+  const key = `${style}:${level}`;
+  if (!hallPlans.has(key)) hallPlans.set(key, drawHall(level, STYLES[style]));
+  return hallPlans.get(key);
+}
+const spotLists = new Map();
+// The hall's stairs spots, best first, worked out a little each tick (one search per hall design)
+function hallSpots(style, level) {
+  const key = `${style}:${level}`;
+  if (spotLists.has(key)) return spotLists.get(key);
+  const job = new Promise((resolve) => {
+    system.runJob((function* () {
+      try {
+        const plans = [];
+        for (let l = level; l <= 5; l++) { plans.push(hallPlan(style, l)); yield; }
+        resolve(yield* spotSearch(plans[0], plans.slice(1)));
+      } catch (e) {
+        console.warn(`[Vault] stairs search for ${key}: ${e}`);
+        spotLists.delete(key);
+        resolve([]);
+      }
+    })());
+  });
+  spotLists.set(key, job);
+  return job;
+}
+
+// The room (this tier) stays on the settlement's own land
+function offLand(owner, at, tier) {
+  const b = groundBox(at, roomOf(tier, at.layout).box);
+  return ![[b.x0, b.z0], [b.x1, b.z0], [b.x0, b.z1], [b.x1, b.z1]].every(([x, z]) => settlementAt({ x, y: at.y, z }) === owner);
+}
+
+const tell = (owner, text) => say(world.getPlayers().find((p) => p.id === owner), text);
+const seating = new Set();
+
+// Dig the vault under the town hall, or lay its stairs again after the hall was rebuilt (moving it when the new
+// hall has something where they were)
+async function seatInHall(owner) {
+  const v = vaults()[owner];
+  if (!v?.paid || v.pending || buildFor(jobId(owner)) || seating.has(owner)) return;
+  if (v.built && !v.hall) return; // placed by hand before vaults came with the hall: it stays where it is
+  const hall = hallOf(owner);
+  if (!hall || hall.lost || hall.building || !(hall.level > 0) || !STYLES[hall.style]) {
+    if (!v.built) tell(owner, "§7Your vault will be dug out under the town hall as soon as the hall is finished.");
+    return;
+  }
+  // the stairs stay where they are while they still fit the hall
+  if (v.built && !spotProblem(hallPlan(hall.style, hall.level), spotOfVault(hall, v))) return start(owner, v, v.built);
+  seating.add(owner);
+  let spots;
+  try { spots = await hallSpots(hall.style, hall.level); } finally { seating.delete(owner); }
+  const now = vaults()[owner], still = hallOf(owner);
+  if (now !== v || v.pending || buildFor(jobId(owner)) || still?.building || still?.level !== hall.level) return;
+  const tier = v.built ?? "wood";
+  for (const spot of spots) {
+    const at = { ...vaultFrameAt(hall, spot), layout: v.layout ?? LAYOUT.wood };
+    if (offLand(owner, at, tier)) continue;
+    if (v.built) {
+      v.moveFrom = { x: v.x, y: v.y, z: v.z, fx: v.fx, fz: v.fz, tier: v.built, layout: v.layout };
+      v.open = undefined;
+    }
+    Object.assign(v, at, { hall: true });
+    start(owner, v, tier);
+    return;
+  }
+  tell(owner, "§cThere is no room for the vault's stairs in this town hall, on your own land. Talk to the Town Board again once the hall has grown.");
+}
+
+// A hall raised, grown or moved: dig the vault paid for, or lay its stairs again (the new hall was built over them)
+on("hallBuilt", ({ owner }) => { system.run(() => seatInHall(owner).catch((e) => console.warn(`[Vault] ${e}`))); });
 
 // A build cut short by the world closing carries on when it loads again
 onTick("vault", 200, () => {
@@ -165,7 +300,7 @@ function vaultMenu(player, owner) {
   const lines = [];
   if (v?.built || v?.pending) {
     const tier = v.built ?? v.pending;
-    lines.push(`§l${TIER_NAME[tier]}§r`, v.pending ? "§6It is being dug out right now." : `§7Down the stairs at ${v.x}, ${v.z}. Use the Vault Key on the lock to open the door.`);
+    lines.push(`§l${TIER_NAME[tier]}§r`, v.pending ? "§6It is being dug out right now." : v.hall ? "§7Down the stairs inside the town hall. Use the Vault Key on the lock to open the door." : `§7Down the stairs at ${v.x}, ${v.z}. Use the Vault Key on the lock to open the door.`);
     if (v.broken) {
       lines.push("", "§cThe vault door has been broken in. Anyone can walk in until you rebuild it.");
       const cost = REBUILD[v.built].map(([label, amount, match]) => ({ label, amount, match, have: countMatching(player, match) }));
@@ -182,13 +317,15 @@ function vaultMenu(player, owner) {
       actions.push(() => { giveKey(player, owner); say(player, "§7Here is a spare Vault Key, cut for your vault. Anyone holding it can open the door."); });
     }
   } else if (v?.paid) {
-    lines.push("§lA vault, paid for§r", "§7Take the Vault Key to where the stairs should start, on your own land, face the way they should go down, and use the key on the ground.");
+    lines.push("§lA vault, paid for§r", "§7It is dug out under the town hall, with the stairs down inside the hall, as soon as the hall is finished.");
     if (mine) {
+      form.button("§2Dig it under the town hall\n§8now", "textures/items/iron_pickaxe");
+      actions.push(() => { v.hall = true; store.save(); seatInHall(owner).catch(() => {}); });
       form.button("I lost the key\n§8get another", "textures/items/vault/vault_key");
       actions.push(() => giveKey(player, owner));
     }
   } else {
-    lines.push("§lNo vault yet§r", "§7A vault keeps your relics behind a locked door underground. Attackers have to break in to take them.", "", "§lCosts:§r");
+    lines.push("§lNo vault yet§r", "§7A vault keeps your relics behind a locked door underground. Attackers have to break in to take them.", "§7It is dug out under the town hall, with the stairs down inside the hall.", "", "§lCosts:§r");
     const cost = costLines(player, "wood");
     const free = creative(player);
     for (const c of cost) lines.push(`${free || c.have >= c.amount ? "§a" : "§c"}${c.amount} ${c.label}§7 (you have ${c.have})`);
@@ -207,50 +344,15 @@ function buy(player, owner, cost) {
   if (vaults()[owner]?.paid) return;
   for (const c of cost) if (countMatching(player, c.match) < c.amount) return say(player, "§cYou don't have the materials any more.");
   for (const c of cost) takeMatching(player, c.match, c.amount);
-  vaults()[owner] = { paid: true };
+  vaults()[owner] = { paid: true, hall: true };
   store.save();
   giveKey(player, owner);
   sfx(player, "random.orb");
-  say(player, "§6Here is your Vault Key. Walk to where the stairs should start, face the way they should go down into the ground, and use the key on the ground there.");
+  say(player, "§6Here is your Vault Key. Masons are digging your vault out under the town hall: the stairs go down inside the hall. Keep the key, it opens the door.");
+  seatInHall(owner).catch((e) => console.warn(`[Vault] ${e}`));
 }
 
-hallMenuExtras.push({ label: "Vault\n§8keep your relics underground", icon: "textures/items/vault/vault_key", action: (player, owner) => vaultMenu(player, owner) });
-
-// ---------- choosing the spot with the key ----------
-
-function placeProblem(owner, v, tier) {
-  return siteProblem(owner, groundBox(v, roomOf(tier, v.layout).box));
-}
-
-function chooseSpot(player, block) {
-  const owner = settlementAt(block.location);
-  if (!owner || owner !== player.id) return player.onScreenDisplay.setActionBar("§7Dig your vault on your own settlement's land.");
-  const v = vaults()[owner];
-  if (!v?.paid || v.built || v.pending) return; // nothing to place (opening the door comes later)
-  const f = cardinal(player.getViewDirection());
-  const spot = { ...v, x: block.location.x, y: block.location.y + 1, z: block.location.z, fx: f.x, fz: f.z, layout: LAYOUT.wood };
-  const problem = placeProblem(owner, spot, "wood");
-  if (problem) return say(player, `§7No room for the vault here: ${problem}`);
-  new MessageFormData().title("Dig your vault here?")
-    .body("The stairs go down from where you stand, the way you are facing, to an entrance hall and the Wooden Strongroom below. Make sure nothing you've built is in the way underground.")
-    .button1("Dig it").button2("Not here")
-    .show(player).then((r) => {
-      if (r.canceled || r.selection !== 0) return;
-      const now = vaults()[owner];
-      if (!now?.paid || now.built || now.pending) return;
-      Object.assign(now, spot);
-      start(owner, now, "wood");
-      say(player, "§6Your vault is being dug out. Keep the key: it opens the door.");
-    }).catch(() => {});
-}
-
-world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
-  const { block, player, itemStack } = event;
-  if (event.isFirstEvent === false || !isReady() || itemStack?.typeId !== VAULT_KEY || block.dimension.id !== OVERWORLD) return;
-  if (block.typeId.startsWith("siege:vault_")) return; // the lock and door: their own handler
-  event.cancel = true;
-  system.run(() => chooseSpot(player, block));
-});
+hallMenuExtras.push({ label: "Vault\n§8keep your relics under the town hall", icon: "textures/items/vault/vault_key", action: (player, owner) => vaultMenu(player, owner) });
 
 // ---------- the door: the key on the lock swings it open (the gates' swing) ----------
 
@@ -616,13 +718,13 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
 
 // ---------- reinforcing: click the lock with the next tier's material ----------
 
-// Relic stands keep their relic and move to the bigger room's plinths
-function moveStands(v, from, to) {
+// Relic stands keep their relic and move to the new room's plinths (a bigger room, or a room moved with the hall)
+function moveStands(a0, from, b0, to) {
   const dim = world.getDimension(OVERWORLD);
-  const old = roomOf(from, v.layout).marks, now = roomOf(to, v.layout).marks;
+  const old = roomOf(from, a0.layout).marks, now = roomOf(to, b0.layout).marks;
   for (const kind of Object.keys(RELICS)) {
     if (!old[`stand_${kind}`] || !now[`stand_${kind}`]) continue;
-    const a = worldOf(v, ...old[`stand_${kind}`]), b = worldOf(v, ...now[`stand_${kind}`]);
+    const a = worldOf(a0, ...old[`stand_${kind}`]), b = worldOf(b0, ...now[`stand_${kind}`]);
     const stand = standOn(dim, a);
     try { stand?.teleport({ x: b.x + 0.5, y: b.y + 0.25, z: b.z + 0.5 }); } catch { /* unloaded */ }
   }

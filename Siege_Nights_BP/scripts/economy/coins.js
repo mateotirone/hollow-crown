@@ -9,7 +9,7 @@ import { GameMode, ItemStack } from "@minecraft/server";
 // siege/ files import this one, so nothing from siege/api.js may be used while this file loads (only inside functions)
 import { countItem, takeItems, settlementAt, keepOf } from "../siege/api.js";
 import { moduleStore } from "../core/store.js";
-import { emit } from "../core/events.js";
+import { emit, applyFilter } from "../core/events.js";
 import { COIN, GOLD, ECON } from "./config.js";
 import { asCoins, fromEmeralds } from "./rules.js";
 
@@ -63,7 +63,8 @@ export function robBank(id, amount) {
 // On your own land (kept for callers that ask; the balance itself is reachable anywhere)
 export function atHome(player) {
   try {
-    return player.dimension.id === "minecraft:overworld" && !!keepOf(player.id) && settlementAt(player.location) === player.id;
+    const land = player.dimension.id === "minecraft:overworld" ? settlementAt(player.location) : undefined;
+    return !!land && !!keepOf(land) && (land === player.id || !!keepOf(land).allies?.includes(player.id)); // own land, or a writ ally's
   } catch {
     return false;
   }
@@ -93,9 +94,11 @@ export function takeCoins(player, amount) {
 
 // charge(player, amount): takes the price from the balance.
 // true if paid (always true in Creative, which pays nothing). The coins leave the world.
+// A feature may lower or raise the price through the "chargeAmount" filter ({ player, reason }), e.g. a wonder.
 export function charge(player, amount, reason = "shop") {
   amount = Math.ceil(amount);
   if (amount <= 0 || creative(player)) return true;
+  amount = Math.max(1, Math.ceil(applyFilter("chargeAmount", amount, { player, reason })));
   if (!takeCoins(player, amount)) return false;
   ledger.data.sunk += amount;
   ledger.save();
@@ -104,9 +107,11 @@ export function charge(player, amount, reason = "shop") {
 }
 
 // pay(player, amount): new Regals onto the player's balance (a sale, a reward, a bounty).
+// A feature may change the amount through the "payAmount" filter ({ player, reason }), e.g. a wonder.
 export function pay(player, amount, reason = "sale") {
   amount = Math.floor(amount);
   if (amount <= 0) return;
+  amount = Math.max(0, Math.floor(applyFilter("payAmount", amount, { player, reason })));
   giveCoins(player, amount);
   ledger.data.minted += amount;
   ledger.save();

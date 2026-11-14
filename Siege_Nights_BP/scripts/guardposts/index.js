@@ -24,14 +24,14 @@
 import { world, system, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, on, emit, addFilter, keepOf, guardOwner, guardTag, GUARD_TYPES, GUARD_ARMOR, armorTier,
-  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, underAttack, addTests, assert, assertEqual } from "../siege/api.js";
+  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, canManage, homeOf, underAttack, addTests, assert, assertEqual } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { townOf, layoutOf } from "../settle/founding.js";
 import { slotsOf } from "../settle/towns.js";
 import { seatInWorld } from "../settle/plotmarker.js";
 import { BUILDING } from "../settle/buildings.js";
 import { wallOf } from "../settle/walls.js";
-import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight } from "../settle/walldata.js";
+import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight, WATCH, WATCH_KINDS } from "../settle/walldata.js";
 import { raisedBuildings } from "../settle/raised.js";
 import { hallOf } from "../townhall/townhall.js";
 import { drawHall, HALL_TIERS } from "../townhall/halls.js";
@@ -39,7 +39,7 @@ import { worldBox } from "../townhall/build.js";
 import { STYLES } from "../townhall/styles.js";
 import { sfx } from "../core/sfx.js";
 import { standY } from "./ground.js";
-import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, WALK } from "./walk.js";
+import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, upAbove, WALK } from "./walk.js";
 import { POSTS, wallPosts, buildingPosts, frontOf, numberPosts, skyCamera, yawOf, wallStand, compassOf } from "./posts.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -155,9 +155,17 @@ function baseOf(owner) {
 // ---------- stationing ----------
 
 // Where a guard stands at a post: the middle of the block, feet height, facing out
+// (a lookout up a ladder also carries climb, and foot = where the guard steps off the ladder at the bottom)
 function postDest(post) {
   const stand = standOf(post);
-  return stand ? { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out) } : undefined;
+  if (!stand) return undefined;
+  const dest = { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out) };
+  if (post.watch) {
+    dest.climb = true;
+    const y = post.foot ? standY(post.foot.x, post.foot.z, post.foot.from) : undefined;
+    if (y !== undefined) dest.foot = { x: post.foot.x + 0.5, y, z: post.foot.z + 0.5 };
+  }
+  return dest;
 }
 
 // Where a stationed guard waits while its watch is off: beside the nearest Barracks (its own spot of eight round it)
@@ -201,7 +209,8 @@ function sendOff(guard, owner, post, { salute = false } = {}) {
   const current = postOf(guard);
   if (near(current, dest) && (isWalking(guard) || !guard.getDynamicProperty("siege:walking"))) return true;
   setPost(guard, { ...dest, stand: true });
-  walkTo(guard, owner, dest, { salute: salute || dest === atPost });
+  // off a lookout (the watch ended, or a new post): down the ladder first, then walk
+  walkTo(guard, owner, dest, { salute: salute || dest === atPost, down: current?.foot ?? (current?.climb ? atPost.foot : undefined) });
   return true;
 }
 
@@ -421,7 +430,7 @@ addFilter("barracksButtons", (buttons, { player, block }) => [...buttons, {
 
 // The sky view. guard = the guard being stationed, or none to look at the posts and fill them.
 export function openPosts(player, owner, guard) {
-  if (owner !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can station its guards.");
+  if (!canManage(owner, player.id)) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner and their allies can station its guards.");
   const sites = sitesFor(owner, true);
   if (!sites.length) return player.sendMessage("§7There are no posts yet. Raise a wall or put up a building, and posts come with it.");
   startView(player, owner);
@@ -524,7 +533,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player" || !isReady()) return;
   const cmd = event.message.trim() || "view";
-  if (cmd === "view") return openPosts(player, player.id);
+  if (cmd === "view") return openPosts(player, homeOf(player.id) ?? player.id);
   if (cmd === "list") {
     const manned = mannedOf(player.id);
     const lines = sitesFor(player.id, true).map((s) => `§6${s.name}§7: ${s.posts.map((p) => `${p.n}${manned[p.key] ? "§a*§7" : ""}`).join(" ")}`);
@@ -541,12 +550,20 @@ addTests("guard posts", {
     for (const level of [1, 3, 5, 7, 10]) {
       const w = { x: 1000, z: 2000, radius: 46, level, gate: 1.2, ground: new Array(WALLS.stations).fill(70), shape };
       const posts = wallPosts(w);
-      assertEqual(posts.length, POSTS.wallPosts + 2, `level ${level}`);
+      const watch = posts.filter((p) => p.key.startsWith("watch:"));
+      assertEqual(watch.length, level <= 6 ? 4 : 0, `level ${level} watchtower posts`);
+      assert(posts.length >= POSTS.wallPosts + 2 && posts.length <= POSTS.wallPosts + 2 + watch.length, `level ${level}: ${posts.length} posts`);
+      if (watch.length) assertEqual(posts.slice(0, 4).map((p) => p.key).join(), "watch:0,watch:1,watch:2,watch:3", "lookouts are manned first");
+      for (const p of watch) { // the ladder's foot (the front step) is close enough to climb up from and to be put down at
+        assert(p.foot && Math.hypot(p.x - p.foot.x, p.z - p.foot.z) <= WALK.climb, `level ${level} ${p.key}: foot ${JSON.stringify(p.foot)}`);
+        assert(upAbove({ x: p.x, y: p.from, z: p.z }, { x: p.foot.x, y: p.foot.from, z: p.foot.z }), `level ${level} ${p.key}: up on the lookout`);
+        assert(!upAbove({ x: p.x, y: p.foot.from, z: p.z }, { x: p.foot.x, y: p.foot.from, z: p.foot.z }), "on the ground is not up");
+      }
       assertEqual(new Set(posts.map((p) => p.key)).size, posts.length);
       for (const p of posts) {
         const r = Math.hypot(p.x - w.x, p.z - w.z);
         assert(r > 30 && r < 52, `level ${level} post ${p.key} at ${r.toFixed(1)}`);
-        assert(p.from > 70 && p.from <= 70 + WALL_LEVELS[level].h + 3, `level ${level} looks down from ${p.from}`);
+        assert(p.from > 70 && p.from <= 70 + (p.watch ? WATCH_KINDS[level === 1 ? "stand" : "tower"].guardUp : WALL_LEVELS[level].h + 3), `level ${level} looks down from ${p.from}`);
       }
       const gate = posts.filter((p) => p.key.startsWith("gate:"));
       assertEqual(gate.length, 2);
@@ -555,13 +572,17 @@ addTests("guard posts", {
   },
   "a wall post keeps its key and place round the ring when the wall moves out": () => {
     const w = { x: 0, z: 0, radius: 36, level: 4, gate: 0, ground: new Array(WALLS.stations).fill(64) };
-    const a = wallPosts(w), b = wallPosts({ ...w, radius: 56 });
-    for (let i = 0; i < a.length; i++) {
-      assertEqual(a[i].key, b[i].key);
-      if (a[i].key.startsWith("gate:")) continue; // the gate pair stay a few blocks from the gate, so their angle changes
-      assert(Math.abs(a[i].a - b[i].a) < 1e-9, "same angle");
-      assertEqual(compassOf(a[i].a), compassOf(b[i].a));
+    const a = wallPosts(w), b = new Map(wallPosts({ ...w, radius: 56 }).map((p) => [p.key, p]));
+    let same = 0;
+    for (const p of a) {
+      const q = b.get(p.key);
+      if (!q) continue; // a wall post beside a watchtower can be left out on one ring and not the other
+      same++;
+      if (p.key.startsWith("gate:")) continue; // the gate pair stay a few blocks from the gate, so their angle changes
+      assert(Math.abs(p.a - q.a) < 1e-9, "same angle");
+      assertEqual(compassOf(p.a), compassOf(q.a));
     }
+    assert(same >= POSTS.wallPosts, `${same} posts on both rings`);
   },
   "buildings get door posts, big ones corners and sides, all outside the building": () => {
     const small = buildingPosts("s", { x0: 0, z0: 0, x1: 8, z1: 8 }, { x: 0, z: 1 }, 64);

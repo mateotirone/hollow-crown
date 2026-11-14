@@ -7,7 +7,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, addKeepMenuButtons } from "../siege/api.js";
 import {
   HORSE_SETTINGS as S, BREEDS, REGIONAL_BREEDS, TRAITS, GEAR_ITEMS, SHOES, SADDLES, HALTER, WHISTLE, CROP, CAPARISON,
-  SPEED_VALUES, HEALTH_VALUES, levelFromValue, newRecord, hasPerk, rosterCap, costText,
+  SPEED_VALUES, HEALTH_VALUES, levelFromValue, newRecord, hasPerk, rosterCap, costText, isCob, cobBack, COB,
 } from "./data.js";
 import { recordOf, horsesOf, saveRecord, newUid, meta, stablesLevelFor, rosterRoom } from "./store.js";
 import { STEED, uidOf, valid, entityOf, spawnSteed, applyRecord, readGear, refresh, scanSteeds, bannerColorOf } from "./steed.js";
@@ -15,8 +15,10 @@ import { ridingTick, useCrop, undertowStep, mountOf } from "./riding.js";
 import { horseMenu, stablesMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
 import "./tests.js";
 import "./showcase.js";
+import "./starter.js";
 import { useStablesLevel } from "./barn.js";
 import { sfx } from "../core/sfx.js";
+import { regionAt } from "../economy/shops.js";
 
 export { stallMenu } from "./menus.js"; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";
@@ -70,6 +72,7 @@ function register(player, horse) {
 // ---------- Gear ----------
 
 function fitGear(player, entity, rec, itemId) {
+  if (isCob(rec)) return say(player, `§7${rec.name} is a working cob: fine shoes and saddle kits are wasted on it.`);
   const gear = GEAR_ITEMS[itemId];
   const table = gear.slot === "shoes" ? SHOES : SADDLES;
   if (rec[gear.slot] === gear.key) return say(player, `§7${rec.name} already wears that.`);
@@ -137,8 +140,17 @@ const whistled = new Map(); // player id -> tick the Loyal call is ready again
 function whistle(player) {
   if (undertowStep(player)) return;
   if (mountOf(player)) return;
-  const mine = horsesOf(player.id).filter((r) => r.status !== "fallen" && !r.foal);
-  if (!mine.length) return say(player, "§7You have no horse to call.");
+  const time = world.getAbsoluteTime();
+  const all = horsesOf(player.id);
+  const mine = all.filter((r) => (r.status !== "fallen" || cobBack(r, time)) && !r.foal);
+  if (!mine.length) {
+    const resting = all.find((r) => isCob(r) && r.status === "fallen");
+    if (resting) {
+      const hours = Math.ceil(((resting.fallenAt ?? 0) + COB.recoverTicks - time) / 1000);
+      return say(player, `§7${resting.name} is still resting after its fall. Try again in ${hours} hour${hours === 1 ? "" : "s"}.`);
+    }
+    return say(player, "§7You have no horse to call.");
+  }
   sfx(player.dimension, "note.flute", player.location, { pitch: 1.6 });
   const here = player.location;
   const near = mine.map((rec) => ({ rec, entity: entityOf(rec) }))
@@ -149,6 +161,14 @@ function whistle(player) {
   if (near) {
     near.entity.teleport(here, { dimension: player.dimension });
     return say(player, `§6${near.rec.name} comes running.`);
+  }
+  // A starter cob always comes, from anywhere (stall, far away, or home again after a fall)
+  const cob = mine.find(isCob);
+  if (cob && !mine.some((r) => !isCob(r) && hasPerk(r, "loyal"))) {
+    const entity = entityOf(cob);
+    if (entity) entity.teleport(here, { dimension: player.dimension });
+    else spawnSteed(cob, player.dimension, here);
+    return say(player, `§6${cob.name} plods up to you.`);
   }
   const loyal = mine.filter((r) => hasPerk(r, "loyal")).sort((a, b) => (b.lastRidden ?? 0) - (a.lastRidden ?? 0))[0];
   if (!loyal) return say(player, `§7No horse of yours is within ${S.whistleRange} blocks. A horse with the Loyal perk comes from anywhere.`);
@@ -172,6 +192,9 @@ world.afterEvents.itemUse.subscribe((event) => {
 
 // ---------- Stables and Breeder's Posts ----------
 
+// The regional breed bred in a region ("Frostmarch" -> "destrier"), or undefined off the map
+export const regionBreed = (region) => REGIONAL_BREEDS.find((b) => BREEDS[b].region === region);
+
 async function breederSetup(player, key) {
   const res = await new ModalFormData().title("Breeder's Post")
     .dropdown("Which breed is sold here?", REGIONAL_BREEDS.map((b) => `${BREEDS[b].name} (${BREEDS[b].region})`)).show(player);
@@ -184,11 +207,11 @@ async function breederSetup(player, key) {
 
 async function breederMenu(player, block) {
   const key = posKey(block.location);
-  const breed = meta.data.posts[key];
-  if (!breed || (isBuilder(player) && player.isSneaking)) {
-    if (isBuilder(player)) return breederSetup(player, key);
-    return say(player, "§7Nobody is selling horses here yet.");
-  }
+  // A post the map itself placed (a town's breeder's yard) was never set up by a builder: it sells the breed of
+  // the region it stands in. A builder can still sneak-click it to choose another.
+  const breed = meta.data.posts[key] ?? regionBreed(regionAt(block.location));
+  if (isBuilder(player) && (player.isSneaking || !breed)) return breederSetup(player, key);
+  if (!breed) return say(player, "§7Nobody is selling horses here yet.");
   const info = BREEDS[breed];
   const cost = [{ item: "coins", count: S.breederPostPrice }];
   const boughtKey = `${key}|${player.id}`;
@@ -271,8 +294,14 @@ world.afterEvents.entityDie.subscribe((event) => {
   rec.gearSaddle = false; // its saddle and barding dropped where it fell
   rec.gearArmor = null;
   rec.gen++;
-  saveRecord(rec);
   const owner = world.getPlayers().find((p) => p.id === rec.owner);
+  if (isCob(rec)) {
+    rec.fallenAt = world.getAbsoluteTime();
+    rec.gearSaddle = true; // it limps home in its old saddle
+    saveRecord(rec);
+    return owner?.sendMessage(`§c${rec.name} has fallen.§7 It will limp home in a day: then blow your Horse Whistle and it comes to you.`);
+  }
+  saveRecord(rec);
   owner?.sendMessage(`§c${rec.name} has fallen. A level 2 Stables can bring it back (${costText(S.reviveCost)}).`);
 });
 

@@ -1,0 +1,274 @@
+{
+ "name": "wallwatch_blackfen",
+ "card": {
+  "title": "Wall watchtower",
+  "sub": "Blackfen",
+  "region": "blackfen",
+  "where": "Every settlement wall from the Palisade (level 2) to the Battlement Wall: four astride the wall line (the Low Palisade gets lookout stands)",
+  "kind": "Defence",
+  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "tuff_bricks",
+     "infill": {
+      "ladder": [
+       "mud_bricks",
+       "packed_mud"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "canopy": false
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "hatch": false,
+    "beams": false,
+    "parapet": "none"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0.04,
+   "interior": {
+    "use": "tower",
+    "hatch": true
+   },
+   "piles": true
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 5,
+   "sides": "nsew",
+   "material": "tuff_brick_stairs"
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 9,
+   "sides": "nsew",
+   "material": "mangrove_stairs"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -3,
+    -5,
+    3,
+    1
+   ],
+   "y": 10,
+   "h": 3,
+   "pier": "mangrove_fence",
+   "deck": "mangrove_planks",
+   "trim": "dark_oak_planks",
+   "bell": false,
+   "louvres": false,
+   "cap_trim": "dark_oak_planks",
+   "cap": "hip",
+   "roof": {
+    "block": "dark_oak_planks"
+   },
+   "finial": "short"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   11,
+   -4,
+   "mangrove_fence"
+  ],
+  [
+   -3,
+   11,
+   -3,
+   "mangrove_fence"
+  ],
+  [
+   -3,
+   11,
+   -2,
+   "mangrove_fence"
+  ],
+  [
+   -3,
+   11,
+   -1,
+   "mangrove_fence"
+  ],
+  [
+   -3,
+   11,
+   0,
+   "mangrove_fence"
+  ],
+  [
+   -2,
+   11,
+   -5,
+   "mangrove_fence"
+  ],
+  [
+   -2,
+   11,
+   1,
+   "mangrove_fence"
+  ],
+  [
+   -1,
+   11,
+   -5,
+   "mangrove_fence"
+  ],
+  [
+   -1,
+   11,
+   1,
+   "mangrove_fence"
+  ],
+  [
+   0,
+   11,
+   -5,
+   "mangrove_fence"
+  ],
+  [
+   0,
+   11,
+   1,
+   "mangrove_fence"
+  ],
+  [
+   1,
+   11,
+   -5,
+   "mangrove_fence"
+  ],
+  [
+   1,
+   11,
+   1,
+   "mangrove_fence"
+  ],
+  [
+   2,
+   11,
+   -5,
+   "mangrove_fence"
+  ],
+  [
+   2,
+   11,
+   1,
+   "mangrove_fence"
+  ],
+  [
+   3,
+   11,
+   -4,
+   "mangrove_fence"
+  ],
+  [
+   3,
+   11,
+   -3,
+   "mangrove_fence"
+  ],
+  [
+   3,
+   11,
+   -2,
+   "mangrove_fence"
+  ],
+  [
+   3,
+   11,
+   -1,
+   "mangrove_fence"
+  ],
+  [
+   3,
+   11,
+   0,
+   "mangrove_fence"
+  ],
+  [
+   0,
+   13,
+   -2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ]
+ ]
+}

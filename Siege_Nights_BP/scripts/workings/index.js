@@ -14,7 +14,7 @@
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
-import { emit } from "../core/events.js";
+import { emit, applyFilter } from "../core/events.js";
 import { moduleStore } from "../core/store.js";
 import { mapMode } from "../plots/claims.js";
 import {
@@ -236,10 +236,15 @@ function jumpers() {
     lastBand.set(w.id, now);
     const dim = overworld(), foot = { x: site.x + site.dx * T.depth + 0.5, y: site.y - T.depth + 1, z: site.z + site.dz * T.depth + 0.5 };
     for (let i = 0; i < T.jumpers.count; i++) {
+      const tags = [JUMPER_TAG, `siege_cj_${w.id}`], name = "§cClaim Jumper";
+      // men after the ore: the bestiary's retainers fight like players; our own raiders if that feature is missing
+      let e;
+      try { e = applyFilter("rivalSoldier", undefined, { dim, at: foot, role: "retainer", tier: 1, name, tags, stance: "hostile" }); } catch { e = undefined; }
+      if (e) continue;
       try {
-        const e = dim.spawnEntity(i % 2 ? "minecraft:pillager" : "minecraft:vindicator", foot);
-        e.addTag(JUMPER_TAG); e.addTag(`siege_cj_${w.id}`);
-        e.nameTag = "§cClaim Jumper";
+        e = dim.spawnEntity(i % 2 ? "siege:hollow_footman" : "siege:shieldwall_brute", foot);
+        for (const t of tags) e.addTag(t);
+        e.nameTag = name;
       } catch { /* stair not loaded */ }
     }
     for (const p of inside) p.onScreenDisplay.setActionBar("§cBoots on the stair. Claim jumpers, after the ore!");

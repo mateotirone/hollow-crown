@@ -49,6 +49,16 @@ export function plotAtBlock(loc) {
 
 // Every non-air block in the plot from the floor up, yielding as it goes
 export function* scanPlot(dim, box, floorY, height = SCAN_HEIGHT) {
+  const cells = yield* scanCells(dim, box, floorY, height);
+  if (!cells) return undefined;
+  const t = tally(cells);
+  t.beds = t.beds.map((p) => ({ x: p.x + box.x0, y: p.y + floorY, z: p.z + box.z0 }));
+  return t;
+}
+
+// The raw cells behind scanPlot: [{ x, y, z, id, head, upper }] relative to the box corner and the floor, or
+// undefined when part of the plot isn't loaded
+export function* scanCells(dim, box, floorY, height = SCAN_HEIGHT) {
   const cells = [];
   let n = 0;
   for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) for (let y = 0; y <= height; y++) {
@@ -63,9 +73,7 @@ export function* scanPlot(dim, box, floorY, height = SCAN_HEIGHT) {
     if (/door$/.test(id)) try { upper = !!b.permutation.getState("upper_block_bit"); } catch { /* no state */ }
     cells.push({ x: x - box.x0, y, z: z - box.z0, id, head, upper });
   }
-  const t = tally(cells);
-  t.beds = t.beds.map((p) => ({ x: p.x + box.x0, y: p.y + floorY, z: p.z + box.z0 }));
-  return t;
+  return cells;
 }
 
 export function runScan(owner, slotId) {
@@ -85,7 +93,7 @@ export function runScan(owner, slotId) {
 // ---------- the dawn count ----------
 
 // Homes: how many beds count. Hand-built buildings: still what they were registered as?
-async function census(owner) {
+async function census(owner, arrivals) {
   const town = townOf(owner);
   if (!town) return;
   let changed = false;
@@ -100,7 +108,11 @@ async function census(owner) {
       const beds = bedsCounted(t);
       if (beds !== st.beds) changed = true;
       st.beds = beds;
-      st.bedSpots = t.beds.slice(0, beds);
+      // the founder's own bed (basebuilds.js) is theirs: never a settler's
+      const box = worldBox(town, s), floorY = floorOf(town, s, st);
+      const head = st.ownerHead ?? (st.ownerBed && st.forward && { x: st.ownerBed.x + st.forward.x, y: st.ownerBed.y, z: st.ownerBed.z + st.forward.z });
+      const mine = (b) => head && b.x + box.x0 === head.x && b.y + floorY === head.y && b.z + box.z0 === head.z;
+      st.bedSpots = t.beds.filter((b) => !mine(b)).slice(0, beds);
     }
     if (st.hand) {
       const ok = matches(t).find((m) => m.id === st.building)?.ok ?? false;
@@ -109,10 +121,10 @@ async function census(owner) {
   }
   saveTowns();
   if (changed) emit("settleCharter", { owner });
-  emit("settleCensus", { owner });
+  emit("settleCensus", { owner, arrivals });
 }
 
-export const countNow = (owner) => census(owner);
+export const countNow = (owner, arrivals) => census(owner, arrivals);
 
 let lastDay = -1;
 onTick("settle_census", 100, () => {
@@ -122,5 +134,10 @@ onTick("settle_census", 100, () => {
   if (time > 2000 || day === lastDay) return;
   lastDay = day;
   const online = new Set(world.getPlayers().map((p) => p.id));
-  for (const owner of Object.keys(allTowns())) if (online.has(owner)) census(owner).catch((e) => console.warn(`[Hollow Crown] census: ${e}`));
+  for (const [owner, town] of Object.entries(allTowns())) {
+    if (!online.has(owner)) continue;
+    town.lastDawn = day;
+    census(owner).catch((e) => console.warn(`[Hollow Crown] census: ${e}`));
+  }
 });
+

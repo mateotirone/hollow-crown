@@ -6,7 +6,7 @@ import json, os, sys, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
 from models import Model
-import roster, items
+import roster, items, voices
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")) + "/"
 RP = ROOT + "Siege_Nights_RP/"; BP = ROOT + "Siege_Nights_BP/"
 
@@ -22,14 +22,20 @@ FAMILIES = {
     "order": ["mob", "ashen_order"], "boss": ["monster", "mob", "hollow", "siege_boss"], "boss_add": ["monster", "mob", "hollow", "siege_boss_add"],
     "boss_prop": ["inanimate", "siege_boss_prop"], "omen": ["inanimate", "siege_omen"], "seep": ["inanimate", "siege_seep"], "champion": ["mob", "siege_champion"], "projectile": ["inanimate"],
 }
+# Knockback (Mateo 2026-11-13: "When you hit a mob they should knock back like vanilla"). Bedrock reads
+# minecraft:knockback_resistance as a dice roll, not a fraction: 0.6 means six hits in ten don't move it at all. So every
+# creature is 0 (full vanilla knockback) except the heavy ones below and bosses, which are 1 and get a small scripted
+# stagger instead on every hit (scripts/bestiary/stagger.js, family siege_heavy / siege_boss). tools/check.mjs holds the rule.
+HEAVY = {"siege_ogre", "gatebreaker", "dune_wyrm", "shieldwall_brute", "stone_vigil", "oswin_reflection"}
 # mobs whose abilities are run by scripts/bestiary/mobs.js
 SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
             "dune_wyrm", "bog_hag", "mire_toad", "inquisitor"}
+# vanilla monsters never spawn (spawn_rules/vanilla_*.json), so string, gunpowder, spider eyes and rotten flesh come from these
 DROPS = {
-    "hollow_footman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 0, 3, 1)],
+    "hollow_footman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 0, 3, 1), ("minecraft:rotten_flesh", 0, 1, 1)],
     "bell_ringer": [("siege:hollow_ash", 1, 2, 1), ("minecraft:gold_nugget", 2, 5, 1), ("minecraft:bell", 1, 1, 0.05)],
     "shieldwall_brute": [("siege:hollow_ash", 1, 3, 1), ("minecraft:iron_ingot", 0, 2, 1)],
-    "torchbearer": [("minecraft:coal", 0, 2, 1), ("minecraft:torch", 1, 3, 1)],
+    "torchbearer": [("minecraft:coal", 0, 2, 1), ("minecraft:torch", 1, 3, 1), ("minecraft:gunpowder", 0, 1, 1)],
     "siege_ogre": [("siege:coin", 16, 40, 1), ("minecraft:leather", 2, 4, 1), ("siege:hollow_ash", 2, 4, 1)],
     "crow_mage": [("minecraft:feather", 1, 3, 1), ("minecraft:amethyst_shard", 0, 2, 1), ("siege:hollow_ash", 1, 2, 1)],
     "lost_villager": [("siege:hollow_ash", 0, 1, 1), ("siege:coin", 0, 8, 1)],
@@ -57,11 +63,11 @@ DROPS = {
     "frost_stag": [("siege:pale_antler", 1, 2, 1), ("minecraft:leather", 1, 2, 1)],
     "rimewolf": [("siege:rime_pelt", 1, 1, 0.5), ("minecraft:bone", 0, 2, 1)],
     "brine_lurker": [("siege:brine_scale", 1, 2, 1), ("minecraft:cod", 0, 2, 1), ("minecraft:prismarine_shard", 1, 1, 0.4)],
-    "ash_scarab": [("siege:ash_glass", 1, 1, 0.25)],
+    "ash_scarab": [("siege:ash_glass", 1, 1, 0.25), ("minecraft:gunpowder", 0, 2, 1)],
     "dune_wyrm": [("siege:wyrm_scale", 3, 6, 1), ("siege:ash_glass", 2, 4, 1), ("minecraft:diamond", 1, 1, 0.5)],
-    "bog_hag": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:glowstone_dust", 0, 2, 1), ("minecraft:redstone", 0, 2, 1), ("minecraft:glass_bottle", 0, 2, 1)],
-    "mire_toad": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:slime_ball", 0, 2, 1)],
-    "barrow_wight": [("siege:wight_dust", 1, 2, 1), ("minecraft:bone", 0, 2, 1), ("minecraft:iron_ingot", 1, 1, 0.3), ("minecraft:gold_nugget", 0, 3, 1)],
+    "bog_hag": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:glowstone_dust", 0, 2, 1), ("minecraft:redstone", 0, 2, 1), ("minecraft:glass_bottle", 0, 2, 1), ("minecraft:string", 0, 2, 1), ("minecraft:spider_eye", 1, 1, 0.5)],
+    "mire_toad": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:slime_ball", 0, 2, 1), ("minecraft:spider_eye", 0, 1, 1)],
+    "barrow_wight": [("siege:wight_dust", 1, 2, 1), ("minecraft:bone", 0, 2, 1), ("minecraft:iron_ingot", 1, 1, 0.3), ("minecraft:gold_nugget", 0, 3, 1), ("minecraft:rotten_flesh", 0, 2, 1), ("minecraft:string", 0, 2, 1)],
     "ashen_squire": [("minecraft:iron_nugget", 2, 5, 1)],
     "ashen_knight": [("minecraft:iron_ingot", 1, 3, 1), ("siege:coin", 0, 16, 1)],
     "inquisitor": [("minecraft:arrow", 2, 6, 1), ("siege:coin", 8, 24, 1), ("minecraft:crossbow", 1, 1, 0.05)],
@@ -106,9 +112,15 @@ def sensor_for(m):
 
 def entity_bp(m):
     mid = m["id"]; fam = "boss" if m.get("boss") else m["family"]
+    if not m.get("boss") and m.get("dmg", 0) > roster.MAX_MOB_MELEE:
+        raise SystemExit(f"{mid}: dmg {m['dmg']} would kill a full-health player in one bite on Hard (cap {roster.MAX_MOB_MELEE}, see roster.MAX_MOB_MELEE)")
     families = list(FAMILIES[fam])
     if m.get("raider"): families.append("siege_raider")
     if mid in SCRIPTED: families.append("siege_scripted")
+    if m.get("kb") and not m.get("boss") and mid not in HEAVY:
+        raise SystemExit(f"{mid}: kb {m['kb']} would make it shrug off your blows (Bedrock rolls knockback_resistance as a chance); only bosses and HEAVY creatures resist")
+    heavy = mid in HEAVY and not m.get("static")
+    if heavy: families.append("siege_heavy")
     w, h = m.get("collision", (0.6, 1.9)); sc = m.get("scale", 1)
     desc = {"identifier": "siege:" + mid, "is_spawnable": bool(m.get("egg")), "is_summonable": True, "is_experimental": False}
     if m.get("projectile"):
@@ -126,10 +138,11 @@ def entity_bp(m):
         "minecraft:nameable": {},
         "minecraft:physics": {},
         "minecraft:pushable": {"is_pushable": not m.get("static") and not m.get("boss"), "is_pushable_by_piston": not m.get("static")},
-        "minecraft:knockback_resistance": {"value": 1 if m.get("static") else m.get("kb", 0)},
+        "minecraft:knockback_resistance": {"value": 1 if m.get("static") or m.get("boss") or heavy else 0},
     }
     if sc != 1: c["minecraft:scale"] = {"value": sc}
     c.update(sensor_for(m))
+    if voices.has_ambient(mid): c.update(voices.ambient_component(mid, m.get("boss")))   # idle voice: studio/bestiary/voices.py
     groups = {}; events = {}
     if m.get("static"):
         c["minecraft:movement"] = {"value": 0}; c["minecraft:persistent"] = {}
@@ -158,6 +171,8 @@ def entity_bp(m):
         c["minecraft:movement.basic"] = {}; c["minecraft:jump.static"] = {}
         c["minecraft:behavior.float"] = {"priority": 0}
         c["minecraft:behavior.random_stroll"] = {"priority": 7, "speed_multiplier": 0.8}
+    if m.get("boss"):   # a boss holds its ground until it has someone to fight: wandering off fought the script that walks it in Creative
+        c.pop("minecraft:behavior.random_stroll", None); c.pop("minecraft:behavior.random_hover", None)
     # who it fights
     filt = None
     if fam in ("raider",) or m.get("raider"): filt = roster.RAIDER_TARGETS
@@ -175,7 +190,7 @@ def entity_bp(m):
     elif mid == "crow_mage" or m.get("hollow_bolts"):
         fight.update(roster.ranged("siege:hollow_bolt", interval=(2.5, 4), radius=16)); fight["minecraft:attack"] = {"damage": m["dmg"]}
     else:
-        fight.update(roster.melee(m["dmg"], 1.25, m.get("effect")))
+        fight.update(roster.melee(m["dmg"], 1.25, m.get("effect"), m.get("melee_cooldown")))
     if m.get("flees"):
         c["minecraft:behavior.avoid_mob_type"] = {"priority": 2, "entity_types": [{"filters": roster.any_of(roster.fam("player"), roster.fam("siege_guard")), "max_dist": 7, "walk_speed_multiplier": 1.2, "sprint_speed_multiplier": 1.4}]}
         c["minecraft:attack"] = {"damage": m["dmg"]}
@@ -248,6 +263,8 @@ def client_entity(m, motion=None):
     if m.get("variants"):
         d["textures"]["alt"] = f"textures/entity/siege/bestiary/{mid}_alt"; d["render_controllers"] = ["controller.render.siege_bestiary_variant"]
     if m.get("egg"): d["spawn_egg"] = {"base_color": m["egg"][0], "overlay_color": m["egg"][1]}
+    if leaves_body(m):   # bodies.js lays its body down the moment it dies, so the dying mob itself goes invisible
+        d["animations"]["dead_hide"] = "animation.siege_b.dead_hide"; d["scripts"]["animate"].append({"dead_hide": "!query.is_alive"})
     return {"format_version": "1.10.0", "minecraft:client_entity": {"description": d}}
 
 def loot(drops):
@@ -262,7 +279,7 @@ def loot(drops):
 
 def spawn_rule(m):
     s = m["spawn"]; cond = {"minecraft:spawns_on_surface": {}, "minecraft:weight": {"default": s["weight"]},
-        "minecraft:herd": {"min_size": s["herd"][0], "max_size": s["herd"][1]}, "minecraft:density_limit": {"surface": 4},
+        "minecraft:herd": {"min_size": s["herd"][0], "max_size": s["herd"][1]}, "minecraft:density_limit": {"surface": s.get("density", 4)},
         "minecraft:biome_filter": {"any_of": [{"test": "has_biome_tag", "operator": "==", "value": b} for b in s["biomes"]]}}
     if s["light"] is not None: cond["minecraft:brightness_filter"] = {"min": 0, "max": s["light"], "adjust_for_weather": True}
     if s["pop"] == "monster": cond["minecraft:difficulty_filter"] = {"min": "easy", "max": "hard"}
@@ -371,16 +388,89 @@ def merge_lang(path, lines):
 # One entity (siege:body) wears any mob's shape and skin, picked by its siege:kind property, so a
 # battlefield of bodies costs one cheap entity each: no AI, no collisions with players, no ticking parts.
 NO_BODY_FAMILIES = ("boss_prop", "projectile", "summon", "seep", "omen")
+# How each shape of creature lies down when it dies. Tipping everything over backwards stood the long ones
+# (Gloamwings, hounds, stags, toads, the wyrm, the scarab) up on their tails like a plank (Mateo, 2026-11-12).
+#   back: two-legged things fall flat on their backs     side: four-legged and long things roll onto their side
+#   flat: flyers drop and lie spread out, wings slack    belly_up: beetles end on their backs, legs in the air
+POSES = ("back", "side", "flat", "belly_up")
+POSE_TURN = {"back": [-90, 0, 3], "side": [3, 0, 90], "flat": [2, 0, 0], "belly_up": [0, 0, 180]}
+WING_SLACK = {"wing_r": [0, 0, -3], "wing_l": [0, 0, 3], "tip_r": [0, 0, -5], "tip_l": [0, 0, 5], "tail": [0, 12, 0], "tail2": [0, -18, 0]}
+# The lift that keeps a body on the ground is measured on its trunk, not on a key, cloak or sword sticking out of it.
+def is_trunk(name): return name in ("root", "body", "head", "torso", "chest", "hips") or name.startswith("seg")
+
+def pose_of(m):
+    if m.get("glider"): return "flat"
+    return {"quad": "side", "wyrm": "side", "bird": "flat", "bug": "belly_up"}.get(m.get("plan", "biped"), "back")
+
+def body_lift(model, pose):
+    """How far (model px) the root must rise so the lying body rests on the ground: not half sunk, not floating."""
+    from render import _rot, _about
+    bones = {b["name"]: b for b in model.bones}
+    slack = WING_SLACK if pose == "flat" else {}
+    death = (_rot(*POSE_TURN[pose]), [0, 0, 0])
+    low = None; tips = None
+    for b in model.bones:
+        chain = []; cur = b
+        while cur:
+            r = cur.get("rotation") or [0, 0, 0]
+            extra = slack.get(cur["name"])
+            if extra: r = [r[i] + extra[i] for i in range(3)]
+            if any(r): chain.append((_rot(*r), cur["pivot"]))
+            cur = bones.get(cur.get("parent"))
+        for c in b["cubes"]:
+            (x, y, z), (w, h, d) = c["origin"], c["size"]
+            for p in ((x + i * w, y + j * h, z + k * d) for i in (0, 1) for j in (0, 1) for k in (0, 1)):
+                if c.get("rotation"): p = _about(_rot(*c["rotation"]), c["pivot"], p)
+                for M, piv in chain: p = _about(M, piv, p)
+                p = _about(death[0], death[1], p)
+                if is_trunk(b["name"]): low = p[1] if low is None else min(low, p[1])
+                elif b["name"] in slack: tips = p[1] if tips is None else min(tips, p[1])
+    if tips is not None: body_lift.slack_gap = tips - low   # how far slack wings end above (+) or below (-) the ground
+    return round(-(low or 0), 2)
+
+def body_animations():
+    lift = "query.property('siege:lift')*query.property('siege:size')"
+    up = lambda dy: f"{lift}+{dy}" if dy else lift
+    a = {}
+    for pose in POSES:
+        rx, ry, rz = POSE_TURN[pose]
+        if pose == "flat":   # drops and settles with a small bounce; the wings go slack
+            bones = {"root": {"rotation": {"0.0": [0, 0, 0], "0.3": [6, 0, -3], "0.6": [rx, ry, rz]},
+                              "position": {"0.0": [0, 0, 0], "0.3": [0, up(1.5), 0], "0.6": [0, up(0), 0]}}}
+            for bone, r in WING_SLACK.items(): bones[bone] = {"rotation": {"0.0": [0, 0, 0], "0.6": r}}
+        else:                # tips past the ground a little, bounces, settles
+            k = 1.04 if pose != "belly_up" else 1.0
+            bones = {"root": {"rotation": {"0.0": [0, 0, 0], "0.15": [rx * 0.13, 0, rz * 0.13 if pose != "back" else 2],
+                                           "0.45": [rx * k, ry, rz * k + (1 if pose == "back" else 0)], "0.55": [rx * 0.96, ry, rz * 0.96], "0.7": [rx, ry, rz]},
+                              "position": {"0.0": [0, 0, 0], "0.45": [0, up(0), 0], "0.55": [0, up(1.5), 0], "0.7": [0, up(0), 0]}}}
+        a[f"animation.siege_b.body.fall_{pose}"] = {"loop": "hold_on_last_frame", "animation_length": 0.7, "bones": bones}
+        down = {"root": {"rotation": [rx, ry, rz]}}
+        if pose == "flat": down.update({bone: {"rotation": r} for bone, r in WING_SLACK.items()})
+        a[f"animation.siege_b.body.down_{pose}"] = {"loop": True, "bones": down}
+    # sinks into the ground over five seconds (on top of the lying pose)
+    a["animation.siege_b.body.sink"] = {"loop": "hold_on_last_frame", "animation_length": 5.0, "bones": {"root": {
+        "position": {"0.0": [0, up(0), 0], "5.0": [0, f"{lift}-10*query.property('siege:size')", 0]}, "scale": {"0.0": [1, 1, 1], "5.0": [0.9, 0.9, 0.55]}}}}
+    a["animation.siege_b.body.size"] = {"loop": True, "bones": {"root": {"scale": "query.property('siege:size')"}}}
+    # on the living mob: the moment it dies its model goes, because its body has just taken its place
+    a["animation.siege_b.dead_hide"] = {"loop": True, "bones": {"root": {"scale": 0}}}
+    return a
+
+def leaves_body(m):
+    return m.get("family", "boss") not in NO_BODY_FAMILIES and m.get("material", "entity_alphatest") == "entity_alphatest"   # ghosts and shades leave nothing behind
+
+def body_kinds(built):
+    return [mid for mid, (m, model) in built.items() if leaves_body(m) and any(b["name"] == "root" for b in model.bones)]
+
 def write_bodies(built):
-    kinds = [mid for mid, (m, model) in built.items() if m.get("family", "boss") not in NO_BODY_FAMILIES
-             and m.get("material", "entity_alphatest") == "entity_alphatest"      # ghosts and shades leave nothing behind
-             and any(b["name"] == "root" for b in model.bones)]
+    kinds = body_kinds(built)
     assert len(kinds) <= 64, "raise the siege:kind range"
     geo = {f"g{i}": f"geometry.siege_b.{k}" for i, k in enumerate(kinds)}; tex = {f"t{i}": f"textures/entity/siege/bestiary/{k}" for i, k in enumerate(kinds)}
     write(BP + "entities/bestiary/body.json", {"format_version": "1.21.60", "minecraft:entity": {
         "description": {"identifier": "siege:body", "is_spawnable": False, "is_summonable": True, "is_experimental": False, "properties": {
             "siege:kind": {"type": "int", "range": [0, 63], "default": 0, "client_sync": True},
             "siege:size": {"type": "float", "range": [0.2, 4.0], "default": 1.0, "client_sync": True},
+            "siege:pose": {"type": "int", "range": [0, len(POSES) - 1], "default": 0, "client_sync": True},
+            "siege:lift": {"type": "float", "range": [-16.0, 32.0], "default": 1.0, "client_sync": True},
             "siege:fading": {"type": "bool", "default": False, "client_sync": True}}},
         "component_groups": {"siege:gone": {"minecraft:instant_despawn": {}}},
         "components": {
@@ -392,31 +482,28 @@ def write_bodies(built):
             "minecraft:knockback_resistance": {"value": 1},
             "minecraft:timer": {"time": 900, "looping": False, "time_down_event": {"event": "siege:gone"}}},   # failsafe: never outlives 15 minutes
         "events": {"siege:gone": {"add": {"component_groups": ["siege:gone"]}}}}})
+    amap = {"size": "animation.siege_b.body.size", "sink": "animation.siege_b.body.sink", "life": "controller.animation.siege_b.body"}
+    for pose in POSES: amap[f"fall_{pose}"] = f"animation.siege_b.body.fall_{pose}"; amap[f"down_{pose}"] = f"animation.siege_b.body.down_{pose}"
     write(RP + "entity/bestiary/body.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": "siege:body", "materials": {"default": "entity_alphatest"}, "textures": tex, "geometry": geo,
-        "animations": {"fall": "animation.siege_b.body.fall", "down": "animation.siege_b.body.down", "sink": "animation.siege_b.body.sink", "size": "animation.siege_b.body.size",
-                       "life": "controller.animation.siege_b.body"},
-        "scripts": {"animate": ["life", "size"]}, "render_controllers": ["controller.render.siege_body"]}}})
-    write(RP + "animations/bestiary_body.animation.json", {"format_version": "1.8.0", "animations": {
-        # tips over backwards, hits the ground, settles
-        "animation.siege_b.body.fall": {"loop": "hold_on_last_frame", "animation_length": 0.7, "bones": {"root": {
-            "rotation": {"0.0": [0, 0, 0], "0.15": [-12, 0, 2], "0.45": [-94, 0, 4], "0.55": [-86, 0, 3], "0.7": [-90, 0, 3]},
-            "position": {"0.0": [0, 0, 0], "0.45": [0, 1, 0], "0.55": [0, 2.5, 0], "0.7": [0, 1, 0]}}}},
-        "animation.siege_b.body.down": {"loop": True, "bones": {"root": {"rotation": [-90, 0, 3]}}},
-        # sinks into the ground over five seconds
-        "animation.siege_b.body.sink": {"loop": "hold_on_last_frame", "animation_length": 5.0, "bones": {"root": {
-            "position": {"0.0": [0, 1, 0], "5.0": [0, -9, 0]}, "scale": {"0.0": [1, 1, 1], "5.0": [0.9, 0.9, 0.55]}}}},
-        "animation.siege_b.body.size": {"loop": True, "bones": {"root": {"scale": "query.property('siege:size')"}}}}})
+        "animations": amap, "scripts": {"animate": ["life", "size"]}, "render_controllers": ["controller.render.siege_body"]}}})
+    write(RP + "animations/bestiary_body.animation.json", {"format_version": "1.8.0", "animations": body_animations()})
+    states = {"start": {"transitions": [{f"lying_{p}": f"query.property('siege:pose') == {i}"} for i, p in enumerate(POSES)]}}
+    for p in POSES:
+        states[f"lying_{p}"] = {"animations": [f"fall_{p}"], "transitions": [{f"fading_{p}": "query.property('siege:fading')"}]}
+        states[f"fading_{p}"] = {"animations": [f"down_{p}", "sink"]}
     write(RP + "animation_controllers/bestiary_body.animation_controllers.json", {"format_version": "1.10.0", "animation_controllers": {
-        "controller.animation.siege_b.body": {"initial_state": "lying", "states": {
-            "lying": {"animations": ["fall"], "transitions": [{"fading": "query.property('siege:fading')"}]},
-            "fading": {"animations": ["down", "sink"]}}}}})
+        "controller.animation.siege_b.body": {"initial_state": "start", "states": states}}})
     write(RP + "render_controllers/siege_body.render_controllers.json", {"format_version": "1.8.0", "render_controllers": {
         "controller.render.siege_body": {"arrays": {"geometries": {"Array.shapes": [f"Geometry.g{i}" for i in range(len(kinds))]},
                                                     "textures": {"Array.skins": [f"Texture.t{i}" for i in range(len(kinds))]}},
             "geometry": "Array.shapes[query.property('siege:kind')]", "materials": [{"*": "Material.default"}],
             "textures": ["Array.skins[query.property('siege:kind')]"]}}})
-    return {"siege:" + k: {"kind": i, "size": built[k][0].get("scale", 1)} for i, k in enumerate(kinds)}
+    out = {}
+    for i, k in enumerate(kinds):
+        m, model = built[k]; pose = pose_of(m)
+        out["siege:" + k] = {"kind": i, "size": m.get("scale", 1), "pose": POSES.index(pose), "lift": body_lift(model, pose)}
+    return out
 
 def main():
     lang = []; data_mobs = {}; built = {}
@@ -463,7 +550,29 @@ def main():
           + "export const MOBS = " + json.dumps(data_mobs, indent=1) + ";\n\nexport const ITEMS = " + json.dumps(data_items, indent=1)
           + ";\n\nexport const SIGILS = " + json.dumps(sig, indent=1)
           + ";\n\n// Which fallen body each mob leaves (see bodies.js): kind picks its shape and skin, size is its scale.\nexport const BODIES = " + json.dumps(bodies, indent=1) + ";\n")
+    voices.write_sounds()
     print(len(roster.MOBS), "entities,", len(all_items), "items")
     return built
 
-if __name__ == "__main__": main()
+def bodies_only():
+    """Rewrite just the body files, the BODIES table in data.js and the dead_hide hook in each client entity,
+    leaving every other generated file alone: python3 studio/bestiary/build.py --bodies"""
+    built = {}
+    for m in roster.MOBS:
+        model = Model(m["id"], m["pal"], seed=sum(map(ord, m["id"]))); m["model"](model); built[m["id"]] = (m, model)
+    bodies = write_bodies(built)
+    path = BP + "scripts/bestiary/data.js"; src = open(path).read()
+    head = src[:src.index("export const BODIES = ")]
+    write(path, head + "export const BODIES = " + json.dumps(bodies, indent=1) + ";\n")
+    for mid, (m, _) in built.items():
+        ce = RP + f"entity/bestiary/{mid}.entity.json"
+        if not leaves_body(m) or not os.path.exists(ce): continue
+        d = json.load(open(ce)); desc = d["minecraft:client_entity"]["description"]
+        desc["animations"]["dead_hide"] = "animation.siege_b.dead_hide"
+        an = desc["scripts"]["animate"]
+        if not any(isinstance(a, dict) and "dead_hide" in a for a in an): an.append({"dead_hide": "!query.is_alive"})
+        write(ce, d)
+    print(len(bodies), "bodies")
+
+if __name__ == "__main__":
+    bodies_only() if "--bodies" in sys.argv else main()

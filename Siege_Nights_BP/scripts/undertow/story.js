@@ -8,15 +8,20 @@
 //     a spared cart means half price at every Tally (hollowfolk asks sparedCart())
 // It hears lore's flags through the loreFlag event: cartsong, seams_wreck, seams_spare.
 //
+//   - after the Choir, until the Seat is empty: shows each player in the Hollow which way the Seat lies and how
+//     far (Mateo 2026-11-12: "where do i go from the choir to morvane")
+//
 //   /scriptevent hc:carter_go     go to wherever the Carter stands now (testing)
 
 import { world, system, GameMode } from "@minecraft/server";
 import { on, emit, onTick, addTests, assert } from "../siege/api.js";
-import { UNDERTOW_ID, COURT, pathX } from "./layout.js";
+import { UNDERTOW_ID, COURT, HEART, pathX } from "./layout.js";
 import { SITES } from "./roads.js";
 import { heightAt } from "./terrain.js";
 import { load, save, say } from "./data.js";
 import { shove } from "../bestiary/util.js";
+import { fightOf } from "../bestiary/bossCore.js";
+import { dressNpc } from "../core/npc_skins.js";
 
 const K_STORY = "hc:hollow_story"; // { cartsong: {playerId: true}, spared: {playerId: true}, reached: {beat: true} }
 const K_PROGRESS = "hc:undertow_progress"; // shared with index.js and choir.js
@@ -97,6 +102,7 @@ function placeCarter() {
     npc.addTag(CARTER_TAG);
     npc.nameTag = CARTER_NAME;
     try { npc.getComponent("minecraft:npc").name = CARTER_NAME; } catch { /* cosmetic */ }
+    dressNpc(npc, "lore_carter");
   } catch { /* chunk not loaded */ }
 }
 
@@ -151,6 +157,40 @@ onTick("undertow:story", 20, () => {
 });
 onTick("undertow:carter", 40, placeCarter);
 
+// ---- the way to the Seat, after the Choir ------------------------------------------------------
+// Once the Court is quiet, every player in the Hollow sees on their action bar which way the Seat lies and how
+// far, until Morvane falls. It goes quiet on the Seat itself and while his fight is on.
+// Which way to turn, from where a player stands and the way they face (Minecraft yaw: 0 is south, 90 west). Pure.
+export function seatPointer(loc, yaw) {
+  const dx = HEART.center.x - loc.x, dz = HEART.center.z - loc.z, dist = Math.round(Math.hypot(dx, dz));
+  const want = (Math.atan2(-dx, dz) * 180) / Math.PI;
+  const turn = ((((want - yaw) % 360) + 540) % 360) - 180; // -180..180, plus = to your right
+  const a = Math.abs(turn);
+  const way = a <= 30 ? "ahead" : a >= 150 ? "behind you" : a <= 75 ? (turn > 0 ? "ahead, to your right" : "ahead, to your left")
+    : a < 120 ? (turn > 0 ? "to your right" : "to your left") : (turn > 0 ? "behind you, to your right" : "behind you, to your left");
+  return { dist, way };
+}
+export const SEAT_QUIET_RADIUS = HEART.outerRadius + 6; // on the Seat itself nobody needs telling
+export function seatLine(loc, yaw) {
+  const { dist, way } = seatPointer(loc, yaw);
+  if (dist <= SEAT_QUIET_RADIUS) return undefined;
+  return `§5The Seat§7: ${dist} blocks, ${way}`;
+}
+onTick("undertow:seat_pointer", 40, () => {
+  const prog = load(K_PROGRESS, {});
+  if (!prog.choir || prog.morvane) return;
+  try { if (fightOf("morvane")) return; } catch { /* no boss framework: carry on */ }
+  for (const p of hollowPlayers()) {
+    if (playing(p)) continue;
+    const line = seatLine(p.location, p.getRotation().y);
+    if (line) { try { p.onScreenDisplay.setActionBar(line); } catch { /* left */ } }
+  }
+});
+// A scene is playing for this player (lore/hollow.js): keep the bar clear for its title.
+const sceneUntil = new Map();
+const playing = (p) => (sceneUntil.get(p.id) ?? 0) > system.currentTick;
+on("hollowBeat", ({ player }) => { if (player?.id) sceneUntil.set(player.id, system.currentTick + 200); });
+
 // ---- lore's flags --------------------------------------------------------------------------
 on("loreFlag", ({ player, flag }) => {
   if (!player?.id) return;
@@ -192,6 +232,16 @@ addTests("hollow story places", {
     assert(carterStation({ ...blank(), reached: { glimwade: true } }, false) === "glimwade");
     assert(carterStation({ ...blank(), cartsong: { a: true } }, false) === "court");
     assert(carterStation(blank(), true) === "court");
+  },
+  "after the Choir, the Seat pointer shows the way (Mateo 2026-11-12)": () => {
+    const court = { x: 0, z: COURT.gateZ + 4 };
+    assert(seatPointer(court, 0).way === "ahead", "facing south from the Court gate, the Seat is ahead");
+    assert(seatPointer(court, 180).way === "behind you", "facing north, it is behind you");
+    assert(seatPointer(court, 90).way === "to your left", "facing west, the Seat (south) is to your left");
+    assert(seatPointer(court, -90).way === "to your right", "facing east, it is to your right");
+    assert(seatPointer(court, 0).dist === HEART.center.z - court.z, "distance");
+    assert(seatLine({ x: HEART.center.x, z: HEART.center.z + 5 }, 0) === undefined, "quiet on the Seat");
+    assert(/The Seat.*blocks, ahead/.test(seatLine(court, 0)), "the line names the Seat, how far and which way");
   },
   "one Cartsong opens the Court for everyone with them": () => {
     assert(!courtOpenFor(["a", "b"], {}, false));

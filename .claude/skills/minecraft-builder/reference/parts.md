@@ -114,7 +114,7 @@ Doors sit on a bay centre, never on a post, at least 2 from a corner. Never two 
   round dirt with flowers (style key `flowers` picks them: region colours from `palettes/`), about a
   quarter of street windows (05 planters).
 - **Surround**: stone walls get dark oak trapdoors standing either side of the glass (the stone, spruce,
-  dark oak pairing).
+  dark oak pairing). The style key `panel` changes the trapdoor (`everwake_stone` uses `birch_trapdoor`: no dark timber there). `"panel": null` leaves it off (tower slits and lancets, towers guide).
 - **Shutters**: open trapdoors either side of the glass, 1 out, as tall as the glass, with a trim slab
   shelf under it; about one shuttered window in three has a lantern on the shelf; now and then a single
   shutter (shutter dressing).
@@ -207,6 +207,17 @@ onion / tall, `material` (default waxed copper from weathered to oxidized, green
 "glass"}`, `finial` `short` / `gold` (one gold block, Emberwaste civic) / `spire_block` / `none`. Cyan
 terracotta has no stairs, so its curve uses dark prismarine; the copper default reads better in game.
 
+## `envelope`: a body of revolution lying on its side (air boat, 2026-11-13)
+
+`{"part": "envelope", "at": [x, y, z], "heading": "e", "profile": [[0, 0.8], [32, 9.5], [60, 1.2]], "rib": "waxed_weathered_cut_copper", "cap": "waxed_cut_copper"}`:
+`at` is the tail-end centre block of the axis, `heading` the way the nose points, `profile` [[u, r], ...] from the
+tail. Each slice across the axis is fitted as a circle (full blocks, upright stairs above the axis, upside-down
+below, slabs at crown and keel), radii held to half blocks so rings run in clean bands. Keys `belly` / `top`
+(blocks with stair and slab forms, default light grey and white wool), `belly_rows` (5), `rib_every` (8),
+`cap_len` ([2, 4]). Use it instead of a `lathe` shape for anything on a horizontal axis: the shape fitter's
+height field leaves those jaggy and holed. From Python, `envelope_cells()` gives local cells and `turn_cell()`
+places any local cell list at a point facing e/w/n/s (stairs, doors and log axes turn with it).
+
 ## Castle parts: `keep` and `curtain` (towers/README castle row; the Barracks, 2026-11-12)
 
 ```json
@@ -253,7 +264,7 @@ pot on top.
 | `spire` | `rect` (the tower), `y` (`"top"` default), `rows` (3), `kind` (`stepped` / `broach`), `overhang`, `roof`, `trim`, `finial` (`spire_block` default / `rod` / `tall` / `short` / `none`) | sits on the walls of whatever is built in `rect` and replaces its roof: an eave ring over the overhang with upside-down trim under it, the tower's width one row, then rings stepping in one block every `rows` rows (stairs stacked on stairs, full corners), then the add-on's spire top block `siege:spire_roof` on the full top block (or a wall-post finial with a lightning rod). **Never a slab under a spire top** (Mateo 2026-11-12: it floats): the engine swaps any slab under `siege:spire_roof` for the full block, in every build, `place` cells included. `broach` leaves the corners off the upper rings so it turns octagonal (06 steep roofs) |
 | `belfry` | `rect`, `y` (`"top"` on a tower, `"roof"` on a ridge, or a number), `h` (4), `pier`, `deck`, `trim`, `louvres`, `bell` (true), `cap` (`hip` / `spire` / `none`), `roof`, `finial`, `base` | an open bell storey: deck (built up from the roof on a ridge), corner piers (walls when 3 wide), a round-angle head on every face 5 or more wide, a beam ring, a beam across with a hanging bell, louvres of open trapdoors flush to each face, then a spire cap (rows 1 = a hip cap) |
 | `clock_face` | `rect` + `side` + `y` (+ `along`) or `at` + `side`; `size` (3 / 5), `time` ("3:00"), `face` (calcite), `hand` (polished_blackstone), `hub` (button), `frame` | a face flush in the wall, hands from the hub (minute on the 12 for whole hours, both snapped to the nearest eighth), a button hub; a window's sill, shutters or lantern in front go. Keep it clear of the eave row |
-| `interior` | `use`, `levels` [{`rect` (inside the walls), `floor_y`, `height`}], `region`, `rooms`, `stairs`, `furnish`, `lights` | stage 8 for shells the `house` part did not make: stairs or ladders between the levels, rooms by use, a one-block walkway, lanterns (08-interiors). The `house` part runs the same stage itself from its `interior` key (default `home`; `false` for none; `attic` adds a room under the roof) |
+| `interior` | `use`, `levels` [{`rect` (inside the walls), `floor_y`, `height`}], `region`, `rooms`, `stairs`, `furnish`, `lights` | stage 8 for shells the `house` part did not make: stairs or ladders between the levels, rooms by use, a one-block walkway, lanterns (08-interiors). The `house` part runs the same stage itself from its `interior` key (default `home`; `false` for none; `attic` adds a room under the roof; `hatch` adds a ladder from the top storey to a trapdoor hatch in a flat roof, kept by a belfry built on top) |
 | `wheel` | `at` (axle centre), `axis` (axle direction x / z), `r` (3-5), `width` (1-2), `wood`, `paddles`, `axle` | a waterwheel: plank rim, fence spokes, a paddle at every eighth, a stripped log axle into the wall |
 
 ## Round towers, leaning towers, galleries, boardwalks and curved roofs (2026-11-12)
@@ -281,9 +292,35 @@ pot on top.
   every 4 and at the ends, fence rails on planks along both edges (`"rails"`: `both` / `one` / `none`,
   `"gaps"` for landings), and a lantern on a rail post at both ends and every 8 so it shows through fen mist.
 
+## `stands`: tiered seating round a floor (the Kingsrest arena, 2026-11-13)
+
+`{"part": "stands", "at": [0, 0], "chamfer": 18, "from": 32, "to": 56, "y": 7, "walk": [42, 43, 55, 56], "seat": "stone_bricks",
+"aisle": "polished_andesite", "aisle_every": 6, "band": {"every": 4, "material": "polished_andesite"}, "fill": "stone_bricks", "base": 0,
+"skip": [[-8, -50, 8, -41]]}`: one row per ring round `at` (`ring_norm`: an octagon with its corners cut `chamfer` in, or a
+square with no chamfer), each row one up and one out so every row sees over the one in front. Seats are stairs with the
+tall side away from the floor (people sit facing in); on the diagonal faces a bottom slab bench. `walk` rings stay level
+(a walkway between tiers, a promenade on top); `aisle_every` marks the ways up in the aisle stone; `band` lightens every
+few rows so the tiers read across the floor; everything under the seats is filled with `fill` down to `base` (carve rooms
+and corridors out of it with `place` air); `skip` leaves boxes out (a royal box, a stair hall). The layout gets
+`info["stands"]` (standing spots, every other seat) for crowds and `info["stand_rows"]` (each ring's seat row).
+
+**Round** (an amphitheatre; The Twelve Gates): `"round": true, "aisles": 24` makes every row a circle (ring =
+`round(hypot)`), every seat a stair facing its nearest axis, and the aisles `aisles` evenly spaced rays from the centre
+instead of `aisle_every`. `chamfer` is ignored.
+
 ## Not automated yet (build with shapes and `place`)
 
 Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses (spans of 15+), hip-roof
 wings joined to gable roofs at odd angles, and hand-made interiors beyond the interior stage's rooms. Each is described with its exact block pattern in `build-instructions/`
 (02-frame, 05, 06, 07 and reference/shapes.md): write the cells with `place`, or add the part to `parts.py`
 and this table. A square tower is a narrow house with `"roof": {"type": "hip", "pitch": 2}`.
+
+## Ruins (2026-11-13)
+
+`"ruin": {"seed": 13, "holes": 0.07, "cap": [[x0, z0, x1, z1, top, jag], ...]}` on a spec turns the finished
+build into its ruin (`engine.ruin`, run after the blocks are resolved): everything in each cap box above `top`
+(plus up to `jag` of blocky noise) falls; clumps of wall are knocked out (`holes`); glass, doors, lanterns,
+bells and furniture go; timber and cloth mostly rot away; stone ages to mossy and cracked; copper oxidizes;
+anything left with no path to the ground is dropped (nothing floats); rubble lies at the foot of the walls.
+Design the restored building once and make the ruin from the same spec (the air boat station,
+`map/structures/everwake/station.py`).

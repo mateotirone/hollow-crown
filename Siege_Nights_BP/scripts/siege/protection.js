@@ -5,7 +5,7 @@ import { world, system, MolangVariableMap } from "@minecraft/server";
 import { CHARGE, COLORS, DYE_RGB, KEEP_BANNER } from "./constants.js";
 import { keepFallen } from "./keep.js";
 import { saveState, state } from "./state.js";
-import { foreignSettlement, settlementAt, tierOf, landRadius } from "./territory.js";
+import { foreignSettlement, isAlly, settlementAt, landRadius } from "./territory.js";
 import { isOnline, title, attackable } from "./util.js";
 import { applyFilter } from "../core/events.js";
 
@@ -22,11 +22,8 @@ export function borderTick() {
     const before = lastLand.get(player.id) ?? null;
     if (here !== before) {
       lastLand.set(player.id, here);
-      if (here) {
-        const keep = state.keeps[here];
-        const whose = here === player.id ? "your" : `${keep.name}'s`;
-        player.onScreenDisplay.setActionBar(`§6Entering ${whose} ${tierOf(keep).name}`);
-      } else if (before && state.keeps[before]) {
+      // Walking in gets the "You are entering ..." card (entering/index.js); walking out gets this line.
+      if (!here && before && state.keeps[before]) {
         player.onScreenDisplay.setActionBar("§7Entering the wilds");
       }
     }
@@ -66,6 +63,14 @@ export function borderTick() {
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
   if (!state) return;
   const { player, block } = event;
+  if (block.typeId === KEEP_BANNER && block.dimension.id === "minecraft:overworld") {
+    // a writ ally runs the settlement but can't take its banner down (that would end it for the owner)
+    const land = settlementAt(block.location);
+    if (land && isAlly(land, player.id)) {
+      event.cancel = true;
+      return void system.run(() => player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can take down its Keep Banner."));
+    }
+  }
   const owner = foreignSettlement(player, block.location, block.dimension.id);
   if (!owner) return;
   // An enemy can carry off your Keep Banner, but only while you're online to defend it

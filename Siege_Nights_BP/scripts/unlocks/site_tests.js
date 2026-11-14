@@ -1,9 +1,12 @@
 // Self-tests for the four set pieces after the Reeve: the puzzles, the plans and the rematch rule. All pure and fast.
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
-import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, mirelightPlan } from "./plans.js";
+import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, approachWave, approachCount, APPROACH_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
+import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, inIceEdge, ICE_EDGE, inDrownedWater, inAshSand, ASH_SAND, mirelightPlan } from "./plans.js";
 import { socketAnswer } from "./site.js";
-import { stampOps } from "./landmarks.js";
+import { stampOps, LANDMARKS } from "./landmarks.js";
+import { treeClearBoxes, CLEAR_MARGIN, CLEAR_ABOVE, looseBranches } from "../core/clearing.js";
+import { inShaft, stairSpotsBelow, stairSteps, WELL as WELL2 } from "./well_plan.js";
+import { inChamber } from "./reeve.js";
 
 const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const run = (gen) => { let r; do { r = gen.next(); } while (!r.done); return r.value; };
@@ -13,6 +16,31 @@ const key = (o) => `${o.dx},${o.dy},${o.dz}`;
 const span = (ops, k) => { const v = ops.map((o) => o[k]); return Math.max(...v) - Math.min(...v) + 1; };
 
 addTests("unlocks: sites", {
+  "tree clearing covers a build, its margin and the air above, in fills the game accepts": () => {
+    const b = { x0: -40, y0: 60, z0: -25, x1: 52, y1: 95, z1: 31 };
+    const fills = treeClearBoxes(b);
+    let cells = 0;
+    for (const { from, to } of fills) {
+      const v = (to.x - from.x + 1) * (to.y - from.y + 1) * (to.z - from.z + 1);
+      assert(v <= 32768, `a fill of ${v}`); cells += (to.x - from.x + 1) * (to.z - from.z + 1);
+      assert(from.y <= b.y0 && to.y === b.y1 + CLEAR_ABOVE, "full height");
+    }
+    assertEqual(cells, (b.x1 - b.x0 + 1 + 2 * CLEAR_MARGIN) * (b.z1 - b.z0 + 1 + 2 * CLEAR_MARGIN));
+    assert(LANDMARKS.mirelight?.clear === false && LANDMARKS.reeve?.clear === false, "town squares keep their trees");
+    assert(LANDMARKS.mother?.clear !== false, "the Cradle area clears");
+  },
+  "a tree's fence and wall branches go once its trunk is cleared; a fence on the ground stays": () => {
+    const ground = (x, y, z) => y <= 64;
+    // a branch out in the air (its trunk cleared), and a fence post standing on the ground with a rail joined to it
+    const cells = new Set(["3,80,0", "4,80,0", "4,81,1", "0,65,0", "0,66,0", "1,66,0"]);
+    assertEqual(looseBranches(cells, ground).sort(), ["3,80,0", "4,80,0", "4,81,1"]);
+    assertEqual(looseBranches(new Set(["0,65,5"]), ground), []);
+    // a whole tree (crown cells first) on its roots stays; the same tree with its foot cut away goes, every block
+    const tree = new Set(); for (let x = -3; x <= 3; x++) tree.add(`${x},71,0`); for (let y = 65; y <= 70; y++) tree.add(`0,${y},0`);
+    assertEqual(looseBranches(tree, ground), []);
+    tree.delete("0,65,0");
+    assertEqual(looseBranches(tree, ground).length, 12);
+  },
   "the hunt: same world same rhyme, every beast once, only the rhyme's order wins": () => {
     assertEqual(makeHunt(99), makeHunt(99));
     const firsts = new Set();
@@ -163,6 +191,15 @@ addTests("unlocks: sites", {
     assertEqual(ops[1].states, { pillar_axis: "y" });
     assertEqual(stampOps(undefined), []);
   },
+  "a big stamp's columns decode to the same cells, gaps skipped": () => {
+    const palette = [{ name: "minecraft:air", states: {} }, { name: "minecraft:stone", states: {} }, { name: "minecraft:dirt", states: {} }];
+    const ops = stampOps({ origin: [0, 0, 0], palette, cols: { w: 1, data: "0,0,-1:$#!%;2,-3,4:$" } });
+    assertEqual(ops.length, 4);
+    assertEqual(ops[0], { dx: 0, dy: -1, dz: 0, block: "minecraft:stone", states: undefined });
+    assertEqual(ops[1], { dx: 0, dy: 2, dz: 0, block: "minecraft:dirt", states: undefined });
+    assertEqual(ops[3], { dx: 0, dy: 0, dz: 0, block: "minecraft:air", states: undefined });
+    assertEqual(stampOps({ palette, cols: { w: 2, data: "1,1,0:#$" } })[0].block, "minecraft:stone");
+  },
   "the Changeling Glade: a wave when someone walks in, never in a fight, then it rests": () => {
     assert(gladeWave({ players: 1, fighting: false, now: 10, last: undefined }));
     assert(!gladeWave({ players: 0, fighting: false, now: 10, last: undefined }));
@@ -174,6 +211,39 @@ addTests("unlocks: sites", {
     assert(!inGlade(c, { x: 0.5, y: 70, z: 0.5 }), "the cave is not the glade");
     assert(!inCradle(c, { x: 0.5, y: 70 + CRADLE.floor + 2, z: GLADE.dz + 0.5 }));
     assert(GLADE.dz - GLADE.r > CRADLE.r, "the glade stays clear of the cave");
+  },
+  "approach fights: the rule, the head count, and zones that keep clear of each arena": () => {
+    assert(approachWave({ players: 1, fighting: false, now: 5, last: undefined }));
+    assert(!approachWave({ players: 1, fighting: true, now: 5, last: undefined }));
+    assert(!approachWave({ players: 1, fighting: false, now: APPROACH_REST_TICKS - 1, last: 0 }));
+    assertEqual(approachCount(1), 4);
+    assertEqual(approachCount(5), 6);
+    assertEqual(approachCount(3, { base: 1, per: 1, max: 4 }), 4);
+    const c = { x: 0, y: 64, z: 0 };
+    // Hallowmere: outside the crack ring and the arena
+    assert(inIceEdge(c, { x: 20.5, y: 65, z: 0.5 }));
+    assert(!inIceEdge(c, { x: 10.5, y: 65, z: 0.5 }));
+    assert(ICE_EDGE.r0 >= HUNT.crack + 1 && ICE_EDGE.r0 > HUNT.arena, "outside the ring that cracks");
+    assert(!inIceEdge(c, { x: HUNT.crack + 0.5, y: 65, z: 0.5 }), "not on the crack ring");
+    // Gull Bay: in the water, never in the nave or the tower
+    assert(inDrownedWater(c, { x: 0.5, y: 70, z: 15.5 }, 12));
+    assert(!inDrownedWater(c, { x: 0.5, y: 66, z: 0.5 }, 12), "the nave");
+    assert(!inDrownedWater(c, { x: -12, y: 70, z: 0.5 }, 12), "the tower");
+    assert(!inDrownedWater(c, { x: 0.5, y: 80, z: 15.5 }, 12), "above the sea");
+    for (const [x, y, z] of chapelInterior(12)) assert(!inDrownedWater(c, { x: x + 0.5, y: 64 + y, z: z + 0.5 }, 12), `chapel cell ${x},${y},${z}`);
+    // Sunscar: on the sand south of the stair, never down in the vault
+    assert(inAshSand(c, { x: 0.5, y: 65, z: ASH_SAND.dz + 0.5 }));
+    assert(!inAshSand(c, { x: 0.5, y: 64 + VAULT.floor + 1, z: -20 }));
+    assert(ASH_SAND.dz - ASH_SAND.r >= 2, "clear of the stair top");
+    // Millbrook: in the shaft, above the chamber; the footmen stand on real steps below
+    assert(inShaft(c, { x: 1.5, y: 64 - 6, z: 0.5 }));
+    assert(!inShaft(c, { x: 1.5, y: 64, z: 0.5 }), "the square");
+    assert(!inChamber({ x: 1.5, y: 64 - 6, z: 0.5 }, c), "the shaft is not the chamber");
+    const steps = new Set(stairSteps().map((s) => `${s.dx},${s.dz}`));
+    for (const relY of [-3, -6, -10]) for (const s of stairSpotsBelow(relY, 4)) {
+      assert(steps.has(`${s.dx},${s.dz}`), "on the stair");
+      assert(s.dy < relY - 3 && s.dy >= WELL2.floorY + 1, `below the player, above the floor (${s.dy})`);
+    }
   },
   "Mirelight: five lantern spots, one per villager": () => {
     const plan = run(mirelightPlan(flat, { x: 0, z: 0, y: 64 }, VILLAGERS));

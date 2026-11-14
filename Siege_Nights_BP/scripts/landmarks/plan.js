@@ -9,8 +9,10 @@
 //   drape  every column follows the land: a block at y sits y above that column's own ground. For things
 //          strewn about (fields, rows of posts, a road). With `rise`, a column standing in water is carried
 //          up to the surface (posts walking out into the sea).
+// A rigid design with `sea` stands on the sea bed: it never clears the water round it, only the air above.
 // Ops come out in a safe order: clearing first, then fill, then solid blocks bottom-up, then the "late"
-// blocks that hang on others (lanterns, signs, trapdoors, torches, chains).
+// blocks that hang on others (lanterns, signs, trapdoors, torches, chains). A `dry` design (a room under water)
+// sets its solid blocks first and clears after, so its walls stand before the water inside them is taken out.
 
 export const AIR = -1;
 export const KEEP_TOP = -2; // "the ground's own top block here" (grass, snow, sand...), read from the world
@@ -30,7 +32,11 @@ function median(a) {
 
 // height(x, z): world y of the top solid ground block there, or undefined if unknown.
 // water(x, z): world y of the top water block over that ground, or undefined if dry.
-export function planPiece(d, ox, oz, height, water = () => undefined) {
+// built(x, z): true where the ground's top block there is something built (another place's wall, a road's
+// kerb): the eased ring round a rigid design never grades those (2026-11-14: the Cinder Roost's ring cut the top
+// off Sunscar's wall and left its coping hanging over the wall walk).
+export const BUILT_TOP = /(^|:)castle_|bricks|planks|_slab|_stairs|_wall$|fence|glass|wool|concrete|polished|smooth_|cut_|chiseled|tiles|lantern|door|_log$|_wood$/;
+export function planPiece(d, ox, oz, height, water = () => undefined, built = () => false) {
   const cells = cellsOf(d);
   const late = new Set(d.late ?? []);
   const cols = new Map(); // "x,z" -> [cells]
@@ -64,8 +70,11 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
       for (let z = b.z0 - ease; z <= b.z1 + ease; z++) {
         const r = height(ox + x, oz + z) ?? G;
         const out = Math.max(b.x0 - x, x - b.x1, b.z0 - z, z - b.z1, 0); // 0 inside the box
+        if (out > 0 && built(ox + x, oz + z)) continue;
         const t = out === 0 ? G : Math.round(G + (r - G) * (out / (ease + 1)));
         const col = cols.get(`${x},${z}`) ?? [];
+        const wet = d.sea ? water(ox + x, oz + z) : undefined; // a design standing in the sea never clears its water
+        const dry = (y) => wet === undefined || y > wet;
         const ownsTop = col.some((c) => c[1] <= 0);
         const lowest = col.length ? Math.min(...col.map((c) => c[1])) : 1;
         // fill up from the real ground to the target (stopping under the design's own lowest block)
@@ -77,12 +86,12 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
         // cut down to the target: air above it, its top block becomes the ground top
         if (r > t) {
           if (!ownsTop) put(fill, x, t, z, d.top);
-          for (let y = t + 1; y <= r; y++) if (!col.some((c) => c[1] === y - G)) put(clear, x, y, z, AIR);
+          for (let y = t + 1; y <= r; y++) if (!col.some((c) => c[1] === y - G) && dry(y)) put(clear, x, y, z, AIR);
         }
         // air over the design (inside the box only), so trees and grass do not grow through it
         if (out === 0) {
           const have = new Set(col.map((c) => c[1]));
-          for (let y = Math.max(t, r) + 1; y <= G + top; y++) if (!have.has(y - G)) put(clear, x, y, z, AIR);
+          for (let y = Math.max(t, r) + 1; y <= G + top; y++) if (!have.has(y - G) && dry(y)) put(clear, x, y, z, AIR);
         }
       }
     }
@@ -110,7 +119,46 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
   clear.sort((a, b) => b[1] - a[1]);
   solid.sort((a, b) => a[1] - b[1]);
   hang.sort((a, b) => a[1] - b[1]);
+  if (d.dry) return { ops: [...solid, ...fill, ...clear, ...hang], G };
   return { ops: [...clear, ...fill, ...solid, ...hang], G };
+}
+
+// Nothing of a landmark may float (Mateo 2026-11-14: every story build has to be perfect). A drape design follows
+// each column's own ground and a rigid one is eased into the land round it, so on real ground a fence post, a leaf or
+// a wall stub can end up joined to nothing. settleOps replays the planned ops over the ground (height) and drops every
+// placed block not joined by a face or an edge to the ground or to something that is. It is a generator so the game
+// can spread it over ticks (yield* in a runJob); run it to the end with settleNow. Returns the kept ops.
+const N18 = [];
+for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) { const s = Math.abs(a) + Math.abs(b) + Math.abs(c); if (s > 0 && s < 3) N18.push([a, b, c]); }
+export function* settleOps(ops, d, height, step = 4000) {
+  const key = (x, y, z) => `${x},${y},${z}`;
+  const last = new Map(); // cell -> op index (AIR included)
+  ops.forEach((o, i) => last.set(key(o[0], o[1], o[2]), i));
+  const holds = (i) => i !== undefined && ops[i][3] !== AIR && !/water|lava/.test(d.palette[ops[i][3]]?.[0] ?? "");
+  const natural = (x, y, z) => { if (last.has(key(x, y, z))) return false; const g = height(x, z); return g !== undefined && y <= g; };
+  const grounded = new Set(), todo = [];
+  let n = 0;
+  for (const [k, i] of last) {
+    if (!holds(i)) continue;
+    const [x, y, z] = ops[i];
+    if (N18.some(([a, b, c]) => natural(x + a, y + b, z + c))) { grounded.add(k); todo.push(i); }
+    if (++n % step === 0) yield;
+  }
+  while (todo.length) {
+    const [x, y, z] = ops[todo.pop()];
+    for (const [a, b, c] of N18) {
+      const k = key(x + a, y + b, z + c), i = last.get(k);
+      if (!grounded.has(k) && holds(i)) { grounded.add(k); todo.push(i); }
+    }
+    if (++n % step === 0) yield;
+  }
+  return ops.filter((o) => { const k = key(o[0], o[1], o[2]); return o[3] === AIR || !holds(last.get(k)) || grounded.has(k); });
+}
+export function settleNow(ops, d, height) {
+  const g = settleOps(ops, d, height);
+  let r;
+  do { r = g.next(); } while (!r.done);
+  return r.value;
 }
 
 // Where a seeking piece goes. Walks out from the anchor along bearings (0 north, 90 east) round `bearing`,
@@ -159,7 +207,17 @@ export function seekSpot(anchor, seek, height, water = () => undefined) {
   return { x: best.x, z: best.z, face: faceOf(best.b) };
 }
 
+// How far round a piece's spot the ground is held loaded while it builds (index.js tickingarea): its whole box and
+// the eased edge, never under 44 and never over 72 (a ticking area holds at most 100 chunks: 2 x 72 = 144 blocks a
+// side is 10 chunks at worst). Crownhold's castle and the Cinder Roost's school are the big ones.
+export const REACH_MAX = 72;
+export function reachOf(d) {
+  const b = d.box ?? { x0: 0, x1: 0, z0: 0, z1: 0 };
+  return Math.min(REACH_MAX, Math.max(44, Math.max(-b.x0, b.x1, -b.z0, b.z1) + (d.ease ?? 3) + 3));
+}
+
 // The design to use for a piece: a plain id, or one id per facing ({ n, e, s, w }) for pieces that turn.
 export function designFor(piece, face) {
   return typeof piece.d === "string" ? piece.d : piece.d[face ?? "n"];
 }
+

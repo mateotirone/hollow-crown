@@ -3,7 +3,7 @@
 //
 //  1. every pack JSON file parses
 //  2. every script import points at a real file
-//  3. (if `npm install` was run in tools/) no undefined names and no unused imports in the scripts
+//  3. no undefined names and no unused imports in the scripts (needs `npm ci` in tools/ once; a problem if it can't run)
 //  4. the whole script loads in Node with a fake Minecraft (catches crashes at startup)
 //  5. every loop task runs a few times in an empty world without an error
 //  6. all self-tests pass (the in-game-only ones are skipped here)
@@ -239,6 +239,31 @@ step("Content log rules");
     }
   }
 
+  // 3c. Held items: every geometry the player entity uses must keep vanilla's bone path to the item bones
+  // (rightItem under rightArm, rightArm under body). Bedrock floats held items at the chest or face otherwise
+  // (playtest 1.2.1116: items under the forearm). See docs/PLAYER-ANIMATIONS.md.
+  {
+    const ep = join(RP, "entity/player.entity.json");
+    const pgeo = new Set(Object.values(readJson(ep)?.["minecraft:client_entity"]?.description?.geometry ?? {}));
+    // Held items are placed from the DEFAULT geometry, so while a look is drawn the hidden item carrier
+    // (default geometry, every part hidden) must be drawn too, or items stay still while the arm moves.
+    const prc = readJson(ep)?.["minecraft:client_entity"]?.description?.render_controllers ?? [];
+    const names = prc.map((e) => (typeof e === "string" ? e : Object.keys(e)[0]));
+    const firstLook = names.findIndex((n) => n.startsWith("controller.render.hc_look.") && n !== "controller.render.hc_look.item_carrier");
+    const carrier = names.indexOf("controller.render.hc_look.item_carrier");
+    if (firstLook >= 0 && (carrier < 0 || carrier > firstLook)) fail(`${rel(ep)}: the hidden item carrier must come before the look render controllers; run python3 tools/build_player_joints.py`);
+    const PATH = { rightItem: "rightArm", leftItem: "leftArm", rightArm: "body", leftArm: "body" };
+    for (const file of walk(join(RP, "models/entity"), ".json")) {
+      for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
+        if (!pgeo.has(g?.description?.identifier)) continue;
+        for (const b of g.bones ?? []) {
+          const want = PATH[b.name];
+          if (want && b.parent !== want) fail(`${rel(file)}: ${b.name} hangs on "${b.parent}", must hang on "${want}" or held items float (vanilla bone path)`);
+        }
+      }
+    }
+  }
+
   // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
   const geometries = new Set();
   for (const file of walk(join(RP, "models"), ".json")) {
@@ -357,6 +382,226 @@ step("Saved data versions");
   console.log(raw ? `${raw} file(s) save unversioned data (see notes)` : "every saved store is versioned");
 }
 
+// ---------- 2b2. no vanilla monsters ----------
+// Rule (Mateo 2026-11-13): vanilla monsters never spawn; our own creatures (siege:*) are this world's monsters.
+// So no script may hand a vanilla monster straight to spawnEntity() or summon(), as a string or through a const.
+// (Sieges plan with vanilla ids and spawnRaider() swaps every one for ours: see bestiary/spawns.js.)
+step("No vanilla monsters spawned");
+{
+  const MONSTER = /^minecraft:(zombie|zombie_villager(_v2)?|husk|drowned|skeleton|stray|bogged|parched|creeper|spider|cave_spider|enderman|endermite|silverfish|witch|slime|phantom|pillager|vindicator|evoker|evocation_illager|vex|ravager|guardian|elder_guardian|zombie_horse|skeleton_horse|camel_husk|zombie_nautilus|zombie_pigman|piglin|piglin_brute|hoglin|zoglin|blaze|ghast|magma_cube|wither_skeleton)$/;
+  let bad = 0;
+  for (const file of scripts) {
+    const src = readFileSync(file, "utf8");
+    const consts = Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]]));
+    for (const m of src.matchAll(/(?:spawnEntity|\.summon)\(/g)) {
+      // the first argument: up to the first comma or close bracket outside brackets (a ternary counts too)
+      let i = m.index + m[0].length, depth = 0, arg = "";
+      for (; i < src.length && arg.length < 300; i++) {
+        const c = src[i];
+        if ("([{".includes(c)) depth++;
+        else if (")]}".includes(c)) { if (!depth) break; depth--; } else if (c === "," && !depth) break;
+        arg += c;
+      }
+      const ids = [...arg.matchAll(/["'`]([^"'`]+)["'`]/g)].map((x) => x[1]).concat([...arg.matchAll(/\b([A-Z_][A-Z0-9_]*)\b/g)].map((x) => consts[x[1]]).filter(Boolean));
+      for (const id of ids) if (MONSTER.test(id)) { bad++; failIn(file, `${rel(file)}: spawns the vanilla monster ${id}. Use one of our own creatures (siege:*).`); }
+    }
+  }
+  console.log(bad ? `${bad} vanilla monster spawn(s)` : "no script spawns a vanilla monster");
+}
+
+// ---------- 2b4. safe inside the walls ----------
+// Rule (Mateo 2026-11-13): hostile mobs never spawn inside a settlement's walls or a town, only out in the wild.
+// Natural spawns are caught by bestiary/sheltered.js, which knows the wild monsters from gentle.js WILD. So every
+// creature with a "monster" spawn rule must be in WILD, or it could spawn inside the walls unseen.
+step("Hostile mobs stay out of settlements");
+{
+  const gentle = readFileSync(join(SCRIPTS, "bestiary/gentle.js"), "utf8");
+  const wild = new Set([...(gentle.match(/export const WILD = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]));
+  const dir = join(BP, "spawn_rules");
+  let bad = 0, monsters = 0;
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+    let rule;
+    try { rule = parseJson(readFileSync(join(dir, f), "utf8"))["minecraft:spawn_rules"]; } catch { continue; } // step 1 reports it
+    const id = rule?.description?.identifier;
+    if (!id || id.startsWith("minecraft:") || !(rule.conditions ?? []).length) continue; // vanilla: core/nomonsters.js
+    if (rule.description.population_control !== "monster") continue;
+    monsters++;
+    if (!wild.has(id)) { bad++; fail(`spawn_rules/${f}: ${id} spawns as a monster but is not in bestiary/gentle.js WILD, so it could spawn inside a settlement's walls (bestiary/sheltered.js).`); }
+  }
+  for (const id of wild) if (!existsSync(join(dir, `bestiary_${id.replace(/^siege:/, "")}.json`))) { bad++; fail(`bestiary/gentle.js WILD lists ${id}, which has no spawn rule.`); }
+  if (!/shelteredAt\(at, dim\.id\)/.test(readFileSync(join(SCRIPTS, "bestiary/spawns.js"), "utf8"))) { bad++; fail("bestiary/spawns.js: Hollow things must ask shelteredAt() before they spawn."); }
+  // the sweep (bestiary/sheltered.js) finds strays with families: ["monster"], so every wild hostile body must carry it
+  const { MOBS } = await import(pathToFileURL(join(SCRIPTS, "bestiary/data.js")).href);
+  const wildFamilies = ["wild_hostile", "undead", "hollow"];
+  for (const [id, m] of Object.entries(MOBS)) {
+    if (!wildFamilies.includes(m.family) && !wild.has(id)) continue;
+    const file = join(BP, "entities/bestiary", `${id.replace(/^siege:/, "")}.json`);
+    if (!existsSync(file)) continue;
+    const fam = parseJson(readFileSync(file, "utf8"))?.["minecraft:entity"]?.components?.["minecraft:type_family"]?.family ?? [];
+    if (!fam.includes("monster")) { bad++; fail(`${rel(file)}: ${id} is a wild hostile but lacks the "monster" family, so the walls sweep can't find it.`); }
+  }
+  console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
+}
+
+// ---------- 2b5. creatures take knockback ----------
+// Rule (Mateo 2026-11-13: "When you hit a mob they should knock back like vanilla"). Bedrock rolls
+// minecraft:knockback_resistance as a chance per hit, so anything between 0 and 1 means some blows do nothing at all.
+// Every creature is 0, except bosses (siege_boss) and heavy creatures (siege_heavy), which are 1 and rock back a little
+// by script (bestiary/stagger.js), and creatures built not to move (movement 0). NPCs, guards, mounts, dragons and
+// props are not creatures you fight, so they are left alone.
+step("Creatures take knockback");
+{
+  const NOT_FOES = ["npc", "villager", "inanimate", "siege_dragon", "horse", "player", "siege_guard"];
+  const stagger = existsSync(join(SCRIPTS, "bestiary/stagger.js")) ? readFileSync(join(SCRIPTS, "bestiary/stagger.js"), "utf8") : "";
+  let bad = 0, foes = 0, resisting = 0;
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    let ent;
+    try { ent = parseJson(readFileSync(f, "utf8"))["minecraft:entity"]; } catch { continue; } // step 1 reports it
+    const c = ent?.components ?? {};
+    const fam = c["minecraft:type_family"]?.family ?? [];
+    if (!fam.includes("mob") || fam.some((x) => NOT_FOES.includes(x))) continue;
+    foes++;
+    const allowed = fam.includes("siege_boss") || fam.includes("siege_heavy") || c["minecraft:movement"]?.value === 0;
+    const kbs = [c, ...Object.values(ent.component_groups ?? {})].map((g) => g["minecraft:knockback_resistance"]?.value).filter((v) => v !== undefined);
+    for (const kb of kbs) {
+      if (kb > 0 && kb < 1) { bad++; fail(`${rel(f)}: knockback_resistance ${kb} is a dice roll in Bedrock (some hits don't move it at all). Use 0, or 1 for a boss or siege_heavy creature.`); }
+      else if (kb >= 1 && !allowed) { bad++; fail(`${rel(f)}: ${ent.description?.identifier} shrugs off all knockback. Ordinary creatures take vanilla knockback (0); only siege_boss or siege_heavy creatures resist (studio/bestiary/build.py HEAVY).`); }
+      else if (kb >= 1) resisting++;
+    }
+  }
+  for (const fam of ["siege_boss", "siege_heavy"]) if (!stagger.includes(`"${fam}"`)) { bad++; fail(`bestiary/stagger.js must give ${fam} creatures their small stagger, or they never react to a hit.`); }
+  console.log(bad ? `${bad} problem(s)` : `${foes} creatures take vanilla knockback or a stagger (${resisting} bosses and heavy ones stagger)`);
+}
+
+// ---------- 2b6. every creature that fights guards has its own guard damage ----------
+// Rule (Mateo 2026-11-14: "We need to have custom damage parameters for each mob"). scripts/siege/guarddamage_data.js
+// has a line for each: its ordinary blow (base) and what it does to a guard. base must match the entity file's attack.
+step("Every creature has its own damage against guards");
+{
+  const { GUARD_DAMAGE } = await import(pathToFileURL(join(SCRIPTS, "siege/guarddamage_data.js")).href);
+  let bad = 0, n = 0;
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    let ent;
+    try { ent = parseJson(readFileSync(f, "utf8"))["minecraft:entity"]; } catch { continue; }
+    const id = ent?.description?.identifier;
+    const c = ent?.components ?? {};
+    const fam = c["minecraft:type_family"]?.family ?? [];
+    if (fam.includes("siege_guard") || !JSON.stringify(ent).includes("\"siege_guard\"")) continue; // doesn't fight guards
+    const attack = [c, ...Object.values(ent.component_groups ?? {})].map((g) => g["minecraft:attack"]?.damage).find((d) => typeof d === "number");
+    if (!attack) continue; // no blow of its own (scripted only)
+    n++;
+    const line = GUARD_DAMAGE[id];
+    if (!line) { bad++; fail(`${rel(f)}: ${id} fights guards but has no line in scripts/siege/guarddamage_data.js (how hard it hits a guard).`); }
+    else if (line.base !== attack) { bad++; fail(`scripts/siege/guarddamage_data.js: ${id} base ${line.base}, but its entity file's attack is ${attack}. Update base (and guard if it should change too).`); }
+  }
+  console.log(bad ? `${bad} problem(s)` : `${n} creatures that fight guards, each with its own guard damage`);
+}
+
+// ---------- 2b3. every NPC has its own skin ----------
+// Rule (Mateo 2026-11-13: "make sure everyone has a skin"): no NPC shows Bedrock's default skin. Our packs replace the
+// built-in NPC's skins with ours (core/npc_skins_data.js, painted by studio/art/build_npc_skins.py), every script that
+// spawns minecraft:npc dresses it with dressNpc(), nobody sets skinIndex by hand, and every NPC-family entity of our
+// own has its pictures. 2026-11-14 ("make sure every NPC has a skin", again): spawns through constants exported from
+// other files and runCommand("summon ...") count too, no .mcfunction summons people, a script that spawns a vanilla
+// villager or wandering trader must say why on that line ("// vanilla villager on purpose: ..."), and a skin picked by
+// an entity property can never point past the end of its list.
+step("Every NPC has a skin");
+{
+  let bad = 0;
+  const no = (file, msg) => { bad++; file ? failIn(file, msg) : fail(msg); };
+  const dataFile = join(SCRIPTS, "core/npc_skins_data.js");
+  const keys = existsSync(dataFile)
+    ? [...readFileSync(dataFile, "utf8").split("NPC_SKINS = [")[1].split("];")[0].replace(/\/\/[^\n]*/g, "").matchAll(/"([a-z0-9_]+)"/g)].map((m) => m[1])
+    : [];
+  if (!keys.length) no(null, "core/npc_skins_data.js is missing or lists no NPC skins");
+  for (const k of keys) if (!existsSync(join(RP, `textures/entity/siege/npc_skins/${k}.png`))) no(null, `NPC skin "${k}" has no picture: run python3 studio/art/build_npc_skins.py`);
+  const read = (f) => (existsSync(f) ? parseJson(readFileSync(f, "utf8")) : undefined);
+  const ce = read(join(RP, "entity/npc.entity.json"))?.["minecraft:client_entity"]?.description;
+  const rc = read(join(RP, "render_controllers/siege_npc.render_controllers.json"))?.render_controllers?.["controller.render.siege_npc"];
+  const bp = read(join(BP, "entities/npc.json"))?.["minecraft:entity"];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  if (ce?.identifier !== "minecraft:npc" || !same(Object.keys(ce?.textures ?? {}), keys)) no(null, "Siege_Nights_RP/entity/npc.entity.json does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  if (!same(rc?.arrays?.textures?.["Array.skins"], keys.map((k) => `Texture.${k}`))) no(null, "the siege_npc render controller does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  const list = bp?.components?.["minecraft:npc"]?.npc_data?.skin_list ?? [];
+  if (bp?.description?.identifier !== "minecraft:npc" || !same(list.map((x) => x.variant), keys.map((_, i) => i))) no(null, "Siege_Nights_BP/entities/npc.json skin_list does not match core/npc_skins_data.js: run python3 studio/art/build_npc_skins.py");
+  // story people, wonder keepers: each has a key
+  try {
+    const { NPCS } = await import(pathToFileURL(join(SCRIPTS, "lore/data/dialogue.js")).href);
+    for (const n of NPCS) if (!keys.includes(`lore_${n.id}`)) no(null, `story NPC "${n.id}" has no skin: add "lore_${n.id}" to the end of core/npc_skins_data.js and a look in build_npc_skins.py`);
+    const { WONDERS } = await import(pathToFileURL(join(SCRIPTS, "wonders/data.js")).href);
+    for (const w of WONDERS ?? []) if (!keys.includes(`keeper_${w.id}`)) no(null, `wonder keeper "${w.id}" has no skin: add "keeper_${w.id}"`);
+  } catch (e) { no(null, `could not read the NPC lists for the skin check: ${e}`); }
+  // What each spawnEntity() / summon in our scripts makes. A type can be a literal, a const in the file, a const
+  // exported from any other script, or an object field (RETURNED.type -> type: "...").
+  const PEOPLE_VANILLA = ["minecraft:villager_v2", "minecraft:villager", "minecraft:wandering_trader"];
+  const ON_PURPOSE = /vanilla villager on purpose:/;
+  const srcOf = new Map(scripts.map((f) => [f, readFileSync(f, "utf8")]));
+  const exported = {};
+  for (const src of srcOf.values()) for (const m of src.matchAll(/export\s+const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)) exported[m[1]] = m[2];
+  for (const [file, src] of srcOf) {
+    const r = rel(file);
+    if (/\.skinIndex\s*=(?!=)/.test(src) && !r.endsWith("core/npc_skins.js")) no(file, `${r}: sets skinIndex by hand. Use dressNpc(entity, key) from core/npc_skins.js.`);
+    const consts = { ...exported, ...Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]])) };
+    const lines = src.split("\n");
+    const made = []; // { type, line }
+    lines.forEach((ln, i) => {
+      for (const m of ln.matchAll(/spawnEntity\(\s*(?:["'`]([^"'`]+)["'`]|([A-Za-z_][\w.]*))\s*,/g)) {
+        let type = m[1];
+        if (!type && m[2]) {
+          const parts = m[2].split(".");
+          const body = parts.length === 2 ? src.match(new RegExp(`const\\s+${parts[0]}\\s*=\\s*\\{([\\s\\S]*?)\\n\\};?`))?.[1] : undefined;
+          type = parts.length === 1 ? consts[parts[0]] : body?.match(new RegExp(`\\b${parts[1]}\\s*:\\s*["'\`]([^"'\`]+)["'\`]`))?.[1];
+        }
+        if (type) made.push({ type, line: i });
+      }
+      for (const m of ln.matchAll(/\bsummon\s+((?:minecraft:)?[a-z0-9_]+)\b/g)) if (/runCommand|["'`]/.test(ln)) made.push({ type: m[1].includes(":") ? m[1] : `minecraft:${m[1]}`, line: i });
+    });
+    if (made.some((x) => x.type === "minecraft:npc") && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
+    // A person in a vanilla villager's coat is the default look too: talking people are minecraft:npc (dressNpc) or one
+    // of our own entities. Only villagers that must pass for any vanilla villager (the Returned) may stay, marked so.
+    for (const x of made) {
+      if (!PEOPLE_VANILLA.includes(x.type)) continue;
+      if (ON_PURPOSE.test(lines[x.line]) || ON_PURPOSE.test(lines[x.line - 1] ?? "")) continue;
+      no(file, `${r}:${x.line + 1}: spawns ${x.type}, which wears Bedrock's own villager look. Spawn minecraft:npc and dressNpc() it, or mark the line "// vanilla villager on purpose: <why>"`);
+    }
+  }
+  // no .mcfunction summons an NPC or a villager: nothing there can dress it
+  for (const f of [join(BP, "functions"), join(ROOT, "map")].filter((d) => existsSync(d)).flatMap((d) => walk(d, ".mcfunction"))) {
+    const src = readFileSync(f, "utf8");
+    if (/\bsummon\s+(minecraft:)?(npc|villager_v2|villager|wandering_trader)\b/.test(src)) no(null, `${rel(f)}: summons an NPC or villager from a function, where it gets no skin of ours. Spawn it from a script with dressNpc().`);
+  }
+  // our own people (job NPCs, townsfolk, soldiers, champions, quartermaster, ...) have a client entity with real
+  // pictures, and a skin picked by a property never points past the end of its list
+  const PEOPLE = ["npc", "villager", "siege_guard", "siege_townsfolk", "siege_champion", "quartermaster", "ashen_order", "siege_arena_crowd"];
+  const clients = new Map();
+  for (const f of walk(join(RP, "entity"), ".json")) { const d = read(f)?.["minecraft:client_entity"]?.description; if (d?.identifier) clients.set(d.identifier, d); }
+  const rcs = {};
+  for (const f of walk(join(RP, "render_controllers"), ".json")) Object.assign(rcs, read(f)?.render_controllers ?? {});
+  let people = 0;
+  for (const f of walk(join(BP, "entities"), ".json")) {
+    const e = read(f)?.["minecraft:entity"];
+    const id = e?.description?.identifier;
+    if (!id || id.startsWith("minecraft:") || !(e.components?.["minecraft:type_family"]?.family ?? []).some((x) => PEOPLE.includes(x))) continue;
+    people++;
+    const d = clients.get(id);
+    const tex = Object.values(d?.textures ?? {});
+    if (!tex.length) { no(null, `${id} is a person with no skin (no client entity textures)`); continue; }
+    for (const t of tex) if (/textures\/entity\/(npc|villager|villager2|wandering_trader|steve|alex)\b/.test(t) || !["png", "tga"].some((x) => existsSync(join(RP, `${t}.${x}`)))) no(null, `${id}: skin ${t} is missing or a vanilla one`);
+    for (const rcName of (d.render_controllers ?? []).map((x) => (typeof x === "string" ? x : Object.keys(x)[0]))) {
+      const rc = rcs[rcName];
+      for (const t of rc?.textures ?? []) {
+        const m = /^(Array\.\w+)\[q(?:uery)?\.property\('([\w:]+)'\)\]$/.exec(t);
+        if (!m) continue;
+        const n = rc.arrays?.textures?.[m[1]]?.length ?? 0;
+        const range = e.description.properties?.[m[2]]?.range;
+        if (!range || range[0] !== 0 || range[1] !== n - 1) no(null, `${id}: property ${m[2]} runs ${JSON.stringify(range)} but ${m[1]} has ${n} skins, so some would show no skin`);
+        for (const x of rc.arrays?.textures?.[m[1]] ?? []) if (!(x.split(".")[1] in (d.textures ?? {}))) no(null, `${id}: ${x} is in ${m[1]} but not in the client entity's textures`);
+      }
+    }
+  }
+  console.log(bad ? `${bad} NPC skin problem(s)` : `${keys.length} NPC skins; every NPC spawner dresses its NPCs; ${people} kinds of our own people have their skins; no stray vanilla villagers`);
+}
+
 // ---------- 2c. sounds ----------
 // Every custom sound has its file, every installed recording is wired in, and scripts play sounds through sfx().
 step("Sounds");
@@ -383,9 +628,69 @@ step("Sounds");
     const n = (readFileSync(file, "utf8").match(/\.playSound\??\.?\(/g) ?? []).length;
     if (n) { direct += n; warnings.push(`${rel(file)}: ${n} direct playSound call(s). Use sfx() from core/sfx.js so the sound gets the house treatment (SOUND-LIST.md).`); }
   }
+  // every sound id the game is asked to play must exist: Bedrock plays nothing (and says nothing) for an unknown id
+  const vanillaFile = join(TOOLS, "vanilla_sounds.json");
+  if (existsSync(vanillaFile)) {
+    const known = new Set([...(parseJson(readFileSync(vanillaFile, "utf8")) ?? []), ...Object.keys(defs)]);
+    const cuesSrc = readFileSync(join(SCRIPTS, "core/sfx_cues.js"), "utf8");
+    const cueNames = new Set([...cuesSrc.matchAll(/^\s*(?:\[BELL\]|"([^"]+)"):\s*\{/gm)].map((m) => m[1] ?? "block.bell.hit"));
+    for (const [, id] of cuesSrc.matchAll(/\[\s*"([a-z0-9_.]+)"\s*,\s*[\d.]+/g)) if (!known.has(id)) fail(`core/sfx_cues.js: a layer plays "${id}", which is not a Bedrock sound`);
+    for (const file of walk(SCRIPTS, ".js")) {
+      for (const [, id] of readFileSync(file, "utf8").matchAll(/\bsfx\([^,()]+,\s*"([a-z0-9_.]+)"/g)) {
+        if (!known.has(id) && !cueNames.has(id)) fail(`${rel(file)}: sfx(..., "${id}") is not a Bedrock sound or a cue in core/sfx_cues.js`);
+      }
+    }
+    const sj = join(RP, "sounds.json");
+    const ents = existsSync(sj) ? parseJson(readFileSync(sj, "utf8"))?.entity_sounds?.entities ?? {} : {};
+    for (const [ent, e] of Object.entries(ents)) {
+      for (const [ev, s] of Object.entries(e.events ?? {})) {
+        const id = typeof s === "string" ? s : s?.sound;
+        if (id && !known.has(id)) fail(`sounds.json: ${ent} ${ev} plays "${id}", which is not a Bedrock sound (studio/bestiary/voices.py)`);
+      }
+    }
+  }
   const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
   if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
+  const weather = spawnSync(process.execPath, [join(TOOLS, "weather_assets.mjs"), "--check"]);
+  if (weather.status !== 0) fail("the weather fogs and particles are out of date: run  node tools/weather_assets.mjs");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
+}
+
+// ---------- 2c. the land at the thin places ----------
+// map/thinplaces shapes the map at the seven thin places. Each place must hold its own water and keep it off the
+// cave floor (water written beside lower dry ground pours out in the game the first time a block changes).
+step("Thin place land");
+{
+  const r = spawnSync(process.execPath, [join(ROOT, "map/thinplaces/test_shapes.mjs")], { encoding: "utf8" });
+  if (r.status !== 0) for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 12)) fail(`thin place land: ${line}`);
+  else console.log((r.stdout || "").trim());
+}
+
+// ---------- 2c2. wall-hung blocks in the baked world files ----------
+// Item frames, ladders, buttons and wall signs need a wall behind them, or they drop off (tools/hung-check.mjs).
+step("Wall-hung blocks have a wall");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "hung-check.mjs")], { encoding: "utf8" });
+  for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 20)) fail(`hung on nothing: ${line}`);
+  if (r.status === 0) console.log("every item frame, ladder, button and wall sign has a wall");
+}
+
+// ---------- 2c3. nothing floats in a landmark design ----------
+step("Landmark designs have nothing floating");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "landmark-float-check.mjs")], { encoding: "utf8" });
+  for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 20)) fail(`floating: ${line}`);
+  if (r.status === 0) console.log("every rigid landmark design stands on its ground");
+}
+
+// ---------- 2d. build catalog ----------
+// Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
+step("Build catalog");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "build-catalog.mjs"), "--check"], { encoding: "utf8" });
+  for (const line of (r.stdout || "").split("\n").filter(Boolean)) fail(line);
+  if (r.status !== 0 && !(r.stdout || "").trim()) fail("tools/build-catalog.mjs --check failed: " + (r.stderr || "").trim().split("\n").pop());
+  if (r.status === 0) console.log(`${JSON.parse(readFileSync(join(ROOT, "builds/catalog.json"), "utf8")).builds.length} builds listed, CATALOG.md up to date`);
 }
 
 // ---------- 3. deep check (optional) ----------
@@ -399,7 +704,9 @@ async function deepCheck() {
     acorn = await import(pathToFileURL(require.resolve("acorn")));
     eslintScope = await import(pathToFileURL(require.resolve("eslint-scope")));
   } catch {
-    console.log("skipped (run `npm install` in siege-nights/tools once to turn this on)");
+    // not optional any more: a name used without its import (getRift in the veil gate, PR #225) passed every other check
+    console.log("could not run");
+    fail("the undefined-name check could not run: run `npm ci` in tools/ once, then check again");
     return;
   }
   const globals = new Set(["console", "JSON", "Math", "Object", "Array", "Map", "Set", "WeakMap", "Number", "String",
@@ -506,6 +813,7 @@ console.warn = (...args) => warned.push(args.join(" "));
 let loaded = false;
 try {
   await import(pathToFileURL(entry).href);
+  mock.endEarly();
   loaded = true;
   console.log(`loaded: ${mock.subscriptions.length} event subscriptions, ${mock.intervals.length} loop tasks`);
 } catch (e) {
@@ -546,6 +854,33 @@ if (loaded) {
   for (const name of OFFLINE_ONLY) if (!known.has(name)) fail(`core/tests.js OFFLINE_ONLY lists "${name}", but no test has that name`);
   console.log(`${result.passed} passed, ${result.failed.length} failed, ${result.skipped} in-game only (skipped here)`);
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
+}
+
+// ---------- 7. terraform: the game's copy gives the same ground as the map's ----------
+{
+  step("Terraform: settle/terraform.js against map/structures/terraform_cases.json");
+  const TF = await import(pathToFileURL(join(SCRIPTS, "settle/terraform.js")).href);
+  const cases = JSON.parse(readFileSync(join(ROOT, "map/structures/terraform_cases.json"), "utf8"));
+  const roundEven = (v) => { const f = Math.floor(v), r = v - f; return r > 0.5 ? f + 1 : r < 0.5 ? f : f % 2 === 0 ? f : f + 1; };
+  const LAND = { // terraform_test.py land()
+    flat: () => 64, slope2: (i) => 64 + Math.floor(i / 2), slope1: (i) => 60 + i,
+    bumpy: (i, j) => 64 + roundEven(3 * Math.sin(i / 3) + 2 * Math.cos(j / 4)), cliff: (i) => (i < 15 ? 64 : 72),
+  };
+  let bad = 0;
+  for (const c of cases) {
+    const n = 31, h = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => LAND[c.land](i, j)));
+    const sites = c.sites.map(({ box: [x0, z0, w, d], fill = "stone", door = true }) => {
+      const cells = [];
+      for (let i = x0; i < x0 + w; i++) for (let j = z0; j < z0 + d; j++) cells.push([i, j]);
+      const y = TF.padHeight(cells.map(([i, j]) => h[i][j]));
+      const con = new Map();
+      if (door) for (const s of [-1, 0, 1]) for (let t = 0; t < 4; t++) con.set(`${x0 + (w >> 1) + s},${z0 + d + t}`, y);
+      return TF.site({ pad: new Map(cells.map(([i, j]) => [`${i},${j}`, y])), connectors: con, padFill: fill });
+    });
+    const { T } = TF.solve(h, sites);
+    if (JSON.stringify(T) !== JSON.stringify(c.expect)) { bad++; fail(`terraform.js: case "${c.name}" gives different ground from terraform.py`); }
+  }
+  if (!bad) console.log(`${cases.length} cases match`);
 }
 
 // ---------- result ----------

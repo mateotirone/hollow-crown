@@ -1,4 +1,5 @@
-// Shared machinery for the boss unlocks after the Reeve: a set piece that builds itself near players, NPCs that
+// Shared machinery for the boss unlocks after the Reeve: a set piece that builds itself near players (or, on the
+// full map, is already baked into it: baked.js, map/bake_sites.mjs, and is only finished off on approach), NPCs that
 // stay at their spots, a summon scene played as timed cues, and the fight gate (start the fight once someone is in
 // the arena, count wins, allow a rematch once a siege night has passed after a win).
 //
@@ -14,7 +15,11 @@ import { OVERWORLD } from "../plots/config.js";
 import { isBuilder } from "../plots/claims.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
+import { clearTrees, clearLooseBranches, treeClearBoxes } from "../core/clearing.js";
+import { approachWave, approachCount } from "./puzzles.js";
 import { markSocketed } from "../bestiary/relics.js";
+import { bakedFor, bakedState } from "./baked.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const overworld = () => world.getDimension(OVERWORLD);
 export const say = (player, text) => { try { player.sendMessage(text); } catch { /* gone */ } };
@@ -105,6 +110,29 @@ export function ring(c, r, y, particle = "minecraft:basic_smoke_particle", n = 2
   }
 }
 
+// ---------- approach fights ----------
+/**
+ * A stretch on the way in to a boss where its lesser things come for whoever walks through, then rest five minutes.
+ *   mid(site) -> { x, z } and r: where to look for players;  inZone(site, loc);  when?(site) -> bool
+ *   mob, count? ({ base, per, max }), line (chat), cry (sound id), spots(site, players, n, now) -> [{ x, y, z }]
+ * Returns the function to call from the site's tick. Never fires during the summon scene or the fight.
+ */
+export function makeApproach(a) {
+  let last;
+  return (site) => {
+    const d = site.data;
+    if (!d.built || (a.when && !a.when(site))) return;
+    const inside = nearby(a.mid(site), a.r).filter((p) => a.inZone(site, p.location));
+    const now = system.currentTick;
+    if (!approachWave({ players: inside.length, fighting: d.fighting || !!site.scene, now, last })) return;
+    last = now;
+    const n = approachCount(inside.length, a.count);
+    for (const p of inside) { say(p, a.line); if (a.cry) sound(a.cry, p.location, a.cryOpts ?? { volume: 1 }); }
+    const dim = overworld();
+    for (const at of a.spots(site, inside, n, now)) { try { dim.spawnEntity(a.mob, at); } catch { /* unloaded */ } }
+  };
+}
+
 // ---------- the rematch rule (pure) ----------
 // What clicking the socket does. `when` is the site's own condition (a siege night, a dark moon) and its reason.
 export function socketAnswer({ armed, holdingKey, hasKey, scene, fighting, pending, wins, siegesSinceWin, whenOk }) {
@@ -130,8 +158,11 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   event.cancel = true;
   system.run(() => { try { npcHandlers.get(tag)(player, target); } catch (e) { console.warn(`[Hollow Crown] unlock npc: ${e}`); } });
 });
-/** Keep one NPC with this tag at `spot` (spawn if missing, bring back if moved). */
+/** Keep one NPC with this tag at `spot` (spawn if missing, bring back if moved). skin: a key from core/npc_skins_data.js */
+const skinOfTag = new Map(); // npc tag -> skin key, so NPCs from before skin tags get theirs back
+addNpcLook((e) => { for (const t of e.getTags()) if (skinOfTag.has(t)) return skinOfTag.get(t); return undefined; });
 export function keepNpc(dim, { tag, name, skin, spot }) {
+  skinOfTag.set(tag, skin);
   let found;
   try { found = dim.getEntities({ type: "minecraft:npc", tags: [tag], location: spot, maxDistance: 48 }); } catch { return; }
   for (const extra of found.slice(1)) extra.remove();
@@ -144,7 +175,8 @@ export function keepNpc(dim, { tag, name, skin, spot }) {
     e.addTag(tag);
     e.nameTag = name;
     const npc = e.getComponent("minecraft:npc");
-    if (npc) { npc.name = name; npc.skinIndex = skin; }
+    if (npc) npc.name = name;
+    dressNpc(e, skin);
   } catch { /* not loaded */ }
 }
 export function removeNpc(dim, tag, near) {
@@ -158,6 +190,8 @@ export function talk(player, title, body, buttons = ["Thank you."]) {
 
 // ---------- sites ----------
 const sites = new Map();
+// Has this unlock site been built in this world yet? (the Faceless statues wait for the Gate's precinct: statues/index.js)
+export const siteBuilt = (id) => !!sites.get(id)?.data?.built;
 const blockHandlers = new Map(); // block type -> (player, block) => void
 world.afterEvents.playerInteractWithBlock.subscribe(({ player, block }) => {
   const fn = blockHandlers.get(block.typeId);
@@ -210,11 +244,24 @@ export function defineSite(def) {
         return;
       }
       const ops = [...stampOps(LANDMARKS[def.id]), ...plan.ops]; // the landmark first, the site's own cells on top
+      // the map's trees out of the whole build and the air over it first, so none stand in its dead space or float
+      // over it (Mateo 2026-11-12). Sites in a town square keep the town's trees (their stamp says clear: false).
+      let clearBox;
+      if (ops.length && LANDMARKS[def.id]?.clear !== false) {
+        const c = plan.center, b = clearBox = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
+        for (const o of ops) {
+          b.x0 = Math.min(b.x0, c.x + o.dx); b.x1 = Math.max(b.x1, c.x + o.dx);
+          b.y0 = Math.min(b.y0, c.y + o.dy); b.y1 = Math.max(b.y1, c.y + o.dy);
+          b.z0 = Math.min(b.z0, c.z + o.dz); b.z1 = Math.max(b.z1, c.z + o.dz);
+        }
+        yield* clearTrees(dim, b);
+      }
       let failed = 0, n = 0;
       for (const o of ops) {
         try { put(dim, plan.center, o); } catch { failed++; }
         if (++n % 64 === 0) yield;
       }
+      if (clearBox) yield* clearLooseBranches(dim, treeClearBoxes(clearBox));   // a tree on ground the site paved or cut away
       if (failed > ops.length * 0.02) {
         site.busy = false;
         if (by) say(by, `§c${def.name}: ${failed} blocks were not loaded. It will try again when someone comes near.`);
@@ -237,8 +284,18 @@ export function defineSite(def) {
     for (const n of def.npcs(site)) keepNpc(dim, n);
   };
 
+  // A site baked into the map: its blocks already stand. Take its centre and seed and finish it as a build would.
+  site.adopt = (bake) => {
+    const dim = overworld();
+    Object.assign(store.data, { built: true, center: { ...bake.center }, seed: bake.seed ?? store.data.seed, info: bake.info ?? {},
+      armed: false, pending: false, fighting: false, state: {}, baked: true });
+    store.save();
+    try { def.afterBuild?.(site, dim); } catch (e) { console.warn(`[Hollow Crown] ${def.id} after build: ${e}`); }
+    site.keepNpcs();
+  };
+
   // Build the first time someone comes near; keep NPCs in place
-  let area = false;
+  let area = false, baked;
   const AREA = `hc_unlock_${def.id}`;
   onTick(`unlock_${def.id}_build`, 100, () => {
     const dim = overworld();
@@ -248,6 +305,14 @@ export function defineSite(def) {
       return;
     }
     if (!nearby(def.anchor, 56).length) return;
+    // baked into the map (baked_sites.js): take it as it stands, add only its signs, keepers and fight
+    const bake = baked === undefined ? bakedFor(def.id, def.anchor) : baked;
+    if (bake) {
+      const state = bakedState(bake, (x, y, z) => { try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; } });
+      if (state === "wait") return;
+      if (state === "yes") return site.adopt(bake);
+      baked = null; // not this world's: build it the old way
+    }
     if (!area) {
       const L = LANDMARKS[def.id], half = L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0;
       const r = Math.max(def.reach ?? 24, half), a = def.anchor; // hold the landmark loaded too

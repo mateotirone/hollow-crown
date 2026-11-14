@@ -13,6 +13,7 @@ Conventions: rect = [x0, z0, x1, z1] inclusive block indices; sides n (z0), s (z
 "at" along a wall = offset from the wall's centre block, positive to the right as seen from outside.
 Logical facing as in map/structures/bp.py: stairs face their tall side; trapdoors/doors Java-style.
 """
+import math
 from materials import h3
 
 DIRS = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
@@ -77,6 +78,12 @@ STYLES = {
                             floor="acacia_planks", trim="acacia_planks", roof={"block": "smooth_red_sandstone"}, shutter="acacia_planks",
                             door="acacia_door", glass="orange_stained_glass_pane", leaves="jungle_leaves", bush=None, sign_wood="acacia",
                             chimney="sandstone", quoin="cut_sandstone", stone="smooth_sandstone", frame_kind="stone", sill="stair"),
+    # Everwake, the city in the sky (regions/everwake.md): white stone, aged copper roofs, gold, pale blue glass
+    "everwake_stone": dict(plinth={"ladder": ["polished_diorite", "calcite"], "axis": "noise", "scale": 3}, frame="smooth_quartz",
+                           infill={"ladder": ["polished_diorite", "calcite"], "axis": "y"}, floor="birch_planks", trim="birch_planks",
+                           roof={"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}, shutter="birch_planks",
+                           door="birch_door", glass="light_blue_stained_glass_pane", leaves="azalea_leaves", sign_wood="birch",
+                           chimney="quartz_bricks", quoin="diorite", stone="smooth_quartz", panel="birch_trapdoor", frame_kind="stone", sill="stair"),
     "hollow_timber": dict(plinth={"ladder": ["cobbled_deepslate", "polished_blackstone_bricks"], "axis": "noise", "scale": 3},
                           frame="dark_oak_log", infill="siege:pale_ash", floor="dark_oak_planks", trim="dark_oak_planks",
                           roof={"ladder": ["cobbled_deepslate", "deepslate_tiles"], "axis": "y"}, shutter="dark_oak_planks",
@@ -1403,7 +1410,8 @@ def belfry(ctx, s):
     (round angle, when the face is 3 or more wide), a beam ring on top, a bell hanging from a beam across the
     middle, optional louvres (open trapdoors flush to each face) and a cap. Sits on a tower (y "top",
     replacing its roof), on a ridge (y "roof": the deck is built up from the roof) or at a given y.
-    Keys: rect, y, h (open height, 4), pier, deck, trim, roof, louvres, bell, cap ("hip" / "spire" / "none"),
+    Keys: rect, y, h (open height, 4), pier, deck, trim, roof, louvres, bell (true, false, or "empty": beam and a bare
+    chain where the bell was taken down), cap ("hip" / "spire" / "none"),
     finial, base (rows of deck above the ridge, 1)."""
     rect = list(s["rect"]); x0, z0, x1, z1 = rect
     on_roof = s.get("y") == "roof"
@@ -1422,7 +1430,8 @@ def belfry(ctx, s):
     else:
         deck = y
         for x in range(x0, x1 + 1):
-            for z in range(z0, z1 + 1): ctx.set(x, deck, z, "floors", "full", dm)
+            for z in range(z0, z1 + 1):
+                if (x, deck, z) not in getattr(ctx, "hatches", ()): ctx.set(x, deck, z, "floors", "full", dm)   # keep the tower's roof hatch
     W, D = x1 - x0 + 1, z1 - z0 + 1
     thin = min(W, D) <= 3
     for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
@@ -1447,7 +1456,10 @@ def belfry(ctx, s):
         ax = "x" if W >= D else "z"
         for k in range((x0 if ax == "x" else z0) + 1, (x1 if ax == "x" else z1)):
             ctx.set(k if ax == "x" else cx, beam, cz if ax == "x" else k, "frame", "full", tm, axis=ax)
-        ctx.set(cx, beam - 1, cz, "details", raw="bell", facing="s" if ax == "x" else "e")
+        if s.get("bell") == "empty":   # a bell taken down: the beam and a bare chain (Millbrook, where every bell came down)
+            ctx.set(cx, beam - 1, cz, "details", raw="iron_chain", axis="y")
+        else:
+            ctx.set(cx, beam - 1, cz, "details", raw="bell", facing="s" if ax == "x" else "e")
     cap = s.get("cap", "hip")
     if cap == "none": return beam
     return spire(ctx, {"rect": rect, "y": beam + 1, "rows": 1 if cap == "hip" else s.get("rows", 3), "overhang": s.get("overhang", 1),
@@ -1851,7 +1863,9 @@ def keep(ctx, s):
         for (dx, dz) in inner:                                  # nothing stands in front of it inside
             if (cx + dx, cz + dz) == (x - ox, z - oz):
                 for dy in (1, 2): ctx.clear(x - ox, fy + dy, z - oz)
-    for y in range(y0 + 2, top + 1):                            # the ladder, from the ground floor to the deck
+    # the ladder, from the ground floor to the deck; under a cone cap it stops a block lower, where the wall
+    # behind it ends (the top rung hung on air and dropped, the arena's gate towers 2026-11-13)
+    for y in range(y0 + 2, top + (0 if s.get("cap") == "cone" else 1)):
         ctx.set(lcell[0], y, lcell[1], "details", raw="ladder", facing=OPP[lad])
     if s.get("cap") == "cone":                                 # a round tower's conical cap (towers/README 5)
         _cone_cap(ctx, cx, cz, r, top, s); s = dict(s, flags=[])
@@ -2093,6 +2107,159 @@ def bridge(ctx, s):
 
 PARTS["bridge"] = bridge
 
+
+# ---- sideways bodies of revolution (air boat envelopes, barrels on their side, hulls of airships) ----
+# The shape fitter reads up/down surfaces as a height field, which suits domes but leaves a body lying on its
+# side jagged and full of holes. A body along a horizontal axis is fitted ring by ring instead: each slice
+# across the axis is a circle of full blocks, upright stairs on the top half, upside-down stairs underneath and
+# slabs at the crown and keel, with radii held to half blocks so rings run in clean bands (air boat, 2026-11-13).
+HEADING = {   # nose direction -> (x, z) of local (u along the axis, w across, +w = starboard), and local facing map
+    "e": (lambda u, w: (u, w), {"e": "e", "w": "w", "s": "s", "n": "n"}),
+    "w": (lambda u, w: (-u, -w), {"e": "w", "w": "e", "s": "n", "n": "s"}),
+    "s": (lambda u, w: (-w, u), {"e": "s", "w": "n", "s": "w", "n": "e"}),
+    "n": (lambda u, w: (w, -u), {"e": "n", "w": "s", "s": "e", "n": "w"}),
+}
+
+
+def turn_cell(cell, at, heading):
+    """A local cell [u, y, w, block, {states}] (u east = toward the nose) placed at `at` facing `heading`."""
+    u, y, w, b = cell[:4]
+    st = dict(cell[4]) if len(cell) > 4 else {}
+    xz, fm = HEADING[heading]
+    dx, dz = xz(u, w)
+    if "facing" in st: st["facing"] = fm[st["facing"]]
+    if st.get("axis") in ("x", "z") and heading in ("n", "s"): st["axis"] = "z" if st["axis"] == "x" else "x"
+    return [at[0] + dx, at[1] + y, at[2] + dz, b] + ([st] if st else [])
+
+
+def profile_r(profile, u):
+    if u <= profile[0][0]: return profile[0][1]
+    for (u0, r0), (u1, r1) in zip(profile, profile[1:]):
+        if u0 <= u <= u1: return r0 + (r1 - r0) * (u - u0) / (u1 - u0)
+    return 0.0
+
+
+def ring_fit(R, q=4):
+    """One circular slice of radius R round the centre of block (0, 0): {(y, w): (kind, facing, half)}."""
+    out, n = {}, int(R) + 2
+    opts = [("full", None, None, lambda i, j: True), ("slab", None, "bottom", lambda i, j: i < q // 2),
+            ("slab", None, "top", lambda i, j: i >= q // 2),
+            ("stairs", "n", "bottom", lambda i, j: i < q // 2 or j < q // 2), ("stairs", "s", "bottom", lambda i, j: i < q // 2 or j >= q // 2),
+            ("stairs", "n", "top", lambda i, j: i >= q // 2 or j < q // 2), ("stairs", "s", "top", lambda i, j: i >= q // 2 or j >= q // 2)]
+    rank = {"air": 0, "full": 0, "stairs": 1, "slab": 2}
+    for y in range(-n, n + 1):
+        for w in range(-n, n + 1):
+            m = [[(w - .5 + (j + .5) / q) ** 2 + (y - .5 + (i + .5) / q) ** 2 <= R * R for j in range(q)] for i in range(q)]
+            tot = sum(map(sum, m))
+            if tot == 0: continue
+            if tot == q * q: out[(y, w)] = ("full", None, None); continue
+            mis = lambda f: sum(1 for i in range(q) for j in range(q) if f(i, j) != m[i][j])
+            best = min([("air", None, None, lambda i, j: False)] + opts, key=lambda o: (mis(o[3]), rank[o[0]]))
+            if best[0] != "air": out[(y, w)] = best[:3]
+    return out
+
+
+def envelope_cells(profile, belly="light_gray_wool", top="white_wool", rib=None, rib_every=8, cap=None, cap_len=(2, 4),
+                   belly_rows=5, shell=1):
+    """Local cells [u, y, w, block, {states}] of a body of revolution along u (tail u 0, nose at the last profile u),
+    axis through the centre of block row y 0. profile [[u, r], ...]. Two-row dithered seam from belly to top
+    `belly_rows` under the axis; `rib` rings every `rib_every`; `cap` on the last cap_len[1] / first cap_len[0] slices."""
+    L = int(profile[-1][0])
+    rings = {u: ring_fit(max(0.8, math.floor(profile_r(profile, u) * 2 + .5) / 2)) for u in range(0, L + 1)}
+    solid = lambda u, y, w: rings.get(u, {}).get((y, w), ("",))[0] == "full"
+    out = []
+    for u, cells in rings.items():
+        for (y, w), (kind, f, h) in cells.items():
+            if kind == "full" and shell and all(solid(*p) for p in ((u + 1, y, w), (u - 1, y, w), (u, y + 1, w), (u, y - 1, w), (u, y, w + 1), (u, y, w - 1))):
+                continue
+            if cap and (u > L - cap_len[1] or u < cap_len[0]): b = cap
+            elif rib and u % rib_every == 0 and rib_every <= u <= L - cap_len[1]: b = rib
+            else:
+                t = y + belly_rows
+                b = belly if t < 0 or (t < 2 and (u + w + t) % 2 == 0) else top
+            if kind == "full": out.append([u, y, w, b])
+            elif kind == "slab": out.append([u, y, w, b + "_slab", {"half": h}])
+            else: out.append([u, y, w, b + "_stairs", {"facing": f, "half": h}])
+    return out
+
+
+def envelope(ctx, s):
+    """Part "envelope": a body of revolution lying along a horizontal axis, fitted ring by ring (see ring_fit).
+    at [x, y, z] = the tail-end centre block of the axis, heading e/w/n/s = the way the nose points, profile
+    [[u, r], ...] from the tail (u 0) to the nose, belly / top / rib / cap blocks (with _stairs and _slab forms),
+    rib_every, belly_rows (rows under the axis where the belly colour gives way to the top)."""
+    for c in envelope_cells(s["profile"], s.get("belly", "light_gray_wool"), s.get("top", "white_wool"), s.get("rib"),
+                            s.get("rib_every", 8), s.get("cap"), tuple(s.get("cap_len", (2, 4))), s.get("belly_rows", 5)):
+        x, y, z, b, *st = turn_cell(c, s["at"], s.get("heading", "e"))
+        ctx.set(x, y, z, "frame", raw=b, **(st[0] if st else {}))
+
+
+PARTS["envelope"] = envelope
+
+
+
+def ring_norm(x, z, chamfer=None):
+    """Distance from the centre for ring builds (stands, arena walls): a square ring (chamfer None), or an
+    octagon whose diagonal faces are cut `chamfer` in from the corners (|x| + |z| - chamfer)."""
+    ax, az = abs(x), abs(z)
+    return max(ax, az) if chamfer is None else max(ax, az, ax + az - chamfer)
+
+
+def stands(ctx, s):
+    """Tiered seating round an open floor (an arena, a tilting ground, a moot): one row per ring of the
+    octagon (or square) round `at`, every row one block up and one block out, so each row sees over the
+    heads of the row in front (07 detailing: depth outward; the arena, 2026-11-13).
+
+    at [x, z] the floor centre, chamfer (the octagon's corner cut, None for a square), from / to (the first
+    and last row's ring), y (the first row's seat block), walk ([ring, ...]: level walkways a row wide that
+    do not rise, between tiers), seat (stairs material: each seat is a stair with its tall side away from the
+    floor, so people sit facing in; on the diagonal faces a bottom slab, a bench), aisle (material of the
+    stairs every `aisle_every` blocks along the straight faces, marking the ways up), band ({"every": 4,
+    "material": ...}: every few rows in a lighter stone, so the tiers read from across the floor), fill (what is under the
+    seats, down to `base`), skip ([[x0, z0, x1, z1], ...] world boxes to leave out, for
+    stair halls and boxes built into the stands), round (true: the rows are circles, d = round(hypot), for a
+    round amphitheatre; the aisles then run out along `aisles` evenly spaced rays instead of every few blocks,
+    and every seat is a stair facing its nearest axis). The seat spots (the air block a person stands in) go to the
+    layout as info["stands"]."""
+    cx, cz = s["at"]; ch = s.get("chamfer"); d0, d1 = s["from"], s["to"]; y0 = s["y"]
+    walk = set(s.get("walk", [])); seat = s.get("seat", "stone_bricks"); aisle = s.get("aisle", seat)
+    every = s.get("aisle_every", 0); fill = s.get("fill", seat); base = s.get("base", 0); skip = s.get("skip", [])
+    band = s.get("band") or {}                   # {"every": 4, "material": ...}: a lighter row every few, so the tiers read
+    rnd = s.get("round", False); n_ais = s.get("aisles", 0)
+    tops, y = {}, y0
+    for d in range(d0, d1 + 1):
+        if d in walk and d != d0: y -= 1
+        tops[d] = y; y += 1
+    spots = ctx.info.setdefault("stands", [])
+    for x in range(-d1, d1 + 1):
+        for z in range(-d1, d1 + 1):
+            d = int(round(math.hypot(x, z))) if rnd else ring_norm(x, z, ch)
+            if not d0 <= d <= d1: continue
+            if any(a <= x + cx <= c and b <= z + cz <= e for a, b, c, e in skip): continue
+            t = tops[d]
+            for yy in range(base, t): ctx.set(cx + x, yy, cz + z, "foundation", "full", fill)
+            ax, az = abs(x), abs(z)
+            diag = not rnd and ch is not None and ax + az - ch > max(ax, az)
+            if d in walk:
+                ctx.set(cx + x, t, cz + z, "floors", "full", fill); continue
+            if diag:
+                ctx.set(cx + x, t, cz + z, "floors", "slab", seat, half="bottom")
+            else:
+                face = ("s" if z > 0 else "n") if az >= ax else ("e" if x > 0 else "w")
+                along = x if face in "ns" else z
+                if rnd and n_ais:                        # on an aisle ray: within half a block of it, across
+                    a = math.atan2(x, -z) * n_ais / (2 * math.pi)
+                    on = abs(a - round(a)) * 2 * math.pi * math.hypot(x, z) / n_ais <= 0.5
+                else:
+                    on = every and along % every == 0
+                m = aisle if on else seat
+                if band and (d - d0) % band.get("every", 4) == band.get("every", 4) - 1: m = band.get("material", aisle)
+                ctx.set(cx + x, t, cz + z, "floors", "stairs", m, facing=face, half="bottom")
+                if (x + z) % 2 == 0: spots.append([cx + x, t + 1, cz + z])
+    ctx.info["stand_rows"] = tops
+
+
+PARTS["stands"] = stands
 
 def run(ctx, pt):
     k = pt.get("part")

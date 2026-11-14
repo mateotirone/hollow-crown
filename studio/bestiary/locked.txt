@@ -105,3 +105,13 @@ textures/models/armor/guard_emberwaste_layer_*.png
 textures/items/siege_guard_emberwaste_*.png
 textures/models/armor/guard_blackfen_layer_*.png
 textures/items/siege_guard_blackfen_*.png
+textures/blocks/unlocks/*.png
+textures/items/vault/vault_key.png
+textures/items/siege_guardgear_*.png
+textures/items/siege_guard_*_dyed.png
+textures/models/siege_armor/rimeforged_*.png
+textures/models/armor/rimeforged_layer_*.png
+textures/items/siege_rimeforged_*.png
+textures/items/siege_rime_*.png
+textures/models/siege_armor/codex_*.png
+textures/items/codex/*.png

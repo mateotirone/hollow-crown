@@ -65,5 +65,9 @@ def bake(plan_path, structures, treedb):
 if __name__ == "__main__":
     plan, structures, treedb, dst = sys.argv[1:5]
     d = bake(plan, structures, treedb)
+    import furnish_blocks  # every building has an interior (Mateo 2026-11-12): empty rooms get furniture first
+    furnish_blocks.furnish_worldblocks(d, json.load(open(plan)))
+    import light_blocks   # every build lit at night (Mateo 2026-11-13): the engine's light stage over the whole town
+    light_blocks.light_worldblocks(d)
     with open(dst, "w") as fh: json.dump(d, fh, separators=(",", ":"))
     print(d["town"], len(d["blocks"]), "blocks,", len(d["palette"]), "palette entries ->", dst)

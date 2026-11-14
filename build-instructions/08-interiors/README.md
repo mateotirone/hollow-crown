@@ -44,9 +44,19 @@ The use names the rooms storey by storey, ground first; the last one repeats upw
 | barracks | guard room | bunks | |
 | library | library | library | |
 | storage, stable | store / stable | | |
+| storehouse | chest store | chest store | chest store |
 
 A building with wings: each block's storey is its own room (a wing gets its own long table, its own
 hearth), while the walkway is checked across the whole floor.
+
+### The chest store (Mateo, 2026-11-13)
+
+`"interior": {"use": "storehouse", "pillar": "stone_bricks", "beam": "stone_bricks"}` (the Storehouse): chests turned
+sideways (facing along the wall, so you see their side; side by side along their own facing they never join into
+double chests) in 3 x 3 bays between pillars of the region's stone, with a beam of stone over each bay. Neighbouring bays
+share a pillar, so a wall run of 4n + 1 holds n bays. A bay goes only on a blank wall (no glass or door behind it), keeps
+clear of the stairs and the door, and keeps every chest front on the walkway. Rooms 11 or more wide also get free-standing
+racks 3 in from each long wall, open both sides, with cross aisles at the ends. A roof's tie beam over a bay is its beam.
 
 ## The rules the skill follows
 
@@ -58,6 +68,9 @@ hearth), while the walkway is checked across the whole floor.
   chimney breast free for the hearth.
 - The well on the upper floor is guarded with a fence along its open side.
 - Where no flight fits (a narrow tower), a ladder against a blank wall with a hole above.
+- **A roof you walk on is reached** (Mateo 2026-11-13, the air boat mast: "how do you get up to the top?"): a
+  tower with a flat top players use (a mooring deck, a lookout, a belfry deck) gets a ladder from its top storey
+  up through a closed top trapdoor hatch in the roof: `"interior": {"use": "tower", "hatch": true}`.
 - An attic (`"attic": true`) gets a floor on the wall plate wherever two rows of air stand over it, and the
   stair comes up into it.
 
@@ -127,7 +140,9 @@ Every interior is checked in a cut-away 3D view before it is shown:
 
 ## Before you move on
 
-- [ ] Every storey reached by a stair or ladder, the well guarded.
+- [ ] Every storey reached by a stair or ladder, the well guarded; a walked-on roof reached through a hatch.
 - [ ] A one-block walkway from the door to every room, stair end, bed, chest and work block.
-- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window.
+- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window. In a hand-drawn design
+      the floor block is y 0, so furniture starts at y 1: check one column of the room before placing anything.
+- [ ] Every ladder hangs on a solid block behind it (check the cell its facing points away from), right under its hatch.
 - [ ] Region woods, rugs and lights; nothing sits on a stair, a well or in a doorway.

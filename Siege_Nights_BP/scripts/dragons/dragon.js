@@ -88,6 +88,7 @@ export function applyRecord(entity, rec, { keepMode = false } = {}) {
   if (!valid(entity)) return;
   rec.mind ??= newMind();
   setProp(entity, "siege:species", rec.species ?? 0);
+  setProp(entity, "siege:hue", rec.hue ?? 0);
   if (rec.down) {
     // unconscious: it just lies there until it is tended, finished off, or bleeds out
     entity.setDynamicProperty(OWNER, rec.owner);

@@ -49,7 +49,7 @@ export function startSiege(provokedBy) {
     else title(player, "§cSiege Night", "§7The settlements are under attack!");
     sfx(player, "sig.siege_horn");
   }
-  emit("siegeStart", { provokedBy });
+  emit("siegeStart", { provokedBy, defenders: Object.keys(state.plans) }); // defenders: ids of the players whose keeps are attacked
 }
 
 export function spawnRaider(dim, type, x, z, fallbackY, tags, name) {
@@ -177,7 +177,8 @@ export function siegeTick() {
     const day = world.getDay();
     const siegeDue = applyFilter("siegeDue", day >= SETTINGS.firstSiegeDay && day % SETTINGS.siegeEveryNNights === 0, { day });
     const anySettlement = Object.keys(state.keeps).length > 0;
-    if (night && siegeDue && anySettlement && day !== state.lastSiegeDay) startSiege();
+    // "holdSiege": Act 1 keeps a settlement's first raid waiting until its lord is home for supper, or midnight
+    if (night && siegeDue && anySettlement && day !== state.lastSiegeDay && !applyFilter("holdSiege", false, { day })) startSiege();
     return;
   }
 

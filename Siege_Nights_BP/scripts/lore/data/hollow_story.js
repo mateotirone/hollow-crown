@@ -88,6 +88,9 @@ export const SCENES = {
     lines: [
       "§7§oThe Court is quiet. One by one the Singers who fell are getting up off the floor, holding their throats.",
       "§7§oNone of them can make a sound. They do not seem to mind. They walk out past you toward the villages, slowly, the way people walk home.",
+      "§7§oBehind the empty throne the sealed gate stands open. Past it the path goes on south, up the Long Climb, to where the land breaks off over the dark.",
+      "§7§oOut over the drop the Seat hangs in the fog. Somebody is still sitting in the Chair. Nothing in the Hollow is singing for him now, and he has not moved.",
+      "§7§oThe Carter is waiting at the Court door. Then the Seat.",
     ],
   },
 };

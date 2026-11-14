@@ -32,7 +32,12 @@
     "is_pushable_by_piston": true
    },
    "minecraft:knockback_resistance": {
-    "value": 0.6
+    "value": 0
+   },
+   "minecraft:ambient_sound_interval": {
+    "value": 12,
+    "range": 20,
+    "event_name": "ambient"
    },
    "minecraft:movement": {
     "value": 0.3

@@ -1,7 +1,7 @@
 // The Hollow Crown: lore. Lore Tomes, the Library (Archive Shelves), the Ledger of Whispers,
 // the mysteries, and the story characters' conversations.
 //
-//   data/tomes_a.js, tomes_b.js, tomes_c.js   the 74 tomes
+//   data/tomes_a.js, tomes_b.js, tomes_c.js   the 75 tomes
 //   data/world.js                             collections, rewards, places, thin places, mysteries
 //   data/dialogue.js                          what the characters say
 //   LORE-BIBLE.md (in siege-nights/)          the whole truth, for the builder only
@@ -41,7 +41,7 @@ import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
-import "./library.js";
+import { slotAt } from "./library.js";
 import "./ledger.js";
 import "./journal.js";
 import "./voices.js";
@@ -57,7 +57,9 @@ import { PLOT_LORE, LOCAL_TOMES, LOCAL_THREADS } from "./data/plots.js";
 import { PLOT_REGION, REGION_BOSS, BOSS_LEADS, REGIONAL_BOSSES, CONVERGE, fallenCount } from "./data/spine.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import "./cases.js";
+import "./places.js";
 import "./singing.js";
+import "./morvane_voice.js"; // Morvane's voice: heard long before he is seen
 import "./truce.js"; // the hidden third ending: the truce renewed at the empty Seat
 import { REVEAL } from "./data/reveal.js";
 import { ART_IDS, GATED } from "./arts.js";
@@ -66,6 +68,16 @@ import { dialogueProblems, SCRIPT_CLUES } from "./npcs.js";
 import "./showcase.js";
 
 addTests("lore", {
+  "Archive Shelf: a click on the front picks the slot under it, as the player sees the shelf": () => {
+    // a shelf facing north is seen from the north: the viewer's left is east (+x)
+    assertEqual(slotAt("north", "North", { x: 0.9, y: 0.8, z: 0 }), 0);
+    assertEqual(slotAt("north", "North", { x: 0.1, y: 0.2, z: 0 }), 5);
+    assertEqual(slotAt("south", "South", { x: 0.1, y: 0.8, z: 1 }), 0);
+    assertEqual(slotAt("east", "East", { x: 1, y: 0.2, z: 0.5 }), 4);
+    assertEqual(slotAt("west", "West", { x: 0, y: 0.8, z: 0.95 }), 2);
+    assertEqual(slotAt("north", "Up", { x: 0.5, y: 1, z: 0.5 }), undefined); // the top is not the front
+    assertEqual(slotAt("north", "South", { x: 0.5, y: 0.5, z: 1 }), undefined);
+  },
   "local lore: every one of the twelve plots has its past, three books and a mystery it can solve": () => {
     assertEqual(Object.keys(PLOT_LORE).sort(), PLOT_PLAN.map((p) => p.name).sort());
     assertEqual(LOCAL_TOMES.length, 36);
@@ -79,7 +91,7 @@ addTests("lore", {
     }
     for (const t of LOCAL_THREADS) assert(answerIsRight(t, t.accept[0]) && !answerIsRight(t, "nobody"), t.id);
     assertEqual(new Set(LOCAL_TOMES.map((t) => t.title)).size, 36);
-    assertEqual(TOMES.length, 74); // the local books never count toward the Unburned Library
+    assertEqual(TOMES.length, 75); // the local books never count toward the Unburned Library
   },
   "the reveal: the scene's line is the journal's own, and nobody names him before the fight": () => {
     assert(JOURNAL.entries.some((e) => e.text.includes(REVEAL.journalLine)), "the line must be word for word from the journal");
@@ -132,9 +144,9 @@ addTests("lore", {
     for (const clue of JOURNAL_CLUES) assert(CLUE_THREADS[clue], clue);
     assert(answerIsRight(THREAD.old_journal, "King Aldric"));
   },
-  "74 tomes with unique ids, three pages or more each": () => {
-    assertEqual(TOMES.length, 74);
-    assertEqual(new Set(TOMES.map((t) => t.id)).size, 74);
+  "75 tomes with unique ids, three pages or more each": () => {
+    assertEqual(TOMES.length, 75);
+    assertEqual(new Set(TOMES.map((t) => t.id)).size, 75);
     for (const t of TOMES) assert(t.pages.length >= 3 && t.title && t.author && t.where && t.hint, t.id);
   },
   "every collection has the tomes it says, numbered 1..n": () => {
@@ -196,7 +208,7 @@ addTests("lore", {
     p.solved.push("lost_days");
     assertEqual(startNode(wren, p, {}), "after");
     assert(holds("path:marked", p, { path: "marked" }) && !holds("!flag:wren_met", p, {}));
-    assertEqual(startNode(NPCS.find((n) => n.id === "sage"), blankProgress(), { shelved: 74 }), "all");
+    assertEqual(startNode(NPCS.find((n) => n.id === "sage"), blankProgress(), { shelved: 75 }), "all");
   },
   "the late truths can't be answered from early clues": () => {
     const p = blankProgress();

@@ -1,0 +1,7 @@
+{"name": "millbrook_order_waystation", "edition": "bedrock",
+ "parts": [
+  {"part": "house", "style": "vale_stone", "rect": [-4, -5, 4, 5], "plinth": 2, "storeys": [5],
+   "door": {"side": "s", "kind": "grand", "steps": 1}, "roof": {"type": "gable", "ridge": "z", "pitch": 1}}
+ ],
+ "place": []
+}

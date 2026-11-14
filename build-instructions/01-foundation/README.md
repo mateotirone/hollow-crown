@@ -15,6 +15,11 @@ every post has something solid under it.
 
 ## Step 1: Level the footprint
 
+Placed by a generator (towns, plots, story sites, the game's Foundation Stone): don't level by hand. The one
+terraform pass (`map/structures/terraform.py`, house rules "Every placed thing is terraformed") picks the floor,
+cuts the pad, blends a skirt round it and meets the door landing and streets. The steps below are for a build
+set by hand on its own.
+
 1. Take the footprint plus one block all round (plus the steps and any terrace from the plan).
 2. Set the ground level `y = 0` for the build: the **average** ground height under the front, rounded,
    unless the street gives it.

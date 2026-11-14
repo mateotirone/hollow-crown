@@ -85,7 +85,16 @@ def stall(seed):
     s.set(2, 1, 1, rnd.choice(["barrel", "pumpkin", "hay_block"]))
     return s.finish()
 
-def lamp():
-    l = Blueprint("lamp_post")
-    l.set(0, 1, 0, "stone_brick_wall"); l.set(0, 2, 0, "dark_oak_fence"); l.set(0, 3, 0, "dark_oak_fence"); l.set(0, 4, 0, "lantern")
+# street lamps per region (Mateo 2026-11-12: "none of the towns have light"): a stone foot, a post in the
+# region's wood, a lantern on top; the square's lamps carry a second lantern hung from an arm
+LAMP_STYLE = {"vale": ("stone_brick_wall", "dark_oak_fence"), "frost": ("cobbled_deepslate_wall", "spruce_fence"),
+              "salt": ("stone_brick_wall", "birch_fence"), "ember": ("sandstone_wall", "acacia_fence"),
+              "fen": ("mud_brick_wall", "mangrove_fence")}
+
+def lamp(region="vale", arm=False):
+    foot, post = LAMP_STYLE.get(region, LAMP_STYLE["vale"])
+    l = Blueprint(f"lamp_post_{region}{'_arm' if arm else ''}")
+    l.set(0, 1, 0, foot); l.set(0, 2, 0, post); l.set(0, 3, 0, post); l.set(0, 4, 0, "lantern")
+    if arm:                                      # an arm toward +z with a hanging lantern (turned to face the street)
+        l.set(0, 3, 1, post); l.set(0, 2, 1, "lantern", hanging=True)
     return l.finish()

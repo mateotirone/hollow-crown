@@ -39,7 +39,7 @@ export const SITE_NAMES = {
 const K_SITE = "hc:source_site"; // the secret pick (shared with the lore thread)
 const K_SITES = "hc:source_sites"; // { id: { x, y, z, facing } } where Mateo marked each shrine
 const K_RIFT = "hc:rift"; // { open, site, x, y, z, facing } once the Rift is open
-const K_SIGNS = "hc:source_signs"; // { sculk: n } slow creep counter
+const K_SIGNS = "hc:source_signs"; // { sculk: n } slow creep counter (now amethyst buds; the key keeps its old name)
 
 export const FORK = "siege:tuning_fork";
 const OVERWORLD = "minecraft:overworld";
@@ -57,7 +57,8 @@ export const getSites = () => load(K_SITES, {});
 export function recordSite(id, spot) {
   if (!SOURCE_SITE_IDS.includes(id)) return;
   const sites = getSites();
-  sites[id] = { x: spot.x, y: spot.y, z: spot.z, facing: spot.facing };
+  // h: crack height (thin places); auto: worked out from the map's data before the cave was built (thinplaces.js)
+  sites[id] = { x: spot.x, y: spot.y, z: spot.z, facing: spot.facing, ...(spot.h ? { h: spot.h } : {}), ...(spot.auto ? { auto: true } : {}) };
   save(K_SITES, sites);
 }
 
@@ -108,16 +109,18 @@ export function openRift(by) {
   const id = getSourceSite();
   const site = getSites()[id];
   if (!site) return { ok: false, why: `the picked site has not been marked yet` };
+  if (site.auto) return { ok: false, why: `its cave has not been built yet` }; // requestRift (thinplaces.js) builds it first
   const rift = getRift();
   if (rift?.open) return { ok: false, why: "the Rift is already open" };
   save(K_RIFT, { open: true, site: id, x: site.x, y: site.y, z: site.z, facing: site.facing, by: by?.name, day: world.getDay?.() });
+  // a thin place's crack runs its chamber's full height and opens on the void; a hand-marked seam keeps the old crack
   tearOpen(world.getDimension(OVERWORLD), site, site.facing, () => {
     world.sendMessage(TEXT.riftOpened);
     for (const p of world.getAllPlayers()) {
       try { sfx(p, "mob.warden.roar", { volume: 0.6, pitch: 0.5 }); } catch {}
     }
     try { system.sendScriptEvent("siege:undertow_rift_opened", JSON.stringify({ site: id, by: by?.name })); } catch {}
-  });
+  }, site.h ? { height: site.h, deep: true } : {});
   return { ok: true };
 }
 
@@ -181,7 +184,9 @@ function strike(player, loc) {
 }
 
 // Signs at the real site: on siege nights a low bell tolls from the seam and violet motes drift
-// out of it, and over the weeks sculk creeps across the rock around it. Decoys stay dead.
+// INTO it (a draught drawn toward the wall), and over the weeks small amethyst buds come up on the rock round it
+// (Mateo 2026-11-12: keep the seven caves and the Field Notes, add tells; buds, not sculk, so the rock of each
+// place keeps its own look). Decoys stay dead.
 export function sourceSignsTick(isNight) {
   const id = getSourceSite();
   const site = getSites()[id];
@@ -202,8 +207,8 @@ export function sourceSignsTick(isNight) {
     for (let y = site.y + 3; y >= site.y - 3; y--) {
       try {
         const b = dim.getBlock({ x, y, z }), above = dim.getBlock({ x, y: y + 1, z });
-        if (b && above && !b.isAir && !b.isLiquid && above.isAir && b.typeId !== SEAM && !b.typeId.startsWith("siege:")) {
-          b.setType("minecraft:sculk");
+        if (b && above && !b.isAir && !b.isLiquid && above.isAir && b.typeId !== SEAM && !b.typeId.startsWith("siege:") && !b.typeId.includes("amethyst")) {
+          above.setType("minecraft:small_amethyst_bud"); // the rock is left as it is: only the buds give the place away
           signs.sculk++;
           save(K_SIGNS, signs);
           break;

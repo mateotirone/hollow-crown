@@ -1,0 +1,223 @@
+<title>Town Audit 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: an inspector's sheet. Site picker on top, the model beside its numbered findings, list scrolls on its own. */
+:root {
+  --bg: #eef0ec; --panel: #ffffff; --ink: #1d2420; --muted: #5d685f; --line: #d0d7cf;
+  --accent: #39634a; --accent-ink: #ffffff; --stage: #c3d8ea;
+  --fix: #b3412e; --check: #b07a12; --info: #4f6d8f;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141916; --panel: #1c231f; --ink: #e4eae5; --muted: #97a499; --line: #2e3a32;
+  --accent: #8ccf9f; --accent-ink: #0f1a12; --stage: #1b2733; --fix: #ef8a76; --check: #e6b65a; --info: #8fb0d6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141916; --panel: #1c231f; --ink: #e4eae5; --muted: #97a499; --line: #2e3a32;
+  --accent: #8ccf9f; --accent-ink: #0f1a12; --stage: #1b2733; --fix: #ef8a76; --check: #e6b65a; --info: #8fb0d6; color-scheme: dark }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1400px; margin: 0 auto; padding-block: 18px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 12px; }
+h1 { font-family: var(--display); font-size: 1.45rem; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 80ch; }
+.picker { display: flex; flex-direction: column; gap: 6px; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); min-width: 64px; }
+button.opt { font: 500 0.86rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; display: inline-flex; gap: 6px; align-items: baseline; }
+button.opt .n { font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+button.opt:hover { border-color: var(--accent); }
+button.opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.opt[aria-pressed="true"] .n { color: var(--accent-ink); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; align-items: start; }
+@media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; height: min(76vh, 820px); min-height: 340px; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.pin { position: absolute; transform: translate(-50%, -100%); font: 700 0.7rem var(--body); color: #fff; padding: 1px 6px; border-radius: 9px; white-space: nowrap; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
+.pin.fix { background: #b3412e; } .pin.check { background: #a36f0c; } .pin.info { background: #4f6d8f; }
+.pin.on { transform: translate(-50%, -100%) scale(1.35); z-index: 3; box-shadow: 0 0 0 3px rgba(0,0,0,0.25); }
+.hint { position: absolute; left: 10px; bottom: 8px; font-size: 0.76rem; color: #24302a; background: rgba(255,255,255,0.78); padding: 2px 8px; border-radius: 4px; pointer-events: none; }
+.status[hidden] { display: none; }
+.status { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #24302a; font-weight: 500; pointer-events: none; }
+.side { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; display: flex; flex-direction: column; max-height: min(76vh, 820px); min-height: 340px; min-width: 0; }
+.side header { padding: 12px 14px 8px; border-bottom: 1px solid var(--line); }
+.side h2 { font-family: var(--display); font-size: 1.1rem; margin: 0; }
+.stats { color: var(--muted); font-size: 0.82rem; margin: 2px 0 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.filters button { font: 500 0.76rem var(--body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 1px 8px; cursor: pointer; }
+.filters button[aria-pressed="false"] { opacity: 0.45; text-decoration: line-through; }
+ol.list { list-style: none; margin: 0; padding: 6px 0; overflow-y: auto; flex: 1; }
+ol.list li button { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 6px; width: 100%; text-align: left; background: none; border: 0; padding: 6px 12px; color: var(--ink); font: 0.84rem/1.4 var(--body); cursor: pointer; border-left: 3px solid transparent; }
+ol.list li button:hover { background: var(--bg); }
+ol.list li button.on { background: var(--bg); border-left-color: var(--accent); }
+.num { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--muted); }
+.kind { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+.kind.fix { color: var(--fix); } .kind.check { color: var(--check); } .kind.info { color: var(--info); }
+.xyz { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.76rem; }
+.empty { padding: 16px 14px; color: var(--muted); }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<div class="wrap">
+  <header>
+    <h1>Town audit in 3D</h1>
+    <p class="sub">Every NPC town as it stands in the newest map bake, and every plot's Hamlet as the add-on's own code founds it on the real ground, with real Minecraft block textures. Each pin is one finding from the audit; pick it in the list to fly there. Towns show the empty houses furnished, as the next rebake will have them.</p>
+  </header>
+  <div class="picker" id="picker"></div>
+  <div class="main">
+    <div class="stage" id="stage"><div class="status" id="status">Loading...</div><div class="hint">Drag to turn, scroll or pinch to zoom, right-drag to pan</div></div>
+    <aside class="side">
+      <header><h2 id="sname">Site</h2><p class="stats" id="stats"></p><div class="filters" id="filters"></div></header>
+      <ol class="list" id="list"></ol>
+    </aside>
+  </div>
+</div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+const stage = document.getElementById("stage"), status = document.getElementById("status");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(40, 1, 0.3, 1500);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495;
+scene.add(new THREE.HemisphereLight(0xe2ecff, 0x6d5c47, 1.5));
+const sun = new THREE.DirectionalLight(0xfff2de, 1.9); sun.position.set(-60, 110, 45); scene.add(sun);
+scene.background = new THREE.Color(0xbcd6ee); scene.fog = new THREE.Fog(0xd3e3f1, 220, 520);
+const KIND_NAME = { door: "Door", floating: "Floating", hung: "Hung on nothing", facing: "Facing", interior: "Interior", light: "Dark street", ground: "Ground", junk: "Junk", plan: "Plan" };
+let INDEX = [], TEX = null, group = null, pins = [], D = null, cur = -1, hidden = new Set();
+const cache = new Map(), texCache = new Map();
+async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(`Could not load ${u} (${r.status})`); return r.json(); }
+function texture(key) {
+  if (!texCache.has(key)) {
+    const t = new THREE.TextureLoader().load(TEX[key] || TEX.stone || "");
+    t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestMipmapLinearFilter; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    texCache.set(key, t);
+  }
+  return texCache.get(key);
+}
+async function load(i) {
+  const e = INDEX[i];
+  if (!cache.has(e.file)) {
+    status.hidden = false; status.textContent = `Loading ${e.name}...`;
+    const d = await getJSON(e.file);
+    const r = await fetch(e.file.replace(/[^/]+$/, d.bin)); if (!r.ok) throw new Error(`Could not load ${d.bin}`);
+    const raw = Uint8Array.from(atob((await r.text()).trim()), (c) => c.charCodeAt(0));   // gzip in base64
+    d.buf = await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+    cache.set(e.file, d);
+  }
+  return cache.get(e.file);
+}
+function build(d) {
+  D = d;
+  if (group) { scene.remove(group); group.traverse((o) => { o.geometry?.dispose(); o.material?.dispose(); }); }
+  group = new THREE.Group(); scene.add(group);
+  for (const m of d.meshes) {
+    const nv = m.nv, nq = nv / 4;
+    const p16 = new Int16Array(d.buf, m.o[0], nv * 3), uv8 = new Uint8Array(d.buf, m.o[1], nv * 2), c8 = new Uint8Array(d.buf, m.o[2], nv), n8 = new Int8Array(d.buf, m.o[3], nq * 3);
+    const pos = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), col = new Float32Array(nv * 3), nor = new Float32Array(nv * 3);
+    for (let i = 0; i < nv * 3; i++) pos[i] = p16[i] / 16;
+    for (let i = 0; i < nv * 2; i++) uv[i] = uv8[i] / 16;
+    for (let i = 0; i < nv; i++) { const a = c8[i] / 255; col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = a; const q = (i >> 2) * 3; nor[i * 3] = n8[q]; nor[i * 3 + 1] = n8[q + 1]; nor[i * 3 + 2] = n8[q + 2]; }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+    g.setAttribute("uv", new THREE.BufferAttribute(uv, 2)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    const idx = new Uint32Array(nq * 6); for (let i = 0; i < nq; i++) { const b = i * 4; idx.set([b, b + 1, b + 2, b, b + 2, b + 3], i * 6); }
+    g.setIndex(new THREE.BufferAttribute(idx, 1));
+    const mat = new THREE.MeshLambertMaterial({ map: texture(m.k), vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.8 : 1, side: m.cut ? THREE.DoubleSide : THREE.FrontSide });
+    if (m.glow) { mat.emissive = new THREE.Color(0x553311); }
+    group.add(new THREE.Mesh(g, mat));
+  }
+  pins.forEach((p) => p.el.remove()); pins = [];
+  d.findings.forEach((f, i) => {
+    const el = document.createElement("div"); el.className = `pin ${f.sev}`; el.textContent = i + 1; el.title = f.what;
+    el.addEventListener("click", () => focus(i)); stage.appendChild(el);
+    pins.push({ el, v: new THREE.Vector3(f.at[0] + 0.5, f.at[1] + 1.6, f.at[2] + 0.5), f });
+  });
+  document.getElementById("sname").textContent = `${d.name}${d.region ? ", " + d.region : ""}`;
+  const s = d.stats || {};
+  document.getElementById("stats").textContent = `${d.kind === "hamlet" ? "Hamlet founded by the game" : "Town in the map bake"} · ${d.findings.length} findings · ${s.doors ?? "?"} doors · ${(s.blocks ?? 0).toLocaleString()} blocks`;
+  hidden = new Set(); filters(); list();
+  const r = d.radius; cam.position.set(-r * 0.9, r * 0.85, r * 0.95); controls.target.set(0, 0, 0); controls.update();
+  status.hidden = true;
+}
+function filters() {
+  const box = document.getElementById("filters"); box.innerHTML = "";
+  const counts = {}; D.findings.forEach((f) => (counts[f.kind] = (counts[f.kind] || 0) + 1));
+  for (const [k, n] of Object.entries(counts).sort((a, b) => b[1] - a[1])) {
+    const b = document.createElement("button"); b.textContent = `${KIND_NAME[k] || k} ${n}`; b.setAttribute("aria-pressed", "true");
+    b.addEventListener("click", () => { hidden.has(k) ? hidden.delete(k) : hidden.add(k); b.setAttribute("aria-pressed", String(!hidden.has(k))); list(); });
+    box.appendChild(b);
+  }
+}
+function list() {
+  const ol = document.getElementById("list"); ol.innerHTML = "";
+  let shown = 0;
+  D.findings.forEach((f, i) => {
+    const off = hidden.has(f.kind); pins[i].off = off;
+    if (off) return; shown++;
+    const li = document.createElement("li"), b = document.createElement("button"); b.id = `f${i}`;
+    b.innerHTML = `<span class="num">${i + 1}</span><span><span class="kind ${f.sev}">${KIND_NAME[f.kind] || f.kind}</span><br>${f.what.replace(/</g, "&lt;")}<br><span class="xyz">${f.at[0] + D.centre[0]}, ${f.at[1] + D.centre[1]}, ${f.at[2] + D.centre[2]}</span></span>`;
+    b.addEventListener("click", () => focus(i)); li.appendChild(b); ol.appendChild(li);
+  });
+  if (!shown) ol.innerHTML = `<li class="empty">${D.findings.length ? "All findings are filtered out." : "No findings at this site."}</li>`;
+}
+let fly = null;
+function focus(i) {
+  cur = i; const f = D.findings[i];
+  document.querySelectorAll("ol.list button.on").forEach((b) => b.classList.remove("on"));
+  const b = document.getElementById(`f${i}`); if (b) { b.classList.add("on"); b.scrollIntoView({ block: "nearest" }); }
+  pins.forEach((p, j) => p.el.classList.toggle("on", j === i));
+  const t = new THREE.Vector3(f.at[0] + 0.5, f.at[1] + 0.5, f.at[2] + 0.5);
+  const dir = cam.position.clone().sub(controls.target).normalize();
+  fly = { t0: performance.now(), fromT: controls.target.clone(), toT: t, fromP: cam.position.clone(), toP: t.clone().add(dir.multiplyScalar(22)) };
+}
+function picker() {
+  const box = document.getElementById("picker");
+  for (const [kind, label] of [["town", "Towns"], ["hamlet", "Hamlets"]]) {
+    const row = document.createElement("div"); row.className = "group";
+    row.innerHTML = `<span class="label">${label}</span>`;
+    INDEX.forEach((e, i) => {
+      if (e.kind !== kind) return;
+      const b = document.createElement("button"); b.className = "opt"; b.id = `s${i}`; b.setAttribute("aria-pressed", "false");
+      b.innerHTML = `${e.name}<span class="n">${e.findings}</span>`; b.addEventListener("click", () => pick(i)); row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+}
+async function pick(i) {
+  INDEX.forEach((_, j) => document.getElementById(`s${j}`)?.setAttribute("aria-pressed", String(i === j)));
+  try { location.hash = INDEX[i].file.replace(/^sites\/|\.json$/g, "").replace(/_/g, "-"); } catch {}
+  try { build(await load(i)); } catch (e) { status.hidden = false; status.textContent = e.message; }
+}
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage);
+const v = new THREE.Vector3();
+function frame(now) {
+  if (fly) {
+    const k = Math.min(1, (now - fly.t0) / 700), e = k * k * (3 - 2 * k);
+    controls.target.lerpVectors(fly.fromT, fly.toT, e); cam.position.lerpVectors(fly.fromP, fly.toP, e);
+    if (k >= 1) fly = null;
+  }
+  controls.update(); renderer.render(scene, cam);
+  const w = stage.clientWidth, h = stage.clientHeight;
+  for (const p of pins) {
+    v.copy(p.v).project(cam);
+    const vis = !p.off && v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05 && cam.position.distanceTo(p.v) < 260;
+    p.el.hidden = !vis;
+    if (vis) { p.el.style.left = `${(v.x + 1) / 2 * w}px`; p.el.style.top = `${(1 - v.y) / 2 * h}px`; }
+  }
+  requestAnimationFrame(frame);
+}
+(async () => {
+  try {
+    [INDEX, TEX] = await Promise.all([getJSON("index.json"), getJSON("tex.json")]);
+    picker(); resize(); requestAnimationFrame(frame);
+    const h = location.hash.slice(1).replace(/-/g, "_");
+    const start = Math.max(0, INDEX.findIndex((e) => e.file === `sites/${h}.json`));
+    pick(start >= 0 ? start : 0);
+  } catch (e) { status.textContent = e.message; }
+})();
+</script>

@@ -1,6 +1,6 @@
-// Waking the Ash Seneschal, in the Faceless Vault under Sunscar.
+// Waking the Ash Seneschal, in the Faceless Vault in the desert south of Sunscar.
 //
-//   A sandstone stair at the south edge of Sunscar goes down to an antechamber. Five statues of one king stand in
+//   A sandstone stair in a sunken courtyard among the dunes south of Sunscar goes down to an antechamber. Five statues of one king stand in
 //   it with their faces chiselled off, each with a line carved under it about when it was made.
 //   1. Turn the statues to face the vault door in the order of the king's life, youngest first. A wrong one and they
 //      all grind back, and ash scarabs pour out of the cracks. The fifth opens a niche beside the door: the
@@ -10,9 +10,11 @@
 //   The seal stays in the wall. Once a siege night has passed after he falls, press it again.
 
 import { system, BlockPermutation } from "@minecraft/server";
-import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put } from "./site.js";
+import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put, makeApproach } from "./site.js";
 import { makeStatues, statueStep, resting } from "./puzzles.js";
-import { vaultPlan, statueAt, signSpot, doorCells, inVault, VAULT } from "./plans.js";
+import { vaultPlan, statueAt, signSpot, doorCells, inVault, inAshSand, VAULT, ASH_SAND } from "./plans.js";
+import { grantTome } from "../lore/player.js";
+import { TOME_IN_UNLOCKS } from "../lore/places.js";
 
 export const SEAL = "siege:faceless_seal";
 const SCARAB = "siege:ash_scarab";
@@ -52,9 +54,23 @@ export const seneschalSite = defineSite({
   },
   inArena: (site, l) => inVault(site.data.center, l),
   spawnAt: (site) => ({ x: site.data.center.x + 0.5, y: site.data.center.y + VAULT.floor + 1, z: site.data.center.z - 41.5 }),
-  onWin: () => {},
+  onWin: (site) => turnAway(site),
+  tick: (site) => ashSand(site),
   tpAt: (site) => { const c = site.data.center; return { x: c.x + 0.5, y: c.y + 1, z: c.z + 3.5 }; },
   answer: (site) => `Statue order by spot: ${statues(site).spots.map((age, spot) => [age, spot]).sort((a, b) => a[0] - b[0]).map(([, spot]) => spot).join(", ")}`,
+});
+
+// ---------- the sand before the stair: ash scarabs ----------
+const ashSand = makeApproach({
+  mid: (site) => ({ x: site.data.center.x, z: site.data.center.z + ASH_SAND.dz }), r: ASH_SAND.r + 2,
+  inZone: (site, l) => inAshSand(site.data.center, l),
+  mob: SCARAB, count: { base: 3, per: 2, max: 7 },
+  line: "§7The sand in front of the stair shifts under your boots. Then it is not sand. It is ash, and the ash is moving.",
+  cry: "random.anvil_use", cryOpts: { pitch: 1.6, volume: 0.5 },
+  spots: (site, players, n, now) => Array.from({ length: n }, (_, i) => {
+    const c = site.data.center, a = (i / n) * Math.PI * 2 + now;
+    return { x: c.x + 0.5 + Math.sin(a) * (ASH_SAND.r - 3), y: c.y + 1, z: c.z + ASH_SAND.dz + 0.5 + Math.cos(a) * (ASH_SAND.r - 3) };
+  }),
 });
 
 function spotOf(site, block) {
@@ -99,6 +115,7 @@ function turnStatue(site, player, block) {
   site.save();
   try { put(overworld(), d.center, { dx: VAULT.niche.dx, dy: VAULT.floor + 2, dz: VAULT.niche.dz, block: "minecraft:air" }); } catch { /* unloaded */ }
   sound("tile.piston.in", abs(d.center, { dx: VAULT.niche.dx, dy: VAULT.floor + 2, dz: VAULT.niche.dz }), { pitch: 0.5, volume: 1 });
+  for (const id of TOME_IN_UNLOCKS.seneschal) grantTome(player, id); // papers in the niche under the seal
   if (inventoryHas(player, SEAL)) return say(player, "§7A niche grinds open beside the door. It's empty. You already have what it held.");
   give(player, SEAL);
   say(player, "§6A niche grinds open beside the door. Inside, on a bed of ash: a steward's seal, with no face on it.§r You take the Faceless Seal.");
@@ -133,4 +150,19 @@ function summon(site, first, player) {
   }
   cues.push([first ? 175 : 120, () => toAll((p) => say(p, "§6The vault is open. At the far end, someone is sitting at a desk, writing. He does not look up."))]);
   site.summon(cues);
+}
+
+// When he falls, the statues grind round one by one and turn their faces back to the vault door, as they stood for
+// whoever solved them: the vault is empty again (boss walkthrough, Mateo 2026-11-13)
+function turnAway(site) {
+  const c = site.data.center;
+  if (!c) return;
+  const cues = VAULT.spots.map((_, i) => [40 + i * 16, () => {
+    setFace(site, i, "north");
+    sound("random.anvil_use", abs(c, statueAt(i)), { pitch: 0.35 + i * 0.05, volume: 0.6 });
+  }]);
+  cues.push([40 + VAULT.spots.length * 16 + 10, () => {
+    for (const p of nearby(c, 64)) { try { say(p, "§7Out in the antechamber, stone grinds on stone. One by one, the faceless statues turn back to face the vault door, as if to see him out."); } catch { /* gone */ } }
+  }]);
+  for (const [t, fn] of cues) system.runTimeout(() => { try { fn(); } catch { /* unloaded */ } }, t);
 }

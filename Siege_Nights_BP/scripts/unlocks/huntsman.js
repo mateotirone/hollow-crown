@@ -4,15 +4,14 @@
 //   2. Four cairns stand on the shore, each topped with a carved beast. After dark, click them in the rhyme's order:
 //      each one lights as it wakes. The wrong one puts them all out, and rimewolves answer. The fourth gives the
 //      Pale Horn, frozen into the stone under it.
-//   3. On a siege night, take the horn out onto the frozen lake and lay it on the Hunter's Cairn in the middle. It
+//   3. After dark (any night, Mateo 2026-11-13), take the horn out onto the frozen lake and lay it on the Hunter's Cairn in the middle. It
 //      sounds; something answers from far off; hounds; the ice cracks in a ring round you. He rides up out of it.
-//   The horn stays on the cairn. Once a siege night has passed after he falls, sound it again on a siege night.
+//   The horn stays on the cairn. Once a siege night has passed after he falls, sound it again after dark.
 
 import { isNight } from "../siege/api.js";
-import { isSiegeNight } from "../reach/api.js";
-import { defineSite, column, overworld, say, actionbar, sound, ring, abs, mid, setState, put, give, inventoryHas, talk, nearby } from "./site.js";
+import { defineSite, column, overworld, say, actionbar, sound, ring, abs, mid, setState, put, give, inventoryHas, talk, nearby, makeApproach } from "./site.js";
 import { makeHunt, huntStep, resting, BEASTS } from "./puzzles.js";
-import { huntPlan, crackCells, HUNT } from "./plans.js";
+import { huntPlan, crackCells, inIceEdge, HUNT, ICE_EDGE } from "./plans.js";
 
 export const HORN = "siege:pale_horn";
 const WARDEN = "siege_lodge_warden";
@@ -33,7 +32,7 @@ export const huntsmanSite = defineSite({
   *plan(dim, anchor, seed) {
     return yield* huntPlan((x, z) => column(dim, x, z), anchor, makeHunt(seed));
   },
-  npcs: (site) => [{ tag: WARDEN, name: "Old Sigga", skin: 32, spot: mid(site.data.center, site.data.info.warden) }],
+  npcs: (site) => [{ tag: WARDEN, name: "Old Sigga", skin: "warden_sigga", spot: mid(site.data.center, site.data.info.warden) }],
   onNpc: {
     [WARDEN]: (site, player) => void talk(player, "Old Sigga, the lodge warden",
       "§oShe doesn't get up. The fire's out and she hasn't noticed.§r\n\n\"You want the old rhyme. They all want the rhyme, at the end. He taught it to my grandmother's grandmother, and she taught it to me, and I've never once said it out on the ice.\"\n\n"
@@ -44,8 +43,8 @@ export const huntsmanSite = defineSite({
   blocks: {
     "siege:hunt_cairn": (site, player, block) => clickCairn(site, player, block),
     "siege:hunters_cairn": (site, player, block) => site.socket(player, block, {
-      whenOk: isSiegeNight(),
-      notNow: "§7The ice is quiet. It only listens on a siege night.",
+      whenOk: isNight(),
+      notNow: "§7The ice is quiet. It only listens after dark.",
       first: () => summon(site, true),
       again: () => summon(site, false),
     }),
@@ -53,8 +52,26 @@ export const huntsmanSite = defineSite({
   inArena: (site, l) => Math.hypot(l.x - (site.data.center.x + 0.5), l.z - (site.data.center.z + 0.5)) <= HUNT.arena && Math.abs(l.y - site.data.center.y) < 6,
   spawnAt: (site) => ({ x: site.data.center.x + 0.5, y: site.data.center.y + 1, z: site.data.center.z + 9.5 }),
   onWin: (site) => refreeze(site),
+  tick: (site) => iceEdge(site),
   tpAt: (site) => { const c = site.data.center, w = site.data.info.warden; return { x: c.x + w.dx, y: c.y + w.dy + 1, z: c.z + w.dz - 2 }; },
   answer: (site) => `Rhyme order: ${hunt(site).order.map((b) => BEASTS[b].id).join(", ")}`,
+});
+
+// ---------- the ice edge: rimewolves come across the lake after dark ----------
+const iceEdge = makeApproach({
+  mid: (site) => site.data.center, r: ICE_EDGE.r1 + 2,
+  when: () => isNight(),
+  inZone: (site, l) => inIceEdge(site.data.center, l),
+  mob: RIMEWOLF, count: { base: 1, per: 2, max: 5 },
+  line: "§7Out on the ice, something is keeping pace with you. Then there are more of them, and they stop keeping pace.",
+  cry: "mob.wolf.howl", cryOpts: { pitch: 0.8, volume: 2 },
+  // they come along the ice from either side of whoever is furthest out
+  spots: (site, players, n) => Array.from({ length: n }, (_, i) => {
+    const c = site.data.center, p = players[i % players.length].location;
+    const a = Math.atan2(p.x - c.x, p.z - c.z) + (i % 2 ? 1 : -1) * (0.35 + 0.2 * Math.floor(i / 2));
+    const r = (ICE_EDGE.r0 + ICE_EDGE.r1) / 2;
+    return { x: c.x + 0.5 + Math.sin(a) * r, y: c.y + 1, z: c.z + 0.5 + Math.cos(a) * r };
+  }),
 });
 
 function clickCairn(site, player, block) {

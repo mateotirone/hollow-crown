@@ -6,14 +6,15 @@
 //
 //   townFor(plotName) -> the plot's entry, or undefined (the twelve map plots have one)
 //   pickLayout(town, seed) -> layout index
-//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags, long }]
+//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags, long, start }]
+//     start = the design already standing on the slot when the town is founded (the starter village's houses)
 //   groundwork(layout, tier) -> [[dx, dy, dz, paletteIndex], ...] for that tier only
 //   seatOnSlot(slot, bounds) -> { origin: {dx, dy, dz}, forward } | undefined   where a design fits on a slot
 
 import { TOWNS, TOWN_CHARS } from "./towns_data.js";
 
 export const TIER_NAMES = ["Hamlet", "Town", "City", "Castle"];
-export const SIZE_NAMES = { S: "Small", M: "Medium", L: "Large", G: "Great" };
+export const SIZE_NAMES = { S: "Small", M: "Medium", L: "Large", G: "Great", W: "Works" };
 const DOOR = { n: { x: 0, z: -1 }, s: { x: 0, z: 1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } };
 
 export const townFor = (plotName) => (plotName ? TOWNS[String(plotName).toLowerCase()] : undefined);
@@ -34,9 +35,9 @@ export function pickLayout(town, seed) {
 export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 66;
 
 export function slotsOf(layout) {
-  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long]) => ({
+  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long, start]) => ({
     id, size, box: { x0, z0, x1, z1 }, dy, side, door: DOOR[side], step: { x: step[0], z: step[1] },
-    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long,
+    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long, start: start ?? undefined,
   }));
 }
 
@@ -61,7 +62,8 @@ export function groundwork(layout, tier) {
 }
 
 export const fixturesOf = (layout, tier) => (layout?.fix ?? []).filter((f) => f[3] === tier)
-  .map(([kind, x, z, t, dy, a, b, c]) => ({ kind, x, z, tier: t, dy, ...(kind === "tree" ? { species: a, size: b, rotation: c } : { stamp: a, rotation: b }) }));
+  .map(([kind, x, z, t, dy, a, b, c]) => ({ kind, x, z, tier: t, dy,
+    ...(kind === "tree" ? { species: a, size: b, rotation: c } : kind === "mason_yard" || kind === "storehouse" ? { rotation: a } : { stamp: a, rotation: b }) }));
 
 // The hall's reserved box at a hall level (1..5)
 export const hallBox = (layout, level) => {

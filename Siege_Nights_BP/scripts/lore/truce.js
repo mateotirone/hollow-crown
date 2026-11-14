@@ -32,6 +32,7 @@ import {
   TRUCE, STATES, nameIsSpoken, offerVerdict, isGuestNight, guestsFor, guestSpot, WARES, waresOf, freshPick,
   SEAT_PROMPT, REPLIES, answerFor, KEPT_NEWS, BREAK_ASK, BROKEN_NEWS, DUSK_GUEST, DAWN_GUEST, GUESTS, MARKET_KEEPER, EXPLAIN,
 } from "./data/truce.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const NPC_TYPE = "minecraft:npc";
 const GUEST_NPC_TAG = "siege_truce_guest_npc"; // on the guests themselves
@@ -191,6 +192,14 @@ world.afterEvents.playerInteractWithBlock.subscribe(({ player, block }) => {
 const guestNightNow = () =>
   isGuestNight(world.getDay(), truceState(), { firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights });
 
+// Each guest has their own face; the Even Market keeper is Seneth, the last guest
+const guestSkin = (market, index) => `guest_${market ? 11 : Math.abs(Number(index) || 0) % 12}`;
+addNpcLook((e) => {
+  if (!e.hasTag(GUEST_NPC_TAG)) return undefined;
+  const market = e.hasTag(MARKET_TAG), i = Number(e.getDynamicProperty(GUEST_PROP)) || 0;
+  return { key: guestSkin(market, i), name: `§d${market ? MARKET_KEEPER.name : GUESTS[i % GUESTS.length].name}` };
+});
+
 function spawnGuest(dimension, spot, index, market = false) {
   const top = dimension.getTopmostBlock({ x: spot.x, z: spot.z });
   if (!top) return false;
@@ -199,6 +208,7 @@ function spawnGuest(dimension, spot, index, market = false) {
   if (market) e.addTag(MARKET_TAG);
   e.setDynamicProperty(GUEST_PROP, index);
   e.nameTag = `§d${market ? MARKET_KEEPER.name : GUESTS[index].name}`;
+  dressNpc(e, guestSkin(market, index));
   return true;
 }
 function removeGuests() {
@@ -414,7 +424,7 @@ addTests("lore truce", {
   },
   "guest nights are the third nights, and only while it holds": () => {
     assert(isGuestNight(9, "kept") && !isGuestNight(10, "kept") && !isGuestNight(9, "broken") && !isGuestNight(9, "none"));
-    assert(!isGuestNight(3, "kept"), "not before the first siege day");
+    assert(!isGuestNight(0, "kept") && isGuestNight(3, "kept"), "never before the first siege day, which is day 3");
     assertEqual(guestsFor(1), TRUCE.guestsPerKeep);
     assert(guestsFor(12) * 12 <= TRUCE.maxGuests && guestsFor(12) >= 1);
     assertEqual(guestsFor(0), 0);

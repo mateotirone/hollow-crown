@@ -130,6 +130,12 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
 - campfires in hearths;
 - snow layers beside every step.
 
+**On or beside ice** (huts on a frozen lake, shrines on the shore): Bedrock melts ice next to block light of 12 or
+more, so light these with soul lanterns or candles (10 or less), never lanterns, torches or campfires. A room under
+the water (a shaft down through a lake) is walled in packed ice or stone and set with `dry: true`, so the landmark
+planner puts the walls in before it clears the water inside them (`map/structures/story_places.py`, the Hallowmere
+ice door).
+
 ## Colour and blocks (short)
 
 | Role | Blocks |
@@ -155,6 +161,10 @@ spruces (tall spruce, grey fir).
 
 **Round the foundation:** clumps of spruce leaves under the ground-floor windows and at some corners, never a
 strip round the house (the skill's `bushes`, on by default).
+
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is plank rows in a dark log frame on a deepslate ground storey, the steep pitch 2 gable with dragon heads and snow; inside, `deepslate_bricks` pillars with `polished_deepslate` beams. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
 
 ## Building it with the skill
 

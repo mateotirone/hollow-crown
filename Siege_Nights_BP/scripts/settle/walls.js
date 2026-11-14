@@ -9,7 +9,11 @@
 //   raiseWall(id, level, { center?, style?, bearing? }) -> true | "why not"     does not charge
 //   WALL_LEVELS, MAX_WALL (walldata.js)   wallCap(owner) -> highest level this settlement may raise
 //   answers the town hall's "wallInfo" and "wallUpgrade" events (contract in townhall/flyby.js)
-//   on("wallProgress", ({ id, level, done, total }))   on("wallBuilt", ({ id, level, first }))
+//   on("wallProgress", ({ id, level, done, total }))   on("wallBuilt", ({ id, level, first }))   on("wallWatchBuilt", ({ id, k }))
+// Watchtowers (Mateo, 2026-11-13): levels 1-6 get four watch posts astride the line (walldata.js WATCH; the Low Palisade
+// a small lookout stand, Mateo 2026-11-14, the towers from level 2), raised
+// once the wall is up and taken down before the Watch Wall's stone towers rise in their place or the wall moves out.
+// The wall record keeps them as w.watch = [{ k, origin, forward, style, built }].
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
@@ -19,7 +23,9 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
+import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 
@@ -29,6 +35,13 @@ const walls = () => store.data.walls;
 const save = () => store.save();
 
 export const wallOf = (id) => walls()[id];
+// Put back (or forget, with no record) a settlement's wall record as it was (the battle test, battletest/). Blocks stay.
+export function setWallRecord(id, record) {
+  if (jobs.has(id)) return false;
+  if (record) walls()[id] = record; else delete walls()[id];
+  save();
+  return true;
+}
 export function wallRing(id) {
   const w = walls()[id];
   if (!w?.ground) return undefined;
@@ -253,6 +266,11 @@ function step(id, job) {
       save();
       return world.getPlayers().find((p) => p.id === id)?.sendMessage(`§cThe wall can't be raised: ${problem}`);
     }
+    // the Watch Wall and up have stone towers where the watchtowers stand: those come down first
+    if (!hasWatch(job.level) && w.watch?.length) {
+      if (!job.watchDown) { job.watchDown = "going"; takeDownWatch(id, [...w.watch], () => { job.watchDown = "done"; }); }
+      if (job.watchDown !== "done") return;
+    }
     job.cols = wallColumns({ center: w, radius: w.radius, level: job.level, gateAngle: w.gate, smooth: w.ground });
     clearOldSteps(dim, w, job);
     job.index = Math.min(w.building?.index ?? 0, job.cols.length);
@@ -283,6 +301,7 @@ function step(id, job) {
     // it was never added
   }
   emit("wallBuilt", { id, level: job.level, first: firstTime });
+  raiseWatch(id);
   const player = world.getPlayers().find((p) => p.id === id);
   if (player) {
     title(player, `§6${job.L.name} complete`, "§7Your land now reaches a little past your wall");
@@ -295,7 +314,8 @@ const CARDINALS = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 
 // Raise (or upgrade to) a wall level. center/style/bearing are only needed for the first wall.
 // radius: where a new wall line goes (default WALLS.radius); a town layout starts it at its Hamlet radius.
-export function raiseWall(id, level, { center, style, bearing, radius, shape } = {}) {
+// outline: { radii, radiiAt } from a map plot's starter village (towns_data.js): the wall follows that line at every ring.
+export function raiseWall(id, level, { center, style, bearing, radius, shape, outline } = {}) {
   const L = WALL_LEVELS[level];
   if (!L) return `There is no wall level ${level}.`;
   if (jobs.has(id)) return "A wall is already rising.";
@@ -307,6 +327,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape } =
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
+    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt, ...(outline.tight ? { tight: outline.tight } : {}) }); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -350,6 +371,7 @@ export function moveWall(id, radius, down = () => {}) {
   save();
   const L = WALL_LEVELS[old.level] ?? WALL_LEVELS[level];
   const air = perm("minecraft:air");
+  if (w.watch?.length) takeDownWatch(id, [...w.watch]); // the old line's watchtowers come down with it; new ones rise with the new ring
   system.runJob((function* takeDown() {
     const dim = world.getDimension(OVERWORLD);
     let n = 0;
@@ -393,9 +415,73 @@ function addSteps(id) {
 }
 on("wallBuilt", ({ id }) => { const w = walls()[id]; if (w) { w.steps = STEPS_VERSION; save(); } });
 
+// ---------- watchtowers ----------
+const WATCH_PER_TICK = 40; // blocks a rising watchtower places per tick
+const watchJobId = (id, k) => `wallwatch:${id}:${k}`;
+const sameSpot = (t, s) => t.origin.x === s.origin.x && t.origin.y === s.origin.y && t.origin.z === s.origin.z && t.forward.x === s.forward.x && t.forward.z === s.forward.z;
+const goingDown = new Set(); // wall ids whose watchtowers are coming down
+
+// Make the watchtowers match the wall: towers standing where they no longer belong come down, missing ones rise.
+// Safe to call any time (after each wall, on load); does nothing while the wall itself is rising.
+export function raiseWatch(id) {
+  const w = walls()[id];
+  if (!w || jobs.has(id) || goingDown.has(id) || !(w.level > 0) || !w.ground) return;
+  const want = watchSpots(w, w.radius, w.gate, w.ground, w.level);
+  w.watch ??= [];
+  const stale = w.watch.filter((t) => t.style !== w.style || !want.some((s) => s.k === t.k && (t.kind ?? "tower") === s.kind && sameSpot(t, s)));
+  if (stale.length) return takeDownWatch(id, stale, () => raiseWatch(id));
+  for (const s of want) {
+    let t = w.watch.find((x) => x.k === s.k);
+    if (t?.built || buildFor(watchJobId(id, s.k))) continue;
+    if (!t) { t = { k: s.k, kind: s.kind, origin: s.origin, forward: s.forward, style: w.style }; w.watch.push(t); }
+    const plan = watchPlan(w.style, s.kind);
+    startBuild({
+      id: watchJobId(id, s.k), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.style, perTick: WATCH_PER_TICK, anyOrigin: true, // the origin is the door's front step, cleared like the rest of the way in
+      onDone: () => { const now = walls()[id]?.watch?.find((x) => x.k === s.k && sameSpot(x, s)); if (now) { now.built = true; save(); } emit("wallWatchBuilt", { id, k: s.k }); },
+    });
+  }
+  save();
+}
+
+// Lay the way in to every standing watchtower again (wallwatch.js watchWayPlan): a town tier's groundwork is laid while
+// the wall and its towers rise, and ground laid after a tower must not bury its step
+export function clearWatchWays(id) {
+  const w = walls()[id];
+  for (const t of w?.watch ?? []) {
+    if (!t.built || buildFor(`${watchJobId(id, t.k)}:way`)) continue;
+    const plan = watchWayPlan(t.style, t.kind ?? "tower");
+    startBuild({ id: `${watchJobId(id, t.k)}:way`, dimensionId: OVERWORLD, origin: t.origin, forward: t.forward, plan, style: plan.style, perTick: WATCH_PER_TICK, anyOrigin: true });
+  }
+}
+on("townLaidOut", ({ owner }) => { try { clearWatchWays(owner); } catch (e) { console.warn(`[Hollow Crown] watchtower ways ${owner}: ${e}`); } });
+
+// Take watchtowers down (a few hundred blocks each, a little at a time): everything above the floor goes, the floor and
+// plinth turn back to earth. done() runs once they are gone and off the wall record.
+function takeDownWatch(id, towers, done = () => {}) {
+  goingDown.add(id);
+  const air = perm("minecraft:air"), earth = perm("minecraft:grass_block") ?? perm("minecraft:dirt");
+  system.runJob((function* takeDown() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (const t of towers) {
+      for (const c of watchCells(t.style, t.origin, t.forward, t.kind ?? "tower")) {
+        for (let tries = 0; tries < 30 && !dim.getBlock(c); tries++) for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
+        try { setBlock(dim, c.x, c.y, c.z, c.below ? earth : air); } catch { /* not loaded */ }
+        if (++n % 120 === 0) yield;
+      }
+      const w = walls()[id];
+      if (w?.watch) w.watch = w.watch.filter((x) => !(x.k === t.k && sameSpot(x, t)));
+    }
+    goingDown.delete(id);
+    save();
+    done();
+  })());
+}
+
 // Walls that were rising when the world closed carry on
 on("ready", () => {
   system.runTimeout(() => { for (const id of Object.keys(walls())) addSteps(id); }, 200);
+  system.runTimeout(() => { for (const id of Object.keys(walls())) try { raiseWatch(id); } catch (e) { console.warn(`[Hollow Crown] watchtowers ${id}: ${e}`); } }, 300); // towers cut short by a restart, and walls from before towers
   for (const [id, w] of Object.entries(walls())) {
     if (w.moving && !jobs.has(id)) { delete w.moving; raiseWall(id, Math.max(1, w.level || 1)); continue; }
     if (!w.building || jobs.has(id)) continue;
@@ -411,6 +497,9 @@ on("ready", () => {
 // and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
 const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
 const guardOpened = new Set(); // wall ids whose gate a guard opened
+const gateGreeted = new Set(); // wall ids whose guard has already opened up for the friend standing there
+// Pure: what the guard does this step. He opens only on the step a friend arrives.
+export const gateGuardStep = ({ friendNear, greeted, opened, guards }) => (friendNear && !greeted && !opened && guards > 0 ? "open" : friendNear ? "wait" : opened ? "shut" : "idle");
 function findGateBlocks(id, w) {
   const key = `${id}|${w.level}`;
   if (gateBlocks.has(key)) return gateBlocks.get(key);
@@ -456,12 +545,16 @@ onTick("settle_gates", 10, () => {
     }
     const g = gateSpot(w, w.gate, w.ground, w.radius);
     const opened = guardOpened.has(id);
-    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
-    if (friendNear && !opened && guardCount(id) > 0) {
+    const greeted = gateGreeted.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened || greeted ? 6 : WALLS.gateGreet));
+    // The guard opens the gate once, as a friend arrives. After that the gate is the friend's to work: shut it by
+    // hand and it stays shut until they have walked away and come back (it used to swing open again at once).
+    if (gateGuardStep({ friendNear, greeted, opened, guards: guardCount(id) }) === "open") {
+      gateGreeted.add(id);
       if (setWallGate(id, w, true)) guardOpened.add(id);
-    } else if (!friendNear && opened) {
-      setWallGate(id, w, false);
-      guardOpened.delete(id);
+    } else if (!friendNear) {
+      gateGreeted.delete(id);
+      if (opened) { setWallGate(id, w, false); guardOpened.delete(id); }
     }
   }
 });

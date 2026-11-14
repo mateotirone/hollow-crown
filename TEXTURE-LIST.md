@@ -12,6 +12,12 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 
 **Regional Castle Stone (textures ready, blocks not wired yet):** `textures/blocks/regional/siege_castle_stone_<region>[_<tier>_<cracks>].png` and `siege_mossy_castle_stone_<region>.png`, `siege_cracked_castle_stone_<region>.png` for frostmarch, saltreach, emberwaste, blackfen, undertow. The Vale look is the default `siege_castle_stone`.
 
+## Player skins (64×64, in `Hollow_Crown_Skins/`)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Reikia Cinderhale (Emberwaste, slim arms), Lorcan Duskmire (Blackfen) | `reikia_cinderhale.png`, `lorcan_duskmire.png`, made by `studio/art/build_photo_skins.py`; 3D preview `studio/photo_skins/build_preview.py` | **Approved by Mateo 2026-11-13** |
+
 ## Blocks (16×16, in `textures/blocks/`)
 
 | Asset | File(s) | Status |
@@ -76,7 +82,7 @@ Item icons for these stay vanilla for now. Leather and gold armor are untouched.
 
 ## Guard armor (128×64, in `textures/models/siege_guard_armor/`)
 
-Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<piece>`, hidden from menus). The chest always leaves the tabard open so the banner color shows. Shapes in `models/entity/guard_armor/`, made by `studio/build_guardgear.py`. Icons reuse the Castle Guard armor icons.
+Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<piece>`, hidden from menus). The chest always leaves the tabard open so the banner color shows. Shapes in `models/entity/guard_armor/`, made by `studio/build_guardgear.py`. Each tier has its own icons (`textures/items/siege_guardgear_<tier>_<piece>.png`, by `studio/art/build_audit_icons.py`): dark mail, studded leather, bright plate, plate with gold trim.
 
 | Tier | File | Status |
 |---|---|---|
@@ -98,6 +104,7 @@ Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<
 | Man-at-Arms ×16 colors (64×64 player skin layout) | `textures/entity/siege/man_at_arms_<color>.png`, padded gambeson, tabard in the banner color with the gold tower | **Final style, awaiting your review** |
 | All nine soldiers ×6 regions ×16 colors (128×64: player layout + gear) | `textures/entity/soldiers/<type>/<region>_<color>.png`, painted by `studio/art/build_soldiers.py` (Man-at-Arms, Archer, Pikeman, Shieldbearer, Crossbowman, Knight, Ram Crew, Trebuchet Crew, Sapper); replaces the old guard skins in game | **Final style, awaiting your review** |
 | Keep heart | `textures/entity/siege_invisible.png` | Stays invisible, no art needed |
+| NPC skins ×88: every Bedrock NPC the game spawns (Mason, the 18 story people, settlers, fair traders, mummers, wonder keepers, Spire travellers, clock keepers, Old Sigga, Mirelight villagers, rival lords by region and oath, guest-night visitors, Hollow foremen and miners, the great houses' envoys). 64×64 player layout, same painter as the townsfolk plus robes, mail and tabards, coats, motley, shawls, wimples, circlets, lamp caps. Order and keys: `scripts/core/npc_skins_data.js` | `textures/entity/siege/npc_skins/<key>.png` (by `studio/art/build_npc_skins.py`, which also writes `entity/npc.entity.json`, the `siege_npc` render controller and BP `entities/npc.json`), worn by `minecraft:npc` | Painted in house palette 2026-11-13, awaiting your review |
 | Townsfolk ×40 (64×64 player skin layout, 8 per region: tunic, apron/vest/fur/stripes/sash, hood/cap/kerchief/headwrap, skirt or breeches, varied skin and hair) | `textures/entity/siege/townsfolk/tf_<region>_<0-7>.png` (by `studio/art/build_townsfolk.py`), worn by `siege:townsfolk` | Placeholder in house palette, awaiting your review |
 
 ## 3D shapes
@@ -124,6 +131,7 @@ Placeholders came from `studio/build_crown.py`; final art for the icons and bloc
 | Citadel Cornerstone (16×16 block): stone with a gold band, crown mark on top | `textures/blocks/siege_cornerstone_side.png`, `siege_cornerstone_top.png` | **Final style, awaiting your review** |
 | The Throne (16×16 block sheet: gold and red cushion patch at 0,0, finials at 12,0, stone plinth at 0,8). Shape in `models/blocks/throne.geo.json` | `textures/blocks/siege_throne.png` | **Final style, awaiting your review**, the shape deserves a proper model in the art pass |
 | Fallen Oath Shard (16×16 block), glowing crystal cluster. Shape in `models/blocks/fallen_shard.geo.json` | `textures/blocks/siege_fallen_shard.png` | **Final style, awaiting your review** |
+| Fallen Ember (16×16 block), the Ember lying in its scorch outside your gate (Act 1). The shard shape in pale fire, recoloured from the shard by script | `textures/blocks/siege_fallen_ember.png` | **Placeholder (recolour), awaiting your review** |
 | Throne Seal (64×64 entity): a floating seal-stone in front of the throne during a Storm. Shape in `models/entity/throne_seal.geo.json` | `textures/entity/siege_throne_seal.png` | Placeholder |
 | The Heart of the Hollow, resting (32×32 entity): the Heart lying where the final boss fell, before anyone takes it. Dark, veined, should look like it is beating. Shape in `models/entity/resting_heart.geo.json` | `textures/entity/siege_resting_heart.png` | Placeholder |
 
@@ -226,6 +234,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 | Asset | Suggested file | Status |
 |---|---|---|
 | Five breed coats: Vale Courser (bright chestnut, white blaze), Frostmarch Destrier (heavy white-grey, feathered legs), Saltreach Runner (dapple grey, sea-salt mane), Emberwaste Sandstrider (pale gold), Blackfen Mire-Pony (black-brown, shaggy) | `textures/entity/siege/steed_vale.png`, `steed_frostmarch.png`, `steed_saltreach.png`, `steed_emberwaste.png`, `steed_blackfen.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
+| Five starter cob coats (plain working coats under a saddle blanket in the region's cloth): Vale Plough-Cob (bay, green check), Frostmarch Sledge-Cob (dun, feathered, red and white stripe), Saltreach Cart-Cob (grey, navy sailcloth), Emberwaste Pack-Cob (sandy dun, ochre zigzag), Blackfen Peat-Cob (dark brown, shaggy, moss sacking) | `textures/entity/siege/steed_cob_vale.png`, `steed_cob_frostmarch.png`, `steed_cob_saltreach.png`, `steed_cob_emberwaste.png`, `steed_cob_blackfen.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` (siege:breed 7..11) |
 | Crossbred coat (piebald mix) | `textures/entity/siege/steed_crossbred.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
 | Knight Warhorse overlay (armored chamfron and crinet, heavier build) | `textures/entity/siege/steed_warhorse.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
 | Glimstrider (spectral pale blue-white, hollow eyes, needs transparency) | `textures/entity/siege/steed_hollow.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
@@ -238,6 +247,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 |---|---|---|
 | Archive Shelf casing (sides, top and bottom) | `textures/blocks/siege_shelf_side.png`, `siege_shelf_top.png` | **Final style, awaiting your review** |
 | Archive Shelf front ×7 (empty, then 1 to 6 tomes: two rows of three slots, one book spine per shelved tome) | `textures/blocks/siege_shelf_front_0.png` to `siege_shelf_front_6.png` | **Final style, awaiting your review**. Could later get a regional variant per build style |
+| Archive Shelf 3D bookcase atlas (two-block oak case with cornice, dark back, six cloth book spines, page edges; model `models/blocks/archive_shelf.geo.json`, lower and upper halves) | `textures/blocks/siege_archive_shelf.png` | **New 2026-11-14, awaiting your review** (`studio/art/build_archive_shelf.py`). Replaces the flat fronts in game |
 | Dusty Tome (a closed book lying in the world; 32×16 box-UV for a 10×3×8 book, shape in `models/blocks/tome_cache.geo.json`) | `textures/blocks/hc_tome_cache.png` | **Final style, awaiting your review** |
 | Gravestone (weathered headstone with a carved cross, moss at the foot; 32×16, left half the front face, right half plain stone; shape in `models/blocks/gravestone.geo.json`) | `textures/blocks/graves/gravestone.png` | **First pass, awaiting your review** (`studio/art/build_gravestone.py`) |
 | Lore Tome item (old leather book, gilt bands) | `textures/items/siege_lore_tome.png` | **Final style, awaiting your review**. Nice to have later: one cover per collection (8) |
@@ -273,6 +283,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Stone Vigil (Mob) | `stone_vigil.png` | 128×128 | House style, generated |
 | Seep (Hollow incursion, see-through: keep the alpha) | `seep.png` | 64×64 | House style, generated |
 | Gloamwing (Mob, flyer of the Hollow) | `gloamwing.png` | 128×128 | House style, generated |
+| Ulfa, the Bell-Wife (Boss, the Deep: Grey Host hood and skirts, a big bronze bell on her staff) | `bell_wife.png` | 128×128 | House style, generated |
 | Rival Knight (NPC fighter) | `champion_knight.png` | 128×128 | House style, generated |
 | Rival Sorcerer (NPC fighter) | `champion_sorcerer.png` | 128×128 | House style, generated |
 | Rival Lord (NPC fighter) | `champion_lord.png` | 128×128 | House style, generated |
@@ -338,13 +349,14 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
 | Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
 | Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
-| Boss Summon ×9 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
+| Boss Summon ×10 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
 | Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
 | Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
 | Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |
 | Seneschal's Greatshield (boss relic, shield) | `seneschal_greatshield.png` | **Final style, awaiting your review** |
 | Faceless Crown Shard (boss relic, shard) | `faceless_crown_shard.png` | **Final style, awaiting your review** |
 | Mire Heart (boss relic, charm) | `mire_heart.png` | **Final style, awaiting your review** |
+| The Last Note (Hollow Choir relic, charm: a small violet bell, drawn by `studio/art/build_hc_items.py`) | `last_note.png` | **Final style, awaiting your review** |
 | The Warlord's Brand (boss relic, sword) | `warlords_brand.png` | **Final style, awaiting your review** |
 | Oath of Oswin (boss relic, sword) | `oath_of_oswin.png` | **Final style, awaiting your review** |
 | Crownless Mantle (boss relic, chest) | `crownless_mantle.png` | **Final style, awaiting your review** |
@@ -407,9 +419,11 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Ashen Wyvern skin (two legs, wings for arms, whip tail: ash grey, pale belly, orange eye, single back crest). Model `wyvern.geo.json` | `textures/entity/siege/dragons/wyvern.png` | **Final style, awaiting your review** (painted from the model by `studio/art/geoskin.py`; rerun it when the model changes) |
 | Dune Drake skin (low, wide, armoured back plates, club tail, stubby wings: sand gold, cream belly, teal eye). Model `drake.geo.json` | `textures/entity/siege/dragons/drake.png` | **Final style, awaiting your review** (painted from the model by `studio/art/geoskin.py`; rerun it when the model changes) |
 | Glass Wyrm skin (long serpent, raised frilled head, two small forelegs, four narrow wings, tail fin: near-black violet, glassy pink eye; frill, wings and fin can use alpha). Model `wyrm.geo.json` | `textures/entity/siege/dragons/wyrm.png` | **Final style, awaiting your review** (painted from the model by `studio/art/geoskin.py`; rerun it when the model changes) |
+| Dragon colour skins, two more per species (the same models, repainted): Cinderwing Ash Black and Copper, Ashen Wyvern Bone White and Soot, Dune Drake Rust and Pale Sand, Glass Wyrm Sea Glass and Frost Glass | `textures/entity/siege/dragons/<species>_1.png`, `_2.png` (made by `studio/art/dragon_colours.py`) | **New, awaiting your review** |
 | Dragon Egg (16×16 icon, transparent; dark red scaled egg, one side glowing warm) | `textures/items/dragons/siege_dragon_egg.png` | **Final style, awaiting your review** |
 | Dragon Saddle (16×16 icon, transparent; heavy dark leather, chain girth) | `textures/items/dragons/siege_dragon_saddle.png` | **Final style, awaiting your review** |
 | Dragon Horn (16×16 icon, transparent; curved bone horn, gold mouthpiece) | `textures/items/dragons/siege_dragon_horn.png` | **Final style, awaiting your review** |
+| Hatching Brazier (3D model: carved red sandstone bowl on a stem, bronze rim, glowing coals; the nest egg sits in it, a cracked egg with glowing cracks near hatching) | `textures/blocks/dragons/brazier/stone.png`, `bronze.png`, `coals.png`, `egg_cracked.png`; model `models/blocks/hatching_brazier.geo.json` (made by `studio/build_hatching_brazier.py`) | **New, awaiting your review** |
 | Dragon Roost (16×16 side + top; stone brick hearth with a gold band, top is scorched straw around an ember bed) | `textures/blocks/dragons/siege_dragon_roost_side.png`, `_top.png` | **Final style, awaiting your review** |
 | Dragon Nest (a 9x9 wild nest built from five 3D pieces: woven rim, twig tops, straw floor with bones, ribcage, skull and shed scales, and a clutch of three dark red eggs). Eight 16×16 textures: weathered, bleached and scorched branch, straw, packed earth, bone, egg, scale. Models `models/blocks/dragon_nest.geo.json`, made by `studio/build_dragon_nest.py` | `textures/blocks/dragons/nest/*.png` | **New, awaiting your review** |
 | Dragon voices: 8 per species (idle, roar, hurt, purr, snarl, whimper, death, chirp) plus wingbeat, breath, slow breathing, egg crack. Synthesised, mono .ogg | `sounds/siege/dragon/*.ogg` (36 files) | First pass, not recorded audio |
@@ -502,7 +516,7 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 | Roof shingles per region (Vale blue slate, Frostmarch frosted dark slate, Saltreach driftwood shakes, Emberwaste fired clay, Blackfen mossy thatch) | `textures/blocks/regional/siege_roof_shingles_<region>.png` | **Final style, awaiting your review.** Not wired as blocks; all regions still use `siege_roof_shingles.png` |
 | Particle sheet (32×16, eight 8×8 sprites: mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip) | `textures/particle/hc_particles.png` | **Final style, awaiting your review** |
 | Seven particle effects: `siege:hollow_mote`, `vein_spark`, `glint`, `pale_ash`, `veil_spore`, `choir_ring`, `moss_drip` | `particles/<name>.particle.json` | Written, untested in game, nothing spawns them yet |
-| The moon (128×64, vanilla phase layout): a hairline violet crack that shows more the fuller the moon is | `textures/environment/moon_phases.png` | **Final style, awaiting your review.** Replaces the vanilla moon everywhere |
+| The moon (128×64 RGB on black like vanilla, no alpha: a see-through moon does not draw): a hairline violet crack that shows more the fuller the moon is | `textures/environment/moon_phases.png` | **Final style, awaiting your review.** Replaces the vanilla moon everywhere |
 ## Regional Castle Guard armor (2026-11-10, textures thread; Mateo chose regional sets)
 Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the Castle Guard armor (alpha 255 grey = banner colour, alpha 1 = own colour). Items `siege:guard_<region>_<piece>`, same stats as `siege:guard_*`; shapeless workshop recipe = Castle Guard piece + that region's Castle Stone (Vale uses plain Castle Stone). Shop entries: economy thread.
 | Worn sheets x5 regions | `textures/models/armor/guard_<vale/frostmarch/saltreach/emberwaste/blackfen>_layer_1.png`, `_layer_2.png` | Final style, untested in game |
@@ -526,6 +540,13 @@ Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py
 | Worn 3D armour x100 (texture + geometry per piece) | `textures/models/siege_armor/<material>_<region>_<piece>.png`, `models/entity/armor/<material>_<region>_<piece>.geo.json` | **awaiting your review** |
 | Icons x100 (regional guard shapes in each material, region surcoat) | `textures/items/siege_<material>_<region>_<piece>.png` | **awaiting your review** |
 | Sheet | `art/regional-player-armor.png` | |
+## Starter clothes and weapons (2026-11-13, Mateo: "cheap starter armor that looks like clothes ... and a starter weapon")
+Made by `studio/art/build_starter_clothes.py` (then `tools/build_player_joints.py`). Five regional sets of working clothes, items `siege:starter_<region>_<helmet/chestplate/leggings/boots>` (leather-weak), and a starter weapon each, `siege:starter_<region>_weapon` (flat icon, held like a vanilla sword). Vale farmhand (straw hat, jerkin, breeches, field shoes; billhook), Frostmarch trapper (fur-trimmed hood, quilted coat, wrapped trousers, fur boots; hatchet), Saltreach deckhand (knit cap, striped smock, canvas trousers, rope sandals; cutlass), Emberwaste caravaneer (sun wrap, sand tunic, loose trousers, wrapped sandals; sickle-sword), Blackfen fen-walker (oilskin hat, oilskin coat, patched trousers, waders; reed spear). 64x32 vanilla-layout sheets with 3D parts (brims, fur, cap cuff, neck cloth, coat skirts). 3D preview: `studio/starter_clothes/build_preview.py`. Untested in game.
+| Asset | Files | Status |
+|---|---|---|
+| Worn 3D clothes x20 (texture + geometry per piece) | `textures/models/siege_armor/starter_<region>_<piece>.png`, `models/entity/armor/starter_<region>_<piece>.geo.json` | **awaiting your review** |
+| Icons x25 (20 clothes, 5 weapons) | `textures/items/siege_starter_<region>_<piece|weapon>.png` | **awaiting your review** |
+| Sheet | `art/starter-clothes.png` | |
 
 ## Depth pass from the Studio review (2026-11-11, Mateo)
 | What | Files | Made by | Status |
@@ -537,6 +558,7 @@ Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+- `textures/ui/hc/minimap/pg.png`, `pe.png`, `pt.png` (quest pins, 14x14: the quest's place, held on the rim when further, a person to talk to), `p_.png` (empty, what a pin shows if the HUD can't read it) and `textures/particle/hc_quest_mark.png` (16x16 gold "!" floating over that person): drawn by `tools/minimap_pins.py`, first pass
 
 ## Hall Map (2026-11-12)
 Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.
@@ -550,7 +572,7 @@ Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`).
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
 
-## Boss unlocks (placeholders by `studio/build_unlocks.py`, 16×16 opaque, in `textures/blocks/unlocks/`; it never overwrites a PNG that exists)
+## Boss unlocks (final art by `studio/art/build_unlocks_art.py` since 2026-11-12, painted over the placeholders from `studio/build_unlocks.py`, which never overwrites a PNG that exists; 16×16 opaque, in `textures/blocks/unlocks/`)
 
 | Asset | File | Status |
 |---|---|---|
@@ -585,9 +607,48 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
 | Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
 
+## Faceless statues, 3D (2026-11-13, thread "Make the Faceless statues 3D figures"; `studio/statues/build_statues.py`)
+
+The forty statues of King Oswin are one entity (`siege:faceless_statue`) with a model and skin per age. The skins are painted
+from the models by the script: rerun it whenever a model changes (it rewrites the models, skins, entity files and
+`scripts/statues/model_data.js`). To repaint by hand, keep each file's size and its face layout (the script prints them).
+
+| Asset | File | Status |
+|---|---|---|
+| Faceless statue skins ×5 (weathered sandstone robe with folds and chips, blank smooth pale-quartz face in the hood's shadow, pale quartz hands, cut red sandstone crown ring, staff, sword and bowl; per-face UVs, opaque) | `textures/entity/statues/faceless_statue_<age>.png` for boy (128×128), youth, young_king, king, old_king (256×128) | First pass, awaiting your review |
+| Faceless statue models ×5 (Blockbench format; bones root, legs, body, head, crown, arm_r, stub, arms_folded/staff/sword/bowl, rubble) | `models/entity/statues/faceless_statue_<age>.geo.json` | First pass, awaiting your review |
+
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |
 |---|---|---|
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
+
+## Everwake Wings (thread "Everwake", generator `studio/wings/`, installed by `tools/build_everwake_wings.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Wing model texture (64×64, feathers white with gold tips, cloth-wrapped bones, brass mount) | `textures/entity/everwake_wings.png` (model `models/entity/everwake_wings.geo.json`) | Drawn in code, model and animations approved by Mateo 2026-11-12, untested in game |
+| Everwake Wings item icon (16×16) | `textures/items/everwake_wings.png` | Placeholder drawn in code |
+
+## Item audit 2026-11-12 (every item and block checked from the files)
+All 187 items and 202 blocks have an icon or texture that exists, is the right size and is not blank, and every one has a name. Fixed in that pass:
+- Dyeable Castle Guard armor (64 pieces): the `_dyed` icon is now the whole piece in greys (`studio/art/build_dyed_icons.py`). The game shows only that texture for a dyeable item with a default colour, and tints all of it, so the icon is one colour (the banner colour), like vanilla dyed leather. The painted full-colour icon is still the `default` one.
+- 81 blocks had no name in the language files (regional Castle Bricks/Tiles/Cobbled/Smooth/Stone and the unbreakable "Old" tree and trim blocks).
+- Boss unlock blocks, guard tier icons, vault key: see above.
+Not tested in game.
+
+## Rimeforged gear (Frostmarch; painted 2026-11-13 by `studio/art/build_rimeforged.py`, items wired by the custom armour thread)
+Dark iron rimed in pale blue, fur collar, dragon-head crest. Sheet: `art/rimeforged-gear.png`. Not tested in game.
+- Worn, 3D, one 64×32 vanilla-layout sheet per piece (trim-safe): `textures/models/siege_armor/rimeforged_<helmet|chestplate|leggings|boots>.png`, shapes `models/entity/armor/rimeforged_<piece>.geo.json`, attachables `attachables/rimeforged_<piece>.json` for `siege:rimeforged_<piece>`. Helm: dragon skull, snout and swept horns. Hauberk: fur collar, pauldrons. Greaves: knee cops. Boots: fur cuffs.
+- Flat sheets: `textures/models/armor/rimeforged_layer_1.png`, `_2.png`.
+- Icons (keys in `item_texture.json`): `siege_rimeforged_<piece>`, `siege_rime_axe`, `siege_rime_spear`, `siege_rime_steel`. The axe and spear have icons only (held like vanilla); a thrown-spear model is not painted.
+## Codex regional gear (painted 2026-11-13 by `studio/art/build_codex_art.py`; items, attachables and icon keys by the custom armour thread)
+Sheet: `art/codex-regional-gear.png`. In the Texture Studio under Armor. Not tested in game.
+- Sets: Watchward (Vale), Tidewrought (Saltreach), Sunscale (Emberwaste), Fenlight (Blackfen). Worn, 3D, one 64×32 trim-safe sheet per piece: `textures/models/siege_armor/codex_<set>_<piece>.png`; shapes `models/entity/armor/codex_<set>_<piece>.geo.json` (`geometry.siege_codex_<set>_<piece>`).
+- Icons in `textures/items/codex/`: the 16 armour pieces, `watchmans_glaive`, `watch_crossbow`, `lighthouse_harpoon`, `tidesteel_cutlass`, `sunbrand_sabre`, `sunscale_bow`, `wisp_bow`, `bogsilver_sickle`, and the alloys `watchsteel`, `tidesteel`, `sunsteel`, `bogsilver`.
+- Second batch (`studio/art/build_codex_art2.py`, sheet `art/codex-items.png`): Oathsworn set and Cairn-Helm of the Thane worn in 3D (`codex_oathsworn_<piece>`, `codex_cairn_helm`), and icons for every other Codex item: the drops, the twelve mythical weapons and tools, the seven charms, the caravan goods, the Codex. No stand-ins are left (`studio/codex/standins.json` is empty).
+- Codex book pictures, made by `studio/build_codex.py` from the item icons: `textures/ui/codex/<id>.png` (found) and `<id>_outline.png` (not found yet: dark silhouette, pale rim), for all 103 entries. Repaint an icon and run the script again to refresh them.
+- The five Choir Shards (`textures/items/codex/choir_shard_<reeve|huntsman|bride|seneschal|mother>.png`, keys `siege_cx_choir_shard_<boss>`): STAND-INS recoloured from `siege_choir_shard.png` (brass, ice, sea, ember, fen) by `studio/build_codex.py`, listed in `studio/codex/standins.json`. Each needs its own painted shape. The old `siege_choir_shard.png` stays for the "Faded Choir Shard" that old saves convert.
+- Tuning Fork icon repainted 2026-11-13 as a combination of the five Choir Shards (`studio/art/build_tuning_fork.py`, writes `textures/items/siege_tuning_fork.png`): Huntsman's ice tine and Bride's sea-green tine, the Reeve's brass cog at the yoke, the Seneschal's ember-cracked collar, an amethyst handle gripped by the Mother's roots. Replaces the one from `build_hollowcrown.py`; don't regenerate that one over it.
