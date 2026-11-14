@@ -55,7 +55,8 @@ function freeClasses(owner, except) {
 // What a player could put on a slot: [{ id, style, foreign, name, fits, open, why, tagged }]. Only buildings
 // whose plan is known (planbook.js: the player's own plans and the town owner's), of the plot's size class
 // (config.js PLOT_SIZE), that physically fit are listed; one that needs a different spot (PLOT_TAGS) or a later
-// tier is listed greyed with the reason. Good spots for a building come first. A plan in another region's
+// tier is listed greyed with the reason. A one-of-a-kind building the settlement already has (config.js ONE_EACH)
+// is left out altogether (Mateo 2026-11-14: "if it's standing, it shouldn't show in the menu"). Good spots for a building come first. A plan in another region's
 // style is offered too, at a higher price. hidden: how many buildings would suit the plot without a plan.
 export function choicesFor(owner, slot, player) {
   const town = townOf(owner);
@@ -71,18 +72,18 @@ export function choicesFor(owner, slot, player) {
     if (!rule.ok && !rule.tagged) continue; // not this plot's size
     if (!seatInWorld(owner, slot, id, style)) continue;
     const open = opensAt(id) <= tier;
-    const one = oneEachProblem(owner, id); // one of each per settlement (config.js ONE_EACH)
-    const kept = rule.ok && open && !one ? keptFor(owner, slot, id) : undefined; // the plot is the last one a charter need can use
-    const why = one ?? (!rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : kept ?? "");
+    if (oneEachProblem(owner, id)) continue; // one of each per settlement (config.js ONE_EACH): already has it, so not offered
+    const kept = rule.ok && open ? keptFor(owner, slot, id) : undefined; // the plot is the last one a charter need can use
+    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : kept ?? "";
     const name = foreign ? `${b.name} (${STYLES[style]?.name ?? style})` : b.name;
-    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok && !kept && !one, why, tagged: rule.tagged && rule.ok, one: !!one });
+    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok && !kept, why, tagged: rule.tagged && rule.ok });
   }
   out.hidden = BUILDINGS.filter((b) => !offers.some((o) => o.id === b.id) && plotFit(b.id, slot, free).ok).length;
   return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged) || (a.foreign - b.foreign));
 }
 
 // A Works plot takes the machines (buildings.js WORKS) and nothing else. No plan is needed for one; a machine
-// the town already has, or that opens at a later tier, is listed greyed with the reason.
+// the town already has is left out; one that opens at a later tier is listed greyed with the reason.
 function worksChoices(owner, slot, tier, free) {
   const town = townOf(owner);
   const out = [];
@@ -91,8 +92,8 @@ function worksChoices(owner, slot, tier, free) {
     if (!rule.ok && !rule.tagged) continue;
     if (!seatInWorld(owner, slot, w.id, town.style)) continue;
     const open = opensAt(w.id) <= tier;
-    const taken = w.taken?.(owner);
-    const why = taken ?? (!rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(w.id))}` : "");
+    if (w.taken?.(owner)) continue; // the town already has this one
+    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(w.id))}` : "";
     out.push({ id: w.id, style: town.style, foreign: false, name: w.name, fits: true, open: !why, why, tagged: rule.tagged && rule.ok });
   }
   out.hidden = 0;
@@ -158,7 +159,6 @@ async function openSlot(player, owner, slot) {
   if (own && res.selection === 0) return registerOwn(player, owner, slot);
   const c = choices[res.selection - (own ? 1 : 0)];
   if (!c) return;
-  if (!c.open && c.one) return player.sendMessage(oneEachMessage(BUILDING[c.id].name));
   if (!c.open) return player.sendMessage(/^Kept/.test(c.why) ? `§7${c.why}: this is the last plot it can go on. Raise that here, or another building on a different plot.` : `§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : works ? "" : " Try another plot."}`);
   Object.assign(state, { pick: c.id, pickStyle: c.style, pickedAt: system.currentTick, by: player.id });
   saveTowns();

@@ -220,7 +220,7 @@ export function stationQuest(f) {
 
 function sideQuest(f, main) {
   if (f.dim === UNDERTOW) return undefined;
-  if (!f.keep && !f.morvane) return { id: "keep", title: "Found your settlement", hint: "Raise your Keep Banner on a Plot Stone before the first siege night." };
+  if (!f.keep && !f.morvane) return { id: "keep", title: "Found your settlement", hint: "Click your Plot Stone and raise your banner before the first siege night." };
   const station = stationQuest(f);
   if (station) return station;
   const down = fallen(f.flags).length;

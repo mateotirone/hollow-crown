@@ -2,7 +2,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT, EXPANSION, REGION_BIOME } from "./config.js";
 import { pedestalLayout, arrivalSpot } from "./welcome.js";
 import { MINI } from "./miniature.js";
-import { compass } from "./claims.js";
+import { compass, canRaiseHere } from "./claims.js";
 import { outsideMap, wardAt } from "./travel.js";
 
 addTests("plots", {
@@ -25,6 +25,17 @@ addTests("plots", {
     for (const p of PLOT_PLAN) count[p.region] = (count[p.region] ?? 0) + 1;
     assertEqual(Object.keys(count).length, 5);
     assert(Object.values(count).every((n) => n >= 2));
+  },
+  "the Plot Stone offers to raise your banner only on a plot free for you": () => {
+    const plot = { name: "Oakmere", x: 10, y: 70, z: 20 };
+    const me = { id: "me" }, you = { id: "you" };
+    assert(canRaiseHere(me, plot, {}, 0), "a free plot, no settlement yet");
+    assert(!canRaiseHere(me, plot, { me: { x: 500, y: 70, z: 500 } }, 0), "already settled elsewhere: moving stays a banner placement");
+    assert(!canRaiseHere(me, plot, { you: { x: 10, y: 71, z: 20 } }, 0), "someone's banner stands on it");
+    assert(!canRaiseHere(me, { ...plot, npc: { id: "l", name: "Lord" } }, {}, 0), "a Rival Lord holds it");
+    const held = { ...plot, reservedFor: "you", reservedUntil: 100 };
+    assert(!canRaiseHere(me, held, {}, 50) && canRaiseHere(you, held, {}, 50), "held for its old lord after a fall");
+    assert(canRaiseHere(me, held, {}, 150), "the hold ran out");
   },
   "compass points north for negative z": () => {
     assertEqual(compass({ x: 0, z: 0 }, { x: 0, z: -100 }), "100 blocks N");
