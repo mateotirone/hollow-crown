@@ -1,7 +1,8 @@
 """NPC skins: one painted skin for every NPC the game spawns (Mateo 2026-11-13: "make sure everyone has a skin").
 
-Bedrock's built-in NPC entity (minecraft:npc) shows the skin its skinIndex points at. Our packs replace that entity's
-whole skin list with ours, so no NPC can show Bedrock's default skin. The list and its order live in
+Bedrock's built-in NPC entity (minecraft:npc) shows the skin its siege:skin property points at (key index + 1), set by
+core/npc_skins.js dressNpc; 0 falls back to its skinIndex. Our packs replace that entity's whole skin list with ours,
+so no NPC can show Bedrock's default skin. Keys "<key>__<region>" are regional looks (REGIONAL below). The list and its order live in
 Siege_Nights_BP/scripts/core/npc_skins_data.js (the place of a key is its skinIndex); this script reads it and writes
   Siege_Nights_RP/textures/entity/siege/npc_skins/<key>.png      64x64 player layout (geometry.humanoid.custom)
   Siege_Nights_RP/entity/npc.entity.json                          minecraft:npc client entity, one texture per key
@@ -145,6 +146,26 @@ LOOKS = {
     'envoy_root': S('#2a3e2a', '#6a5a3a', '#22281e', '#2a3e2a', 'shawl', 'hood', 'skirt', sk=PALE, hair=1),
     'envoy_tide': S('#1e4448', '#5e6168', '#1a2a2e', None, 'mail', 'long', sk=PALE, hair=6, trim='#4a9a9a'),
 }
+
+# Regional looks (Mateo 2026-11-14): the same person dressed for each region, signature kept (Elspeth's shawl,
+# kerchief and white hair; the Mason's leather apron, cap and beard). The Vale wears the plain key.
+REGIONAL = {
+    'lore_elspeth': {
+        'frostmarch': dict(t='#3e4e60', o='#d8d4cc', l='#2e2a28', h='#6a7a90'),     # blue wool, white fleece shawl
+        'saltreach': dict(t='#d8d0b8', o='#2a4e6a', l='#3a3e4a', h='#e2e6e8'),      # linen, sea-blue shawl
+        'emberwaste': dict(t='#c8a060', o='#a8482a', l='#6a4a3a', h='#e0c890'),     # sand, rust shawl, pale headcloth
+        'blackfen': dict(t='#3a3a2a', o='#5a4a3a', l='#24221e', h='#4a4a30'),       # oilskin dark, reed-brown shawl
+    },
+    'mason': {
+        'frostmarch': dict(t='#3a4e62', h='#d8d4cc', l='#2e2a28', cuffs=True),      # wool and a fleece cap
+        'saltreach': dict(t='#d8d0b8', h='#2a3e6a', l='#3a3e4a'),                   # linen, sea-blue cap
+        'emberwaste': dict(t='#c8a060', h='#e0c890', l='#8a6a4a', sk=3),            # sand, pale cap
+        'blackfen': dict(t='#4a4a2a', h='#3a3a2a', l='#2e2a24'),                    # oilskin and a dark cap
+    },
+}
+for _base, _regions in REGIONAL.items():
+    for _slug, _over in _regions.items():
+        LOOKS[f'{_base}__{_slug}'] = {**LOOKS[_base], **_over}
 
 
 def keys_from_js():
@@ -290,13 +311,15 @@ def pack_files(keys):
             "arrays": {"textures": {"Array.skins": [f"Texture.{k}" for k in keys]}},
             "geometry": "Geometry.default",
             "materials": [{"*": "Material.default"}],
-            "textures": ["Array.skins[query.variant]"]}}})
+            # siege:skin (key index + 1) from core/npc_skins.js dressNpc; 0 = Bedrock's own pick, for hand-placed NPCs
+            "textures": ["Array.skins[query.property('siege:skin') > 0 ? query.property('siege:skin') - 1 : query.variant]"]}}})
     # Bedrock's own NPC entity, as shipped, with our skin list: skinIndex N shows variant N (our key N)
     write_json(os.path.join(ROOT, 'Siege_Nights_BP/entities/npc.json'), {
         "format_version": "1.21.60",
         "minecraft:entity": {
             "description": {"identifier": "minecraft:npc", "is_experimental": False, "is_summonable": True,
-                            "is_spawnable": True, "spawn_category": "creature"},
+                            "is_spawnable": True, "spawn_category": "creature",
+                            "properties": {"siege:skin": {"type": "int", "range": [0, len(keys)], "default": 0, "client_sync": True}}},
             "components": {
                 "minecraft:behavior.look_at_player": {"look_time": {"min": 1, "max": 2}, "look_distance": 6},
                 "minecraft:collision_box": {"height": 2.1, "width": 0.6},
