@@ -6,7 +6,7 @@
   "region": "emberwaste",
   "where": "Emberwaste settlements, raised on a Dragon plot from its Plot Marker",
   "kind": "Work",
-  "blurb": "A kasbah stable for dragons: a wide arched way in, six big stalls off a broad aisle, a tack corner and a hay loft, and a flat roof to land on. The nursery joined on the east, under a small blue-green dome, holds three Hatching Braziers where eggs are set to hatch."
+  "blurb": "A kasbah stable for dragons: a wide arched way in, three big stalls off a broad aisle, a hay loft with the tack, and a flat roof to land on. The nursery joined on the east, under a small blue-green dome, holds three Hatching Braziers where eggs are set to hatch."
  },
  "after": "dragon_stable_skill:inside",
  "parts": [
@@ -18,7 +18,7 @@
    },
    "rect": [
     -7,
-    -10,
+    -8,
     7,
     0
    ],
@@ -55,31 +55,25 @@
     ],
     "w": [
      {
-      "at": -4,
+      "at": -2,
       "storey": 0,
       "w": 1,
       "h": 2
      },
      {
-      "at": 0,
+      "at": 2,
       "storey": 0,
       "w": 1,
       "h": 2
      },
      {
-      "at": 4,
-      "storey": 0,
-      "w": 1,
-      "h": 2
-     },
-     {
-      "at": -4,
+      "at": -2,
       "storey": 1,
       "w": 1,
       "h": 2
      },
      {
-      "at": 4,
+      "at": 2,
       "storey": 1,
       "w": 1,
       "h": 2
@@ -87,13 +81,13 @@
     ],
     "e": [
      {
-      "at": -4,
+      "at": -2,
       "storey": 1,
       "w": 1,
       "h": 2
      },
      {
-      "at": 4,
+      "at": 2,
       "storey": 1,
       "w": 1,
       "h": 2
@@ -134,9 +128,9 @@
     {
      "rect": [
       7,
-      -9,
+      -8,
       13,
-      -1
+      0
      ],
      "storeys": [
       6
@@ -153,7 +147,7 @@
    "part": "dome",
    "at": [
     10,
-    -5
+    -4
    ],
    "r": 2.5,
    "drum": {
