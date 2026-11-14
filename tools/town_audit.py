@@ -15,6 +15,7 @@ tools/sim-hamlet.mjs (the Hamlet as the game lays it on that plot). Checks, each
   door         a door with nothing to stand on outside, a door you can't walk to from the square, a door step that
                is grass or sand instead of a path, a building in the town plan with no door where the plan put it
   interior     a door that opens on a room with no furnishing at all, or on no room (open to the sky)
+  under        a block resting on a bottom slab (half a block of air under it), a post on air, a plant or a carpet
   light        street cells (built paths under the sky) darker than 4 at night, rooms darker than 7
   ground       a natural cliff 3+ blocks high in the town (pads not blended), a path or square block over air
   junk         tree logs or leaves standing on a path, or leaves over a roof
@@ -289,6 +290,47 @@ def audit(path, plan=None, centre_hint=None, radius=None):
         for c, n, grp in cluster(cells, 2):
             F.append(finding("facing", what, S.w(*c), n))
 
+    # ---- underneath (Mateo 2026-11-14: "under it is ____ but it's a slab so it's floating. Needs to be a full block"):
+    # a block resting on a bottom slab hangs half a block over it, and a post (fence, wall, log) whose foot is air,
+    # a plant, a carpet or leaves stands on nothing, even when the floating check sees it touch something
+    under = defaultdict(list)
+    sunk = np.array([n.endswith("_slab") and "double" not in n and st.get("minecraft:vertical_half", "bottom") == "bottom" and not st.get("top_slot_bit")
+                     for n, st in S.pal] + [False])
+    rests = np.array([not (AIRY.match(n) or FLUID.match(n) or LANTERN.search(n) and st.get("hanging") or n == "chain" or n.endswith("_chain")
+                           or WALL_HUNG.search(n) or HANG_FROM_ABOVE.search(n) or LEAVES.search(n) or n.endswith("_trapdoor") or n == "trapdoor"
+                           or (n.endswith("_slab") and (st.get("minecraft:vertical_half") == "top" or st.get("top_slot_bit")))
+                           or (n.endswith("_stairs") and st.get("upside_down_bit")) or n.endswith("_torch") and st.get("torch_facing_direction", "top") != "top"
+                           or n in ("vine", "scaffolding", "snow_layer") or n.endswith("_door") and st.get("upper_block_bit"))
+                      for n, st in S.pal] + [False])
+    # a tree's own branches (the tree database's siege:old_ blocks) and a log laid sideways (a beam) are not posts
+    post = np.array([bool(re.search(r"(_fence$|^fence$|_wall$|_log$|^log$|_post$)", n)) and not n.endswith("fence_gate")
+                     and not n.startswith("siege:old_") and not (n.endswith("_log") and st.get("pillar_axis", "y") != "y")
+                     for n, st in S.pal] + [False])
+    nothing = np.array([bool(AIRY.match(n) or STANDS.search(n) or LEAVES.search(n)) for n, _ in S.pal] + [True])
+    G_ = S.g
+    r_ = S.C(rests); s_ = S.C(sunk); p_ = S.C(post); no_ = S.C(nothing)
+    on_slab = np.zeros_like(r_); on_slab[:, 1:, :] = r_[:, 1:, :] & s_[:, :-1, :]
+    # a tree's limb on its own branch slab is the tree database's design, not a build resting on a slab
+    tree = S.C(np.array([n.startswith("siege:old_") for n, _ in S.pal] + [False]))
+    on_slab[:, 1:, :] &= ~(tree[:, 1:, :] & tree[:, :-1, :])
+    post_air = np.zeros_like(r_); post_air[:, 1:, :] = p_[:, 1:, :] & no_[:, :-1, :]
+    # held from the side (a parapet over an arch, a rail between two posts) is not standing on anything: only a post
+    # with no hard block beside it at its own height must stand on the ground
+    hard = S.C(np.array([not SOFT.search(n) for n, _ in S.pal] + [False]))
+    side = np.zeros_like(hard)
+    side[1:, :, :] |= hard[:-1, :, :]; side[:-1, :, :] |= hard[1:, :, :]; side[:, :, 1:] |= hard[:, :, :-1]; side[:, :, :-1] |= hard[:, :, 1:]
+    post_air &= ~side
+    for (i, j, k) in np.argwhere(on_slab & inside2d[:, None, :]):
+        if j <= 4: continue
+        under[f"{S.pal[G_[i, j, k]][0]} rests on a bottom slab ({S.pal[G_[i, j - 1, k]][0]}): half a block of air under it"].append((i, j, k))
+    for (i, j, k) in np.argwhere(post_air & inside2d[:, None, :]):
+        if j <= 4: continue
+        b = G_[i, j - 1, k]
+        under[f"{S.pal[G_[i, j, k]][0]} post standing on {S.pal[b][0] if b >= 0 else 'air'}"].append((i, j, k))
+    for what, cells in under.items():
+        for c, n, grp in cluster(cells, 3):   # an upright log under a roof is often a truss's king post: look, don't fix
+            F.append(finding("under", what, S.w(*c), n, sev="check" if re.match(r"\S*_log post", what) else "fix"))
+
     # ---- walking: cells a player can stand in
     free = S.C(S.is_free)
     stand = S.C(S.is_stand)
@@ -493,7 +535,8 @@ def audit(path, plan=None, centre_hint=None, radius=None):
     for c, n, grp in cluster(pts, 2):
         F.append(finding("junk", "a tree trunk standing on a path", S.w(*c), n, sev="check"))
     leaves = S.C(S.is_leaves)
-    built = S.C(np.array([bool(re.search(r"(_stairs$|_slab$|_planks$|bricks$|^chimney)", n)) for n, _ in S.pal] + [False]))
+    built = S.C(np.array([bool(re.search(r"(_stairs$|_slab$|_planks$|bricks$|^chimney)", n)) and not n.startswith("siege:old_")
+                          for n, _ in S.pal] + [False]))         # a tree's own branch slabs are not a roof
     over = np.zeros_like(free)
     over[:, 1:, :] = leaves[:, 1:, :] & built[:, :-1, :]
     over &= inside2d[:, None, :]

@@ -131,7 +131,7 @@ def townhall():
     W, H = 340, 220; im = backdrop(W, H); box = (70, 18, 200, 190); nine(im, panel(), box, 14); header(im, box, 'Town Hall')
     text(im, (84, 46), 'Millbrook   Wall level 5', DIM)
     rows = [('textures/blocks/siege_castle_stone.png', 'Raise the wall', 'Battlement Wall', True), ('textures/blocks/siege_oath_tree_crown.png', 'Tree of Oaths', '2 points to spend', False),
-            ('textures/items/siege_ledger.png', 'Roster', '3 townsfolk', False), ('textures/items/siege_writ.png', 'Rumor Board', '1 new rumor', False), ('textures/items/siege_war_horn.png', 'Defences', 'Siege in 2 nights', False)]
+            ('textures/items/siege_ledger.png', 'Roster', '3 townsfolk', False), ('textures/items/siege_writ.png', 'Town Board', '1 new notice', False), ('textures/items/siege_war_horn.png', 'Defences', 'Siege in 2 nights', False)]
     for i, (ic, a, b, hot) in enumerate(rows):
         y = 62 + i * 27; nine(im, plaque(hot=hot), (84, y, 172, 23), 3); im.alpha_composite(tile(18), (88, y + 2)); im.alpha_composite(icon(ic, 14), (90, y + 4))
         text(im, (112, y + 1), a, WHITE, SH); text(im, (112, y + 11), b, PINK if hot else DIM)

@@ -11,7 +11,7 @@ import settle_buildings as SB
 import settle_skill as SK
 from export_halls import export
 
-LIBRARY_MARKS = {f"shelf{i}" for i in range(8)} | {"lectern", "portrait0", "portrait1", "portrait2", "painting0"}
+LIBRARY_MARKS = {f"shelf{i}" for i in range(16)} | {"lectern", "portrait0", "portrait1", "portrait2", "painting0"}
 SIDE, DEEP = 8, 14   # keep every plot building small enough for a settlement plot (Large 15 x 15)
 PLOT_WIDE = {"house": 11, "farmhouse": 11, "mint": 11, "townhouse": 13}   # Medium and long Medium plots are narrower
 

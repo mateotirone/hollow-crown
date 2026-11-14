@@ -34,6 +34,7 @@ The use names the rooms storey by storey, ground first; the last one repeats upw
 | farmhouse | farm kitchen | bedroom | |
 | inn | tap room | guest rooms | |
 | mint | counting room | store | |
+| moneyer | money-changer: grilled counter with the scales (iron and gold plates) in the pass window, strongbox, stacked iron; the Moneyer stands behind the scales (marker `moneyer`, Mateo 2026-11-14) | store | |
 | shop | shop | bedroom | |
 | smithy | smithy | bedroom | |
 | guildhall | hall | office | |

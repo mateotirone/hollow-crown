@@ -7,14 +7,33 @@
         "category": "items"
       },
       "states": {
-        "siege:fill": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
+        "siege:slot_0": [
+          false,
+          true
+        ],
+        "siege:slot_1": [
+          false,
+          true
+        ],
+        "siege:slot_2": [
+          false,
+          true
+        ],
+        "siege:slot_3": [
+          false,
+          true
+        ],
+        "siege:slot_4": [
+          false,
+          true
+        ],
+        "siege:slot_5": [
+          false,
+          true
+        ],
+        "siege:half": [
+          "lower",
+          "upper"
         ]
       },
       "traits": {
@@ -28,22 +47,20 @@
     },
     "components": {
       "minecraft:display_name": "tile.siege:archive_shelf.name",
-      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_archive_shelf",
+        "bone_visibility": {
+          "book_0": "q.block_state('siege:slot_0')",
+          "book_1": "q.block_state('siege:slot_1')",
+          "book_2": "q.block_state('siege:slot_2')",
+          "book_3": "q.block_state('siege:slot_3')",
+          "book_4": "q.block_state('siege:slot_4')",
+          "book_5": "q.block_state('siege:slot_5')"
+        }
+      },
       "minecraft:material_instances": {
         "*": {
-          "texture": "siege_shelf_side",
-          "render_method": "opaque"
-        },
-        "up": {
-          "texture": "siege_shelf_top",
-          "render_method": "opaque"
-        },
-        "down": {
-          "texture": "siege_shelf_top",
-          "render_method": "opaque"
-        },
-        "north": {
-          "texture": "siege_shelf_front_0",
+          "texture": "siege_archive_shelf",
           "render_method": "opaque"
         }
       },
@@ -58,7 +75,10 @@
         "destroy_chance_modifier": 20
       },
       "minecraft:map_color": "#7a5a34",
-      "siege:clickable": {}
+      "siege:clickable": {},
+      "minecraft:collision_box": true,
+      "minecraft:selection_box": true,
+      "minecraft:light_dampening": 15
     },
     "permutations": [
       {
@@ -110,162 +130,17 @@
         }
       },
       {
-        "condition": "q.block_state('siege:fill') == 0",
+        "condition": "q.block_state('siege:half') == 'upper'",
         "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_0",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 1",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_1",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 2",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_2",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 3",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_3",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 4",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_4",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 5",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_5",
-              "render_method": "opaque"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:fill') == 6",
-        "components": {
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_shelf_side",
-              "render_method": "opaque"
-            },
-            "up": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "down": {
-              "texture": "siege_shelf_top",
-              "render_method": "opaque"
-            },
-            "north": {
-              "texture": "siege_shelf_front_6",
-              "render_method": "opaque"
+          "minecraft:geometry": {
+            "identifier": "geometry.siege_archive_shelf_upper",
+            "bone_visibility": {
+              "book_0": "q.block_state('siege:slot_0')",
+              "book_1": "q.block_state('siege:slot_1')",
+              "book_2": "q.block_state('siege:slot_2')",
+              "book_3": "q.block_state('siege:slot_3')",
+              "book_4": "q.block_state('siege:slot_4')",
+              "book_5": "q.block_state('siege:slot_5')"
             }
           }
         }

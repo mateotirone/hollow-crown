@@ -422,6 +422,32 @@ function answerDemand(player, lord, paying) {
   emit("rivalTribute", { lord, player, paid: paying });
 }
 
+// Act 2's herald (newplayer/herald.js): the story's own demand, carried to the player's gate by a herald instead of a
+// message. heraldDemand puts the demand on the lord (the usual clock runs) and returns the coins. heraldAnswer pays or
+// refuses it; a refusal sends the lord's soldiers with the next siege night (a march), as the herald warns.
+// Returns "paid", "refused", "short" (not enough coin) or undefined (no demand any more).
+export function heraldDemand(lord, player) {
+  const amount = tributeOf(lord, oathsOf(player.id));
+  (lord.demands ??= {})[player.id] = { coins: amount, due: day() + DEEDS.demandDays, herald: true };
+  saveRivals();
+  emit("rivalDemand", { lord, player, coins: amount });
+  return amount;
+}
+export function heraldAnswer(player, lord, paying) {
+  const demand = lord.demands?.[player.id];
+  if (!demand) return undefined;
+  if (paying && funds(player) < demand.coins) return "short";
+  answerDemand(player, lord, paying);
+  if (!paying && !lord.march && !rivalLords().some((l) => l.march?.target === player.id)) {
+    DO.march(lord, player);
+    lord.lastDeed = "march";
+    lord.lastTarget = player.id;
+    saveRivals();
+    emit("rivalDeed", { lord, kind: "march", player });
+  }
+  return paying ? "paid" : "refused";
+}
+
 // ---------- oaths ----------
 
 function swear(player, lord, kind, { free = false } = {}) {

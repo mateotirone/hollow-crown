@@ -108,6 +108,20 @@ addJoinStep(10, "look picker", async (player, { wait }) => {
   }
 }, { when: "first", timeout: 120 });
 
+// A newcomer who waited at Kingsrest for the welcome hall and never got to pick (the menu couldn't open while the
+// world was loading) is asked again once they are up in the hall
+on("newcomerInHall", ({ player }) => {
+  system.runTimeout(async () => {
+    try {
+      if (!player.isValid || typeof player.getDynamicProperty(CHOSEN) === "string" || reservedFor(player.name)) return;
+      for (let tries = 0; tries < 8 && player.isValid; tries++) {
+        if ((await chooseLook(player)) !== "busy") return;
+        await new Promise((r) => system.runTimeout(r, 40));
+      }
+    } catch { /* they left */ }
+  }, 60);
+});
+
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (event.isFirstEvent === false || event.block.typeId !== LOOKING_GLASS) return;
   event.cancel = true;
