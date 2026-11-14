@@ -98,6 +98,24 @@ def bedrock(n, p):
 LIT_ELSEWHERE = ("cinder_roost", "crownhold_hall", "crownhold_walls")
 
 
+N18 = [(a, b, e) for a in (-1, 0, 1) for b in (-1, 0, 1) for e in (-1, 0, 1) if 0 < abs(a) + abs(b) + abs(e) < 3]
+
+
+def floating(blocks):
+    """Cells of a rigid design that would hang in the air: not joined  to anything that stands on its ground
+    layer (y 0 and 1 rest on the ground the game fills under it). Joined means sharing a face or an edge, so a stair
+    roof stepping down diagonally holds; a block touching only at a corner does not. Mateo 2026-11-13/14: nothing floats, and every story
+    build has to be perfect, so they are dropped here and tools/check.mjs keeps it at none."""
+    solid = {c for c, (n, _) in blocks.items() if n not in ("air", "water")}
+    seen = {c for c in solid if c[1] <= 1}
+    todo = list(seen)
+    while todo:
+        x, y, z = todo.pop()
+        for c in ((x + a, y + b, z + e) for a, b, e in N18):
+            if c in solid and c not in seen: seen.add(c); todo.append(c)
+    return solid - seen
+
+
 def export(d, q=0, name=None):
     spec = dict(d.spec()); spec["light"] = False      # lit below, once the dug air is in
     blocks = compute(spec)
@@ -107,6 +125,8 @@ def export(d, q=0, name=None):
         if d.meta.get("mark"): spots.append(tuple(d.meta["mark"][:3]))
         lighting.light(blocks, kind="hollow" if d.meta.get("hollow") else None, avoid=spots)
         emit.connect(blocks)
+    if d.meta.get("mode", "rigid") == "rigid" and not d.meta.get("sea") and not d.meta.get("dry"):
+        for c in floating(blocks): del blocks[c]
     cells, pal, idx = {}, [], {}
 
     def index(n, p):
