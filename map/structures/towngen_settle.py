@@ -303,7 +303,10 @@ class Settlement(Town):
                 arc = []
         # radial streets
         for theta, r0, r1 in self.tpl["radials"]:
-            end = self.polar(theta, r1); end = (int(round(end[0])), int(round(end[1])))
+            end = self.polar(theta, r1)
+            if getattr(self, "starter", None):   # the outer end follows the outline too, so the street still closes its portions
+                end = self.polar(theta, r1 + float(self.outline(math.atan2(end[1] - self.C[1], end[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
+            end = (int(round(end[0])), int(round(end[1])))
             if r0 <= 12 and getattr(self, "starter", None):   # from the ring lane round the village (the old Hamlet wall line)
                 p = self.polar(theta, WALL_R[0])
                 s = self.polar(theta, WALL_R[0] - 1 + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
@@ -442,6 +445,9 @@ class Settlement(Town):
     # ---- portions: fields are whole outer portions
     def portions(self):
         super().portions()
+        self.choose_fields()
+
+    def choose_fields(self):
         hall_near = self._dilate(self.HALL, 4)
         land = sum(p["area"] for p in self.port.values())
         for p in self.port.values(): p["kind"] = "build"
@@ -451,6 +457,7 @@ class Settlement(Town):
             if p["area"] >= 200 and (m & (self.D <= WALL_R[0] - CLEAR)).sum() <= 0.25 * p["area"]:
                 spare.append((int((m & (self.D <= WALL_R[1] - CLEAR)).sum()) - 4 * int((m & hall_near).sum()), p["area"], L))
             if p["area"] < 220 or (m & hall_near).any(): continue
+            if p["area"] > 2.5 * self.tpl["field_share"] * land: continue   # a field never takes a whole quarter of the Town band
             if (m & (self.D <= WALL_R[0] - CLEAR)).sum() > 0.25 * p["area"]: continue   # Hamlet ground is for building
             g = self.G[m]
             if np.percentile(g, 95) - np.percentile(g, 5) > 10: continue
@@ -464,6 +471,7 @@ class Settlement(Town):
         for town, area, L in cand:
             if got >= self.tpl["field_share"] * land: break
             self.port[L]["kind"] = "field"; got += area
+        spare = [t for t in spare if t[1] <= 2.5 * self.tpl["field_share"] * land]   # never the whole band (town_field finds room then)
         if not got and spare:                                   # every layout gets a field (the Farmhouse needs one)
             L = min(spare, key=lambda t: abs(t[1] - self.tpl["field_share"] * land) - 2 * min(t[0], 120))[2]
             self.port[L]["kind"] = "field"
@@ -1065,7 +1073,9 @@ class Settlement(Town):
         self.square()
         self.streets(); self.relax(); self.grade_verges()
         self.portions()
-        self.subdivide(); self.back_paths(); self.grade_verges()
+        self.subdivide()
+        if not any(p["kind"] == "field" for p in self.port.values()): self.choose_fields()   # the band was one portion: pick from its pieces
+        self.back_paths(); self.grade_verges()
         self.rid_map(); self.road_tiers()
         self.town_field()
         self.place_slots()

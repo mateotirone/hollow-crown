@@ -457,6 +457,17 @@ addTests("settle towns", {
       }
     }
   },
+  "every layout sets up a Works yard at Hamlet, for the Ironworks (Mateo 2026-11-14)": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const w = slotsOf(layout).filter((s) => s.size === "W" && s.tier === 0);
+        assert(w.length === 1, `${key} ${layout.label}: ${w.length} Hamlet Works plots`);
+        const { x0, z0, x1, z1 } = w[0].box;
+        const dims = [x1 - x0 + 1, z1 - z0 + 1].sort((a, b) => a - b).join("x");
+        assertEqual(dims, "17x27", `${key} ${layout.label}: Works plot is 27 x 17`);
+      }
+    }
+  },
   "slots open by tier, have a door side and stand inside the Castle wall": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
       for (const layout of town.variants) {
@@ -929,7 +940,7 @@ addTests("settle plans", {
 });
 
 import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
-import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
+import { pickBaseSlot, bedSpot, bedSpots, hasFurnace, furnaceSpots, gateDir, roadEnd, roadLine, gradeLine, joinRoute, gradeRoute, joinSurface, routeSides, ROAD_BLOCKS as JOIN_ROAD_BLOCKS, ROAD_JOIN_PATHY } from "./basedata.js";
 import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
 import { needsRoad } from "./founding.js";
@@ -967,6 +978,19 @@ addTests("settle base", {
         const all = bedSpots(drawBuilding(id, region));
         assert(all.length >= 2 && all[0].x === at.x && all[0].z === at.z, `${region} ${id} has a second spot for when the first is taken`);
       }
+    }
+  },
+  "the founder's house has a furnace: the cottage's own, or a spot by the bed in the starter village's house"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      assert(hasFurnace(drawBuilding("cottage", region)), `${region} cottage has its own furnace`);
+      const plan = drawBuilding("house", region);
+      if (hasFurnace(plan)) continue;
+      const bed = bedSpot(plan);
+      const spots = furnaceSpots(plan, bed);
+      assert(spots.length >= 2, `${region} house has room for a furnace`);
+      const f = spots[0];
+      assert(f.y === bed.y && !(Math.abs(f.x - bed.x) <= 1 && f.z >= bed.z - 1 && f.z <= bed.z + 2), `${region} house furnace is on the bed's floor, clear of the bed`);
+      assert(Math.abs(f.face.x) + Math.abs(f.face.z) === 1, `${region} house furnace faces one way`);
     }
   },
   "the base buildings take the nearest free Small plot, never the library's"() {

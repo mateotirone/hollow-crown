@@ -10,6 +10,7 @@
 // The founder's bed is checked every ten seconds while the owner is on (Mateo 2026-11-13: "my house doesn't have a
 // bed in it"): a town with no founder's house adopts its finished house nearest the square (the starter village's
 // "founder" one first), and a finished founder's house with no bed gets one, on the first spot free in the world.
+// It also gets a furnace by the bed when its design has none (Mateo 2026-11-14: one furnace in every Hamlet).
 // Test: /scriptevent siege:founder_bed   put your own bed back in your founder's house (and set your spawn there)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
@@ -21,7 +22,7 @@ import { raiseOnSlot, risingAt } from "./plans.js";
 import { townOf, allTowns, layoutOf, clearMarker, placeMarker, slotState, saveTowns } from "./founding.js";
 import { slotsOf, fixturesOf } from "./towns.js";
 import { seatInWorld } from "./plotmarker.js";
-import { pickBaseSlot, bedSpots } from "./basedata.js";
+import { pickBaseSlot, bedSpots, hasFurnace, furnaceSpots } from "./basedata.js";
 import { HOMES } from "./config.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -144,7 +145,39 @@ export function placeOwnerBed(owner, st) {
       try { player.setSpawnPoint({ dimension: dim, x: foot.x, y: foot.y, z: foot.z }); } catch { /* the bed still works when slept in */ }
       player.sendMessage(`§6Your own house is ready by the square (${foot.x}, ${foot.z}).§7 The bed in it is yours: you wake there, and it is never given to a settler.`);
     }
+    placeOwnerFurnace(st, spot);
     emit("settleCharter", { owner });
+    return true;
+  }
+  return false;
+}
+
+// ---------- the founder's furnace ----------
+// One furnace in every Hamlet from day one (Mateo 2026-11-14): the founder's house gets one against a wall near the
+// bed when its design has none (the starter village's houses; a founder's cottage already has its own).
+const FACE = (x, z) => (x > 0 ? "east" : x < 0 ? "west" : z > 0 ? "south" : "north");
+export function placeOwnerFurnace(st, bed) {
+  if (st.ownerFurnace || !st.origin || !st.forward || !st.building) return false;
+  const plan = drawBuilding(st.building, st.style);
+  if (hasFurnace(plan)) { st.ownerFurnace = true; saveTowns(); return true; }
+  const dim = world.getDimension(OVERWORLD);
+  const frame = frameFor(st.forward);
+  for (const spot of furnaceSpots(plan, bed ?? bedSpots(plan)[0])) {
+    const at = toWorld(frame, st.origin, spot.x, spot.y, spot.z);
+    const front = toWorld(frame, st.origin, spot.x + spot.face.x, spot.y, spot.z + spot.face.z);
+    let blk, fr;
+    try { blk = dim.getBlock(at); fr = dim.getBlock(front); } catch { return false; }
+    if (!blk || !fr) return false; // not loaded
+    if (!isAir(blk) || !isAir(fr)) continue; // something the player put there
+    const facing = FACE(front.x - at.x, front.z - at.z);
+    try {
+      let perm;
+      try { perm = BlockPermutation.resolve("minecraft:furnace", { "minecraft:cardinal_direction": facing }); } catch { perm = BlockPermutation.resolve("minecraft:furnace"); }
+      blk.setPermutation(perm);
+    } catch (e) { console.warn(`[Hollow Crown] founder furnace: ${e}`); return false; }
+    if (dim.getBlock(at)?.typeId !== "minecraft:furnace") continue;
+    st.ownerFurnace = at;
+    saveTowns();
     return true;
   }
   return false;
@@ -174,8 +207,9 @@ function checkFounderBed(owner, town) {
     return;
   }
   const [, st] = found;
-  if (st.ownerBed || risingAt(st.origin)) return;
-  placeOwnerBed(owner, st);
+  if (risingAt(st.origin)) return;
+  if (!st.ownerBed) placeOwnerBed(owner, st);
+  else if (!st.ownerFurnace) placeOwnerFurnace(st); // a house that got its bed before furnaces were added
 }
 
 onTick("settle_founder_bed", 200, () => {
