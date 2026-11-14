@@ -23,6 +23,7 @@ export const OFFLINE_ONLY = new Set([
   "wonders: every wonder has a design, cut into six stages that hold every block",
   "landmarks: tomes laid in designs are real tomes, each laid once, each on something solid",
   "plot caves: a plot cave: each tier opens more, all of it reached from the shaft, ore only on open faces, a door at Castle",
+  "plot caves: a plot mine: the road from the pit bottom is walkable and lit, the rest has its note, the ladder reaches the floor",
   "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
   "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",

@@ -263,7 +263,9 @@ def cull_group(n):
     if n == "water": return "water"
     return None
 
-PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
+PLANTS = {"cave_vines": "cave_vines_body", "cave_vines_body_with_berries": "cave_vines_body_berries", "cave_vines_head_with_berries": "cave_vines_head_berries",
+          "cave_vines_head": "cave_vines_head", "azalea": "azalea_plant", "flowering_azalea": "potted_flowering_azalea_bush_plant", "pointed_dripstone": "pointed_dripstone_down_tip",
+          "poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
