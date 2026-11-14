@@ -97,6 +97,20 @@ function groundAt(dim, x, z) {
   return undefined;
 }
 
+/** The square's floor: the commonest floor round the middle, never the middle itself (the town's own well and the
+ * market awnings stand there; reading them put the well, posts and clocktower four blocks up in the air). */
+export const FLOOR_RING = [[4, 0], [-4, 0], [0, 4], [0, -4], [3, 3], [-3, 3], [3, -3], [-3, -3]];
+export function commonest(ys) {
+  const n = new Map();
+  for (const y of ys) if (y !== undefined) n.set(y, (n.get(y) ?? 0) + 1);
+  let best, k = 0;
+  for (const [y, c] of n) if (c > k || (c === k && y < best)) { best = y; k = c; }
+  return best;
+}
+function squareFloor(dim, x, z) {
+  return commonest(FLOOR_RING.map(([dx, dz]) => groundAt(dim, Math.floor(x) + dx, Math.floor(z) + dz)));
+}
+
 const perms = new Map();
 function perm(o) {
   const k = o.block + JSON.stringify(o.states ?? {});
@@ -149,7 +163,7 @@ let busy = false;
 export function buildWell(center, by) {
   if (busy) return { ok: false, why: "it is already being built" };
   const dim = overworld();
-  const y = center.y ?? groundAt(dim, center.x, center.z);
+  const y = center.y ?? squareFloor(dim, center.x, center.z);
   if (y === undefined) return { ok: false, why: "not loaded yet (stand closer)" };
   const c = { x: Math.floor(center.x), y, z: Math.floor(center.z) };
   busy = true;

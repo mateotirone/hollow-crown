@@ -9,6 +9,18 @@ const ids = (f) => questsFor(f).map((q) => q.id);
 const THIN = WARDS.filter((w) => w.thin);
 
 addTests("quests", {
+  "your railway station is a step until you have been there, even in the first nights": () => {
+    const station = { name: "Lanternbog Halt", x: 180, z: 900, built: true, found: false };
+    const f = base({ flags: ["wren_met"], plot: "Lanternbog", station, solved: ["local_lanternbog"] });
+    const q = questsFor(f).find((x) => x.id === "station");
+    assert(q, "station step shown");
+    assertEqual(q.target.name, "Lanternbog Halt");
+    assertEqual(q.target.x, 180);
+    assert(!ids({ ...f, station: { ...station, found: true } }).includes("station"), "gone once you've been there");
+    const first = { keep: true, wins: 0, days: 3 };
+    assertEqual(ids({ ...f, first }).slice(-1)[0], "station", "beside the first-nights step");
+    assert(!ids({ ...f, first, station: undefined }).includes("station"), "no station, no step");
+  },
   "a new settlement's first Regals: sell wheat to your own Farmer, until 16 are sold": () => {
     const farmer = { at: { x: 23, z: 2 }, sold: 0, tag: "siege_hamlet_farmer_me" };
     const f = base({ farmer, first: { keep: true, days: 4 } });

@@ -52,6 +52,9 @@ export function stationPlan(style, stage, end = 0) {
   d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = spellings(id); });
   const p = new Plan(st);
   drawData(p, d, prefix);
+  // every column of the building stands on footings down to the ground (a station on a slope never hangs in the air:
+  // Mateo's Grand Station, playtest 2026-11-13); the Groundwork stage (station_sites.js) cuts and blends the land round it
+  for (const c of p.cells.values()) if (c.y === 0 && c.role !== "air" && !p.columns.has(`${c.x},${c.z}`)) p.column(c.x, c.z, "foundation");
   const x0 = d.box.x0 - STATION.runOn, x1 = d.box.x1 + STATION.runOn;
   for (let x = x0; x <= x1; x++) {
     if (!p.get(x, 0, 0)) p.set(x, 0, 0, "foundation");

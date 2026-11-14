@@ -55,6 +55,7 @@
     -47,
     -470
    ],
+   "walked": true,
    "name": "chapel"
   },
   {
@@ -70,6 +71,7 @@
     -70,
     -479
    ],
+   "walked": true,
    "name": "clock tower"
   },
   {
@@ -85,6 +87,7 @@
     -46,
     -481
    ],
+   "walked": true,
    "name": "bakery"
   },
   {
@@ -100,6 +103,7 @@
     -44,
     -456
    ],
+   "walked": true,
    "name": "order waystation"
   },
   {
@@ -115,6 +119,7 @@
     -60,
     -434
    ],
+   "walked": true,
    "name": "breeder's post"
   },
   {
@@ -130,10 +135,11 @@
     -62,
     -459
    ],
+   "walked": true,
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11453_mangrove",
+   "stamp": "tg_cottage_11453_dark_oak",
    "kind": "house",
    "x": -49,
    "z": -441,
@@ -145,7 +151,8 @@
     -52,
     -446
    ],
-   "roof": "warm red"
+   "walked": true,
+   "roof": "dark shingle"
   },
   {
    "stamp": "tg_cottage_11175_d-47_-428",
@@ -160,6 +167,7 @@
     -40,
     -431
    ],
+   "walked": true,
    "roof": "slate"
   },
   {
@@ -175,10 +183,11 @@
     -33,
     -439
    ],
+   "walked": true,
    "roof": "slate"
   },
   {
-   "stamp": "tg_cottage_11543_mangrove",
+   "stamp": "tg_cottage_11543_dark_oak",
    "kind": "house",
    "x": -24,
    "z": -432,
@@ -190,25 +199,27 @@
     -29,
     -430
    ],
-   "roof": "warm red"
-  },
-  {
-   "stamp": "tg_cottage_11901_dark_oak",
-   "kind": "house",
-   "x": -13,
-   "z": -479,
-   "ground_y": 81,
-   "rotation": 180,
-   "footprint": 63,
-   "foundation": 0,
-   "door": [
-    -16,
-    -484
-   ],
+   "walked": true,
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_barn_11366",
+   "stamp": "tg_cottage_11162",
+   "kind": "house",
+   "x": -11,
+   "z": -477,
+   "ground_y": 80,
+   "rotation": 180,
+   "footprint": 120,
+   "foundation": -1,
+   "door": [
+    -18,
+    -484
+   ],
+   "walked": true,
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_barn_11118",
    "kind": "barn",
    "x": 1,
    "z": -478,
@@ -219,109 +230,168 @@
    "door": [
     -3,
     -489
-   ]
+   ],
+   "walked": true
   },
   {
-   "stamp": "tg_barn_11473",
-   "kind": "barn",
-   "x": -31,
-   "z": -508,
+   "stamp": "tg_cottage_11632_dark_oak",
+   "kind": "house",
+   "x": -4,
+   "z": -503,
+   "ground_y": 81,
+   "rotation": 0,
+   "footprint": 49,
+   "foundation": 0,
+   "door": [
+    -2,
+    -498
+   ],
+   "walked": true,
+   "roof": "dark shingle"
+  },
+  {
+   "stamp": "tg_cottage_11588_mangrove",
+   "kind": "house",
+   "x": -86,
+   "z": -531,
    "ground_y": 80,
    "rotation": 0,
-   "footprint": 165,
+   "footprint": 49,
    "foundation": 0,
    "door": [
-    -27,
-    -495
-   ]
-  },
-  {
-   "stamp": "tg_barn_11725",
-   "kind": "barn",
-   "x": -110,
-   "z": -508,
-   "ground_y": 81,
-   "rotation": 270,
-   "footprint": 143,
-   "foundation": 1,
-   "door": [
-    -99,
-    -512
-   ]
-  },
-  {
-   "stamp": "tg_cottage_11403_dark_oak",
-   "kind": "house",
-   "x": -111,
-   "z": -492,
-   "ground_y": 81,
-   "rotation": 270,
-   "footprint": 63,
-   "foundation": 0,
-   "door": [
-    -104,
-    -494
+    -84,
+    -526
    ],
+   "walked": true,
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_11345_dark_oak",
+   "kind": "house",
+   "x": -103,
+   "z": -513,
+   "ground_y": 80,
+   "rotation": 0,
+   "footprint": 49,
+   "foundation": 0,
+   "door": [
+    -101,
+    -508
+   ],
+   "walked": true,
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_cottage_11207_d-62_-487_dark_oak",
+   "stamp": "tg_cottage_11204_d-62_-486_dark_oak",
    "kind": "house",
    "x": -62,
-   "z": -487,
+   "z": -486,
    "ground_y": 78,
    "rotation": 180,
-   "footprint": 49,
-   "foundation": 1,
-   "door": [
-    -64,
-    -492
-   ],
-   "roof": "dark shingle"
-  },
-  {
-   "stamp": "tg_cottage_11274_d-98_-473",
-   "kind": "house",
-   "x": -98,
-   "z": -473,
-   "ground_y": 79,
-   "rotation": 90,
    "footprint": 63,
    "foundation": 2,
    "door": [
-    -103,
-    -470
+    -65,
+    -491
    ],
-   "roof": "slate"
-  },
-  {
-   "stamp": "tg_cottage_11471_dark_oak",
-   "kind": "house",
-   "x": -126,
-   "z": -471,
-   "ground_y": 83,
-   "rotation": 270,
-   "footprint": 81,
-   "foundation": 0,
-   "door": [
-    -119,
-    -474
-   ],
+   "walked": true,
    "roof": "dark shingle"
   },
   {
-   "stamp": "tg_windmill_vale_342",
-   "kind": "windmill",
+   "stamp": "tg_cottage_11856_d-87_-498_mangrove",
+   "kind": "house",
+   "x": -87,
+   "z": -498,
+   "ground_y": 78,
+   "rotation": 90,
+   "footprint": 49,
+   "foundation": 2,
+   "door": [
+    -92,
+    -496
+   ],
+   "walked": true,
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_11745_d-111_-494_dark_oak",
+   "kind": "house",
+   "x": -111,
+   "z": -494,
+   "ground_y": 81,
+   "rotation": 0,
+   "footprint": 63,
+   "foundation": 1,
+   "door": [
+    -108,
+    -489
+   ],
+   "walked": true,
+   "roof": "dark shingle"
+  },
+  {
+   "stamp": "tg_cottage_12099_d-33_-528_mangrove",
+   "kind": "house",
+   "x": -33,
+   "z": -528,
+   "ground_y": 78,
+   "rotation": 0,
+   "footprint": 49,
+   "foundation": 2,
+   "door": [
+    -31,
+    -523
+   ],
+   "walked": true,
+   "roof": "warm red"
+  },
+  {
+   "stamp": "tg_cottage_11512_d-25_-506",
+   "kind": "house",
+   "x": -25,
+   "z": -506,
+   "ground_y": 80,
+   "rotation": 90,
+   "footprint": 120,
+   "foundation": 1,
+   "door": [
+    -32,
+    -499
+   ],
+   "walked": true,
+   "roof": "slate"
+  },
+  {
+   "stamp": "tg_cottage_11864_dark_oak",
+   "kind": "house",
    "x": -99,
    "z": -453,
-   "ground_y": 78,
+   "ground_y": 77,
    "rotation": 270,
-   "footprint": 77,
+   "footprint": 63,
    "foundation": 0,
    "door": [
-    -95,
-    -453
-   ]
+    -94,
+    -456
+   ],
+   "walked": true,
+   "roof": "dark shingle"
+  },
+  {
+   "stamp": "tg_windmill_vale_342_d-107_-456",
+   "kind": "windmill",
+   "x": -107,
+   "z": -456,
+   "ground_y": 81,
+   "rotation": 180,
+   "footprint": 77,
+   "foundation": 1,
+   "door": [
+    -107,
+    -460
+   ],
+   "walked": true,
+   "fence_path": true
   },
   {
    "stamp": "tg_windmill_vale_348_d-48_-418",
@@ -335,24 +405,28 @@
    "door": [
     -44,
     -418
-   ]
+   ],
+   "fence_path": true,
+   "walked": true
   },
   {
    "stamp": "tg_windmill_vale_355",
    "kind": "windmill",
-   "x": -13,
-   "z": -505,
+   "x": -15,
+   "z": -508,
    "ground_y": 81,
    "rotation": 0,
    "footprint": 77,
    "foundation": 0,
    "door": [
-    -13,
-    -501
-   ]
+    -15,
+    -504
+   ],
+   "walked": true,
+   "fence_path": true
   },
   {
-   "stamp": "tg_well_11",
+   "stamp": "tg_cross_11",
    "kind": "square",
    "x": -60,
    "z": -470,
@@ -363,70 +437,79 @@
   {
    "stamp": "market_stall_11",
    "kind": "stall",
-   "x": -60,
+   "x": -66,
+   "z": -472,
+   "ground_y": 79,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_12",
+   "kind": "stall",
+   "x": -61,
    "z": -476,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_12",
+   "stamp": "market_stall_13",
    "kind": "stall",
    "x": -54,
-   "z": -470,
+   "z": -471,
    "ground_y": 79,
    "rotation": 90,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_13",
+   "stamp": "market_stall_14",
    "kind": "stall",
-   "x": -57,
+   "x": -56,
    "z": -464,
    "ground_y": 79,
    "rotation": 180,
    "footprint": 0
   },
   {
-   "stamp": "market_stall_14",
-   "kind": "stall",
-   "x": -66,
-   "z": -466,
-   "ground_y": 79,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
    "stamp": "market_stall_15",
    "kind": "stall",
-   "x": -66,
-   "z": -471,
+   "x": -63,
+   "z": -465,
    "ground_y": 79,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -68,
-   "z": -468,
-   "ground_y": 79,
-   "rotation": 270,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale_arm",
-   "kind": "lamp",
-   "x": -65,
-   "z": -475,
-   "ground_y": 78,
-   "rotation": 0,
+   "rotation": 180,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
    "x": -58,
+   "z": -463,
+   "ground_y": 78,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -65,
+   "z": -465,
+   "ground_y": 78,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -67,
+   "z": -472,
+   "ground_y": 78,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale_arm",
+   "kind": "lamp",
+   "x": -62,
    "z": -477,
    "ground_y": 78,
    "rotation": 0,
@@ -435,17 +518,17 @@
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -51,
-   "z": -473,
-   "ground_y": 79,
-   "rotation": 90,
+   "x": -55,
+   "z": -475,
+   "ground_y": 78,
+   "rotation": 0,
    "footprint": 0
   },
   {
    "stamp": "lamp_post_vale_arm",
    "kind": "lamp",
-   "x": -53,
-   "z": -464,
+   "x": -52,
+   "z": -468,
    "ground_y": 79,
    "rotation": 90,
    "footprint": 0
@@ -453,9 +536,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -57,
-   "z": -458,
-   "ground_y": 78,
+   "x": -51,
+   "z": -460,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -543,7 +626,16 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -45,
+   "x": -36,
+   "z": -525,
+   "ground_y": 76,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
+   "x": -49,
    "z": -479,
    "ground_y": 80,
    "rotation": 0,
@@ -579,7 +671,7 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -15,
+   "x": -14,
    "z": -496,
    "ground_y": 81,
    "rotation": 0,
@@ -653,7 +745,7 @@
    "kind": "lamp",
    "x": -97,
    "z": -510,
-   "ground_y": 81,
+   "ground_y": 80,
    "rotation": 0,
    "footprint": 0
   },
@@ -759,15 +851,6 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -66,
-   "z": -461,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
    "x": -92,
    "z": -483,
    "ground_y": 78,
@@ -804,9 +887,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -117,
-   "z": -486,
-   "ground_y": 83,
+   "x": -113,
+   "z": -488,
+   "ground_y": 81,
    "rotation": 0,
    "footprint": 0
   },
@@ -840,18 +923,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -29,
-   "z": -517,
+   "x": -28,
+   "z": -518,
    "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -36,
-   "z": -524,
-   "ground_y": 77,
    "rotation": 0,
    "footprint": 0
   },
@@ -869,7 +943,7 @@
    "kind": "lamp",
    "x": -104,
    "z": -474,
-   "ground_y": 79,
+   "ground_y": 80,
    "rotation": 0,
    "footprint": 0
   },
@@ -921,17 +995,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -92,
-   "z": -497,
-   "ground_y": 78,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -68,
-   "z": -521,
+   "x": -62,
+   "z": -522,
    "ground_y": 77,
    "rotation": 0,
    "footprint": 0
@@ -939,18 +1004,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -60,
-   "z": -523,
-   "ground_y": 76,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -63,
-   "z": -483,
-   "ground_y": 79,
+   "x": -62,
+   "z": -484,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
@@ -966,9 +1022,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -74,
-   "z": -517,
-   "ground_y": 77,
+   "x": -73,
+   "z": -519,
+   "ground_y": 78,
    "rotation": 0,
    "footprint": 0
   },
@@ -996,24 +1052,6 @@
    "x": -88,
    "z": -444,
    "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -93,
-   "z": -449,
-   "ground_y": 77,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
-   "x": -41,
-   "z": -420,
-   "ground_y": 80,
    "rotation": 0,
    "footprint": 0
   },

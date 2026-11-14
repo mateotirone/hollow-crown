@@ -13,6 +13,7 @@ import { STATION, STAGE_NAMES, STAGES, stageFor, stationPlan, siteFor, lineBlock
 import { TRACK } from "./data.js";
 import { reader } from "./index.js";
 import { addSwitch } from "./switches.js";
+import { Groundwork } from "../settle/ground.js";
 import { ROUTES } from "./routes_data.js";
 import { stopSite, deadEndAt } from "./routes.js";
 
@@ -122,6 +123,9 @@ function raise(site) {
   startBuild({
     id: jobId(site), dimensionId: site.dim, origin: site.origin, forward: site.forward, plan, style: plan.style,
     perTick: STATION.perTick, remove, onDone: () => finish(site, plan),
+    // on a pad at the platform's level: the hill cut away over it, the land blended round it (settle/ground.js), so
+    // a bigger station never rises into a hillside or over a drop
+    ground: new Groundwork(plan, site.origin, site.forward, regionOf(site.style)),
   });
 }
 

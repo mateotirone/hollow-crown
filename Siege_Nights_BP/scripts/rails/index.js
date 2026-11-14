@@ -38,6 +38,9 @@ const say = (player, text) => player.onScreenDisplay.setActionBar(text);
 const stationAt = (block) => stations().find((s) => s.x === block.location.x && s.y === block.location.y && s.z === block.location.z && s.dim === block.dimension.id);
 const byId = (id) => stations().find((s) => s.id === id);
 
+// Has this player been to (discovered) this station?
+export const hasFound = (player, id) => foundBy(player).includes(id);
+
 function foundBy(player) {
   try {
     const raw = player.getDynamicProperty(FOUND);

@@ -123,6 +123,7 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //   dim, pos: where the player is                                        site: the named source site { id, name, x, z }
 //   rift: the Rift, once open { x, z, name }                             hollow: { cartsong, choir, carter: { x, z } }
 //   morvane: Morvane has fallen (world or player)                      farmer: { at?: { x, z }, sold, tag } once you have a settlement
+//                                                                       station: your railway station (stationQuest)
 //   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
 // }
 export function questsFor(f) {
@@ -136,7 +137,9 @@ export function questsFor(f) {
   if (farm) out.push(farm);
   const main = mainQuest(f);
   if (main) out.push(main);
-  const side = first ? undefined : sideQuest(f, main);
+  // your own railway station: shown until you have stood on its platform, even in the first nights (playtest
+  // 2026-11-13: "Where's the train station?"), and the only side step then
+  const side = first ? stationQuest(f) : sideQuest(f, main);
   if (side) out.push(side);
   return out;
 }
@@ -203,9 +206,23 @@ function mainQuest(f) {
   return bossQuest(f, nextBoss(f));
 }
 
+// f.station = { name, x, z, built (the Halt is up), found (you have been there) } for your settlement's station
+export function stationQuest(f) {
+  const st = f.station;
+  if (f.dim === UNDERTOW || !st || st.found) return undefined;
+  return {
+    id: "station", title: "Find your railway station",
+    hint: st.built ? "Your Halt stands where the line passes your land. Click its Station Post to ride and to buy track to the next stop."
+      : "A Halt rises where the line passes your land once you are near it. Click its Station Post to ride and buy track.",
+    target: at(st.name, st.x, st.z),
+  };
+}
+
 function sideQuest(f, main) {
   if (f.dim === UNDERTOW) return undefined;
   if (!f.keep && !f.morvane) return { id: "keep", title: "Found your settlement", hint: "Raise your Keep Banner on a Plot Stone before the first siege night." };
+  const station = stationQuest(f);
+  if (station) return station;
   const down = fallen(f.flags).length;
   if (down >= 3 && down < 5 && !f.solved.includes("source") && main?.id?.startsWith("boss_")) return notesQuest(f);
   return undefined;

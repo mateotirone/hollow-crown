@@ -177,12 +177,12 @@ function crossingTick(dim, seg, c) {
   return true;
 }
 
-// Every two seconds: try again the pieces that were out of loaded ground
+// Twice a second: try again the pieces that were out of loaded ground (the far-track area below loads them)
 function missedTick() {
   if (!isReady()) return;
   const dim = world.getDimension("minecraft:overworld");
   // laying costs budget; looking at unloaded ground is cheap, so a long unloaded stretch can't starve the rest
-  let budget = ROUTE.layPerTick, looks = ROUTE.missedLooks, changed = false;
+  let budget = ROUTE.layPerTick * 2, looks = ROUTE.missedLooks, changed = false;
   store.data.missedWorks ??= {};
   // earthworks first: a piece of track whose works haven't gone in yet waits for them
   const waiting = new Set();
@@ -217,7 +217,69 @@ function missedTick() {
   }
   if (changed) store.save();
 }
-onTick("route_missed", 40, missedTick);
+onTick("route_missed", 10, missedTick);
+
+// ---------- far track ----------
+// A stretch is hundreds of blocks long, and on a Realm only the ground round players is loaded, so a bought stretch
+// used to go down only near the buyer and stop in the grass: a short stub with the rest "waiting" (playtest
+// 2026-11-13). Now one ticking area walks along whatever is still waiting, holding that ground loaded until its
+// pieces, earthworks and crossings are down, then moves on, and is taken away when nothing waits.
+const FAR = { name: "hc_rail_lay", half: 32, giveUp: 60 }; // area 65 x 65 round the next waiting piece; checks (2 s each) before skipping it
+const runCmd = (dim, cmd) => { try { return dim.runCommand(cmd); } catch { return undefined; } };
+
+// The next spot something waits on: { x, z, key } or undefined. The stretch going down comes first, then earthworks,
+// then pieces, then crossings (they wait on the pieces near them).
+export function nextWaiting(data = store.data, segOf = segById) {
+  const job = data.laying?.[0], seg = job && segOf(job.seg);
+  for (const [id, list] of Object.entries(data.missedWorks ?? {})) {
+    const s = segOf(id), k = list?.at(-1);
+    if (s?.works && k !== undefined && s.works[k]) return { x: s.works[k][0], z: s.works[k][1], key: `w:${id}:${k}` };
+  }
+  for (const [id, list] of Object.entries(data.missed ?? {})) {
+    const s = segOf(id), k = list?.at(-1);
+    if (s && k !== undefined && s.blocks[k]) return { x: s.blocks[k][0], z: s.blocks[k][2], key: `p:${id}:${k}` };
+  }
+  for (const [id, list] of Object.entries(data.missedCross ?? {})) {
+    const s = segOf(id), c = list?.at(-1);
+    const at = s?.crossings?.[c] && s.blocks[s.crossings[c].at];
+    if (at) return { x: at[0], z: at[2], key: `c:${id}:${c}` };
+  }
+  if (seg && job.i < seg.blocks.length) { const b = seg.blocks[job.i]; return { x: b[0], z: b[2], key: `l:${seg.id}:${job.i}` }; }
+  return undefined;
+}
+
+function farTick() {
+  if (!isReady()) return;
+  const dim = world.getDimension("minecraft:overworld");
+  const far = (store.data.far ??= {});
+  const at = nextWaiting();
+  if (!at) {
+    if (far.x !== undefined) { runCmd(dim, `tickingarea remove ${FAR.name}`); store.data.far = {}; store.save(); }
+    return;
+  }
+  if (far.key === at.key) {
+    if (++far.tries < FAR.giveUp) return;
+    // the same spot has waited two minutes with its ground held loaded: it can't go down (out of the world, or
+    // something keeps refusing it). Drop it from the lists so the rest of the line isn't held up behind it.
+    const [kind, id, k] = at.key.split(":"), n = Number(k);
+    const lists = { w: store.data.missedWorks, p: store.data.missed, c: store.data.missedCross };
+    const list = lists[kind]?.[id];
+    if (list) { const j = list.lastIndexOf(n); if (j >= 0) list.splice(j, 1); }
+    console.warn(`[Hollow Crown] rail: gave up on ${at.key} at ${at.x}, ${at.z}`);
+    store.data.far = {};
+    store.save();
+    return;
+  }
+  const inside = far.x !== undefined && Math.abs(at.x - far.x) <= FAR.half - 8 && Math.abs(at.z - far.z) <= FAR.half - 8;
+  if (!inside) {
+    runCmd(dim, `tickingarea remove ${FAR.name}`);
+    runCmd(dim, `tickingarea add ${at.x - FAR.half} 0 ${at.z - FAR.half} ${at.x + FAR.half} 0 ${at.z + FAR.half} ${FAR.name} true`);
+    far.x = at.x; far.z = at.z;
+  }
+  far.key = at.key; far.tries = 0;
+  store.save();
+}
+onTick("route_far", 40, farTick);
 
 async function buyMenu(player, station, back) {
   const owner = ownerOf(player);

@@ -235,7 +235,7 @@ fenpool &= ~PG.water
 log("plot ground:", int(pgwater.sum()), "water columns")
 
 Y = np.round(Yf).astype(np.int32)
-Y[land & ~fenpool & ~islake & ~pgwater] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
+_dry = land & ~fenpool & ~islake & ~pgwater; Y[_dry] = np.maximum(Y[_dry], SEA + 1)   # one mask both sides (they differed by the plot ponds)
 Y[~land] = np.minimum(Y[~land], SEA - 1)            # the sea bed stays under water (no grass specks at sea level)
 Y[isriver] -= 3; Y[bank] -= 1
 water_level = np.full((SIZE, SIZE), -999, np.int32)
@@ -380,7 +380,21 @@ AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, 
 if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):   # and the boss sites' whole areas (baked below)
     _ba = json.loads(__import__("subprocess").check_output(["node", os.path.join(os.path.dirname(os.path.abspath(__file__)), "bake_sites.mjs"), "--anchors"]))
     AVOID += [(a_["x"], a_["z"], int(_ba["reach"][s_])) for s_, a_ in _ba["anchors"].items() if s_ not in ("reeve", "mirelight")]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+if os.environ.get("GW_RAIL_KEEP"):
+    # GW_RAIL_KEEP=map/rail-segments.json: keep that export's stations and routes (the towns, station roads and
+    # world were built round them) and only re-raster, re-profile and re-plan the works along them
+    _kp = json.load(open(os.environ["GW_RAIL_KEEP"]))
+    STATION_POS, LINE_PTS = {}, {}
+    for st_ in _kp["stops"]:
+        d_ = next((b_[4] for g_ in _kp["segments"] for b_ in g_["blocks"] if (b_[0], b_[2]) == (st_["x"], st_["z"]) and b_[3] == 0), 2)
+        STATION_POS[st_["id"]] = (st_["x"], st_["z"], "x" if d_ % 4 == 2 else "z"); stop_y[st_["id"]] = st_["y"]
+    for g_ in _kp["segments"]:
+        pts_ = LINE_PTS.setdefault(g_["line"], [])
+        cl_ = [(b_[0], b_[2]) for b_ in g_["blocks"]]
+        pts_ += cl_ if not pts_ else cl_[1:]
+    log("rail: kept the stations and routes of", os.environ["GW_RAIL_KEEP"])
+else:
+    STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
 stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
 # a station road (towns thread 2026-11-13): a village station the map placed itself gets a 5-wide road from the
@@ -407,11 +421,14 @@ for n_, tx_, tz_, _r, _ in TOWNS:
     rd_ = raster([[(fx_, fz_), (ex_, ez_)]], lambda f: 5) & land & ~isriver
     isroad |= rd_; istrail &= ~rd_
     log("station road", n_, (fx_, fz_), "->", (ex_, ez_), int(rd_.sum()), "cells")
+def _rail_blocked(x, z):
+    """Ground the line was routed round (towns, plots, story sites): the straightener keeps out of it."""
+    return any(math.hypot(x - ax_, z - az_) < ar_ for ax_, az_, ar_ in AVOID) or any(math.hypot(x - tx_, z - tz_) < tr_ for _, tx_, tz_, tr_ in R_TOWNS)
 for lname in SEQ:
     pts = LINE_PTS[lname]
     on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
     stops_ = [(st["x"], st["z"], STATION_POS[sid][2][-1]) for sid, st in on]
-    cells, si = railplan.trace(pts, stops_, routed=True)
+    cells, si = railplan.trace(pts, stops_, routed=True, blocked=_rail_blocked)
     order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
     ground = [gy(x, z) for x, z in cells]
     for (sid, st), i in zip(on, si):
@@ -1005,9 +1022,10 @@ if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
     _probe = {"seed": int.from_bytes(os.urandom(4), "little") & 0x7FFFFFFF, "sites": {}, "reeve_y": None}
     _gold = []
     for sid_, a_ in _anch["anchors"].items():
-        if sid_ == "reeve":
-            y_, _, gl_ = _column(a_["x"], a_["z"], reeve=True); _probe["reeve_y"] = y_
-            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in gl_]; continue
+        if sid_ == "reeve":   # the square's commonest floor round the middle (reeve.js squareFloor: FLOOR_RING)
+            _ys = [_column(a_["x"] + dx_, a_["z"] + dz_, reeve=True)[0] for dx_, dz_ in ((4, 0), (-4, 0), (0, 4), (0, -4), (3, 3), (-3, 3), (3, -3), (-3, -3))]
+            _probe["reeve_y"] = min(set(_ys), key=lambda v: (-_ys.count(v), v))
+            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in _column(a_["x"], a_["z"], reeve=True)[2]]; continue
         n_ = 2 * _R + 1; gr_, wa_ = [], []
         for x_ in range(a_["x"] - _R, a_["x"] + _R + 1):
             for z_ in range(a_["z"] - _R, a_["z"] + _R + 1):
