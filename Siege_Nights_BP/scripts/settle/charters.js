@@ -48,9 +48,16 @@ export function plotFit(id, slot, freeClasses = new Set()) {
 export function charterCheck(tier, counts, known) {
   const lines = [];
   const charter = CHARTERS[tier] ?? [];
-  // the work buildings the charters up to this one name (only the ones that exist), for "more"
+  // the work buildings the charters up to this one name (only the ones that exist), for "more"; a building two
+  // charters name (the Barracks: Hamlet and City) counts once, at the larger count
+  const namedBy = new Map();
+  for (let t = 0; t <= tier; t++) for (const l of CHARTERS[t] ?? []) {
+    if (l.more || !l.ids.every((i) => WORK.includes(i)) || !l.ids.some((i) => known.has(i))) continue;
+    const key = l.ids.join();
+    namedBy.set(key, Math.max(namedBy.get(key) ?? 0, l.count ?? 1));
+  }
   let named = 0;
-  for (let t = 0; t <= tier; t++) for (const l of CHARTERS[t] ?? []) if (!l.more && l.ids.every((i) => WORK.includes(i)) && l.ids.some((i) => known.has(i))) named += l.count ?? 1;
+  for (const n of namedBy.values()) named += n;
   for (const l of charter) {
     const live = l.ids.filter((i) => known.has(i));
     const have = live.reduce((n, i) => n + (counts[i] ?? 0), 0);

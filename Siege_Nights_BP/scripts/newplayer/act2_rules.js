@@ -29,6 +29,9 @@ export const F2 = {
   family: "family_met", // you heard Tobin out at the cart
   housed: "family_housed", // you gave the family a place in the Longhouse
   notice: "act2_notice_told", // Elspeth told you there's a notice up you'll want to read
+  herald: "act2_herald", // a Rival Lord's herald came to your gate and had his answer (or there was no lord to send one)
+  tall: "act2_tall_seen", // the Town night came: the tall one walked up to this player's wall
+  townNight: "act2_town_night", // the Town night: the tall thing looked at your wall, and Elspeth said "Build higher"
 };
 export const ELSPETH_TAG = "siege_lore_npc_elspeth";
 export const MONEYER_TAG = "siege_job_moneyer";
@@ -68,9 +71,43 @@ export function act2Stage(f) {
   // part 5: the first Town Board job, the morning after they move in: Tobin's notice, the chest from the burned hamlet.
   // f.board = { taken (the job is yours), done, step (the board's own step, townhall/board.js boardStep) }
   if (!f.board || !morningAfter(f.housedAt, f.now ?? 0)) return undefined;
-  if (f.board.done) return undefined;
-  return f.board.taken ? "board_job" : "read_notice";
+  if (!f.board.done) return f.board.taken ? "board_job" : "read_notice";
+  // part 6: after the second win a Rival Lord's herald rides in (newplayer/herald.js); f.herald is "due", "riding"
+  // or "here"
+  if (!has(F2.herald)) return f.herald === "riding" || f.herald === "here" ? "meet_herald" : undefined;
+  // part 7: the Town night, the first siege night with three wins (lore/glimpse.js, reach/index.js): no step to
+  // show, the night comes to you
+  if (!has(F2.townNight)) return "town_night";
+  return undefined;
 }
+// Act 2 is behind this player (or was never theirs): the Town charter's story line (settle/founding.js "charterStory")
+export const act2Done = (f) => !!f && (f.flags.includes(F2.townNight) || !!f.morvane || (f.down ?? 0) > 0);
+// Ready for the herald: every earlier step is behind this player and the keep has two wins
+export const heraldReady = (f) => (f.wins ?? 0) >= 2 && act2Stage({ ...f, herald: "here" }) === "meet_herald";
+// Ready for the Town night: the herald answered ("look to your wall on the next siege night") and two sieges held, so
+// the night it comes is the one that can make you a Town (three wins)
+export const townNightReady = (f) => (f.wins ?? 0) >= 2 && act2Stage(f) === "town_night";
+// Held back from the Hollow's first glimpse (reach/index.js): in Act 2 and not yet at the Town night. That night
+// is their glimpse.
+export const glimpseHeld = (f) => inAct2(f) && !act2Done(f) && act2Stage(f) !== "town_night";
+// The morning after the Town night: the first morning (before noon) of a later day
+export const townMorning = (tallDay, today, time) => tallDay !== undefined && today > tallDay && time < 6000;
+
+// The herald (part 6): the gate lookout's call, what he says, and his answers. {lord} the lord's full name, {plot}
+// their plot, {coins} the tribute. Hand-written; Mateo to approve.
+export const HERALD = {
+  call: "Rider on the road! Under a lord's colours.",
+  title: "A herald at your gate",
+  speech: "From {lord}, at {plot}, to the lord of this wall: greetings.\n\nMy lord has watched your wall go up, and watched it hold twice. These nights are hard on a new wall. My lord's riders know the roads the raiders use, and could keep them off yours.\n\nA good neighbour pays {coins} toward the peace of the road. That is the custom. What answer do I carry back?",
+  pay: "Pay {coins}",
+  refuse: "Refuse",
+  paid: "Wisely answered. The road will be quiet.",
+  refused: "Then I carry that back. Look to your wall on the next siege night, my lord.",
+  short: "A purse that light? Find the coin, my lord. I'll wait at your gate.",
+};
+export const fillHerald = (line, w) => line.replace(/\{(lord|plot|coins)\}/g, (_, k) => w[k] ?? "");
+// The morning after the Town night (Mateo's approved line)
+export const BUILD_HIGHER = "It came to see how high you build. Build higher.";
 // Part 1: Aldous, the Tree, and the road you chose; "done" once that is behind you (or you said "Not yet")
 function roadStage(f, has) {
   if (f.path === "none" || !f.path) {
@@ -132,6 +169,8 @@ export function act2Step(stage, f = {}, p = {}) {
       at("The cart", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
     case "house_family": return step("Give them a place in the Longhouse", "Tobin said: we can work, we only need a roof. Tell him there's room in the Longhouse.",
       at("Tobin", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
+    case "meet_herald": return step("Talk to the herald at your gate", `A shout from ${f.heraldCaller ?? "the gate lookout"}: "${HERALD.call}"`,
+      at("The herald", p.herald), { npc: { tag: "hc_herald", name: "the herald" } });
     case "read_notice": return step("Read the notice on the Town Board", `Elspeth said: "${NOTICE_LINE}"`, at("Town Board", p.board));
     case "board_job": return boardJobStep(f.board?.step, p);
     default: return undefined;

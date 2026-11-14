@@ -431,7 +431,9 @@ on("assaultIncoming", ({ assault }) => {
     }
   }
   // every settlement gets its own first glimpse: the keeps besieged tonight that have not had theirs
-  n.glimpse = role === "toll" && n.stage >= 2 && n.stage !== AFTER && FULL_NIGHTS.includes(n.kind) ? st.besieged.filter((o) => !hasGlimpsed(o)) : [];
+  // (the story can hold a keep back, or bring one in on its own night: "glimpseKeeps", newplayer/act2.js)
+  const tolled = role === "toll" && n.stage !== AFTER && FULL_NIGHTS.includes(n.kind);
+  n.glimpse = applyFilter("glimpseKeeps", tolled && n.stage >= 2 ? st.besieged.filter((o) => !hasGlimpsed(o)) : [], { besieged: [...st.besieged], tolled });
   if (role !== "tide" && n.kind === "long") storm();
   const line = n.clock || role === "tide" ? WAVES[role].line : waveOf(assault) >= n.waves ? "§7The last of them." : "§7They come again.";
   system.runTimeout(() => {
@@ -512,7 +514,10 @@ function firstGlimpse(owners) {
   }
   system.runTimeout(() => {
     if (!getState().active) return;
-    sendSoldiers(3, "toll", true, owners);
+    // the story can send something of its own instead ("glimpseTall": Act 2's Town night, newplayer/town_night.js)
+    const tall = applyFilter("glimpseTall", [], { owners: [...owners] });
+    const rest = owners.filter((o) => !tall.includes(o));
+    if (rest.length) sendSoldiers(3, "toll", true, rest);
     for (const p of everyone()) {
       if (!there(p)) continue;
       p.sendMessage("§8Something is walking up between them. It is not one of them.");

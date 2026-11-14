@@ -16,6 +16,8 @@
 //   /scriptevent siege:act2           your Act 2 stage, its facts and the tracker's line
 //   /scriptevent siege:act2 choose    play the choosing scene at your hall's Tree now (you need the Ember)
 //   /scriptevent siege:act2 voice     hear the voice now
+//   /scriptevent siege:act2 herald    send the herald up your gate road now
+//   /scriptevent siege:act2 townnight the tall one walks up your gate road now; Elspeth speaks the next morning
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
@@ -37,10 +39,14 @@ import { ironworksFacts } from "../ironworks/index.js";
 import { fallen } from "../quests/rules.js";
 import { sfx } from "../core/sfx.js";
 import { familyOf, familyDue, startCart, houseFamily } from "./family.js";
+import { heraldOf, heraldDue, startHerald } from "./herald.js";
+import { walkTall } from "./town_night.js";
+import { storyOn } from "./mode.js";
+import { emit } from "../core/events.js";
 import { boardStep, memOf } from "../townhall/board.js";
 import { jobById } from "../townhall/board_rules.js";
 import { regionAt } from "../minimap/data.js";
-import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT, familyReady, FIRST_JOBS, NOTICE_LINE } from "./act2_rules.js";
+import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT, familyReady, FIRST_JOBS, NOTICE_LINE, heraldReady, townNightReady, BUILD_HIGHER, glimpseHeld, townMorning, act2Done, HERALD } from "./act2_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const CHOSE = "hc:act2_chose"; // absolute time of the choice at the Tree (the voice comes the first night after)
@@ -101,13 +107,17 @@ export function act2Facts(player) {
   f.caller = fam?.caller;
   f.housedAt = fam?.housedAt;
   if (fam?.state === "housed") f.board = firstJobOf(player, home);
+  try { f.wins = keepOf(home)?.wins ?? 0; } catch { f.wins = 0; }
+  const her = heraldOf(home);
+  f.herald = her?.state;
+  f.heraldCaller = her?.caller;
   const marked = (() => { try { return markedPlaces(); } catch { return {}; } })();
   const tree = hallOf(home)?.marks?.tree;
   const places = {
     aldous: aldousAt(home) ?? marked.ashen_chapterhouse, tree, chapterhouse: marked.ashen_chapterhouse, mag: marked.mags_hut ?? mirelight(),
     hearth: elspethSpot(home), moneyer: nearestMoneyer(player.location), works: f.ironworks?.at,
     shelf: libraryShelfOf(home), relic: f.book ? PLOT_PLAN.find((x) => x.name === f.book.plot)?.relic : undefined,
-    cart: fam?.cart, tobin: fam?.tobin, board: hallOf(home)?.marks?.board,
+    cart: fam?.cart, tobin: fam?.tobin, board: hallOf(home)?.marks?.board, herald: her?.at,
   };
   return { f, places, home };
 }
@@ -167,6 +177,63 @@ on("siegeEnd", ({ outcome, besieged }) => {
     familyDue(a.home, now);
   }
 });
+// Part 6: two sieges held and the chest brought home, a herald rides in from the nearest lord (newplayer/herald.js).
+// He comes in the morning, like the cart; his answer (paid, refused, or settled at the lord's court) ends the step.
+function heraldCheck(player, a) {
+  if (a.home && heraldReady(a.f) && !heraldOf(a.home)) heraldDue(a.home, world.getAbsoluteTime());
+  // answered while this player was away (a co-owner paid, or at the lord's court): the step is behind them
+  if ((a.f.herald === "leaving" || a.f.herald === "done") && !a.f.flags.includes(F2.herald)) { setFlag(player, F2.herald); forget(player); }
+}
+on("heraldAnswered", ({ owner }) => {
+  const player = world.getPlayers().find((p) => p.id === owner);
+  if (!player) return;
+  setFlag(player, F2.herald);
+  forget(player);
+});
+// Part 7: the Town night. The first full siege night after the herald is this settlement's first glimpse of what is
+// behind the raids (reach/index.js), told Act 2's way: one tall thing walks up the gate road, looks at the wall and
+// goes (newplayer/town_night.js). Act 2 players before this step are held back from the glimpse.
+const ownerPlayer = (owner) => world.getPlayers().find((p) => p.id === owner);
+const TALL_DAY = "hc:act2_tall_day";
+addFilter("glimpseKeeps", (list, { besieged = [], tolled }) => {
+  let out = list.filter((o) => { const p = ownerPlayer(o); return !p || !glimpseHeld(act2Of(p, true).f); });
+  if (tolled) for (const o of besieged) {
+    const p = ownerPlayer(o);
+    if (p && !out.includes(o) && townNightReady(act2Of(p, true).f)) out = [...out, o];
+  }
+  return out;
+});
+addFilter("glimpseTall", (list, { owners = [] }) => [...list, ...owners.filter((o) => { const p = ownerPlayer(o); return p && townNightReady(act2Of(p, true).f); })]);
+on("firstGlimpse", ({ owners = [] }) => {
+  for (const o of owners) {
+    const p = ownerPlayer(o);
+    if (!p || act2Of(p, true).stage !== "town_night" || p.getDynamicProperty(TALL_DAY) !== undefined) continue;
+    walkTall(o);
+    p.setDynamicProperty(TALL_DAY, world.getDay());
+    setFlag(p, F2.tall);
+  }
+});
+// The morning after: Old Elspeth's one line, and the charter may let the settlement grow
+function townMorningCheck(player, a) {
+  if (a.stage !== "town_night" || !a.f.flags.includes(F2.tall)) return;
+  if (!townMorning(player.getDynamicProperty(TALL_DAY), world.getDay(), world.getTimeOfDay()) || getState().active) return;
+  system.runTimeout(() => { try { say(player, "Old Elspeth", BUILD_HIGHER); } catch { /* left */ } }, 400); // after the morning's talk
+  setFlag(player, F2.townNight);
+  forget(player);
+  system.runTimeout(() => emit("settleCharter", { owner: a.home }), 440);
+}
+// The Hamlet's charter (settle/founding.js charterOf): the Ironworks for everyone, and Act 2 in Story Mode
+addFilter("charterStory", (check, { owner, tier, lord }) => {
+  if (tier !== 0 || lord || !check) return check;
+  const lines = [...check.lines];
+  let iron = false;
+  try { iron = ironworksFacts(owner).standing; } catch { /* no town */ }
+  lines.push({ what: "Ironworks", have: iron ? 1 : 0, need: 1, skipped: false, more: 0 });
+  const p = ownerPlayer(owner);
+  if (p && storyOn(p)) lines.push({ what: "Act 2 of the story", have: act2Done(act2Of(p, true).f) ? 1 : 0, need: 1, skipped: false, more: 0 });
+  return { met: lines.every((l) => l.skipped || l.have >= l.need), lines };
+});
+
 on("loreFlag", ({ player, flag }) => { if (flag === F2.housed && player) houseFamily(homeId(player)); });
 // Part 5: while Tobin's notice is this player's step, it is the only notice on the board (townhall/board.js)
 addFilter("boardFirstJob", (id, { player }) => {
@@ -344,6 +411,8 @@ onTick("act2", 20, () => {
       if (!a.f) continue;
       if (a.on && PILLAR2.has(a.stage)) pillar(player, { chapterhouse: a.places?.chapterhouse, mag: a.places?.mag, book_place: a.places?.relic }[a.stage]);
       if (a.stage === "book_place") bookPlace(player, a);
+      if (!a.stage && a.f.board?.done) heraldCheck(player, a);
+      if (a.stage === "town_night") townMorningCheck(player, a);
       if (a.stage === "read_notice" && !a.f.flags.includes(F2.notice)) { say(player, "Old Elspeth", NOTICE_LINE); setFlag(player, F2.notice); }
       if (scenes.has(player.id) || player.dimension.id !== OVERWORLD) continue;
       if (voiceDue(a.f, world.getAbsoluteTime(), world.getTimeOfDay()) && !getState().active) { speakVoice(player); forget(player); }
@@ -359,6 +428,18 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
     const home = homeId(player);
     familyDue(home, 0);
     return player.sendMessage(startCart(home) ? "§6The family's cart is on the road to your gate." : "§cNo cart: your settlement has no wall with a gate yet.");
+  }
+  if (arg === "herald") {
+    const home = homeId(player);
+    heraldDue(home, 0);
+    return player.sendMessage(startHerald(home) ? "§6A herald is on the road to your gate." : "§cNo herald: your settlement has no wall with a gate yet, or one is already here.");
+  }
+  if (arg === "townnight") {
+    const home = homeId(player);
+    player.setDynamicProperty(TALL_DAY, world.getDay() - 1);
+    setFlag(player, F2.tall);
+    forget(player);
+    return player.sendMessage(walkTall(home) ? "§6The tall one is on your gate road. Elspeth speaks in the morning (or now, if it is morning)." : "§cNo walk: your settlement has no wall with a gate yet.");
   }
   if (arg === "choose") {
     const tree = hallOf(homeId(player))?.marks?.tree;
@@ -443,6 +524,31 @@ addTests("act2", {
     const back = act2Step("board_job", { board: { ...board, taken: true, step: { ...step, step: "back", title: "Go back to Tobin in your Longhouse" } } }, { tobin: { x: 1, z: 1 } });
     assertEqual(back.target.name, "Tobin", "coming back, the pin is Tobin");
     for (const id of Object.values(FIRST_JOBS)) assert(jobById(id)?.first && jobById(id).story && jobById(id).giver === "tobin", `${id} is Tobin's story job`);
+  },
+  "Act 2: the herald after two sieges held, then the Town night, then Act 2 is done": () => {
+    const chest = { id: "vale_family_chest", taken: true, done: true };
+    const base = { flags: [F2.aldous, F2.tree, F2.wait, F2.bills, F2.sold, F2.collected, F2.family, F2.housed], path: "none", down: 0, now: 200000, ironworks: { standing: true, built: 1 }, cart: "housed", housedAt: 100000, board: chest };
+    assertEqual(act2Stage({ ...base, wins: 1 }), undefined, "nothing to do until the herald comes");
+    assert(!heraldReady({ ...base, wins: 1 }), "one siege held: no herald yet");
+    assert(heraldReady({ ...base, wins: 2 }), "two held: he is due");
+    assert(!heraldReady({ ...base, wins: 2, board: { ...chest, done: false } }), "the chest comes first");
+    assertEqual(act2Stage({ ...base, wins: 2, herald: "due" }), undefined, "due is not yet on the road");
+    assertEqual(act2Stage({ ...base, wins: 2, herald: "riding" }), "meet_herald");
+    assertEqual(act2Stage({ ...base, wins: 2, herald: "here" }), "meet_herald");
+    const answered = { ...base, wins: 2, herald: "leaving", flags: [...base.flags, F2.herald] };
+    assertEqual(act2Stage(answered), "town_night");
+    assert(townNightReady(answered), "the next full siege night is the Town night");
+    assert(!glimpseHeld(answered), "that night is this settlement's glimpse");
+    assert(glimpseHeld({ ...base, wins: 2 }), "before it, Act 2 holds the glimpse back");
+    assert(!act2Done(answered));
+    assert(act2Done({ ...answered, flags: [...answered.flags, F2.tall, F2.townNight] }), "Build higher: Act 2 is done");
+    assertEqual(act2Stage({ ...answered, flags: [...answered.flags, F2.townNight] }), undefined);
+    assertEqual(townMorning(10, 10, 1000), false, "not the same day");
+    assertEqual(townMorning(10, 11, 1000), true, "the next morning");
+    assertEqual(townMorning(10, 11, 9000), false, "a morning, not an afternoon");
+    const s = act2Step("meet_herald", { heraldCaller: "Wat" }, { herald: { x: 4, z: 5 } });
+    assert(s.target && /Wat/.test(s.hint) && s.npc?.tag === "hc_herald", "the lookout's shout, pinned at the herald");
+    for (const k of Object.keys(HERALD)) assert(!/hollow|truce|oswin|edda|morvane/i.test(HERALD[k]), `herald ${k} names nothing Act 2 keeps back`);
   },
   "Act 2: every step names its source and pins a place": () => {
     const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 }, cart: { x: 4, z: 4 }, board: { x: 5, z: 5 } };

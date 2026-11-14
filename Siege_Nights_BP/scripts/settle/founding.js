@@ -19,6 +19,7 @@
 
 import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { world, system, BlockPermutation } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
@@ -720,7 +721,9 @@ export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(own
 
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
-export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
+// The story can add its own lines ("charterStory": the Hamlet's Ironworks and Act 2, newplayer/act2.js)
+export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => applyFilter("charterStory",
+  charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN), { owner, tier, lord: !!townOf(owner)?.lord });
 
 // Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
 // Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"
