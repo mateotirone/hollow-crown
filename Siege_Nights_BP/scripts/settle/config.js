@@ -208,7 +208,6 @@ export const STAGES = [
   { tier: 3, name: "Castle", homes: 0,
     build: [
       { id: "watchtower", name: "Watchtower", step: "act4:watchtower", from: "your Sergeant" },
-      { id: "stable", name: "Stable", step: "act4:stable", from: "a groom", pending: "retire into the Stables? (asked Mateo 2026-11-14; one layout has no plot for it)" },
     ] },
 ];
 // Blocks that raise a building when placed (old worlds only). No recipe may make one (tools/check.mjs "Every building
@@ -352,7 +351,7 @@ export const SETTLER_LINES = {
 //   noPlan: buildings every player may raise on a fitting plot without a plan (no Plan Book card).
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
-  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["watchtower"] },
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "inn"], 4: ["watchtower"] },
   noPlan: ["barracks", "quartermaster_desk"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade

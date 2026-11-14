@@ -938,8 +938,8 @@ addTests("settle plans", {
     const by = Object.fromEntries(cards.map((c) => [c.id, c]));
     assert(by.cottage.home && by.cottage.texture.endsWith("cottage_saltreach"), "a basic shows bright in the town's style");
     assert(!by.smithy.home && by.smithy.known && by.smithy.texture.endsWith("smithy_frostmarch"), "a foreign-only plan shows in its own style");
-    assert(!by.stable.known && by.stable.texture.endsWith("stable_saltreach_dim"), "an unfound plan is greyed");
-    assertEqual(whereFrom("stable").short, "Hall level 3");
+    assert(!by.inn.known && by.inn.texture.endsWith("inn_saltreach_dim"), "an unfound plan is greyed");
+    assertEqual(whereFrom("inn").short, "Hall level 3");
     assert(whereFrom("cottage").short.length <= 14, "card hints are short");
   },
 });

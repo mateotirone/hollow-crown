@@ -276,7 +276,6 @@ const designOf = (id) => (styleId) => {
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
-  { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
@@ -306,6 +305,8 @@ export const FIXED_BUILDINGS = [
 // No longer offered, kept so a settlement that raised one before still knows what stands on its plot: the old
 // Castle-tier plot Storehouse, replaced by the Storehouse every settlement gets with its Hamlet (2026-11-13)
 export const RETIRED_BUILDINGS = [
+  // the 3-stall plot Stable: the Stables barn (horses/barn.js) is the one stable building (Mateo 2026-11-14)
+  { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
   { id: "storehouse", name: "Old Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
 ];
 export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS, ...RETIRED_BUILDINGS].map((b) => [b.id, b]));
