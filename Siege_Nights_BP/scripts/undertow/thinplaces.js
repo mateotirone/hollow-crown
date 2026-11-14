@@ -20,6 +20,12 @@
 // blocks per step (never a long tick), and retries later if part of it was not loaded. A site a builder already
 // marked by hand (/scriptevent hc:mark_source_site) is left alone.
 //
+// Every seam is known before its cave is built: on world load each thin place's seam is worked out from the map's
+// data (plannedSeam: the ward, its facing, the shaped land's floor in thin_land.js) and recorded as an `auto` site,
+// so nobody has to mark anything by hand. Building the cave records the real seam over it. If the Rift is asked to
+// open (hc:open_rift) at a site whose cave nobody has visited yet, requestRift holds that ground loaded, builds the
+// cave, and tears it open as soon as it stands.
+//
 // Commands (creative/op):
 //   /scriptevent hc:thin_tp <site id>       go to a thin place's camp
 //   /scriptevent hc:thin_build <site id>    build (or rebuild) that site now; you must be near it
@@ -32,12 +38,13 @@ import { placeCache } from "../lore/caches.js";
 import { markPlace } from "../lore/ledger.js";
 import { hash, fbm } from "./noise.js";
 import { load, save, say, runCmd, FACING } from "./data.js";
-import { getSites, recordSite } from "./source.js";
+import { getSites, recordSite, getSourceSite, getRift, openRift } from "./source.js";
 import { SEAM, CRACK_DEPTH } from "./rift.js";
 import { THIN_LAND } from "./thin_land.js";
 
 const OVERWORLD = "minecraft:overworld";
 const K_BUILT = "hc:thin_built"; // { siteId: true }
+const K_RIFT_WAIT = "hc:rift_wait"; // { by } the Rift was asked to open before its cave was built
 const BUILD_NEAR = 110; // past the reach of the build, so nobody stands in it as it goes up
 const PER_STEP = 96; // blocks placed per runJob step
 
@@ -223,6 +230,14 @@ export function caveGeometry(id) {
   }
   const crackH = roof(uc, wallV + 1) - F + 1;
   return { air, wet, route, props, chamber: { kind: C.kind, uc, vc, rx: C.rx, rz: C.rz, F, wallV, inside, top: roof }, crackH };
+}
+
+// Pure: where a thin place's seam stands once its cave is built on ground height G, and how tall its crack is.
+// The same numbers planThinPlace gives (seam, crackH); the seam depends only on the cave's shape, never the land.
+export function plannedSeam(site, G) {
+  const geo = caveGeometry(site.id), CH = geo.chamber;
+  const [dx, dz] = toWorld(CH.uc, CH.wallV, site.facing);
+  return { x: site.x + dx, y: G + CH.F, z: site.z + dz, facing: site.facing, h: geo.crackH };
 }
 
 // Pure: every block for one site, given ground height G (the top solid block at the build centre).
@@ -520,6 +535,21 @@ function perm(op) {
 
 let busy = false;
 const builtMap = () => load(K_BUILT, {});
+const handMarked = (s) => !!s && !s.auto;
+
+// Record every thin place's seam from the map's data, so the Source and the Rift work before anyone visits a cave.
+// Sites already recorded (built, or marked by hand) keep what they have.
+export function registerThinSites() {
+  const sites = getSites();
+  let n = 0;
+  for (const site of THIN_PLACES) {
+    const floor = THIN_LAND[site.id]?.floor;
+    if (sites[site.id] || floor === undefined) continue;
+    recordSite(site.id, { ...plannedSeam(site, floor), auto: true });
+    n++;
+  }
+  return n;
+}
 
 export const REACH = 80; // how far from the build centre a thin place can reach, any facing
 
@@ -581,25 +611,84 @@ export function buildSite(site, by) {
 // Every few seconds: when someone is near an unbuilt site, hold its ground loaded with a ticking area, then build.
 const AREA = "hc_thin_site";
 let holding; // site id with a ticking area up
+let holdUntil = 0; // keep the area up until this tick (the Rift's crack is still tearing open)
+let registered = false;
+function hold(dim, site) {
+  if (holding === site.id) return;
+  runCmd(dim, `tickingarea remove ${AREA}`);
+  runCmd(dim, `tickingarea add ${site.x - REACH} 0 ${site.z - REACH} ${site.x + REACH} 0 ${site.z + REACH} ${AREA} true`);
+  holding = site.id;
+}
+
+// Open the Rift at the picked site, building its cave first if nobody has been there yet. Anyone can ask (the
+// fork's checks happen before this); the cave builds and the crack tears with the area held loaded, wherever the
+// players are.
+export function requestRift(by) {
+  if (getRift()?.open) return { ok: false, why: "the Rift is already open" };
+  const id = getSourceSite();
+  const site = THIN_PLACES.find((s) => s.id === id);
+  if (!site || builtMap()[id] || handMarked(getSites()[id])) return riftAt(site, by);
+  save(K_RIFT_WAIT, { by: by?.name ?? null });
+  return { ok: true, waiting: true, name: site.name };
+}
+
+function riftAt(site, by) {
+  const dim = world.getDimension(OVERWORLD);
+  if (site) { hold(dim, site); holdUntil = system.currentTick + 20 * 60; }
+  return openRift(by);
+}
+
 export function thinTick() {
   if (busy) return;
   const dim = world.getDimension(OVERWORLD);
-  if (holding && builtMap()[holding]) { runCmd(dim, `tickingarea remove ${AREA}`); holding = undefined; }
+  if (!registered) { registered = true; try { registerThinSites(); } catch { registered = false; } }
+  const wait = load(K_RIFT_WAIT, null);
+  if (wait) {
+    const id = getSourceSite(), site = THIN_PLACES.find((s) => s.id === id);
+    if (!site || getRift()?.open) { save(K_RIFT_WAIT, null); return; }
+    if (builtMap()[id]) {
+      save(K_RIFT_WAIT, null);
+      riftAt(site, world.getAllPlayers().find((p) => p.name === wait.by));
+      return;
+    }
+    hold(dim, site);
+    buildSite(site); // waits quietly until the area has loaded; the next tick sees it built and opens the Rift
+    return;
+  }
+  if (holding && builtMap()[holding] && system.currentTick >= holdUntil) { runCmd(dim, `tickingarea remove ${AREA}`); holding = undefined; }
   const players = world.getAllPlayers().filter((p) => p.dimension.id === OVERWORLD);
   if (!players.length) return;
   const built = builtMap();
   const marked = getSites();
   for (const site of THIN_PLACES) {
-    if (built[site.id] || marked[site.id]) continue;
+    if (built[site.id] || handMarked(marked[site.id])) continue;
     if (!players.some((p) => Math.hypot(p.location.x - site.x, p.location.z - site.z) < BUILD_NEAR)) continue;
-    if (holding !== site.id) {
-      runCmd(dim, `tickingarea remove ${AREA}`);
-      runCmd(dim, `tickingarea add ${site.x - REACH} 0 ${site.z - REACH} ${site.x + REACH} 0 ${site.z + REACH} ${AREA} true`);
-      holding = site.id;
-    }
+    hold(dim, site);
     buildSite(site); // waits quietly until the area has loaded
     return;
   }
+}
+
+// Take a player to a thin place's camp, looking at the mouth. The ground there may not be loaded yet, so they
+// arrive high with slow falling and are set down on the real ground once it has loaded.
+export function goSee(player, site) {
+  const dim = world.getDimension(OVERWORLD);
+  const [dx, dz] = toWorld(0, MOUTH_V + 14, site.facing);
+  const x = site.x + dx + 0.5, z = site.z + dz + 0.5;
+  const look = (y) => ({ facingLocation: { x: site.x, y: y + 4, z: site.z } });
+  const G = groundY(dim, x, z);
+  if (G !== undefined) return player.teleport({ x, y: G + 2, z }, { dimension: dim, ...look(G) });
+  const guess = (THIN_LAND[site.id]?.floor ?? 100) + 24;
+  player.teleport({ x, y: guess, z }, { dimension: dim, ...look(guess - 24) });
+  try { player.addEffect("slow_falling", 20 * 20, { showParticles: false }); } catch {}
+  let tries = 0;
+  const id = system.runInterval(() => {
+    const g = groundY(dim, x, z);
+    if (g !== undefined || ++tries > 30) {
+      system.clearRun(id);
+      try { if (g !== undefined) player.teleport({ x, y: g + 2, z }, { dimension: dim, ...look(g) }); } catch {}
+    }
+  }, 10);
 }
 
 export function thinCommand(id, player, message) {
@@ -607,15 +696,12 @@ export function thinCommand(id, player, message) {
   const site = THIN_PLACES.find((s) => s.id === arg);
   if (id === "hc:thin_status") {
     const built = builtMap(), marked = getSites();
-    say(player, THIN_PLACES.map((s) => `§f${s.name}§7 (${s.id}) at ${s.x} ${s.z}: ${built[s.id] ? "§abuilt" : marked[s.id] ? "§emarked by hand" : "§cnot yet"}`).join("\n"));
+    say(player, THIN_PLACES.map((s) => `§f${s.name}§7 (${s.id}) at ${s.x} ${s.z}: ${built[s.id] ? "§abuilt" : handMarked(marked[s.id]) ? "§emarked by hand" : marked[s.id] ? "§7not built yet (seam known)" : "§cnot yet"}`).join("\n"));
     return;
   }
   if (!site) return say(player, `§cUse one of: ${THIN_PLACES.map((s) => s.id).join(", ")}`);
   if (id === "hc:thin_tp") {
-    const dim = world.getDimension(OVERWORLD);
-    const [dx, dz] = toWorld(0, MOUTH_V + 14, site.facing);
-    const G = groundY(dim, site.x + dx, site.z + dz) ?? 100;
-    player.teleport({ x: site.x + dx + 0.5, y: G + 2, z: site.z + dz + 0.5 }, { dimension: dim, facingLocation: { x: site.x, y: G + 4, z: site.z } });
+    goSee(player, site);
     return say(player, `§d${site.name}. ${builtMap()[site.id] ? "" : "It builds itself in a moment."}`);
   }
   if (id === "hc:thin_build") {
