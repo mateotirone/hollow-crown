@@ -23,7 +23,7 @@ export function firstStep(f) {
   if (!f || (f.wins ?? 0) > 0) return undefined;
   const when = f.days === undefined ? "" : f.days <= 0 ? "The first siege comes tonight." : `First siege in ${f.days} day${f.days === 1 ? "" : "s"}.`;
   const step = (id, title, hint, target) => ({ id: `first_${id}`, title, hint, target, note: when });
-  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Place your Keep Banner on your Plot Stone, the stone in the middle of your plot. That makes the land yours. Raiders come from the fifth night." };
+  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Place your Keep Banner on your Plot Stone, the stone in the middle of your plot. That makes the land yours. Raiders come on the third night." };
   if (!f.barracks && !f.ballistas) {
     const pin = f.plot ? { name: "Barracks plot", x: f.plot.x, z: f.plot.z, dim: "minecraft:overworld" } : undefined;
     if (f.plot?.state === "rising") return step("rising", "Wait for your Barracks", "Builders are raising it on its plot, a layer at a time. When it stands, the Barracks block is by its front door.", pin);
@@ -57,7 +57,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ player, block }) => {
 });
 
 const FIRST_DAYS = [
-  "§6Your settlement stands. Before the first siege on the fifth night:",
+  "§6Your settlement stands. Before the first siege on the third night:",
   "§7 1. Take what you need from the §ffounder's chest§7 in your house.",
   "§7 2. Build a §fBarracks§7: go to your big empty plot, click its §fPlot Marker§7 (the post on it), choose Barracks and Raise it.",
   "§7 3. When it stands, click the §fBarracks block§7 by its door and §ftrain guards§7 (40 Regals each).",
