@@ -113,7 +113,8 @@ export const OPENS_AT = {
   smithy: 2, stable: 2, inn: 2, barracks: 0, watchtower: 3,
   // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
   ironworks: 0,
-  quartermaster_desk: 0, // the Quartermaster's Armoury: a plot building since 2026-11-14 (no block raises buildings)
+  quartermaster_desk: 2, // the Quartermaster's Armoury, a City building: every Hamlet plot is taken (the two starting houses, the
+  // Library, the Barracks' deep Large, the Works yard) and the Town's Mediums go to the Farmhouse and the Mint (2026-11-14)
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
@@ -123,12 +124,13 @@ export const PLOT_SIZE = {
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
   stable: "ML", library: "ML",
-  market: "L", inn: "L", barracks: "L",
+  inn: "L", barracks: "L",
+  market: "S", // the stall is 7 x 5: a Small plot, so every Town has room for it (it asked for a Large until 2026-11-14)
   quartermaster_desk: "M", // the armoury is 11 x 12
   ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
-  market: ["ML"], // the market may take a long Medium
+  market: ["M", "ML", "L"], // and any bigger plot
   farmhouse: ["ML"],
   house: ["ML"],
   library: ["L"], stable: ["L"], townhouse: ["L"],
@@ -163,32 +165,78 @@ export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a
 // stay unlimited.
 export const ONE_EACH = ["library", "mint", "inn", "barracks", "quartermaster_desk", "dragon_roost"];
 
+// ---------- Stages: what each settlement level builds (Mateo 2026-11-14) ----------
+// "You need to place every building for the settlement stage you're on in order to level up", "every placeable
+// building needs a plot", "the story (tutorial) takes you through this". So this one table says, for each tier, the
+// buildings you must build there (on a plot from its Plot Marker, never from a block), how many homes in all, and
+// the story step that sends you to each. The level-up charters (CHARTERS below) are made from it, the town
+// generator reads the same lists (map/structures/stages.json, tools/export_stages.mjs), and settle/stages.js plus
+// the self-tests check it against every layout. Plan: https://claude.ai/artifact/MHAFrsXtYdx4dEwjFJu5X8
+//   id: a plot building (buildings.js BUILDINGS or WORKS), or a raising block's building waiting for its plot
+//   name: what the charter and the tracker call it
+//   step: "<act>:<step>", the story step that tells you to build it (quests/acts.js ACT_STEPS). Once that act is
+//         written the step must exist (self-test); until then tools/check.mjs lists it as still to write.
+//   from: who sends you (an NPC, a book, a cutscene): every step has a source
+//   pending: why it has no plot yet (still a block). Skipped by the plot check and the charter until removed.
+//   region: only this region's settlements build it
+// given: what the game raises for you at this tier (no plot to pick). homes: cottages, houses and townhouses in all.
+// To add a building: give it a PLOT_SIZE, put it in the stage it belongs to, and make sure every layout has a plot.
+export const STAGES = [
+  { tier: 0, name: "Hamlet", homes: 0,
+    given: ["library", "founder's house", "house", "storehouse", "mason_yard", "town hall", "railway halt"],
+    build: [
+      { id: "barracks", name: "Barracks", step: "act1:barracks", from: "Old Elspeth" },
+      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "Old Elspeth, after your first upkeep bill" },
+    ] },
+  { tier: 1, name: "Town", homes: 3,
+    build: [
+      { id: "farmhouse", name: "Farmhouse with its field", step: "act2:farmhouse", from: "your Hamlet Farmer" },
+      { id: "mint", name: "Mint", step: "act2:mint", from: "Old Elspeth" },
+      { id: "market", name: "Market Stall", step: "act2:market", from: "the caravan trader" },
+      { id: "stables", name: "Stables", step: "act2:stables", from: "a groom", pending: "the Stables plot the town layout thread is adding (still a crafted block)" },
+    ] },
+  { tier: 2, name: "City", homes: 6,
+    build: [
+      { id: "quartermaster_desk", name: "Quartermaster's Armoury", step: "act3:quartermaster", from: "your Sergeant" },
+      { id: "inn", name: "Inn", step: "act3:inn", from: "a traveller" },
+      { id: "smithy", name: "Smithy", step: "act3:smithy", from: "the Ironworks foreman" },
+      { id: "garden", name: "Kitchen Garden", step: "act3:garden", from: "your Farmer" },
+      { id: "well", name: "Well", step: "act3:well", from: "the settlers" },
+      { id: "foresters_lodge", name: "Forester's Lodge", step: "act3:forester", from: "the mason, short of wood", pending: "a second Works yard (still a crafted block)" },
+      { id: "dragon_roost", name: "Dragon Stable", step: "act3:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the Dragon Stable plot, 23 x 18 (still a crafted block)" },
+    ] },
+  { tier: 3, name: "Castle", homes: 0,
+    build: [
+      { id: "watchtower", name: "Watchtower", step: "act4:watchtower", from: "your Sergeant" },
+      { id: "stable", name: "Stable", step: "act4:stable", from: "a groom", pending: "retire into the Stables? (asked Mateo 2026-11-14; one layout has no plot for it)" },
+    ] },
+];
+// Blocks that raise a building when placed (old worlds only). No recipe may make one (tools/check.mjs "Every building
+// on a plot"), unless its building is still pending a plot, or it is listed in CRAFT_LEFT with the reason it stays.
+// Value: the STAGES id it belongs to ("" = retired for good: the hall and station come with the Hamlet).
+export const RAISING_BLOCKS = {
+  "siege:barracks": "barracks", "siege:quartermaster_desk": "quartermaster_desk", "siege:ironworks": "ironworks",
+  "siege:stables": "stables", "siege:foresters_lodge": "foresters_lodge", "siege:dragon_roost": "dragon_roost",
+  "siege:hall_cornerstone": "", "siege:foundation_stone": "", "siege:rail_depot": "",
+};
+export const CRAFT_LEFT = {
+  "siege:ironworks": "towns laid out before the Works yard (PR 399) have no plot for it; the settlement thread drops the recipe after",
+};
+// Buildings that stand in no stage on purpose: optional homes (they count toward the homes line)
+export const STAGE_OPTIONAL = ["cottage", "house", "townhouse"];
+
 export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1", "storehouse_2", "storehouse_3", "storehouse_4", "farmhouse", "mint", "inn", "barracks"];
 
-// What a settlement must have standing before it can grow past each tier (index = the tier it is at now).
-// Siege wins still decide the tier; a charter that isn't met holds the town at its tier until it is.
-// count: how many (default 1). more: this many work buildings beyond the ones the charters name.
-// A line whose buildings are not in the game yet is skipped (and said so), so nobody is stuck.
-export const CHARTERS = [
-  [ // Hamlet, to become a Town: nothing beyond the library it starts with
-  ],
-  [ // Town, to become a City
-    { what: "homes", ids: HOMES, count: 3 },
-    { what: "Farmhouse with its field", ids: ["farmhouse"] },
-    { what: "Mint", ids: ["mint"] },
-    { what: "market", ids: ["market"] },
-  ],
-  [ // City, to become a Castle
-    { what: "homes", ids: HOMES, count: 6 },
-    { what: "inn", ids: ["inn"] },
-    { what: "barracks", ids: ["barracks"] },
-    { what: "more work building of any size", ids: WORK, more: 1 },
-  ],
-  [ // Castle: the top tier. Shown as the full Castle charter, it holds nothing back.
-    { what: "homes", ids: HOMES, count: 10 },
-  ],
-];
+// What a settlement must have standing before it can grow past each tier (index = the tier it is at now), made
+// from STAGES: the homes, then every building of the stage. Siege wins still decide the tier; a charter that isn't
+// met holds the town at its tier until it is. A line whose building is still waiting for a plot (pending), or isn't
+// in the game, or that this settlement can't build (region, or an old layout with no plot for it) is skipped.
+//   what: the words shown. ids: what counts. count: how many (default 1). region: only there.
+export const CHARTERS = STAGES.map((s) => [
+  ...(s.homes ? [{ what: "homes", ids: HOMES, count: s.homes }] : []),
+  ...s.build.filter((b) => !b.pending).map((b) => ({ what: b.name, ids: [b.id], ...(b.region ? { region: b.region } : {}) })),
+]);
 
 // ---------- Buildings you build yourself, beds and settlers (census.js, settlers.js) ----------
 // Build by hand on an empty plot, then use its Plot Marker and pick "I built here myself": the plot is checked

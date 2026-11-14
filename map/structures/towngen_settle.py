@@ -793,19 +793,16 @@ class Settlement(Town):
             out.append(c)
         return out
 
-    # The charters as the game checks them (settle/config.js CHARTERS + PLOT_SIZE/PLOT_ALSO/PLOT_FALLBACK, PR #168),
-    # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
-    # Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium), L, G.
-    # Homes are cottages (S) or houses (M). A hall4 slot is gone by the Castle, so it is not counted there.
-    # LD: a deep Large (15 wide x 17 deep or more): the only plot the Barracks takes (settle/config.js PLOT_MIN_BOX, PR #276).
-    HOME = ("S", "M", "ML"); ANY = ("S", "M", "ML", "L", "G")
-    # a home may take a long Medium too (the townhouse is ML; settlement placement thread 2026-11-13)
-    CHARTER_NEEDS = [
-        [("library", ("ML", "L"))],
-        [("home", HOME + ("MF",))] * 3 + [("farmhouse", ("MF",)), ("mint", ("M", "MF")), ("market", ("L", "ML"))],
-        [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("LD",)), ("work", ANY + ("MF",))],
-        [("home", HOME + ("MF",))] * 4,
-    ]
+    # The charters as the game checks them: settle/config.js STAGES (Mateo 2026-11-14: to level up you build every
+    # building of your stage, and every building has a plot), exported to stages.json by tools/export_stages.mjs.
+    # Cumulative: each tier's buildings, and its homes in all, must each have a slot of a class they may take, open
+    # by that tier. Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium),
+    # L, LD (a deep Large, 15 x 17: the Barracks'), G, W (Works yard). A hall4 slot is gone by the Castle.
+    # Buildings still waiting for a plot type of their own (stages.json "pending") are not counted yet.
+    _STAGES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "stages.json")))
+    HOME = tuple(_STAGES["homes"]); ANY = ("S", "M", "ML", "L", "G")
+    CHARTER_NEEDS = [[(b["id"], tuple(b["classes"])) for b in st["build"] if not b.get("region")] for st in _STAGES["stages"]]
+    HOMES_BY = [st["homes"] for st in _STAGES["stages"]]   # homes standing in all by the end of each stage
     FARM_EDGE = True                     # the Farmhouse needs a Medium (plain or long, 2026-11-12) tagged field_edge (settlement thread)
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
@@ -818,9 +815,13 @@ class Settlement(Town):
                 c = "ML" if e["size"] == "M" and e.get("long") else "LD" if e["size"] == "L" and min(e["dims"]) >= 15 and e["dims"][1] >= 17 else e["size"]
                 if c in ("M", "ML") and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c += "F"
                 sup[c] += 1
-            if getattr(self, "starter", None):   # the starter village's library plot and its open deep Large (its houses stand already)
-                sup["ML"] += 1; sup["LD"] += 1
+            starter = getattr(self, "starter", None)
+            if starter:   # the starter village's open deep Large (its Library and two houses stand already)
+                sup["LD"] += 1
+                sup["W"] += 1     # and its Works yard (starter.py, PR 399): the Ironworks'
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
+            if not starter: needs.append(("library", ("ML", "L")))
+            needs += [("home", self.HOME)] * max(0, max(self.HOMES_BY[:t + 1]) - (2 if starter else 0))
             needs.sort(key=lambda n: (len(n[1]), n[1] != ("LD",)))   # strictest first (the Barracks' deep Large before the inn's Large), each into its smallest class
             for name, classes in needs:
                 if "ML" in classes or "MF" in classes: classes = classes + ("MLF",)   # a long Medium by crops serves either

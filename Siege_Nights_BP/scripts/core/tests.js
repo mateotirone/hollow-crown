@@ -35,7 +35,7 @@ export const OFFLINE_ONLY = new Set([
   "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
   "settle towns: a building seated on a slot stays inside it, front on the door side",
   "settle storehouse: every layout's Hamlet has a plot the Barracks seats on",
-  "settle storehouse: every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'",
+  "settle stages: every stage building has a plot of its own, open by its stage, in every town layout (all of a stage at once)",
   "undertow: a chunk built under the low roof has it taken away and the high roof built",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
   "after: Deep: the halls are open where players and the Host stand, with floor under them",

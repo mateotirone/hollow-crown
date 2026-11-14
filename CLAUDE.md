@@ -31,5 +31,7 @@ five regions, written by `gen_settle.py`).
 - One branch and one PR per piece of work. `node tools/check.mjs` must print ALL OK before you push (run `npm ci` in
   `tools/` once first: the check for names used without an import needs it).
 - Changes players will notice get a line in `CHANGELOG.md`.
+- Settlement buildings (Mateo 2026-11-14): never placed with a block; each has a plot in every layout, is in a stage you must
+  finish to level up, and has a story step that sends you there. Rules and how the check enforces them: `docs/STAGES.md`.
 - Every size is odd ("work in threes"). Every building has an interior (Mateo 2026-11-12): the skill's interior stage,
   `build-instructions/08-interiors`.
