@@ -15,10 +15,53 @@ import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns,
 import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
 import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
 import { HAMLET_WALLS } from "./hamlet_walls_data.js";
+import { planLaneLamps } from "./lanelamps.js";
+import { slotsOf as layoutSlots } from "./towns.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
 addTests("settle", {
+  "every hanging lantern in a hall or plot building hangs from something (a chain up to the roof)": () => {
+    const hung = (p, label) => {
+      for (const c of p.cells.values()) {
+        const ids = p.style.roles[c.role] ?? [];
+        if (!c.o?.hanging || !ids.some((id) => /lantern$/.test(id))) continue;
+        const up = p.cells.get(`${c.x},${c.y + 1},${c.z}`);
+        assert(up && up.role !== "air", `${label}: lantern at ${c.x},${c.y},${c.z} hangs on air`);
+      }
+    };
+    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) hung(drawHall(level, STYLES[id]), `${id} hall ${level}`);
+    for (const b of BUILDINGS) for (const id of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      try { hung(drawBuilding(b.id, id), `${b.id} ${id}`); } catch (e) { if (/lantern/.test(String(e))) throw e; }
+    }
+  },
+  "lane lamps: every Hamlet's lanes get posts on the verge, never on a plot, the same every time": () => {
+    for (const [key, t] of Object.entries(TOWNS)) {
+      const L = t.variants[0];
+      const a = planLaneLamps(L, 0, t.walls[0]), b = planLaneLamps(L, 0, t.walls[0]);
+      assertEqual(JSON.stringify(a), JSON.stringify(b), `${key}: same posts every time`);
+      for (const s of layoutSlots(L)) for (const q of a) assert(!(q.x >= s.box.x0 && q.x <= s.box.x1 && q.z >= s.box.z0 && q.z <= s.box.z1), `${key}: post ${q.x},${q.z} on plot ${s.id}`);
+      assert(a.length < 40, `${key}: ${a.length} posts`);
+    }
+  },
+  "watchtowers on every map plot's wall line: nothing of the wall on the way in to a door": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
+    for (const [key, t] of Object.entries(TOWNS)) {
+      if (!t.outline?.radii?.length) continue;
+      const tight = HAMLET_WALLS[key] ?? HAMLET_WALLS[t.name?.toLowerCase()];
+      const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) };
+      const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
+      const radius = t.walls[0];
+      for (const level of [1, 2, 6]) {
+        const spots = watchSpots(center, radius, gate, smooth, level);
+        const at = new Set(wallColumns({ center, radius, level, gateAngle: gate, smooth }).map((c) => `${c.x},${c.z}`));
+        for (const s of spots) for (let n = 0; n < WATCH.clear; n++) for (let side = -1; side <= 1; side++) {
+          const x = s.origin.x - s.forward.x * n + side * s.forward.z, z = s.origin.z - s.forward.z * n + side * s.forward.x;
+          assert(!at.has(`${x},${z}`), `${key} level ${level}: wall at ${x},${z} in front of watchtower ${s.k}'s door`);
+        }
+      }
+    }
+  },
   "the reserve covers every hall tier in every style": () => {
     for (const id of STYLE_IDS) {
       const reach = hallReach(id);
