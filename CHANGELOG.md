@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- **Watchtowers on your wall.** From the first wall (the Low Palisade) up to the Battlement Wall, four small watchtowers stand astride your wall line in your region's style: a stone base, a ladder inside up to a hatch, and an open lookout under the region's tower roof. Each lookout is a guard post ("Watchtower, north-east"), and new Archers climb the towers before they walk the wall. At the Watch Wall the stone towers rise in the same four places. Walls you already have get their towers the next time the world loads.
 - The Barracks is no longer crafted: it opens with your Hamlet and you raise it from the Plot Marker on your big empty plot (every Hamlet has one that fits), for 16 Regals. The working Barracks block stands by its door when it's built. Barracks blocks already placed keep working.
 - The first-nights tracker spells out every step on screen, with a pin to the plot for your Barracks: build it from its Plot Marker, wait for it to go up, click its Barracks block to train guards, then hold the first siege.
 - A way home from the Hollow: walk into the tear at the back of the Wound and you come out at the Rift, or back where you came in if the Rift isn't open. Testers can type `/scriptevent hc:undertow_leave`.

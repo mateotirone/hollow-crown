@@ -9,7 +9,10 @@
 //   raiseWall(id, level, { center?, style?, bearing? }) -> true | "why not"     does not charge
 //   WALL_LEVELS, MAX_WALL (walldata.js)   wallCap(owner) -> highest level this settlement may raise
 //   answers the town hall's "wallInfo" and "wallUpgrade" events (contract in townhall/flyby.js)
-//   on("wallProgress", ({ id, level, done, total }))   on("wallBuilt", ({ id, level, first }))
+//   on("wallProgress", ({ id, level, done, total }))   on("wallBuilt", ({ id, level, first }))   on("wallWatchBuilt", ({ id, k }))
+// Watchtowers (Mateo, 2026-11-13): levels 1-6 get four small watchtowers astride the line (walldata.js WATCH), raised
+// once the wall is up and taken down before the Watch Wall's stone towers rise in their place or the wall moves out.
+// The wall record keeps them as w.watch = [{ k, origin, forward, style, built }].
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
@@ -19,7 +22,9 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js";
+import { watchPlan, watchCells } from "./wallwatch.js";
+import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 
@@ -260,6 +265,11 @@ function step(id, job) {
       save();
       return world.getPlayers().find((p) => p.id === id)?.sendMessage(`§cThe wall can't be raised: ${problem}`);
     }
+    // the Watch Wall and up have stone towers where the watchtowers stand: those come down first
+    if (!hasWatch(job.level) && w.watch?.length) {
+      if (!job.watchDown) { job.watchDown = "going"; takeDownWatch(id, [...w.watch], () => { job.watchDown = "done"; }); }
+      if (job.watchDown !== "done") return;
+    }
     job.cols = wallColumns({ center: w, radius: w.radius, level: job.level, gateAngle: w.gate, smooth: w.ground });
     clearOldSteps(dim, w, job);
     job.index = Math.min(w.building?.index ?? 0, job.cols.length);
@@ -290,6 +300,7 @@ function step(id, job) {
     // it was never added
   }
   emit("wallBuilt", { id, level: job.level, first: firstTime });
+  raiseWatch(id);
   const player = world.getPlayers().find((p) => p.id === id);
   if (player) {
     title(player, `§6${job.L.name} complete`, "§7Your land now reaches a little past your wall");
@@ -359,6 +370,7 @@ export function moveWall(id, radius, down = () => {}) {
   save();
   const L = WALL_LEVELS[old.level] ?? WALL_LEVELS[level];
   const air = perm("minecraft:air");
+  if (w.watch?.length) takeDownWatch(id, [...w.watch]); // the old line's watchtowers come down with it; new ones rise with the new ring
   system.runJob((function* takeDown() {
     const dim = world.getDimension(OVERWORLD);
     let n = 0;
@@ -402,9 +414,61 @@ function addSteps(id) {
 }
 on("wallBuilt", ({ id }) => { const w = walls()[id]; if (w) { w.steps = STEPS_VERSION; save(); } });
 
+// ---------- watchtowers ----------
+const WATCH_PER_TICK = 40; // blocks a rising watchtower places per tick
+const watchJobId = (id, k) => `wallwatch:${id}:${k}`;
+const sameSpot = (t, s) => t.origin.x === s.origin.x && t.origin.y === s.origin.y && t.origin.z === s.origin.z && t.forward.x === s.forward.x && t.forward.z === s.forward.z;
+const goingDown = new Set(); // wall ids whose watchtowers are coming down
+
+// Make the watchtowers match the wall: towers standing where they no longer belong come down, missing ones rise.
+// Safe to call any time (after each wall, on load); does nothing while the wall itself is rising.
+export function raiseWatch(id) {
+  const w = walls()[id];
+  if (!w || jobs.has(id) || goingDown.has(id) || !(w.level > 0) || !w.ground) return;
+  const want = hasWatch(w.level) ? watchSpots(w, w.radius, w.gate, w.ground) : [];
+  w.watch ??= [];
+  const stale = w.watch.filter((t) => t.style !== w.style || !want.some((s) => s.k === t.k && sameSpot(t, s)));
+  if (stale.length) return takeDownWatch(id, stale, () => raiseWatch(id));
+  for (const s of want) {
+    let t = w.watch.find((x) => x.k === s.k);
+    if (t?.built || buildFor(watchJobId(id, s.k))) continue;
+    if (!t) { t = { k: s.k, origin: s.origin, forward: s.forward, style: w.style }; w.watch.push(t); }
+    const plan = watchPlan(w.style);
+    startBuild({
+      id: watchJobId(id, s.k), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.style, perTick: WATCH_PER_TICK,
+      onDone: () => { const now = walls()[id]?.watch?.find((x) => x.k === s.k && sameSpot(x, s)); if (now) { now.built = true; save(); } emit("wallWatchBuilt", { id, k: s.k }); },
+    });
+  }
+  save();
+}
+
+// Take watchtowers down (a few hundred blocks each, a little at a time): everything above the floor goes, the floor and
+// plinth turn back to earth. done() runs once they are gone and off the wall record.
+function takeDownWatch(id, towers, done = () => {}) {
+  goingDown.add(id);
+  const air = perm("minecraft:air"), earth = perm("minecraft:grass_block") ?? perm("minecraft:dirt");
+  system.runJob((function* takeDown() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (const t of towers) {
+      for (const c of watchCells(t.style, t.origin, t.forward)) {
+        for (let tries = 0; tries < 30 && !dim.getBlock(c); tries++) for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
+        try { setBlock(dim, c.x, c.y, c.z, c.below ? earth : air); } catch { /* not loaded */ }
+        if (++n % 120 === 0) yield;
+      }
+      const w = walls()[id];
+      if (w?.watch) w.watch = w.watch.filter((x) => !(x.k === t.k && sameSpot(x, t)));
+    }
+    goingDown.delete(id);
+    save();
+    done();
+  })());
+}
+
 // Walls that were rising when the world closed carry on
 on("ready", () => {
   system.runTimeout(() => { for (const id of Object.keys(walls())) addSteps(id); }, 200);
+  system.runTimeout(() => { for (const id of Object.keys(walls())) try { raiseWatch(id); } catch (e) { console.warn(`[Hollow Crown] watchtowers ${id}: ${e}`); } }, 300); // towers cut short by a restart, and walls from before towers
   for (const [id, w] of Object.entries(walls())) {
     if (w.moving && !jobs.has(id)) { delete w.moving; raiseWall(id, Math.max(1, w.level || 1)); continue; }
     if (!w.building || jobs.has(id)) continue;

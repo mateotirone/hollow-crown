@@ -1,0 +1,174 @@
+{
+ "name": "wallwatch_emberwaste",
+ "card": {
+  "title": "Wall watchtower",
+  "sub": "Emberwaste",
+  "region": "emberwaste",
+  "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+  "kind": "Defence",
+  "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone"
+   },
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "canopy": false
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "none"
+     }
+    ],
+    "s": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "hatch": false,
+    "beams": false,
+    "parapet": "crenel"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": {
+    "use": "tower",
+    "hatch": true
+   }
+  },
+  {
+   "part": "string_course",
+   "rect": [
+    -2,
+    -4,
+    2,
+    0
+   ],
+   "y": 5,
+   "sides": "nsew",
+   "material": "smooth_sandstone_stairs"
+  }
+ ],
+ "place": [
+  [
+   -2,
+   11,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   -2,
+   12,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   -2,
+   13,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   11,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   12,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   13,
+   -4,
+   "cut_sandstone"
+  ],
+  [
+   -2,
+   11,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   -2,
+   12,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   -2,
+   13,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   11,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   12,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   13,
+   0,
+   "cut_sandstone"
+  ],
+  [
+   2,
+   14,
+   -4,
+   "gold_block"
+  ]
+ ]
+}
