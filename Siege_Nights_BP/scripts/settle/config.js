@@ -186,28 +186,29 @@ export const STAGES = [
     given: ["library", "founder's house", "house", "storehouse", "mason_yard", "town hall", "railway halt"],
     build: [
       { id: "barracks", name: "Barracks", step: "act1:barracks", from: "Old Elspeth" },
-      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "Old Elspeth, after your first upkeep bill" },
+      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "the Moneyer, after your first upkeep bill",
+        counted: "newplayer/act2.js (the charterStory filter counts it from its Works machine)" },
     ] },
   { tier: 1, name: "Town", homes: 3,
     build: [
-      { id: "farmhouse", name: "Farmhouse with its field", step: "act2:farmhouse", from: "your Hamlet Farmer" },
-      { id: "mint", name: "Mint", step: "act2:mint", from: "Old Elspeth" },
-      { id: "market", name: "Market Stall", step: "act2:market", from: "the caravan trader" },
-      { id: "stables", name: "Stables", step: "act2:stables", from: "a groom", pending: "the Stables plot the town layout thread is adding (still a crafted block)" },
+      { id: "farmhouse", name: "Farmhouse with its field", step: "act3:farmhouse", from: "your Hamlet Farmer" },
+      { id: "mint", name: "Mint", step: "act3:mint", from: "Old Elspeth" },
+      { id: "market", name: "Market Stall", step: "act3:market", from: "the caravan trader" },
+      { id: "stables", name: "Stables", step: "act3:stables", from: "a groom", pending: "the 23 x 13 Barn plot the layout thread is adding (still a crafted block)" },
     ] },
   { tier: 2, name: "City", homes: 6,
     build: [
-      { id: "quartermaster_desk", name: "Quartermaster's Armoury", step: "act3:quartermaster", from: "your Sergeant" },
-      { id: "inn", name: "Inn", step: "act3:inn", from: "a traveller" },
-      { id: "smithy", name: "Smithy", step: "act3:smithy", from: "the Ironworks foreman" },
-      { id: "garden", name: "Kitchen Garden", step: "act3:garden", from: "your Farmer" },
-      { id: "well", name: "Well", step: "act3:well", from: "the settlers" },
-      { id: "foresters_lodge", name: "Forester's Lodge", step: "act3:forester", from: "the mason, short of wood", pending: "a second Works yard (still a crafted block)" },
-      { id: "dragon_roost", name: "Dragon Stable", step: "act3:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the Dragon Stable plot, 23 x 18 (still a crafted block)" },
+      { id: "quartermaster_desk", name: "Quartermaster's Armoury", step: "act4:quartermaster", from: "your Sergeant" },
+      { id: "inn", name: "Inn", step: "act4:inn", from: "a traveller" },
+      { id: "smithy", name: "Smithy", step: "act4:smithy", from: "the Ironworks foreman" },
+      { id: "garden", name: "Kitchen Garden", step: "act4:garden", from: "your Farmer" },
+      { id: "well", name: "Well", step: "act4:well", from: "the settlers" },
+      { id: "foresters_lodge", name: "Forester's Lodge", step: "act4:forester", from: "the mason, short of wood", pending: "the 41 x 29 woodlot outside the wall the layout thread is adding (still a crafted block)" },
+      { id: "dragon_roost", name: "Dragon Stable", step: "act4:dragon_stable", from: "the Cinder Roost trainers", region: "emberwaste", pending: "the 23 x 13 Dragon plot the layout thread is adding (still a crafted block)" },
     ] },
   { tier: 3, name: "Castle", homes: 0,
     build: [
-      { id: "watchtower", name: "Watchtower", step: "act4:watchtower", from: "your Sergeant" },
+      { id: "watchtower", name: "Watchtower", step: "act5:watchtower", from: "your Sergeant" },
     ] },
 ];
 // Blocks that raise a building when placed (old worlds only). No recipe may make one (tools/check.mjs "Every building
@@ -230,11 +231,12 @@ export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1",
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now), made
 // from STAGES: the homes, then every building of the stage. Siege wins still decide the tier; a charter that isn't
 // met holds the town at its tier until it is. A line whose building is still waiting for a plot (pending), or isn't
-// in the game, or that this settlement can't build (region, or an old layout with no plot for it) is skipped.
+// in the game, or that this settlement can't build (region, or an old layout with no plot for it) is skipped. A
+// building counted elsewhere (counted: the Ironworks, by the story's charterStory filter) has no line here.
 //   what: the words shown. ids: what counts. count: how many (default 1). region: only there.
 export const CHARTERS = STAGES.map((s) => [
   ...(s.homes ? [{ what: "homes", ids: HOMES, count: s.homes }] : []),
-  ...s.build.filter((b) => !b.pending).map((b) => ({ what: b.name, ids: [b.id], ...(b.region ? { region: b.region } : {}) })),
+  ...s.build.filter((b) => !b.pending && !b.counted).map((b) => ({ what: b.name, ids: [b.id], ...(b.region ? { region: b.region } : {}) })),
 ]);
 
 // ---------- Buildings you build yourself, beds and settlers (census.js, settlers.js) ----------

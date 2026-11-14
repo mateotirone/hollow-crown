@@ -13,7 +13,15 @@
             "Texture.hunter",
             "Texture.herbalist",
             "Texture.moneyer",
-            "Texture.factor"
+            "Texture.factor",
+            "Texture.moneyer__frostmarch",
+            "Texture.moneyer__saltreach",
+            "Texture.moneyer__emberwaste",
+            "Texture.moneyer__blackfen",
+            "Texture.farmer__frostmarch",
+            "Texture.farmer__saltreach",
+            "Texture.farmer__emberwaste",
+            "Texture.farmer__blackfen"
           ]
         }
       },

@@ -45,7 +45,7 @@ Custom first- and third-person moves for every player. Written by `tools/build_p
   geometry keeps vanilla's path (`waist > body > rightArm > rightItem`). PR #165 put them under the forearm and
   every held item floated at the chest or face (playtest 1.2.1116, book at the chest, sword at the face).
   `node tools/check.mjs` now fails on it. So that items stay in the hand, `fold_elbows` in
-  `build_player_anims.py` moves a forearm's bend to the shoulder while that hand holds something
+  `build_player_anims.py` drops a forearm's bend while that hand holds something (adding it to the shoulder instead, as first tried, swung chambered arms up and back so blades pointed into the chest and face for every skin: playtest 1.2.1616)
   (`variable.hc_rbend` / `hc_lbend`); empty hands still bend at the elbow.
 - **Held items are placed from the player's default (skin) geometry, not the look's.** With only the look drawn,
   the default model was never posed, so items stayed still while the arm swung (playtest 1.2.1519).

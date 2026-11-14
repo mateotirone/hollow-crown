@@ -24,6 +24,7 @@ export function optionsFor(name, p) {
   if (/(:bed|_bed)$/.test(name)) st.head_piece_bit = !!p.head; // the two halves of a bed (emit.py)
   if (name.endsWith(":bell")) st.attachment = p.attach ?? "hanging";
   if (name.endsWith("_door")) { st.upper_block_bit = !!p.upper; st.door_hinge_bit = !!p.hinge; st.open_bit = !!p.open; }
+  if (name === "siege:archive_shelf") st["siege:half"] = p.upper ? "upper" : "lower"; // a bookcase is two halves, like a door
   if (name.endsWith("trapdoor")) { o.trap = true; st.open_bit = !!p.open; st.upside_down_bit = p.half === "top"; }
   if (name.endsWith("_slab") && p.half) { delete o.dir; }
   if (p.raw) Object.assign(st, p.raw); // add-on block states, passed through as they are (the vault's Regal Safe part)

@@ -732,7 +732,7 @@ page(key="endgame", group="play", name="The crowns and the endless game", hide=T
     ("Ruling the Hollow", "The ruler owns the Choir Ore, sets its price and tithe, is told when someone mines or robs, and can step straight to them. A player ruler can only be robbed or besieged while online.", S),
     ("The Heart of the Hollow", "Whoever defeats Morvane does not rule the Hollow. The Heart rests where he fell, for anyone to take, now or later. Reaching for it alerts everyone, and it is yours after 10 seconds unless you are hit or step away. Its holder is the Heartbearer, the strongest in the overworld: their settlement becomes a Citadel, and they are offered the Sorcerer's path with a boost.", S),
     ("Taking it from them", "Rivals earn a Claim, throw down a Gauntlet, and storm the Citadel on the next siege night while the ruler is online. The loser is banished and walks the Long Road Back as an Exile.", S),
-    ("Forever", "Seeps keep opening. Twelve Rival Lords settle free plots and can claim the throne. A Rumor Board at the town hall offers three jobs a day. When no player rules the Hollow, a computer-run ruler does.", S),
+    ("Forever", "Seeps keep opening. Twelve Rival Lords settle free plots and can claim the throne. A Town Board at the town hall offers three hand-written jobs a day from the people round about. When no player rules the Hollow, a computer-run ruler does.", S),
   ])
 
 page(key="relics", group="items", name="Relics and boss keys",

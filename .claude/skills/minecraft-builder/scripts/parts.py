@@ -1214,6 +1214,21 @@ def hanging_lantern(ctx, s):
     ctx.set(x, y - n, z, "details", raw="lantern", hanging=True)
 
 
+def trade_sign(ctx, s):
+    """A trade's hanging sign (Mateo 2026-11-14, the Moneyer's coin sign over the door): an arm of `fence` `len` long
+    straight out from the wall cell `at` the way `out`, and a hanging sign of `wood` on chains under its end. By default
+    the board stands across the arm (faces along the wall) and reads to anyone coming along the street; "face": the
+    same way as `out` turns it to face the square, the way to hang it over a door (len 1, in front of the fanlight).
+    The game writes the words on it (signs carry no text in a stamp). Keep it above head height (y at least 2 over
+    the walk) and clear of shutters and wall lanterns."""
+    x, y, z = s["at"]; out = s.get("out", "s"); n = s.get("len", 2)
+    dx, dz = DIRS[out]
+    fence = s.get("fence", "dark_oak_fence"); wood = s.get("wood", "spruce")
+    for k in range(1, n + 1): ctx.set(x + dx * k, y, z + dz * k, "details", raw=fence)
+    face = s.get("face") or ("e" if out in "ns" else "s")     # "face": out = the board faces the square (over a door)
+    ctx.set(x + dx * n, y - 1, z + dz * n, "details", raw=f"{wood}_hanging_sign", hanging=True, facing=face)
+
+
 def lean_to(ctx, s):
     """A lean-to (06-roof skillion): one slope against a wall, on log posts. rect = the covered ground
     [x0, z0, x1, z1]; against = the side the wall is on (n/s/e/w); top = y of the roof's high edge, just
@@ -2027,7 +2042,7 @@ def curtain(ctx, s):
         ctx.info["gate"] = [gx, y0 + 1, gz]
 
 
-PARTS = {"keep": keep, "curtain": curtain, "house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+PARTS = {"keep": keep, "curtain": curtain, "house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern, "trade_sign": trade_sign}
 
 
 def boardwalk(ctx, s):
@@ -2118,7 +2133,7 @@ def turn_cell(cell, at, heading):
     st = dict(cell[4]) if len(cell) > 4 else {}
     xz, fm = HEADING[heading]
     dx, dz = xz(u, w)
-    if "facing" in st: st["facing"] = fm[st["facing"]]
+    if "facing" in st: st["facing"] = fm.get(st["facing"], st["facing"])        # up / down stay
     if st.get("axis") in ("x", "z") and heading in ("n", "s"): st["axis"] = "z" if st["axis"] == "x" else "x"
     return [at[0] + dx, at[1] + y, at[2] + dz, b] + ([st] if st else [])
 
@@ -2251,6 +2266,22 @@ def stands(ctx, s):
 
 
 PARTS["stands"] = stands
+
+
+def ship(ctx, s):
+    """A block-built sailing ship moored on water (scripts/ship.py; Gull's Rest's great ship, 2026-11-14)."""
+    import ship as _ship
+    return _ship.ship(ctx, s)
+
+
+def pier(ctx, s):
+    """A timber pier on log piles with rails, bollards and lamp posts (scripts/ship.py)."""
+    import ship as _ship
+    return _ship.pier(ctx, s)
+
+
+PARTS["ship"] = ship
+PARTS["pier"] = pier
 
 def run(ctx, pt):
     k = pt.get("part")
