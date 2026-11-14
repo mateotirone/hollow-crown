@@ -24,7 +24,7 @@ export function planLaneLamps(layout, tier, radius, avoid = [], within) {
       const id = layout.pal[p]?.[0] ?? "minecraft:air";
       if (id === "minecraft:air") continue;
       const k = `${dx},${dz}`;
-      if (/lantern$/.test(id)) glow.push({ x: dx, z: dz }); // the layout's own lamp posts (the square, the lanes)
+      if (/lantern$/.test(id)) glow.push({ x: dx, z: dz, y: dy }); // the layout's own lamp posts (the square, the lanes)
       if ((topY.get(k) ?? -999) <= dy) { topY.set(k, dy); top.set(k, id); }
     }
   }
@@ -55,7 +55,15 @@ export function planLaneLamps(layout, tier, radius, avoid = [], within) {
   const inBox = (x, z, list = boxes) => list.some((b) => x >= b.x0 - 1 && x <= b.x1 + 1 && z >= b.z0 - 1 && z <= b.z1 + 1);
   // light spreads through the air whatever the ground is made of (a rutted lane has grass down its middle), so a lane
   // cell counts as lit when a lamp is within REACH steps of it on the map
-  const lit = (x, z) => lamps.some((l) => Math.abs(l.x - x) + Math.abs(l.z - z) <= LANE_REACH);
+  // and up or down counts too: a post's lantern is 3 over the ground it stands on, 2 over a lane at its foot, so a
+  // lamp up a bank from the lane (or down in a yard) reaches fewer steps along it (town audit 2026-11-14: a woodyard
+  // edge in Oakmere at light 3 from a post on the verge above it)
+  const lanternY = (l) => l.y ?? (topY.has(`${l.x},${l.z}`) ? topY.get(`${l.x},${l.z}`) + 3 : undefined);
+  const lit = (x, z) => lamps.some((l) => {
+    const ly = lanternY(l), cy = topY.get(`${x},${z}`);
+    const up = ly === undefined || cy === undefined ? 2 : Math.abs(ly - (cy + 1));
+    return Math.abs(l.x - x) + Math.abs(l.z - z) + up <= LANE_REACH + 2;
+  });
   for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) blocked.add(`${a},${b}`); // the Plot Stone
   for (const g of glow) { lamps.push(g); for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) blocked.add(`${g.x + a},${g.z + b}`); }
   const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
