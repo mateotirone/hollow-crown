@@ -1064,4 +1064,18 @@ addTests("settle storehouse", {
       }
     }
   },
+  "every layout's Hamlet has a plot for the Quartermaster's Armoury besides the Barracks'"() {
+    assertEqual(opensAt("quartermaster_desk"), 0, "opens with the Hamlet");
+    assert(BUILDING.quartermaster_desk && PLAN_RULES.noPlan.includes("quartermaster_desk"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const qb = drawBuilding("quartermaster_desk", style).bounds(), bb = drawBuilding("barracks", style).bounds();
+        const hamlet = slotsOf(v).filter((s) => s.tier === 0);
+        const forQ = hamlet.filter((s) => plotFit("quartermaster_desk", s).ok && seatOnSlot(s, qb));
+        assert(forQ.length, `${name} layout ${i}: no Hamlet plot fits the armoury`);
+        assert(hamlet.some((s) => plotFit("barracks", s).ok && seatOnSlot(s, bb) && forQ.some((q) => q.id !== s.id)), `${name} layout ${i}: the armoury would take the Barracks' only plot`);
+      }
+    }
+  },
 });

@@ -10,14 +10,14 @@ export const SETTLE = {
   localBonus: 1.5, // your own region's materials: this many times more blocks per lot
   maxSpend: 32, // most lots one purchase can buy
   maxBenches: 2, // Mason's Benches per settlement
-  stonePrice: 4, // lots for a Foundation Stone at the mason (it can also be crafted)
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
   plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, smithy: 12, stable: 14,
     house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16,
-    barracks: 2 }, // the Barracks opens with the Hamlet and is cheap: the first guards are what the first siege needs
+    barracks: 2, // the Barracks opens with the Hamlet and is cheap: the first guards are what the first siege needs
+    quartermaster_desk: 3 },
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -113,6 +113,7 @@ export const OPENS_AT = {
   smithy: 2, stable: 2, inn: 2, barracks: 0, watchtower: 3,
   // the Storehouse is no plot building any more: every settlement gets one with its Hamlet (storehouse.js)
   ironworks: 0,
+  quartermaster_desk: 0, // the Quartermaster's Armoury: a plot building since 2026-11-14 (no block raises buildings)
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
@@ -123,6 +124,7 @@ export const PLOT_SIZE = {
   townhouse: "ML",
   stable: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
+  quartermaster_desk: "M", // the armoury is 11 x 12
   ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
@@ -130,6 +132,7 @@ export const PLOT_ALSO = {
   farmhouse: ["ML"],
   house: ["ML"],
   library: ["L"], stable: ["L"], townhouse: ["L"],
+  quartermaster_desk: ["ML"], // never a Large: the Hamlet's one Large is the Barracks'
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
 export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
@@ -302,7 +305,7 @@ export const SETTLER_LINES = {
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
   hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["watchtower"] },
-  noPlan: ["barracks"],
+  noPlan: ["barracks", "quartermaster_desk"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
   lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town
