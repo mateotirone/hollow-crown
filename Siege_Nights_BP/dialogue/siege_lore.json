@@ -1884,9 +1884,54 @@
             ]
           },
           {
-            "name": "I haven't seen anything.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous first 2"
+            ]
+          },
+          {
+            "name": "I haven't seen anything.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_keep",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Show me. ...Bare-handed, and you're still standing.\n\nThe Rule says a knight takes a light before it takes anyone. I don't think it has taken you. And I won't pull it out of a lord's hand at his own gate like a thief.",
+        "buttons": [
+          {
+            "name": "Then what?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous keep 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_lie",
+        "npc_name": "Sir Aldous Vane",
+        "text": "It hums, you know. I can hear it from here, through your wall.\n\nNo, I won't search your house. The Rule doesn't let me, and I wouldn't if it did.",
+        "buttons": [
+          {
+            "name": "...I'm keeping it.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous lie 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_tree",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Not to me, then. Take it to the Tree and choose.\n\nThe Tree of Oaths, in your hall. Give the light up there and I'll box it and carry it to the chapterhouse myself. Keep it, and that is between you and it. Only choose. I don't think a light nobody has chosen stays quiet for long.",
+        "buttons": [
+          {
+            "name": "I'll go to the Tree.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous tree 0"
             ]
           }
         ]
@@ -1909,7 +1954,7 @@
             ]
           },
           {
-            "name": "Good day, Sir Aldous.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous what 2"
             ]
@@ -1928,7 +1973,7 @@
             ]
           },
           {
-            "name": "Good day.",
+            "name": "I have it. I'm keeping it.",
             "commands": [
               "/scriptevent siege:lore_say aldous why 1"
             ]
@@ -1941,7 +1986,7 @@
         "text": "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
         "buttons": [
           {
-            "name": "Thank you.",
+            "name": "I already have.",
             "commands": [
               "/scriptevent siege:lore_say aldous rule 0"
             ]

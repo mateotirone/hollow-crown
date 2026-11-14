@@ -103,7 +103,12 @@
         "mason__frostmarch": "textures/entity/siege/npc_skins/mason__frostmarch",
         "mason__saltreach": "textures/entity/siege/npc_skins/mason__saltreach",
         "mason__emberwaste": "textures/entity/siege/npc_skins/mason__emberwaste",
-        "mason__blackfen": "textures/entity/siege/npc_skins/mason__blackfen"
+        "mason__blackfen": "textures/entity/siege/npc_skins/mason__blackfen",
+        "herald_vale": "textures/entity/siege/npc_skins/herald_vale",
+        "herald_frostmarch": "textures/entity/siege/npc_skins/herald_frostmarch",
+        "herald_saltreach": "textures/entity/siege/npc_skins/herald_saltreach",
+        "herald_emberwaste": "textures/entity/siege/npc_skins/herald_emberwaste",
+        "herald_blackfen": "textures/entity/siege/npc_skins/herald_blackfen"
       },
       "geometry": {
         "default": "geometry.humanoid.custom"

@@ -218,6 +218,35 @@ below, slabs at crown and keel), radii held to half blocks so rings run in clean
 height field leaves those jaggy and holed. From Python, `envelope_cells()` gives local cells and `turn_cell()`
 places any local cell list at a point facing e/w/n/s (stairs, doors and log axes turn with it).
 
+## `ship` and `pier`: a moored sailing ship and the pier it lies at (Gull's Rest, 2026-11-14)
+
+```json
+{"part": "pier", "rects": [[-27, -2, 0, 2], [-78, -4, -28, 4]], "y": 2, "bed": -8, "moor": "n", "land": "e"}
+{"part": "ship", "at": [-32, 0, -12], "heading": "w", "length": 47, "beam": 13, "gangway": {"side": "port", "at": 27}}
+```
+
+- **`ship`** (`scripts/ship.py`): `at` is the stern's centre on the waterline row (the top water block), `heading`
+  where the bow points. The hull is fitted row by row: a keel one block wide, the bilge turning out to the full beam
+  at the deck, an upside-down stair wherever the row below is narrower (so the turn reads round), a blunt bow and a
+  narrower stern. Colour bands by row: tarred dark oak below the water, a spruce boot-top, a dark log wale, oak
+  topsides, a teal stripe (warped planks) along the top of the side, birch fence rails. A quarterdeck over the
+  captain's cabin aft (`aft` 11 long, deck three rows over the waist) and a forecastle over the galley forward
+  (`fore` 9), each with a front wall, a door on the centre line and stairs up both sides. Inside: the great cabin
+  (bed, chart table, lectern, books, chest, a cyan carpet, stern windows and side lights), the galley, and a lower
+  deck under the whole waist (bunks, chests, a mess table with benches, the hold of barrels and chests, stores aft),
+  reached by a solid flight of stairs through a railed hatch, with a 3-wide way down the middle and lanterns hung
+  from the deck beams. `masts` `[{"at": u, "top": rows over its deck, "yards": [[y, half span, sail rows]], "nest": y}]`
+  (default: mizzen, main with a crow's nest, fore): square sails of white wool with a cyan band, bellied forward,
+  hung from log yards; shrouds from the channels (a slab ledge one out from the side) to under the lowest yard; main
+  and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
+  `gangway` opens the bulwark and lays a plank out to the pier. Every cell inside the hull is written, air included,
+  so a stamp over the sea leaves no water in the hold; `materials` overrides any role (`SALT` in ship.py).
+- **`pier`**: a deck of `rects` (oak, darker spruce boards over the pile rows) at row `y`; stripped oak piles from
+  `bed` under the edges every 4 and under the middle on the pile rows, stringers under every edge, cross beams on the
+  pile rows; oak fence rails on the sides that are not `moor`ing faces or the `land` side; along the mooring faces
+  blackstone bollards every 4 and lamp posts every `lamp_every` (8), lamp posts along the rails too. Map code carries
+  the piles down to the real sea bed (`harbour.ship_blocks`).
+
 ## Castle parts: `keep` and `curtain` (towers/README castle row; the Barracks, 2026-11-12)
 
 ```json

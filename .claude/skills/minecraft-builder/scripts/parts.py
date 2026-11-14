@@ -2118,7 +2118,7 @@ def turn_cell(cell, at, heading):
     st = dict(cell[4]) if len(cell) > 4 else {}
     xz, fm = HEADING[heading]
     dx, dz = xz(u, w)
-    if "facing" in st: st["facing"] = fm[st["facing"]]
+    if "facing" in st: st["facing"] = fm.get(st["facing"], st["facing"])        # up / down stay
     if st.get("axis") in ("x", "z") and heading in ("n", "s"): st["axis"] = "z" if st["axis"] == "x" else "x"
     return [at[0] + dx, at[1] + y, at[2] + dz, b] + ([st] if st else [])
 
@@ -2251,6 +2251,22 @@ def stands(ctx, s):
 
 
 PARTS["stands"] = stands
+
+
+def ship(ctx, s):
+    """A block-built sailing ship moored on water (scripts/ship.py; Gull's Rest's great ship, 2026-11-14)."""
+    import ship as _ship
+    return _ship.ship(ctx, s)
+
+
+def pier(ctx, s):
+    """A timber pier on log piles with rails, bollards and lamp posts (scripts/ship.py)."""
+    import ship as _ship
+    return _ship.pier(ctx, s)
+
+
+PARTS["ship"] = ship
+PARTS["pier"] = pier
 
 def run(ctx, pt):
     k = pt.get("part")

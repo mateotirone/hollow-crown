@@ -241,6 +241,8 @@ function respec(player, hallLevel) {
 function pathMenu(player, hallLevel) {
   const hero = heroOf(player);
   const holding = has(player, EMBER);
+  // with the Ember, the choosing scene (newplayer/act2.js) plays instead of this list
+  if (holding && applyFilter("treeScene", false, { player })) return;
   const body = [
     "Two roads lead from here, and you can only walk one. §cThe choice is permanent.",
     "",
@@ -248,7 +250,7 @@ function pathMenu(player, hallLevel) {
     "",
     "§5The Marked.§r Take the Ember into your hand. It gives you powers no one living understands: bolts of pale fire, a step through the air, a call that turns armies on themselves. Every casting raises your Resonance, and loud Resonance is heard. Stages: " + RANKS.marked.map((r) => r.name).join(", ") + ".",
     "",
-    holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. It falls near your keep the night you first hold a siege.",
+    holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. Something will come down near your keep, early on; keep it until you are ready.",
     "",
     "§fOther roads, earned later in the regions.§7 Choosing the Ember's road closes these, because a person holds one role. There is no hurry: keep the Ember and come back to the Tree whenever you like.",
     ...Object.keys(ROLES).filter((id) => ROLES[id].region).map((id) => `${ROLES[id].color}${ROLES[id].name}§7: ${ROLE_DEEDS[id]?.deed ?? "a deed in " + STYLES[ROLES[id].region].name}.`),
@@ -394,5 +396,7 @@ export function acceptVictor(player) {
 export function openTree(player, block) {
   const level = hallLevelAt(block.location, block.dimension.id);
   if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands.");
+  // holding the Ember and on no road yet: the choosing scene (newplayer/act2.js: addFilter("treeScene", ...))
+  if (heroOf(player).path === "none" && has(player, EMBER) && applyFilter("treeScene", false, { player, block })) return;
   treeMenu(player, level);
 }

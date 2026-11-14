@@ -41,7 +41,7 @@ import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
-import { slotAt } from "./library.js";
+import { slotAt, slotLine } from "./library.js";
 import "./ledger.js";
 import "./journal.js";
 import "./voices.js";
@@ -72,6 +72,7 @@ addTests("lore", {
     // a shelf facing north is seen from the north: the viewer's left is east (+x)
     assertEqual(slotAt("north", "North", { x: 0.9, y: 0.8, z: 0 }), 0);
     assertEqual(slotAt("north", "North", { x: 0.1, y: 0.2, z: 0 }), 5);
+    assert(/empty/i.test(slotLine(null)), "looking at an empty slot says so");
     assertEqual(slotAt("south", "South", { x: 0.1, y: 0.8, z: 1 }), 0);
     assertEqual(slotAt("east", "East", { x: 1, y: 0.2, z: 0.5 }), 4);
     assertEqual(slotAt("west", "West", { x: 0, y: 0.8, z: 0.95 }), 2);
