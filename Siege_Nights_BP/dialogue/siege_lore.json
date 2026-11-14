@@ -5,7 +5,7 @@
       {
         "scene_tag": "siege_lore_elspeth_meet",
         "npc_name": "Old Elspeth",
-        "text": "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nGo and touch the Plot Stone outside. Raise your banner, and this place is yours.",
+        "text": "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nThe cob tied by your gate is yours too. Slow, and no jumper, but it knows the roads. Blow the whistle in your pack and it comes from anywhere.\n\nNow go and touch the Plot Stone outside. Raise your banner, and this place is yours.",
         "buttons": [
           {
             "name": "Thank you.",
@@ -120,7 +120,7 @@
       {
         "scene_tag": "siege_lore_elspeth_workshop",
         "npc_name": "Old Elspeth",
-        "text": "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.",
+        "text": "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.\n\nThe Store Shed beside it keeps what you can't carry. Use it. A lord with full pockets walks slow.",
         "buttons": [
           {
             "name": "I'll find it.",
@@ -190,7 +190,7 @@
       {
         "scene_tag": "siege_lore_elspeth_barracks",
         "npc_name": "Old Elspeth",
-        "text": "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.",
+        "text": "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
         "buttons": [
           {
             "name": "I will.",
@@ -311,7 +311,7 @@
       {
         "scene_tag": "siege_lore_elspeth_wheat",
         "npc_name": "Old Elspeth",
-        "text": "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.",
+        "text": "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.\n\nAnd mind the two cows in the pen. Feed them wheat and you'll have calves. Nobody sends you more.",
         "buttons": [
           {
             "name": "I will.",
@@ -432,7 +432,7 @@
       {
         "scene_tag": "siege_lore_elspeth_station",
         "npc_name": "Old Elspeth",
-        "text": "The rail runs past here. Find the station. You'll want roads that don't tire your horse.",
+        "text": "The rail runs past here. Find the station. You'll want roads that don't tire your horse.\n\nThere's a Goods Crate on the platform. Whatever you put in it finds its way home to your Store Shed.",
         "buttons": [
           {
             "name": "I'll find it.",
@@ -495,6 +495,178 @@
             "name": "Thank you.",
             "commands": [
               "/scriptevent siege:lore_say elspeth stuck2_station 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_mine",
+        "npc_name": "Old Elspeth",
+        "text": "You found the rails. Good. Now take that pickaxe from the chest.\n\nThere's an old shaft past your wall. The ore comes back every night. Nobody knows why, and nobody asks.\n\nBring back coal and iron. There's a furnace in your house. Smelt the iron, and the Moneyer will buy every ingot you make.",
+        "buttons": [
+          {
+            "name": "I'll find it.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mine 0"
+            ]
+          },
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mine 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_mine_wait",
+        "npc_name": "Old Elspeth",
+        "text": "The old shaft, past your wall. It won't come to you.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mine_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mine_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_mine",
+        "npc_name": "Old Elspeth",
+        "text": "Listen for the wheel. It creaks when the wind's up.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mine 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mine 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_mine",
+        "npc_name": "Old Elspeth",
+        "text": "Follow the pin on your map to the headframe. There's a ladder down.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_mine 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_ore_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Coal and iron. Your pockets are still light.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ore_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ore_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_ore",
+        "npc_name": "Old Elspeth",
+        "text": "The rock tells you where to swing, if you look.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ore 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ore 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_ore",
+        "npc_name": "Old Elspeth",
+        "text": "Coal is black-flecked stone. Iron is speckled tan. Mine both with the pickaxe.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_ore 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_smelt_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Iron's no use as rock. The furnace.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth smelt_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth smelt_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_smelt",
+        "npc_name": "Old Elspeth",
+        "text": "Fire does the work. You only feed it.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_smelt 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_smelt 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_smelt",
+        "npc_name": "Old Elspeth",
+        "text": "The furnace in your house. Iron in the top, coal underneath.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_smelt 0"
             ]
           }
         ]
@@ -670,7 +842,7 @@
       {
         "scene_tag": "siege_lore_elspeth_raid_won2",
         "npc_name": "Old Elspeth",
-        "text": "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nTake your cob. Stay on the road.",
+        "text": "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nSee to your wall before you go. The Mason will mend it, for a price. And mind your purse: win a night and the town starts costing you. Every dawn.\n\nThen take your cob. Stay on the road.",
         "buttons": [
           {
             "name": "I'll ride to Millbrook.",
@@ -683,7 +855,7 @@
       {
         "scene_tag": "siege_lore_elspeth_raid_lost",
         "npc_name": "Old Elspeth",
-        "text": "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.",
+        "text": "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, and have the Mason see to your wall. Then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.\n\nWhen you do win a night, the town starts costing you. Every dawn. Keep some coin back.",
         "buttons": [
           {
             "name": "I will.",
@@ -740,6 +912,57 @@
             "name": "Thank you.",
             "commands": [
               "/scriptevent siege:lore_say elspeth stuck2_rebanner 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_mend_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Your wall's still open. The Mason, before the road.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mend_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth mend_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_mend",
+        "npc_name": "Old Elspeth",
+        "text": "Masons mend. That's the whole of their trade.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mend 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_mend 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_mend",
+        "npc_name": "Old Elspeth",
+        "text": "The Mason stands by his bench in the yard. Ask him to mend the wall.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_mend 0"
             ]
           }
         ]

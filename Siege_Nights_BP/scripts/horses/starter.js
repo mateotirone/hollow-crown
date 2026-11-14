@@ -15,6 +15,7 @@
 // Saves: player property "hc:starter_horse" (the uid of the cob they were given).
 
 import { world, system } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 import { on, countItem, addTests, assert, assertEqual } from "../siege/api.js";
 import { mapMode, hallBuilt } from "../plots/api.js";
 import { regionAt } from "../economy/shops.js";
@@ -52,6 +53,8 @@ export function giveCob(player, region, { once = true } = {}) {
   if (countItem(player, WHISTLE) === 0) give(player, WHISTLE);
   player.setDynamicProperty(GIVEN, rec.uid);
   sfx(player, "mob.horse.idle");
+  // In Act 1 on a map Old Elspeth introduces the cob and the whistle (newplayer/act1.js, filter "cobQuiet")
+  if (once && applyFilter("cobQuiet", false, { player })) return true;
   player.sendMessage(`§6${rec.name}§7, ${aCob(rec)}, is yours: saddled and ready. Slow and no jumper, but it gets you about.`);
   player.sendMessage("§7Blow your §fHorse Whistle§7 and it comes from anywhere. Sneak and click it with an empty hand to see its sheet.");
   return true;

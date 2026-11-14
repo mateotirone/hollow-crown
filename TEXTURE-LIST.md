@@ -247,6 +247,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 |---|---|---|
 | Archive Shelf casing (sides, top and bottom) | `textures/blocks/siege_shelf_side.png`, `siege_shelf_top.png` | **Final style, awaiting your review** |
 | Archive Shelf front ×7 (empty, then 1 to 6 tomes: two rows of three slots, one book spine per shelved tome) | `textures/blocks/siege_shelf_front_0.png` to `siege_shelf_front_6.png` | **Final style, awaiting your review**. Could later get a regional variant per build style |
+| Archive Shelf 3D bookcase atlas (two-block oak case with cornice, dark back, six cloth book spines, page edges; model `models/blocks/archive_shelf.geo.json`, lower and upper halves) | `textures/blocks/siege_archive_shelf.png` | **New 2026-11-14, awaiting your review** (`studio/art/build_archive_shelf.py`). Replaces the flat fronts in game |
 | Dusty Tome (a closed book lying in the world; 32×16 box-UV for a 10×3×8 book, shape in `models/blocks/tome_cache.geo.json`) | `textures/blocks/hc_tome_cache.png` | **Final style, awaiting your review** |
 | Gravestone (weathered headstone with a carved cross, moss at the foot; 32×16, left half the front face, right half plain stone; shape in `models/blocks/gravestone.geo.json`) | `textures/blocks/graves/gravestone.png` | **First pass, awaiting your review** (`studio/art/build_gravestone.py`) |
 | Lore Tome item (old leather book, gilt bands) | `textures/items/siege_lore_tome.png` | **Final style, awaiting your review**. Nice to have later: one cover per collection (8) |
