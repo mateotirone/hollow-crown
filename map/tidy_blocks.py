@@ -220,10 +220,12 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
             if nm.endswith(":air"): continue
             if HUNG.search(nm):
                 f = st.get("facing_direction")
-                def ok(fd):
+                def ok(fd, strict=False):
                     o = BEHIND[fd]; back = (cell[0] + o[0], cell[1], cell[2] + o[2]); front = (cell[0] - o[0], cell[1], cell[2] - o[2])
                     bn = name_at(back)
-                    held = solid(back) or (nm.endswith("wall_sign") and bn is not None and "leaves" in bn)
+                    # strict: held by one of the town's own blocks, as tools/hung-check.mjs sees it (the land is not in
+                    # the file: Rimehold's planter signs held by the hillside kept failing the check, 2026-11-14)
+                    held = (bn is not None and not SOFT.search(bn) if strict else solid(back)) or (nm.endswith("wall_sign") and bn is not None and "leaves" in bn)
                     if nm.endswith("ladder") and bn is not None and bn.endswith("ladder"): held = False
                     # in front: the land as it was counts too (ground_hi: a sign by a house at the town's edge faced
                     # the hillside the grading never reached, Rimehold 2026-11-14)
@@ -234,9 +236,13 @@ def tidy_worldblocks(d, ground=None, ground_hi=None):
                     shaft = (nm.endswith("ladder") and lb is not None and lb not in drop and entry(lb)["name"].endswith("ladder")
                              and (entry(lb).get("states") or {}).get("facing_direction") == fd)
                     return held and (shaft or not solid(front) and not (g_hi is not None and front[1] <= g_hi))
-                if f in BEHIND and ok(f): continue
-                for fd in (2, 3, 4, 5):
-                    if ok(fd):
+                if f in BEHIND and ok(f, True): continue
+                for fd in [(fd, True) for fd in (2, 3, 4, 5) if fd != f] + ([(f, False)] if f in BEHIND else []) + [(fd, False) for fd in (2, 3, 4, 5) if fd != f]:
+                    fd, strict = fd
+                    if fd == f and not strict:         # no side with a block of ours: held by the land is fine as it is
+                        if ok(f): break
+                        continue
+                    if ok(fd, strict):
                         blocks[i] = [*blocks[i][:3], index_of({**e, "states": {**st, "facing_direction": fd}}), *blocks[i][4:]]
                         n["turned"] += 1; changed = True; break
                 else:
