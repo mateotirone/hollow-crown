@@ -14,7 +14,7 @@ tome takes one of what is left.
 Re-run this whenever a town's blocks file changes (after tools/townsfolk_spots.py), then commit the new file.
 The game checks each spot on the spot and steps aside if something now stands there.
 """
-import json, os, sys
+import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -25,27 +25,28 @@ EXTRA = 14  # extra spots asked for in each town, past the townsfolk's own
 
 # Who stands in which town, and how to pick their street (key: lower sorts first). "near:<id>" = closest to that
 # character's spot. Characters are picked in this order, so a later one never takes an earlier one's spot.
-# "in:x,y,z" = inside the building their dialogue names, at that air cell (the floor is the block under it). These
-# come from the baked towns (project files siege-nights/towngen/, towns thread 2026-11-12), not from the street
-# spots, and take none of them. Re-check them whenever the towns are baked again.
+# "in:<name>" = inside the building of that name in map/<town>-plan.json; "in:@x,z" = inside the building whose
+# middle is nearest that spot. indoor() finds the cell: walked in from the door, under a roof, on a real floor,
+# a few steps in and clear of the doorway. These take no street spots. Nothing is hard-coded, so a rebake of the
+# towns only needs this tool re-run.
 PEOPLE = [
     # Gull's Rest: the lighthouse keeper in the lighthouse, the harbourmistress in the harbour office, the girl on the
     # sea wall on the lowest street
-    ("elias", "Gull's Rest", "in:-949,65,402"),   # the lighthouse, ground floor
+    ("elias", "Gull's Rest", "in:lighthouse"),
     ("tilly", "Gull's Rest", "low"),
-    ("ottilie", "Gull's Rest", "in:-914,65,388"), # the harbour office
+    ("ottilie", "Gull's Rest", "in:harbourmaster"),
     ("pip", "Gull's Rest", "near:tilly"),        # Tilly's little brother (a villager: the Returned case)
     # Rimehold: Sigrun's longhouse and Jorund's net sheds both face the frozen lake (Hallowmere, north-east)
-    ("sigrun", "Rimehold", "in:-90,116,-1114"),   # the longhouse nearest Hallowmere
-    ("jorund", "Rimehold", "in:-19,115,-1095"),   # the net sheds, on the street nearest the lake
+    ("sigrun", "Rimehold", "in:hall"),           # the longhouse (rimehold_hall)
+    ("jorund", "Rimehold", "in:net sheds"),
     ("bram", "Rimehold", "near:jorund"),          # Jorund's father
     # Sunscar: the warden's office on the avenue of statues
-    ("isolde", "Sunscar", "in:891,95,445"),       # the warden's office
+    ("isolde", "Sunscar", "in:warden's office"),
     # Millbrook: the bakery
-    ("nessa", "Millbrook", "in:-62,79,-433"),     # the bakery, north of the square
+    ("nessa", "Millbrook", "in:bakery"),
     ("harl", "Millbrook", "near:nessa"),          # her husband, at the ovens
     # Mirelight: the last house before the lanterns stop
-    ("hesper", "Mirelight", "in:-4,75,892"),  # by the Fen Line's east gate, past the last lamp
+    ("hesper", "Mirelight", "in:@-4,892"),        # the house nearest this spot, by the Fen Line's east gate
     ("odo", "Mirelight", "near:hesper"),          # her husband, cutting reeds out back
 ]
 
@@ -60,13 +61,105 @@ TOWN_TOMES = [
 ]
 
 
+AIRY = re.compile(r"^air$|carpet|snow_layer|pressure_plate|button|torch|lantern|flower$|^short_grass$|^fern$|vine|sign$|"
+                  r"banner|ladder|rail$|^flower_pot$")
+NOT_FLOOR = re.compile(r"^air$|fence|_wall$|door|carpet|snow_layer|pressure_plate|button|torch|lantern|flower|grass$|"
+                       r"fern|vine|sign$|banner|ladder|rail$|pot$|bed$|chain|bars|pane|water|lava|leaves")
+
+
+def indoor(blocks_path, plan_path, how):
+    """The cell a story character stands in, inside the building named by how ("in:<name>" or "in:@x,z").
+    Returns [x, y, z] of the air cell they stand in, or raises when the building has no fitting room."""
+    d = json.load(open(blocks_path))
+    pal = d["palette"]
+    cell = {}
+    for x, y, z, i in d["blocks"]:
+        e = pal[i]
+        if e.get("soft") and (x, y, z) in cell:
+            continue
+        cell[(x, y, z)] = e["name"].split(":")[-1]
+    plan = json.load(open(plan_path))["buildings"]
+    want = how[3:]
+    if want.startswith("@"):
+        hx, hz = map(int, want[1:].split(","))
+        bld = min((b for b in plan if b.get("door")), key=lambda b: (b["x"] - hx) ** 2 + (b["z"] - hz) ** 2)
+    else:
+        found = [b for b in plan if b.get("name") == want]
+        if len(found) != 1:
+            raise SystemExit(f"{plan_path}: {len(found)} buildings named {want!r}")
+        bld = found[0]
+    gy, (dx0, dz0) = bld["ground_y"], bld["door"]
+    reach = int(bld.get("footprint", 100) ** 0.5 * 0.8) + 2      # half the building's width, and a little over
+
+    def name(c):
+        n = cell.get(c)
+        if n is None:
+            return "air" if c[1] >= gy else "stone"      # nothing baked there: open above the pad, ground below it
+        return n
+
+    def walk(c):     # stand in c: feet and head clear, a real floor under
+        return bool(AIRY.search(name(c)) and AIRY.search(name((c[0], c[1] + 1, c[2])))
+                and not NOT_FLOOR.search(name((c[0], c[1] - 1, c[2]))))
+
+    def roofed(c):
+        return any(not AIRY.search(name((c[0], c[1] + k, c[2]))) for k in range(2, 40))
+
+    def door_near(c):
+        return any("door" in name((c[0] + a, c[1] + h, c[2] + b))
+                   for a in (-1, 0, 1) for b in (-1, 0, 1) for h in (0, 1))
+
+    # start on the floor cells just inside the building's doors (the plan's door is where the path meets it, which on
+    # a stilt house is the foot of the stair, so look for the door blocks themselves)
+    doors = [c for c, n in cell.items() if n.endswith("door") and "trapdoor" not in n
+             and (max(abs(c[0] - bld["x"]), abs(c[2] - bld["z"])) <= reach + 1
+                  or (c[0] - dx0) ** 2 + (c[2] - dz0) ** 2 <= 36)
+             and "door" not in name((c[0], c[1] - 1, c[2]))]
+    doors.sort(key=lambda c: (c[0] - dx0) ** 2 + (c[2] - dz0) ** 2)
+    doors = [c for c in doors if doors and abs(c[0] - doors[0][0]) + abs(c[2] - doors[0][2]) <= 2]   # the front door
+    start = [(c[0] + a, c[1], c[2] + b) for c in doors for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+    start = [c for c in start if walk(c) and roofed(c)]
+    seen = {c: 0 for c in start}
+    todo = list(start)
+    while todo:
+        c = todo.pop(0)
+        for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for h in (0, 1, -1):
+                n = (c[0] + a, c[1] + h, c[2] + b)
+                if n in seen or max(abs(n[0] - bld["x"]), abs(n[2] - bld["z"])) > reach + 2:
+                    continue
+                if h == 1 and not AIRY.search(name((c[0], c[1] + 2, c[2]))):
+                    continue                             # no head room for the step up
+                if walk(n) and roofed(n):
+                    seen[n] = seen[c] + 1
+                    todo.append(n)
+                    break
+    def open_sides(c):
+        return sum(walk((c[0] + a, c[1], c[2] + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+
+    def in_doorway(c):
+        return any("door" in name((c[0] + a, c[1], c[2] + b)) for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+
+    # clear of the door all round with room to step past them; in a small room (a lighthouse foot), just out of
+    # the doorway itself
+    room = ([c for c in seen if not door_near(c) and open_sides(c) >= 2]
+            or [c for c in seen if not in_doorway(c) and open_sides(c) >= 1])
+    if not room:
+        raise SystemExit(f"{plan_path}: no room inside {bld['stamp']} to stand in")
+    # a few steps in from the door, facing whoever walks in; ground floor first
+    low = min(c[1] for c in room)
+    best = min(room, key=lambda c: (c[1] > low + 1, abs(seen[c] - 4),
+                                    (c[0] - bld["x"]) ** 2 + (c[2] - bld["z"]) ** 2, c))
+    return list(best)
+
+
 def main():
     centres = TF.wards()
-    extras = {}
+    extras, paths = {}, {}
     for stem, (name, count) in TF.TOWNS.items():
         path = os.path.join(ROOT, "map", f"{stem}-blocks.json")
         if len(sys.argv) > 1 and os.path.exists(os.path.join(sys.argv[1], stem, f"{stem}-blocks.json")):
             path = os.path.join(sys.argv[1], stem, f"{stem}-blocks.json")
+        paths[stem] = path
         spots = TF.spots_for(path, count + EXTRA, centres[name]) if os.path.exists(path) else []
         extras[name] = spots[count:]
         print(f"{name}: {len(extras[name])} extra spots")
@@ -74,8 +167,10 @@ def main():
     people = {}
     for npc, town, how in PEOPLE:
         if how.startswith("in:"):
-            x, y, z = map(int, how[3:].split(","))
+            stem = next(k for k, (n, _) in TF.TOWNS.items() if n == town)
+            x, y, z = indoor(paths[stem], os.path.join(ROOT, "map", f"{stem}-plan.json"), how)
             people[npc] = {"town": town, "at": [x, y - 1, z], "indoors": True}   # at = the floor block, as for streets
+            print(f"{npc}: inside, standing at {x},{y},{z}")
             continue
         free = extras[town]
         if not free:
