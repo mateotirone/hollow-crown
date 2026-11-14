@@ -84,11 +84,17 @@ for e in EFFECTS:
     json.dump(effect(*e), open(RP + f'particles/{e[0]}.particle.json', 'w'), indent=1)
 
 # ---- 4. an uneasy moon: vanilla layout moon_phases (4 columns x 2 rows of 32x32), a hairline violet crack that grows toward the full moon
+# Same format as the vanilla moon (2026-11-14, "where is the moon"): RGB with NO alpha channel on a black
+# ground. The game adds the moon onto the sky, so black is see-through; a transparent PNG (our old one) is not
+# what the sky shader expects and the moon did not show. The shadowed side is a faint earthshine, as vanilla
+# does it, so the dark moon (phase 4) is a dim disc you can just make out, not nothing.
 MOON = fixed('#3c3a4c', '#7c7a8c', '#aeb0be', '#d0d2dc', '#e8eaf0', '#f8f8fc')
-mp = Image.new('RGBA', (128, 64), (0, 0, 0, 0))
+SHADE = ((26, 25, 34), (34, 33, 44), (40, 39, 52))                                                     # earthshine, darkest to lightest
+mp = Image.new('RGB', (128, 64), (0, 0, 0))
 CRACK = [(16, 9), (17, 11), (16, 13), (15, 15), (16, 17), (18, 19), (17, 21), (16, 23)]
 for ph in range(8):
     ox, oy = (ph % 4) * 32, (ph // 4) * 32; lit = 1 - abs(ph - 0) / 4 if ph <= 4 else (ph - 4) / 4       # phase 0 full, 4 new
+    on_px = set()
     for y in range(32):
         for x in range(32):
             dx, dy = x - 15.5, y - 15.5; d = math.hypot(dx, dy)
@@ -96,13 +102,13 @@ for ph in range(8):
             edge = math.sqrt(max(0, 10.5 ** 2 - dy ** 2)); k = (1 - 2 * lit) * edge                           # terminator
             on = (dx > k) if ph <= 4 else (dx < -k)
             if not on:
-                mp.putpixel((ox + x, oy + y), MOON[0] + (90,)); continue
+                mp.putpixel((ox + x, oy + y), SHADE[0 if d > 8.5 else 2 if (x // 3 + y // 3) % 5 else 1]); continue
             v = 4 - (1 if d > 8.5 else 0) - (1 if ((x * 7 + y * 13) % 23 < 3) else 0) + (1 if (dx < -3 and dy < -3 and d < 7) else 0)
             if (x // 3 + y // 3) % 5 == 0 and d < 8: v -= 1                                                    # maria
-            mp.putpixel((ox + x, oy + y), MOON[max(1, min(5, v))] + (255,))
+            mp.putpixel((ox + x, oy + y), MOON[max(1, min(5, v))]); on_px.add((x, y))
     n = round(len(CRACK) * lit)
     for (x, y) in CRACK[:n]:
-        if mp.getpixel((ox + x, oy + y))[3] == 255: mp.putpixel((ox + x, oy + y), VI[3] + (255,))
+        if (x, y) in on_px: mp.putpixel((ox + x, oy + y), VI[3])
 os.makedirs(RP + 'textures/environment', exist_ok=True); mp.save(RP + 'textures/environment/moon_phases.png')
 
 # ---- sheet
@@ -110,5 +116,5 @@ sh = Image.new('RGBA', (820, 560), (30, 28, 40, 255))
 for i, im in enumerate(roofs): sh.alpha_composite(im.resize((96, 96), Image.NEAREST), (8 + i * 104, 8))
 for i, im in enumerate(plates): sh.alpha_composite(im.resize((im.width * 2, im.height * 2), Image.NEAREST), (8 + (i % 4) * 200, 112 + (i // 4) * 136))
 sh.alpha_composite(sheet.resize((256, 128), Image.NEAREST), (540, 8) if False else (8, 412))
-sh.alpha_composite(mp.resize((512, 256), Image.NEAREST).crop((0, 0, 512, 140)), (290, 412))
+sh.alpha_composite(mp.convert("RGBA").resize((512, 256), Image.NEAREST).crop((0, 0, 512, 140)), (290, 412))
 sh.save(ROOT + 'art/missing-art-2.png'); print('ok', len(plates))
