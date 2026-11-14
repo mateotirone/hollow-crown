@@ -131,6 +131,7 @@ Placeholders came from `studio/build_crown.py`; final art for the icons and bloc
 | Citadel Cornerstone (16×16 block): stone with a gold band, crown mark on top | `textures/blocks/siege_cornerstone_side.png`, `siege_cornerstone_top.png` | **Final style, awaiting your review** |
 | The Throne (16×16 block sheet: gold and red cushion patch at 0,0, finials at 12,0, stone plinth at 0,8). Shape in `models/blocks/throne.geo.json` | `textures/blocks/siege_throne.png` | **Final style, awaiting your review**, the shape deserves a proper model in the art pass |
 | Fallen Oath Shard (16×16 block), glowing crystal cluster. Shape in `models/blocks/fallen_shard.geo.json` | `textures/blocks/siege_fallen_shard.png` | **Final style, awaiting your review** |
+| Fallen Ember (16×16 block), the Ember lying in its scorch outside your gate (Act 1). The shard shape in pale fire, recoloured from the shard by script | `textures/blocks/siege_fallen_ember.png` | **Placeholder (recolour), awaiting your review** |
 | Throne Seal (64×64 entity): a floating seal-stone in front of the throne during a Storm. Shape in `models/entity/throne_seal.geo.json` | `textures/entity/siege_throne_seal.png` | Placeholder |
 | The Heart of the Hollow, resting (32×32 entity): the Heart lying where the final boss fell, before anyone takes it. Dark, veined, should look like it is beating. Shape in `models/entity/resting_heart.geo.json` | `textures/entity/siege_resting_heart.png` | Placeholder |
 

@@ -9,10 +9,13 @@
 // She is put back if she goes missing whenever someone comes near. Worlds that built her old porch (before the
 // chapel) keep the porch, but she moves into the chapel.
 //
+// She patches people up (Act 1, Mateo 2026-11-14), so once the chapel stands a healer's corner is set out beside her
+// altar end, off the aisle: a cot, a chair, a cauldron of water and a barrel with a pot of herbs on it.
+//
 // Players who start in Kingsrest with no plot never get a plot's first book, so a carter on the square points
 // them to Wren instead (startedHomeless, from plots/welcome.js).
 
-import { world, system } from "@minecraft/server";
+import { world, system, BlockPermutation } from "@minecraft/server";
 import { on, addTests, assert, assertEqual } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
@@ -25,7 +28,7 @@ const ward = WARDS.find((w) => w.name === "Millbrook");
 export const MILLBROOK = { x: ward.x, z: ward.z };
 const WREN_TAG = "siege_lore_npc_wren";
 // wren: where she keeps to. chapel: true once that is the chapel (or a spot a builder chose), not the old porch
-const store = moduleStore("siege:opening_millbrook", () => ({ wren: null, chapel: false }));
+const store = moduleStore("siege:opening_millbrook", () => ({ wren: null, chapel: false, corner: false }));
 
 // The chapel, in world blocks: its walls (the eaves reach a block further out) and the air cell inside its door.
 // Its front faces west onto the square, twelve out from the middle, clear of the Seneschal's clock ring (r 10);
@@ -80,6 +83,58 @@ export function buildMillbrook(dim, floor, finish) {
   finish?.();
 }
 
+// ---------- the healer's corner ----------
+
+// Pure: where the corner goes, as offsets from Wren's altar spot ({ dx, dz }), on whichever side of the aisle has
+// room. The aisle runs west from her to the door, so nothing is put within a block of it. free(dx, dz) says a cell
+// is open floor. undefined if neither side fits.
+export function healerPlan(free) {
+  for (const s of [1, -1]) {
+    for (const r of [3, 4]) {
+      const plan = {
+        cotHead: { dx: 0, dz: r * s }, cotFoot: { dx: -1, dz: r * s }, chair: { dx: -2, dz: (r - 1) * s },
+        cauldron: { dx: 0, dz: (r - 1) * s }, barrel: { dx: -3, dz: r * s },
+      };
+      if (Object.values(plan).every((c) => Math.abs(c.dz) >= 2 && free(c.dx, c.dz))) return plan;
+    }
+  }
+  return undefined;
+}
+
+function setCornerBlock(dim, at, id, states) {
+  dim.getBlock(at)?.setPermutation(BlockPermutation.resolve(id, states));
+}
+
+function healerCorner(dim) {
+  const a = WREN_ALTAR;
+  const cell = (c) => ({ x: a.x + c.dx, y: a.y, z: a.z + c.dz });
+  const firmUnder = (b) => !!b && !b.isAir && !b.isLiquid;
+  const free = (dx, dz) => {
+    const at = cell({ dx, dz });
+    const below = dim.getBlock({ ...at, y: at.y - 1 }), here = dim.getBlock(at), above = dim.getBlock({ ...at, y: at.y + 1 });
+    return firmUnder(below) && !!here?.isAir && !!above?.isAir;
+  };
+  const plan = healerPlan(free);
+  if (!plan) return false;
+  setCornerBlock(dim, cell(plan.cotFoot), "minecraft:bed", { direction: 3, head_piece_bit: false });
+  setCornerBlock(dim, cell(plan.cotHead), "minecraft:bed", { direction: 3, head_piece_bit: true });
+  setCornerBlock(dim, cell(plan.chair), "minecraft:spruce_stairs", { weirdo_direction: plan.chair.dz > 0 ? 3 : 2, upside_down_bit: false });
+  setCornerBlock(dim, cell(plan.cauldron), "minecraft:cauldron", { fill_level: 4, cauldron_liquid: "water" });
+  const barrel = cell(plan.barrel);
+  setCornerBlock(dim, barrel, "minecraft:barrel", { facing_direction: 1, open_bit: false });
+  setCornerBlock(dim, { ...barrel, y: barrel.y + 1 }, "minecraft:flower_pot");
+  return true;
+}
+
+function cornerOnce(dim) {
+  if (store.data.corner || !store.data.chapel) return;
+  try {
+    healerCorner(dim);
+    store.data.corner = true; // once, fitted or not: a corner someone rearranged is theirs
+    store.save();
+  } catch { /* not loaded */ }
+}
+
 // Wren goes back to her place if she is missing or has been moved, whenever a player is near enough to load it.
 // Waiting on the square (or on the old porch) she moves into the chapel as soon as it is there.
 onTick("opening_wren", 200, () => {
@@ -93,6 +148,7 @@ onTick("opening_wren", 200, () => {
     store.data.chapel = true;
     store.save();
   }
+  cornerOnce(dim);
   const to = store.data.wren;
   const there = wrenNear(dim, to);
   if (!there) return;
@@ -137,6 +193,13 @@ addTests("opening", {
     const inside = (p) => p.x > CHAPEL.x0 && p.x < CHAPEL.x1 && p.z > CHAPEL.z0 && p.z < CHAPEL.z1;
     assert(inside(WREN_ALTAR) && inside(CHAPEL.door), "Wren and the door are inside the chapel");
     assert(!inside(IN_FRONT), "while she waits she waits outside");
+  },
+  "Wren's healer's corner keeps off the aisle and fits on whichever side has room": () => {
+    const p = healerPlan(() => true);
+    assert(p && Object.values(p).every((c) => Math.abs(c.dz) >= 2), "off the aisle");
+    const north = healerPlan((dx, dz) => dz < 0);
+    assert(north && Object.values(north).every((c) => c.dz < 0), "the other side when one is full");
+    assertEqual(healerPlan(() => false), undefined);
   },
   "the carter points to Wren and gives nothing away": () => {
     assert(/Millbrook/.test(CARTER_LINE) && /Sister Wren/.test(CARTER_LINE));

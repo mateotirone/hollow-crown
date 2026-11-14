@@ -290,7 +290,7 @@ export function raiseBannerOn(player, plot) {
 
 async function confirmRaise(player, plot) {
   const res = await new MessageFormData().title(plot.name)
-    .body(`Raise your banner here and claim ${plot.name}?\n\n§7The land around this stone becomes yours. Raiders come on the third night.`)
+    .body(`Raise your banner here and claim ${plot.name}?\n\n§7The land around this stone becomes yours.`)
     .button1("Raise it").button2("Not yet").show(player);
   if (res.canceled || res.selection !== 0 || !player.isValid) return;
   raiseBannerOn(player, plot);

@@ -3,6 +3,1043 @@
   "minecraft:npc_dialogue": {
     "scenes": [
       {
+        "scene_tag": "siege_lore_elspeth_meet",
+        "npc_name": "Old Elspeth",
+        "text": "Sit, sit. The ash said someone new would come up the road today. It didn't say you'd be so loud on the step.\n\nThis purse was left for whoever took this hall. Fifty Regals. Don't spend it on the first pretty thing.\n\nGo and touch the Plot Stone outside. Raise your banner, and this place is yours.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth meet 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_banner",
+        "npc_name": "Old Elspeth",
+        "text": "The stone's still waiting for your hand. Go on.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth banner 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth banner 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_banner",
+        "npc_name": "Old Elspeth",
+        "text": "The stone outside wants a hand on it.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_banner 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_banner 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_banner",
+        "npc_name": "Old Elspeth",
+        "text": "The grey stone by your gate. Touch it and raise your banner.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_banner 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_chest",
+        "npc_name": "Old Elspeth",
+        "text": "Someone left more than a purse for you. Go and look.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth chest 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth chest 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_chest",
+        "npc_name": "Old Elspeth",
+        "text": "Someone left you more than a purse.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_chest 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_chest 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_chest",
+        "npc_name": "Old Elspeth",
+        "text": "There's a chest in your house. Open it.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_chest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_workshop",
+        "npc_name": "Old Elspeth",
+        "text": "Good. The ash took to your name. Now the Workshop. Nothing here gets built without it.",
+        "buttons": [
+          {
+            "name": "I'll find it.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth workshop 0"
+            ]
+          },
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth workshop 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_workshop_wait",
+        "npc_name": "Old Elspeth",
+        "text": "The Workshop. Nothing gets built without it.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth workshop_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth workshop_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_workshop",
+        "npc_name": "Old Elspeth",
+        "text": "Builders need a bench.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_workshop 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_workshop 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_workshop",
+        "npc_name": "Old Elspeth",
+        "text": "Your Workshop stands in the Mason's Yard, beside the bench. It costs nothing. Open it.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_workshop 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_barracks",
+        "npc_name": "Old Elspeth",
+        "text": "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth barracks 0"
+            ]
+          },
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth barracks 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_barracks_wait",
+        "npc_name": "Old Elspeth",
+        "text": "A Barracks first. Men want a roof before they'll guard you.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth barracks_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth barracks_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_barracks",
+        "npc_name": "Old Elspeth",
+        "text": "Men want a roof before they'll guard you.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_barracks 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_barracks 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_barracks",
+        "npc_name": "Old Elspeth",
+        "text": "Click a Plot Marker and choose the Barracks. Sixteen Regals.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_barracks 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_guards_wait",
+        "npc_name": "Old Elspeth",
+        "text": "A roof with nobody under it. Hire your men.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth guards_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth guards_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_guards",
+        "npc_name": "Old Elspeth",
+        "text": "An empty Barracks guards nothing.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_guards 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_guards 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_guards",
+        "npc_name": "Old Elspeth",
+        "text": "Go into the Barracks and hire a guard. Forty Regals a head.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_guards 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_wheat",
+        "npc_name": "Old Elspeth",
+        "text": "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth wheat 0"
+            ]
+          },
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth wheat 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_sell_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Sixteen sheaves to the Farmer. Then bread.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth sell_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth sell_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_sell",
+        "npc_name": "Old Elspeth",
+        "text": "The Farmer's been watching your field.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_sell 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_sell 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_sell",
+        "npc_name": "Old Elspeth",
+        "text": "Cut the wheat and take sixteen to the Farmer by the field.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_sell 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_bread_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Bread. I can smell when there's none in a house.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth bread_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth bread_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_bread",
+        "npc_name": "Old Elspeth",
+        "text": "Your belly will thank you.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_bread 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_bread 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_bread",
+        "npc_name": "Old Elspeth",
+        "text": "Three wheat at a crafting table makes a loaf.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_bread 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_station",
+        "npc_name": "Old Elspeth",
+        "text": "The rail runs past here. Find the station. You'll want roads that don't tire your horse.",
+        "buttons": [
+          {
+            "name": "I'll find it.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth station 0"
+            ]
+          },
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth station 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_station_wait",
+        "npc_name": "Old Elspeth",
+        "text": "The station. Roads that don't tire your horse.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth station_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth station_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_station",
+        "npc_name": "Old Elspeth",
+        "text": "Listen for the rails.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_station 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_station 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_station",
+        "npc_name": "Old Elspeth",
+        "text": "Follow the pin on your map to the station.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_station 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_rest",
+        "npc_name": "Old Elspeth",
+        "text": "Nothing in the ash for you today. Rest your feet.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_rest__1",
+        "npc_name": "Old Elspeth",
+        "text": "Walk your walls. Learn your people's names. The ash has nothing else for you today.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_rest__2",
+        "npc_name": "Old Elspeth",
+        "text": "Sit a while, if you like. I don't get many who sit.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_rest__3",
+        "npc_name": "Old Elspeth",
+        "text": "The fire's low. Put a log on it on your way out.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_sundown",
+        "npc_name": "Old Elspeth",
+        "text": "Do what you like today, but be home by sundown. I'll have supper on. A lord's first supper in his own hall is a thing you keep.",
+        "buttons": [
+          {
+            "name": "I'll be home.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth sundown 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_home_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Supper's when the sun goes down. Not a moment after.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth home_wait 0"
+            ]
+          },
+          {
+            "name": "I'll be here.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth home_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_home",
+        "npc_name": "Old Elspeth",
+        "text": "The sun won't wait for you.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_home 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_home 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_home",
+        "npc_name": "Old Elspeth",
+        "text": "Whistle for your cob and ride home.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_home 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_supper",
+        "npc_name": "Old Elspeth",
+        "text": "Sit. Eat. ...Hush a moment.\n\nDo you see the ravens? On the wall. I can hear them, but I want you to look.",
+        "buttons": [
+          {
+            "name": "Why?",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth supper 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_supper2",
+        "npc_name": "Old Elspeth",
+        "text": "I've seen this before. Long ago. They gather before something comes for a hall. Shut your gate. Put your men on the wall. Don't go out to meet it.",
+        "buttons": [
+          {
+            "name": "I'll go to the wall.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth supper2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_defend",
+        "npc_name": "Old Elspeth",
+        "text": "Go. Your men need you on the wall, not at my fire.",
+        "buttons": [
+          {
+            "name": "Going.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth defend 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_raid_won",
+        "npc_name": "Old Elspeth",
+        "text": "You're still breathing. Good. So am I, which surprises nobody anymore.",
+        "buttons": [
+          {
+            "name": "What were those things?",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth raid_won 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_raid_won2",
+        "npc_name": "Old Elspeth",
+        "text": "Not men. And not anything I'll name at my own hearth. But there's a woman in Millbrook, Sister Wren. She keeps the old books. If anyone can tell you what came over your wall, it's her.\n\nTake your cob. Stay on the road.",
+        "buttons": [
+          {
+            "name": "I'll ride to Millbrook.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth raid_won2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_raid_lost",
+        "npc_name": "Old Elspeth",
+        "text": "They pulled your banner down. Banners go back up. Raise it again on the Plot Stone, then go and find Sister Wren in Millbrook. She'll want to hear this more than I do.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth raid_lost 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_rebanner_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Banners go back up. The stone's waiting.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rebanner_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth rebanner_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_rebanner",
+        "npc_name": "Old Elspeth",
+        "text": "The stone outside wants a hand on it.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_rebanner 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_rebanner 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_rebanner",
+        "npc_name": "Old Elspeth",
+        "text": "The grey stone by your gate. Touch it and raise your banner again.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_rebanner 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_wren_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Millbrook. Sister Wren. Go on, before the road gets any longer.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth wren_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth wren_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_wren",
+        "npc_name": "Old Elspeth",
+        "text": "Millbrook's down the road, where it's always night.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_wren 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_wren 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_wren",
+        "npc_name": "Old Elspeth",
+        "text": "Follow the pin. Look for the light over the chapel.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_wren 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_home_again",
+        "npc_name": "Old Elspeth",
+        "text": "You've been a long way. Sit by the fire tonight.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth home_again 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_ember_wait",
+        "npc_name": "Old Elspeth",
+        "text": "Something came down by your gate. I heard it. Go and look.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ember_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ember_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_ember",
+        "npc_name": "Old Elspeth",
+        "text": "It came down near the gate.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ember 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_ember 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_ember",
+        "npc_name": "Old Elspeth",
+        "text": "Look for the glow just outside your gate.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_ember 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_ember",
+        "npc_name": "Old Elspeth",
+        "text": "Put it in my hands. ...Warm. Still warm.\n\nI held one like it once.",
+        "buttons": [
+          {
+            "name": "When?",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ember 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_ember2",
+        "npc_name": "Old Elspeth",
+        "text": "Longer ago than I'll tell you tonight. Nobody stumbles on one of these. It was sent to you, on purpose.\n\nKeep it close and keep it covered. The ash says a rider comes at first light, one of the King's knights, Sir Aldous. Hear him out. Remember what your Sister told you: give him nothing you haven't read.",
+        "buttons": [
+          {
+            "name": "I'll keep it close.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth ember2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_sleep",
+        "npc_name": "Old Elspeth",
+        "text": "Sleep. He'll be at your gate at first light.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth sleep 0"
+            ]
+          },
+          {
+            "name": "Good night.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth sleep 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_sleep",
+        "npc_name": "Old Elspeth",
+        "text": "Morning comes sooner in a bed.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_sleep 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_sleep 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_sleep",
+        "npc_name": "Old Elspeth",
+        "text": "Sleep in your bed, in your house. He comes in the morning.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_sleep 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_aldous_wait",
+        "npc_name": "Old Elspeth",
+        "text": "He's at your keep. Hear him out. Give him nothing you haven't read.",
+        "buttons": [
+          {
+            "name": "I'm stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth aldous_wait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth aldous_wait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck_aldous",
+        "npc_name": "Old Elspeth",
+        "text": "Knights don't come in. They wait by the banner.",
+        "buttons": [
+          {
+            "name": "Still stuck.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_aldous 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck_aldous 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_stuck2_aldous",
+        "npc_name": "Old Elspeth",
+        "text": "Sir Aldous stands by your Keep Banner. Follow the pin.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth stuck2_aldous 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_hub",
+        "npc_name": "Old Elspeth",
+        "text": "Still here. I usually am.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_hub__1",
+        "npc_name": "Old Elspeth",
+        "text": "Sit, if you're staying. The fire likes company.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_hub__2",
+        "npc_name": "Old Elspeth",
+        "text": "You smell of the road. Sit.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth hub 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elspeth_hub__3",
+        "npc_name": "Old Elspeth",
+        "text": "The ash is quiet tonight. That's not always good news.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say elspeth hub 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_wren_boy",
         "npc_name": "Sister Wren",
         "text": "They're saying in the square that the knocking has stopped. The first third night in three hundred years that nobody had to count.\n\nDo you still have the journal? Turn to the lambing entry. \"He is nine, grey-eyed, quick with his right hand and quicker to laugh.\"\n\nEverybody is going to remember the thing you fought down there. Somebody ought to remember that one as well. I'll do it, if you like. I'm good with the ones nobody else sits up for.",
@@ -18,10 +1055,10 @@
       {
         "scene_tag": "siege_lore_wren_first",
         "npc_name": "Sister Wren",
-        "text": "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? You have that look. Like someone who has started counting to three.",
+        "text": "Mind the step. It's been dark here since before I was born. You're from one of the new holds, and you've just had your first third night. I can see it on you.\n\nI'm Sister Wren. I patch people up.",
         "buttons": [
           {
-            "name": "Counting to three?",
+            "name": "Who attacked us?",
             "commands": [
               "/scriptevent siege:lore_say wren first 0"
             ]
@@ -42,6 +1079,38 @@
             "name": "I should go.",
             "commands": [
               "/scriptevent siege:lore_say wren first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_early",
+        "npc_name": "Sister Wren",
+        "text": "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? Come back if you ever need patching.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say wren early 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_lead",
+        "npc_name": "Sister Wren",
+        "text": "Go home. Whatever stood on your land before you, someone wrote it down. Find what they wrote.\n\nAnd if the knights come asking, and they will, don't give them anything you haven't read first.",
+        "buttons": [
+          {
+            "name": "I'll go home.",
+            "commands": [
+              "/scriptevent siege:lore_say wren lead 0"
+            ]
+          },
+          {
+            "name": "Tell me about Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say wren lead 1"
             ]
           }
         ]
@@ -93,7 +1162,7 @@
       {
         "scene_tag": "siege_lore_wren_three",
         "npc_name": "Sister Wren",
-        "text": "Every third night they come for your walls. You've noticed. Everyone with walls notices.\n\nNobody here will tell you why, because nobody here knows. The knights know. Ask a knight and watch his face go smooth as a plate.",
+        "text": "Nobody here knows. Every third night they come for whoever's walls are brightest. You've noticed. Everyone with walls notices.\n\nThe knights know why. Ask a knight and watch his face go smooth as a plate.",
         "buttons": [
           {
             "name": "Where are the knights?",
@@ -184,15 +1253,21 @@
         "text": "Don't tell me what you saw. I can see it on you. It wasn't anywhere, was it? Nowhere on any map of ours. I can smell the water on you.\n\nI don't have a name for it. I think the knights do, and I think they've spent three hundred years making sure nobody else does.\n\nAll I know is that it let go of you. It didn't let go of Tobin. Stay away from the well tonight.",
         "buttons": [
           {
-            "name": "Tell me about Tobin.",
+            "name": "What do I do now?",
             "commands": [
               "/scriptevent siege:lore_say wren slipwhere 0"
             ]
           },
           {
-            "name": "I need some air.",
+            "name": "Tell me about Tobin.",
             "commands": [
               "/scriptevent siege:lore_say wren slipwhere 1"
+            ]
+          },
+          {
+            "name": "I need some air.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipwhere 2"
             ]
           }
         ]
@@ -203,15 +1278,21 @@
         "text": "You are not fine. Your sleeves are dripping and you're holding that cup in your left hand. You came in here right-handed.\n\n...There. It's passing. You've switched back. Saints, I hoped I'd never watch that happen twice.\n\nIt let go of you. It didn't let go of my brother. I'd like to know why, and so should you.",
         "buttons": [
           {
-            "name": "Tell me about Tobin.",
+            "name": "What do I do now?",
             "commands": [
               "/scriptevent siege:lore_say wren slipfine 0"
             ]
           },
           {
-            "name": "I need some air.",
+            "name": "Tell me about Tobin.",
             "commands": [
               "/scriptevent siege:lore_say wren slipfine 1"
+            ]
+          },
+          {
+            "name": "I need some air.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipfine 2"
             ]
           }
         ]
@@ -3236,7 +4317,7 @@
       {
         "scene_tag": "siege_lore_isolde_fragments",
         "npc_name": "Warden Isolde",
-        "text": "My father was warden before me. He used to say a careful man scatters things where he can find them again.\n\nA brow under the old cistern. A jaw in the east tower. An eye where the caravans water. I don't know the rest, and I don't know that, either, officially.",
+        "text": "My father was warden before me. He used to say the statues remember better than people do. Every one of them has a line cut under it, about when it was carved: the boy, the crowning, the war, and on to an old man.\n\nPut his life in order and turn them that way, youngest first. That's the whole secret. I don't know that, either, officially.",
         "buttons": [
           {
             "name": "Back.",
@@ -3262,7 +4343,7 @@
       {
         "scene_tag": "siege_lore_isolde_riddle",
         "npc_name": "Warden Isolde",
-        "text": "There's a heraldry riddle on the vault door under the fortress. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's instructions.",
+        "text": "There's a heraldry riddle on the vault door out in the dunes. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's him. The king on all those statues, before they took his face off.",
         "buttons": [
           {
             "name": "Back.",

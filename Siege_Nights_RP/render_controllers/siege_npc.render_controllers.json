@@ -92,7 +92,8 @@
             "Texture.envoy_salt",
             "Texture.envoy_lamp",
             "Texture.envoy_root",
-            "Texture.envoy_tide"
+            "Texture.envoy_tide",
+            "Texture.lore_elspeth"
           ]
         }
       },
