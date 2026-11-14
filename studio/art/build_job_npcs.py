@@ -96,8 +96,24 @@ JOBS = [
   [(2, 9, W), (3, 9, W), (4, 9, W), (2, 10, W), (3, 10, K), (4, 10, W), (2, 11, W), (3, 11, W), (4, 11, W), (5, 8, Bz), (5, 9, Bz), (5, 10, Bz)],
   dict(hat_rows=2)),  # Guild Factor: burgundy coat, ledger and quill
 ]
+# Regional looks (Mateo 2026-11-14): the Moneyer and the Farmer are met in every region, so each dresses for it and
+# keeps the signature (the Moneyer's dark purple robe, gold chain, trim and coins and grey beard; the Farmer's straw hat and wheat ear).
+# job_<id>__<region>.png; the Vale wears the plain skin. Order = build_economy.py JOB_SKINS after the base jobs.
+REGION_DRESS = {   # region -> (shirt, robe, legs, hat override or None)
+    'frostmarch': ((176, 186, 200), (70, 84, 104), (46, 42, 40), ((214, 210, 202), 'fur')),     # wool and white fleece
+    'saltreach': ((226, 220, 200), (42, 78, 106), (58, 62, 74), None),                         # linen, sea-blue
+    'emberwaste': ((224, 200, 144), (168, 72, 42), (106, 74, 58), ((224, 200, 144), 'cloth')),  # sand, rust, headcloth
+    'blackfen': ((96, 96, 66), (58, 58, 42), (36, 34, 30), ((58, 58, 42), 'cloth')),            # oilskin
+}
+REGIONAL_JOBS = ['moneyer', 'farmer']
 ims = []
 for (name, skin, shirt, robe, legs, hat, hair, trim, emb, kw) in JOBS: ims.append(npc(name, skin, shirt, robe, legs, hat, hair, trim, emb, **kw))
-sh = Image.new('RGBA', (4 * 264 + 8, 3 * 264 + 8), (38, 34, 46, 255))
+for job in REGIONAL_JOBS:
+    (name, skin, shirt, robe, legs, hat, hair, trim, emb, kw) = next(j for j in JOBS if j[0] == job)
+    for region, (sh_, ro, le, ha) in REGION_DRESS.items():
+        if job == 'farmer': ha = None   # the straw hat is the Farmer
+        if job == 'moneyer': ro = robe   # the dark purple robe with its gold trim is the Moneyer
+        ims.append(npc(f'{name}__{region}', skin, sh_, ro, le, ha or hat, hair, trim, emb, **kw))
+sh = Image.new('RGBA', (4 * 264 + 8, ((len(ims) + 3) // 4) * 264 + 8), (38, 34, 46, 255))
 for i, im in enumerate(ims): sh.alpha_composite(im.resize((256, 256), Image.NEAREST), (8 + (i % 4) * 264, 8 + (i // 4) * 264))
 sh.save(ROOT + 'art/job-npcs.png'); print('ok')

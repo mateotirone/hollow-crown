@@ -20,7 +20,7 @@ import { regionAt } from "../minimap/data.js";
 import { activeFights } from "../bestiary/bossCore.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { INSTALLED_MUSIC } from "./installed.js";
-import { MUSIC, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, between } from "./data.js";
+import { MUSIC, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, between, keepLoop } from "./data.js";
 import "./tests.js";
 
 const SECOND = 20;
@@ -37,8 +37,14 @@ function stop(player, s) {
   s.track = undefined;
 }
 
+// Every piece, not just the one the script thinks is playing: after a script reload, a rejoin or a dimension change
+// that did not cut the sound, an old piece can still be running, and starting another on top of it doubles the music.
+function stopAll(player) {
+  for (const id of Object.keys(INSTALLED_MUSIC)) { try { player.runCommand(`stopsound @s ${id}`); } catch {} }
+}
+
 function play(player, s, track, mode) {
-  stop(player, s);
+  stopAll(player);
   sfx(player, soundId(track));
   Object.assign(s, { track, mode, last: track, until: system.currentTick + Math.max(1, lengthOf(track)) * SECOND });
 }
@@ -70,10 +76,15 @@ function listen(player) {
   const where = situation(player);
   const must = overrideFor(where);
   if (must && INSTALLED_MUSIC[soundId(must)]) {
+    s.mustAt = now;
     if (s.track !== must || s.mode !== "loop" || now >= s.until) play(player, s, must, "loop"); // start, or go round again
     return;
   }
-  if (s.mode === "loop") { stop(player, s); return quiet(s, MUSIC.afterFight); }
+  if (s.mode === "loop") {
+    // a fight that drops you for a moment (you stepped out of its ring, a teleport) keeps its music: no restart from the top
+    if (keepLoop(now - (s.mustAt ?? 0), MUSIC.overrideGrace * SECOND)) { if (now >= s.until) play(player, s, s.track, "loop"); return; }
+    stop(player, s); return quiet(s, MUSIC.afterFight);
+  }
   // walked into another region (or the Hollow): once you have stayed a few seconds, its music takes over
   const key = poolKey(where);
   if (s.key === undefined) s.key = key;
@@ -107,6 +118,7 @@ onTick("music", MUSIC.checkTicks, () => {
 world.afterEvents.playerDimensionChange.subscribe(({ player }) => {
   const s = listeners.get(player.id);
   if (!s) return;
+  stopAll(player);
   s.track = undefined;
   s.key = undefined;
   quiet(s, MUSIC.afterDimension);

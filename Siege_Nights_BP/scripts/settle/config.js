@@ -186,7 +186,8 @@ export const STAGES = [
     given: ["library", "founder's house", "house", "storehouse", "mason_yard", "town hall", "railway halt"],
     build: [
       { id: "barracks", name: "Barracks", step: "act1:barracks", from: "Old Elspeth" },
-      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "the Moneyer, after your first upkeep bill" },
+      { id: "ironworks", name: "Ironworks", step: "act2:ironworks", from: "the Moneyer, after your first upkeep bill",
+        counted: "newplayer/act2.js (the charterStory filter counts it from its Works machine)" },
     ] },
   { tier: 1, name: "Town", homes: 3,
     build: [
@@ -230,11 +231,12 @@ export const WORK = ["market", "smithy", "stable", "storehouse", "storehouse_1",
 // What a settlement must have standing before it can grow past each tier (index = the tier it is at now), made
 // from STAGES: the homes, then every building of the stage. Siege wins still decide the tier; a charter that isn't
 // met holds the town at its tier until it is. A line whose building is still waiting for a plot (pending), or isn't
-// in the game, or that this settlement can't build (region, or an old layout with no plot for it) is skipped.
+// in the game, or that this settlement can't build (region, or an old layout with no plot for it) is skipped. A
+// building counted elsewhere (counted: the Ironworks, by the story's charterStory filter) has no line here.
 //   what: the words shown. ids: what counts. count: how many (default 1). region: only there.
 export const CHARTERS = STAGES.map((s) => [
   ...(s.homes ? [{ what: "homes", ids: HOMES, count: s.homes }] : []),
-  ...s.build.filter((b) => !b.pending).map((b) => ({ what: b.name, ids: [b.id], ...(b.region ? { region: b.region } : {}) })),
+  ...s.build.filter((b) => !b.pending && !b.counted).map((b) => ({ what: b.name, ids: [b.id], ...(b.region ? { region: b.region } : {}) })),
 ]);
 
 // ---------- Buildings you build yourself, beds and settlers (census.js, settlers.js) ----------

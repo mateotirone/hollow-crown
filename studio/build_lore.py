@@ -60,44 +60,44 @@ for name, (label, icon, cat) in ITEMS.items():
     })
 
 # ---------------------------------------------------------------- blocks
-FILL = list(range(7))
+FILL = list(range(7))  # the old flat shelf fronts (siege_shelf_front_0..6), kept for the art and old worlds' icons
 ROT = {"north": 0, "west": 90, "south": 180, "east": -90}
+# The Archive Shelf is a 3D bookcase two blocks high (siege:half lower/upper), six book slots in each half (studio/art/build_archive_shelf.py writes its geometry and
+# texture): each slot's books show while siege:slot_<n> is true (lore/library.js sets them).
+SLOTS = range(6)
 shelf_perms = [
     {"condition": f"q.block_state('minecraft:cardinal_direction') == '{d}'",
      "components": {"minecraft:transformation": {"rotation": [0, r, 0]}}} for d, r in ROT.items()
-] + [
-    {"condition": f"q.block_state('siege:fill') == {n}",
-     "components": {"minecraft:material_instances": {
-         "*": {"texture": "siege_shelf_side", "render_method": "opaque"},
-         "up": {"texture": "siege_shelf_top", "render_method": "opaque"},
-         "down": {"texture": "siege_shelf_top", "render_method": "opaque"},
-         "north": {"texture": f"siege_shelf_front_{n}", "render_method": "opaque"},
-     }}} for n in FILL
 ]
 write_json(os.path.join(BP, "blocks", "archive_shelf.json"), {
-    "format_version": "1.21.60",
+    "format_version": "1.21.90",
     "minecraft:block": {
         "description": {
             "identifier": "siege:archive_shelf",
             "menu_category": {"category": "items"},
-            "states": {"siege:fill": FILL},
+            "states": {**{f"siege:slot_{n}": [False, True] for n in SLOTS}, "siege:half": ["lower", "upper"]},
             "traits": {"minecraft:placement_direction": {"enabled_states": ["minecraft:cardinal_direction"], "y_rotation_offset": 180}},
         },
         "components": {
             "minecraft:display_name": "tile.siege:archive_shelf.name",
-            "minecraft:geometry": "minecraft:geometry.full_block",
-            "minecraft:material_instances": {
-                "*": {"texture": "siege_shelf_side", "render_method": "opaque"},
-                "up": {"texture": "siege_shelf_top", "render_method": "opaque"},
-                "down": {"texture": "siege_shelf_top", "render_method": "opaque"},
-                "north": {"texture": "siege_shelf_front_0", "render_method": "opaque"},
-            },
+            "minecraft:geometry": {"identifier": "geometry.siege_archive_shelf",
+                                   "bone_visibility": {f"book_{n}": f"q.block_state('siege:slot_{n}')" for n in SLOTS}},
+            "minecraft:material_instances": {"*": {"texture": "siege_archive_shelf", "render_method": "opaque"}},
             "minecraft:destructible_by_mining": {"seconds_to_destroy": 2},
             "minecraft:destructible_by_explosion": {"explosion_resistance": 3},
             "minecraft:flammable": {"catch_chance_modifier": 5, "destroy_chance_modifier": 20},
             "minecraft:map_color": "#7a5a34",
+            "siege:clickable": {},
+            "minecraft:collision_box": True,
+            "minecraft:selection_box": True,
+            "minecraft:light_dampening": 15,
         },
-        "permutations": shelf_perms,
+        "permutations": shelf_perms + [
+            # the bookcase is two blocks high, like a door: the upper half has the cornice
+            {"condition": "q.block_state('siege:half') == 'upper'",
+             "components": {"minecraft:geometry": {"identifier": "geometry.siege_archive_shelf_upper",
+                                                   "bone_visibility": {f"book_{n}": f"q.block_state('siege:slot_{n}')" for n in SLOTS}}}},
+        ],
     },
 })
 write_json(os.path.join(BP, "blocks", "tome_cache.json"), {
@@ -149,7 +149,7 @@ write_json(os.path.join(BP, "recipes", "archive_shelf.json"), {
 # ---------------------------------------------------------------- shared files
 def terrain(data):
     t = data["texture_data"]
-    for name in ["siege_shelf_side", "siege_shelf_top"] + [f"siege_shelf_front_{n}" for n in FILL] + ["hc_tome_cache"]:
+    for name in ["siege_shelf_side", "siege_shelf_top", "siege_archive_shelf"] + [f"siege_shelf_front_{n}" for n in FILL] + ["hc_tome_cache"]:
         t[name] = {"textures": f"textures/blocks/{name}"}
 patch_json(os.path.join(RP, "textures", "terrain_texture.json"), terrain)
 def item_tex(data):

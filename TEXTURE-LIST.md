@@ -247,6 +247,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 |---|---|---|
 | Archive Shelf casing (sides, top and bottom) | `textures/blocks/siege_shelf_side.png`, `siege_shelf_top.png` | **Final style, awaiting your review** |
 | Archive Shelf front ×7 (empty, then 1 to 6 tomes: two rows of three slots, one book spine per shelved tome) | `textures/blocks/siege_shelf_front_0.png` to `siege_shelf_front_6.png` | **Final style, awaiting your review**. Could later get a regional variant per build style |
+| Archive Shelf 3D bookcase atlas (two-block oak case with cornice, dark back, six cloth book spines, page edges; model `models/blocks/archive_shelf.geo.json`, lower and upper halves) | `textures/blocks/siege_archive_shelf.png` | **New 2026-11-14, awaiting your review** (`studio/art/build_archive_shelf.py`). Replaces the flat fronts in game |
 | Dusty Tome (a closed book lying in the world; 32×16 box-UV for a 10×3×8 book, shape in `models/blocks/tome_cache.geo.json`) | `textures/blocks/hc_tome_cache.png` | **Final style, awaiting your review** |
 | Gravestone (weathered headstone with a carved cross, moss at the foot; 32×16, left half the front face, right half plain stone; shape in `models/blocks/gravestone.geo.json`) | `textures/blocks/graves/gravestone.png` | **First pass, awaiting your review** (`studio/art/build_gravestone.py`) |
 | Lore Tome item (old leather book, gilt bands) | `textures/items/siege_lore_tome.png` | **Final style, awaiting your review**. Nice to have later: one cover per collection (8) |
@@ -621,8 +622,18 @@ from the models by the script: rerun it whenever a model changes (it rewrites th
 | Asset | File | Status |
 |---|---|---|
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
+| Sorcerer effect objects (six 128×128 two-tone glass textures: Ember shard, Ward plates, Bind chains, Choir bell, Veilstep rift, Blink afterimage; model `models/entity/siege_arc_fx.geo.json`) | `textures/entity/siege_arc_<form>.png` | **New 2026-11-14**, drawn in code by `tools/build_sorcerer_fx.py`, untested in game |
+| Marked layer (64×64 skin overlay, five stages: palm mark, veins to the wrist, elbow, past the elbow, full with lit eyes; glows) | `textures/entity/hc_marked/stage_0-4.png` | **New 2026-11-14**, from the Marked Layer page Mateo approved (`art/marked_layer/`), untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
+
+## Knight technique effects (2026-11-14, `tools/build_knight_fx.py`)
+| Asset | File | Status |
+|---|---|---|
+| Knight particle sheet (80×16, five white 16×16 sprites tinted in code: pennant, dust, crack, spark, ring) | `textures/particle/hc_knight.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Banner of the Keep, 10-block war banner (128×192: cloth with the Oath mark and gold fringe, dark oak pole, iron, brass), one per settlement colour x16; model `models/entity/siege_knight_fx.geo.json` | `textures/entity/siege_knight_banner_<colour>.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Crownbreaker's ghostly greatsword (64×64, ghost steel, bright edge, gold guard) | `textures/entity/siege_knight_sword.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Fourteen technique particles `siege:kn_grit`, `kn_settle`, `kn_parry`, `kn_rise`, `kn_glow`, `kn_ring`, `kn_reach`, `kn_dust`, `kn_cracks`, `kn_haze`, `kn_mark`, `kn_shell`, `kn_hooves`, `kn_pennant` (gold, ember, grit) | `particles/kn_*.particle.json` | Written, untested in game |
 
 ## Everwake Wings (thread "Everwake", generator `studio/wings/`, installed by `tools/build_everwake_wings.py`)
 

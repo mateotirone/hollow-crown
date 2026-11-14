@@ -45,4 +45,13 @@ export const NPC_SKINS = [
   "envoy_bell", "envoy_salt", "envoy_lamp", "envoy_root", "envoy_tide",
   // Act 1's guide at every hall's hearth (newplayer/act1.js)
   "lore_elspeth",
+  // regional looks (Mateo 2026-11-14: story NPCs met in every region dress for it, signature kept): <key>__<region>;
+  // the Vale wears the plain key. core/npc_skins.js regionalKey picks them by where the NPC stands.
+  "lore_elspeth__frostmarch", "lore_elspeth__saltreach", "lore_elspeth__emberwaste", "lore_elspeth__blackfen",
+  "mason__frostmarch", "mason__saltreach", "mason__emberwaste", "mason__blackfen",
+  // a Rival Lord's herald at your gate (Act 2), in his lord's region colours: herald_<region>
+  "herald_vale", "herald_frostmarch", "herald_saltreach", "herald_emberwaste", "herald_blackfen",
+  // the family at the gate (Act 2, newplayer/family.js): Tobin and Marta, dressed for the region they fled from
+  "lore_tobin", "lore_tobin__frostmarch", "lore_tobin__saltreach", "lore_tobin__emberwaste", "lore_tobin__blackfen",
+  "lore_marta", "lore_marta__frostmarch", "lore_marta__saltreach", "lore_marta__emberwaste", "lore_marta__blackfen",
 ];

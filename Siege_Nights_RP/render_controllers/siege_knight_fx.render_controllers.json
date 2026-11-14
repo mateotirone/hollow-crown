@@ -1,0 +1,51 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.siege_knight_fx": {
+   "arrays": {
+    "geometries": {
+     "Array.geo": [
+      "Geometry.banner",
+      "Geometry.sword"
+     ]
+    },
+    "materials": {
+     "Array.mat": [
+      "Material.banner",
+      "Material.sword"
+     ]
+    },
+    "textures": {
+     "Array.tex": [
+      "Texture.banner_white",
+      "Texture.banner_orange",
+      "Texture.banner_magenta",
+      "Texture.banner_light_blue",
+      "Texture.banner_yellow",
+      "Texture.banner_lime",
+      "Texture.banner_pink",
+      "Texture.banner_gray",
+      "Texture.banner_light_gray",
+      "Texture.banner_cyan",
+      "Texture.banner_purple",
+      "Texture.banner_blue",
+      "Texture.banner_brown",
+      "Texture.banner_green",
+      "Texture.banner_red",
+      "Texture.banner_black",
+      "Texture.sword"
+     ]
+    }
+   },
+   "geometry": "Array.geo[query.property('siege:form')]",
+   "materials": [
+    {
+     "*": "Array.mat[query.property('siege:form')]"
+    }
+   ],
+   "textures": [
+    "Array.tex[query.property('siege:form') == 1 ? 16 : query.property('siege:color')]"
+   ]
+  }
+ }
+}
