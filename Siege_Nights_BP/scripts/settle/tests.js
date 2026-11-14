@@ -468,6 +468,14 @@ addTests("settle towns", {
       }
     }
   },
+  "every layout has the starter village's cow pen at Hamlet (Mateo 2026-11-14)": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const pens = fixturesOf(layout, 0).filter((f) => f.kind === "cow_pen");
+        assert(pens.length === 1, `${key} ${layout.label}: ${pens.length} cow pens`);
+      }
+    }
+  },
   "slots open by tier, have a door side and stand inside the Castle wall": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
       for (const layout of town.variants) {

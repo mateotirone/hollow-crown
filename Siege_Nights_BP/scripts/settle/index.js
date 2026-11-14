@@ -58,7 +58,7 @@ export { repairWall, offerRepair } from "./repair.js";
 export { setWallet } from "./wallet.js";
 export { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 export { layOut } from "./arrival.js";
-export { townOf, townSlots, growTown, foundTown, settlementTier, PLOT_MARKER, charterOf, builtCounts } from "./founding.js";
+export { townOf, cowPenOf, founderFurnaceOf, townSlots, growTown, foundTown, settlementTier, PLOT_MARKER, charterOf, builtCounts } from "./founding.js";
 export { plotFit, charterCheck, slotClass } from "./charters.js";
 export { plotRegistry, plotAtBlock, runScan } from "./register.js";
 export { settlersOf, freeBeds } from "./settlers.js";

@@ -47,6 +47,13 @@ const PER_TICK = 400; // blocks set per tick while laying out (the watchdog rule
 const store = moduleStore("siege:settle_towns", () => ({ towns: {}, markers: {} }));
 const save = () => store.save();
 export const townOf = (owner) => store.data.towns[owner];
+// Marks the story can point at (minimap pins): the starter village's cow pen centre { x, y, z }, and the founder's
+// furnace (basebuilds.js placeOwnerFurnace) { x, y, z }; undefined until laid
+export const cowPenOf = (owner) => townOf(owner)?.cowPen;
+export const founderFurnaceOf = (owner) => {
+  const f = Object.values(townOf(owner)?.slots ?? {}).find((s) => s.founderHome)?.ownerFurnace;
+  return f && typeof f === "object" ? f : undefined;
+};
 export const allTowns = () => store.data.towns;
 export const markerAt = (loc) => store.data.markers[`${loc.x},${loc.y},${loc.z}`];
 export function registerMarker(at, owner, slot) { store.data.markers[keyOf(at)] = { owner, slot }; save(); }
@@ -498,6 +505,14 @@ function placeFixture(owner, town, f) {
   } else if (f.kind === "hall_cornerstone") {
     if (town.lord) town.hallSeat = { x, y, z, ...hallFacing(town, { x, z }) }; // the lord raises it (rivals/index.js)
     else foundHall(owner, town, { x, y, z });
+  } else if (f.kind === "cow_pen") {
+    // the starter village's cow pen (Mateo 2026-11-14): two cows from day one, never refilled; breed them with wheat
+    town.cowPen = { x, y, z };
+    if (!town.cowsStocked && !town.lord) {
+      for (const dx of [-1, 1]) dim.spawnEntity("minecraft:cow", { x: x + dx + 0.5, y, z: z + 0.5 });
+      town.cowsStocked = true;
+    }
+    save();
   } else if (f.kind === "tree" || f.kind === "windmill") {
     emit("settleFixture", { owner, kind: f.kind, species: f.species, size: f.size, rotation: f.rotation ?? 0, stamp: f.stamp, at: { x, y, z }, tier: f.tier });
   }
