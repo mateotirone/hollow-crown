@@ -451,8 +451,8 @@ addTests("lore", {
     for (const c of CASES) assert(STORY_PEOPLE[c.asker], `${c.asker} (asker of ${c.id}) has no town spot`);
   },
   "every NPC the story needs has a way onto the map": () => {
-    // wren: opening/millbrook.js; carter: undertow/story.js; mag, cael, kesh, ulla, nell: landmark designs
-    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin", "elspeth"]; // elspeth: every hall's hearth, above
+    // wren: opening/millbrook.js; carter: undertow/story.js; mag, cael, kesh, ulla, nell: landmark designs; tobin, marta: newplayer/family.js (the family at the gate)
+    const elsewhere = ["wren", "carter", "mag", "cael", "kesh", "ulla", "nell", "sage", "aldous", "corvin", "elspeth", "tobin", "marta"]; // elspeth: every hall's hearth, above
     for (const n of NPCS) assert(elsewhere.includes(n.id) || STORY_PEOPLE[n.id], `${n.id} is never placed`);
   },
   "placed tomes are real and none is placed twice": () => {

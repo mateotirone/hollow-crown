@@ -34,6 +34,7 @@ export const NPCS = [
       [["act1:talk_barracks"], "barracks"],
       [["act1:barracks"], "barracks_wait"],
       [["act1:guards"], "guards_wait"],
+      [["act1:station"], "post_wait"],
       [["act1:talk_wheat"], "wheat"],
       [["act1:sell"], "sell_wait"],
       [["act1:bread"], "bread_wait"],
@@ -97,7 +98,7 @@ export const NPCS = [
       stuck2_workshop: { text: "Your Workshop stands in the Mason's Yard, beside the bench. It costs nothing. Open it.", opts: [["Thank you.", "end"]] },
       // ---- day 2
       barracks: {
-        text: "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
+        text: "There are other halls out there, and other lords who'd like yours. Nobody keeps what they can't hold.\n\nFind a Plot Marker and raise a Barracks. Then hire men who'll stand on your wall, and send the first of them up the lookout by your gate.\n\nAnd take this. A Plan Book. It lists what you can raise, and where. Every hall that grows builds what's in it.",
         opts: [["I will.", "end", ["flag:elspeth_barracks", "emit:elspethPlanBook"]], ["I'm stuck.", "stuck_barracks", ["flag:elspeth_barracks", "emit:elspethPlanBook"]]],
       },
       barracks_wait: { text: "A Barracks first. Men want a roof before they'll guard you.", opts: [["I'm stuck.", "stuck_barracks"], ["I'll go.", "end"]] },
@@ -106,6 +107,9 @@ export const NPCS = [
       guards_wait: { text: "A roof with nobody under it. Hire your men.", opts: [["I'm stuck.", "stuck_guards"], ["I'll go.", "end"]] },
       stuck_guards: { text: "An empty Barracks guards nothing.", opts: [["Still stuck.", "stuck2_guards"], ["Thank you.", "end"]] },
       stuck2_guards: { text: "Go into the Barracks and hire a guard. Forty Regals a head.", opts: [["Thank you.", "end"]] },
+      post_wait: { text: "One of them up the lookout by your gate. A man up there sees the road before you do, and the road is where trouble comes from.", opts: [["I'm stuck.", "stuck_post"], ["I'll go.", "end"]] },
+      stuck_post: { text: "Your men take orders. Give one.", opts: [["Still stuck.", "stuck2_post"], ["Thank you.", "end"]] },
+      stuck2_post: { text: "Click one of your guards, choose Station, and send him up the gate lookout.", opts: [["Thank you.", "end"]] },
       wheat: {
         text: "The field's ripe. Take sixteen sheaves to the Farmer. The first harvest of a new lord always fetches a good price.\n\nKeep the rest. Bake bread. A lord who sells all his grain eats his boots by winter.\n\nAnd mind the two cows in the pen. Feed them wheat and you'll have calves. Nobody sends you more.",
         opts: [["I will.", "end", ["flag:elspeth_wheat"]], ["I'm stuck.", "stuck_sell", ["flag:elspeth_wheat"]]],
@@ -1656,6 +1660,71 @@ export const NPCS = [
       last: {
         text: "It's gone quiet all the way down. Not the Court. All of it. The whole Hollow stopped humming for a breath, the way you do when someone leaves the room.\n\nWho was he?\n\n...No. Don't tell me yet. Tell me some other time, when I'm older. I'd like there to be something left to find out.",
         opts: [["Some other time.", "end", ["flag:carter_last", "sp:1"]]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ The family at the gate (Act 2, step 6)
+  // A cart comes up the road the morning after a siege (newplayer/family.js). The Order's riders blamed raiders for
+  // their hamlet, but the doors were barred from outside and nothing was taken. Housed in the Longhouse, they become
+  // your first settlers. Never named here: the Hollow or what walked round the houses.
+  {
+    id: "tobin", name: "Tobin", where: "Arrives with his family's cart at a player's gate the morning after a siege in Act 2, then lives in their Longhouse (newplayer/family.js).",
+    start: [
+      [["flag:family_housed"], "hub"],
+      [["flag:family_met"], "ask"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "Easy, my lord, we're no trouble. Tobin. That's Marta with the cart, and the boy's asleep on the sacks. Let him be.\n\nWe had a hamlet, three days back up the road. We haven't now.",
+        opts: [["What happened?", "what"]],
+      },
+      what: {
+        text: "The Order's riders came by after and looked it over. Raiders, they said. Wrote it in their book and rode on.\n\nBut the doors were barred from outside, and nothing was taken. Not a hen. I never heard of raiders who bar you in and leave the hens.",
+        opts: [["How did you get out?", "who"], ["Where will you go?", "ask"]],
+      },
+      who: {
+        text: "Marta heard the bar go across and woke me, and we went out the back, through the byre. Nobody else had a byre door.\n\nWe never saw who. We heard them going round the houses, slow, trying each door to see it held. Then the smoke.",
+        opts: [["Where will you go?", "ask"]],
+      },
+      ask: {
+        text: "That's the question. Nobody wants a family the raiders came for, even raiders who don't take anything.\n\nWe can work. Marta keeps bees, I can thatch, and the boy can carry. We only need a roof.",
+        opts: [["There's room in the Longhouse.", "housed", ["flag:family_met", "flag:family_housed"]], ["Let me think about it.", "end", ["flag:family_met"]]],
+      },
+      housed: {
+        text: "...Thank you, my lord. We won't forget it.\n\nMarta! Wake the boy. We're stopping.",
+        opts: [["Go on in.", "end"]],
+      },
+      hub: {
+        greets: ["My lord. The roof doesn't leak. You don't know what that's worth till you've had none.", "Marta's found a place for the bees, if your guards will stop poking at the hive.", "The boy asks every night if the doors here bar from outside. I tell him no. I check, after."],
+        text: "My lord.",
+        opts: [["Tell me again about the night it burned.", "again"], ["Good day, Tobin.", "end"]],
+      },
+      again: {
+        text: "Doors barred from outside. Nothing taken. Raiders, the Order wrote.\n\nI've told it to everyone who'll listen, my lord. You're the only one who's asked twice.",
+        opts: [["Good day, Tobin.", "end"]],
+      },
+    },
+  },
+  {
+    id: "marta", name: "Marta", where: "Tobin's wife: rides in on the family's cart in Act 2, then lives in the player's Longhouse (newplayer/family.js).",
+    start: [
+      [["flag:family_housed"], "hub"],
+      [[], "cart"],
+    ],
+    nodes: {
+      cart: {
+        text: "Talk to Tobin, my lord. He does the talking. I do the remembering.",
+        opts: [["What do you remember?", "remember"], ["Of course.", "end"]],
+      },
+      remember: {
+        text: "The bar going across. You know that sound your whole life, a bar dropping into its brackets. Only it was on the wrong side of the door.\n\nAnd it was patient. Whatever went round the houses, it was in no hurry at all.",
+        opts: [["I'll talk to Tobin.", "end"]],
+      },
+      hub: {
+        greets: ["The bees are settling. They didn't like the road.", "I sleep by the door. Don't mind me.", "Your old woman by the fire asked me what it sounded like. Nobody else asked."],
+        text: "My lord.",
+        opts: [["Rest well, Marta.", "end"]],
       },
     },
   },

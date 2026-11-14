@@ -627,6 +627,14 @@ from the models by the script: rerun it whenever a model changes (it rewrites th
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
 
+## Knight technique effects (2026-11-14, `tools/build_knight_fx.py`)
+| Asset | File | Status |
+|---|---|---|
+| Knight particle sheet (80×16, five white 16×16 sprites tinted in code: pennant, dust, crack, spark, ring) | `textures/particle/hc_knight.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Banner of the Keep, 10-block war banner (128×192: cloth with the Oath mark and gold fringe, dark oak pole, iron, brass), one per settlement colour x16; model `models/entity/siege_knight_fx.geo.json` | `textures/entity/siege_knight_banner_<colour>.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Crownbreaker's ghostly greatsword (64×64, ghost steel, bright edge, gold guard) | `textures/entity/siege_knight_sword.png` | **New 2026-11-14**, drawn in code, untested in game |
+| Fourteen technique particles `siege:kn_grit`, `kn_settle`, `kn_parry`, `kn_rise`, `kn_glow`, `kn_ring`, `kn_reach`, `kn_dust`, `kn_cracks`, `kn_haze`, `kn_mark`, `kn_shell`, `kn_hooves`, `kn_pennant` (gold, ember, grit) | `particles/kn_*.particle.json` | Written, untested in game |
+
 ## Everwake Wings (thread "Everwake", generator `studio/wings/`, installed by `tools/build_everwake_wings.py`)
 
 | Asset | File | Status |

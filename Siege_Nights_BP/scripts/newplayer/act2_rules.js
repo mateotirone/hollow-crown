@@ -26,6 +26,8 @@ export const F2 = {
   collected: "act2_iron", // you took the Ironworks' first iron
   bookThought: "act2_book_thought", // the first local book made you think "That's here. That's my land."
   bookSeen: "act2_book_seen", // you rode to the place it names and saw it for yourself
+  family: "family_met", // you heard Tobin out at the cart
+  housed: "family_housed", // you gave the family a place in the Longhouse
 };
 export const ELSPETH_TAG = "siege_lore_npc_elspeth";
 export const MONEYER_TAG = "siege_job_moneyer";
@@ -56,6 +58,12 @@ export function act2Stage(f) {
   if (!has(F2.collected)) return "collect";
   // part 3: the book's place
   if (f.book && !has(F2.bookSeen)) return f.book.read ? "book_place" : "read_book";
+  // part 4: the family at the gate. The cart comes the morning after a siege (newplayer/family.js); f.cart is
+  // "due" (waiting for that morning), "rolling" (on the road, the gate lookout has called it) or "here"
+  if (!has(F2.housed)) {
+    if (f.cart !== "rolling" && f.cart !== "here") return undefined;
+    return has(F2.family) ? "house_family" : "meet_cart";
+  }
   return undefined;
 }
 // Part 1: Aldous, the Tree, and the road you chose; "done" once that is behind you (or you said "Not yet")
@@ -72,6 +80,16 @@ function roadStage(f, has) {
 
 // Stages whose place is a story place: a light pillar stands over it
 export const PILLAR2 = new Set(["chapterhouse", "mag", "book_place"]);
+
+// The family at the gate (part 4): the gate lookout's call (Mateo's approved line), and the cart's road
+export const CART_CALL = "Cart on the road! Families, by the look.";
+export const CART_ROAD = { from: 30, to: 6, speed: 0.07 }; // blocks out from the gate it starts and stops, blocks a tick
+export const FAMILY_TAGS = { tobin: "siege_lore_npc_tobin", marta: "siege_lore_npc_marta" };
+// The morning after a siege: the cart sets off once it is day (time of day) and the lord is home
+export const CART_FROM = 1000, CART_TO = 11000;
+// Ready for the family: every earlier Act 2 step is behind this player (the cart is all that is missing)
+export const familyReady = (f) => act2Stage({ ...f, cart: "here" }) === "meet_cart";
+export const cartDue = (due, now, time) => due !== undefined && now >= due && time >= CART_FROM && time < CART_TO;
 
 // The stages where Elspeth holds the next step
 export const TALK2 = new Set(["talk_bills"]);
@@ -102,6 +120,10 @@ export function act2Step(stage, f = {}, p = {}) {
       at("Library shelf", p.shelf));
     case "book_place": return step(`Ride to ${BOOK_PLACES[f.book?.plot]?.place ?? "the place in the book"}`, `The book "${f.book?.title ?? "from your shelf"}" names a place on your land. That's here. That's your land.`,
       at(cap(BOOK_PLACES[f.book?.plot]?.place ?? "The place in the book"), p.relic));
+    case "meet_cart": return step("Meet the cart at your gate", `A shout from ${f.caller ?? "the gate lookout"}: "${CART_CALL}"`,
+      at("The cart", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
+    case "house_family": return step("Give them a place in the Longhouse", "Tobin said: we can work, we only need a roof. Tell him there's room in the Longhouse.",
+      at("Tobin", p.cart), { npc: { tag: FAMILY_TAGS.tobin, name: "Tobin" } });
     default: return undefined;
   }
 }

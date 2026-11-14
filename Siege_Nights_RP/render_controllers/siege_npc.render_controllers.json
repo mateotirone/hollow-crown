@@ -106,7 +106,17 @@
             "Texture.herald_frostmarch",
             "Texture.herald_saltreach",
             "Texture.herald_emberwaste",
-            "Texture.herald_blackfen"
+            "Texture.herald_blackfen",
+            "Texture.lore_tobin",
+            "Texture.lore_tobin__frostmarch",
+            "Texture.lore_tobin__saltreach",
+            "Texture.lore_tobin__emberwaste",
+            "Texture.lore_tobin__blackfen",
+            "Texture.lore_marta",
+            "Texture.lore_marta__frostmarch",
+            "Texture.lore_marta__saltreach",
+            "Texture.lore_marta__emberwaste",
+            "Texture.lore_marta__blackfen"
           ]
         }
       },

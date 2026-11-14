@@ -40,7 +40,7 @@ import { STYLES } from "../townhall/styles.js";
 import { sfx } from "../core/sfx.js";
 import { standY } from "./ground.js";
 import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, upAbove, WALK } from "./walk.js";
-import { POSTS, wallPosts, buildingPosts, frontOf, numberPosts, skyCamera, yawOf, wallStand, compassOf } from "./posts.js";
+import { POSTS, wallPosts, buildingPosts, frontOf, numberPosts, skyCamera, yawOf, wallStand, compassOf, GATE_POST } from "./posts.js";
 
 const OVERWORLD = "minecraft:overworld";
 const STATION = "siege:station"; // dynamic property on a stationed guard: its post key
@@ -189,6 +189,7 @@ const period = () => `${world.getDay()}:${isNight() ? 1 : 0}`;
 export function onDuty(guard, owner) {
   if (underAttack(owner)) return true; // a siege or a Wanted player on your land: everyone to their post
   try { if (guard.getDynamicProperty("siege:hold") === period()) return true; } catch { /* fine */ } // just stationed: holds until the watch changes
+  if (stationOf(guard) === GATE_POST) return true; // the gate lookout is kept by day too: he calls out who comes up the road
   if (POSTS.watch === "always") return true;
   if (POSTS.watch === "shifts") {
     let h = 0;
@@ -437,8 +438,39 @@ export function openPosts(player, owner, guard) {
   system.runTimeout(() => mainForm(player, owner, guard), 30);
 }
 
+// The story can narrow the posts on offer to one (Act 1's guard step: only the gate lookout):
+//   addFilter("guardPostsOnly", (key, { player, owner }) => key ?? "<post key>")
+export const gateManned = (owner) => !!mannedOf(owner)[GATE_POST];
+export const gatePostAt = (owner) => { try { const p = allPosts(sitesFor(owner)).find((x) => x.key === GATE_POST); return p ? { x: p.x, z: p.z } : undefined; } catch { return undefined; } };
+// The guard up the gate lookout (Act 2: he calls out the cart and the herald), or undefined
+export const gateGuard = (owner) => { const id = mannedOf(owner)[GATE_POST]; const g = id ? entityById(id) : undefined; return g?.isValid ? { entity: g, name: nameOf(g) } : undefined; };
+export const hasGatePost = (owner) => { try { return allPosts(sitesFor(owner)).some((p) => p.key === GATE_POST); } catch { return false; } };
+
+function onlyForm(player, owner, guard, key) {
+  const post = allPosts(sitesFor(owner)).find((p) => p.key === key);
+  if (!post) return false;
+  const view = viewing.get(player.id);
+  view.focus = undefined;
+  view.highlight = key;
+  lookDown(player, owner);
+  const who = mannedOf(owner)[key];
+  new ActionFormData().title(guard ? `Station ${nameOf(guard)}` : "Guard posts")
+    .body(`Your settlement from above. The §6gold§r ring is post ${post.n}: the ${post.label.toLowerCase()}, by the gate. A man up there sees the road before anyone.`)
+    .button(`${post.n}. ${post.label}\n${who ? `§2manned: ${guardLabel(who)}` : "§4empty"}`, who ? "textures/ui/hc/post_manned" : "textures/ui/hc/post_empty")
+    .button("Done")
+    .show(player).then((r) => {
+      if (r.canceled || r.selection !== 0) return endView(player);
+      if (guard) return chooseForGuard(player, owner, guard, post, post.site);
+      return choosePost(player, owner, post, post.site);
+    }).catch(() => endView(player));
+  return true;
+}
+
 function mainForm(player, owner, guard) {
   if (!viewing.has(player.id)) return;
+  let only;
+  try { only = applyFilter("guardPostsOnly", undefined, { player, owner }); } catch { /* fine */ }
+  if (only && onlyForm(player, owner, guard, only)) return;
   const view = viewing.get(player.id);
   view.focus = undefined;
   view.highlight = guard ? stationOf(guard) : undefined;
@@ -551,7 +583,8 @@ addTests("guard posts", {
       const w = { x: 1000, z: 2000, radius: 46, level, gate: 1.2, ground: new Array(WALLS.stations).fill(70), shape };
       const posts = wallPosts(w);
       const watch = posts.filter((p) => p.key.startsWith("watch:"));
-      assertEqual(watch.length, level <= 6 ? 4 : 0, `level ${level} watchtower posts`);
+      assertEqual(watch.length, level <= 6 ? 5 : 0, `level ${level} watchtower posts (four corners and the gate lookout)`);
+      if (watch.length) assertEqual(posts.find((p) => p.key === GATE_POST)?.label, "Gate lookout");
       assert(posts.length >= POSTS.wallPosts + 2 && posts.length <= POSTS.wallPosts + 2 + watch.length, `level ${level}: ${posts.length} posts`);
       if (watch.length) assertEqual(posts.slice(0, 4).map((p) => p.key).join(), "watch:0,watch:1,watch:2,watch:3", "lookouts are manned first");
       for (const p of watch) { // the ladder's foot (the front step) is close enough to climb up from and to be put down at
@@ -578,7 +611,7 @@ addTests("guard posts", {
       const q = b.get(p.key);
       if (!q) continue; // a wall post beside a watchtower can be left out on one ring and not the other
       same++;
-      if (p.key.startsWith("gate:")) continue; // the gate pair stay a few blocks from the gate, so their angle changes
+      if (p.key.startsWith("gate:") || p.key === GATE_POST) continue; // the gate pair and the gate lookout stay a few blocks from the gate, so their angle changes
       assert(Math.abs(p.a - q.a) < 1e-9, "same angle");
       assertEqual(compassOf(p.a), compassOf(q.a));
     }
