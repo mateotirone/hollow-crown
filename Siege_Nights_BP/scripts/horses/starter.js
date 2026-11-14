@@ -19,7 +19,7 @@ import { applyFilter } from "../core/events.js";
 import { on, countItem, addTests, assert, assertEqual } from "../siege/api.js";
 import { mapMode, hallBuilt } from "../plots/api.js";
 import { regionAt } from "../economy/shops.js";
-import { starterRegion, STARTER_REGIONS } from "../starter/index.js";
+import { starterRegion, STARTER_REGIONS, noHallGift } from "../starter/index.js";
 import { newCob, isCob, effectiveStats, STARTER_COBS, COB, SPEED_VALUES, JUMP_VALUES, WHISTLE, rosterCap, countsToRoster, cobBack, newRecord } from "./data.js";
 import { horsesOf, newUid, deleteRecord } from "./store.js";
 import { spawnSteed, entityOf, valid } from "./steed.js";
@@ -81,7 +81,7 @@ on("joined", ({ player, first }) => {
     // no plots on this world
   }
   if (hall) return; // the welcome hall's choice gives it
-  later(player, regionAt(player.location), 20);
+  noHallGift(player, () => later(player, regionAt(player.location), 20));
 });
 
 // For the quest tracker: { name, at: { x, z }, dim } until the cob has first been ridden, else undefined
