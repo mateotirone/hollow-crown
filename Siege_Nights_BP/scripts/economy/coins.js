@@ -63,7 +63,8 @@ export function robBank(id, amount) {
 // On your own land (kept for callers that ask; the balance itself is reachable anywhere)
 export function atHome(player) {
   try {
-    return player.dimension.id === "minecraft:overworld" && !!keepOf(player.id) && settlementAt(player.location) === player.id;
+    const land = player.dimension.id === "minecraft:overworld" ? settlementAt(player.location) : undefined;
+    return !!land && !!keepOf(land) && (land === player.id || !!keepOf(land).allies?.includes(player.id)); // own land, or a writ ally's
   } catch {
     return false;
   }

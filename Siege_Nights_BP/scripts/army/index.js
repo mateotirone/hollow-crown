@@ -11,7 +11,7 @@
 
 import { world, system, EntityTypes } from "@minecraft/server";
 import { ModalFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, onTick, moduleStore, keepOf, tierOf, emit } from "../siege/api.js";
+import { isReady, onTick, moduleStore, keepOf, tierOf, emit, homeAt, homeOf } from "../siege/api.js";
 import { addFilter, applyFilter } from "../core/events.js";
 import { emptyPost, station } from "../guardposts/index.js";
 import { walkTo } from "../guardposts/walk.js";
@@ -45,8 +45,9 @@ function countOf(owner, type) {
   try { return world.getDimension(OVERWORLD).getEntities({ type, tags: [`siege_guard_of_${owner}`] }).length; } catch { return 0; }
 }
 
-async function trainMenu(player, block) {
-  const owner = player.id, level = barracksLevel(owner), tier = tierName(owner);
+// owner: the settlement the Barracks serve (a writ ally trains for it and pays from their own purse)
+async function trainMenu(player, block, owner = homeAt(player, block.location) ?? player.id) {
+  const level = barracksLevel(owner), tier = tierName(owner);
   S().barracks[owner] = { ...(S().barracks[owner] ?? {}), level, at: { ...block.location } };
   store.save();
   const free = freeSlots(owner);
@@ -104,8 +105,8 @@ export function enlistFree(owner, type) {
   return null;
 }
 
-async function upgradeMenu(player) {
-  const owner = player.id, level = barracksLevel(owner), cost = upgradeCost(level);
+async function upgradeMenu(player, owner = homeOf(player.id) ?? player.id) {
+  const level = barracksLevel(owner), cost = upgradeCost(level);
   if (cost === undefined) return say(player, "§7Your Barracks are as good as they get.");
   const res = await new MessageFormData().title("Upgrade the Barracks")
     .body(`Level ${level} to ${level + 1}: ${coins(cost)}.\n\nEvery soldier's price and retraining cost drops by ${Math.round(BARRACKS.discount * 100)}% more, and training is faster.`)
@@ -118,10 +119,10 @@ async function upgradeMenu(player) {
   emit("barracksUpgraded", { owner, level: level + 1 });
 }
 
-addFilter("barracksButtons", (buttons, { player }) => [
-  { label: `Train soldiers\n§8${guardCount(player.id)}/${guardLimit(player.id)}`, icon: "textures/items/siege_man_at_arms", run: (p, block) => trainMenu(p, block).catch((e) => console.warn(`[Hollow Crown] train: ${e}`)) },
-  { label: `Upgrade the Barracks\n§8level ${barracksLevel(player.id)}`, icon: "textures/items/iron_sword", run: (p) => upgradeMenu(p).catch(() => {}) },
-  { label: "Armoury\n§8upgrade a whole type", icon: "textures/items/iron_chestplate", run: (p) => armouryMenu(p).catch((e) => console.warn(`[Hollow Crown] armoury: ${e}`)) },
+addFilter("barracksButtons", (buttons, { player, owner = player.id }) => [
+  { label: `Train soldiers\n§8${guardCount(owner)}/${guardLimit(owner)}`, icon: "textures/items/siege_man_at_arms", run: (p, block) => trainMenu(p, block, owner).catch((e) => console.warn(`[Hollow Crown] train: ${e}`)) },
+  { label: `Upgrade the Barracks\n§8level ${barracksLevel(owner)}`, icon: "textures/items/iron_sword", run: (p) => upgradeMenu(p, owner).catch(() => {}) },
+  { label: "Armoury\n§8upgrade a whole type", icon: "textures/items/iron_chestplate", run: (p) => armouryMenu(p, owner).catch((e) => console.warn(`[Hollow Crown] armoury: ${e}`)) },
   ...buttons,
 ]);
 
@@ -180,7 +181,7 @@ onTick("army-train", 20, () => {
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player" || event.id !== "siege:army_status") return;
-  const owner = player.id, level = barracksLevel(owner);
+  const owner = homeOf(player.id) ?? player.id, level = barracksLevel(owner);
   say(player, [`§6Barracks level ${level}§7, soldiers ${guardCount(owner)}/${guardLimit(owner)}, ${queued(owner).length} in training.`,
     ...SOLDIERS.map((s) => `${s.name}: ${coins(priceOf(s, level))} (retrain ${coins(retrainOf(s, level))}), ${s.unlock}${exists(s.id) ? "" : ", not in the game yet"}`)].join("\n"));
 });
