@@ -47,6 +47,7 @@ export function inAct1(f) {
 //       your walls), ember: "none" | "fallen" | "held" (picked up or used), aldousHere,
 //       mine (found the mine shaft), ore (brought back coal and iron), smelted (has smelted iron),
 //       wall (the settlement has a wall), mended (the wall was mended or found whole after the raid),
+//       gateLookout (undefined: no gate lookout on this wall; false: nobody stationed there yet; true: manned),
 //       mode: "story" | "settlement", and in Settlement Mode grow: { tier, wins, winsNeed, warlords, warlordsNeed,
 //       build: [names still to raise for this tier's charter] } }
 export function act1Stage(f) {
@@ -68,6 +69,7 @@ export function act1Stage(f) {
     const fs = f.first ?? {};
     if (!fs.barracks && !fs.ballistas) return "barracks";
     if (fs.barracks && !fs.guards && !fs.ballistas) return "guards";
+    if (fs.guards && f.gateLookout === false) return "station"; // your first guard goes up the gate lookout (Mateo 2026-11-14)
     if (!has(F.wheat)) return "talk_wheat";
     if ((f.sold ?? 0) < WHEAT_GOAL) return "sell";
     if (!f.bread) return "bread";
@@ -113,7 +115,7 @@ export const TALK = new Set(["talk_grow_0", "talk_grow_1", "talk_grow_2", "talk_
 export const PILLAR = new Set(["wren", "find_ember"]);
 
 // The tracker's line. p = places: { hearth, stone, chest, workshop, farmer, station, keep, millbrook, ember, aldous,
-// mine (the pithead), furnace (the founder's house), mason }
+// mine (the pithead), furnace (the founder's house), mason, gateLookout }
 // each { x, z } (or undefined); names the step's person for the "!" marker.
 export function act1Step(stage, f = {}, p = {}) {
   if (!stage || stage === "rest") return undefined;
@@ -134,6 +136,8 @@ export function act1Step(stage, f = {}, p = {}) {
       const s = firstStep({ keep: true, ...(f.first ?? {}) }); // the Barracks plot, rising, its block, or the guards
       return s ? { ...s, id: `act1_${stage}`, note: undefined } : undefined;
     }
+    case "station": return step("Station a guard at the gate lookout", "Elspeth said: send the first of your men up the lookout by your gate. Click a guard, choose Station, and send him up.",
+      at("Gate lookout", p.gateLookout));
     case "talk_wheat": return talk("Talk to Old Elspeth", "Your men are hired. Ask her what's next.");
     case "sell": return step(`Sell ${WHEAT_GOAL} wheat to the Farmer`, "Elspeth said the first harvest of a new lord fetches a good price. Cut the field and take him sixteen.",
       at("Your Farmer", p.farmer), { note: f.sold ? `${f.sold} of ${WHEAT_GOAL} sold.` : "", npc: p.farmerTag ? { tag: p.farmerTag, name: "your Farmer" } : undefined });

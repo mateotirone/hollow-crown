@@ -820,6 +820,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `chime.amethyst_block` | 1 | roletrials |
 | `dig.gravel` | 1 | roletrials |
 | `elytra.loop` | 1 | roletrials |
+| `fire.ignite` | 1 | townhall |
 | `item.book.put` | 1 | lore |
 | `item.trident.throw` | 1 | codex |
 | `mob.allay.idle` | 1 | roletrials |

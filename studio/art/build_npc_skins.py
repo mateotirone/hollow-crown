@@ -152,6 +152,10 @@ LOOKS = {
     'herald_saltreach': S('#3a3e4a', '#2f8f88', '#2a2e3a', '#2a3e6a', 'tabard', 'cap', sk=0, hair=0, trim='#e2e6e8', cuffs=True),
     'herald_emberwaste': S('#4a3024', '#b0382a', '#5a3a2a', '#e0b040', 'tabard', 'cap', sk=3, hair=5, trim='#f4ecd8', cuffs=True),
     'herald_blackfen': S('#2e2a24', '#4e602a', '#24221e', '#6a4a7a', 'tabard', 'cap', sk=1, hair=4, trim='#d8b04a', cuffs=True),
+    # the family at the gate (Act 2): road-worn, soot on the hems. Tobin the thatcher (vest over a smock, a straw-
+    # coloured cap, beard); Marta the beekeeper (shawl, headscarf, long skirt)
+    'lore_tobin': S('#8a7a5a', '#5a4a34', '#4a3e30', '#c8b070', 'vest', 'cap', sk=1, hair=1, beard=True),
+    'lore_marta': S('#6a5a6a', '#a89a6a', '#3e3630', '#cdc2a6', 'shawl', 'kerchief', 'skirt', sk=1, hair=2),
 }
 
 # Regional looks (Mateo 2026-11-14): the same person dressed for each region, signature kept (Elspeth's shawl,
@@ -168,6 +172,18 @@ REGIONAL = {
         'saltreach': dict(t='#d8d0b8', h='#2a3e6a', l='#3a3e4a'),                   # linen, sea-blue cap
         'emberwaste': dict(t='#c8a060', h='#e0c890', l='#8a6a4a', sk=3),            # sand, pale cap
         'blackfen': dict(t='#4a4a2a', h='#3a3a2a', l='#2e2a24'),                    # oilskin and a dark cap
+    },
+    'lore_tobin': {
+        'frostmarch': dict(t='#4a5a6a', o='#d8d4cc', h='#8a7e70', cuffs=True),      # wool smock, fleece vest
+        'saltreach': dict(t='#d8d0b8', o='#3a5a6a', h='#2a3e6a'),                   # linen, sea-blue vest
+        'emberwaste': dict(t='#c8a060', o='#8a4a2a', h='#e0c890', sk=3),            # sand, rust vest, pale cap
+        'blackfen': dict(t='#3e3e2a', o='#2e2a24', h='#4a4a30'),                    # oilskin, reed cap
+    },
+    'lore_marta': {
+        'frostmarch': dict(t='#3e4e60', o='#d8d4cc', h='#6a7a90', cuffs=True),      # blue wool, fleece shawl
+        'saltreach': dict(t='#e2e6e8', o='#2f6f8f', h='#d8d0b8'),                   # linen, sea-blue shawl
+        'emberwaste': dict(t='#c89a6a', o='#a8482a', h='#e0c890', sk=3),            # sand, rust shawl
+        'blackfen': dict(t='#3a3a2a', o='#4e602a', h='#5a4a3a'),                    # oilskin, moss shawl
     },
 }
 for _base, _regions in REGIONAL.items():

@@ -127,6 +127,7 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //                                                                       station: your railway station (stationQuest)
 //   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
 //   act1: { on, step } while Act 1 is this player's story (newplayer/act1.js)
+//   board: the step of the Town Board job this player has taken (townhall/board.js boardQuest), if any
 //   mode: "story" | "settlement" (newplayer/mode.js)
 //   act2: { on, step } while an Act 2 step is this player's story (newplayer/act2.js): shown as the main step
 // }
@@ -151,6 +152,8 @@ export function questsFor(f) {
   // 2026-11-13: "Where's the train station?"), and the only side step then
   const side = first ? stationQuest(f) : sideQuest(f, main);
   if (side) out.push(side);
+  // a Town Board job you took: its step, always shown while you have one (outside the Hollow)
+  if (f.board && f.dim !== UNDERTOW) out.push(f.board);
   return out;
 }
 

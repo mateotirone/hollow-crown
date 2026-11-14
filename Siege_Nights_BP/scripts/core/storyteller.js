@@ -269,7 +269,7 @@ export function pick(deck, subject, { exclude = [], peek = false, rng = Math.ran
   return option;
 }
 
-// Up to `count` different options, each contrasting with the one before (a Rumor Board's three jobs)
+// Up to `count` different options, each contrasting with the one before (a Town Board's three notices)
 export function pickSeveral(deck, subject, count, opts = {}) {
   const picked = [];
   for (let i = 0; i < count; i++) {
