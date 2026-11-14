@@ -7,13 +7,14 @@ so it sees the town's own street lamps and every building's rooms, doors and yar
 towngen.write_worldblocks and bake_town.py call light_worldblocks() before they write, so a new bake comes out lit;
 running this again on a lit file adds nothing. Lanterns go in after every block they hang from (attached blocks last).
 """
-import json, os, sys
+import json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", ".claude", "skills", "minecraft-builder", "scripts"))
 import emit, lighting  # noqa: E402
 
 DOOR_DIR = {0: "e", 1: "s", 2: "w", 3: "n"}
+LAID = re.compile(r"^(sandstone|red_sandstone|gravel|andesite|tuff|calcite|blackstone|coarse_dirt)$")
 
 
 def logical(e):
@@ -21,22 +22,39 @@ def logical(e):
     n, st = lighting.bare(e["name"]), e.get("states") or {}
     p = {}
     if n.endswith("_door") and "trapdoor" not in n:
-        p["facing"] = DOOR_DIR.get(st.get("direction", 1), "s")
+        cd = st.get("minecraft:cardinal_direction")   # newer bakes spell it this way: without it every door read as facing south,
+        p["facing"] = cd[0] if cd in ("north", "south", "east", "west") else DOOR_DIR.get(st.get("direction", 1), "s")   # so an east-west door's step got a lantern
         if st.get("upper_block_bit"): p["upper"] = True
     if st.get("hanging"): p["hanging"] = True
     if n.endswith("_slab"): p["half"] = st.get("minecraft:vertical_half", "top" if st.get("top_slot_bit") else "bottom")
     return n, p
 
 
-def light_worldblocks(d, kind=None, log=None):
-    """Add the town's missing lights to worldblocks dict d in place. Returns the number of blocks added."""
+def light_worldblocks(d, kind=None, log=None, ground=None):
+    """Add the town's missing lights to worldblocks dict d in place. Returns the number of blocks added.
+    ground(x, z) -> the land's top y there (or None): the bake knows the land the town sits on, so a one-wide walk
+    beside a building (a granary's sand apron) has the grass beside it to stand a post on (town audit 2026-11-14)."""
     pal = d["palette"]
     lp = [logical(e) for e in pal]
     blocks = {}
     for x, y, z, i in d["blocks"]:
         if pal[i].get("soft") and (x, y, z) in blocks: continue          # leaves only fill air
         blocks[(x, y, z)] = lp[i]
-    added, _r = lighting.light(blocks, kind=kind, log=log)
+    laid = set()
+    if ground and blocks:
+        # the town's own ways laid of a stone the land is also made of (Sunscar's sandstone walks, gravel lanes): light them
+        for x, y, z, i in d["blocks"]:          # every block in the file is the town's (the land is not in it)
+            if LAID.search(lighting.bare(lp[i][0])): laid.add((x, y + 1, z))
+
+        cols = {}
+        for (x, y, z) in blocks: cols[(x, z)] = max(cols.get((x, z), y), y)
+        xs = [c[0] for c in cols]; zs = [c[1] for c in cols]
+        for x in range(min(xs), max(xs) + 1):
+            for z in range(min(zs), max(zs) + 1):
+                if (x, z) in cols: continue
+                g = ground(x, z)
+                if g is not None: blocks[(x, int(g), z)] = ("grass_block", {})   # the land itself: never written back
+    added, _r = lighting.light(blocks, kind=kind, log=log, laid=laid)
     if not added: return 0
     new = {c: blocks[c] for c in added}
     # fence brackets join the wall they stick out from (connections from the town's blocks round them)
