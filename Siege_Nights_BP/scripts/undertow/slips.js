@@ -22,7 +22,7 @@ import { onTick } from "../core/loop.js";
 import { on, emit, isReady, getState } from "../siege/api.js";
 import { activeFights } from "../bestiary/bossCore.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L } from "./layout.js";
-import { isBuilt } from "./builder.js";
+import { arrivalReady } from "./builder.js";
 import { runCmd, say } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
@@ -79,7 +79,7 @@ export function canSlip(player) {
 export function startSlip(playerOrId, opts = {}) {
   const player = resolvePlayer(playerOrId);
   const id = opts.id ?? "slip";
-  const why = canSlip(player) ?? (isBuilt(0, 0) && isBuilt(-1, 0) ? undefined : "the Hollow is not ready yet");
+  const why = canSlip(player) ?? (arrivalReady() ? undefined : "the Hollow is not ready yet");
   if (why) {
     emit("slipRefused", { player: player?.id, id, why });
     return false;

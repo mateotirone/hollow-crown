@@ -30,7 +30,7 @@ import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX }
 import { getSourceSite, getSites, markSite, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { CHASM, inChasm } from "./chasm.js";
-import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
+import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing, arrivalReady, arrivalProgress, arrivalAreaCmd, ARRIVAL_AREA, ARRIVAL_CHUNKS } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, ROADS, roadLines, signposts, signRot } from "./roads.js";
@@ -86,8 +86,10 @@ const progress = () => load(K_PROGRESS, { oswin: false, choir: false });
 
 on("ready", () => {
   getSourceSite(); // make the secret pick now if nobody has yet
-  // Keep the arrival area loaded so it gets built before anyone arrives.
-  runCmd(undertow(), "tickingarea add -32 60 -48 31 130 47 hc_undertow_wound true");
+  // Keep the whole arrival loaded so it is built before anyone arrives (builder.js ARRIVAL_CHUNKS). The area is
+  // taken away and added again so a world that has the old, smaller one gets the new size.
+  runCmd(undertow(), `tickingarea remove ${ARRIVAL_AREA}`);
+  runCmd(undertow(), arrivalAreaCmd());
 });
 
 // ---- going in and out ---------------------------------------------------------------------
@@ -96,12 +98,22 @@ const cooldown = new Map();
 // Where a player stepped in from (the overworld spot), so the way out can put them back there when there is no
 // Rift to come out of (a test trip by command, or a world where the Rift is not open yet).
 const FROM = "hc:undertow_from";
+// Nobody lands in half-built land (Mateo 2026-11-14, "Fix the loading issue in the hollow"): until the whole
+// arrival is built (builder.js arrivalReady), a player who steps in waits on our side, with the build's progress
+// on the action bar, and is taken across the moment it is done. The builder works on the arrival first meanwhile.
+const waiting = new Map(); // player id -> tick to give up
+const WAIT_TICKS = 20 * 90;
+export const arrivalBar = (frac) => `§5The way through is taking shape... §d${Math.min(99, Math.floor(frac * 100))}%`;
 function enter(player) {
   cooldown.set(player.id, system.currentTick + 60);
-  if (!isBuilt(0, 0) || !isBuilt(-1, -1)) {
-    say(player, "§5The Rift shudders but will not take you yet. Try again in a moment.");
+  if (!arrivalReady()) {
+    if (!waiting.has(player.id)) {
+      waiting.set(player.id, system.currentTick + WAIT_TICKS);
+      say(player, "§5The Rift shudders. The Hollow is still gathering itself on the other side. Hold still a moment.");
+    }
     return;
   }
+  waiting.delete(player.id);
   player.addEffect("slow_falling", 300, { amplifier: 0, showParticles: false });
   player.addEffect("resistance", 300, { amplifier: 4, showParticles: false });
   player.addEffect("darkness", 60, { amplifier: 0, showParticles: false });
@@ -109,10 +121,21 @@ function enter(player) {
     const l = player.location;
     try { player.setDynamicProperty(FROM, JSON.stringify({ x: Math.floor(l.x) + 0.5, y: Math.floor(l.y), z: Math.floor(l.z) + 0.5 })); } catch { /* no room */ }
   }
+  // A dark violet veil over the screen while the game sends the land round the ledge to the player's screen.
+  runCmd(player, "camera @s fade time 0.2 1.4 1.4 color 20 6 32");
   player.teleport(L.arrival, { dimension: undertow(), facingLocation: { x: 0, y: 95, z: 60 } });
   // The fog straight away, not up to two seconds later under an open sky.
   if (!player.hasTag(IN_TAG)) { player.addTag(IN_TAG); runCmd(player, `fog @s push ${FOG_ID} ${FOG_LAYER}`); }
   noteEntry(player, "rift");
+  // Bedrock sometimes leaves chunks undrawn after a change of dimension until the player moves. Set them down on
+  // the same spot once the land has been sent, which makes the game send it again, unless they have moved already.
+  system.runTimeout(() => {
+    try {
+      if (!inUndertow(player)) return;
+      const l = player.location;
+      if (Math.abs(l.x - L.arrival.x) < 1.5 && Math.abs(l.z - L.arrival.z) < 1.5) player.teleport(l, { rotation: player.getRotation() });
+    } catch { /* left */ }
+  }, 30);
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
     sfx(player, "sig.rift_cross");
@@ -251,7 +274,23 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
 // ---- building -----------------------------------------------------------------------------
 onTick("undertow:build", 1, () => {
   const players = world.getAllPlayers().filter(inUndertow);
-  buildTick(players);
+  buildTick(players, waiting.size > 0);
+});
+// Players waiting to come in: progress on the action bar, across the moment the arrival is ready.
+onTick("undertow:arrive", 10, () => {
+  if (!waiting.size) return;
+  const ready = arrivalReady(), frac = arrivalProgress();
+  for (const [id, until] of [...waiting]) {
+    const p = world.getAllPlayers().find((x) => x.id === id);
+    if (!p || inUndertow(p)) { waiting.delete(id); continue; }
+    if (ready) { waiting.delete(id); enter(p); continue; }
+    if (system.currentTick > until) {
+      waiting.delete(id);
+      say(p, "§5The Rift will not take you yet. Try again in a moment.");
+      continue;
+    }
+    try { p.onScreenDisplay.setActionBar(arrivalBar(frac)); } catch { /* gone */ }
+  }
 });
 onTick("undertow:pieces", 40, () => piecesTick());
 // A fall into the chasm under the Seat is a fall out of the world, as it was when there was only void there: the
@@ -517,7 +556,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:undertow_status":
       if (player) {
         const p = pieces(), marked = Object.keys(getSites()).length;
-        say(player, `§dThe Hollow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}. Source sites marked ${marked}/7. Choir ${progress().choir ? "silenced" : "singing"}, the Seat ${progress().morvane ? "empty" : "held"}.`);
+        say(player, `§dThe Hollow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}, arrival ${Math.floor(arrivalProgress() * 100)}%${arrivalReady() ? " (ready)" : ""}. Source sites marked ${marked}/7. Choir ${progress().choir ? "silenced" : "singing"}, the Seat ${progress().morvane ? "empty" : "held"}.`);
       }
       break;
   }
@@ -543,6 +582,21 @@ onTick("undertow:seep", 100, () => seepTick());
 
 // ---- self-tests ---------------------------------------------------------------------------
 addTests("undertow", {
+  "arrival: built ahead under one ticking area, covering the ledge, the Wound and the view": () => {
+    const A = ARRIVAL_CHUNKS, n = (A.cx1 - A.cx0 + 1) * (A.cz1 - A.cz0 + 1);
+    assert(n <= 100, `${n} chunks: over the ticking-area cap`);
+    const inside = (x, z) => x >= A.cx0 * 16 && x <= A.cx1 * 16 + 15 && z >= A.cz0 * 16 && z <= A.cz1 * 16 + 15;
+    assert(inside(L.arrival.x, L.arrival.z) && inside(L.returnCrack.x, L.returnCrack.z), "the ledge or the tear is outside");
+    assert(inside(-48, -48) && inside(47, 66), "the Wound's box is outside");
+    assert(inside(0, L.arrival.z + 100), "the view in front of the ledge is not covered");
+    assert(arrivalAreaCmd().includes(ARRIVAL_AREA));
+  },
+  "arrival: progress counts finished chunks, and only all of them is ready": () => {
+    assert(arrivalProgress(() => true) === 0 && arrivalProgress(() => false) === 1);
+    const half = arrivalProgress((cx) => cx < 0);
+    assert(half > 0.4 && half < 0.6, `${half}`);
+    assert(arrivalBar(1).includes("99%") && arrivalBar(0.5).includes("50%"));
+  },
   "saved data: old worlds get every upgrade step, in order, once": () => {
     const steps = [{ to: 3 }, { to: 2 }, { to: 4 }];
     assert(upgradeSteps(1, 3, steps).map((s) => s.to).join() === "2,3" && upgradeSteps(3, 3, steps).length === 0 && upgradeSteps(2, 4, steps).map((s) => s.to).join() === "3,4");
