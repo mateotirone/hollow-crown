@@ -108,7 +108,17 @@
         "herald_frostmarch": "textures/entity/siege/npc_skins/herald_frostmarch",
         "herald_saltreach": "textures/entity/siege/npc_skins/herald_saltreach",
         "herald_emberwaste": "textures/entity/siege/npc_skins/herald_emberwaste",
-        "herald_blackfen": "textures/entity/siege/npc_skins/herald_blackfen"
+        "herald_blackfen": "textures/entity/siege/npc_skins/herald_blackfen",
+        "lore_tobin": "textures/entity/siege/npc_skins/lore_tobin",
+        "lore_tobin__frostmarch": "textures/entity/siege/npc_skins/lore_tobin__frostmarch",
+        "lore_tobin__saltreach": "textures/entity/siege/npc_skins/lore_tobin__saltreach",
+        "lore_tobin__emberwaste": "textures/entity/siege/npc_skins/lore_tobin__emberwaste",
+        "lore_tobin__blackfen": "textures/entity/siege/npc_skins/lore_tobin__blackfen",
+        "lore_marta": "textures/entity/siege/npc_skins/lore_marta",
+        "lore_marta__frostmarch": "textures/entity/siege/npc_skins/lore_marta__frostmarch",
+        "lore_marta__saltreach": "textures/entity/siege/npc_skins/lore_marta__saltreach",
+        "lore_marta__emberwaste": "textures/entity/siege/npc_skins/lore_marta__emberwaste",
+        "lore_marta__blackfen": "textures/entity/siege/npc_skins/lore_marta__blackfen"
       },
       "geometry": {
         "default": "geometry.humanoid.custom"

@@ -39,6 +39,8 @@ import { givePurse } from "../starter/index.js";
 import { firstFacts } from "./firstnights.js";
 import { founderChest } from "./founder.js";
 import { yardWorkshop } from "./workshop.js";
+import { gateManned, hasGatePost, gatePostAt } from "../guardposts/index.js";
+import { GATE_POST } from "../guardposts/posts.js";
 import { act1Stage, act1Step, inAct1, F, DUSK, MIDNIGHT, PILLAR } from "./act1_rules.js";
 import { modeOf } from "./mode.js";
 import { SETTLEMENT } from "./mode_rules.js";
@@ -117,6 +119,7 @@ export function act1Facts(player) {
   const chestAt = founderChest(home);
   if (!chestAt) f.chest = true; // no founder's chest on this settlement: nothing to open
   try { f.first = firstFacts(player); } catch { /* not ready */ }
+  try { f.gateLookout = hasGatePost(home) ? gateManned(home) : undefined; } catch { /* no wall */ }
   let farmer;
   try { farmer = farmerFacts(player); } catch { /* not ready */ }
   f.sold = farmer?.sold ?? 0;
@@ -139,7 +142,7 @@ export function act1Facts(player) {
     workshop: yardWorkshop(home), farmer: farmer?.at, farmerTag: farmer?.tag ?? `${FARMER_TAG}_${player.id}`,
     station: f.station, keep: keepAt ?? (ring ? { x: ring.x, z: ring.z } : undefined),
     millbrook: WREN_ALTAR, ember: store.data.ember[home], aldous,
-    mine: mineOf(stone), furnace: furnaceOf(home) ?? chestAt, mason: benchOf(home),
+    mine: mineOf(stone), furnace: furnaceOf(home) ?? chestAt, mason: benchOf(home), gateLookout: gatePostAt(home),
   };
   return { f, places, ring, home };
 }
@@ -243,6 +246,8 @@ addFilter("joinPurse", (give, { player }) => {
 });
 // The Ember is the story's, for Act 1 players: it falls at the gate after Wren, not after a siege win
 addFilter("emberByStory", (story, { player }) => story || (() => { try { return !!act1Of(player, true).on; } catch { return false; } })());
+// The guard step: while it is yours, the only post offered is the gate lookout (Mateo 2026-11-14)
+addFilter("guardPostsOnly", (key, { player }) => key ?? (() => { try { return act1Of(player, true).stage === "station" ? GATE_POST : undefined; } catch { return undefined; } })());
 // Sir Aldous comes after Elspeth reads the Ember, not after the first win
 addFilter("aldousByStory", (story, { player }) => story || (() => { try { return !!act1Of(player, true).on || progressOf(player).flags.includes(F.met); } catch { return false; } })());
 
@@ -483,6 +488,8 @@ addTests("act1", {
     assertEqual(act1Stage(bk), "barracks");
     assertEqual(act1Stage({ ...bk, first: { barracks: true } }), "guards");
     const wh = { ...bk, first: { barracks: true, guards: 2 } };
+    assertEqual(act1Stage({ ...wh, gateLookout: false }), "station", "the first guard goes up the gate lookout");
+    assertEqual(act1Stage({ ...wh, gateLookout: true }), "talk_wheat");
     assertEqual(act1Stage(wh), "talk_wheat");
     const sell = { ...wh, flags: [...wh.flags, F.wheat] };
     assertEqual(act1Stage({ ...sell, sold: 3 }), "sell");
@@ -499,7 +506,7 @@ addTests("act1", {
     assertEqual(act1Stage({ ...mn, mine: true, ore: true }), "smelt");
     assertEqual(act1Stage({ ...mn, mine: true, ore: true, smelted: true }), "rest");
     for (const s of ["meet", "banner", "chest", "talk_workshop", "workshop", "talk_barracks", "talk_wheat", "sell", "bread", "talk_station", "station", "talk_mine", "mine", "ore", "smelt", "mend"]) {
-      const step = act1Step(s, { flags: [] }, { hearth: { x: 1, z: 2 }, stone: { x: 3, z: 4 }, chest: { x: 5, z: 6 }, workshop: { x: 7, z: 8 }, farmer: { x: 9, z: 9 }, station: { x: 1, z: 1 }, mine: { x: 2, z: 2 }, furnace: { x: 4, z: 4 }, mason: { x: 6, z: 6 } });
+      const step = act1Step(s, { flags: [] }, { hearth: { x: 1, z: 2 }, stone: { x: 3, z: 4 }, chest: { x: 5, z: 6 }, workshop: { x: 7, z: 8 }, farmer: { x: 9, z: 9 }, station: { x: 1, z: 1 }, mine: { x: 2, z: 2 }, furnace: { x: 4, z: 4 }, mason: { x: 6, z: 6 }, gateLookout: { x: 8, z: 8 } });
       assert(step?.title && step.hint, `${s} has a line`);
       if (s !== "bread") assert(step.target, `${s} pins a place (the minimap always shows where to go)`);
     }

@@ -297,29 +297,45 @@ export function groundProblem(ground) {
 export function watchSpots(center, radius, gateAngle, smooth, level) {
   const kind = level === undefined ? "tower" : watchKind(level);
   if (!kind) return [];
+  return Array.from({ length: WATCH.count }, (_, k) => watchAt(center, radius, gateAngle + ((k + 0.5) / WATCH.count) * TAU, smooth, kind, k));
+}
+// The gate lookout (Mateo, 2026-11-14): one more lookout of the same design just beside the gate, so a guard there sees
+// the road in. The Act 1 guard step stations your first guard in it, and he keeps it by day too (guardposts: "watch:4",
+// GATE_WATCH). It stands left of the gate looking out, clear of the gateway and of the gate guards' posts.
+export const GATE_WATCH = { k: WATCH.count, gap: 3 }; // k: its number after the four corner lookouts; gap: blocks between the gateway's edge and the shaft
+export function gateWatchSpot(center, radius, gateAngle, smooth, level) {
+  const kind = level === undefined ? "tower" : watchKind(level);
+  if (!kind) return undefined;
+  const along = WALLS.gateWidth / 2 + WATCH_KINDS[kind].half + GATE_WATCH.gap + 0.5;
+  const spot = watchAt(center, radius, gateAngle - along / radiusAt(center, radius, gateAngle), smooth, kind, GATE_WATCH.k);
+  return { ...spot, gate: true };
+}
+// Every lookout a wall of this level has: the four on the diagonals and the one by the gate
+export function allWatchSpots(center, radius, gateAngle, smooth, level) {
+  const g = gateWatchSpot(center, radius, gateAngle, smooth, level);
+  return [...watchSpots(center, radius, gateAngle, smooth, level), ...(g ? [g] : [])];
+}
+function watchAt(center, radius, a, smooth, kind, k) {
   const K = WATCH_KINDS[kind];
-  return Array.from({ length: WATCH.count }, (_, k) => {
-    const a = gateAngle + ((k + 0.5) / WATCH.count) * TAU;
-    const r = radiusAt(center, radius, a);
-    const x = Math.round(center.x + Math.cos(a) * (r - 1)), z = Math.round(center.z + Math.sin(a) * (r - 1));
-    // the door faces in along the nearer of the two axes, unless the wall line runs across its way in there (a wavy
-    // starter-village line at a tower set on the diagonal: the 2026-11-14 town audit found Dunehold's and Oakmere's
-    // doors opening onto a palisade stake), then along the other one
-    const ax = { x: Math.sign(Math.cos(a)), z: 0 }, az = { x: 0, z: Math.sign(Math.sin(a)) };
-    const both = (Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? [ax, az] : [az, ax]).filter((f) => f.x || f.z);
-    const crossed = (f) => {
-      let n = 0;
-      for (let step = 0; step < WATCH.clear; step++) for (let side = -1; side <= 1; side++) {
-        const cx = x - f.x * (K.back + step) + side * f.z, cz = z - f.z * (K.back + step) + side * f.x;
-        const dx = cx - center.x, dz = cz - center.z;
-        if (Math.hypot(dx, dz) > radiusAt(center, radius, Math.atan2(dz, dx)) - 2.5) n++;
-      }
-      return n;
-    };
-    const forward = both.reduce((best, f) => (crossed(f) < crossed(best) ? f : best));
-    const ground = groundAt(smooth, a);
-    return { k, a, x, z, ground, forward, kind, half: K.half, guardUp: K.guardUp, guardOut: K.guardOut, origin: { x: x - forward.x * K.back, y: ground + 1, z: z - forward.z * K.back } };
-  });
+  const r = radiusAt(center, radius, a);
+  const x = Math.round(center.x + Math.cos(a) * (r - 1)), z = Math.round(center.z + Math.sin(a) * (r - 1));
+  // the door faces in along the nearer of the two axes, unless the wall line runs across its way in there (a wavy
+  // starter-village line at a tower set on the diagonal: the 2026-11-14 town audit found Dunehold's and Oakmere's
+  // doors opening onto a palisade stake), then along the other one
+  const ax = { x: Math.sign(Math.cos(a)), z: 0 }, az = { x: 0, z: Math.sign(Math.sin(a)) };
+  const both = (Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) ? [ax, az] : [az, ax]).filter((f) => f.x || f.z);
+  const crossed = (f) => {
+    let n = 0;
+    for (let step = 0; step < WATCH.clear; step++) for (let side = -1; side <= 1; side++) {
+      const cx = x - f.x * (K.back + step) + side * f.z, cz = z - f.z * (K.back + step) + side * f.x;
+      const dx = cx - center.x, dz = cz - center.z;
+      if (Math.hypot(dx, dz) > radiusAt(center, radius, Math.atan2(dz, dx)) - 2.5) n++;
+    }
+    return n;
+  };
+  const forward = both.reduce((best, f) => (crossed(f) < crossed(best) ? f : best));
+  const ground = groundAt(smooth, a);
+  return { k, a, x, z, ground, forward, kind, half: K.half, guardUp: K.guardUp, guardOut: K.guardOut, origin: { x: x - forward.x * K.back, y: ground + 1, z: z - forward.z * K.back } };
 }
 // Is a column inside a watchtower's shaft (pad = blocks round it too)?
 export const inWatch = (spots, x, z, pad = 0) => spots.some((s) => Math.abs(x - s.x) <= (s.half ?? WATCH.half) + pad && Math.abs(z - s.z) <= (s.half ?? WATCH.half) + pad);
@@ -336,7 +352,7 @@ export const onWatchPath = (spots, x, z) => spots.some((s) => {
 export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, smooth }) {
   const L = WALL_LEVELS[level];
   const cols = new Map();
-  const watch = watchSpots(center, radius, gateAngle, smooth, level);
+  const watch = allWatchSpots(center, radius, gateAngle, smooth, level);
   const put = (x, z, col) => {
     if (watch.length && inWatch(watch, x, z)) return; // a watchtower's shaft: the wall butts against it
     const k = key(x, z), old = cols.get(k);
