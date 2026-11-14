@@ -56,6 +56,9 @@ export const GIVERS = {
   abel: { kind: "folk", town: "Millbrook", name: "Abel Crane", trade: "shepherd" },
   bryony: { kind: "folk", town: "Millbrook", name: "Bryony Ward", trade: "midwife" },
   harlan: { kind: "folk", town: "Millbrook", name: "Harlan Voss", trade: "blacksmith" },
+  // Act 2's first job (story thread): Tobin, the cart family's father, at the player's own Longhouse (newplayer/family.js;
+  // the lore NPC carries siege_lore_npc_tobin). Not in a town, so the story pins him.
+  tobin: { kind: "story", tag: "siege_lore_npc_tobin", where: "your Longhouse", name: "Tobin", trade: "thatcher" },
   kingsrest_hunter: { kind: "trader", town: "Kingsrest", job: "hunter", name: "the Kingsrest hunter", trade: "hunter" },
   kingsrest_smith: { kind: "trader", town: "Kingsrest", job: "smith", name: "the Kingsrest smith", trade: "smith" },
   kingsrest_farmer: { kind: "trader", town: "Kingsrest", job: "farmer", name: "the Kingsrest farmer", trade: "farmer" },
@@ -426,6 +429,20 @@ export const JOBS = [
       done: "Silent, is it? I'm not wearing that. You have it. You go out at night more than I do.",
     },
   },
+  // Act 2, step 7: the first job, the cart family's chest from their burned hamlet (story thread; first: offered alone,
+  // and only while it is the player's Act 2 step: newplayer/act2.js filter "boardFirstJob")
+  {
+    id: "vale_family_chest", region: "Aldmere Vale", kind: "recover", giver: "tobin", place: "brackenfold", about: "what's left at Brackenfold",
+    title: "What's left at Brackenfold", thing: "the family's chest", site: "vale_burned_hamlet", find: "minecraft:chest", story: true, first: true,
+    keepsake: ["minecraft:candle", "Marta's beeswax candle", "Hand-dipped. It burns longer than it should."],
+    lines: {
+      notice: "Wanted: somebody with a strong back to fetch what's left of our things from Brackenfold. Tobin, thatcher, in the Longhouse.",
+      offer: "I can't go back there, my lord. Marta won't have it, and she's right. But our chest is still in the last house on the lane, if the fire left it. Her mother's linen, the deed to our strip, the boy's spoon. Bring it out for us?\n\nAnd look at the doors while you're there. Tell me I'm wrong about the doors.",
+      seen: "Every door in Brackenfold is barred from the outside, a beam dropped into its brackets across each one. The scorch marks start inside the houses and climb out through the windows. The chest is in the last house, by what's left of the table. Nobody has touched it.",
+      while: ["The last house on the lane. Under what's left of the table, if it's anywhere."],
+      done: "That's it. That's all of it. ...You saw the doors. Barred from outside, every one, like I said. Raiders, the Order wrote. You've a book of your own now, my lord. Write it true.",
+    },
+  },
   // ---------------- Frostmarch (Rimehold) ----------------
   {
     id: "frost_wolf", region: "Frostmarch", kind: "hunt", giver: "hakon", place: "hounds_back", about: "the wolf that waits",
@@ -616,6 +633,20 @@ export const JOBS = [
       done: "Untouched. Like the one at mine. I'll leave the door off the latch tonight. In case he wants to come in. Or in case he doesn't.",
     },
   },
+  // Act 2, step 7: the first job, the cart family's chest from their burned hamlet (story thread; first: offered alone,
+  // and only while it is the player's Act 2 step: newplayer/act2.js filter "boardFirstJob")
+  {
+    id: "frost_family_chest", region: "Frostmarch", kind: "recover", giver: "tobin", place: "kettlenes", about: "what's left at Kettlenes",
+    title: "What's left at Kettlenes", thing: "the family's chest", site: "frost_burned_hamlet", find: "minecraft:chest", story: true, first: true,
+    keepsake: ["minecraft:candle", "Marta's beeswax candle", "Hand-dipped. It burns longer than it should."],
+    lines: {
+      notice: "Wanted: somebody with a strong back to fetch what's left of our things from Kettlenes. Tobin, thatcher, in the Longhouse.",
+      offer: "I can't go back there, my lord. Marta won't have it, and she's right. But our chest is still in the last house on the lane, if the fire left it. Her mother's linen, the deed to our strip, the boy's spoon. Bring it out for us?\n\nAnd look at the doors while you're there. Tell me I'm wrong about the doors.",
+      seen: "Every door in Kettlenes is barred from the outside, a beam dropped into its brackets across each one. The scorch marks start inside the houses and climb out through the windows. The chest is in the last house, by what's left of the table. Nobody has touched it.",
+      while: ["The last house on the lane. Under what's left of the table, if it's anywhere."],
+      done: "That's it. That's all of it. ...You saw the doors. Barred from outside, every one, like I said. Raiders, the Order wrote. You've a book of your own now, my lord. Write it true.",
+    },
+  },
   // ---------------- Saltreach (Gull's Rest) ----------------
   {
     id: "salt_westwatch", region: "Saltreach", kind: "camp", giver: "silas", place: "westwatch_camp", about: "the Westwatch",
@@ -794,6 +825,20 @@ export const JOBS = [
       while: ["Wet footprints. Coming up from the water. Keep your eyes on the bay."],
       done: "All there. Every one. You've the look of somebody who's seen the bay at night. Go and sleep.",
       again: "Wet tracks to the dune pen again. Same as before, if you'll sit up.",
+    },
+  },
+  // Act 2, step 7: the first job, the cart family's chest from their burned hamlet (story thread; first: offered alone,
+  // and only while it is the player's Act 2 step: newplayer/act2.js filter "boardFirstJob")
+  {
+    id: "salt_family_chest", region: "Saltreach", kind: "recover", giver: "tobin", place: "sandwick", about: "what's left at Sandwick",
+    title: "What's left at Sandwick", thing: "the family's chest", site: "salt_burned_hamlet", find: "minecraft:chest", story: true, first: true,
+    keepsake: ["minecraft:candle", "Marta's beeswax candle", "Hand-dipped. It burns longer than it should."],
+    lines: {
+      notice: "Wanted: somebody with a strong back to fetch what's left of our things from Sandwick. Tobin, thatcher, in the Longhouse.",
+      offer: "I can't go back there, my lord. Marta won't have it, and she's right. But our chest is still in the last house on the lane, if the fire left it. Her mother's linen, the deed to our strip, the boy's spoon. Bring it out for us?\n\nAnd look at the doors while you're there. Tell me I'm wrong about the doors.",
+      seen: "Every door in Sandwick is barred from the outside, a beam dropped into its brackets across each one. The scorch marks start inside the houses and climb out through the windows. The chest is in the last house, by what's left of the table. Nobody has touched it.",
+      while: ["The last house on the lane. Under what's left of the table, if it's anywhere."],
+      done: "That's it. That's all of it. ...You saw the doors. Barred from outside, every one, like I said. Raiders, the Order wrote. You've a book of your own now, my lord. Write it true.",
     },
   },
   // ---------------- Emberwaste (Sunscar) ----------------
@@ -987,6 +1032,20 @@ export const JOBS = [
       again: "Scarabs at the oasis pen again. Same night, same goats.",
     },
   },
+  // Act 2, step 7: the first job, the cart family's chest from their burned hamlet (story thread; first: offered alone,
+  // and only while it is the player's Act 2 step: newplayer/act2.js filter "boardFirstJob")
+  {
+    id: "ember_family_chest", region: "Emberwaste", kind: "recover", giver: "tobin", place: "thornwell", about: "what's left at Thornwell",
+    title: "What's left at Thornwell", thing: "the family's chest", site: "ember_burned_hamlet", find: "minecraft:chest", story: true, first: true,
+    keepsake: ["minecraft:candle", "Marta's beeswax candle", "Hand-dipped. It burns longer than it should."],
+    lines: {
+      notice: "Wanted: somebody with a strong back to fetch what's left of our things from Thornwell. Tobin, thatcher, in the Longhouse.",
+      offer: "I can't go back there, my lord. Marta won't have it, and she's right. But our chest is still in the last house on the lane, if the fire left it. Her mother's linen, the deed to our strip, the boy's spoon. Bring it out for us?\n\nAnd look at the doors while you're there. Tell me I'm wrong about the doors.",
+      seen: "Every door in Thornwell is barred from the outside, a beam dropped into its brackets across each one. The scorch marks start inside the houses and climb out through the windows. The chest is in the last house, by what's left of the table. Nobody has touched it.",
+      while: ["The last house on the lane. Under what's left of the table, if it's anywhere."],
+      done: "That's it. That's all of it. ...You saw the doors. Barred from outside, every one, like I said. Raiders, the Order wrote. You've a book of your own now, my lord. Write it true.",
+    },
+  },
   // ---------------- Blackfen (Mirelight) ----------------
   {
     id: "fen_peat_camp", region: "Blackfen", kind: "camp", giver: "rufus", place: "peat_cuttings", about: "the peat cuttings",
@@ -1176,6 +1235,20 @@ export const JOBS = [
       while: ["If a pig goes quiet, look where it's looking."],
       done: "Every pig, and fatter for the fright. Here's a ham. Not one of these. An older one.",
       again: "Toads at the pig hummock again. Same as before, if you'll sit up.",
+    },
+  },
+  // Act 2, step 7: the first job, the cart family's chest from their burned hamlet (story thread; first: offered alone,
+  // and only while it is the player's Act 2 step: newplayer/act2.js filter "boardFirstJob")
+  {
+    id: "fen_family_chest", region: "Blackfen", kind: "recover", giver: "tobin", place: "rushby", about: "what's left at Rushby",
+    title: "What's left at Rushby", thing: "the family's chest", site: "fen_burned_hamlet", find: "minecraft:chest", story: true, first: true,
+    keepsake: ["minecraft:candle", "Marta's beeswax candle", "Hand-dipped. It burns longer than it should."],
+    lines: {
+      notice: "Wanted: somebody with a strong back to fetch what's left of our things from Rushby. Tobin, thatcher, in the Longhouse.",
+      offer: "I can't go back there, my lord. Marta won't have it, and she's right. But our chest is still in the last house on the lane, if the fire left it. Her mother's linen, the deed to our strip, the boy's spoon. Bring it out for us?\n\nAnd look at the doors while you're there. Tell me I'm wrong about the doors.",
+      seen: "Every door in Rushby is barred from the outside, a beam dropped into its brackets across each one. The scorch marks start inside the houses and climb out through the windows. The chest is in the last house, by what's left of the table. Nobody has touched it.",
+      while: ["The last house on the lane. Under what's left of the table, if it's anywhere."],
+      done: "That's it. That's all of it. ...You saw the doors. Barred from outside, every one, like I said. Raiders, the Order wrote. You've a book of your own now, my lord. Write it true.",
     },
   },
 ];

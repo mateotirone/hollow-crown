@@ -41,10 +41,20 @@ addTests("town board", {
   },
   "every giver stands somewhere in the world": () => {
     for (const [key, g] of Object.entries(GIVERS)) {
+      if (g.kind === "story") { assert(g.tag && g.where, `${key}: a story person carries a tag and a place`); continue; } // the story pins them
       assert(WARDS.some((w) => w.name === g.town), `${key}: town ${g.town}`);
       if (g.kind === "folk") assert(TOWNSFOLK[g.town]?.people.some((p) => p.name === g.name), `${key}: ${g.name} lives in ${g.town}`);
       else assert(TOWNS.find((t) => t.name === g.town)?.jobs.includes(g.job), `${key}: ${g.town} has a ${g.job}`);
     }
+  },
+  "a story job that comes first is the only notice, then never comes round again": () => {
+    const mem = blankMemory();
+    const first = JOBS.find((j) => j.first);
+    assert(first, "there is a first story job");
+    assert(!noticesFor(1, "p", first.region, mem, STORY).some((j) => j.first), "never on the board by itself");
+    assertEqual(noticesFor(1, "p", first.region, mem, { ...STORY, firstJob: first.id }).map((j) => j.id), [first.id]);
+    finish(mem, first, STORY);
+    assert(!noticesFor(2, "p", first.region, mem, { ...STORY, firstJob: first.id }).some((j) => j.id === first.id), "done: the board opens normally");
   },
   "nobody on the board says what the street doesn't know": () => {
     for (const j of allJobs()) {
@@ -73,7 +83,7 @@ addTests("town board", {
   },
   "one-offs once, everyday jobs once a round, then the neighbours": () => {
     const mem = blankMemory();
-    const vale = JOBS.filter((j) => j.region === "Aldmere Vale");
+    const vale = JOBS.filter((j) => j.region === "Aldmere Vale" && !j.first); // a first story job comes only through the story (next test)
     const sharedHere = () => openIn("Aldmere Vale", mem, STORY).filter((j) => j.shared);
     let guard = 0;
     // play the Vale through, taking the first notice each day

@@ -8,7 +8,7 @@
 // Per settlement (owner), saved: { due, state: "due" | "rolling" | "here" | "housed", road, t, caller, spots }.
 // newplayer/act2.js decides when the cart is due (the story) and asks for the scene; this file moves the cart.
 //
-//   familyOf(owner) -> { state, cart: { x, z }, caller } | undefined
+//   familyOf(owner) -> { state, cart: { x, z }, caller, housedAt, tobin: { x, z } } | undefined
 //   familyDue(owner, now)        the next fitting morning, the cart sets off
 //   startCart(owner)             it sets off now (the test command); true if it did
 //   houseFamily(owner)           Tobin and Marta into the Longhouse, the cart to its door
@@ -35,7 +35,8 @@ export function familyOf(owner) {
   const r = store.data.by[owner];
   if (!r) return undefined;
   const at = r.spots?.cart ?? (r.road ? roadPoint(r.road, r.t ?? CART_ROAD.from) : undefined);
-  return { state: r.state, cart: at ? { x: at.x, z: at.z } : undefined, caller: r.caller };
+  const t = r.spots?.tobin;
+  return { state: r.state, cart: at ? { x: at.x, z: at.z } : undefined, caller: r.caller, housedAt: r.housedAt, tobin: t ? { x: t.x, z: t.z } : undefined };
 }
 
 export function familyDue(owner, now) {
@@ -188,6 +189,7 @@ export function houseFamily(owner) {
   const m = { x: c.x + fwd.x * 2.4, z: c.z + fwd.z * 2.4 };
   spots.mule = { ...m, y: groundY(dim, m.x, m.z, door.y) ?? door.y, yaw: along };
   r.state = "housed";
+  r.housedAt = world.getAbsoluteTime();
   r.spots = spots;
   save();
   keep(owner, r, true);
