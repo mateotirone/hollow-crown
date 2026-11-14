@@ -1,4 +1,6 @@
-// The Barracks and the Quartermaster's Desk raise their building when placed on your land (designs in
+// Old worlds only: no block raises a building any more (Mateo 2026-11-14), the Barracks, Quartermaster's Armoury and
+// the rest go on plots from the Plot Marker. Blocks already in a pack or placed still work: the Barracks, the
+// Quartermaster's Desk and the Dragon Roost raise their building when placed on your land (designs in
 // blockdesigns.js), in your settlement's style, running away from where you stood. Free: the block is the
 // price. No room (land edge, ground kept for your hall, another building rising)? The block still works on
 // its own and says why. A build cut short by the world closing carries on when it loads again.
@@ -139,18 +141,23 @@ function start(key, job) {
   if (gaps.cols.size) b.columns = b.columns.filter((c) => !gaps.cols.has(`${c.x},${c.z}`));
 }
 
-// A Barracks raised on a plot from its Plot Marker (or a Foundation Stone): the working Barracks block goes at its
-// front, where a placed block would have stood, and the guardhouse is remembered like a block-raised one (its yard
-// for the off-duty soldiers, guard posts) without counting twice for the charter (plot: the plot counts it).
+// A Barracks or Quartermaster's Armoury raised on a plot from its Plot Marker (or a Foundation Stone): the working
+// block goes at its front, where a placed block would have stood, and the building is remembered like a block-raised
+// one (the Barracks yard for the off-duty soldiers, guard posts) without counting twice for the charter (plot: the
+// plot counts it).
+const PLOT_BLOCKS = {
+  barracks: { type: "siege:barracks", said: "§6Your Barracks stands.§7 Click the Barracks block at its front and choose §fTrain soldiers§7: 40 Regals each, and a Hamlet keeps 4." },
+  quartermaster_desk: { type: "siege:quartermaster_desk", said: "§6Your Quartermaster's Armoury stands.§7 A quartermaster soon takes the post at the desk by its front: click them to buy siege gear." },
+};
 on("settleBuilt", ({ owner, building, style, origin, forward, box }) => {
-  if (building !== "barracks") return;
+  const made = PLOT_BLOCKS[building];
+  if (!made) return;
   const dim = world.getDimension(OVERWORLD);
-  try { dim.getBlock(origin)?.setType("siege:barracks"); } catch { return; }
-  trackMachine(OVERWORLD, origin, "siege:barracks");
-  (store.data.built ??= {})[keyOf(origin)] = { type: "siege:barracks", fx: forward.x, fz: forward.z, style, owner, box, lift: 0, plot: true };
+  try { dim.getBlock(origin)?.setType(made.type); } catch { return; }
+  trackMachine(OVERWORLD, origin, made.type);
+  (store.data.built ??= {})[keyOf(origin)] = { type: made.type, fx: forward.x, fz: forward.z, style, owner, box, lift: 0, plot: true };
   store.save();
-  const player = world.getPlayers().find((p) => p.id === owner);
-  player?.sendMessage("§6Your Barracks stands.§7 Click the Barracks block at its front and choose §fTrain soldiers§7: 40 Regals each, and a Hamlet keeps 4.");
+  world.getPlayers().find((p) => p.id === owner)?.sendMessage(made.said);
 });
 
 // Asked before a placed block raises anything: (owner, typeId, "x,y,z") -> why not, or undefined (oneeach.js: one of

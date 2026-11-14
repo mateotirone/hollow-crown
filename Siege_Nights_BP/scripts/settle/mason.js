@@ -13,7 +13,7 @@ import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pi
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
 import { purse, charge, coins, coinName, coinIcon, lot } from "./wallet.js";
-import { styleOf, FOUNDATION } from "./plans.js";
+import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
@@ -133,18 +133,14 @@ export async function openShop(player, mason) {
   const all = shelves(styleId);
   const form = new ActionFormData().title("Mason").body(`§o"${line}"§r\n\nYou carry ${coins(purse(player))}.`);
   for (const shelf of all) form.button(shelf.name, shelf.icon);
-  form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice * lot())}`);
   if (home) form.button("Mend the wall\n§8The masons survey it and name a price");
   if (home) form.button("Choose what the wall is built in\n§8Any stone, any region's timber. Free");
   const res = await form.show(player);
   if (res.canceled) return;
   if (res.selection < all.length) return openShelf(player, all[res.selection], mason);
-  if (res.selection === all.length + 1) return emit("wallRepair", { owner: home, player }); // repair.js
-  if (res.selection === all.length + 2) return chooseWallLook(player, home); // walls.js
-  const stonePrice = SETTLE.stonePrice * lot();
-  if (purse(player) < stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(stonePrice)}.`);
-  hand(player, FOUNDATION, 1);
-  player.sendMessage("§7Mason: §fSet it where the front should be, facing the way the building runs. Click it and choose. You get the stone back after.");
+  // (no Foundation Stones any more, Mateo 2026-11-14: buildings go on plots from the Plot Marker)
+  if (res.selection === all.length) return emit("wallRepair", { owner: home, player }); // repair.js
+  if (res.selection === all.length + 1) return chooseWallLook(player, home); // walls.js
 }
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {

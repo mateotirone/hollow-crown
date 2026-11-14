@@ -10,12 +10,6 @@ export const WORKSHOP_BOOK = [
     "needs": "6 oak planks, 1 crossbow, 1 dispenser, 1 redstone"
    },
    {
-    "id": "siege:quartermaster_desk",
-    "name": "Quartermaster's Desk",
-    "what": "A quartermaster takes the post and sells siege gear.",
-    "needs": "2 any planks, 1 iron ingot, 1 chest"
-   },
-   {
     "id": "siege:guard_helmet",
     "name": "Guard Helmet",
     "what": "Castle Guard armour, in your banner colour.",
@@ -97,18 +91,6 @@ export const WORKSHOP_BOOK = [
   "name": "Your settlement",
   "items": [
    {
-    "id": "siege:foundation_stone",
-    "name": "Foundation Stone",
-    "what": "Places a ready-made building.",
-    "needs": "5 cobblestone, 4 any planks"
-   },
-   {
-    "id": "siege:hall_cornerstone",
-    "name": "Hall Cornerstone",
-    "what": "Raises a town hall (one comes free with a map plot).",
-    "needs": "5 cobblestone, 3 any logs, 1 iron ingot"
-   },
-   {
     "id": "siege:mason_bench",
     "name": "Mason's Bench",
     "what": "A mason sets up beside it and sells blocks.",
@@ -160,14 +142,8 @@ export const WORKSHOP_BOOK = [
     "name": "Horse Whistle",
     "what": "Calls your horse from up to 64 blocks.",
     "needs": "3 bamboo, 1 iron nugget, 1 string"
-   },
-   {
-    "id": "siege:rail_depot",
-    "name": "Rail Depot",
-    "what": "Joins your settlement to the rail network.",
-    "needs": "5 any planks, 2 rail, 1 minecart, 1 iron ingot"
    }
   ]
  }
 ];
-export const WORKSHOP_RECIPES = 263;
+export const WORKSHOP_RECIPES = 259;

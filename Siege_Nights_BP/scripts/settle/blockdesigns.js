@@ -8,7 +8,7 @@
 // The Stables barn and the Breeder's yard live with the horses (horses/barndesign.js).
 
 import { Plan } from "../townhall/halls.js";
-import { styleFor, pieces, drawDesigned, useGuardhouse } from "./buildings.js";
+import { styleFor, pieces, drawDesigned, useBlockDesign } from "./buildings.js";
 import { BARN_DESIGNS } from "./barn_data.js";
 
 const { floor, walls, hollow, roof, hang, stair } = pieces;
@@ -23,8 +23,9 @@ function designed(key, styleId, plain) {
 }
 
 export const drawGuardhouse = (styleId) => designed("barracks", styleId, plainGuardhouse);
-useGuardhouse(drawGuardhouse); // the Barracks plot building (buildings.js BUILDINGS)
+useBlockDesign("barracks", drawGuardhouse); // the Barracks plot building (buildings.js BUILDINGS)
 export const drawArmoury = (styleId) => designed("quartermaster", styleId, plainArmoury);
+useBlockDesign("quartermaster_desk", drawArmoury); // the Quartermaster's Armoury plot building
 export const drawDragonStable = (styleId) => {
   const d = BARN_DESIGNS.emberwaste?.dragon_stable;
   return d ? drawDesigned(new Plan(styleFor(styleId)), d, "bn:emberwaste:dragon_stable") : plainArmoury(styleId);
