@@ -4,7 +4,7 @@
 // supplies for emeralds. The stone comes back to you when the building is done.
 //
 // Events: emit("settleBuilt", { owner, player, building, style, origin, forward, box, marks })
-//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf7, lectern, portrait0..2, painting0
+//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf13, lectern, portrait0..2, painting0
 //   a library also sends portraitYaw and paintingYaw: the way those pictures face (0 south, 90 west, 180 north, -90 east)
 // Test: /scriptevent siege:settle_build <building> [style]   raise one where you stand, free
 

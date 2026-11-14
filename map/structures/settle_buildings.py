@@ -154,7 +154,8 @@ def well(region):
     return finish(bp, (0, 1, 0), P=P)
 
 def library(region):
-    """Two storeys of books: eight Archive Shelves for the town's own lore, a lectern, portraits. 11 x 11."""
+    """Two storeys of books: fourteen Archive Shelves for the town's lore (the 75 tomes and the plot's own books),
+    a lectern, portraits. 11 x 11."""
     bp, B, P, k, L = new("library", region)
     rect = (-5, -10, 5, 0); lift = stilts(bp, P, grow(rect, "ew"), 1, region)
     B.foundation(rect, lift); B.floor(rect, lift)
@@ -175,11 +176,15 @@ def library(region):
     # the shelves: back wall, two rows of four; lectern in front of them; portraits above
     zb = -9; n = 0
     for y in (lift + 1, lift + 2):
-        for x in (-2, -1, 1, 2): bp.set(x, y, zb, "siege:archive_shelf"); bp.marks[f"shelf{n}"] = (x, y, zb); n += 1
+        for x in (-2, -1, 1, 2): bp.set(x, y, zb, "siege:archive_shelf", facing="s"); bp.marks[f"shelf{n}"] = (x, y, zb); n += 1
     bp.set(0, lift + 1, zb + 2, "lectern", facing="s"); bp.marks["lectern"] = (0, lift + 1, zb + 2)
     for i, x in enumerate((-2, 0, 2)): bp.marks[f"portrait{i}"] = (x, lift + 4, zb)
     bp.marks["painting0"] = (0, lift + 3, -1)
     for z in range(-8, -1): bp.set(-4, lift + 1, z, "bookshelf"); bp.set(4, lift + 1, z, "bookshelf")
+    # six more Archive Shelves along the side walls, facing into the room (Mateo 2026-11-14: 6 book slots a shelf,
+    # 14 shelves hold all 75 tomes and the plot's own books): shelf8..shelf10 west, shelf11..shelf13 east
+    for x, sd in ((-4, "e"), (4, "w")):
+        for z in (-7, -6, -5): bp.set(x, lift + 1, z, "siege:archive_shelf", facing=sd); bp.marks[f"shelf{n}"] = (x, lift + 1, z); n += 1
     return finish(bp, step_up(bp, lift), P=P)
 
 def market(region):
