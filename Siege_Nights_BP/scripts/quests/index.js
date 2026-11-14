@@ -35,6 +35,7 @@ import { farmerFacts } from "../economy/api.js";
 import { cobFacts } from "../horses/starter.js";
 import { act1Quest } from "../newplayer/act1.js";
 import { boardQuest } from "../townhall/board.js";
+import { modeOf } from "../newplayer/mode.js";
 import { act2Quest } from "../newplayer/act2.js";
 import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import { markTalk, talkSpot, forget } from "./marks.js";
@@ -119,6 +120,7 @@ function factsOf(player) {
     cob: (() => { try { return cobFacts(player); } catch { return undefined; } })(),
     act1: (() => { try { return act1Quest(player); } catch { return undefined; } })(),
     board: (() => { try { return boardQuest(player); } catch { return undefined; } })(),
+    mode: modeOf(player),
     act2: (() => { try { return act2Quest(player); } catch { return undefined; } })(),
   };
 }
@@ -170,7 +172,7 @@ export function questPin(player) {
 
 // Something in the story moved: work the steps out again at once, not at the next look.
 const refresh = (player) => { if (player?.id) steps.delete(player.id); };
-for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward", "goodsSold", "siegeEnd", "keepFallen", "emberFell", "boardJob"]) on(name, (d) => refresh(d?.player));
+for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward", "goodsSold", "siegeEnd", "keepFallen", "emberFell", "boardJob", "modeSet"]) on(name, (d) => refresh(d?.player));
 on("minimapToggled", ({ player }) => { if (player) { lastSent.delete(player.id); try { send(player, true); } catch { /* left */ } } });
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => lastSent.delete(player.id));

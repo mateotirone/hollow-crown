@@ -57,7 +57,8 @@ SITES = {
                              ("clock tower", vale_civic.clock_tower),
                              ("bakery", lambda: __import__("story_builds").build("bakery")),
                              ("order waystation", lambda: __import__("story_builds").build("waystation")),
-                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))]),
+                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale")),
+                             ("moneyer", lambda: __import__("settle_skill").town_moneyer("vale"))]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
                       civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
@@ -1120,10 +1121,17 @@ class Town:
         self.stamp(mid, self.sq[0], self.sq[1], self.sqY, 0, "square")
         ns = 5 if self.big else 3
         a0 = self.rng.random() * 6.28
+        # a stall never stands in front of a door on the square (Millbrook's Moneyer, 2026-11-14): it slides round the
+        # ring to clear every door by 5, or the square goes without it
+        doors = [e["door"] for e in self.plan if e.get("door") and e["kind"] not in ("tree", "lamp", "stall", "square")]
         for k in range(ns):
             a = a0 + 2 * math.pi * k / ns + self.rng.uniform(-0.2, 0.2)
             rr = self.sqR - 1.5
-            x, z = self.sq[0] + math.cos(a) * rr, self.sq[1] + math.sin(a) * rr
+            for da in (0, 0.3, -0.3, 0.6, -0.6, None):
+                if da is None: break
+                x, z = self.sq[0] + math.cos(a + da) * rr, self.sq[1] + math.sin(a + da) * rr
+                if all(math.hypot(x - dx, z - dz) >= 5 for dx, dz in doors): break
+            if da is None: continue
             deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
             st = dressing.stall(self.seed + k)
             ox, oz = rot_xz(1, 1, deg)
@@ -1677,6 +1685,10 @@ class Town:
                 dd = abs(w[0] - e["door"][0]) + abs(w[2] - e["door"][1])
                 if dd <= 12 and (best is None or dd < best[0]): best = (dd, w)
             if best: e["door_block"] = [int(v) for v in best[1]]
+            for k, m in bp.markers.items():     # a design's named spots in the world (the Moneyer's place behind his counter, 2026-11-14)
+                if k == "door": continue
+                rx, rz = rot_xz(m[0], m[2], e["rotation"])
+                e.setdefault("spots", {})[k] = [int(e["x"] + rx), int(e["ground_y"] + m[1]), int(e["z"] + rz)]
         json.dump({"town": self.name, "centre": list(self.C), "radius": self.R, "square": {"centre": list(self.sq), "y": self.sqY, "radius": self.sqR},
                    "about": "Stamp origin = blueprint (0,0,0) at world x, ground_y, z after turning clockwise by rotation (0 = front faces south). "
                             "Apply the groundwork file first (it already levels every plot and builds the foundations), then the stamps. "

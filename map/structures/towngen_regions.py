@@ -153,7 +153,11 @@ class RegionTown(Town):
         hall = HALLS[self.region]
         makers = list(RT.CIVIC.get(self.town, []))          # (the town hall claimed its ground first: hall_first)
         built = [(name, mk()) for name, mk in makers]
-        built.sort(key=lambda t: -len(t[1].cells))
+        # the Moneyer (2026-11-14) never takes a story place's ground: it waits until the story places are down,
+        # otherwise it goes in its turn by size (Mirelight's store gives way to it, a story place never does)
+        story = [len(bp.cells) for name, bp in built if name in RT.STORY_PLACES]
+        size = lambda name, bp: min(len(bp.cells), min(story) - 1) if name == "moneyer" and story else len(bp.cells)
+        built.sort(key=lambda t: -size(*t))
         import story_builds
         for name, bp in built:
             bp.kind = "civic"; done = None

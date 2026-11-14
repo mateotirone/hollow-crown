@@ -38,6 +38,7 @@ USES = {
     "farmhouse": ["farm_kitchen", "bedroom"],
     "inn":       ["taproom", "guest_rooms"],
     "mint":      ["mint", "storage"],
+    "moneyer":   ["moneyer", "storage"],   # the town money-changer (Mateo 2026-11-14): grilled counter, scales, strongbox
     "shop":      ["shop", "bedroom"],
     "smithy":    ["smithy", "bedroom"],
     "guildhall": ["hall", "office"],
@@ -507,6 +508,59 @@ def _counter(L, doors, wood):
     return False
 
 
+def p_grille_counter(L, x, z, d, n, wood):
+    """The money-changer's counter (Mateo 2026-11-14, "a Moneyer in every town"): p_counter's logs, an iron grille
+    three high along the top, and in the middle a pass window under it with the scales, an iron and a gold weighted
+    plate side by side. The Moneyer stands behind the middle (L.spot)."""
+    cx, cz = _fwd(x, z, d)
+    ax = "z" if d in "ew" else "x"
+    cells, block, need = [], [], []
+    for k in range(-(n // 2), n // 2 + 1):
+        px, pz = _side(cx, cz, d, k)
+        cells.append((px, 0, pz, f"stripped_{wood}_log", {"axis": ax}))
+        top = "heavy_weighted_pressure_plate" if k == 0 else "light_weighted_pressure_plate" if k == 1 else "iron_bars"
+        cells.append((px, 1, pz, top, {}))      # the scales sit in the gap under the grille: the pass window
+        for dy in (2, 3): cells.append((px, dy, pz, "iron_bars", {}))   # the grille runs whole above, bars joined
+        block.append((px, pz)); need.append(_fwd(px, pz, d))
+    for k in (-(n // 2),):                        # a barrel at one end only: the other end is the way in behind
+        bx, bz = _side(x, z, d, k)
+        if (bx, bz) in L.area and _clear_behind(L, bx, bz, d, (1,)):
+            cells.append((bx, 0, bz, "barrel", {})); block.append((bx, bz))
+    if not _put(L, cells, block, need=need, must=[(x, z)]): return False
+    L.spot = (x, z)                               # behind the pass window, facing the room
+    return True
+
+
+def _grille_counter(L, doors, wood):
+    """Across the wall furthest from the door, 5 long where it fits (3 at least), a gap at one end to get behind."""
+    x0, z0, x1, z1 = _room_box(L)
+    for (x, z, d) in _by_far(L, L.wall_cells(), doors):
+        span = (x1 - x0 + 1) if d in "ns" else (z1 - z0 + 1)
+        n = min(5, span - 2)
+        if n % 2 == 0: n -= 1
+        if n < 3: continue
+        if p_grille_counter(L, x, z, d, n, wood): return True
+    return False
+
+
+def _strongbox(L, doors):
+    """An iron-bound strongbox: a chest on an iron block against a wall, its front free."""
+    for (x, z, d) in _by_far(L, L.wall_cells(), doors):
+        if _put(L, [(x, 0, z, "iron_block", {}), (x, 1, z, "chest", {"facing": d})], [(x, z)], need=[_fwd(x, z, d)]): return True
+    return False
+
+
+def _iron_stack(L, doors):
+    """Iron bars stacked in a corner: two iron blocks up and one beside, weighted plates on top."""
+    for (x, z, d) in _by_far(L, L.wall_cells(), doors):
+        sx, sz = _side(x, z, d, 1)
+        if (sx, sz) not in L.area or not _clear_behind(L, x, z, d, (1,)): continue
+        if _put(L, [(x, 0, z, "iron_block", {}), (x, 1, z, "iron_block", {}), (x, 2, z, "heavy_weighted_pressure_plate", {}),
+                    (sx, 0, sz, "iron_block", {}), (sx, 1, sz, "heavy_weighted_pressure_plate", {})], [(x, z), (sx, sz)], need=[_fwd(x, z, d)]):
+            return True
+    return False
+
+
 def _pews(L, doors, wood, cloth):
     """Chapel: an aisle on the centre line from the door, pews (stairs) in rows either side facing the altar
     at the far end, the altar on a step with candles, a runner up the aisle."""
@@ -665,6 +719,11 @@ def furnish_level(L, kind, doors, region, wood, table):
     elif kind == "shop":
         _counter(L, doors, wood)
         _wall_items(L, ["barrel", "chest", "barrel", "bookshelf", F["extra"][0]], doors)
+    elif kind == "moneyer":
+        _grille_counter(L, doors, wood)
+        _strongbox(L, doors)
+        _iron_stack(L, doors)
+        _wall_items(L, ["lectern", "chest", "barrel"], doors)
     elif kind == "mint":
         _counter(L, doors, wood)
         _wall_items(L, ["chest", "chest", "anvil", "chest", "lectern", "furnace"], doors)

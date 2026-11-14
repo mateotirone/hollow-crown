@@ -215,6 +215,15 @@ Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, 
 **Not in the skill yet:**
 - the octagonal lighthouse (build it with shapes: a cylinder at 8 sides).
 
+## The Moneyer (Mateo, 2026-11-14)
+
+Every town has a Moneyer on its square (`settle_skill.town_moneyer("saltreach")`, spec `review/specs/settle_moneyer_saltreach.json`):
+the region's Mint shell with barred ground-floor windows, the skill's `moneyer` interior (a counter with an iron grille
+three high and the scales, an iron and a gold weighted plate, in the pass window under it; a strongbox, a chest on an
+iron block; stacked iron blocks) and a `trade_sign` over the door: a birch hanging sign under a one-block birch fence arm,
+in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
+with a shutter or the light stage's wall lantern.
+
 ## Never
 
 - **Walls and colours:** no dark timber frames and no dark walls; Saltreach is pale.

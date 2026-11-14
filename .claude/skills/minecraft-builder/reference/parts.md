@@ -227,18 +227,25 @@ places any local cell list at a point facing e/w/n/s (stairs, doors and log axes
 
 - **`ship`** (`scripts/ship.py`): `at` is the stern's centre on the waterline row (the top water block), `heading`
   where the bow points. The hull is fitted row by row: a keel one block wide, the bilge turning out to the full beam
-  at the deck, an upside-down stair wherever the row below is narrower (so the turn reads round), a blunt bow and a
-  narrower stern. Colour bands by row: tarred dark oak below the water, a spruce boot-top, a dark log wale, oak
-  topsides, a teal stripe (warped planks) along the top of the side, birch fence rails. A quarterdeck over the
-  captain's cabin aft (`aft` 11 long, deck three rows over the waist) and a forecastle over the galley forward
-  (`fore` 9), each with a front wall, a door on the centre line and stairs up both sides. Inside: the great cabin
-  (bed, chart table, lectern, books, chest, a cyan carpet, stern windows and side lights), the galley, and a lower
+  at the deck, an upside-down stair wherever the row below is narrower (so the turn reads round), a bow that runs in
+  to a point (a parabola in plan, not an ellipse, which ends blunt) with the forefoot kept under water, and a
+  narrower stern. Colour bands by row: tarred dark oak below the water, a spruce boot-top, a dark log wale that
+  sweeps up toward both ends (the sheer, so a long side never reads flat), oak topsides, a teal stripe (warped
+  planks) along the top of the side, birch fence rails; a rubbing strake (dark oak top slabs) one out along the
+  wale's straight runs only (on the curves it reads as loose steps), and closed gunport lids on the waist. A tall
+  stern: the quarterdeck over the captain's cabin (`aft` 11 long, deck four rows over the waist) and a poop deck over
+  a chart room at the very stern (`poop` 5), each with a front wall, a door on the centre line and stairs up both
+  sides; two tiers of stern windows, a railed stern gallery outside the cabin's, carved cornices (upside-down stairs)
+  under each deck. A forecastle over the galley forward (`fore` 9), a stem carried down as a cutwater, and a white
+  quartz figurehead with spread wings under the bowsprit. Inside: the great cabin (bed, chart table, lectern, books,
+  chest, a cyan carpet, stern windows and side lights), the chart room, the galley, and a lower
   deck under the whole waist (bunks, chests, a mess table with benches, the hold of barrels and chests, stores aft),
   reached by a solid flight of stairs through a railed hatch, with a 3-wide way down the middle and lanterns hung
   from the deck beams. `masts` `[{"at": u, "top": rows over its deck, "yards": [[y, half span, sail rows]], "nest": y}]`
   (default: mizzen, main with a crow's nest, fore): square sails of white wool with a cyan band, bellied forward,
-  hung from log yards; shrouds from the channels (a slab ledge one out from the side) to under the lowest yard; main
-  and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
+  hung from log yards; the lowest `furl` (1) yards on each mast carry their sail furled, a roll of wool under the
+  yard, as a moored ship would; shrouds of iron chain (fences read as staircases, 2026-11-14) from the channels (a
+  slab ledge one out from the side) to under the lowest yard, each link turned along the line; main and mizzen stays; a bowsprit with the forestay and a jib; a cyan pennant at every masthead; stern lanterns.
   `gangway` opens the bulwark and lays a plank out to the pier. Every cell inside the hull is written, air included,
   so a stamp over the sea leaves no water in the hold; `materials` overrides any role (`SALT` in ship.py).
 - **`pier`**: a deck of `rects` (oak, darker spruce boards over the pile rows) at row `y`; stripped oak piles from
@@ -288,6 +295,7 @@ pot on top.
 | `string_course` | `rect`, `y`, `sides`, `material` | upside-down stairs 1 out, corners wrapped with outer-corner stairs (07) |
 | `buttress` | `rect`, `side`, `at` [offsets], `y`, `height`, `depth` | 1 to 2 out at the foot, stepping in with a stair at mid height and a stair cap (02 step 6) |
 | `hanging_lantern` | `at`, `chain` | chain links down to a hanging lantern, from a corner block or bracket (07) |
+| `trade_sign` | `at` (the wall cell), `out`, `len`, `face`, `wood`, `fence` | a trade's hanging sign: a fence arm `len` out from the wall, a hanging sign on chains under its end, across the arm or (`face` = `out`) facing the street, as over the Moneyer's door; the game writes its words |
 | `lean_to` | `rect`, `against` (n/s/e/w), `top`, `pitch` (1 or `"half"`), `y`, `roof`, `post`, `trim`, `floor` | a skillion against a wall: one slope falling away from `against`, starting at `top`, overhang 1 at the low edge and a verge at both ends; tie beam under the low edge, log posts at the ends and every 4, upside-down trim stairs under the overhang, barge boards. Roof gets the two-block texture (06) and, without `roof`, the colour of the house built before it |
 | `woodpile` | `at`, `len`, `h` (2-3), `facing`, `wood`, `cover` (`slab`/`trapdoor`/`none`) | logs lying with the end grain to `facing`, top row stepped in, about 1 in 5 stripped, a slab or trapdoor cover, a chopping block beside it (07 dressing) |
 | `spire` | `rect` (the tower), `y` (`"top"` default), `rows` (3), `kind` (`stepped` / `broach`), `overhang`, `roof`, `trim`, `finial` (`spire_block` default / `rod` / `tall` / `short` / `none`) | sits on the walls of whatever is built in `rect` and replaces its roof: an eave ring over the overhang with upside-down trim under it, the tower's width one row, then rings stepping in one block every `rows` rows (stairs stacked on stairs, full corners), then the add-on's spire top block `siege:spire_roof` on the full top block (or a wall-post finial with a lightning rod). **Never a slab under a spire top** (Mateo 2026-11-12: it floats): the engine swaps any slab under `siege:spire_roof` for the full block, in every build, `place` cells included. `broach` leaves the corners off the upper rings so it turns octagonal (06 steep roofs) |
