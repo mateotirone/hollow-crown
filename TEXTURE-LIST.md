@@ -622,6 +622,8 @@ from the models by the script: rerun it whenever a model changes (it rewrites th
 | Asset | File | Status |
 |---|---|---|
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
+| Sorcerer effect objects (six 128×128 two-tone glass textures: Ember shard, Ward plates, Bind chains, Choir bell, Veilstep rift, Blink afterimage; model `models/entity/siege_arc_fx.geo.json`) | `textures/entity/siege_arc_<form>.png` | **New 2026-11-14**, drawn in code by `tools/build_sorcerer_fx.py`, untested in game |
+| Marked layer (64×64 skin overlay, five stages: palm mark, veins to the wrist, elbow, past the elbow, full with lit eyes; glows) | `textures/entity/hc_marked/stage_0-4.png` | **New 2026-11-14**, from the Marked Layer page Mateo approved (`art/marked_layer/`), untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
 

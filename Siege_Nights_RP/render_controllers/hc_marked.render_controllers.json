@@ -1,0 +1,82 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.hc_marked": {
+   "arrays": {
+    "textures": {
+     "Array.mark": [
+      "Texture.hc_mark_1",
+      "Texture.hc_mark_2",
+      "Texture.hc_mark_3",
+      "Texture.hc_mark_4",
+      "Texture.hc_mark_5"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.hc_mark"
+    }
+   ],
+   "textures": [
+    "Array.mark[math.clamp((query.has_property('hc:mark') ? query.property('hc:mark') : 0) - 1, 0, 4)]"
+   ]
+  },
+  "controller.render.hc_marked_look": {
+   "arrays": {
+    "textures": {
+     "Array.mark": [
+      "Texture.hc_mark_1",
+      "Texture.hc_mark_2",
+      "Texture.hc_mark_3",
+      "Texture.hc_mark_4",
+      "Texture.hc_mark_5"
+     ]
+    }
+   },
+   "geometry": "Geometry.hc_look",
+   "materials": [
+    {
+     "*": "Material.hc_mark"
+    }
+   ],
+   "textures": [
+    "Array.mark[math.clamp((query.has_property('hc:mark') ? query.property('hc:mark') : 0) - 1, 0, 4)]"
+   ]
+  },
+  "controller.render.hc_marked_hand": {
+   "arrays": {
+    "textures": {
+     "Array.mark": [
+      "Texture.hc_mark_1",
+      "Texture.hc_mark_2",
+      "Texture.hc_mark_3",
+      "Texture.hc_mark_4",
+      "Texture.hc_mark_5"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.hc_mark"
+    }
+   ],
+   "textures": [
+    "Array.mark[math.clamp((query.has_property('hc:mark') ? query.property('hc:mark') : 0) - 1, 0, 4)]"
+   ],
+   "part_visibility": [
+    {
+     "*": false
+    },
+    {
+     "rightArm": true
+    },
+    {
+     "rightSleeve": true
+    }
+   ]
+  }
+ }
+}

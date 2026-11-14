@@ -7,6 +7,10 @@
 //     heard you" for the Marked; Elspeth's "Good. Keep it covered." for Not yet. Then the road pins.
 //   - The first night after the choice, whatever the road, a far voice: "Keep it safe for me."
 //   - A light pillar, seen only by you, stands over the chapterhouse or Mag's hut while that is your road.
+//   - Part 2: the morning after the choice Elspeth sends you to the Moneyer with your iron; selling him a bar has him
+//     tell you to build an Ironworks (pinned at your Works yard's marker); taking its first iron ends the part.
+//   - Part 3: your plot's first local book names a place on your land ("That's here. That's my land."); riding to
+//     the plot's old landmark you remember what the Order says happened there, and see it can't be so.
 //
 // Builder commands (creative / operators):
 //   /scriptevent siege:act2           your Act 2 stage, its facts and the tracker's line
@@ -19,15 +23,20 @@ import { on, addFilter } from "../core/events.js";
 import { onTick, homeOf, getState, addTests, assert, assertEqual } from "../siege/api.js";
 import { progressOf, setFlag } from "../lore/player.js";
 import { addLoreContext } from "../lore/npcs.js";
-import { aldousAt, aldousWitness, aldousRidesOn } from "../lore/places.js";
+import { aldousAt, aldousWitness, aldousRidesOn, elspethSpot } from "../lore/places.js";
 import { markedPlaces } from "../lore/ledger.js";
 import { heroOf } from "../townhall/hero.js";
 import { hallOf } from "../townhall/townhall.js";
 import { EMBER, choosePath } from "../townhall/tree.js";
-import { WARDS } from "../plots/config.js";
+import { WARDS, PLOT_PLAN } from "../plots/config.js";
+import { plotOf } from "../plots/claims.js";
+import { PLOT_LORE } from "../lore/data/plots.js";
+import { localTomeIds, libraryShelfOf } from "../lore/local.js";
+import { TOWNS } from "../economy/config.js";
+import { ironworksFacts } from "../ironworks/index.js";
 import { fallen } from "../quests/rules.js";
 import { sfx } from "../core/sfx.js";
-import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera } from "./act2_rules.js";
+import { act2Stage, act2Step, inAct2, F2, PILLAR2, CHOICE_FLAG, ROADS, ROAD_ORDER, panelText, MOMENT, VOICE, voiceDue, choiceCamera, morningAfter, MONEYER_LINE, BOOK_PLACES, BOOK_NEAR, BOOK_THOUGHT } from "./act2_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const CHOSE = "hc:act2_chose"; // absolute time of the choice at the Tree (the voice comes the first night after)
@@ -43,6 +52,28 @@ function carries(player, id) {
   return n;
 }
 const mirelight = () => { const w = WARDS.find((x) => x.name === "Mirelight"); return w ? { x: w.x, z: w.z } : undefined; };
+// Part 3: this player's plot's first local book { plot, title, read }, for a plot with its own books and landmark
+function bookOf(player, p) {
+  let plot;
+  try { plot = plotOf(player.id)?.name; } catch { /* no plots */ }
+  const lore = PLOT_LORE[plot];
+  if (!lore || !BOOK_PLACES[plot] || !PLOT_PLAN.find((x) => x.name === plot)?.relic) return undefined;
+  const id = localTomeIds(plot)[0];
+  return { plot, title: lore.tomes[0].title, read: p.read.includes(id) };
+}
+
+// The nearest town with a Moneyer (economy/config.js TOWNS): his NPC carries the marker, the pin is the town
+export function nearestMoneyer(pos) {
+  let best;
+  for (const t of TOWNS) {
+    if (!t.jobs.includes("moneyer")) continue;
+    const w = WARDS.find((x) => x.name === t.name);
+    if (!w) continue;
+    const d = Math.hypot(w.x - pos.x, w.z - pos.z);
+    if (!best || d < best.d) best = { name: t.name, x: w.x, z: w.z, d };
+  }
+  return best;
+}
 
 export function act2Facts(player) {
   const p = progressOf(player);
@@ -50,13 +81,21 @@ export function act2Facts(player) {
   const f = {
     flags: p.flags, morvane: p.flags.includes("morvane_fallen"), path: heroOf(player).path ?? "none",
     ember: carries(player, EMBER) > 0, down: fallen(p.flags).length, chose: typeof chose === "number" ? chose : undefined,
+    now: world.getAbsoluteTime(),
   };
   if (!inAct2(f)) return { f };
   const home = homeId(player);
+  if (morningAfter(f.chose, f.now)) {
+    try { f.ironworks = ironworksFacts(home); } catch { f.ironworks = { standing: false, built: 0 }; }
+    f.haveIngot = carries(player, "minecraft:iron_ingot") > 0;
+    f.book = bookOf(player, p);
+  }
   const marked = (() => { try { return markedPlaces(); } catch { return {}; } })();
   const tree = hallOf(home)?.marks?.tree;
   const places = {
     aldous: aldousAt(home) ?? marked.ashen_chapterhouse, tree, chapterhouse: marked.ashen_chapterhouse, mag: marked.mags_hut ?? mirelight(),
+    hearth: elspethSpot(home), moneyer: nearestMoneyer(player.location), works: f.ironworks?.at,
+    shelf: libraryShelfOf(home), relic: f.book ? PLOT_PLAN.find((x) => x.name === f.book.plot)?.relic : undefined,
   };
   return { f, places, home };
 }
@@ -77,7 +116,20 @@ export function act2Of(player, fresh = false) {
   return out;
 }
 const forget = (player) => { if (player?.id) cache.delete(player.id); };
-for (const name of ["loreFlag", "pathChosen"]) on(name, (d) => forget(d?.player));
+for (const name of ["loreFlag", "pathChosen", "loreTomeRead"]) on(name, (d) => forget(d?.player));
+
+// Part 2: the first bar sold to the Moneyer while he is your step, and the Ironworks' first iron taken
+on("goodsSold", ({ player, job, id }) => {
+  if (job !== "moneyer" || !String(id).endsWith("iron_ingot") || !player) return;
+  if (act2Of(player, true).stage !== "moneyer") return;
+  say(player, "Moneyer", MONEYER_LINE);
+  setFlag(player, F2.sold);
+});
+on("ironworksTaken", ({ player }) => {
+  if (!player || act2Of(player, true).stage !== "collect") return;
+  setFlag(player, F2.collected);
+  player.sendMessage("§7Iron you didn't dig yourself. It still looks like iron.");
+});
 world.afterEvents.playerLeave.subscribe(({ playerId }) => { cache.delete(playerId); scenes.delete(playerId); });
 
 // For the quest tracker (quests/index.js): { on, step }; the step is shown as the main step
@@ -215,6 +267,23 @@ function pillar(player, target) {
   }
 }
 
+// The book's place: the thought when the step begins (the book may have been read long before), then, standing
+// there, what the Order says and what you see
+function thought(player, line) {
+  player.sendMessage(`§7§o${line}`);
+  try { player.onScreenDisplay.setActionBar(`§7§o${line}`); } catch { /* cosmetic */ }
+}
+function bookPlace(player, a) {
+  const b = a.f.book, there = a.places?.relic, words = BOOK_PLACES[b?.plot];
+  if (!b || !words) return;
+  if (!a.f.flags.includes(F2.bookThought)) { thought(player, BOOK_THOUGHT); setFlag(player, F2.bookThought); forget(player); return; }
+  if (!there || player.dimension.id !== OVERWORLD || Math.hypot(player.location.x - there.x, player.location.z - there.z) > BOOK_NEAR) return;
+  setFlag(player, F2.bookSeen);
+  forget(player);
+  thought(player, `The Order says ${words.order}`);
+  system.runTimeout(() => { try { thought(player, words.see); sfx(player, "ambient.cave", { volume: 0.3, pitch: 1.2 }); } catch { /* left */ } }, 80);
+}
+
 export function speakVoice(player) {
   sfx(player, "ambient.cave", { volume: 0.5, pitch: 0.7 });
   try { player.onScreenDisplay.setTitle("§r", { subtitle: `§7§o${VOICE}`, fadeInDuration: 30, stayDuration: 60, fadeOutDuration: 40 }); } catch { /* cosmetic */ }
@@ -226,7 +295,8 @@ onTick("act2", 20, () => {
     try {
       const a = act2Of(player);
       if (!a.f) continue;
-      if (a.on && PILLAR2.has(a.stage)) pillar(player, a.stage === "chapterhouse" ? a.places?.chapterhouse : a.places?.mag);
+      if (a.on && PILLAR2.has(a.stage)) pillar(player, { chapterhouse: a.places?.chapterhouse, mag: a.places?.mag, book_place: a.places?.relic }[a.stage]);
+      if (a.stage === "book_place") bookPlace(player, a);
       if (scenes.has(player.id) || player.dimension.id !== OVERWORLD) continue;
       if (voiceDue(a.f, world.getAbsoluteTime(), world.getTimeOfDay()) && !getState().active) { speakVoice(player); forget(player); }
     } catch (e) { console.warn(`[Act 2] ${e}`); }
@@ -244,19 +314,19 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   }
   const a = act2Of(player, true);
   const f = a.f ?? {};
-  player.sendMessage(`§6Act 2 stage:§f ${a.stage ?? "none"}\n§7path ${f.path} ember ${f.ember} bosses down ${f.down} chose ${f.chose ?? "-"} voice ${f.flags?.includes(F2.voice)}`);
+  player.sendMessage(`§6Act 2 stage:§f ${a.stage ?? "none"}\n§7path ${f.path} ember ${f.ember} bosses down ${f.down} chose ${f.chose ?? "-"} voice ${f.flags?.includes(F2.voice)} ironworks ${f.ironworks ? `${f.ironworks.standing}/${f.ironworks.built}` : "-"}`);
   if (a.step) player.sendMessage(`§6${a.step.title}§7 ${a.step.hint}`);
 });
 
 addTests("act2", {
   "Act 2: Aldous, the Tree, then the road you chose": () => {
-    const met = { flags: [F2.aldous], path: "none", ember: true, down: 0 };
+    const met = { flags: [F2.aldous], path: "none", ember: true, down: 0, chose: 30000, now: 31000 }; // before the morning after
     assertEqual(act2Stage({ ...met, flags: [] }), undefined, "Act 2 starts with Sir Aldous");
     assertEqual(act2Stage(met), "talk_aldous");
     const sent = { ...met, flags: [F2.aldous, F2.tree] };
     assertEqual(act2Stage(sent), "tree");
     assertEqual(act2Stage({ ...sent, ember: false }), undefined, "no Ember, no Tree step");
-    assertEqual(act2Stage({ ...sent, flags: [...sent.flags, F2.wait] }), undefined, "Not yet: no road");
+    assertEqual(act2Stage({ ...sent, flags: [...sent.flags, F2.wait], chose: 30000, now: 31000 }), undefined, "Not yet: no road, and the bills wait for morning");
     assertEqual(act2Stage({ ...sent, path: "knight" }), "chapterhouse");
     assertEqual(act2Stage({ ...sent, path: "knight", flags: [...sent.flags, F2.cael] }), undefined);
     assertEqual(act2Stage({ ...sent, path: "marked" }), "mag");
@@ -264,13 +334,44 @@ addTests("act2", {
     assertEqual(act2Stage({ ...sent, path: "witch" }), undefined, "a regional role: no Ember road");
     assertEqual(act2Stage({ ...sent, down: 1 }), undefined, "worlds past their first boss keep their story");
   },
-  "Act 2: every step names its source and pins a place": () => {
-    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 } };
-    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag"]) {
-      const s = act2Step(stage, {}, p);
-      assert(s?.title && s.hint && s.target, `${stage} has a line, a hint and a pin`);
-      assert(/Aldous|Elspeth/.test(s.hint), `${stage} says who sent you`);
+  "Act 2: the morning after, Elspeth's bills, the Moneyer, the Ironworks": () => {
+    const done = { flags: [F2.aldous, F2.tree, F2.wait], path: "none", down: 0, chose: 30000 };
+    assertEqual(act2Stage({ ...done, now: 40000 }), undefined, "the bills wait for the morning after the choice");
+    assertEqual(act2Stage({ ...done, now: 48000 }), "talk_bills");
+    assertEqual(act2Stage({ ...done, chose: undefined, now: 0 }), "talk_bills", "a choice from before this counts as long ago");
+    const kn = { ...done, path: "knight", flags: [F2.aldous, F2.tree], now: 99000 };
+    assertEqual(act2Stage(kn), "chapterhouse", "your road comes first");
+    const billed = { ...done, now: 50000, flags: [...done.flags, F2.bills] };
+    assertEqual(act2Stage(billed), "moneyer");
+    const sold = { ...billed, flags: [...billed.flags, F2.sold] };
+    assertEqual(act2Stage({ ...sold, ironworks: { standing: false, built: 0 } }), "ironworks");
+    assertEqual(act2Stage({ ...sold, ironworks: { standing: true, built: 0 } }), "ironworks", "still rising");
+    assertEqual(act2Stage({ ...sold, ironworks: { standing: true, built: 1 } }), "collect");
+    assertEqual(act2Stage({ ...sold, ironworks: { standing: true, built: 1 }, flags: [...sold.flags, F2.collected] }), undefined);
+  },
+  "Act 2: the book's place, after the Ironworks": () => {
+    const base = { flags: [F2.aldous, F2.tree, F2.wait, F2.bills, F2.sold, F2.collected], path: "none", down: 0, now: 99000, ironworks: { standing: true, built: 1 } };
+    assertEqual(act2Stage(base), undefined, "a plot without its own books has no book step");
+    const book = { plot: "Harrowford", title: "The Ferryman's Tally", read: false };
+    assertEqual(act2Stage({ ...base, book }), "read_book");
+    assertEqual(act2Stage({ ...base, book: { ...book, read: true } }), "book_place");
+    assertEqual(act2Stage({ ...base, book: { ...book, read: true }, flags: [...base.flags, F2.bookSeen] }), undefined);
+    for (const plot of Object.keys(PLOT_LORE)) {
+      const w = BOOK_PLACES[plot];
+      assert(w?.place && w.order && w.see, `${plot} has a place, the Order's word and what you see`);
+      assert(!/hollow|truce|oswin|edda|morvane/i.test(w.place + w.order + w.see), `${plot}'s lines name nothing Act 2 keeps back`);
+      assert(PLOT_PLAN.find((x) => x.name === plot)?.relic, `${plot} has a landmark to ride to`);
     }
+  },
+  "Act 2: every step names its source and pins a place": () => {
+    const p = { aldous: { x: 1, z: 2 }, tree: { x: 3, z: 4 }, chapterhouse: { x: 5, z: 6 }, mag: { x: 7, z: 8 }, hearth: { x: 9, z: 9 }, moneyer: { x: 0, z: 0, name: "Kingsrest" }, works: { x: 2, z: 2 }, shelf: { x: 1, z: 1 }, relic: { x: 3, z: 3 } };
+    const f = { book: { plot: "Harrowford", title: "The Ferryman's Tally", read: true } };
+    for (const stage of ["talk_aldous", "tree", "chapterhouse", "mag", "talk_bills", "moneyer", "ironworks", "collect", "read_book", "book_place"]) {
+      const s = act2Step(stage, f, p);
+      assert(s?.title && s.hint && s.target, `${stage} has a line, a hint and a pin`);
+      assert(/Aldous|Elspeth|Moneyer|morning|night|book|Somebody/.test(s.hint), `${stage} says who sent you`);
+    }
+    assert(nearestMoneyer({ x: 0, z: 0 })?.name, "there is a Moneyer to send you to");
     for (const id of ROAD_ORDER) assert(panelText(id).includes(ROADS[id].name) && ROADS[id].confirm.go && MOMENT[id].length, `${id} has a panel, a confirm and a moment`);
   },
   "Act 2: the voice comes the first deep night after the choice, once": () => {
