@@ -5,11 +5,13 @@
 Mateo (2026-11-13): "There should be a custom building for settlements in emberwaste as a dragon stable. That's
 also where there is an attached nursery. That's where the dragon hatching blocks are."
 
+Shallow enough for a town's Dragon plot (23 x 13 with the awnings, 2026-11-14: every building goes on a plot).
+
 A kasbah stable (regions/emberwaste.md, preset ember_sandstone, flat roofs with vigas and a parapet):
-  the stable hall  15 x 15, two storeys: a wide arched way in for a grown dragon, a 5-wide aisle, three big
-                   stalls either side (straw, a water trough, a meat hook), the tack corner by the door, and a
-                   loft upstairs (hay, the keeper's bunk, saddles). Its flat roof is the landing terrace.
-  the nursery      7 x 11, joined on the east, one storey under a small blue-green dome: three Hatching
+  the stable hall  15 x 11, two storeys: a wide arched way in for a grown dragon, a 5-wide aisle, two big
+                   stalls on the west and one on the east (straw, a water trough, a meat hook), the tack corner by
+                   the door, and a loft upstairs (hay, the keeper's bunk, saddles). Its flat roof is the landing terrace.
+  the nursery      7 x 9, joined on the east, one storey under a small blue-green dome: three Hatching
                    Braziers (siege:hatching_brazier) on a warm sand bed, where eggs are set to hatch.
 
 Frame (settle_buildings.py): front faces south (+z), the front wall on z = 0, the Dragon Roost block just outside
@@ -20,9 +22,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def noise(*blocks, scale=3): return {"ladder": list(blocks), "axis": "noise", "scale": scale}
 
-HALL = [-7, -14, 7, 0]           # 15 x 15
-NURSERY = [7, -12, 13, -2]       # 7 x 11, sharing the hall's east wall: the whole build is x -7..13 (21 wide)
-DOME = [10, -7]                  # over the middle of the nursery
+HALL = [-7, -10, 7, 0]           # 15 x 11
+NURSERY = [7, -9, 13, -1]        # 7 x 9, sharing the hall's east wall: the whole build is x -7..13 (21 wide)
+DOME = [10, -5]                  # over the middle of the nursery
 # Small deep windows (the region's rule): none low on the front (the arch is the front), two in the loft under
 # awnings; high in each stall's back wall; the loft lit from both sides and the back.
 W = lambda at, storey, h=2: {"at": at, "storey": storey, "w": 1, "h": h}
@@ -40,7 +42,7 @@ def spec():
     return {
         "name": "dragon_stable_emberwaste",
         "card": {"title": "Dragon Stable", "sub": "Emberwaste, stable hall and nursery", "region": "emberwaste",
-                 "where": "Emberwaste settlements, raised by the Dragon Roost block", "kind": "Work",
+                 "where": "Emberwaste settlements, raised on a Dragon plot from its Plot Marker", "kind": "Work",
                  "blurb": "A kasbah stable for dragons: a wide arched way in, six big stalls off a broad aisle, a tack corner "
                           "and a hay loft, and a flat roof to land on. The nursery joined on the east, under a small blue-green "
                           "dome, holds three Hatching Braziers where eggs are set to hatch."},
