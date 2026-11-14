@@ -27,7 +27,6 @@ export function rosterText(people, rulers = {}) {
   const lines = [];
   const here = (r) => r && people.some((p) => p.id === r.id);
   if (rulers.warden) lines.push(here(rulers.warden) ? `§5The Hollow's ruler, ${rulers.warden.name}, is §aonline§5.` : `§5The Hollow's ruler, ${rulers.warden.name}, is §7away§5.`);
-  else lines.push("§8No player rules the Hollow.");
   if (rulers.crown) lines.push(here(rulers.crown) ? `§6${rulers.crown.title} ${rulers.crown.name} is §aonline§6.` : `§6${rulers.crown.title} ${rulers.crown.name} is §7away§6.`);
   lines.push("", `§f${people.length} online`);
   for (const p of [...people].sort((a, b) => (b.level ?? 0) - (a.level ?? 0) || a.name.localeCompare(b.name))) {
@@ -114,6 +113,6 @@ api.addTests("roster", {
     api.assert(text.includes("Sovereign Zed is §7away"), "sovereign away");
     api.assert(text.includes("2 online") && text.includes("Commoner") && text.includes("rules the Hollow"), "rows");
     api.assert(text.indexOf("Ada§7") < text.indexOf("Bo§7"), "highest Renown first");
-    api.assert(rosterText([], {}).includes("No player rules the Hollow"), "empty");
+    api.assert(!/Hollow/.test(rosterText([], {})), "nothing names the Hollow while no one rules it");
   },
 });

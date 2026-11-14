@@ -7,7 +7,7 @@ import { tickTasks } from "../core/loop.js";
 import * as ids from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { withTestState } from "./state.js";
-import { TIERS, tierOf, settlementAt, isAlly, colorTaken, freeColor, foreignSettlement } from "./territory.js";
+import { TIERS, tierOf, settlementAt, isAlly, canManage, homeOf, homeAt, colorTaken, freeColor, foreignSettlement } from "./territory.js";
 import { FACTIONS, MODIFIERS, COUNTERS, buyArmy } from "./warplan.js";
 import { GUARD_LIMIT, GUARD_ARMOR } from "./guards.js";
 import { toughness, wallHp, WALL_HP, REINFORCE_ITEMS, TIER_NAMES } from "./walls.js";
@@ -35,6 +35,7 @@ addTests("siege", {
   "settings are sensible numbers": () => {
     for (const [k, v] of Object.entries(SETTINGS)) assert(typeof v === "number" && v > 0, `${k} = ${v}`);
     assert(SETTINGS.firstSiegeDay >= SETTINGS.siegeEveryNNights, "first siege day before the first siege night");
+    assertEqual(SETTINGS.firstSiegeDay % SETTINGS.siegeEveryNNights, 0, "the first siege day is itself a siege night, so the guide's \"third night\" is true");
   },
   "settlement tiers grow in order": () => {
     for (let i = 1; i < TIERS.length; i++) {
@@ -117,6 +118,13 @@ addTests("siege", {
       assertEqual(foreignSettlement(player("bob"), { x: 1, y: 64, z: 1 }, "minecraft:overworld"), undefined, "allies may build");
       assertEqual(foreignSettlement(player("carol"), { x: 1, y: 64, z: 1 }, "minecraft:overworld"), "alice");
       assertEqual(foreignSettlement(player("carol"), { x: 1, y: 64, z: 1 }, "minecraft:nether"), undefined);
+      // a writ ally runs the shared settlement (Mateo, 2026-11-13)
+      assert(canManage("alice", "alice") && canManage("alice", "bob") && !canManage("alice", "carol") && !canManage(undefined, "bob"));
+      assertEqual(homeOf("alice"), "alice");
+      assertEqual(homeOf("bob"), "alice", "an ally with no keep acts for the shared one");
+      assertEqual(homeOf("dave"), undefined);
+      assertEqual(homeAt(player("bob"), { x: 1, y: 64, z: 1 }), "alice");
+      assertEqual(homeAt(player("carol"), { x: 1, y: 64, z: 1 }), "carol", "on someone else's land you still act for your own");
     });
   },
   "banner colors stay unique": () => {

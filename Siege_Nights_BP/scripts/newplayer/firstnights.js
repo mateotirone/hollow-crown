@@ -7,7 +7,7 @@
 // firstStep(f) is pure (tests run it in Node); firstFacts(player) reads the world for it (quests/index.js asks).
 
 import { world } from "@minecraft/server";
-import { onTick, on, keepOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, on, keepOf, homeOf, nextSiegeDay, guardCount, barracksOf, isReady, addTests, assert, assertEqual } from "../siege/api.js";
 import { ballistasOf } from "../siege/machines.js";
 import { fallenRecord } from "../siege/keep.js";
 import { plotFor } from "../settle/founding.js";
@@ -23,7 +23,7 @@ export function firstStep(f) {
   if (!f || (f.wins ?? 0) > 0) return undefined;
   const when = f.days === undefined ? "" : f.days <= 0 ? "The first siege comes tonight." : `First siege in ${f.days} day${f.days === 1 ? "" : "s"}.`;
   const step = (id, title, hint, target) => ({ id: `first_${id}`, title, hint, target, note: when });
-  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Place your Keep Banner on your Plot Stone, the stone in the middle of your plot. That makes the land yours. Raiders come from the fifth night." };
+  if (!f.keep) return { id: "keep", title: "Found your settlement", hint: "Place your Keep Banner on your Plot Stone, the stone in the middle of your plot. That makes the land yours. Raiders come on the third night." };
   if (!f.barracks && !f.ballistas) {
     const pin = f.plot ? { name: "Barracks plot", x: f.plot.x, z: f.plot.z, dim: "minecraft:overworld" } : undefined;
     if (f.plot?.state === "rising") return step("rising", "Wait for your Barracks", "Builders are raising it on its plot, a layer at a time. When it stands, the Barracks block is by its front door.", pin);
@@ -37,15 +37,16 @@ export function firstStep(f) {
 }
 
 export function firstFacts(player) {
-  const keep = keepOf(player.id);
+  const home = homeOf(player.id) ?? player.id; // a writ ally follows the settlement they share
+  const keep = keepOf(home);
   if (keep && (keep.wins ?? 0) > 0) return undefined;
   const f = { keep: !!keep, wins: keep?.wins ?? 0 };
   if (!keep) return f;
   try { f.days = Math.max(0, nextSiegeDay() - world.getDay()); } catch { /* not ready */ }
-  try { f.barracks = barracksOf(player.id).length > 0; } catch { /* not ready */ }
-  try { f.guards = guardCount(player.id); } catch { /* not ready */ }
-  try { f.ballistas = ballistasOf(player.id).length; } catch { /* not loaded */ }
-  try { f.plot = plotFor(player.id, "barracks"); } catch { /* no town layout */ }
+  try { f.barracks = barracksOf(home).length > 0; } catch { /* not ready */ }
+  try { f.guards = guardCount(home); } catch { /* not ready */ }
+  try { f.ballistas = ballistasOf(home).length; } catch { /* not loaded */ }
+  try { f.plot = plotFor(home, "barracks"); } catch { /* no town layout */ }
   try { f.price = plotPrice("barracks"); } catch { /* no wallet yet */ }
   return f;
 }
@@ -56,7 +57,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ player, block }) => {
 });
 
 const FIRST_DAYS = [
-  "§6Your settlement stands. Before the first siege on the fifth night:",
+  "§6Your settlement stands. Before the first siege on the third night:",
   "§7 1. Take what you need from the §ffounder's chest§7 in your house.",
   "§7 2. Build a §fBarracks§7: go to your big empty plot, click its §fPlot Marker§7 (the post on it), choose Barracks and Raise it.",
   "§7 3. When it stands, click the §fBarracks block§7 by its door and §ftrain guards§7 (40 Regals each).",

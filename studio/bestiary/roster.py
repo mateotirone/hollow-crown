@@ -942,7 +942,7 @@ def m_seep(m):
 mob(id="seep", name="Seep", family="seep", model=m_seep, plan="none", material="entity_alphablend",
     pal=P(light={"c": (176, 140, 236), "style": "glow"}, dark={"c": (26, 22, 40, 235), "style": "stone"}, stain={"c": (40, 34, 60, 150), "style": "stone"}),
     hp=60, static=True, collision=(1.0, 2.4), egg=("#1a1628", "#b08cec"),
-    lore="A place where the Hollow is pushing through. Things come out of it. Left alone, it widens.")
+    lore="A place where something below is pushing through. Things come out of it. Left alone, it widens.")
 
 def m_bolt(m):
     m.bone("root", [0, 0, 0]); m.box("root", [-1.5, 0, -1.5], [3, 3, 3], "orb")
