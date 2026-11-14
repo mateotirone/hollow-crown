@@ -10,7 +10,8 @@
 //   WALL_LEVELS, MAX_WALL (walldata.js)   wallCap(owner) -> highest level this settlement may raise
 //   answers the town hall's "wallInfo" and "wallUpgrade" events (contract in townhall/flyby.js)
 //   on("wallProgress", ({ id, level, done, total }))   on("wallBuilt", ({ id, level, first }))   on("wallWatchBuilt", ({ id, k }))
-// Watchtowers (Mateo, 2026-11-13): levels 1-6 get four small watchtowers astride the line (walldata.js WATCH), raised
+// Watchtowers (Mateo, 2026-11-13): levels 1-6 get four watch posts astride the line (walldata.js WATCH; the Low Palisade
+// a small lookout stand, Mateo 2026-11-14, the towers from level 2), raised
 // once the wall is up and taken down before the Watch Wall's stone towers rise in their place or the wall moves out.
 // The wall record keeps them as w.watch = [{ k, origin, forward, style, built }].
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
@@ -22,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -326,7 +327,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape, ou
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
-    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt }); // walldata.js radiusAt reads them
+    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt, ...(outline.tight ? { tight: outline.tight } : {}) }); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -425,15 +426,15 @@ const goingDown = new Set(); // wall ids whose watchtowers are coming down
 export function raiseWatch(id) {
   const w = walls()[id];
   if (!w || jobs.has(id) || goingDown.has(id) || !(w.level > 0) || !w.ground) return;
-  const want = hasWatch(w.level) ? watchSpots(w, w.radius, w.gate, w.ground) : [];
+  const want = watchSpots(w, w.radius, w.gate, w.ground, w.level);
   w.watch ??= [];
-  const stale = w.watch.filter((t) => t.style !== w.style || !want.some((s) => s.k === t.k && sameSpot(t, s)));
+  const stale = w.watch.filter((t) => t.style !== w.style || !want.some((s) => s.k === t.k && (t.kind ?? "tower") === s.kind && sameSpot(t, s)));
   if (stale.length) return takeDownWatch(id, stale, () => raiseWatch(id));
   for (const s of want) {
     let t = w.watch.find((x) => x.k === s.k);
     if (t?.built || buildFor(watchJobId(id, s.k))) continue;
-    if (!t) { t = { k: s.k, origin: s.origin, forward: s.forward, style: w.style }; w.watch.push(t); }
-    const plan = watchPlan(w.style);
+    if (!t) { t = { k: s.k, kind: s.kind, origin: s.origin, forward: s.forward, style: w.style }; w.watch.push(t); }
+    const plan = watchPlan(w.style, s.kind);
     startBuild({
       id: watchJobId(id, s.k), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.style, perTick: WATCH_PER_TICK,
       onDone: () => { const now = walls()[id]?.watch?.find((x) => x.k === s.k && sameSpot(x, s)); if (now) { now.built = true; save(); } emit("wallWatchBuilt", { id, k: s.k }); },
@@ -451,7 +452,7 @@ function takeDownWatch(id, towers, done = () => {}) {
     const dim = world.getDimension(OVERWORLD);
     let n = 0;
     for (const t of towers) {
-      for (const c of watchCells(t.style, t.origin, t.forward)) {
+      for (const c of watchCells(t.style, t.origin, t.forward, t.kind ?? "tower")) {
         for (let tries = 0; tries < 30 && !dim.getBlock(c); tries++) for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
         try { setBlock(dim, c.x, c.y, c.z, c.below ? earth : air); } catch { /* not loaded */ }
         if (++n % 120 === 0) yield;

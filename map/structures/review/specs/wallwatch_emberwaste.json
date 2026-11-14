@@ -4,7 +4,7 @@
   "title": "Wall watchtower",
   "sub": "Emberwaste",
   "region": "emberwaste",
-  "where": "Every settlement wall from the Low Palisade to the Battlement Wall: four astride the wall line",
+  "where": "Every settlement wall from the Palisade (level 2) to the Battlement Wall: four astride the wall line (the Low Palisade gets lookout stands)",
   "kind": "Defence",
   "blurb": "A small two-storey tower with an open lookout on corbels and the region's tower roof; a ladder inside climbs to the deck, where a guard keeps watch."
  },
