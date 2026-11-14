@@ -21,7 +21,7 @@ export const ELSPETH_TAG = "siege_lore_npc_elspeth";
 export const F = {
   met: "elspeth_met", workshop: "elspeth_workshop", barracks: "elspeth_barracks", wheat: "elspeth_wheat",
   station: "elspeth_station", sundown: "elspeth_sundown", ravens: "elspeth_ravens", raid: "elspeth_raid",
-  ember: "elspeth_ember", wrenMet: "wren_met", wrenLead: "wren_lead", aldous: "aldous_met",
+  ember: "elspeth_ember", wrenMet: "wren_met", wrenLead: "wren_lead", aldous: "aldous_met", mine: "elspeth_mine",
 };
 
 // Is Act 1 this player's story right now? Not after Sir Aldous, and not for a keep that held sieges before
@@ -36,7 +36,9 @@ export function inAct1(f) {
 //       raid and is not up again yet), chest (founder's chest opened), workshop (opened the Workshop), first (the
 //       first-nights facts: barracks, plot, price, guards, ballistas), sold (wheat sold), bread (baked since she
 //       asked), station { found }, siegeDay (tonight is this keep's first siege night), time (of day), home (inside
-//       your walls), ember: "none" | "fallen" | "held" (picked up or used), aldousHere }
+//       your walls), ember: "none" | "fallen" | "held" (picked up or used), aldousHere,
+//       mine (found the mine shaft), ore (brought back coal and iron), smelted (has smelted iron),
+//       wall (the settlement has a wall), mended (the wall was mended or found whole after the raid) }
 export function act1Stage(f) {
   if (!inAct1(f)) return undefined;
   const has = (flag) => f.flags.includes(flag);
@@ -61,11 +63,12 @@ export function act1Stage(f) {
     if (!f.bread) return "bread";
     if (!has(F.station)) return "talk_station";
     if (f.station && !f.station.found) return "station";
-    return "rest";
+    return mineStage(f) ?? "rest";
   }
   if (!has(F.raid)) return f.lost ? "talk_raid_lost" : "talk_raid_won";
   if (!f.keep) return "rebanner";
-  if (!has(F.wrenLead)) return "wren";
+  if (f.wall && !f.mended && !has(F.wrenLead)) return "mend";
+  if (!has(F.wrenLead)) return mineStage(f) ?? "wren"; // a mine left unfinished on day 2 comes before the long ride
   if (f.ember === "none" || !f.ember) return "ride_home";
   if (f.ember === "fallen") return "find_ember";
   if (!has(F.ember)) return "ask_ember";
@@ -73,12 +76,22 @@ export function act1Stage(f) {
 }
 export const WHEAT_GOAL = 16;
 
+// Day 2's mine: Elspeth tells you of the old shaft, you find it, bring back coal and iron, and smelt the iron
+function mineStage(f) {
+  if (!f.flags.includes(F.mine)) return "talk_mine";
+  if (!f.mine) return "mine";
+  if (!f.ore) return "ore";
+  if (!f.smelted) return "smelt";
+  return undefined;
+}
+
 // The stages where Elspeth holds the next step: the tracker says "Talk to Old Elspeth"
-export const TALK = new Set(["meet", "talk_workshop", "talk_barracks", "talk_wheat", "talk_station", "talk_sundown", "talk_supper", "talk_raid_won", "talk_raid_lost", "ask_ember"]);
+export const TALK = new Set(["meet", "talk_workshop", "talk_barracks", "talk_wheat", "talk_station", "talk_mine", "talk_sundown", "talk_supper", "talk_raid_won", "talk_raid_lost", "ask_ember"]);
 // The stages whose place is a story place: a light pillar stands over it (act1.js)
 export const PILLAR = new Set(["wren", "find_ember"]);
 
-// The tracker's line. p = places: { hearth, stone, chest, workshop, farmer, station, keep, millbrook, ember, aldous }
+// The tracker's line. p = places: { hearth, stone, chest, workshop, farmer, station, keep, millbrook, ember, aldous,
+// mine (the pithead), furnace (the founder's house), mason }
 // each { x, z } (or undefined); names the step's person for the "!" marker.
 export function act1Step(stage, f = {}, p = {}) {
   if (!stage || stage === "rest") return undefined;
@@ -105,6 +118,12 @@ export function act1Step(stage, f = {}, p = {}) {
     case "bread": return step("Bake bread", "Keep the rest of the wheat, as she said. Three wheat at a crafting table makes a loaf.");
     case "talk_station": return talk("Talk to Old Elspeth", "The bread is baked. She'll want to hear it.");
     case "station": return step("Find your railway station", "Elspeth said the rail runs past your land. Ride your cob there: blow the Horse Whistle and it comes from anywhere.", at("Station", p.station));
+    case "talk_mine": return talk("Talk to Old Elspeth", "You've found the station. She'll want to hear about it.");
+    case "mine": return step("Find the old mine shaft", "Elspeth said there's an old shaft past your wall, with a wheel over it.", at("Mine shaft", p.mine));
+    case "ore": return step("Bring back coal and iron", "Take the pickaxe from the founder's chest down the shaft. Coal is black-flecked stone; iron is speckled tan.", at("Mine shaft", p.mine),
+      { note: [f.haveCoal ? "Coal: yes" : "Coal: not yet", f.haveIron ? "Iron: yes" : "Iron: not yet"].join(". ") + "." });
+    case "smelt": return step("Smelt your iron at the furnace", "Elspeth said there's a furnace in your house. Iron in the top, coal underneath.", at("Furnace", p.furnace));
+    case "mend": return step("Mend the wall", "Elspeth said: see to your wall before you go. The Mason in the yard will mend it, for a price.", at("The Mason", p.mason));
     case "talk_sundown": return talk("Talk to Old Elspeth", "A new day. She'll have something to say about it.");
     case "home": return step("Be home by sundown", "Elspeth is putting supper on. Be inside your walls before dark.", at("Home", p.keep));
     case "raven": return step("Follow the raven home", "That bird keeps looping back. It wants you home. Blow your Horse Whistle and ride.", at("Home", p.keep));

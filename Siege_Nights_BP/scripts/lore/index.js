@@ -41,7 +41,7 @@ import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
-import "./library.js";
+import { slotAt } from "./library.js";
 import "./ledger.js";
 import "./journal.js";
 import "./voices.js";
@@ -68,6 +68,16 @@ import { dialogueProblems, SCRIPT_CLUES } from "./npcs.js";
 import "./showcase.js";
 
 addTests("lore", {
+  "Archive Shelf: a click on the front picks the slot under it, as the player sees the shelf": () => {
+    // a shelf facing north is seen from the north: the viewer's left is east (+x)
+    assertEqual(slotAt("north", "North", { x: 0.9, y: 0.8, z: 0 }), 0);
+    assertEqual(slotAt("north", "North", { x: 0.1, y: 0.2, z: 0 }), 5);
+    assertEqual(slotAt("south", "South", { x: 0.1, y: 0.8, z: 1 }), 0);
+    assertEqual(slotAt("east", "East", { x: 1, y: 0.2, z: 0.5 }), 4);
+    assertEqual(slotAt("west", "West", { x: 0, y: 0.8, z: 0.95 }), 2);
+    assertEqual(slotAt("north", "Up", { x: 0.5, y: 1, z: 0.5 }), undefined); // the top is not the front
+    assertEqual(slotAt("north", "South", { x: 0.5, y: 0.5, z: 1 }), undefined);
+  },
   "local lore: every one of the twelve plots has its past, three books and a mystery it can solve": () => {
     assertEqual(Object.keys(PLOT_LORE).sort(), PLOT_PLAN.map((p) => p.name).sort());
     assertEqual(LOCAL_TOMES.length, 36);
