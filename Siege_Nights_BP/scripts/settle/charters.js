@@ -8,7 +8,7 @@
 
 import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_MIN_BOX, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK, ONE_EACH } from "./config.js";
 
-export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works" };
+export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works", D: "Dragon", B: "Barn", O: "Wood" };
 
 export const slotClass = (slot) => (slot.size === "M" && slot.long ? "ML" : slot.size);
 // [width along the door side, depth] of a slot with a box and door (undefined without them)
