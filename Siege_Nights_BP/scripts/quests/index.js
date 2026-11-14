@@ -34,6 +34,7 @@ import { firstFacts } from "../newplayer/firstnights.js";
 import { farmerFacts } from "../economy/api.js";
 import { cobFacts } from "../horses/starter.js";
 import { act1Quest } from "../newplayer/act1.js";
+import { act2Quest } from "../newplayer/act2.js";
 import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
 import { markTalk, talkSpot, forget } from "./marks.js";
 import "./tests.js";
@@ -116,6 +117,7 @@ function factsOf(player) {
     farmer: (() => { try { return farmerFacts(player); } catch { return undefined; } })(),
     cob: (() => { try { return cobFacts(player); } catch { return undefined; } })(),
     act1: (() => { try { return act1Quest(player); } catch { return undefined; } })(),
+    act2: (() => { try { return act2Quest(player); } catch { return undefined; } })(),
   };
 }
 

@@ -124,6 +124,11 @@ def ship_cells(s):
         for w in range(-hw, hw + 1):
             if C.get((u, t, w), ("",))[0] in (M["stripe"],): edge.add((u, w))
     for (u, w) in edge: put(u, top(u) + 1, w, M["rail"])
+    # deck lights: lanterns standing on the rail posts every few blocks along both sides and round the castle decks,
+    # so the decks are lit from the rail (never a lantern chained down from a crow's nest or a yard, 2026-11-14)
+    for (u, w) in edge:
+        if abs(w) == half(u, top(u)) and u % 5 == 2 and 0 < u < L - 2:
+            put(u, top(u) + 2, w, "lantern")
 
     # ---- the castles: front walls, doors, windows, stairs up
     trim = M["trim"]
@@ -253,6 +258,9 @@ def ship_cells(s):
     for (u, w) in ((22, 2), (22, -2), (24, 3), (35, 2), (34, -2), (20, -4)):
         put(u, D, w, "barrel", facing="up")
     put(22, D + 1, 2, "barrel", facing="up")
+    for (u, y, w) in ((22, D + 2, 2), (24, D + 1, 3), (20, D + 1, -4), (35, D + 1, 2), (34, D + 1, -2)):
+        put(u, y, w, "lantern")                              # lanterns on the deck cargo light the waist under the sails
+    put(31, D + 2, 0, "lantern")                             # and one on the capstan
 
     # ---- stairs down to the lower deck (starboard of the waist), with a rail round the well
     su = A + 1

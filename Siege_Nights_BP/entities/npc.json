@@ -12,7 +12,7 @@
           "type": "int",
           "range": [
             0,
-            97
+            102
           ],
           "default": 0,
           "client_sync": true
@@ -365,6 +365,21 @@
             },
             {
               "variant": 96
+            },
+            {
+              "variant": 97
+            },
+            {
+              "variant": 98
+            },
+            {
+              "variant": 99
+            },
+            {
+              "variant": 100
+            },
+            {
+              "variant": 101
             }
           ]
         }

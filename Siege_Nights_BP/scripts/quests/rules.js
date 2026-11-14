@@ -126,6 +126,7 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 //                                                                       station: your railway station (stationQuest)
 //   cob: your starter horse until first ridden { name, at?: { x, z }, dim }
 //   act1: { on, step } while Act 1 is this player's story (newplayer/act1.js)
+//   act2: { on, step } while an Act 2 step is this player's story (newplayer/act2.js): shown as the main step
 // }
 export function questsFor(f) {
   // Act 1 (Mateo 2026-11-14): one line, the step Old Elspeth (or Wren, or your own thought) gave you, and nothing
@@ -139,7 +140,7 @@ export function questsFor(f) {
   if (ride) out.push(ride);
   const farm = farmerQuest(f);
   if (farm) out.push(farm);
-  const main = mainQuest(f);
+  const main = (f.act2?.on && f.dim !== UNDERTOW ? f.act2.step : undefined) ?? mainQuest(f);
   if (main) out.push(main);
   // your own railway station: shown until you have stood on its platform, even in the first nights (playtest
   // 2026-11-13: "Where's the train station?"), and the only side step then
