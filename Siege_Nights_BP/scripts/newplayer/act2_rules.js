@@ -24,6 +24,8 @@ export const F2 = {
   bills: "elspeth_bills", // Elspeth pointed at the upkeep and sent you to the Moneyer
   sold: "moneyer_ironworks", // you sold the Moneyer iron and he told you to build an Ironworks
   collected: "act2_iron", // you took the Ironworks' first iron
+  bookThought: "act2_book_thought", // the first local book made you think "That's here. That's my land."
+  bookSeen: "act2_book_seen", // you rode to the place it names and saw it for yourself
 };
 export const ELSPETH_TAG = "siege_lore_npc_elspeth";
 export const MONEYER_TAG = "siege_job_moneyer";
@@ -52,6 +54,8 @@ export function act2Stage(f) {
   if (!has(F2.sold)) return "moneyer";
   if (!f.ironworks?.built) return "ironworks";
   if (!has(F2.collected)) return "collect";
+  // part 3: the book's place
+  if (f.book && !has(F2.bookSeen)) return f.book.read ? "book_place" : "read_book";
   return undefined;
 }
 // Part 1: Aldous, the Tree, and the road you chose; "done" once that is behind you (or you said "Not yet")
@@ -67,13 +71,13 @@ function roadStage(f, has) {
 }
 
 // Stages whose place is a story place: a light pillar stands over it
-export const PILLAR2 = new Set(["chapterhouse", "mag"]);
+export const PILLAR2 = new Set(["chapterhouse", "mag", "book_place"]);
 
 // The stages where Elspeth holds the next step
 export const TALK2 = new Set(["talk_bills"]);
 
-// The tracker's line. p = places: { aldous, tree, chapterhouse, mag, hearth, moneyer, works } each { x, z } (or
-// undefined); moneyer also has name (the town)
+// The tracker's line. p = places: { aldous, tree, chapterhouse, mag, hearth, moneyer, works, shelf, relic } each
+// { x, z } (or undefined); moneyer also has name (the town). f.book = { plot, title, read } (part 3)
 export function act2Step(stage, f = {}, p = {}) {
   const at = (name, spot) => (spot ? { name, x: spot.x, z: spot.z, dim: "minecraft:overworld" } : undefined);
   const step = (title, hint, target, extra = {}) => ({ id: `act2_${stage}`, title, hint, target, ...extra });
@@ -94,9 +98,50 @@ export function act2Step(stage, f = {}, p = {}) {
       ? "It's going up. The Ore Pit is dug while you wait."
       : "The Moneyer said: put up an Ironworks and let it dig for you. Use the Plot Marker on your Works yard and pick the Ironworks.", at("Works yard", p.works));
     case "collect": return step("Collect your iron", "The Ore Pit digs through the night. At dawn, click the Ironworks block in the yard and take what it dug.", at("Ironworks", p.works));
+    case "read_book": return step(`Read "${f.book?.title ?? "the old book"}"`, "Somebody left a book on your Library shelf a long time ago. It's about this land.",
+      at("Library shelf", p.shelf));
+    case "book_place": return step(`Ride to ${BOOK_PLACES[f.book?.plot]?.place ?? "the place in the book"}`, `The book "${f.book?.title ?? "from your shelf"}" names a place on your land. That's here. That's your land.`,
+      at(cap(BOOK_PLACES[f.book?.plot]?.place ?? "The place in the book"), p.relic));
     default: return undefined;
   }
 }
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+// ---------- part 3: the book's place ----------
+// Each plot's first local book (lore/data/plots.js) names somewhere on the plot: its old landmark (PLOT_PLAN relic,
+// built by landmarks/sites.js). Riding there, you remember what the Order says happened, and see that it can't be
+// so. Small true things only: nothing names the Hollow, the truce, Oswin or Edda.
+//   place  where the tracker sends you ("Ride to <place>")
+//   order  what the Order says (its histories, its friars, its riders)
+//   see    your own thought, standing there
+export const BOOK_NEAR = 14; // blocks from the landmark that count as "there"
+export const BOOK_THOUGHT = "That's here. That's my land.";
+export const BOOK_PLACES = {
+  Harrowford: { place: "the ford meadow", order: "the Grey Host drowned at the Alder ford and the river took the bodies.",
+    see: "Rusted spearheads in the grass, and a buckle still done up. A river that takes a man and leaves his belt fastened on the bank." },
+  Oakmere: { place: "the leaning oaks", order: "the King never came back to Oakmere once he was crowned.",
+    see: "A flagstone with an iron ring, and every oak leaning away from it. Somebody sat down there with a lamp, often, and the trees didn't like it." },
+  Thistledown: { place: "the bell frame on the down", order: "the frame on the down was a gallows, and nothing else.",
+    see: "No gallows needs a bell-hook worn smooth. And every sheep on the down is grazing with its face to it." },
+  Wrenfield: { place: "the old garden by Wren Water", order: "the summer house stood empty, and no child of the royal house grew up here.",
+    see: "A letter cut into the apple tree by a child's knife, grown wide with the bark. Somebody grew up here." },
+  Frosthelm: { place: "the old cart road", order: "the old diggings were copper for coin, worked out and left.",
+    see: "Silver showing in the wall, left where it was. Nobody digging for coin walks past silver. And the road runs straight into the ice." },
+  Wolfcairn: { place: "the cairn", order: "the northmen sailed for plunder in a hungry year.",
+    see: "Six thousand stones carried up by hand, and not a name on one. Nobody builds that for men who went looking for plunder." },
+  Gullcliff: { place: "the beacon on the cliff", order: "the beacons were lit and the Vale stood ready for the grey sails.",
+    see: "The tally of sails on the wall just stops. Three fires lit, and nobody came. Ready, they call it." },
+  Tidewatch: { place: "the tide posts", order: "the third-night custom along this shore is old superstition, nothing more.",
+    see: "Notches on the seaward side of the last post. Nobody standing on land could have cut those." },
+  Reedmoor: { place: "the ring of posts", order: "the fen folk are simple, and their ring is an old cattle pound.",
+    see: "Nine posts, too far apart to pen anything. Bare ground inside, and not a footprint on it." },
+  Lanternbog: { place: "the lantern posts", order: "those lost in the fen drowned, and that's an end of it.",
+    see: "Hooks worn bright from lamps hung up and taken down again. Nobody takes a lamp down for the drowned." },
+  Redmesa: { place: "the stone-yard on the mesa", order: "the old king's forty statues were broken up because his people hated him.",
+    see: "Forty pale marks where they stood, and a forty-first under the fallen lean-to. The carver kept one. People who hate a man don't keep his face." },
+  Dunehold: { place: "the hall by the well", order: "the hall at the well was a house of rest for tired clerks.",
+    see: "Forty desks, and every one chained to the floor. Rest doesn't need chains." },
+};
 
 // ---------- the choosing scene ----------
 
