@@ -11,7 +11,7 @@ import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath, allWatchSpots, gateWatchSpot, GATE_WATCH } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath, allWatchSpots, gateWatchSpot, GATE_WATCH, besideHeight } from "./walldata.js";
 import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
 import { windmillFixture, windmillPlan, windmillSpot, windmillDesign, SAILS as WINDMILL_SAILS } from "./windmill_rules.js";
 import { WINDMILL_DESIGNS } from "./windmill_data.js";
@@ -389,6 +389,17 @@ addTests("settle walls", {
   },
 });
 addTests("settle walls", {
+  "a stake counts anything beside it a raider could climb: a log pile, not the wall's own walkway": () => {
+    // a column at 0,0 on ground y 64; a log pile 2 high outside it (x 1), the walkway's planks 3 high inside (x -1)
+    const world = new Map([["1,65,0", "minecraft:oak_log"], ["1,66,0", "minecraft:oak_log"], ["-1,65,0", "siege:wall_planks"], ["-1,66,0", "siege:wall_planks"], ["-1,67,0", "siege:wall_planks"], ["0,65,1", "minecraft:short_grass"], ["0,65,-1", "minecraft:stripped_oak_log"]]);
+    const idAt = (x, y, z) => world.get(`${x},${y},${z}`) ?? (y <= 64 ? "minecraft:grass_block" : "minecraft:air");
+    const plan = (x, z) => (x === -1 && z === 0 ? "plan" : x === 0 && z === -1 ? "wall" : false);
+    assertEqual(besideHeight(idAt, 0, 0, 64, plan), 2, "the log pile is a step up; the walkway and the next stake are not");
+    world.delete("1,65,0"); world.delete("1,66,0");
+    assertEqual(besideHeight(idAt, 0, 0, 64, plan), 0, "grass is not a step");
+    world.set("-1,65,0", "minecraft:dirt");
+    assertEqual(besideHeight(idAt, 0, 0, 64, plan), 1, "natural ground on the wall's own cells still counts");
+  },
   "every map plot's wall is sealed all round apart from the gate, on every ring and at every level": () => {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];

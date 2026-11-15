@@ -219,6 +219,33 @@ export function besideOf(w, col) {
 }
 // The eight neighbours of a column (where a raider could jump from)
 export const AROUND = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+// Natural ground (never wall or building blocks)
+export const WALL_GROUND = /^minecraft:(dirt|coarse_dirt|rooted_dirt|grass_block|podzol|mycelium|mud|clay|gravel|sand|red_sand|sandstone|red_sandstone|stone|granite|diorite|andesite|deepslate|tuff|calcite|dripstone_block|moss_block|snow|packed_ice|ice|terracotta|\w+_terracotta|grass_path|dirt_path|farmland)$/;
+// What a raider can't stand on (or step up onto): air, liquids, plants, lights, flat things
+const NO_FOOTHOLD = /air$|water|lava|grass(?!_block|_path)|fern|flower|snow_layer|vine|sapling|seagrass|kelp|dandelion|poppy|tulip|daisy|cornflower|bluet|orchid|allium|lily|mushroom|deadbush|dead_bush|bush$|torch|lantern|rail$|_rail|carpet|button|pressure_plate|sign|banner|wheat|carrots|potatoes|beetroot|tripwire|string|cobweb|chain$|ladder|vine/;
+// How far the land right beside a wall column rises above the column's own ground (`own`), as a raider sees it:
+// any block they could step up onto counts (a log pile in the village's wood yard, a fence, a crate: the 2026-11-15
+// simulator walked up the Oakmere yard's log piles and over the stakes), except on the wall's own cells, where only
+// natural ground counts (its walkway, steps and gateway are behind or in the wall, not a way over it).
+//   idAt(x, y, z) -> block id ("" when unknown).  wallCell(x, z) -> "wall" for the wall's own stretch and towers
+//   (skipped), "plan" for the rest of the wall's plan and watchtower shafts (natural ground only), or false.
+export function besideHeight(idAt, x, z, own, wallCell = () => false) {
+  let high = 0;
+  for (const [dx, dz] of AROUND) {
+    const nx = x + dx, nz = z + dz, cell = wallCell(nx, nz);
+    if (cell === "wall") continue;
+    const counts = cell ? (id) => WALL_GROUND.test(id) : (id) => !!id && !NO_FOOTHOLD.test(id);
+    let h = 0;
+    while (h < BESIDE_MAX && counts(idAt(nx, own + 1 + h, nz) ?? "")) h++;
+    high = Math.max(high, h);
+  }
+  return high;
+}
+// wallCell for besideHeight, from a level's columns and its watchtower spots
+export function wallCellOf(cols, watch = []) {
+  const role = new Map(cols.map((c) => [`${c.x},${c.z}`, c.role === "wall" || c.role === "tower" ? "wall" : "plan"]));
+  return (x, z) => role.get(`${x},${z}`) ?? (watch.length && inWatch(watch, x, z, 0) ? "plan" : false);
+}
 
 // What a wall or tower column is made of at a height above its ground: "log", "fence" or a Castle Stone kind
 export function materialKind(L, rel, top) {
