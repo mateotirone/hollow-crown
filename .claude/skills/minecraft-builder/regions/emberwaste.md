@@ -137,6 +137,7 @@ flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed
 **Windows:**
 - **Size:** small and deep, with the glass set back one block behind closed acacia trapdoor lattice.
 - **Surrounds:** cut sandstone, with chiseled sandstone lintels.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: orange, red, white and a little yellow. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: orange;
   - halls: yellow;

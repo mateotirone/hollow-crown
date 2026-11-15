@@ -131,6 +131,7 @@ Full rules: `build-instructions/06-roof/`.
 
 **Windows:**
 - **Sizes:** 1 or 3 wide, flush with the wall.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: brown, light grey and clear. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: `brown_stained_glass_pane` (old warm glass) or light grey;
   - stone houses and the guildhall: grey;
