@@ -13,22 +13,22 @@ The door marker (0, 0, -1) makes export_halls.export map blueprint (x, y, z) to 
 
 Each stage contains the one before it, so an upgrade only builds outward. Footprints behind the track
 (x across the platform, z from 2):
-  Halt 15 x 5, Station 23 x 11, Junction 31 x 15, Grand 45 x 21.
+  Halt 15 x 8, Station 23 x 11, Junction 31 x 15, Grand 45 x 21.
 The Trade House (up to 11 x 9) is its own design. Its local (0, 0, 0) goes on the station's trade_join
 mark: a one-block step at z = 0, its front wall at z = 1, and the building behind.
 
-Interiors stay empty apart from a booking counter.
+Every building comes from the skill (review/specs/gen_stations.py) with its interior: the booking hall's ticket\nwindow, benches and timetable, the stable and parcels wings, the tower's rooms.
 """
 import math
 from kit import Building, h3, finish_detail, wool_awning
 from bp import DIRS, OPP
 import settle_halls as SH
 from settle_halls import pyramid, flat_roof, hang, tower, thatch, dragon_heads
-from settle_buildings import new, body, side_windows, dress, REGIONS
+from settle_buildings import new, body, side_windows, dress, REGIONS, castle
 
 STAGES = ("halt", "station", "junction", "grand")
 # platform length, last platform row (local z), deepest local z allowed
-SIZE = {"halt": (15, 6, 6), "station": (23, 5, 12), "junction": (31, 6, 16), "grand": (45, 7, 22)}
+SIZE = {"halt": (15, 7, 9), "station": (23, 5, 12), "junction": (31, 6, 16), "grand": (45, 7, 22)}
 
 def R(x0, a, x1, b):
     """A blueprint rect from local x0..x1 and local z a..b."""
@@ -114,6 +114,8 @@ def counter(bp, P, x0, x1, lz):
     S(bp, x0, 2, lz, "lantern")
 
 def lamp(bp, P, x, lz, h=3):
+    if _empty(bp, x, 0, -lz):                       # a footing: nothing floats
+        st = P.get("stone", "cobblestone"); S(bp, x, 0, lz, st(x, 0, -lz)[0] if callable(st) else st)
     for y in range(1, h): S(bp, x, y, lz, P["fence"])
     S(bp, x, h, lz, "lantern")
 
@@ -215,132 +217,74 @@ def louvres(bp, P, xs, ys, lz, out):
 
 # ---------------------------------------------------------------- the four stages
 
+def shell(bp, stage, region):
+    """The station building on the skill (the one engine): review/specs/station_<stage>_<region>.json, written by
+    gen_stations.py after the Kingsrest station (Mateo 2026-11-15). Hall, porch or clock tower, canopies, wings and
+    the booking hall inside all come from there; this module adds the platform, the train shed and the marks."""
+    import json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
+    if sk not in sys.path: sys.path.insert(0, sk)
+    import engine
+    from bp import Blueprint
+    spec = json.load(open(os.path.join(here, "review", "specs", f"station_{stage}_{region}.json")))
+    tmp = Blueprint("shell"); engine.into_blueprint(tmp, spec)
+    for c, v in tmp.cells.items(): bp.cells[c] = v
+    # every door path is paved to the door (Mateo, PR #400): a cobbled step outside any outer door with no floor
+    out = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if n.endswith("_door") and not p.get("upper") and p.get("facing") in out:
+            dx, dz = out[p["facing"]]
+            if bp.get(x + dx, y - 1, z + dz)[0] in ("keep", "air"): bp.set(x + dx, y - 1, z + dz, castle(region)("cobbled"))
+    return bp
+
 def halt(region):
-    """Halt: a small waiting shelter with its eaves to the line, a ticket counter and a bench, a hitching rail."""
+    """Halt: a booking hut on the platform, its gable to the line, a waiting canopy against each side, a hitching
+    rail at the west end, a back door to the Trade House step."""
     bp, B, P, k, L = start(region, "halt")
-    platform(bp, region, k, 7, 2, 6)
-    rect = R(-3, 3, 3, 5)
-    B.foundation(rect, 0)
-    for x in range(-2, 3):
-        for lz in (4,): S(bp, x, 0, lz, plat_mats(region, k)[0])
-    top = body(B, P, L, rect, 4)
-    for x in range(-2, 3):                         # open front under the beam
-        for y in range(1, 4): S(bp, x, y, 3, "air")
-    S(bp, 0, 0, 3, plat_mats(region, k)[0])
-    side_windows(B, L, rect, 1, sides="ew")
-    counter(bp, P, 1, 2, 4); bench(bp, P, -2, 4)
-    # eaves to the line (Mateo 2026-11-12: a gable to the line on a box three deep read as a house cut in half)
-    roofs(bp, P, L, region, [(rect, "x", 1)], top + (1 if L["roof"] != "flat" else 0))
-    hang(bp, [(0, 3, -4)])
-    stalls = stalls_shed(bp, P, k, L, -7, -5, 4, 6)
-    lamp(bp, P, 6, 4); lamp(bp, P, -4, 6)
-    # the back (Mateo 2026-11-12: more detail on the back): a door to the Trade House step, windows either side
-    B.door(0, 1, -5, "n", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    for x in (-2, 2):
-        for y in (2, 3): S(bp, x, y, 5, P["pane"])
-    sills(bp, P, -3, 3, 5, 1, 4)
-    S(bp, 3, 1, 6, "barrel"); S(bp, 3, 2, 6, "barrel")
-    return end(bp, "halt", (5, 1, 3), stalls, (0, 0, 7))
+    platform(bp, region, k, 7, 2, 7)
+    shell(bp, "halt", region)
+    bench(bp, P, -5, 7); bench(bp, P, 4, 7)
+    for lz in (4, 5): S(bp, -7, 1, lz, P["fence"])
+    S(bp, -7, 1, 6, "hay_block", axis="y")
+    S(bp, 5, 1, 4, "barrel"); S(bp, 5, 2, 4, "barrel")
+    lamp(bp, P, 7, 3); lamp(bp, P, -6, 3)
+    link(bp, k, 9)
+    return end(bp, "halt", (2, 1, 3), (-6, 1, 5), (0, 0, 10))
 
 def station(region):
-    """Station: a booking hall along the platform with a centre gable to the line, a platform canopy,
-    benches, street doors at both ends, a parcels corner and a stalls lean-to."""
+    """Station: a booking hall along the platform with a gabled porch to the line, canopies either side on the hall
+    wall, a stalls lean-to at the east end, a parcels lean-to at the west, a street door behind."""
     bp, B, P, k, L = start(region, "station")
     platform(bp, region, k, 11, 2, 5)
-    hall = R(-7, 6, 7, 10); mid = R(-3, 5, 3, 10)
-    for r in (hall, mid): B.foundation(r, 0); B.floor(r, 0)
-    top = body(B, P, L, hall, 5)
-    body(B, P, L, mid, 5)
-    for x in range(-2, 3):                          # the hall and the centre bay are one room
-        for y in range(1, 6): S(bp, x, y, 6, "air")
-    S(bp, 0, 0, 6, P["floor"])
-    for x in range(-2, 3): S(bp, x, 0, 6, P["floor"])
-    side_windows(B, L, hall, 1, sides="sn")
-    front_door(B, P, k, L, 0, 5)
-    front_door(B, P, k, L, 0, 10, side="n")
-    B.door(7, 1, -8, "e", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    B.door(-7, 1, -8, "w", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    counter(bp, P, 2, 5, 8); bench(bp, P, -5, 9, 3)
-    base = top + (1 if L["roof"] != "flat" else 0)
-    roofs(bp, P, L, region, [(hall, "x", 1), (mid, "z", 1)], base)
-    dress(bp, k, L, hall, 1, top, region)
-    if L["roof"] == "gable":                        # a window in the centre gable over the door
-        for x in (-1, 0, 1): S(bp, x, base + 1, 5, P["pane"])
-        S(bp, 0, base + 2, 5, P["pane"])
-    skip = lambda x, lz: (-3 <= x <= 3 and lz >= 5) or (-7 <= x <= 7 and lz >= 6)
-    canopy(bp, P, 10, 2, 5, 4, 4, skip=lambda x, lz: skip(x, lz) or (abs(x) <= 1 and lz == 4))
-    bench(bp, P, -6, 5); bench(bp, P, 5, 5)
-    stalls = stalls_shed(bp, P, k, L, 9, 11, 7, 11)
-    for (x, lz) in ((-10, 8), (-9, 8), (-10, 9)): S(bp, x, 1, lz, "barrel")
-    S(bp, -10, 2, 8, "barrel"); S(bp, -9, 1, 10, "chest", facing="e")
-    lamp(bp, P, -11, 10); link(bp, k, 11)
-    sills(bp, P, -7, 7, 10, 1, 6)                   # the back: sills, planters, a lamp at the street door
-    for x in (-6, -4, 4, 6): planter(bp, P, x, 10)
-    lamp(bp, P, 3, 11)
-    return end(bp, "station", (4, 1, 3), stalls, (0, 0, 12))
+    shell(bp, "station", region)
+    bench(bp, P, -6, 5); bench(bp, P, 4, 5)
+    S(bp, 8, 1, 9, "hay_block", axis="y"); S(bp, 8, 1, 7, "cauldron")
+    for (x, lz) in ((-8, 9), (-8, 8), (-9, 9)): S(bp, x, 1, lz, "barrel")
+    S(bp, -8, 2, 9, "barrel"); S(bp, -8, 1, 7, "chest", facing="w")
+    lamp(bp, P, -10, 3); lamp(bp, P, 10, 3)
+    link(bp, k, 11); lamp(bp, P, 3, 11); lamp(bp, P, -3, 11)
+    return end(bp, "station", (4, 1, 3), (9, 1, 8), (0, 0, 12))
 
 def junction(region):
-    """Junction: a two-storey hall with a clock tower in the middle of its platform front, single-storey
-    wings (a stable wing open to the street, a parcels wing), and a deep platform canopy."""
+    """Junction: a two-storey hall with a clock tower on the middle of its platform front (its foot the entrance),
+    canopies either side on the hall wall, a stable wing and a parcels wing at the ends."""
     bp, B, P, k, L = start(region, "junction")
-    platform(bp, region, k, 15, 2, 6)
-    hall = R(-8, 8, 8, 14)
-    B.foundation(hall, 0); B.floor(hall, 0)
-    B.stone_storey(hall, 1, 5, quoins=True)
-    B.floor(hall, 5)
-    top = body(B, P, L, hall, 5, y0=6, plinth=False)
-    side_windows(B, L, hall, 1, sides="sn"); side_windows(B, L, hall, 6, sides="sn")
-    for x in (-5, 5): front_door(B, P, k, L, x, 8)
-    for x in (-5, 0, 5): front_door(B, P, k, L, x, 14, side="n")
-    counter(bp, P, -7, -3, 11); bench(bp, P, 2, 13, 3)
-    base = top + (1 if L["roof"] != "flat" else 0)
-    roofs(bp, P, L, region, [(hall, "x", 1)], base)
-    wings = (R(-13, 9, -9, 13), R(9, 9, 13, 13))
-    for w in wings:
-        B.foundation(w, 0); B.floor(w, 0)
-        wt = body(B, P, L, w, 5)
-    for x in range(-12, -9):                        # the stable wing opens to the street
-        for y in range(1, 5): S(bp, x, y, 13, "air")
-        S(bp, x, 0, 13, "coarse_dirt")
-    for x in range(-12, -9):
-        for lz in range(10, 13): S(bp, x, 0, lz, "coarse_dirt")
-    for x in range(-12, -9): S(bp, x, 1, 11, P["fence"])
-    S(bp, -12, 1, 10, "hay_block", axis="y"); S(bp, -10, 1, 10, "cauldron")
-    hang(bp, [(-11, 4, -11)])
-    side_windows(B, L, wings[1], 1, sides="se")
-    side_windows(B, L, wings[0], 1, sides="s")
-    for (x, lz) in ((12, 10), (11, 10), (12, 11)): S(bp, x, 1, lz, "barrel")
-    S(bp, 10, 1, 12, "chest", facing="e")
-    B.door(11, 1, -13, "n", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    roofs(bp, P, L, region, [(wings[0], "z", 1), (wings[1], "z", 1)], wt + (1 if L["roof"] != "flat" else 0), seed=3)
-    TB = Building(bp, P, 31)
-    yt = tower(TB, 0, -9, 2, 1, 17, top="spire" if L["roof"] != "flat" else "crenel")
-    for y in (1, 2, 3):
-        for x in (-1, 0, 1): S(bp, x, y, 11, "air")
-    front_door(TB, P, k, L, 0, 7)
-    louvres(bp, P, (-1, 0, 1), (13, 14), 7, "s"); louvres(bp, P, (-1, 0, 1), (13, 14), 11, "n")
-    for x in (-1, 0, 1):                            # sills under the louvres, front and back
-        S(bp, x, 12, 6, P["sill"], facing="n", half="top"); S(bp, x, 12, 12, P["sill"], facing="s", half="top")
-    hang(bp, [(0, 14, -9)])
-    ring_course(bp, P, (-2, -11, 2, -7), 6); ring_course(bp, P, (-2, -11, 2, -7), 11)
-    skip = lambda x, lz: (-2 <= x <= 2 and lz >= 7) or (-8 <= x <= 8 and lz >= 8) or (abs(x) >= 9 and lz >= 9)
-    canopy(bp, P, 14, 2, 8, 5, 4, skip=skip)
-    for x in (-7, 6): bench(bp, P, x, 7)
-    stalls = (-11, 1, 12)
-    link(bp, k, 15)
-    course(bp, P, -8, 8, 14, 5)                     # the back: a band at the upper floor, sills, planters, lamps
-    sills(bp, P, -8, 8, 14, 1, 12); sills(bp, P, 9, 13, 13, 1, 5)
-    for x in (-7, -3, 3, 7): planter(bp, P, x, 14)
-    lamp(bp, P, -8, 15); lamp(bp, P, 8, 15)
-    return end(bp, "junction", (4, 1, 3), stalls, (0, 0, 16))
+    platform(bp, region, k, 15, 2, 7)
+    shell(bp, "junction", region)
+    for x in (-7, 5): bench(bp, P, x, 7)
+    lamp(bp, P, -12, 3); lamp(bp, P, 12, 3)
+    link(bp, k, 15); lamp(bp, P, -3, 15); lamp(bp, P, 3, 15)
+    return end(bp, "junction", (4, 1, 3), (-11, 1, 11), (0, 0, 16))
 
 def shed_arch(lz):
     """Height of the Grand Station's train shed vault over local z (-7..7)."""
     return 5 + int(round(6.5 * math.sqrt(max(0.0, 1 - (lz / 7.5) ** 2))))
 
 def grand(region):
-    """Grand Station: an arched glass train shed over both lines, a long two-storey hall with a tall centre
-    pavilion and archway, twin clock towers, and end wings (stables to the street, parcels)."""
+    """Grand Station: the Kingsrest station's plan at full size (Mateo 2026-11-15): an arched glass train shed over
+    both lines, a long two-storey hall along the platform, the clock tower on the middle of the street front (its
+    foot the street entrance), a stable wing and a parcels wing at the ends."""
     bp, B, P, k, L = start(region, "grand")
     platform(bp, region, k, 22, 2, 8)
     rib = k("smooth"); col = k("stone")
@@ -362,79 +306,13 @@ def grand(region):
         for lz in (-7, 7):
             S(bp, x + 1, 4, lz, P["sill"], facing="w", half="top")
             S(bp, x + 3, 4, lz, P["sill"], facing="e", half="top")
-    hall = R(-11, 9, 11, 19); pav = R(-4, 8, 4, 20)
-    for r in (hall, pav): B.foundation(r, 0); B.floor(r, 0)
-    B.stone_storey(hall, 1, 6, quoins=True)
-    B.floor(hall, 6)
-    top = body(B, P, L, hall, 5, y0=7, plinth=False)
-    side_windows(B, L, hall, 1, sides="sn"); side_windows(B, L, hall, 7, sides="sn")
-    PB = Building(bp, P, 17)
-    PB.stone_storey(pav, 1, 15, quoins=True)
-    for x in range(-3, 4):                          # the pavilion opens into the hall
-        for y in range(1, 6):
-            S(bp, x, y, 9, "air"); S(bp, x, y, 19, "air")
-    for x in range(-3, 4): S(bp, x, 0, 9, P["floor"]); S(bp, x, 0, 19, P["floor"])
-    for x in (-1, 0, 1):                            # the archway from the platform, and the tall window above it
-        for y in range(1, 5): S(bp, x, y, 8, "air")
-        for y in range(7, 13): S(bp, x, y, 8, P["pane"])
-    S(bp, 0, 13, 8, P["pane"])
-    for x in (-2, 2):
-        for y in range(1, 6): S(bp, x, y, 8, col)
-    for x in (-1, 0, 1): S(bp, x, 5, 8, rib)
-    for y in (2, 3, 9, 10): S(bp, -4, y, 14, P["pane"]); S(bp, 4, y, 14, P["pane"])
-    front_door(PB, P, k, L, 0, 20, side="n")
-    for x in (-8, 8): front_door(B, P, k, L, x, 9)
-    for x in (-8, 8): front_door(B, P, k, L, x, 19, side="n")
-    counter(bp, P, -9, -6, 15); counter(bp, P, 6, 9, 15)
-    base = top + (1 if L["roof"] != "flat" else 0)
-    roofs(bp, P, L, region, [(hall, "x", 1)], base)
-    roofs(bp, P, L, region, [(pav, "z", 1)], 16, seed=5)
-    dress(bp, k, L, pav, 1, 16, region)
-    for cx in (-14, 14):
-        TB = Building(bp, P, 40 + cx)
-        tower(TB, cx, -14, 2, 1, 21, top="spire" if L["roof"] != "flat" else "crenel")
-        hang(bp, [(cx, 18, -14)])
-    wings = (R(-21, 10, -17, 18), R(17, 10, 21, 18))
-    for w in wings:
-        B.foundation(w, 0); B.floor(w, 0)
-        wt = body(B, P, L, w, 5)
-    side_windows(B, L, wings[0], 1, sides="sw"); side_windows(B, L, wings[1], 1, sides="se")
-    for x in range(-20, -17):                       # the stable wing opens to the street
-        for y in range(1, 5): S(bp, x, y, 18, "air")
-        for lz in range(11, 19): S(bp, x, 0, lz, "coarse_dirt")
-    for x in range(-20, -17): S(bp, x, 1, 15, P["fence"]); S(bp, x, 1, 12, P["fence"])
-    S(bp, -20, 1, 11, "hay_block", axis="y"); S(bp, -18, 1, 13, "cauldron"); S(bp, -20, 1, 14, "hay_block", axis="y")
-    hang(bp, [(-19, 4, -13), (-19, 4, -16)])
-    for (x, lz) in ((20, 11), (19, 11), (20, 12), (18, 11)): S(bp, x, 1, lz, "barrel")
-    S(bp, 20, 2, 11, "barrel"); S(bp, 20, 1, 14, "chest", facing="w")
-    B.door(19, 1, -18, "n", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    for w in wings: B.door(w[0] + 2 if w[0] > 0 else w[2] - 2, 1, -10, "s", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
-    roofs(bp, P, L, region, [(wings[0], "z", 1), (wings[1], "z", 1)], wt + (1 if L["roof"] != "flat" else 0), seed=3)
+    shell(bp, "grand", region)
     for x in range(-22, 23):                        # a slab strip from the shed's edge to the building
-        for lz in (8,):
-            if bp.get(x, 5, -lz)[0] in ("keep", "air") and not (-4 <= x <= 4): S(bp, x, 5, lz, P["roof_slab"], half="top")
+        if bp.get(x, 5, -8)[0] in ("keep", "air"): S(bp, x, 5, 8, P["roof_slab"], half="top")
     for x in (-18, -10, 10, 18): bench(bp, P, x, 8)
     for x in (-20, -6, 6, 20): hang(bp, [(x, 4, -6)])
-    link(bp, k, 21)
-    # the back (Mateo 2026-11-12): the pavilion gets the front's tall window, pilasters, two bands and a balcony
-    for x in (-1, 0, 1):
-        for y in range(7, 13): S(bp, x, y, 20, P["pane"])
-    S(bp, 0, 13, 20, P["pane"])
-    for x in (-3, 3):
-        S(bp, x, 1, 21, P["sill"], facing="s")
-        for y in range(2, 15): S(bp, x, y, 21, rib)
-        S(bp, x, 15, 21, P["sill"], facing="s", half="top")
-    course(bp, P, -4, 4, 20, 14); course(bp, P, -11, 11, 19, 6)
-    for x in range(-2, 3):
-        S(bp, x, 6, 21, P["trim_slab"] if "trim_slab" in P else P["roof_slab"], half="top"); S(bp, x, 6, 22, P["trim_slab"] if "trim_slab" in P else P["roof_slab"], half="top")
-        S(bp, x, 7, 22, P["fence"])
-    for x in (-2, 2): S(bp, x, 7, 21, P["fence"]); S(bp, x, 5, 22, P["trim"], facing="s", half="top")
-    sills(bp, P, -11, 11, 19, 1, 12); sills(bp, P, -21, -17, 18, 1, 5); sills(bp, P, 17, 21, 18, 1, 5)
-    for x in (-10, -6, 6, 10): planter(bp, P, x, 19)
-    for cx in (-14, 14):                            # bands round the clock towers at each storey
-        for y in (6, 12, 18): ring_course(bp, P, (cx - 2, -16, cx + 2, -12), y)
-    lamp(bp, P, -5, 21); lamp(bp, P, 5, 21)
-    return end(bp, "grand", (6, 1, 3), (-19, 1, 14), (0, 0, 22))
+    link(bp, k, 21); lamp(bp, P, -6, 21); lamp(bp, P, 6, 21)
+    return end(bp, "grand", (6, 1, 3), (-17, 1, 13), (0, 0, 22))
 
 STAGE_BUILDERS = {"halt": halt, "station": station, "junction": junction, "grand": grand}
 
