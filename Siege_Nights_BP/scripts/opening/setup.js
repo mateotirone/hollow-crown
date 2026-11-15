@@ -18,7 +18,7 @@
 //   /scriptevent siege:opening setup    run the setup here even without the gold block (a hand-built copy of the map)
 
 import { world, system } from "@minecraft/server";
-import { addJoinStep, addTests, assert, assertEqual, emit } from "../siege/api.js";
+import { addJoinStep, addTests, assert, assertEqual, emit, on } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, WARDS, WELCOME, PLOT_STONE, OVERWORLD } from "../plots/config.js";
@@ -235,6 +235,18 @@ function step() {
     if (active.get(id) === job && !store.data.done.includes(id) && id !== "hall" && id !== "millbrook") release(id);
   }
 }
+
+// The hall came built into the world file (plots/welcome.js found its Waystone): that is the Hollow Crown map, and the
+// hall is done; the Plot Stones and Millbrook carry on as usual
+on("hallAdopted", () => {
+  if (store.data.state !== "map") {
+    store.data.state = "map";
+    command(overworld(), "gamerule dodaylightcycle true");
+  }
+  for (const id of ["detect", "hall"]) if (!store.data.done.includes(id)) store.data.done.push(id);
+  store.save();
+  for (const id of ["detect", "hall"]) release(id);
+});
 
 onTick("opening_setup", 10, () => {
   if (store.data.state !== "plain" && left().length) step();
