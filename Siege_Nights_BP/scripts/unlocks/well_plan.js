@@ -142,6 +142,9 @@ export function drainLayers() {
 export const plugOps = () => RING.map(([dx, dz]) => op(dx, WELL.plugY, dz, "minecraft:air"));
 
 // ---------- the clock posts ----------
+export const MOUNT = "siege:clock_anchor";
+/** A clock mount's states: the way the clock looks, its size; Vale face, true habit. */
+export const mountStates = (face, size) => ({ "minecraft:cardinal_direction": face, "siege:size": size, "siege:style": 0, "siege:habit": 0 });
 const FACES = ["north", "east", "south", "west"];
 export const SIGN_TURN = { south: 0, west: 4, north: 8, east: 12 }; // ground_sign_direction that faces that way
 /** Which way a face at (dx, dz) must point to look at the middle of the square. */
@@ -186,6 +189,8 @@ export function postOps(post, tower, signText, { clocktower = false } = {}) {
     clock = { dx, dy: 4, dz };
   }
   ops.push(op(clock.dx, clock.dy, clock.dz, "siege:stopped_clock", { "minecraft:cardinal_direction": face, "siege:struck": 0 }));
+  // a living clock (scripts/clocks) stands on an invisible mount in the air cell in front of the face
+  ops.push(op(clock.dx + fx, clock.dy, clock.dz + fz, MOUNT, mountStates(face, 1)));
   const out = tower ? 2 : 1;
   const sign = { dx: dx + fx * out + fx, dy: 1, dz: dz + fz * out + fz, text: signText };
   // the keeper stands beside the sign, a step to the right as you face the clock

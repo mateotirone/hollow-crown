@@ -1,0 +1,40 @@
+{
+ "format_version": "1.8.0",
+ "render_controllers": {
+  "controller.render.siege_clock": {
+   "arrays": {
+    "textures": {
+     "Array.faces": [
+      "Texture.vale",
+      "Texture.frost",
+      "Texture.salt",
+      "Texture.ember",
+      "Texture.fen",
+      "Texture.hollow",
+      "Texture.royal"
+     ]
+    }
+   },
+   "geometry": "Geometry.default",
+   "materials": [
+    {
+     "*": "Material.default"
+    }
+   ],
+   "textures": [
+    "Array.faces[q.property('siege:style')]"
+   ],
+   "part_visibility": [
+    {
+     "*": true
+    },
+    {
+     "disc": "q.property('siege:style') != 5"
+    },
+    {
+     "snow": "q.property('siege:style') == 1"
+    }
+   ]
+  }
+ }
+}

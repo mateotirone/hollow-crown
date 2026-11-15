@@ -50,6 +50,7 @@ import "./roletrials/index.js";
 import "./landmarks/index.js";
 import "./after/index.js";
 import "./opening/index.js";
+import "./clocks/index.js"; // living clocks: hands follow the game time; the story can stop them, run them back or stick them at 3:17
 import "./unlocks/index.js";
 import "./labels/index.js";
 import "./guardposts/index.js";

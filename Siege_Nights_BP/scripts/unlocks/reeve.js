@@ -22,7 +22,7 @@
 
 import { world, system, ItemStack, BlockPermutation, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { on, onTick, moduleStore, addMenuLabel } from "../siege/api.js";
+import { on, onTick, moduleStore, addMenuLabel, addTests, assert, assertEqual } from "../siege/api.js";
 import { sfx } from "../core/sfx.js";
 import { WARDS, OVERWORLD } from "../plots/config.js";
 import { isBuilder } from "../plots/claims.js";
@@ -33,8 +33,10 @@ import { LANDMARKS, stampOps } from "./landmarks.js";
 import { bakedFor, bakedState } from "./baked.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
-import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
+import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN, MOUNT } from "./well_plan.js";
 import { dressNpc, addNpcLook } from "../core/npc_skins.js";
+import { addClockRule, addClockSpots, refreshClocks } from "../clocks/index.js";
+import { MIN_317 } from "../clocks/logic.js";
 
 export const KEY = "siege:stopped_clock_key";
 export const CLOCK_BLOCK = "siege:stopped_clock";
@@ -63,6 +65,8 @@ const store = moduleStore("siege:unlocks_reeve", () => ({
   fighting: false,
   wins: 0,
   siegesSinceWin: 0,
+  struck: 0, // the minute every Millbrook clock is held at: 0 = 3:17, 1 = 3:18 (the key turned)
+  released: undefined, // true once the Reeve has fallen (and no rematch is wound): the clocks run again
 }));
 
 const puzzle = () => {
@@ -153,6 +157,38 @@ function finishWell(dim, c, plan) {
   });
   Object.assign(store.data, { built: true, center: c, clocks, keepers, wound: false, open: false, pending: false, fighting: false });
   store.save();
+  mountClocks(dim, plan);
+}
+
+// ---------- the living clocks (scripts/clocks) ----------
+// Every clock in Millbrook (the six posts, the gate tower's four faces, the tower on the square) is held at 3:17 and
+// strains for 3:18. The key moves them to 3:18; once the Reeve falls they run with the time again, and a rematch
+// pulls them back to 3:17 until he falls again.
+export function millbrookClock({ wins, struck, released }) {
+  if (released ?? wins > 0) return undefined;
+  return struck ? { base: MIN_317 + 1, t0: 0, rate: 0, strain: false } : { base: MIN_317, t0: 0, rate: 0, strain: true };
+}
+addClockRule("millbrook", (spot) => {
+  if (spot.dim && spot.dim !== OVERWORLD) return undefined;
+  if (Math.hypot(spot.x - MILLBROOK_SQUARE.x, spot.z - MILLBROOK_SQUARE.z) > ward.r) return undefined;
+  return millbrookClock(store.data);
+});
+/** The clock mounts of the square (the posts and the gate tower's faces), in world blocks. */
+function mountCells(c, plan) {
+  return [...(LANDMARKS.reeve ? stampOps(LANDMARKS.reeve) : []), ...plan.ops].filter((o) => o.block === MOUNT).map((o) => ({ ...at(c, o), o }));
+}
+/** Learn the square's mounts, and put any that are missing back (worlds built before the living clocks). */
+function mountClocks(dim, plan = fullPlan(puzzle())) {
+  const c = store.data.center;
+  if (!c) return;
+  const cells = mountCells(c, plan);
+  addClockSpots(cells);
+  for (const cell of cells) {
+    try {
+      const b = dim.getBlock(cell);
+      if (b?.isAir) put(dim, c, cell.o);
+    } catch { /* not loaded: next time */ }
+  }
 }
 
 /** The well baked into the map (baked_sites.js, Mateo 2026-11-13): take its centre and puzzle, add signs and keepers. */
@@ -252,9 +288,11 @@ function placeKeepers(dim) {
 }
 
 // Keepers go back to their clocks if moved or missing, whenever someone is near
+let mounted = false;
 onTick("unlocks_reeve_keepers", 200, () => {
   if (!store.data.built || !nearby(store.data.center, 40).length) return;
   placeKeepers(overworld());
+  if (!mounted) { mounted = true; mountClocks(overworld()); }
 });
 
 const heardBy = (player) => { try { return JSON.parse(player.getDynamicProperty(HEARD) ?? "[]"); } catch { return []; } };
@@ -343,7 +381,11 @@ function climbOut(dim) {
   }
 }
 
-function setClocks(struck) {
+function setClocks(struck, released = false) {
+  store.data.struck = struck;
+  store.data.released = released;
+  store.save();
+  try { refreshClocks(); } catch { /* clocks come round on their own */ }
   const dim = overworld();
   for (const c of store.data.clocks) {
     try {
@@ -530,10 +572,21 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     if (data?.boss !== "reeve" || !store.data.built) return;
     Object.assign(store.data, { fighting: false, pending: false, wins: store.data.wins + 1, siegesSinceWin: 0 });
     store.save();
-    setClocks(1); // the minute ends for good
+    setClocks(1, true); // the minute ends for good: Millbrook's clocks run with the time again
     return;
   }
   if (event.id === "siege:reeve_unlock") command(event.sourceEntity, event.message.trim());
+});
+
+addTests("unlocks_reeve_clocks", {
+  "Millbrook's clocks: held at 3:17, 3:18 once wound, running once he falls, back to 3:17 for a rematch": () => {
+    assertEqual(millbrookClock({ wins: 0, struck: 0 }).base, MIN_317);
+    assert(millbrookClock({ wins: 0, struck: 0 }).strain);
+    assertEqual(millbrookClock({ wins: 0, struck: 1 }).base, MIN_317 + 1);
+    assertEqual(millbrookClock({ wins: 1, struck: 1, released: true }), undefined);
+    assertEqual(millbrookClock({ wins: 1, struck: 1 }), undefined); // a world that won before the living clocks
+    assertEqual(millbrookClock({ wins: 1, struck: 0, released: false }).base, MIN_317);
+  },
 });
 
 // ---------- the held minute: Millbrook's long night ----------

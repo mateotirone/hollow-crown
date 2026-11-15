@@ -1,0 +1,32 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:clock",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "siege:style": { "type": "int", "range": [0, 6], "default": 0, "client_sync": true },
+        "siege:size": { "type": "int", "range": [1, 9], "default": 1, "client_sync": true },
+        "siege:base": { "type": "int", "range": [0, 1439], "default": 0, "client_sync": true },
+        "siege:t0": { "type": "int", "range": [0, 1439], "default": 0, "client_sync": true },
+        "siege:rate": { "type": "float", "range": [-720, 720], "default": 1, "client_sync": true },
+        "siege:habit": { "type": "int", "range": [0, 2], "default": 0, "client_sync": true },
+        "siege:strain": { "type": "bool", "default": false, "client_sync": true }
+      }
+    },
+    "components": {
+      "minecraft:type_family": { "family": ["clock", "inanimate"] },
+      "minecraft:health": { "value": 20, "max": 20 },
+      "minecraft:collision_box": { "width": 0.01, "height": 0.01 },
+      "minecraft:physics": { "has_gravity": false, "has_collision": false },
+      "minecraft:pushable": { "is_pushable": false, "is_pushable_by_piston": false },
+      "minecraft:knockback_resistance": { "value": 1 },
+      "minecraft:movement": { "value": 0 },
+      "minecraft:persistent": {},
+      "minecraft:fire_immune": {},
+      "minecraft:breathable": { "breathes_water": true, "breathes_air": true, "suffocate_time": -1 },
+      "minecraft:damage_sensor": { "triggers": [{ "deals_damage": "no" }] }
+    }
+  }
+}
