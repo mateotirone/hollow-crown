@@ -67,9 +67,9 @@ def tidy(bp):
     if gone or floored: bp.finish()
     return len(gone) + len(floored)
 
-def export(bp, light=True):
+def export(bp, light=True, avoid=()):
     tidy(bp)
-    if light: lighting.light_blueprint(bp)
+    if light: lighting.light_blueprint(bp, avoid=avoid)
     dx, dy, dz = bp.markers["door"]
     to = lambda x, y, z: (x - dx, y, dz - z + 1)
     pal, idx, cells = [], {}, {}
@@ -108,7 +108,8 @@ def main():
         out[arch] = {}
         for level in range(1, 6):
             bp = H.REGION_HALLS[region](level)
-            d = export(bp); out[arch][level] = d
+            keep = H.tree_room(bp, level)   # the Tree of Oaths model needs its room (townhall/oath_tree.js)
+            d = export(bp, avoid=keep); out[arch][level] = d
             b = d["box"]
             if max(-b["x0"], b["x1"]) > SIDE or b["z1"] > DEEP or b["z0"] < FRONT:
                 problems.append(f"{region} {level}: {b}")

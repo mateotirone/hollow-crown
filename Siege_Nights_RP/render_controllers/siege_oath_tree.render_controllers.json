@@ -1,0 +1,15 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_oath_tree": {
+      "arrays": {
+        "textures": {
+          "Array.looks": ["Texture.plain", "Texture.knight", "Texture.marked"]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [{ "*": "Material.default" }],
+      "textures": ["Array.looks[query.has_property('siege:look') ? query.property('siege:look') : 0]"]
+    }
+  }
+}

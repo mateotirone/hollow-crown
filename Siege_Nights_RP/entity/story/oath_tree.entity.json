@@ -1,0 +1,18 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:oath_tree",
+      "materials": { "default": "entity_alphatest" },
+      "textures": {
+        "plain": "textures/entity/siege/oath_tree",
+        "knight": "textures/entity/siege/oath_tree_knight",
+        "marked": "textures/entity/siege/oath_tree_marked"
+      },
+      "geometry": { "default": "geometry.siege_oath_tree" },
+      "animations": { "sway": "animation.siege_oath_tree.sway" },
+      "scripts": { "animate": ["sway"] },
+      "render_controllers": ["controller.render.siege_oath_tree"]
+    }
+  }
+}
