@@ -1,0 +1,184 @@
+{
+ "name": "station_station_emberwaste",
+ "card": {
+  "title": "Emberwaste Station",
+  "sub": "Desert sandstone",
+  "region": "emberwaste",
+  "where": "Every Emberwaste plot's railway, Town tier",
+  "kind": "Station",
+  "blurb": "Station: a booking hall along the platform with a gabled porch to the line (the door), a canopy either side of The building on the skill; stations.py lays the platform and the marks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": {
+     "block": "smooth_sandstone"
+    }
+   },
+   "rect": [
+    -7,
+    -10,
+    7,
+    -6
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": -4,
+      "storey": 0
+     },
+     {
+      "at": 4,
+      "storey": 0
+     }
+    ],
+    "s": [
+     {
+      "at": -5,
+      "storey": 0
+     },
+     {
+      "at": 5,
+      "storey": 0
+     }
+    ],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "station",
+    "entry": "n"
+   },
+   "wings": [
+    {
+     "rect": [
+      -2,
+      -5,
+      2,
+      -3
+     ],
+     "storeys": [
+      6
+     ],
+     "roof": {
+      "type": "flat",
+      "parapet": "crenel"
+     }
+    }
+   ]
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -7,
+    -5,
+    -3,
+    -3
+   ],
+   "against": "n",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    3,
+    -5,
+    7,
+    -3
+   ],
+   "against": "n",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    8,
+    -9,
+    10,
+    -7
+   ],
+   "against": "w",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   },
+   "floor": "coarse_dirt"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -10,
+    -9,
+    -8,
+    -7
+   ],
+   "against": "e",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   },
+   "floor": null
+  },
+  {
+   "part": "door",
+   "rect": [
+    -2,
+    -5,
+    2,
+    -3
+   ],
+   "side": "s",
+   "at": 0,
+   "floor": 0,
+   "kind": "grand",
+   "canopy": false,
+   "style": "ember_sandstone"
+  }
+ ],
+ "place": []
+}

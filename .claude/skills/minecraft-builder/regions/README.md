@@ -133,3 +133,16 @@ Every plot's mine is a story build (Act 1 day 2 sends every player there). One d
   sandstone, diorite, calcite; Emberwaste red sandstone and the mesa terracottas; Blackfen tuff, packed mud, mud bricks,
   clay. Below 0 every region is deepslate with tuff and smooth basalt (Emberwaste blackstone and basalt). Never a block
   that falls (sand, gravel) in a wall or a roof.
+
+## Railway stations in every region (Mateo 2026-11-15)
+
+"Kings rest station go ahead, and then use this base as a repair job for ALL the regions castle level stations", "make sure
+all station upgrades have the same applied build principals as well". Every station is a skill spec written by
+`map/structures/review/specs/gen_stations.py`: the region's preset for the hall (stone ground storey under the region's
+upper storey), the region's roof, a clock tower by `towers/README.md` section 5 (the hall's stone for the shaft, the
+region's top stage jettied one out on brackets with a clock on every face, the region's cap: slate spire, sea-green hip
+lantern, copper dome with a gold finial, dark shingle spire), platform canopies as `lean_to`s on the hall wall (pitch
+"half" so the low edge keeps 3 blocks of headroom over the platform), and `"interior": {"use": "station"}` (the booking
+hall). The plan grows with the tier: Halt (a 5 x 5 hut, a canopy each side), Station (a gabled porch to the line),
+Junction (the clock tower over the platform entrance), Grand (the Kingsrest plan: the tower on the street front, stable
+and parcels wings). `stations.py` lays only what the skill has no part for: the platform, the glass train shed, the marks.

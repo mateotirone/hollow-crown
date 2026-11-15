@@ -1,0 +1,730 @@
+{
+ "name": "station_grand_frostmarch",
+ "card": {
+  "title": "Frostmarch Grand Station",
+  "sub": "Norse stave and stone",
+  "region": "frostmarch",
+  "where": "Every Frostmarch plot's railway, Castle tier",
+  "kind": "Station",
+  "blurb": "Grand Station: the Kingsrest base at full size. A long two-storey hall along the platform under the glass train The building on the skill; stations.py lays the platform, the glass train shed and the marks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    -11,
+    -15,
+    11,
+    -9
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": -8,
+      "storey": 0
+     },
+     {
+      "at": -8,
+      "storey": 1
+     },
+     {
+      "at": -5,
+      "storey": 0
+     },
+     {
+      "at": -5,
+      "storey": 1
+     },
+     {
+      "at": 5,
+      "storey": 0
+     },
+     {
+      "at": 5,
+      "storey": 1
+     },
+     {
+      "at": 8,
+      "storey": 0
+     },
+     {
+      "at": 8,
+      "storey": 1
+     }
+    ],
+    "s": [
+     {
+      "at": -8,
+      "storey": 0
+     },
+     {
+      "at": -8,
+      "storey": 1
+     },
+     {
+      "at": -4,
+      "storey": 0
+     },
+     {
+      "at": -4,
+      "storey": 1
+     },
+     {
+      "at": 4,
+      "storey": 0
+     },
+     {
+      "at": 4,
+      "storey": 1
+     },
+     {
+      "at": 8,
+      "storey": 0
+     },
+     {
+      "at": 8,
+      "storey": 1
+     }
+    ],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "station",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "floor": "coarse_dirt"
+   },
+   "rect": [
+    -21,
+    -16,
+    -11,
+    -10
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    }
+   ],
+   "door": {
+    "side": "n",
+    "kind": "large",
+    "steps": 0,
+    "at": -1
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 3,
+      "storey": 0
+     }
+    ],
+    "s": [
+     {
+      "at": -3,
+      "storey": 0
+     },
+     {
+      "at": 3,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "stable",
+    "entry": "n"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    11,
+    -16,
+    21,
+    -10
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    }
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0,
+    "at": 1
+   },
+   "windows": {
+    "n": [
+     {
+      "at": -3,
+      "storey": 0
+     },
+     {
+      "at": 3,
+      "storey": 0
+     }
+    ],
+    "s": [
+     {
+      "at": -3,
+      "storey": 0
+     },
+     {
+      "at": 3,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "storage",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_stone"
+   },
+   "rect": [
+    -3,
+    -20,
+    3,
+    -14
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    6,
+    6,
+    3
+   ],
+   "door": {
+    "side": "n",
+    "kind": "grand",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 3,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 3,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 3,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 3,
+      "w": 1,
+      "h": 2
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "tower",
+    "rooms": [
+     "open",
+     "guard",
+     "lookout"
+    ],
+    "entry": "n"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber"
+   },
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "y": 22,
+   "plinth": 1,
+   "storeys": [
+    8
+   ],
+   "door": null,
+   "windows": {
+    "n": [],
+    "s": [],
+    "e": [],
+    "w": []
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": false
+  },
+  {
+   "part": "spire",
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "rows": 3,
+   "overhang": 1,
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "trim": "dark_oak_planks",
+   "finial": "none"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -1,
+    -18,
+    1,
+    -16
+   ],
+   "y": "roof",
+   "h": 3,
+   "pier": "dark_oak_fence",
+   "deck": "dark_oak_planks",
+   "trim": "dark_oak_planks",
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "cap": "spire",
+   "rows": 2,
+   "finial": "spire_block"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "side": "n",
+   "y": 26,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "side": "s",
+   "y": 26,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "side": "e",
+   "y": 26,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -4,
+    -21,
+    4,
+    -13
+   ],
+   "side": "w",
+   "y": 26,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "door",
+   "rect": [
+    -11,
+    -15,
+    11,
+    -9
+   ],
+   "side": "n",
+   "at": 0,
+   "floor": 0,
+   "kind": "house",
+   "canopy": false,
+   "style": "frost_timber"
+  }
+ ],
+ "place": [
+  [
+   -4,
+   21,
+   -20,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -4,
+   21,
+   -18,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -4,
+   21,
+   -16,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -4,
+   21,
+   -14,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   21,
+   -21,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   21,
+   -13,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   21,
+   -21,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   21,
+   -13,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   21,
+   -21,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   21,
+   -13,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   21,
+   -20,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   21,
+   -18,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   21,
+   -16,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   21,
+   -14,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ]
+ ]
+}

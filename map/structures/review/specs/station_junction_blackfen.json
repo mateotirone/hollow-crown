@@ -1,0 +1,623 @@
+{
+ "name": "station_junction_blackfen",
+ "card": {
+  "title": "Blackfen Junction",
+  "sub": "Bog timber and mud brick",
+  "region": "blackfen",
+  "where": "Every Blackfen plot's railway, City tier",
+  "kind": "Station",
+  "blurb": "Junction: a two-storey hall (stone ground storey) with a clock tower on the middle of its platform front, the The building on the skill; stations.py lays the platform and the marks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    -8,
+    -14,
+    8,
+    -8
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    5
+   ],
+   "storey_style": [
+    {},
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": -5,
+      "storey": 0
+     },
+     {
+      "at": -5,
+      "storey": 1
+     },
+     {
+      "at": 5,
+      "storey": 0
+     },
+     {
+      "at": 5,
+      "storey": 1
+     }
+    ],
+    "s": [
+     {
+      "at": -6,
+      "storey": 0
+     },
+     {
+      "at": -6,
+      "storey": 1
+     },
+     {
+      "at": 6,
+      "storey": 0
+     },
+     {
+      "at": 6,
+      "storey": 1
+     }
+    ],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "moss": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "station",
+    "entry": "n"
+   },
+   "piles": true
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber",
+    "floor": "coarse_dirt"
+   },
+   "rect": [
+    -14,
+    -13,
+    -8,
+    -9
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "large",
+    "steps": 0,
+    "at": -1
+   },
+   "windows": {
+    "n": [],
+    "s": [
+     {
+      "at": -1,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "moss": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "stable",
+    "entry": "n"
+   },
+   "piles": true
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    8,
+    -13,
+    14,
+    -9
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 0,
+    "at": 1
+   },
+   "windows": {
+    "n": [],
+    "s": [
+     {
+      "at": -1,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "moss": true,
+    "ridge": "x"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "storage",
+    "entry": "n"
+   },
+   "piles": true
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    -2,
+    -8,
+    2,
+    -4
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    6,
+    6
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "tower",
+    "rooms": [
+     "open",
+     "guard",
+     "lookout"
+    ],
+    "entry": "s"
+   },
+   "piles": true
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "y": 19,
+   "plinth": 1,
+   "storeys": [
+    7
+   ],
+   "door": null,
+   "windows": {
+    "n": [],
+    "s": [],
+    "e": [],
+    "w": []
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": false
+  },
+  {
+   "part": "spire",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "rows": 3,
+   "overhang": 1,
+   "roof": {
+    "block": "dark_oak_planks"
+   },
+   "trim": "spruce_planks",
+   "finial": "none"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -1,
+    -7,
+    1,
+    -5
+   ],
+   "y": "roof",
+   "h": 3,
+   "pier": "spruce_fence",
+   "deck": "spruce_planks",
+   "trim": "spruce_planks",
+   "roof": {
+    "block": "dark_oak_planks"
+   },
+   "cap": "spire",
+   "rows": 2,
+   "finial": "spire_block"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "n",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "spruce",
+   "hub": "spruce_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "s",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "spruce",
+   "hub": "spruce_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "e",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "spruce",
+   "hub": "spruce_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "w",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "spruce",
+   "hub": "spruce_button"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -8,
+    -7,
+    -4,
+    -3
+   ],
+   "against": "n",
+   "top": 7,
+   "pitch": "half",
+   "y": 0,
+   "post": "mangrove_log",
+   "trim": "spruce_planks",
+   "roof": {
+    "block": "dark_oak_planks"
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    4,
+    -7,
+    8,
+    -3
+   ],
+   "against": "n",
+   "top": 7,
+   "pitch": "half",
+   "y": 0,
+   "post": "mangrove_log",
+   "trim": "spruce_planks",
+   "roof": {
+    "block": "dark_oak_planks"
+   }
+  },
+  {
+   "part": "door",
+   "rect": [
+    -8,
+    -14,
+    8,
+    -8
+   ],
+   "side": "s",
+   "at": 0,
+   "floor": 0,
+   "kind": "house",
+   "canopy": false,
+   "style": "fen_timber"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   18,
+   -8,
+   "spruce_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -3,
+   18,
+   -6,
+   "spruce_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -3,
+   18,
+   -4,
+   "spruce_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   18,
+   -9,
+   "spruce_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   18,
+   -3,
+   "spruce_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   18,
+   -9,
+   "spruce_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   18,
+   -3,
+   "spruce_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   18,
+   -9,
+   "spruce_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   18,
+   -3,
+   "spruce_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   18,
+   -8,
+   "spruce_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   18,
+   -6,
+   "spruce_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   18,
+   -4,
+   "spruce_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ]
+ ]
+}
