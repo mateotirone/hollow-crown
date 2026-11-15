@@ -7,6 +7,7 @@
 import { world, ItemStack, EquipmentSlot, GameMode } from "@minecraft/server";
 import { moduleStore, getState } from "../siege/api.js";
 import { regionAt } from "../economy/shops.js";
+import { MYTHIC, isDull } from "./rules.js";
 
 export const store = moduleStore("siege:codex", () => ({ writs: {}, braziers: [], banners: {} }));
 
@@ -62,11 +63,24 @@ export function gearOf(player) {
   const out = {};
   try {
     const eq = player.getComponent("equippable");
-    for (const s of SLOTS) out[s] = eq?.getEquipment(s)?.typeId;
+    for (const s of SLOTS) {
+      const stack = eq?.getEquipment(s);
+      out[s] = s === EquipmentSlot.Mainhand && dullMythic(stack) ? undefined : stack?.typeId; // a dull mythical's power rests
+    }
   } catch {
     // player gone
   }
   return out;
+}
+// A mythical weapon or tool worn down to dull (rules.js isDull): it does nothing special until a Smith mends it
+export function dullMythic(stack) {
+  if (!stack || !MYTHIC.has(stack.typeId)) return false;
+  try {
+    const w = stack.getComponent("minecraft:durability");
+    return !!w && isDull(w.damage, w.maxDurability);
+  } catch {
+    return false;
+  }
 }
 export const mainOf = (p) => gearOf(p)[EquipmentSlot.Mainhand];
 export function effect(e, name, ticks, amp = 0) {
