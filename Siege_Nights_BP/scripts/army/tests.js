@@ -27,7 +27,7 @@ addTests("army", {
   },
 });
 
-import { strollSpot, asleepTime, IDLE } from "./idle.js";
+import { strollSpot, asleepTime, IDLE, bedPose, BED_DIRS } from "./idle.js";
 
 addTests("army-idle", {
   "three strolls in four stay in the Barracks yard, the rest go into town": () => {
@@ -83,5 +83,22 @@ addTests("army-visible", {
     const boss = fake("siege:morvane");
     assert(!unhideSoldier(boss));
     assert(boss.fx.has("invisibility"));
+  },
+});
+
+addTests("army-bunks", {
+  "a sleeping soldier stands on the foot of the bed facing out, so he lies back along it to the pillow": () => {
+    for (let dir = 0; dir < 4; dir++) {
+      const head = { x: 10, y: 64, z: -20 }, d = BED_DIRS[dir], at = bedPose(head, dir);
+      assertEqual(at.y, 64.5625);
+      // on the foot block, near its outer end
+      assertEqual(Math.floor(at.x), head.x - d.x, `x dir ${dir}`);
+      assertEqual(Math.floor(at.z), head.z - d.z, `z dir ${dir}`);
+      const toHead = (head.x + 0.5 - at.x) * d.x + (head.z + 0.5 - at.z) * d.z;
+      assert(toHead > 1.3 && toHead < 1.5, `two blocks of bed behind him, dir ${dir}`);
+      // facing away from the head (Bedrock yaw: 0 south, 90 west)
+      const r = (at.yaw * Math.PI) / 180, fx = -Math.sin(r), fz = Math.cos(r);
+      assert(Math.abs(fx + d.x) < 1e-9 && Math.abs(fz + d.z) < 1e-9, `faces out, dir ${dir}`);
+    }
   },
 });
