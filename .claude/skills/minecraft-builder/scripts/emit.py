@@ -74,7 +74,10 @@ def connect(blocks):
 
 def bedrock_state(n, p):
     """logical -> (bedrock id, {state: value})"""
-    if ":" in n and not n.startswith("minecraft:"): return n, {}      # the add-on's own blocks (siege:spire_roof)
+    if ":" in n and not n.startswith("minecraft:"):                # the add-on's own blocks (siege:spire_roof): their
+        st = dict(p.get("raw") or {})                                  # own states (a clock mount's size), turned by facing
+        if p.get("facing"): st["minecraft:cardinal_direction"] = CARD[p["facing"]]
+        return n, st
     st = {}
     f = p.get("facing")
     if is_stairs(n):

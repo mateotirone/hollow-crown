@@ -1497,11 +1497,18 @@ def belfry(ctx, s):
                        "name": st["_name"] + ".cap", "part": "spire"})
 
 
+CLOCK_STYLES = ["vale", "frost", "salt", "ember", "fen", "hollow", "royal"]   # = the add-on's scripts/clocks/logic.js
+
+
 def clock_face(ctx, s):
-    """A clock on a wall (07-detailing): a 3x3 (or 5, round) face of calcite flush in the wall, hands in a
-    dark block from the hub (minute hand on the 12, hour hand by `time`), a button for the hub and an
-    optional frame. Place it by at = [x, y, z] (the face centre, in the wall) and side (the way it faces),
-    or by rect + side + y (+ "along", offset along the wall like windows' "at")."""
+    """A clock on a wall (07-detailing): a 3x3 (or 5 or 7, round) face of calcite flush in the wall and an
+    optional frame. Living (the default, Mateo 2026-11-15): the face stays plain and a clock mount
+    (siege:clock_anchor) goes in the air cell in front of the hub; in game a 3D clock stands on it whose hands
+    follow the game's time (scripts/clocks). style = the face (vale, frost, salt, ember, fen, hollow, royal;
+    by default the region's), habit = "harrowford" (stops at 3:17 every night until six) or "backwards" (the
+    Hollow's default). living: false draws the old block hands instead (dark blocks from the hub, the hour
+    hand by `time`, a button hub). Place it by at = [x, y, z] (the face centre, in the wall) and side (the
+    way it faces), or by rect + side + y (+ "along", offset along the wall like windows' "at")."""
     sd = s["side"]
     if "rect" in s:
         x, z = wall_cell(s["rect"], sd, s.get("along", 0)); y = s["y"]
@@ -1519,12 +1526,13 @@ def clock_face(ctx, s):
         for v in range(-r - 1, r + 2):
             c = (P(u, v)[0] + ox, P(u, v)[1], P(u, v)[2] + oz)
             if ctx.stage_of.get(c) in ("openings", "details"): ctx.clear(*c)
-    hands = {(0, 0)} | set(ray(mm * 6, r)) | set(ray((hh % 12) * 30 + mm / 2, max(1, r - 1)))
+    living = s.get("living", True)
+    hands = ({(0, 0)} | set(ray(mm * 6, r)) | set(ray((hh % 12) * 30 + mm / 2, max(1, r - 1)))) if not living else set()
     for u in range(-r, r + 1):
         for v in range(-r, r + 1):
             if n >= 5 and abs(u) == r and abs(v) == r: continue      # round the big face's corners
             ctx.set(*P(u, v), "details", raw=hand if (u, v) in hands else face)
-    if s.get("marks", n >= 5):          # hour marks at 12, 3, 6 and 9 just inside the rim (towers/README.md, the clock)
+    if s.get("marks", n >= 5) and not living:   # hour marks at 12, 3, 6 and 9 just inside the rim (towers/README.md, the clock)
         mk = s.get("mark", hand)
         for (u, v) in ((0, r), (r, 0), (0, -r), (-r, 0)):
             if (u, v) not in hands: ctx.set(*P(u, v), "details", raw=mk)
@@ -1541,6 +1549,17 @@ def clock_face(ctx, s):
         for u in range(-r - 1, r + 2):
             for v in range(-r - 1, r + 2):
                 if max(abs(u), abs(v)) == r + 1: ctx.set(*P(u, v), "details", raw=fr)
+    if living:                          # the mount: the living clock's size, face and habit, looking out
+        region = ctx.spec.get("region") or (ctx.spec.get("card") or {}).get("region") or "vale"
+        style = s.get("style") or {"frostmarch": "frost", "saltreach": "salt", "emberwaste": "ember", "blackfen": "fen"}.get(region, region)
+        style = style if style in CLOCK_STYLES else "vale"
+        habit = {"true": 0, "harrowford": 1, "backwards": 2}.get(str(s.get("habit", "backwards" if style == "hollow" else "true")), 0)
+        size = min((1, 3, 5, 7), key=lambda k: abs(k - n))
+        c = (x + ox, y, z + oz)
+        ctx.cells[c] = {"kind": "raw", "name": "siege:clock_anchor",
+                        "props": {"facing": sd, "raw": {"siege:size": size, "siege:style": CLOCK_STYLES.index(style), "siege:habit": habit}}}
+        ctx.stage_of[c] = "details"
+        return
     hub = s.get("hub", "polished_blackstone_button")
     if hub: ctx.set(x + ox, y, z + oz, "details", raw=hub, facing=sd)
 
