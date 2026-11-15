@@ -389,6 +389,21 @@ addTests("settle walls", {
   },
 });
 addTests("settle walls", {
+  "no stretch of wall is low enough to hop, even where the land beside it rises or a short stake falls": () => {
+    const smooth = new Array(WALLS.stations).fill(64);
+    const center = { x: 100, y: 64, z: -300 };
+    for (let level = 1; level <= MAX_WALL; level++) {
+      const L = WALL_LEVELS[level];
+      for (const col of wallColumns({ center, level, gateAngle: bearingToAngle(180), smooth })) {
+        if (col.role !== "wall") continue;
+        for (const beside of [0, 1, 3]) {
+          const solid = columnKinds(L, { ...col, beside }, wallSeed(center)).filter(([, k]) => k !== "light" && k !== "tooth").map(([y]) => y);
+          const top = Math.max(...solid);
+          assert(top - col.base >= beside + WALLS.clear, `level ${level} at ${col.x},${col.z}: ${top - col.base} high with ground ${beside} up beside it`);
+        }
+      }
+    }
+  },
   "walls vary along their length and from one settlement to the next, the same way every time": () => {
     const smooth = new Array(WALLS.stations).fill(64);
     const wall = (center, level) => {
@@ -413,7 +428,7 @@ addTests("settle walls", {
 
 // ---------- town layouts (towns.js) ----------
 import { TOWNS } from "./towns_data.js";
-import { townFor, townNames, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox } from "./towns.js";
+import { townFor, townNames, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, slotBorder } from "./towns.js";
 
 addTests("settle towns", {
   "the wall line wanders but stays clear of the plots and inside the land": () => {
@@ -1296,5 +1311,21 @@ addTests("settle stages", {
       if (!ACT_STEPS[act]) continue; // not written yet: tools/check.mjs lists it
       assert(ACT_STEPS[act](name), `${act} is written but has no "${name}" step for the ${b.name} (${b.stage})`);
     }
+  },
+});
+
+addTests("settle towns", {
+  "the starter village's plot borders are found, with the ground to lay back once a building stands": () => {
+    const lay = townFor("oakmere").variants[0];
+    const slots = slotsOf(lay);
+    for (const id of ["st4", "st6"]) {
+      const s = slots.find((q) => q.id === id), b = slotBorder(lay, s);
+      const ring = 2 * (s.box.x1 - s.box.x0 + s.box.z1 - s.box.z0);
+      assert(b.cells.length > ring * 0.8 && b.cells.length <= ring, `${id}: ${b.cells.length} border cells of ${ring}`);
+      assert(b.cells.every(([dx, dy, dz]) => dy === s.dy && (dx === s.box.x0 || dx === s.box.x1 || dz === s.box.z0 || dz === s.box.z1)), `${id}: border off the plot's edge`);
+      assertEqual(b.ground[0], "minecraft:grass_block");
+    }
+    assertEqual(slotBorder(lay, slots.find((q) => q.id === "st2")).cells.length, 0, "a house plot has no border");
+    assertEqual(slotBorder(townFor("dunehold").variants[0], slotsOf(townFor("dunehold").variants[0]).find((q) => q.id === "st6")).ground[0], "minecraft:sand");
   },
 });

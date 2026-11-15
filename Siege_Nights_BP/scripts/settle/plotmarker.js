@@ -6,7 +6,7 @@
 //
 // Test: /scriptevent siege:town found dunehold   then walk to a marker and use it.
 
-import { world, system, GameMode } from "@minecraft/server";
+import { world, system, GameMode, BlockPermutation } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, isAlly, canManage, on, emit, onTick } from "../siege/api.js";
 import { purse, charge, refund, coins, lot } from "./wallet.js";
@@ -19,7 +19,7 @@ import { plotFit, opensAt, slotClass, CLASS_NAMES, oneEachMessage } from "./char
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
 import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, setMarkerBlock, allMarkers, slotState, saveTowns, tierName, slotClosed, keptFor, oneEachProblem } from "./founding.js";
-import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
+import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES, slotBorder, isBorderLog } from "./towns.js";
 import { runScan } from "./register.js";
 import { matches } from "./census.js";
 import { sfx } from "../core/sfx.js";
@@ -28,6 +28,48 @@ const OVERWORLD = "minecraft:overworld";
 const isCreative = (player) => player.getGameMode() === GameMode.Creative;
 
 const slotById = (owner, id) => slotsOf(layoutOf(townOf(owner))).find((s) => s.id === id);
+
+// A building now stands on the plot: take up the flush log border the starter village laid round it (towns.js
+// slotBorder) and lay the plot's own ground there. Only blocks still a stripped log are touched, so anything the
+// player put there stays. A few dozen blocks, done at once.
+const borders = new WeakMap(); // layout -> slot id -> slotBorder
+export function takeUpBorder(owner, slot) {
+  const town = townOf(owner);
+  if (!town) return 0;
+  const state = town.slots?.[slot.id];
+  const layout = layoutOf(town);
+  if (!layout) { if (state) state.borderUp = true; return 0; }
+  if (!borders.has(layout)) borders.set(layout, new Map());
+  const memo = borders.get(layout);
+  if (!memo.has(slot.id)) memo.set(slot.id, slotBorder(layout, slot)); // decodes the groundwork: once per plot
+  const { cells, ground } = memo.get(slot.id);
+  if (!cells.length) { if (state) state.borderUp = true; return 0; }
+  let perm;
+  try { perm = BlockPermutation.resolve(ground[0], ground[1]); } catch { perm = BlockPermutation.resolve("minecraft:grass_block"); }
+  const dim = world.getDimension(OVERWORLD);
+  let n = 0;
+  for (const [dx, dy, dz] of cells) {
+    try {
+      const block = dim.getBlock({ x: town.x + dx, y: town.y + dy, z: town.z + dz });
+      if (!block) return -1; // not loaded: the catch-up below tries again
+      if (isBorderLog(block.typeId)) { block.setPermutation(perm); n++; }
+    } catch { return -1; }
+  }
+  if (state) { state.borderUp = true; saveTowns(); }
+  return n;
+}
+// Plots built before the border was taken up (or whose ground wasn't loaded then) get it taken up once they are loaded
+onTick("settle_plot_borders", 200, () => {
+  if (!isReady()) return;
+  for (const [owner, town] of Object.entries(allTowns())) {
+    for (const [id, state] of Object.entries(town.slots ?? {})) {
+      if (!state.building || state.borderUp) continue;
+      const slot = slotById(owner, id);
+      if (slot) takeUpBorder(owner, slot);
+      else state.borderUp = true;
+    }
+  }
+});
 
 // Where a design stands on a slot, in the world, or undefined if it doesn't fit
 export function seatInWorld(owner, slot, buildingId, style) {
@@ -197,6 +239,7 @@ async function confirm(player, owner, slot, state) {
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
+  takeUpBorder(owner, slot);
   if (credit) { town.credits[slotClass(slot)]--; if (!town.credits[slotClass(slot)]) delete town.credits[slotClass(slot)]; }
   Object.assign(state, { building: building.id, style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, pickStyle: undefined, done: false, lift: Math.max(0, built.lift ?? 0) });
   saveTowns();
@@ -386,6 +429,7 @@ function raiseStart(owner, slot, id) {
   clearMarker(owner, slot);
   const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, id, town.style, slot.id, { quiet: true });
   if (!built) { placeMarker(owner, slot); return false; }
+  takeUpBorder(owner, slot);
   const founder = !town.lord && (slot.tags ?? []).includes("founder"); // the founder's own house (basebuilds.js puts their bed in it)
   Object.assign(slotState(owner, slot.id), { building: id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0, ...(founder ? { founderHome: true, base: true } : {}) });
   saveTowns();

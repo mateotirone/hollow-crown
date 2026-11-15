@@ -113,8 +113,12 @@ class Capital(TG.Town):
         self.station_cells = set(cells)
         self.stamp(bp, x, z, y, 0, "station"); self.plan[-1]["name"] = "grand station"; self.plan[-1]["footprint"] = len(cells)
         self.add_levels("station", self.plan[-1], [(st.capitalize(), bp if st == "grand" else getattr(stations, st)("vale")) for st in stations.STAGES], align="origin")
-        self.foundation(cells, y)
-        for cx, cz in cells:
+        # the town keeps the ground it was planned around (TG.station_ward) while it lays itself out; the current
+        # design's own ground beyond that is levelled and taken after the houses (station_forecourt), so a new
+        # station design never moves the rest of the town (restamp thread, 2026-11-15)
+        self.station_ward = {(gx + x, gz + z) for gx, gz in TG.station_ward("vale") if self.ok(gx + x, gz + z)} or set(cells)
+        self.foundation(sorted(self.station_ward), y)
+        for cx, cz in self.station_ward:
             for dx in (-1, 0, 1):
                 for dz in (-1, 0, 1):
                     if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
@@ -152,6 +156,14 @@ class Capital(TG.Town):
         after the houses, on ground the station's gap already keeps free, so the town's layout does not move."""
         if not getattr(self, "station_row", None): return
         x0, x1, zr, y = self.station_row; k = 2 * y + 1
+        late = sorted(self.station_cells - self.station_ward)       # the design's ground beyond the planned ward
+        if late:
+            self.foundation(late, y)
+            for cx, cz in late:
+                for dx in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
+            self.station_ward |= set(late)
         self.lay([(xx, zr - 1) for xx in range(x0, x1 + 1)], "lane", k_start=k, k_end=k)
         foot = getattr(self, "station_cells", set())
         for xx in range(x0, x1 + 1):
@@ -193,7 +205,7 @@ class Capital(TG.Town):
         zz = np.arange(n1)[None, :] + self.Z0
         band &= np.broadcast_to(zz < RAIL_Z - 11, band.shape)          # the ring stops short of the railway...
         band |= np.broadcast_to((zz >= RAIL_Z - 13) & (zz <= RAIL_Z - 12), band.shape) & (self.E <= self.R) & ~self.WET   # ...and runs straight beside it
-        for cx, cz in getattr(self, "station_cells", ()):              # the Grand Station is the gatehouse
+        for cx, cz in getattr(self, "station_ward", ()):               # the Grand Station is the gatehouse
             for dx in range(-1, 2):
                 for dz in range(-1, 2):
                     if self.ok(cx + dx, cz + dz): band[self.ij(cx + dx, cz + dz)] = False

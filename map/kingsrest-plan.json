@@ -49,7 +49,7 @@
    "z": -51,
    "ground_y": 79,
    "rotation": 0,
-   "footprint": 770,
+   "footprint": 707,
    "name": "grand station"
   },
   {
@@ -1243,15 +1243,6 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -124,
-   "z": -97,
-   "ground_y": 79,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_vale",
-   "kind": "lamp",
    "x": -119,
    "z": -76,
    "ground_y": 78,
@@ -1261,7 +1252,7 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -141,
+   "x": -142,
    "z": -73,
    "ground_y": 79,
    "rotation": 0,
@@ -1270,9 +1261,9 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -206,
-   "z": -143,
-   "ground_y": 72,
+   "x": -124,
+   "z": -97,
+   "ground_y": 79,
    "rotation": 0,
    "footprint": 0
   },
@@ -1297,6 +1288,15 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
+   "x": -206,
+   "z": -143,
+   "ground_y": 72,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post_vale",
+   "kind": "lamp",
    "x": -77,
    "z": -78,
    "ground_y": 79,
@@ -1306,8 +1306,8 @@
   {
    "stamp": "lamp_post_vale",
    "kind": "lamp",
-   "x": -48,
-   "z": -96,
+   "x": -49,
+   "z": -97,
    "ground_y": 79,
    "rotation": 0,
    "footprint": 0

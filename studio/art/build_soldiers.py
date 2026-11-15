@@ -415,6 +415,9 @@ RIDE = {"rightLeg": ((-72, 18, 0), None), "leftLeg": ((-72, -18, 0), None)}
 COUCH = {"rightArm": ((-28, 0, 0), None), "lance": ((112, 0, 0), None), "leftArm": ((-34, -10, 0), None), "kite": ((0, 0, 0), None),
          "body": ((12, 0, 0), None), "head": ((-12, 0, 0), None)}
 LANCE_CARRY = {"rightArm": ((-28, 0, 0), None), "lance": ((28, 0, 0), None)}
+# Asleep in a Barracks bunk (Mateo 2026-11-15: soldiers go to bed like villagers; army/idle.js sets siege:sleeping and
+# stands him on the foot end of the bed facing out): tipped back flat from the feet, face up, along the mattress.
+A["animation.hc.soldier.sleep"] = {"loop": True, "bones": {"root": {"rotation": [-90.0, 0.0, 0.0], "position": [0.0, 2.5, 0.0]}}}
 A["animation.hc.knight.ride"] = {"loop": True, "bones": {b: {"rotation": r(*rot)} for b, (rot, _) in RIDE.items()}}
 A["animation.hc.knight.carry"] = scaled(LANCE_CARRY, f"(1.0 - {RDY})")
 A["animation.hc.knight.stance"] = scaled(COUCH, RDY)
@@ -467,7 +470,21 @@ COMMON = {
     "hc_idle": "animation.hc.guard.idle",
     "hc_hurt": "animation.hc.guard.hurt",
     "hc_salute": "animation.hc.guard.salute",
+    "hc_sleep": "animation.hc.soldier.sleep",
 }
+SLEEP = "query.property('siege:sleeping')"
+AWAKE_ALWAYS = {"humanoid_base_pose", "holding"}  # the rest of his moves stop while he sleeps
+
+def with_sleep(animate):
+    """Every move but the base pose waits while he's asleep, and the sleeping pose goes on top."""
+    out = []
+    for a in animate:
+        if isinstance(a, str):
+            out.append(a if a in AWAKE_ALWAYS else {a: f"!{SLEEP}"})
+        else:
+            (k, c), = a.items()
+            out.append({k: f"({c}) && !{SLEEP}"})
+    return out + [{"hc_sleep": SLEEP}]
 HURT = {"hc_hurt": "query.hurt_time > 0"}
 RIDING = "query.is_riding"
 ANIMATE = {
@@ -672,7 +689,7 @@ def client_entity(kind):
     return {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": f"siege:{kind}", "materials": {"default": "entity_alphatest"}, "textures": tex,
         "geometry": geos,
-        "scripts": {"pre_animation": PRE, "animate": animate},
+        "scripts": {"pre_animation": PRE, "animate": with_sleep(animate)},
         "animations": {**COMMON, **anims},
         "render_controllers": ["controller.render.hc_soldier", {"controller.render.hc_soldier_armor": "query.property('siege:tier') > 0"}],
         "enable_attachables": True}}}
@@ -698,12 +715,14 @@ STARTER = {   # cloned from: stats are a first guess; the sieges thread owns beh
 REGION_PROP = {"type": "int", "range": [0, 5], "default": 0, "client_sync": True}
 
 TIER_PROP = {"type": "int", "range": [0, 4], "default": 0, "client_sync": True}
+SLEEP_PROP = {"type": "bool", "default": False, "client_sync": True}  # in a Barracks bunk (army/idle.js)
 
 def add_region(data):
     """siege:region (clothes and armour finish) and siege:tier (which armour he draws, 0 = Gambeson)."""
     e = data["minecraft:entity"]
     e["description"].setdefault("properties", {})["siege:region"] = REGION_PROP
     e["description"]["properties"]["siege:tier"] = TIER_PROP
+    e["description"]["properties"]["siege:sleeping"] = SLEEP_PROP
     ev = e.setdefault("events", {})
     for n in range(6): ev[f"siege:region_{n}"] = {"set_property": {"siege:region": n}}
     for n in range(5): ev[f"siege:tier_{n}"] = {"set_property": {"siege:tier": n}}
