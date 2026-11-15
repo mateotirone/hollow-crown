@@ -351,7 +351,8 @@ def model(n, p):
                                 "e": (8 / 16, 0, 5 / 16, 1, 14 / 16, 11 / 16), "w": (0, 0, 5 / 16, 8 / 16, 14 / 16, 11 / 16)}[d], t, {}))
         return out
     if is_pane(n):
-        t = {"side": "iron_bars", "edge": "iron_bars"} if n == "iron_bars" else {"side": "glass", "edge": "glass_pane_top"}
+        g = MAT.get(n[:-5], "glass") if n.endswith("_stained_glass_pane") else "glass"    # a stained pane shows its colour
+        t = {"side": "iron_bars", "edge": "iron_bars"} if n == "iron_bars" else {"side": g, "edge": g + "_pane_top" if g == "glass" else g}
         c = p.get("conn", {}); out = [((7 / 16, 0, 7 / 16, 9 / 16, 1, 9 / 16), t, {"cut": 1})]
         if not any(c.values()): c = {"n": True, "s": True}
         for d, on in c.items():

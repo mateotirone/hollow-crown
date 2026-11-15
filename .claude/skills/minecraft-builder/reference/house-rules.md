@@ -12,7 +12,7 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Every building has an interior** (Mateo 2026-11-12, replacing "empty except the inn"): the skill's interior
   stage furnishes it by use (`"interior": "inn"`, `{"use": "home", "attic": true}`), with stairs between every storey
   and a one-block walkway everywhere players walk (`build-instructions/08-interiors`).
-- **Glass flush with the wall face**, tinted to the house, never clear everywhere; stained glass in chapels.
+- **Glass flush with the wall face**, tinted to the house, never clear everywhere; stained glass in chapels (the Kingsrest chapel: red, blue and yellow panes mixed per pane, a style `"glass"` given as `[[block, weight], ...]`; Mateo 2026-11-15).
 - **Depth comes outward**, never by recessing a panel: at least three depth layers on any face over 5 long.
 - **Every overhang is carried** (bracket, post, corbel, truss).
 - **Nothing floats** (Mateo, 2026-11-12): a roof, canopy or vault sits directly on its beam, wall or posts, with no open row between them. Every hanging lantern hangs from a block or a chain up to one. Stacks start at the roof.
