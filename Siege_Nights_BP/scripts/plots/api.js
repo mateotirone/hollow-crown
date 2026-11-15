@@ -15,4 +15,4 @@ export { MAP, PLOT_PLAN, REGION_STYLE, PLOT_STONE, WARDS, WELCOME, SETTLEMENT, E
 // statusOf(plan) -> { state: "free" | "taken" | "kept" | "lord" | "missing", plot?, id?, name? }, hallBuilt(),
 // inWelcomeHall(player) -> true while they are still up in the hall and have not been set down in the world.
 // Event "plotChosen" { player, plot } fires when a player picks a plot, just before they are set down beside its stone.
-export { pickOf, statusOf, hallBuilt, inWelcomeHall, pedestalLayout, arrivalSpot, raiseHall, setKingsrestArrival } from "./welcome.js";
+export { pickOf, statusOf, hallBuilt, inWelcomeHall, waitsForStart, pedestalLayout, arrivalSpot, raiseHall, setKingsrestArrival } from "./welcome.js";

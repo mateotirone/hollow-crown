@@ -9,7 +9,8 @@
 
 import { world, system, GameMode, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { emit, onTick, addTests, assert, assertEqual, addJoinStep, addKeepMenuButtons } from "../siege/api.js";
+import { emit, on, onTick, addTests, assert, assertEqual, addJoinStep, addKeepMenuButtons } from "../siege/api.js";
+import { waitsForStart } from "../plots/api.js";
 import { sfx } from "../core/sfx.js";
 import { pay } from "../economy/coins.js";
 import { CHAPTERS } from "./items_data.js";
@@ -186,11 +187,19 @@ system.beforeEvents.startup.subscribe((e) => {
 });
 
 // A new player gets the book
-addJoinStep(36, "codex book", async (player, { wait }) => {
+const CODEX_GIVEN = "hc:codex_given";
+function handCodex(player) {
+  if (!player.isValid || player.getDynamicProperty(CODEX_GIVEN)) return false;
+  player.setDynamicProperty(CODEX_GIVEN, true);
   give(player, CODEX.bookId, 1);
   player.sendMessage("§6The Codex§7 is in your pack: a book of rare things. Anything rare you pick up gets drawn in it. Use it, or type /siege:codex.");
-  await wait(20);
+  return true;
+}
+addJoinStep(36, "codex book", async (player, { wait }) => {
+  if (waitsForStart(player)) return; // on the map it comes once they have chosen a start
+  if (handCodex(player)) await wait(20);
 }, { when: "first" });
+on("startChosen", ({ player }) => system.runTimeout(() => { try { handCodex(player); } catch { /* left */ } }, 200));
 
 // ---------- test tools ----------
 system.afterEvents.scriptEventReceive.subscribe((e) => {
