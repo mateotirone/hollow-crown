@@ -374,6 +374,16 @@ export const ENTRIES = [
   },
 
   {
+    id: "mending", ch: "coin", title: "Worn gear",
+    tip: "That's wearing thin. Any town's Smith mends worn tools, weapons and armour for a few Regals.",
+    page: "Tools, weapons and armour wear down as you use them, and most break when they run out.\n\n"
+      + "§fThe Smith:§r every town's Smith has a §fMend gear§r button. He mends anything that wears, worn or carried, good as new. The price follows how worn it is and what it's made of: a worn iron pick costs a Regal or two, a Choirsteel blade far more. He also mends the rare things no anvil takes, like trophies from great fights.\n\n"
+      + "§fThe anvil:§r works as it always has. Most gear mends there with its own metal.\n\n"
+      + "§fThe oldest things§r never break. Worn down, they go dull and their gifts rest until a Smith mends them.",
+    when: ["event:gearWorn", "event:gearMended"],
+  },
+
+  {
     id: "upkeep", ch: "coin", title: "Upkeep",
     tip: "Upkeep is paid at dawn: a sum for your town's size, a little for each building and a wage for each guard.",
     page: "A settlement costs Regals to keep. Each §fdawn§r you are in the world for, your upkeep is taken from your Regals and the screen says how much: §fUpkeep paid: 46 Regals§r.\n\n"

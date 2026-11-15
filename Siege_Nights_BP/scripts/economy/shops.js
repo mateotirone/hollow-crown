@@ -21,6 +21,7 @@ import { onTick } from "../core/loop.js";
 import { addTests, assertEqual } from "../core/tests.js";
 import { guildMenu } from "../guild/index.js";
 import { reforgeTarget, reforgePrice, armourName } from "./regional_armor.js";
+import { mendable, mended, gearName } from "./mend.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
@@ -342,6 +343,32 @@ async function reforgeMenu(player, npc, region) {
   return reforgeMenu(player, npc, region);
 }
 
+// ---------- the Smith mends worn gear (mend.js) ----------
+
+async function mendMenu(player, npc) {
+  const pieces = mendable(player);
+  const form = new ActionFormData().title("Smith: mending")
+    .body(`Anything that wears, worn or carried: tools, weapons, armour, even the old and strange things no anvil will take. It comes back good as new, and the price follows the wear.\n\nYou have ${coins(funds(player))}.`
+      + (pieces.length ? "" : "\n\n§7Nothing you have needs mending."));
+  for (const p of pieces) form.button(`${gearName(p.stack)}${p.worn ? " (worn)" : ""}\n§8${coins(p.price)}, ${Math.max(1, Math.round(p.share * 100))}% worn`);
+  if (pieces.length > 1) form.button(`Mend all of it\n§8${coins(pieces.reduce((sum, p) => sum + p.price, 0))}`);
+  form.button("Back");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const chosen = pieces.length > 1 && res.selection === pieces.length ? pieces : pieces[res.selection] ? [pieces[res.selection]] : undefined;
+  if (!chosen) return openShop(player, npc);
+  const price = chosen.reduce((sum, p) => sum + p.price, 0);
+  if (!charge(player, price, "smith_mend")) {
+    player.sendMessage(`§7Smith: §fThat's ${coins(price)}. You have ${coins(funds(player))}.`);
+    return mendMenu(player, npc);
+  }
+  for (const p of chosen) p.put(mended(p.stack));
+  sfx(player, "random.anvil_use");
+  player.onScreenDisplay.setActionBar(`§6Mended§7 for ${coins(price)}`);
+  emit("gearMended", { player, count: chosen.length, coins: price });
+  return mendMenu(player, npc);
+}
+
 // ---------- the shop ----------
 
 export async function openShop(player, npc) {
@@ -360,6 +387,7 @@ export async function openShop(player, npc) {
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
   if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
+  if (jobId === "smith") { form.button("Mend gear\n§8tools, weapons, armour"); acts.push(() => mendMenu(player, npc)); }
   if (jobId === "smith" && region) { form.button(`Reforge armour\n§8in the ${region} style`); acts.push(() => reforgeMenu(player, npc, region)); }
   if (job.mint) { form.button("Trade up metal\n§8iron → gold → diamond → netherite"); acts.push(() => exchangeMenu(player, npc)); }
   form.button("Leave");

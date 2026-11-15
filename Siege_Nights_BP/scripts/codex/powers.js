@@ -7,7 +7,7 @@ import { onTick, isNight, keepOf, nextSiegeDay, addFilter, RAIDER_TAG } from "..
 import { sfx } from "../core/sfx.js";
 import { pay } from "../economy/coins.js";
 import { ITEM, CODEX, PENALTY, mayWear, penaltyStage, setCount } from "./rules.js";
-import { store, homeRegion, gearOf, mainOf, effect, hurt, heal, particle, isCreative, give, valid, players, bearing } from "./state.js";
+import { store, homeRegion, gearOf, mainOf, effect, hurt, heal, particle, isCreative, give, valid, players, bearing, dullMythic } from "./state.js";
 
 const H = EquipmentSlot.Head, C = EquipmentSlot.Chest, L = EquipmentSlot.Legs, F = EquipmentSlot.Feet, M = EquipmentSlot.Mainhand, O = EquipmentSlot.Offhand;
 const ARMOUR = [H, C, L, F];
@@ -349,6 +349,7 @@ world.afterEvents.projectileHitBlock.subscribe((ev) => {
 world.afterEvents.itemUse.subscribe((ev) => {
   const p = ev.source, id = ev.itemStack?.typeId;
   if (!isPlayer(p) || !id?.startsWith("siege:")) return;
+  if (dullMythic(ev.itemStack)) return p.onScreenDisplay.setActionBar("§7It has gone dull. A Smith in any town can mend it.");
   try { use(p, id); } catch (e) { console.warn(`[Codex] ${id}: ${e}`); }
 });
 
@@ -546,6 +547,7 @@ const DIGGABLE = /stone|deepslate|andesite|diorite|granite|tuff|_ore|netherrack|
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
   const p = ev.player, id = ev.itemStackBeforeBreak?.typeId;
   if (id !== "siege:hrodas_pick" && id !== "siege:sextons_spade") return;
+  if (dullMythic(ev.itemStackBeforeBreak)) return;
   try {
     const at = ev.block.location, dim = ev.dimension;
     const d = p.getViewDirection();

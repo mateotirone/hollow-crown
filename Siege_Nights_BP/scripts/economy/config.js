@@ -148,7 +148,7 @@ export const LINES = {
     night: ["We stopped the deep cut. It rings at night. Selling, are you?", "Leave it on the cart. I'll count it at dawn, and pay you now."],
   },
   smith: {
-    day: ["Coal in, tools out. Iron you take to the Moneyer, same as everyone.", "Every coin is a promise of iron. I'd know: I struck half the iron in this town.", "Rails, buckets, shears. Good plain work."],
+    day: ["Coal in, tools out. Iron you take to the Moneyer, same as everyone.", "Every coin is a promise of iron. I'd know: I struck half the iron in this town.", "Rails, buckets, shears. Good plain work.", "Bring me what you've worn thin. Mending costs less than new, and it remembers your hand."],
     night: ["The forge stays lit till dawn. Not for the work.", "Buy what you need and bar your door after."],
   },
   fisher: {

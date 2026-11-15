@@ -26,6 +26,12 @@ export const CODEX = {
 };
 
 export const ITEM = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+// The twelve mythical weapons and tools never break (Mateo 2026-11-15): with DULL_LEFT durability left they stop
+// and go dull, and their powers rest until a Smith mends them (economy/mend.js keeps them there).
+export const MYTHIC = new Set(ITEMS.filter((i) => i.mythical).map((i) => i.id));
+export const DULL_LEFT = 100;
+export const isDull = (damage, max) => max - damage <= DULL_LEFT;
+export const dullDamage = (damage, max) => Math.min(damage, max - DULL_LEFT);
 export const REGION_NAMES = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen"];
 
 // Book order: chapter by chapter, new items first in each chapter in list order, the existing ones after
