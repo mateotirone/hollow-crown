@@ -571,7 +571,7 @@ addTests("act2", {
   },
   "Act 2: the walk-up camera stands between you and the Tree": () => {
     const cam = choiceCamera({ x: 0, y: 64, z: 0 }, { x: 10, y: 64, z: 0.5 });
-    assert(cam.pos.x > 0.5 && cam.pos.x <= 4.1, "toward the player, a few blocks off");
+    assert(cam.pos.x > 4 && cam.pos.x <= 6.1, "toward the player, clear of the Tree's roots");
     assertEqual(cam.look.x, 0.5);
   },
 });
