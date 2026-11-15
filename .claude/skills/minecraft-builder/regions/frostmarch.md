@@ -114,6 +114,7 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
 
 **Windows:**
 - **Size:** small (cold), with heavy dark oak surrounds.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: white (frosted) mostly, some light grey and light blue. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: `white_stained_glass_pane` (frosted);
   - halls and longhouses: `light_blue_stained_glass_pane`;
@@ -200,6 +201,10 @@ three high and the scales, an iron and a gold weighted plate, in the pass window
 iron block; stacked iron blocks) and a `trade_sign` over the door: a spruce hanging sign under a one-block dark oak fence arm,
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
+
+## The windmill
+
+- **Windmill (2026-11-15):** a squat three-storey tower of dark stone (FRO-01), a very steep dark oak cone (pitch 3) with a rod finial, four lattice sails of grey and white cloth on dark oak stocks. No bright cloth. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
 
 ## Never
 

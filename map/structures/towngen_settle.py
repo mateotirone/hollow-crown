@@ -926,10 +926,11 @@ class Settlement(Town):
         self.nparcel = len(self.field_out)
 
     def windmills(self):
-        super().windmills()
-        # a windmill is a fixture of its field, not a slot
-        for e in [e for e in self.plan if e["kind"] == "windmill"]:
-            self.fixtures.append({"name": "windmill", "stamp": e["stamp"], "at": [e["x"] - self.C[0], e["z"] - self.C[1]], "ground_y": e["ground_y"], "rotation": e["rotation"], "tier": None})
+        """Mateo 2026-11-15: every settlement gets a windmill by its Town field, in its region's look. The site is found on
+        the finished layout (map/structures/windmill_sites.py, run by tools/export_towns.py) and the game raises it
+        (settle/windmill.js), so the generator leaves the ground for it alone here (it used to stamp a Vale mill on
+        fields of 900+ blocks only)."""
+        return
 
     # ---- trees (agreed with the placement thread and Mateo, 2026-11-11)
     # Species ids are map/trees/species.py cards; stamps are build_trees.py's "<id>/<id>_<size>_<n>".

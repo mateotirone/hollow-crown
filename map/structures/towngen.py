@@ -986,7 +986,7 @@ class Town:
                 deg = snap_rot(q[0] - x, q[1] - z); f = ROT[deg]
                 ahead = [(x + f[0] * t - f[1] * s_, z + f[1] * t + f[0] * s_) for t in range(9, 16) for s_ in (-1, 0, 1)]
                 if any(not self.ok(*c) or self.at(self.TAKEN, *c) >= 2 or self.at(self.WET, *c) for c in ahead): continue   # its door opens onto open ground
-                bp = TB.windmill(self.seed * 31 + L, getattr(self, "region", "vale"))
+                bp = TB.windmill(self.seed * 31 + L, getattr(self, "arch", None) or getattr(self, "region", "vale"))
                 e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
                 if not e: continue
                 p["windmill"] = [x, z]

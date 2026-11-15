@@ -53,7 +53,7 @@ on shady stone. Vines climb walls that face away from the sun.
 - **Layout:** towns grow along roads and round a square or market. They are organic, never on a grid,
   and never inside a perfect circle (town edges wobble).
 - **Order of work:** paths are laid first, and buildings face the street with their door on it.
-- **Lots:** gardens and orchards behind the houses, fields beyond them, a windmill on fields over 900 blocks.
+- **Lots:** gardens and orchards behind the houses, fields beyond them, a windmill by the first field (every settlement has one, regions/README "Windmills"); in map towns, on fields over 900 blocks.
 - **Street surface:** a bottom slab, half a block below the buildings, made of `cobblestone_slab` 60,
   `stone_brick_slab` 25 and `andesite_slab` 15. The centre line is the most worn (more cobble).
 - **Verges:** `grass_path`, `coarse_dirt`, `gravel`.
@@ -131,6 +131,7 @@ Full rules: `build-instructions/06-roof/`.
 
 **Windows:**
 - **Sizes:** 1 or 3 wide, flush with the wall.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: brown, light grey and clear. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: `brown_stained_glass_pane` (old warm glass) or light grey;
   - stone houses and the guildhall: grey;
@@ -239,6 +240,10 @@ three high and the scales, an iron and a gold weighted plate, in the pass window
 iron block; stacked iron blocks) and a `trade_sign` over the door: a spruce hanging sign under a one-block dark oak fence arm,
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
+
+## The windmill
+
+- **Windmill (2026-11-15):** a stage mill: two storeys of grey stone (VAL-01), a railed stage on dark oak brackets where it steps in, a cap storey of spruce planks between stripped spruce posts, a steep slate cone (VAL-06) with the spire top, four white lattice sails on spruce stocks. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
 
 ## Never
 

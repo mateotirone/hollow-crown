@@ -51,7 +51,8 @@ USES = {
     "barracks":  ["guard", "bunks"],
     "library":   ["library", "library"],
     "stable":    ["stable"],
-    "storehouse": ["chest_store"],   # walls of sideways chests in 3 x 3 bays between stone pillars (Mateo 2026-11-13)
+    "storehouse": ["chest_store"],
+    "station":   ["booking", "office"],   # a railway booking hall (Mateo 2026-11-15): ticket counter, wall benches, notices   # walls of sideways chests in 3 x 3 bays between stone pillars (Mateo 2026-11-13)
 }
 
 # ---- region flavour (08-interiors step 3; regions/<region>.md "inside")
@@ -543,6 +544,22 @@ def _grille_counter(L, doors, wood):
     return False
 
 
+def _wall_benches(L, wood, doors, n):
+    """Benches along the walls: two stairs side by side, their backs to a blank wall, a gap between benches."""
+    got, used = 0, []
+    for (x, z, d) in _by_far(L, L.wall_cells(), doors):
+        if got >= n: break
+        sx, sz = _side(x, z, d, 1)
+        if (sx, sz) not in L.area or d not in L.wall_dir(sx, sz): continue
+        if any(abs(x - u[0]) + abs(z - u[1]) <= 3 for u in used): continue
+        if not (_clear_behind(L, x, z, d, (0, 1)) and _clear_behind(L, sx, sz, d, (0, 1))): continue
+        st = {"facing": OPP[d]}
+        if _put(L, [(x, 0, z, f"{wood}_stairs", st), (sx, 0, sz, f"{wood}_stairs", st)], [(x, z), (sx, sz)],
+                need=[_fwd(x, z, d), _fwd(sx, sz, d)]):
+            got += 1; used += [(x, z), (sx, sz)]
+    return got
+
+
 def _strongbox(L, doors):
     """An iron-bound strongbox: a chest on an iron block against a wall, its front free."""
     for (x, z, d) in _by_far(L, L.wall_cells(), doors):
@@ -724,6 +741,10 @@ def furnish_level(L, kind, doors, region, wood, table):
         _strongbox(L, doors)
         _iron_stack(L, doors)
         _wall_items(L, ["lectern", "chest", "barrel"], doors)
+    elif kind == "booking":    # the station's booking hall: the ticket window, benches, the timetable lectern
+        _grille_counter(L, doors, wood) or _counter(L, doors, wood)     # a halt's hut is too small for the grille
+        _wall_benches(L, wood, doors, 2 if area < 60 else 4)
+        _wall_items(L, ["lectern", "barrel", "chest", F["extra"][0]], doors)
     elif kind == "mint":
         _counter(L, doors, wood)
         _wall_items(L, ["chest", "chest", "anvil", "chest", "lectern", "furnace"], doors)

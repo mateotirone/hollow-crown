@@ -142,6 +142,7 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 ## Windows, doors and details
 
 **Windows:**
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: sea glass: light blue mostly, some cyan and white. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: `light_blue_stained_glass_pane`;
   - stores and shops: clear below, white above;
@@ -223,6 +224,10 @@ three high and the scales, an iron and a gold weighted plate, in the pass window
 iron block; stacked iron blocks) and a `trade_sign` over the door: a birch hanging sign under a one-block birch fence arm,
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
+
+## The windmill
+
+- **Windmill (2026-11-15):** a slender whitewashed tower (calcite and white concrete), teal warped shutters at every window, a low sea-green cone (SAL-04, pitch 1), eight triangle sails of white cloth on birch poles, the harbour ships' cyan band across every other one. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
 
 ## Never
 

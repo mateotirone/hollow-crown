@@ -137,6 +137,7 @@ flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed
 **Windows:**
 - **Size:** small and deep, with the glass set back one block behind closed acacia trapdoor lattice.
 - **Surrounds:** cut sandstone, with chiseled sandstone lintels.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: orange, red, white and a little yellow. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: orange;
   - halls: yellow;
@@ -216,6 +217,10 @@ three high and the scales, an iron and a gold weighted plate, in the pass window
 iron block; stacked iron blocks) and a `trade_sign` over the door: a acacia hanging sign under a one-block acacia fence arm,
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
+
+## The windmill
+
+- **Windmill (2026-11-15):** a broad sandstone tower (EMB-01) with a flat deck behind a cut sandstone parapet and a low red sandstone dome with a gold finial (no steep roof, no timber frame), six triangle sails striped orange and white like the awnings, on acacia poles. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
 
 ## Never
 

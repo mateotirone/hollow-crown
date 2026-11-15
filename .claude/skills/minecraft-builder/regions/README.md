@@ -110,8 +110,20 @@ given here.
 
 ## Windmills and the Breeder's Yard in towns (2026-11-13)
 
-- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot):
-  `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
+- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot).
+  Since 2026-11-15 ("rebuild each region's windmill") each region has its own mill on the skill's `windmill` part
+  (`map/structures/review/specs/gen_windmill.py`, `windmill_skill.py`): Vale stage mill (grey stone, a railed stage,
+  timber cap storey, slate cone, white lattice sails); Frostmarch squat deepslate tower, very steep dark oak cone, grey
+  sails; Saltreach slender whitewashed tower, low sea-green cone, teal shutters, eight white triangle sails with a cyan
+  band; Emberwaste broad sandstone tower, flat deck behind a parapet with a low red dome, six orange-and-white striped
+  triangle sails; Blackfen mud brick tower, mangrove-framed cap storey, low dark oak cone, patched grey and brown sails.
+  Every one: door on the front, sails on the back (or beside it where only that fits), a ladder up the main shaft, a
+  mill inside (sack floor, stone floor, cap floor), lit.
+- **Every settlement has one** (Mateo 2026-11-15: "fix the windmill system"): the site is beside the Town field
+  (`map/structures/windmill_sites.py`, run by `tools/export_towns.py`), on open ground, never a path, plot or fence
+  line, door facing a path with the walk paved 3 wide, sails clear of every plot and inside the Town wall. The game
+  raises it when the Town is laid out (`settle/windmill.js`). Where the field has no room, the nearest open ground in
+  the Town band.
 - Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
   in the region's style; the post sells the foal of the region it stands in.
 
@@ -133,3 +145,16 @@ Every plot's mine is a story build (Act 1 day 2 sends every player there). One d
   sandstone, diorite, calcite; Emberwaste red sandstone and the mesa terracottas; Blackfen tuff, packed mud, mud bricks,
   clay. Below 0 every region is deepslate with tuff and smooth basalt (Emberwaste blackstone and basalt). Never a block
   that falls (sand, gravel) in a wall or a roof.
+
+## Railway stations in every region (Mateo 2026-11-15)
+
+"Kings rest station go ahead, and then use this base as a repair job for ALL the regions castle level stations", "make sure
+all station upgrades have the same applied build principals as well". Every station is a skill spec written by
+`map/structures/review/specs/gen_stations.py`: the region's preset for the hall (stone ground storey under the region's
+upper storey), the region's roof, a clock tower by `towers/README.md` section 5 (the hall's stone for the shaft, the
+region's top stage jettied one out on brackets with a clock on every face, the region's cap: slate spire, sea-green hip
+lantern, copper dome with a gold finial, dark shingle spire), platform canopies as `lean_to`s on the hall wall (pitch
+"half" so the low edge keeps 3 blocks of headroom over the platform), and `"interior": {"use": "station"}` (the booking
+hall). The plan grows with the tier: Halt (a 5 x 5 hut, a canopy each side), Station (a gabled porch to the line),
+Junction (the clock tower over the platform entrance), Grand (the Kingsrest plan: the tower on the street front, stable
+and parcels wings). `stations.py` lays only what the skill has no part for: the platform, the glass train shed, the marks.

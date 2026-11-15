@@ -206,9 +206,46 @@ def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY, planters=True, w
     texture_roofs(bp)
     return bp.finish()
 
+# Window glass by region (Mateo 2026-11-15: "white stained glass for snow regions, reds and oranges and whites for
+# desert, bog green"): each window (a connected run of panes) takes one colour from its region's mix, picked by
+# place, so a front reads varied but every pane of one window matches. Chapels and lamp rooms keep their own glass;
+# the Hollow lights its windows with froglight instead (regions/hollow.md).
+REGION_GLASS = {
+    "vale": [("brown_stained_glass_pane", 2), ("light_gray_stained_glass_pane", 2), ("glass_pane", 1)],
+    "frostmarch": [("white_stained_glass_pane", 4), ("light_gray_stained_glass_pane", 1), ("light_blue_stained_glass_pane", 1)],
+    "saltreach": [("light_blue_stained_glass_pane", 3), ("cyan_stained_glass_pane", 1), ("white_stained_glass_pane", 1)],
+    "emberwaste": [("orange_stained_glass_pane", 3), ("red_stained_glass_pane", 2), ("white_stained_glass_pane", 2), ("yellow_stained_glass_pane", 1)],
+    "blackfen": [("green_stained_glass_pane", 3), ("brown_stained_glass_pane", 2), ("lime_stained_glass_pane", 1)],
+}
+REGION_ALIAS = {"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste", "fen": "blackfen"}
+
+def region_glass(bp, region):
+    region = REGION_ALIAS.get(region, region)
+    mix_ = REGION_GLASS.get(region)
+    name = (getattr(bp, "name", "") or "").lower()
+    if not mix_ or any(w in name for w in ("chapel", "shrine", "lighthouse", "temple")): return bp
+    pane = lambda n: n == "glass_pane" or n.endswith("_stained_glass_pane")
+    todo = {c for c, (n, p) in bp.cells.items() if pane(n)}
+    total = sum(w for _, w in mix_)
+    while todo:
+        seed = min(todo); win = [seed]; todo.discard(seed); i = 0
+        while i < len(win):
+            x, y, z = win[i]; i += 1
+            for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+                c = (x + d[0], y + d[1], z + d[2])
+                if c in todo: todo.discard(c); win.append(c)
+        r = h3(seed[0], seed[1], seed[2], 977) * total
+        pick = mix_[-1][0]
+        for n, w in mix_:
+            r -= w
+            if r < 0: pick = n; break
+        for c in win: bp.cells[c] = (pick, bp.cells[c][1])
+    return bp
+
 def finish_detail(bp, P=None):
     """The last pass for builds outside the Vale doctrine palettes (settlement halls, plot buildings, stations):
     bushes and lantern stands at the foot of blank stone walls, then finish. Emberwaste's sand gets none."""
+    if P and P.get("region"): region_glass(bp, P["region"])
     # settlement builds are placed in fixed slots: dressing never widens a build's footprint, so trim any
     # shutter, shelf, sign or lantern that would stand outside the box of the building itself
     detail = lambda n: n.endswith(("trapdoor", "_wall_sign", "_leaves", "lantern")) or n in ("iron_chain", "flower_pot", "azalea_leaves_flowered") \

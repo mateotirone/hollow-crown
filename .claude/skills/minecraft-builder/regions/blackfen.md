@@ -110,6 +110,7 @@ town and waterline houses.
 
 **Windows:**
 - **Size and place:** few and small, high up.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: bog green mostly, some brown and lime. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: brown;
   - halls: green;
@@ -188,6 +189,10 @@ three high and the scales, an iron and a gold weighted plate, in the pass window
 iron block; stacked iron blocks) and a `trade_sign` over the door: a mangrove hanging sign under a one-block mangrove fence arm,
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
+
+## The windmill
+
+- **Windmill (2026-11-15):** a mud brick tower (BLK-01) on a tuff footing, its cap storey framed in mangrove with packed mud between, a low dark oak cone (pitch 1), four lattice sails of patched grey and brown cloth. No white cloth. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
 
 ## Never
 
