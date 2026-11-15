@@ -101,12 +101,13 @@ addTests("settle", {
   "every building draws in every style with known roles": () => {
     for (const b of BUILDINGS) for (const id of STYLE_IDS) {
       const plan = drawBuilding(b.id, id);
-      assert(plan.cells.size > 20, `${b.id} is empty`);
+      const gateOnly = b.id === "foresters_lodge"; // only the woodlot's gate: forestry lays the grove on the ground as it lies
+      assert(gateOnly || plan.cells.size > 20, `${b.id} is empty`);
       for (const c of plan.cells.values()) assert(plan.style.roles[c.role], `${b.id} (${id}) uses unknown role ${c.role}`);
       const bounds = plan.bounds();
       assert(bounds.z0 >= 0 && !plan.get(0, 1, 0), `${b.id} must rise in front of its Foundation Stone`);
       const price = priceOf(plan);
-      assert(price.timber >= 8 && price.stone >= 8 && price.timber + price.stone <= 320, `${b.id} price`);
+      assert(gateOnly || BIG_PLOT.includes(b.id) || (price.timber >= 8 && price.stone >= 8 && price.timber + price.stone <= 320), `${b.id} price`);
     }
   },
   "footprints follow the way you face": () => {
@@ -621,11 +622,18 @@ import { plotFit, charterCheck, charterKeeps, slotClass, opensAt } from "./chart
 import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST, STAGES as STAGE_LIST } from "./config.js";
 import { townNames as allTownNames, townFor as townByName, slotsOf as slotsOfLayout } from "./towns.js";
 import { BLOCK_BUILDS as BLOCK_BUILD_LIST } from "./blockdesigns.js";
+import { PLOT_PLAN } from "../plots/config.js";
+import { REGION_TO_STYLE } from "./config.js";
+// The big plots' buildings (2026-11-14): priced on the plot, too big for the block price rule, each on a plot of its own
+const BIG_PLOT = ["stables", "dragon_roost", "foresters_lodge"];
+// A town's region (style id) by its name, and whether a building is built there (config.js STAGES region)
+const regionOfTown = (name) => REGION_TO_STYLE[PLOT_PLAN.find((p) => p.name.toLowerCase() === String(name).toLowerCase())?.region];
+const forRegion = (id, name) => STAGE_LIST.every((s) => s.build.every((b) => b.id !== id || !b.region || b.region === regionOfTown(name)));
 
 addTests("settle charters", {
   "every plot building has a size class and an opening tier"() {
     for (const b of BUILDINGS) {
-      assert(["S", "M", "ML", "L", "G"].includes(PSIZE[b.id]), `${b.id} has no PLOT_SIZE`);
+      assert(["S", "M", "ML", "L", "G", "B", "D", "O"].includes(PSIZE[b.id]), `${b.id} has no PLOT_SIZE`);
       assert(opensAt(b.id) >= 0 && opensAt(b.id) <= 3, `${b.id} opens at ${opensAt(b.id)}`);
     }
   },
@@ -657,8 +665,9 @@ addTests("settle charters", {
     assert(charterCheck(1, { ...town, cottage: 1 }, known).met, "three homes, the Farmhouse, the Mint and the Market");
     assert(!charterCheck(1, { ...town, cottage: 1, market: 0 }, known).met, "every building of the stage, not most of them");
     const city = { house: 2, cottage: 4, quartermaster_desk: 1, inn: 1, smithy: 1, garden: 1, well: 1 };
-    assert(charterCheck(2, city, known).met, "the City's list");
-    assert(!charterCheck(2, { ...city, well: 0 }, known).met, "the Well too");
+    assert(charterCheck(2, city, known, "vale").met, "the City's list");
+    assert(!charterCheck(2, { ...city, well: 0 }, known, "vale").met, "the Well too");
+    assert(!charterCheck(2, city, known, "emberwaste").met && charterCheck(2, { ...city, dragon_roost: 1 }, known, "emberwaste").met, "the Emberwaste's City needs its Dragon Stable too");
     for (const t of [0, 1, 2, 3]) {
       const lines = CHARTER_LIST[t].map((l) => l.ids.join(","));
       for (const b of STAGE_LIST[t].build) assertEqual(lines.includes(b.id), !b.pending && !b.counted, `${b.id}: a charter line at ${STAGE_LIST[t].name} exactly when it has a plot and nothing else counts it`);
@@ -673,7 +682,7 @@ addTests("settle charters", {
         if (v.charter === false) continue;
         const slots = slotsOfLayout(v);
         for (const b of BUILDINGS) {
-          if (!known.has(b.id)) continue;
+          if (!known.has(b.id) || !forRegion(b.id, name)) continue;
           assert(slots.some((s) => plotFit(b.id, s, new Set()).ok || plotFit(b.id, s, new Set(["none"])).ok), `${name} layout ${i}: nowhere for the ${b.id}`);
         }
       }
@@ -841,7 +850,7 @@ addTests("settle charters", {
     assert(total[4] > 0 && total[5] > 0, "some passing layouts have hall4 and hall5 plots");
   },
   "a plot that is the last one a charter need can use is kept for it, for players and lords alike"() {
-    const known = new Set(BUILDINGS.map((b) => b.id));
+    const known = new Set(BUILDINGS.map((b) => b.id).filter((id) => !BIG_PLOT.includes(id))); // the big plots' own buildings aside
     // just the plots the Town charter needs, one each, from a real layout: then the Mint's Medium is the last it can use.
     // Any passing layout whose Town plots give two cottage Smalls besides the market's will do (the big plots crowd some out).
     let slots, used, farm, mint, market, homes;
@@ -903,12 +912,12 @@ addTests("settle charters", {
       for (let tier = 0; tier <= 3; tier++) {
         for (let n = 0; n < 80; n++) {
           const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
-          const pick = lordPick(open, tier, counts, designs, () => true, name, slots.filter((s) => !taken.has(s.id)));
+          const pick = lordPick(open, tier, counts, designs, () => true, name, slots.filter((s) => !taken.has(s.id)), regionOfTown(name));
           if (!pick) break;
           taken.add(pick.slot.id);
           counts[pick.id] = (counts[pick.id] ?? 0) + 1; dbg.push(pick.slot.id + ":" + pick.id);
         }
-        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
+        if (tier < 3) assert(charterCheck(tier, counts, designs, regionOfTown(name)).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
       assert(HOMES.reduce((n, id) => n + (counts[id] ?? 0), 0) >= 3, `${name}: a lord's town has homes`);
       for (const id of ONE_EACH) assert((counts[id] ?? 0) <= 1, `${name} ${v.label}: a lord raised ${counts[id]} of the one-of-each ${id}`);
@@ -1233,7 +1242,7 @@ addTests("settle stages", {
     for (const [name, town] of Object.entries(TOWNS)) {
       for (const [i, v] of town.variants.entries()) {
         if (v.charter === false) continue; // never picked (towns.js pickLayout)
-        for (const m of seatStages(v, { fits })) bad.push(`${name} layout ${i}, ${m.stage}: no plot for the ${m.what}`);
+        for (const m of seatStages(v, { fits, region: regionOfTown(name) })) bad.push(`${name} layout ${i}, ${m.stage}: no plot for the ${m.what}`);
       }
     }
     assert(!bad.length, `${bad.length} missing:\n${bad.slice(0, 12).join("\n")}`);

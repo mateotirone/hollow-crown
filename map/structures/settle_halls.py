@@ -8,6 +8,7 @@ Stonework is the region's Castle Stone family (settlements use only it); stairs,
 stay vanilla because the family has none. Interiors hold only what the hall needs to work:
 the Tree of Oaths, hearth, ledger lectern, cartographer's table, throne and vault (marks).
 """
+import math
 from bp import Blueprint, DIRS, OPP, RIGHT
 from kit import band_index, Building, VALE, mix, grow, h3, DOCTRINE, finish_detail
 from vale import STYLES
@@ -840,3 +841,161 @@ def fen_hall(level, seed=0):
     return finish_detail(bp, P)
 
 REGION_HALLS = {"vale": lambda l: VALE_HALLS[l](), "frostmarch": frost_hall, "saltreach": salt_hall, "emberwaste": ember_hall, "blackfen": fen_hall}
+
+# ---------------------------------------------------------------- room for the Tree of Oaths
+# The Tree is its own object now (townhall/oath_tree.js, Mateo 2026-11-14): a tree model standing over the
+# siege:tree_of_oaths block, about 4.7 blocks tall over a 3 x 3 in the Longhouse and Stone Hall and half as big again
+# over a 5 x 5 from the Keep up. TREE_ROOM is how far it reaches from the trunk at each layer above the block
+# (blocks, measured from studio/art/build_oath_tree.py's model; run it again if the model changes).
+TREE_ROOM = {
+    "small": [1.5, 0.75, 1.7, 1.9, 1.9],
+    "grown": [2.25, 0.9, 1.1, 2.15, 2.7, 2.8, 2.8, 0.7],
+}
+SOFT = ("lantern", "soul_lantern", "chain", "iron_chain", "torch", "wall_torch")
+
+def tree_cells(level, t):
+    """The cells the Tree reaches into, standing at t (the tree block)."""
+    room = TREE_ROOM["grown" if level >= 3 else "small"]
+    out = set()
+    for dy, r in enumerate(room):
+        R = int(math.ceil(r))
+        for dx in range(-R, R + 1):
+            for dz in range(-R, R + 1):
+                if math.hypot(dx, dz) <= r + 0.3: out.add((t[0] + dx, t[1] + dy, t[2] + dz))
+    out.discard(tuple(t))
+    return out
+
+def _name(bp, c):
+    return (bp.cells.get(c) or ("air", {}))[0]
+
+def _solid(n):
+    return n not in ("air", "keep", "cave_air") and n not in SOFT
+
+def _wall(bp, c, floor_y):
+    """Part of something standing on the floor all the way up (a wall, a pillar, a dais): not ours to cut."""
+    x, y, z = c
+    return all(_solid(_name(bp, (x, yy, z))) for yy in range(floor_y + 1, y + 1))
+
+def _cost(bp, cells, floor_y):
+    cost = 0
+    for c in cells:
+        n = _name(bp, c)
+        if not _solid(n): continue
+        cost += 10 if _wall(bp, c, floor_y) else 3 if c[1] <= floor_y + 2 else 0.3
+    return cost
+
+def tree_room(bp, level):
+    """Make room for the Tree of Oaths model: stand it where it touches no wall (moving it toward the door if it
+    must, its floor inlay and braziers with it), take hanging lights out of its crown, cut a railed well through any
+    gallery over it, and raise a lantern of glass over it where the roof itself is in the way. Returns the cells
+    the lighting pass must keep clear."""
+    if "tree" not in getattr(bp, "marks", {}): return set()
+    _off_the_table(bp, level)
+    t0 = tuple(bp.marks["tree"])
+    floor_y = t0[1] - 1
+    best = min(range(0, 5), key=lambda s: (_cost(bp, tree_cells(level, (t0[0], t0[1], t0[2] + s)), floor_y), s))
+    if best:
+        _move_tree(bp, level, t0, best)
+    t = tuple(bp.marks["tree"])
+    cells = tree_cells(level, t)
+    top = max(c[1] for c in cells)
+    fence = next((n for n, _ in bp.cells.values() if n.endswith("_fence") and "nether" not in n), "dark_oak_fence")
+    cut, roof = set(), set()
+    for c in sorted(cells, key=lambda c: c[1]):
+        n = _name(bp, c)
+        if n in SOFT: bp.cells[c] = ("air", {}); continue
+        if not _solid(n) or _wall(bp, c, floor_y) or c[1] <= floor_y + 2: continue
+        bp.cells[c] = ("air", {}); cut.add(c)
+    # a cut column with nothing over it any more was the roof: those get the glass lantern
+    sky = max(c[1] for c in bp.cells) + 1
+    for (x, y, z) in cut:
+        if not any(_solid(_name(bp, (x, yy, z))) for yy in range(top + 1, sky)):
+            roof.add((x, z))
+    # railings round the well, on what is left of each gallery floor next to a cut
+    for (x, y, z) in cut:
+        if roof and (x, z) in roof: continue
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            q = (x + dx, y, z + dz)
+            if q in cells or not _solid(_name(bp, q)) or _wall(bp, q, floor_y): continue
+            above = (q[0], y + 1, q[2])
+            if _name(bp, above) == "air" and above not in cells and _name(bp, (q[0], y - 1, q[2])) == "air":
+                bp.cells[above] = (fence, {})
+    if roof:
+        # the roof was in the way: open every column the crown reaches at the roof's height right through to the sky,
+        # so the hole is the crown's size, and stand the lantern on the roof round it
+        roof_y = min(y for (x, y, z) in cut if (x, z) in roof)
+        cols = {(x, z) for (x, y, z) in cells if y >= roof_y - 1}
+        for (x, z) in cols:
+            for yy in range(roof_y - 1, sky):
+                if _solid(_name(bp, (x, yy, z))) and not _wall(bp, (x, yy, z), floor_y): bp.cells[(x, yy, z)] = ("air", {})
+        _roof_lantern(bp, cols, top, t)
+    bp.finish()
+    keep = set(cells)
+    for (x, y, z) in cells: keep.add((x, y + 1, z))
+    return keep
+
+def _move_tree(bp, level, t0, s):
+    x, y, z = t0
+    half = 2 if level >= 3 else 1
+    floor_y = y - 1
+    inlay = _name(bp, (x, floor_y, z))
+    # the plain floor round the inlay, to put back where the inlay was
+    plain = next((_name(bp, (x + dx, floor_y, z + half + 1)) for dx in (0, 1, -1) if _name(bp, (x + dx, floor_y, z + half + 1)) not in (inlay, "air")), inlay)
+    braziers = [c for c, v in bp.cells.items() if v[0] == "siege:brazier" and abs(c[0] - x) <= half + 2 and abs(c[2] - z) <= half + 1 and floor_y <= c[1] <= y]
+    for c in braziers: bp.cells[c] = (plain, {}) if c[1] == floor_y else ("air", {})
+    for dx in range(-half, half + 1):
+        for dz in range(-half, half + 1):
+            if _name(bp, (x + dx, floor_y, z + dz)) == inlay: bp.cells[(x + dx, floor_y, z + dz)] = (plain, {})
+    bp.cells[t0] = ("air", {})
+    for dx in range(-half, half + 1):
+        for dz in range(-half, half + 1):
+            bp.cells[(x + dx, floor_y, z + s + dz)] = (inlay, {})
+    for (bx, by, bz) in braziers: bp.cells[(bx, by, bz + s)] = ("siege:brazier", {})
+    bp.cells[(x, y, z + s)] = ("siege:tree_of_oaths", {})
+    bp.marks["tree"] = (x, y, z + s)
+
+def _roof_lantern(bp, roof, top, t):
+    """Where the roof was in the way: a little glass lantern on the roof over the Tree (a stone sill, two courses of
+    panes between stone corner posts, a stone cap), so the crown has its room and the Tree is lit from above."""
+    xs = [x for x, _ in roof]; zs = [z for _, z in roof]
+    x0, x1, z0, z1 = min(xs) - 1, max(xs) + 1, min(zs) - 1, max(zs) + 1
+    ring = roof_ring(x0, x1, z0, z1)
+    tops = {}
+    for (x, y, z), v in bp.cells.items():
+        if (x, z) in ring and _solid(v[0]) and y > tops.get((x, z), (-99, ""))[0]: tops[(x, z)] = (y, v[0])
+    if not tops: return
+    base = max(y for y, _ in tops.values()) + 1
+    names = [n for _, n in tops.values()]
+    stone = max(set(names), key=names.count)
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if (x, z) in ring:
+                corner = x in (x0, x1) and z in (z0, z1)
+                for y in range(tops.get((x, z), (base - 1, ""))[0] + 1, base + 1): bp.cells[(x, y, z)] = (stone, {})
+                for y in (base + 1, base + 2): bp.cells[(x, y, z)] = (stone, {}) if corner else ("glass_pane", {})
+            elif (x, z) not in roof:
+                for y in range(base, base + 3): bp.cells[(x, y, z)] = ("air", {})
+            bp.cells[(x, base + 3, z)] = (stone, {})
+
+def roof_ring(x0, x1, z0, z1):
+    return {(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1) if x in (x0, x1) or z in (z0, z1)}
+
+def _off_the_table(bp, level):
+    """The Tree used to stand on a little raised square (Mateo: "the table it's on sucks"). Where it still does,
+    the square goes, the Tree stands on the floor itself, and the floor under it is laid in the square's stone."""
+    x, y, z = bp.marks["tree"]
+    half = 2 if level >= 3 else 1
+    top = y - 1
+    square = [(x + dx, top, z + dz) for dx in range(-half, half + 1) for dz in range(-half, half + 1)]
+    ring = [(x + dx, top, z + dz) for dx in range(-half - 1, half + 2) for dz in range(-half - 1, half + 2) if max(abs(dx), abs(dz)) == half + 1]
+    if not all(_solid(_name(bp, c)) for c in square): return False
+    if sum(1 for c in ring if _name(bp, c) == "air") < len(ring) * 0.6: return False   # a stage across the room, not a table
+    if not all(_solid(_name(bp, (c[0], top - 1, c[2]))) for c in square): return False
+    stone = _name(bp, (x, top, z))
+    for c in square:
+        bp.cells[c] = ("air", {})
+        bp.cells[(c[0], top - 1, c[2])] = (stone, {})
+    bp.cells[(x, y, z)] = ("air", {})
+    bp.cells[(x, top, z)] = ("siege:tree_of_oaths", {})
+    bp.marks["tree"] = (x, top, z)
+    return True

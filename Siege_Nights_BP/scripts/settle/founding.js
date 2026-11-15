@@ -758,7 +758,7 @@ export function keptFor(owner, slot, id) {
   const counts = { ...raisedCounts(owner) };
   for (const st of Object.values(town.slots ?? {})) if (st.building && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1; // rising ones too
   const free = slotsOf(layoutOf(town)).filter((s) => !town.slots[s.id]?.building && !slotClosed(owner, s));
-  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id);
+  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id, town.style);
   return k && `Kept for the ${k.what} (${tierName(k.tier)} charter)`;
 }
 

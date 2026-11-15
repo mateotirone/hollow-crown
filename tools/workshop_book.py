@@ -29,12 +29,9 @@ BOOK = [
     ]),
     ("Your settlement", [
         ("siege:mason_bench", "A mason sets up beside it and sells blocks."),
-        ("siege:foresters_lodge", "A grove of your region's trees that regrows by itself."),
-        ("siege:ironworks", "Makes iron over time."),
         ("siege:writ_of_alliance", "Use it on a friend to share your land."),
     ]),
     ("Horses and roads", [
-        ("siege:stables", "Train, breed and keep horses."),
         ("siege:halter", "Use it on a tamed horse to make it your steed."),
         ("siege:riding_crop", "Gallop while riding."),
         ("siege:horse_whistle", "Calls your horse from up to 64 blocks."),

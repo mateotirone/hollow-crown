@@ -44,6 +44,7 @@ import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
 import { boardMenu, boardTick } from "./board.js";
 import "./board_tests.js";
+import "./oath_tree.js";
 
 export { grantPoints, grantRenown, heroOf } from "./hero.js";
 export { hallOf } from "./townhall.js";

@@ -54,11 +54,15 @@
       "L",
       "MF"
      ]
+    },
+    {
+     "id": "stables",
+     "classes": [
+      "B"
+     ]
     }
    ],
-   "pending": [
-    "stables"
-   ]
+   "pending": []
   },
   {
    "tier": 2,
@@ -97,12 +101,22 @@
      "classes": [
       "S"
      ]
+    },
+    {
+     "id": "foresters_lodge",
+     "classes": [
+      "O"
+     ]
+    },
+    {
+     "id": "dragon_roost",
+     "classes": [
+      "D"
+     ],
+     "region": "emberwaste"
     }
    ],
-   "pending": [
-    "foresters_lodge",
-    "dragon_roost"
-   ]
+   "pending": []
   },
   {
    "tier": 3,

@@ -4,7 +4,7 @@
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, addKeepMenuButtons } from "../siege/api.js";
+import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, addKeepMenuButtons, on } from "../siege/api.js";
 import {
   HORSE_SETTINGS as S, BREEDS, REGIONAL_BREEDS, TRAITS, GEAR_ITEMS, SHOES, SADDLES, HALTER, WHISTLE, CROP, CAPARISON,
   SPEED_VALUES, HEALTH_VALUES, levelFromValue, newRecord, hasPerk, rosterCap, costText, isCob, cobBack, COB,
@@ -276,6 +276,15 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
     meta.save();
   }
   player.sendMessage("§7Stables built. Click it to see your horses, train them, breed them and stable them. No horse yet? Use a Halter on a tamed horse.");
+});
+
+// The Stables raised on a plot (horses/barn.js): the same as placing the block
+on("stablesRaised", ({ owner }) => {
+  if (!meta.data.stables[owner]) {
+    meta.data.stables[owner] = 1;
+    meta.save();
+  }
+  world.getPlayers().find((p) => p.id === owner)?.sendMessage("§6Your Stables stands.§7 Click the Stables block at its door to see your horses, train them, breed them and stable them. No horse yet? Use a Halter on a tamed horse.");
 });
 
 // ---------- A horse falls ----------
