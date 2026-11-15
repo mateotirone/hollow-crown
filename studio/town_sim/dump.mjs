@@ -405,7 +405,6 @@ const slotOut = slots.map((s) => {
 // wallColumns leaves for them: the four on the diagonals and the one by the gate. Added to the ring's ops so the page
 // shows the wall whole by day too; returns the cells at or under each one's floor (takeDownWatch fills those with earth).
 const { watchPlan } = await imp("settle/wallwatch.js");
-const { allWatchSpots } = await imp("settle/walldata.js");
 function watchOps(level, ops) {
   const earth = [];
   for (const s of allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)) {
