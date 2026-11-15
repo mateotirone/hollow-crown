@@ -389,6 +389,34 @@ addTests("settle walls", {
   },
 });
 addTests("settle walls", {
+  "every map plot's wall is sealed all round apart from the gate, on every ring and at every level": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
+    const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (const [key, t] of Object.entries(TOWNS)) {
+      const tight = HAMLET_WALLS[key];
+      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...(t.outline?.radii?.length ? { radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) } : {}) };
+      const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
+      for (let tier = 0; tier < 4; tier++) {
+        const radius = t.walls[tier];
+        for (let level = 1; level <= MAX_WALL; level++) {
+          const cols = wallColumns({ center, radius, level, gateAngle: gate, smooth });
+          const watch = allWatchSpots(center, radius, gate, smooth, level);
+          const shut = new Set(cols.filter((c) => c.role === "wall" || c.role === "tower" || c.role === "gate" || c.role === "port" || c.role === "gap").map((c) => `${c.x},${c.z}`));
+          const far = Math.max(...cols.map((c) => Math.hypot(c.x, c.z))) + 2;
+          const seen = new Set(["0,0"]), todo = [[0, 0]];
+          while (todo.length) {
+            const [x, z] = todo.pop();
+            for (const [dx, dz] of SIDES) {
+              const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
+              if (seen.has(k) || shut.has(k) || (watch.length && inWatch(watch, nx, nz))) continue;
+              assert(Math.hypot(nx, nz) <= far, `${key} ring ${radius} level ${level}: a way out through the wall near ${x},${z}`);
+              seen.add(k); todo.push([nx, nz]);
+            }
+          }
+        }
+      }
+    }
+  },
   "no stretch of wall is low enough to hop, even where the land beside it rises or a short stake falls": () => {
     const smooth = new Array(WALLS.stations).fill(64);
     const center = { x: 100, y: 64, z: -300 };
