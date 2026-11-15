@@ -78,6 +78,7 @@ import "./statues/index.js";
 import "./recipebook/index.js"; // the recipe book lists only the regional armour of the region you stand in
 import "./codex/index.js"; // the Codex, the regional arms, mythical finds, the wonders' forges and the caravan market
 import "./arena/index.js"; // the arena at Kingsrest: fight Kings or a mob (/scriptevent siege:arena)
+import "./snapshot/index.js"; // world snapshot roster: names, Regals, story steps saved in the world (/siege:snapshot)
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work
