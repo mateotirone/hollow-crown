@@ -1,0 +1,573 @@
+{
+ "name": "station_junction_emberwaste",
+ "card": {
+  "title": "Emberwaste Junction",
+  "sub": "Desert sandstone",
+  "region": "emberwaste",
+  "where": "Every Emberwaste plot's railway, City tier",
+  "kind": "Station",
+  "blurb": "Junction: a two-storey hall (stone ground storey) with a clock tower on the middle of its platform front, the The building on the skill; stations.py lays the platform and the marks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": {
+     "block": "smooth_sandstone"
+    }
+   },
+   "rect": [
+    -8,
+    -14,
+    8,
+    -8
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    5
+   ],
+   "storey_style": [
+    {},
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": -5,
+      "storey": 0
+     },
+     {
+      "at": -5,
+      "storey": 1
+     },
+     {
+      "at": 5,
+      "storey": 0
+     },
+     {
+      "at": 5,
+      "storey": 1
+     }
+    ],
+    "s": [
+     {
+      "at": -6,
+      "storey": 0
+     },
+     {
+      "at": -6,
+      "storey": 1
+     },
+     {
+      "at": 6,
+      "storey": 0
+     },
+     {
+      "at": 6,
+      "storey": 1
+     }
+    ],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "station",
+    "entry": "n"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": {
+     "block": "smooth_sandstone"
+    },
+    "floor": "coarse_dirt"
+   },
+   "rect": [
+    -14,
+    -13,
+    -8,
+    -9
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "large",
+    "steps": 0,
+    "at": -1
+   },
+   "windows": {
+    "n": [],
+    "s": [
+     {
+      "at": -1,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "stable",
+    "entry": "n"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": {
+     "block": "smooth_sandstone"
+    }
+   },
+   "rect": [
+    8,
+    -13,
+    14,
+    -9
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 0,
+    "at": 1
+   },
+   "windows": {
+    "n": [],
+    "s": [
+     {
+      "at": -1,
+      "storey": 0
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "storage",
+    "entry": "n"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone"
+   },
+   "rect": [
+    -2,
+    -8,
+    2,
+    -4
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    7,
+    6
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 0
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "tower",
+    "rooms": [
+     "open",
+     "guard",
+     "lookout"
+    ],
+    "entry": "s"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": {
+     "block": "smooth_sandstone"
+    }
+   },
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "y": 14,
+   "plinth": 1,
+   "storeys": [
+    7
+   ],
+   "door": null,
+   "windows": {
+    "n": [],
+    "s": [],
+    "e": [],
+    "w": []
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "bushes": false,
+   "vines": 0,
+   "interior": false
+  },
+  {
+   "part": "dome",
+   "at": [
+    0,
+    -6
+   ],
+   "r": 2.5,
+   "finial": "gold"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "n",
+   "y": 18,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "acacia",
+   "hub": "acacia_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "s",
+   "y": 18,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "acacia",
+   "hub": "acacia_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "e",
+   "y": 18,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "acacia",
+   "hub": "acacia_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -3,
+    -9,
+    3,
+    -3
+   ],
+   "side": "w",
+   "y": 18,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "acacia",
+   "hub": "acacia_button"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -8,
+    -7,
+    -4,
+    -3
+   ],
+   "against": "n",
+   "top": 7,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    4,
+    -7,
+    8,
+    -3
+   ],
+   "against": "n",
+   "top": 7,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_acacia_log",
+   "trim": "acacia_planks",
+   "roof": {
+    "block": "smooth_red_sandstone"
+   }
+  },
+  {
+   "part": "door",
+   "rect": [
+    -8,
+    -14,
+    8,
+    -8
+   ],
+   "side": "s",
+   "at": 0,
+   "floor": 0,
+   "kind": "house",
+   "canopy": false,
+   "style": "ember_sandstone"
+  }
+ ],
+ "place": [
+  [
+   -3,
+   13,
+   -8,
+   "sandstone_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -3,
+   13,
+   -6,
+   "sandstone_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -3,
+   13,
+   -4,
+   "sandstone_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   13,
+   -9,
+   "sandstone_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   -2,
+   13,
+   -3,
+   "sandstone_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   13,
+   -9,
+   "sandstone_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   13,
+   -3,
+   "sandstone_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   13,
+   -9,
+   "sandstone_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   13,
+   -3,
+   "sandstone_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   13,
+   -8,
+   "sandstone_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   13,
+   -6,
+   "sandstone_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   3,
+   13,
+   -4,
+   "sandstone_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ]
+ ]
+}

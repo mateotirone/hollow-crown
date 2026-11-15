@@ -1,0 +1,84 @@
+{
+ "name": "windmill_blackfen",
+ "edition": "bedrock",
+ "materials": {
+  "mud": {
+   "ladder": "BLK-01",
+   "axis": "y"
+  },
+  "plinth": {
+   "ladder": [
+    "tuff",
+    "mud_bricks",
+    "tuff_bricks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "shingle": {
+   "ladder": [
+    "dark_oak_planks",
+    "dark_oak_planks",
+    "spruce_planks"
+   ],
+   "axis": "noise",
+   "scale": 2
+  }
+ },
+ "parts": [
+  {
+   "part": "windmill",
+   "name": "windmill_blackfen",
+   "at": [
+    0,
+    -4
+   ],
+   "y": 0,
+   "sections": [
+    {
+     "r": 4.5,
+     "storeys": [
+      5,
+      5
+     ],
+     "material": "mud"
+    },
+    {
+     "r": 4.5,
+     "storeys": [
+      4
+     ],
+     "material": "mud",
+     "frame": "mangrove_log",
+     "infill": "packed_mud"
+    }
+   ],
+   "material": "mud",
+   "plinth": "plinth",
+   "trim": "spruce_planks",
+   "floor": "dark_oak_planks",
+   "door": {
+    "side": "s",
+    "door": "mangrove_door"
+   },
+   "glass": "green_stained_glass_pane",
+   "cap": {
+    "type": "cone",
+    "roof": "shingle",
+    "pitch": 1,
+    "finial": "rod"
+   },
+   "sails": {
+    "kind": "lattice",
+    "count": 4,
+    "arm": 9,
+    "wood": "spruce",
+    "lattice": "dark_oak_planks",
+    "cloth": [
+     "light_gray_wool",
+     "brown_wool"
+    ]
+   }
+  }
+ ]
+}

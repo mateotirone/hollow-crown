@@ -2,6 +2,7 @@
 """Settlement layouts for the game: the town generator's per-plot JSON -> Siege_Nights_BP/scripts/settle/towns_data.js
 
     python3 tools/export_towns.py DIR [--starter SDIR]
+    python3 tools/export_towns.py --windmills-only      (re-site every layout's windmill in the towns_data.js there)
         DIR holds <plot>.json files (format hollow-crown-settlement/1), e.g. /mnt/project-files/siege-nights/towngen/settlements
         SDIR holds the starter villages (<plot>.json, format hollow-crown-starter/1, from map/structures/starter_all.py)
 
@@ -189,6 +190,21 @@ def starter_hamlet(v, st):
     return v
 
 
+def windmills(town, region):
+    """Every layout's windmill (Mateo 2026-11-15): the site by its Town field from map/structures/windmill_sites.py, in
+    place of the town generator's windmill stamps (only on fields of 900+ blocks, Vale everywhere, never raised).
+    Row: ["windmill", x, z, tier, dy, side, sails, walk]; settle/windmill.js raises it when that tier is laid out."""
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "map", "structures"))
+    import windmill_sites as WS
+    region = WS.REGION.get(region, "vale")
+    for n, v in enumerate(town["variants"]):
+        v["fix"] = [f for f in v["fix"] if f[0] != "windmill"]
+        row, why = WS.site(town, v, region)
+        assert row, f"{town['name']} layout {n}: no windmill site ({why})"
+        v["fix"].append(row)
+        print(f"  {town['name']} {n}: windmill at {row[1]}, {row[2]} facing {row[5]}, sails {row[6]} ({why})")
+
+
 def main(src, starters=None):
     towns = {}
     for path in sorted(glob.glob(os.path.join(src, "*.json"))):
@@ -208,6 +224,7 @@ def main(src, starters=None):
                       "minimum": d["minimum"], "variants": [variant(v) for v in d["variants"]]}
         if st:   # the wall outline follows the land (walldata.js radiusAt): radii at even angles for a ring of radiiAt
             towns[key]["outline"] = {"radii": [round(r, 1) for r in st["wall"]["radii"]], "radiiAt": st["wall"]["radiiAt"]}
+        windmills(towns[key], d["plot"].get("region"))
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Siege_Nights_BP", "scripts", "settle", "towns_data.js")
     body = json.dumps(towns, separators=(",", ":"))
     with open(out, "w", encoding="utf8") as f:
@@ -218,8 +235,26 @@ def main(src, starters=None):
     print(f"{out}: {len(towns)} towns, {len(body) // 1024} KB")
 
 
+def windmills_only():
+    """Re-site the windmills in the towns_data.js that is there, leaving everything else as it is (no layout inputs needed)."""
+    import re
+    out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Siege_Nights_BP", "scripts", "settle", "towns_data.js")
+    text = open(out, encoding="utf8").read()
+    m = re.search(r"export const TOWNS = (\{.*\});\n", text)
+    towns = json.loads(m.group(1))
+    cfg = open(os.path.join(os.path.dirname(out), "..", "plots", "config.js"), encoding="utf8").read()
+    region = {r.group(1).lower(): r.group(2) for r in re.finditer(r'name: "([^"]+)", region: "([^"]+)"', cfg)}
+    for key, town in towns.items():
+        windmills(town, region.get(key))
+    body = json.dumps(towns, separators=(",", ":"))
+    open(out, "w", encoding="utf8").write(text[:m.start(1)] + body + text[m.end(1):])
+    print(f"{out}: windmills re-sited in {len(towns)} towns")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(usage=__doc__)
-    ap.add_argument("dir"); ap.add_argument("--starter")
+    ap.add_argument("dir", nargs="?"); ap.add_argument("--starter")
+    ap.add_argument("--windmills-only", action="store_true", help="re-site the windmills in the existing towns_data.js and stop")
     a = ap.parse_args()
-    main(a.dir, a.starter)
+    if a.windmills_only: windmills_only()
+    else: main(a.dir, a.starter)

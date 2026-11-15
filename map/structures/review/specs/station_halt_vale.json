@@ -1,0 +1,123 @@
+{
+ "name": "station_halt_vale",
+ "card": {
+  "title": "Vale Halt",
+  "sub": "Norman stone and timber",
+  "region": "vale",
+  "where": "Every Vale plot's railway, Hamlet tier",
+  "kind": "Station",
+  "blurb": "Halt: a 5 x 5 booking hut in the middle of the platform, its gable to the line and its door to the platform, The building on the skill; stations.py lays the platform and the marks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone"
+   },
+   "rect": [
+    -2,
+    -8,
+    2,
+    -4
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6
+   ],
+   "storey_style": [
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0
+   },
+   "windows": {
+    "s": [],
+    "n": [],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "ridge": "z"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "station",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -5,
+    -7,
+    -3,
+    -4
+   ],
+   "against": "e",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_spruce_log",
+   "trim": "dark_oak_planks",
+   "roof": {
+    "ladder": "VAL-06",
+    "axis": "y",
+    "reverse": true
+   }
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    3,
+    -7,
+    5,
+    -4
+   ],
+   "against": "w",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "post": "stripped_spruce_log",
+   "trim": "dark_oak_planks",
+   "roof": {
+    "ladder": "VAL-06",
+    "axis": "y",
+    "reverse": true
+   }
+  },
+  {
+   "part": "door",
+   "rect": [
+    -2,
+    -8,
+    2,
+    -4
+   ],
+   "side": "n",
+   "at": 0,
+   "floor": 0,
+   "kind": "house",
+   "canopy": false,
+   "style": "vale_stone"
+  }
+ ],
+ "place": []
+}

@@ -46,6 +46,7 @@ The use names the rooms storey by storey, ground first; the last one repeats upw
 | library | library | library | |
 | storage, stable | store / stable | | |
 | storehouse | chest store | chest store | chest store |
+| station | booking hall: the ticket window (a grilled counter, a plain counter in a halt's hut), wall benches, timetable lectern | office | |
 
 A building with wings: each block's storey is its own room (a wing gets its own long table, its own
 hearth), while the walkway is checked across the whole floor.

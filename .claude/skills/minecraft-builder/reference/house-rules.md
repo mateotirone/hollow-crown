@@ -129,7 +129,7 @@ under everything" (2026-11-11), which stood buildings on stone towers on slopes.
   A street that runs past a landing is held within half a block of it.
 - No door opens onto a building, a drop or open grass: a building placed without a walkway (claimed early, on the
   square, a windmill in a field) gets one before the land is terraformed; with no street ahead, the walk runs on
-  straight down to the ground and a footpath goes round from there. A windmill's door must face open ground.
+  straight down to the ground and a footpath goes round from there. A windmill's door must face open ground; a settlement windmill's faces a path, its walk paved 3 wide (`windmill_sites.py`).
 - Check: every town bake prints `doors N door problems 0` (`door_report` in `towngen.py`).
 - The walk out of a door stays clear (Kingsrest deep dive, 2026-11-15): no lamp, market stall or tree in the band
   3 wide and 6 out from any door (`clear_door_fronts` in `towngen.py`), no stall within 2 of a house or civic

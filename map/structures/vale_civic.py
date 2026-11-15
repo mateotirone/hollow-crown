@@ -136,6 +136,19 @@ def _healers_corner(bp):
 
 
 def station(seed=9):
+    """Railway station on the skill (review/specs/kingsrest_station.json, gen_stations.py; Mateo 2026-11-15 "Kings rest
+    station go ahead"): a two-storey stone booking hall along the line, a clock tower on the street front (stone
+    shaft, timber clock stage jettied on brackets, a clock on every face, copper spire and lantern), a slate platform
+    canopy on posts on the rail side (-z), the booking hall inside. It is the base every region's Grand Station follows."""
+    bp = _skill_spec("kingsrest_station.json", "kingsrest_station")
+    from kit import region_glass
+    region_glass(bp, "vale")
+    bp.markers["door"] = (10, 1, 11); bp.markers["stationmaster"] = (10, 1, 2)
+    bp.rotations = [0, 90, 180, 270]
+    return bp.finish()
+
+
+def station_kit(seed=9):
     """Railway station: a long stone booking hall with a central gable to the street and a
     timber platform canopy along the back (rail) side. 21 x 11, canopy 3 deep behind."""
     bp = Blueprint("kingsrest_station"); P = dict(P_STONE); B = Building(bp, P, seed)
