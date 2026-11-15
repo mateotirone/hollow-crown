@@ -15,6 +15,7 @@
 //   /scriptevent siege:welcome kingsrest    make where you stand the "start without a home" arrival spot
 //   /scriptevent siege:welcome release Name give up Name's pick so the plot is free again
 //   /scriptevent siege:welcome status       list every plot's Map Stone and who has it
+//   /scriptevent siege:welcome skip         leave the hall without choosing (a builder); unskip to undo
 // A world that still has the old round hall gets it swapped for the miniature by itself.
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
@@ -35,9 +36,11 @@ import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, m
 import { addMenuLabel } from "../core/labels.js";
 import { modeChoiceOpen, askMode, modeOf, setMode } from "../newplayer/mode.js";
 import { STORY, SETTLEMENT } from "../newplayer/mode_rules.js";
+import { setupState } from "../opening/setup.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
 const ARRIVING = "siege_plots_arriving"; // on a player who is in the hall and has not chosen yet
+const WAITING = "hc_hall_waiting"; // a newcomer who joined before the hall was ready: brought up the moment it is
 const FREE_LIGHT = "minecraft:sea_lantern"; // the showcase marker
 const BUILD_AREA = "hc_miniature"; // ticking area kept while the miniature is being built
 
@@ -189,6 +192,7 @@ function* clearOldHall(dim, old) {
 }
 
 let raising = false;
+export const hallRaising = () => raising; // map setup (opening/setup.js) retries the hall when a raise stops
 const alsoWaiting = []; // then() callbacks from calls that came while the miniature was already going up
 /**
  * Build the hall (the miniature map) at o, spread over ticks. It keeps the whole miniature loaded with one ticking
@@ -206,7 +210,7 @@ export function raiseHall(o, then, old) {
   command(dim, `tickingarea add ${o.x - R_ALL} ${o.y} ${o.z - R_ALL} ${o.x + R_ALL} ${o.y} ${o.z + R_ALL} ${BUILD_AREA} true`);
   let tries = 0;
   const wait = system.runInterval(() => {
-    if (!allLoaded(dim, o) && ++tries < 90) return;
+    if (!allLoaded(dim, o) && ++tries < 450) return; // looked at every 2 ticks, up to 45 seconds
     system.clearRun(wait);
     const markers = pedestalLayout().map((p) => ({ dx: p.dx, dz: p.dz, pedestal: REGION_BLOCK[p.plan.region] ?? "minecraft:stone_bricks" }));
     system.runJob((function* () {
@@ -218,7 +222,9 @@ export function raiseHall(o, then, old) {
           const b = dim.getBlock({ x, y, z });
           if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
         };
-        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
+        // A playtest world ships with the hall already built into it (tools/hall_blocks.mjs lists its blocks): take it as it stands
+        if (old || !hallBakedAt(dim, o)) yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
+        else console.warn("[Hollow Crown] welcome: the hall is already built into this world; using it");
       } catch (e) {
         console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
         raising = false;
@@ -252,7 +258,17 @@ export function raiseHall(o, then, old) {
       command(dim, `tickingarea remove ${BUILD_AREA}`);
       raising = false;
     })());
-  }, 10);
+  }, 2);
+}
+
+/** The world file already holds the hall (baked in ahead of time): its Waystone stands on the quay. */
+export function hallBakedAt(dim, o) {
+  const w = waystoneSpot();
+  try {
+    return dim.getBlock({ x: o.x + w.dx, y: o.y + w.dy, z: o.z + w.dz })?.typeId === HALL_WAYSTONE;
+  } catch {
+    return false;
+  }
 }
 
 // Where a newcomer stands in the hall: on the quay beside the Waystone
@@ -544,8 +560,11 @@ function toHall(player) {
   }
 }
 
+// A player in Creative is a newcomer like any other (Mateo plays every test in Creative, 2026-11-14); a map builder
+// who wants the world without choosing a start types /scriptevent siege:welcome skip, which tags them.
+const SKIP_TAG = "hc_skip_welcome";
 const mustChoose = (player) =>
-  hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
+  hallBuilt() && mapMode() && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
 
 /** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
 export function inWelcomeHall(player) {
@@ -560,7 +579,9 @@ export function inWelcomeHall(player) {
 
 // First join, step 20 of the join sequence (after the look picker, before the journal): up to the hall.
 addJoinStep(20, "welcome hall", async (player, { wait }) => {
-  if (!isReady() || !player.isValid || !mapMode()) return;
+  if (!isReady() || !player.isValid) return;
+  const onMap = mapMode() || setupState() !== "plain"; // a fresh map may not have its Plot Stones down yet
+  if (!onMap) return;
   if (mustChoose(player)) {
     player.addTag(ARRIVING);
     toHall(player);
@@ -568,9 +589,11 @@ addJoinStep(20, "welcome hall", async (player, { wait }) => {
     if (!player.isValid) return;
     player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "Click the Waystone", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
     player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
-  } else if (!hallBuilt() && !plotOf(player.id)) {
-    const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
-    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a free Plot Stone, click it and raise your banner.`);
+  } else if (!hallBuilt() && !plotOf(player.id) && !keepOf(player.id) && !player.hasTag(SKIP_TAG)) {
+    // The hall is still going up (a fresh map sets itself up in the first minutes): wait here, and the hold check
+    // brings them up the moment it stands. Nothing is handed out until they have chosen (starter/, horses/starter.js).
+    player.addTag(WAITING);
+    player.sendMessage("§6Welcome to Aldmere.§7 The welcome hall is still being readied. Stay a moment and you'll be brought up to choose where you start.");
   }
 }, { when: "first" });
 
@@ -579,6 +602,18 @@ const seenAt = new Map(); // player id -> tick the hold check first saw them
 onTick("plots_welcome_hold", 20, () => {
   if (!hallBuilt()) return;
   for (const player of world.getPlayers()) {
+    if (!player.hasTag(ARRIVING) && player.hasTag(WAITING)) {
+      // A newcomer who joined while the hall was going up: straight up now it stands
+      if (!mapMode()) continue; // the Plot Stones are still going down: next pass
+      player.removeTag(WAITING);
+      if (mustChoose(player)) {
+        player.addTag(ARRIVING);
+        toHall(player);
+        player.sendMessage("§6The welcome hall is ready.§7 Click the Waystone in the middle, then choose one of the stones on the rim as your start.");
+        emit("newcomerInHall", { player });
+      }
+      continue;
+    }
     if (!player.hasTag(ARRIVING)) {
       // Someone who was here before the hall existed and still has no home is brought up too, quietly, once
       // they have been on for a minute (so this never cuts in front of the join sequence).
@@ -745,10 +780,21 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       store.save();
       refreshHall();
       player.sendMessage(`§6${found[1].name}'s choice (${found[1].plot ?? "Kingsrest"}) is released. They choose again next time they arrive without a keep.`);
+    } else if (verb === "skip") {
+      // a builder in Creative leaves the hall without choosing a start (and is never brought back up)
+      player.addTag(SKIP_TAG);
+      player.removeTag(ARRIVING);
+      player.removeTag(WAITING);
+      const k = store.data.kingsrest ?? WELCOME.kingsrest;
+      if (inHall(player.location)) player.teleport({ x: k.x + 0.5, y: k.y, z: k.z + 0.5 }, { dimension: overworld() });
+      player.sendMessage("§6You skip the welcome hall on this world.§7 /scriptevent siege:welcome unskip to be a newcomer again.");
+    } else if (verb === "unskip") {
+      player.removeTag(SKIP_TAG);
+      player.sendMessage("§6You'll be brought up to the welcome hall to choose a start.");
     } else if (verb === "status") {
       for (const line of statusLines()) player.sendMessage(line);
     } else {
-      player.sendMessage("§7/scriptevent siege:welcome build | build here | go | testarea | kingsrest | release <name> | status");
+      player.sendMessage("§7/scriptevent siege:welcome build | build here | go | testarea | kingsrest | release <name> | skip | unskip | status");
     }
   } catch (e) {
     player.sendMessage(`§c[Hollow Crown] welcome: ${e}`);

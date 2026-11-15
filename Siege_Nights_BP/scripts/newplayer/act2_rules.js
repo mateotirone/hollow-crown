@@ -295,6 +295,8 @@ export function choiceCamera(tree, from) {
   let dx = from.x - cx, dz = from.z - cz;
   const d = Math.hypot(dx, dz) || 1;
   dx /= d; dz /= d;
-  const back = Math.min(3.5, Math.max(2.5, d - 0.5));
-  return { pos: { x: cx + dx * back, y: tree.y + 1.8, z: cz + dz * back }, look: { x: cx, y: tree.y + 1.6, z: cz } };
+  // the Tree is its own object now, up to seven blocks tall over a 5 x 5 (townhall/oath_tree.js): stand back far
+  // enough to see the trunk and the underside of the crown
+  const back = Math.min(5.5, Math.max(4, d - 0.5));
+  return { pos: { x: cx + dx * back, y: tree.y + 2.2, z: cz + dz * back }, look: { x: cx, y: tree.y + 2.6, z: cz } };
 }

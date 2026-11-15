@@ -21,7 +21,7 @@ import argparse, glob, json, os, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
-SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G", "Works": "W"}
+SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G", "Works": "W", "Dragon": "D", "Barn": "B", "Wood": "O"}
 STAIR = {"e": 0, "w": 1, "s": 2, "n": 3}       # Bedrock weirdo_direction
 GATE = {"s": 0, "w": 1, "n": 2, "e": 3}        # Bedrock direction
 RENAME = {"dirt_path": "grass_path"}
@@ -163,7 +163,7 @@ def starter_hamlet(v, st):
         deep = box[3] - box[1] + 1 if door["side"] in "ns" else box[2] - box[0] + 1
         design = ar.get("design")
         size = ar.get("size") or ("Small" if wide <= 9 else "Medium" if deep <= 15 and wide <= 13 else "Large")
-        size = {"S": "Small", "M": "Medium", "L": "Large"}.get(size, size)
+        size = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works"}.get(size, size)
         hall = ["hall4"] if boxes_meet(box, hall4) else ["hall5"] if boxes_meet(box, hall5) else []   # ground the hall takes back
         tags = ["starter"] + (["library", "square"] if design == "library" else []) + hall
         if design == "house" and not any("founder" in q["tags"] for q in v["slots"]):
@@ -183,7 +183,7 @@ def starter_hamlet(v, st):
             door = st["doors"][n]
             v["fixtures"].append({"name": "storehouse", "at": door["cell"], "ground_y": ar["y"], "side": door["side"], "tier": "Hamlet"})
     for f in st["fixtures"]:
-        if f["kind"] in ("hall_cornerstone", "mason_bench"):
+        if f["kind"] in ("hall_cornerstone", "mason_bench", "cow_pen"):
             x, y, z = f["at"]
             v["fixtures"].append({"name": f["kind"], "at": [x, z], "ground_y": y - 1, "tier": "Hamlet"})
     return v

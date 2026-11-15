@@ -28,7 +28,7 @@ import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
 import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
-import { BUILDINGS } from "./buildings.js";
+import { BUILDINGS, WORKS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
 import { ROAD_BLOCKS, WEAK_ROAD, ROAD_JOIN_PATHY, gateDir, roadEnd, roadLine, joinRoute, routeSides, gradeRoute, joinSurface } from "./basedata.js";
@@ -48,6 +48,13 @@ const PER_TICK = 400; // blocks set per tick while laying out (the watchdog rule
 const store = moduleStore("siege:settle_towns", () => ({ towns: {}, markers: {} }));
 const save = () => store.save();
 export const townOf = (owner) => store.data.towns[owner];
+// Marks the story can point at (minimap pins): the starter village's cow pen centre { x, y, z }, and the founder's
+// furnace (basebuilds.js placeOwnerFurnace) { x, y, z }; undefined until laid
+export const cowPenOf = (owner) => townOf(owner)?.cowPen;
+export const founderFurnaceOf = (owner) => {
+  const f = Object.values(townOf(owner)?.slots ?? {}).find((s) => s.founderHome)?.ownerFurnace;
+  return f && typeof f === "object" ? f : undefined;
+};
 export const allTowns = () => store.data.towns;
 export const markerAt = (loc) => store.data.markers[`${loc.x},${loc.y},${loc.z}`];
 export function registerMarker(at, owner, slot) { store.data.markers[keyOf(at)] = { owner, slot }; save(); }
@@ -521,6 +528,14 @@ function placeFixture(owner, town, f) {
   } else if (f.kind === "hall_cornerstone") {
     if (town.lord) town.hallSeat = { x, y, z, ...hallFacing(town, { x, z }) }; // the lord raises it (rivals/index.js)
     else foundHall(owner, town, { x, y, z });
+  } else if (f.kind === "cow_pen") {
+    // the starter village's cow pen (Mateo 2026-11-14): two cows from day one, never refilled; breed them with wheat
+    town.cowPen = { x, y, z };
+    if (!town.cowsStocked && !town.lord) {
+      for (const dx of [-1, 1]) dim.spawnEntity("minecraft:cow", { x: x + dx + 0.5, y, z: z + 0.5 });
+      town.cowsStocked = true;
+    }
+    save();
   } else if (f.kind === "tree" || f.kind === "windmill") {
     emit("settleFixture", { owner, kind: f.kind, species: f.species, size: f.size, rotation: f.rotation ?? 0, stamp: f.stamp, at: { x, y, z }, tier: f.tier });
   }
@@ -721,9 +736,19 @@ export const oneEachProblem = (owner, id) => oneEachTaken(id, standingCounts(own
 
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
-// The story can add its own lines ("charterStory": the Hamlet's Ironworks and Act 2, newplayer/act2.js)
+// What this settlement's charters may ask for: what the game can raise (the Works machines join when their feature
+// loads) and has a plot for in this town's layout, so an old layout with no Works yard, or a building of another
+// region, is skipped rather than holding the town back for good (config.js STAGES)
+function charterKnown(owner) {
+  const town = townOf(owner), base = town?.lord ? DESIGNED : new Set([...KNOWN, ...WORKS.map((w) => w.id)]);
+  const slots = town ? slotsOf(layoutOf(town)) : [];
+  if (!slots.length) return base;
+  return new Set([...base].filter((id) => slots.some((s) => plotFit(id, s, new Set(["none"])).ok)));
+}
+// The story can add its own lines ("charterStory": the Hamlet's Ironworks, counted from its Works machine, and Act 2
+// in Story Mode; newplayer/act2.js)
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => applyFilter("charterStory",
-  charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN), { owner, tier, lord: !!townOf(owner)?.lord });
+  charterCheck(tier, builtCounts(owner), charterKnown(owner), townOf(owner)?.style), { owner, tier, lord: !!townOf(owner)?.lord });
 
 // Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
 // Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"
@@ -733,7 +758,7 @@ export function keptFor(owner, slot, id) {
   const counts = { ...raisedCounts(owner) };
   for (const st of Object.values(town.slots ?? {})) if (st.building && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1; // rising ones too
   const free = slotsOf(layoutOf(town)).filter((s) => !town.slots[s.id]?.building && !slotClosed(owner, s));
-  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id);
+  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id, town.style);
   return k && `Kept for the ${k.what} (${tierName(k.tier)} charter)`;
 }
 

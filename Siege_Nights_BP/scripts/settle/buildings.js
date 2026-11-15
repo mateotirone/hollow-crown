@@ -268,7 +268,7 @@ function inn(p) {
   p.set(-2, 1, 8, "barrel"); p.set(2, 1, 8, "barrel");
 }
 
-// The Barracks and the Quartermaster's Armoury: designs from blockdesigns.js, raised on a plot from the Plot Marker
+// The Barracks, the Quartermaster's Armoury, the Stables, the Dragon Stable and the Forester's Lodge: designs from blockdesigns.js, raised on a plot from the Plot Marker
 // like any building (Mateo 2026-11-13: "it should just unlock and you place it on a plot that fits it"; 2026-11-14:
 // "I never want to use blocks to place buildings"). The working block (Barracks, Quartermaster's Desk) goes at the
 // front when it stands (raised.js). blockdesigns.js imports this file, so it hands its designs over (useBlockDesign)
@@ -282,7 +282,6 @@ const designOf = (id) => (styleId) => {
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
-  { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
@@ -295,6 +294,10 @@ export const BUILDINGS = [
   { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
   { id: "barracks", name: "Barracks", blurb: "A stone guardhouse with bunks, a weapons corner and a walled yard. Click the Barracks block at its front to train guards.", plan: designOf("barracks") },
   { id: "quartermaster_desk", name: "Quartermaster's Armoury", blurb: "An open shop front with the Quartermaster's Desk as its counter and stores behind. A quartermaster takes the post and sells siege gear.", plan: designOf("quartermaster_desk") },
+  // The big plots (2026-11-14): Barn, Dragon and Wood. Raised level 1; the Stables block at the front grows it later.
+  { id: "stables", name: "Stables", blurb: "A barn with three stalls, a tack corner and a feed corner. Click the Stables block at its door for your horses; its upgrades rebuild the barn bigger.", plan: designOf("stables") },
+  { id: "dragon_roost", name: "Dragon Stable", blurb: "A kasbah stable for dragons with a nursery of Hatching Braziers, where eggs are set to hatch. The Dragon Roost at its arch is your dragon's home.", plan: designOf("dragon_roost") },
+  { id: "foresters_lodge", name: "Forester's Lodge", blurb: "The Lodge at the woodlot's gate and a fenced grove of your region's trees behind it, the one wood you may fell. Click the Lodge to open more plots.", plan: designOf("foresters_lodge") },
 ];
 // Nothing waiting now: the farmhouse, inn and mint joined BUILDINGS when the 2026-11-13 layouts made room for them.
 export const WAITING = [];
@@ -312,6 +315,8 @@ export const FIXED_BUILDINGS = [
 // No longer offered, kept so a settlement that raised one before still knows what stands on its plot: the old
 // Castle-tier plot Storehouse, replaced by the Storehouse every settlement gets with its Hamlet (2026-11-13)
 export const RETIRED_BUILDINGS = [
+  // the 3-stall plot Stable: the Stables barn (horses/barn.js) is the one stable building (Mateo 2026-11-14)
+  { id: "stable", name: "Stable", blurb: "Three open stalls under one roof, with hay and a trough.", draw: stable },
   { id: "storehouse", name: "Old Storehouse", blurb: "A tall barn with a cart door, a loft, barrels and chests.", draw: storehouse },
 ];
 export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS, ...RETIRED_BUILDINGS].map((b) => [b.id, b]));
