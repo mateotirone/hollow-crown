@@ -92,7 +92,14 @@
     -103,
     79,
     -87
-   ]
+   ],
+   "spots": {
+    "innkeeper": [
+     -99,
+     79,
+     -86
+    ]
+   }
   },
   {
    "stamp": "kingsrest_guildhall_copper",
@@ -113,7 +120,14 @@
     -137,
     80,
     -95
-   ]
+   ],
+   "spots": {
+    "reeve": [
+     -139,
+     85,
+     -95
+    ]
+   }
   },
   {
    "stamp": "kingsrest_chapel_copper",
@@ -134,7 +148,14 @@
     -141,
     81,
     -79
-   ]
+   ],
+   "spots": {
+    "priest": [
+     -163,
+     81,
+     -79
+    ]
+   }
   },
   {
    "stamp": "breeder_yard_vale_copper",
