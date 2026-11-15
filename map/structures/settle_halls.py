@@ -158,17 +158,17 @@ def vale_1(seed=1):
     B.roof(rect, "z", 6, overhang=1, verge=1)
     B.build_roofs(); B.gable_walls(rect, "z", 6, style="timber")
     B.window(0, 7, 0, "s", 1, 2); B.window(0, 7, -14, "n", 1, 2)
-    for z in (-4, -10): bp.fill(-3, 5, z, 3, 5, z, P["frame"], axis="x")    # tie beams
-    # hearth: stone kerb, campfire, smoke louvre on the ridge
+    for z in (-4, -7): bp.fill(-3, 5, z, 3, 5, z, P["frame"], axis="x")    # tie beams (clear of the Tree's crown)
+    # hearth: stone kerb, campfire, smoke louvre on the ridge. Toward the door, so the Tree has its room (Mateo 2026-11-15)
     for x in (-1, 0, 1):
-        for z in (-8, -7, -6): bp.set(x, 1, z, "siege:castle_cobbled") if (x, z) != (0, -7) else bp.set(x, 1, z, "campfire")
-    bp.marks["hearth"] = (0, 1, -7)
-    top = B.H[(0, -7)][0]
-    bp.set(0, top, -7, "stone_brick_wall"); bp.set(0, top + 1, -7, P["roof_slab"], half="bottom")
+        for z in (-6, -5, -4): bp.set(x, 1, z, "siege:castle_cobbled") if (x, z) != (0, -5) else bp.set(x, 1, z, "campfire")
+    bp.marks["hearth"] = (0, 1, -5)
+    top = B.H[(0, -5)][0]
+    bp.set(0, top, -5, "stone_brick_wall"); bp.set(0, top + 1, -5, P["roof_slab"], half="bottom")
     oath_dais(bp, P, 0, -12)
     bp.set(3, 1, -12, "lectern", facing="w"); bp.marks["ledger"] = (3, 1, -12)
     bp.set(-3, 1, -12, "bookshelf"); bp.set(-3, 2, -12, "bookshelf")
-    hang(bp, [(-2, 4, -4), (2, 4, -4), (-2, 4, -10), (2, 4, -10)])
+    hang(bp, [(-2, 4, -4), (2, 4, -4), (-2, 4, -7), (2, 4, -7)])
     B.chimney(-5, -9, 1) if False else None
     bp.markers["door"] = (0, 1, 0)
     return finish_detail(bp, P)
