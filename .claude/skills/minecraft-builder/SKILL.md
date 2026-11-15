@@ -86,6 +86,8 @@ A 50,000-block castle costs about the same tokens as a hut.
   `map/structures/build_interiors_viewer.py` (Roof off / per-floor buttons).
 - **Light** (Mateo 2026-11-13: every build is lit): the last stage, `light` (`scripts/lighting.py`), adds lanterns until every
   room, door step and built yard is lit at night (house rules, "Every build is lit"). `"light": false` opts out.
+- **Windmills**: the `windmill` part (round tower in sections, stage, cone or dome cap, lattice or jib sails, a mill
+  inside); `reference/parts.md`.
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
 ## One engine for every build

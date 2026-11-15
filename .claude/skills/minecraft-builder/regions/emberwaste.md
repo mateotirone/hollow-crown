@@ -218,6 +218,10 @@ iron block; stacked iron blocks) and a `trade_sign` over the door: a acacia hang
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
 
+## The windmill
+
+- **Windmill (2026-11-15):** a broad sandstone tower (EMB-01) with a flat deck behind a cut sandstone parapet and a low red sandstone dome with a gold finial (no steep roof, no timber frame), six triangle sails striped orange and white like the awnings, on acacia poles. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
+
 ## Never
 
 - **Roofs:** no steep roofs, no shingle, no slate.

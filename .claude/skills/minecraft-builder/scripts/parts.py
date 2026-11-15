@@ -2306,6 +2306,226 @@ def pier(ctx, s):
 PARTS["ship"] = ship
 PARTS["pier"] = pier
 
+# ------------------------------------------------------------------ windmill (Mateo 2026-11-15: "fix the windmill system and
+# rebuild each region's windmill"; every settlement's field has one, in its region's look)
+def _ring_items(ctx, cx, cz, R1, fy, items, keep_clear, stage="interior"):
+    """Furniture round the inside of a round wall at floor row fy: cells one in from the wall, walking round,
+    skipping keep_clear (door and ladder approaches, the shaft)."""
+    import math
+    inner = _disc(R1 - 0.5); cells = []
+    for (dx, dz) in inner:
+        if any((dx + ox, dz + oz) not in inner for ox, oz in DIRS.values()) and (dx, dz) not in keep_clear:
+            cells.append((dx, dz))
+    cells.sort(key=lambda c: math.atan2(c[1], c[0]))
+    k = 0
+    for i, (dx, dz) in enumerate(cells):
+        if i % 2 or k >= len(items): continue             # every other cell, so the round stays walkable
+        it = items[k]; k += 1
+        props = {}
+        if it in ("chest", "barrel", "grindstone", "smoker", "furnace", "loom", "stonecutter_block", "composter"):
+            if it in ("chest", "grindstone", "furnace", "smoker", "loom"): props["facing"] = OPP[_toward(dx, dz)]
+            if it == "barrel": props["facing"] = "up"
+        if it == "hay_block": props["axis"] = "y"
+        ctx.set(cx + dx, fy + 1, cz + dz, stage, raw=it, **props)
+
+
+def _sail_cells(count, arm, kind, sweep=1):
+    """The sails as cells in their own plane: {(u, v): role} with u across, v up from the hub. kind "lattice" = four
+    arms, each a stock with a cloth three wide on its trailing side over a lattice (a crossbar every third block);
+    "jib" = count arms, each a pole with a triangle of cloth on its trailing side, widest near the hub (Saltreach,
+    Emberwaste). Roles: stock, lattice, cloth0/cloth1 (alternating cloths), band."""
+    import math
+    out = {}
+    if kind == "lattice":
+        for i, (ax, ay) in enumerate(((0, 1), (1, 0), (0, -1), (-1, 0))):
+            cx_, cy_ = -ay * sweep, ax * sweep                 # the trailing side turns with the arm
+            for t in range(1, arm + 1):
+                u, v = ax * t, ay * t
+                out[(u, v)] = ("stock", "x" if ax else "y")
+                if t >= 2:
+                    for c in (1, 2, 3):
+                        q = (u + cx_ * c, v + cy_ * c)
+                        if t % 3 == 2 or t == arm: out.setdefault(q, ("lattice", None))
+                        else: out.setdefault(q, (f"cloth{(i + c) % 2}", None))
+        return out
+    n = count; dmax = 0.8 * (2 * math.pi / n)
+    for k in range(n):
+        a = math.pi / 2 + 2 * math.pi * k / n
+        t = 0.5
+        while t <= arm + 0.01:
+            u, v = round(t * math.cos(a)), round(t * math.sin(a))
+            out[(u, v)] = ("stock", "x" if abs(math.cos(a)) > 0.75 else "y" if abs(math.sin(a)) > 0.75 else None)
+            t += 0.5
+    R = arm + 1
+    for u in range(-R, R + 1):
+        for v in range(-R, R + 1):
+            r = math.hypot(u, v)
+            if r < 2 or r > arm - 0.4 or (u, v) in out: continue
+            phi = math.atan2(v, u)
+            for k in range(n):
+                a = math.pi / 2 + 2 * math.pi * k / n
+                d = ((a - phi) * sweep) % (2 * math.pi)       # how far behind the pole, turning with the sweep
+                w = dmax * min(1.0, (arm - r + 0.5) / (arm * 0.55)) * min(1.0, (r - 0.5) / 2.5)
+                if 0 < d < w:
+                    band = (k % 2 == 0) and abs(r - arm * 0.55) < 0.75
+                    out[(u, v)] = ("band" if band else f"cloth{k % 2}", None)
+                    break
+    return out
+
+
+def windmill(ctx, s):
+    """A tower windmill (regions/README "Windmills"; one design per region from map/structures/review/specs/
+    gen_windmill.py). A round body in sections, each narrower or the same as the one under it, on a plinth with a
+    solid foundation; floors inside with a ladder up the main shaft (the upright log in the middle that the sails
+    turn); a door on the front; windows on the other sides; a stage (a railed gallery on brackets) where a section
+    steps in; a cap (a cone on its eave ring, or a flat deck with a parapet and a low dome); the sails on the back,
+    on a windshaft that runs through the cap to the main shaft. The interior stage furnishes each floor as a mill
+    (sack floor, stone floor with the millstones, cap floor) and the light stage lights it.
+
+    at [x, z] (the shaft's centre), y (ground floor row: the plinth; walked at y + 1), sections [{"r": 4.5,
+    "storeys": [5, 5], "material", "frame" (posts and beams: a timber section), "infill"}], plinth, trim (stairs:
+    courses, brackets, eave), floor, foundation (rows under y, 3), door {"side": "s", "door"}, glass, shutters (a
+    trapdoor block, open beside each window), gallery {"depth": 2, "rail", "deck"} (at a step in), cap {"type":
+    "cone" | "dome", "roof", "pitch", "finial", "parapet"}, sails {"count", "kind" (lattice / jib), "arm", "stock",
+    "lattice", "cloth" [two blocks], "band", "sweep" (1 / -1)}, interior (true)."""
+    cx, cz = s["at"]; y0 = s.get("y", 0)
+    secs = s.get("sections") or [{"r": 3.5, "storeys": [5, 5]}]
+    stone = s.get("material", "stone_bricks"); plinth = s.get("plinth", stone); trim = s.get("trim", "spruce_planks")
+    floor_m = s.get("floor", "spruce_planks"); glass = s.get("glass", "glass_pane")
+    dside = (s.get("door") or {}).get("side", "s"); dblock = (s.get("door") or {}).get("door", "spruce_door")
+    sails = s.get("sails") or {}; sside = sails.get("side", OPP[dside])
+    cap = s.get("cap") or {"type": "cone"}
+    R0 = secs[0]["r"]; Rmax = max(sc["r"] for sc in secs)
+    # ---- clear, foundation and plinth (01)
+    for (dx, dz) in _disc(Rmax + 3):
+        for y in range(y0 + 1, y0 + 60): ctx.clear(cx + dx, y, cz + dz)
+    for (dx, dz) in _disc(R0):
+        for y in range(y0 - s.get("foundation", 3), y0): ctx.set(cx + dx, y, cz + dz, "foundation", "full", plinth)
+        ctx.set(cx + dx, y0, cz + dz, "foundation", "full", plinth)
+    # ---- the body, section by section: walls, floors, courses, windows
+    shaft = (cx, cz); lad = (cx + 1, cz)                       # the ladder climbs the main shaft's east face
+    fy = y0; floors = []; tops = []
+    for si, sc in enumerate(secs):
+        r = sc["r"]; R1 = int(r - 0.5); ring = _disc(r) - _disc(r - 1)
+        mat = sc.get("material", stone); frame = sc.get("frame"); infill = sc.get("infill", mat)
+        for hi, h in enumerate(sc.get("storeys", [5])):
+            if fy > y0:                                      # the floor (the ground floor is the plinth)
+                for (dx, dz) in _disc(r - 1):
+                    if (cx + dx, cz + dz) != lad: ctx.set(cx + dx, fy, cz + dz, "floors", "full", floor_m)
+                for (dx, dz) in ring: ctx.set(cx + dx, fy, cz + dz, "walls", "full", mat if not frame else frame,
+                                             **({"axis": ALONG_AXIS[_toward(dx, dz)]} if frame else {}))
+            floors.append((fy, r, h, si, hi))
+            for y in range(fy + 1, fy + h):
+                for (dx, dz) in ring:
+                    post = frame and abs(dx) == abs(dz)
+                    plate = frame and y == fy + h - 1 and si == len(secs) - 1 and hi == len(sc["storeys"]) - 1
+                    if post: ctx.set(cx + dx, y, cz + dz, "frame", "full", frame, axis="y")
+                    elif plate: ctx.set(cx + dx, y, cz + dz, "frame", "full", frame, axis=ALONG_AXIS[_toward(dx, dz)])
+                    else: ctx.set(cx + dx, y, cz + dz, "walls", "full", infill)
+            # windows on every side but the door's (and the sails' on the cap floor), 1 x 2, flush
+            for sd in "nesw":
+                if (sd == dside and fy == y0) or (sd == sside and si == len(secs) - 1 and hi == len(sc["storeys"]) - 1): continue
+                if h < 4: continue
+                ox, oz = DIRS[sd]; x, z = cx + ox * R1, cz + oz * R1
+                for dy in (2, 3): ctx.set(x, fy + dy, z, "openings", raw=glass)
+                if fy > y0: ctx.set(x + ox, fy + 1, z + oz, "openings", "stairs", trim, facing=OPP[sd], half="top")   # sill, one out (none on the ground)
+                if s.get("shutters"):
+                    tx, tz = -oz, ox
+                    for side_ in (1, -1):
+                        for dy in (2, 3):
+                            ctx.set(x + ox + tx * side_, fy + dy, z + oz + tz * side_, "openings", raw=s["shutters"], facing=sd, open=True, half="bottom",
+                                    hinge=side_ > 0)
+            fy += h
+        tops.append(fy)
+        nxt = secs[si + 1] if si + 1 < len(secs) else None
+        if nxt and nxt["r"] < r:                            # a step in: the stage, a railed gallery on brackets
+            g = s.get("gallery") or {}; dep = g.get("depth", 2)
+            deck = _disc(nxt["r"] + dep) - _disc(nxt["r"]); rail = _disc(nxt["r"] + dep) - _disc(nxt["r"] + dep - 1)
+            for (dx, dz) in deck:
+                c = (cx + dx, cz + dz)
+                if (dx, dz) not in _disc(r): ctx.set(c[0], fy - 1, c[1], "frame", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+                ctx.set(c[0], fy, c[1], "floors", "full", g.get("deck", floor_m))
+                if (dx, dz) in rail: ctx.set(c[0], fy + 1, c[1], "details", "post", g.get("rail", trim))
+            ox, oz = DIRS[dside]; R1n = int(nxt["r"] - 0.5); x, z = cx + ox * R1n, cz + oz * R1n
+            ctx.info["windmill_gallery_door"] = [x, fy + 1, z]
+        elif nxt is None or nxt["r"] == r:
+            for (dx, dz) in _disc(r + 1) - _disc(r):             # a course one out where the section ends (07)
+                if nxt is not None: ctx.set(cx + dx, fy, cz + dz, "details", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    top = fy                                                     # the cap starts here
+    rT = secs[-1]["r"]; R1T = int(rT - 0.5)
+    # ---- doors (05): the front door, and a door out onto the stage
+    ox, oz = DIRS[dside]
+    for (x, y, z) in [(cx + ox * int(R0 - 0.5), y0 + 1, cz + oz * int(R0 - 0.5))] + ([tuple(ctx.info.pop("windmill_gallery_door"))] if "windmill_gallery_door" in ctx.info else []):
+        ctx.set(x, y, z, "openings", raw=dblock, facing=dside, hinge=False)
+        ctx.set(x, y + 1, z, "openings", raw=dblock, facing=dside, hinge=False, upper=True)
+        ctx.set(x, y + 2, z, "openings", "stairs", trim, facing=OPP[dside], half="top")
+        for dy in (0, 1): ctx.clear(x - ox, y + dy, z - oz)     # nothing stands in front of it inside
+    # ---- cap (06)
+    if cap.get("type", "cone") == "dome":
+        for (dx, dz) in _disc(rT):                                # a flat deck on the wall top, a parapet, a low dome
+            ctx.set(cx + dx, top, cz + dz, "roof", "full", stone)
+        for (dx, dz) in _disc(rT + 1) - _disc(rT): ctx.set(cx + dx, top - 1, cz + dz, "roof", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+        rim = sorted(_disc(rT) - _disc(rT - 1), key=lambda c: math.atan2(c[1], c[0]))
+        for i, (dx, dz) in enumerate(rim):
+            ctx.set(cx + dx, top + 1, cz + dz, "roof", "full", cap.get("parapet", stone))
+            if i % 2 == 0: ctx.set(cx + dx, top + 2, cz + dz, "roof", "slab", cap.get("parapet", stone), half="bottom")
+        ytop = dome(ctx, {"at": [cx, top + 1, cz], "r": cap.get("r", rT - 1.5), "material": cap.get("roof", "smooth_red_sandstone"),
+                          "finial": cap.get("finial", "short"), "name": f"{s.get('name', 'windmill')}_dome"})
+        for (dx, dz) in _disc(cap.get("r", rT - 1.5) - 0.5):      # the dome is solid over the deck: no dark sealed pocket
+            y = top + 1
+            while ctx.free(cx + dx, y, cz + dz) and y < ytop: ctx.set(cx + dx, y, cz + dz, "roof", "full", stone); y += 1
+        hub_y = top + 2
+    else:
+        _cone_cap(ctx, cx, cz, rT, top, {"roof": cap.get("roof", "deepslate_tiles"), "trim": trim, "pitch": cap.get("pitch", 2),
+                                         "finial": cap.get("finial", "spire_block")})
+        hub_y = top + 1
+    # ---- the main shaft (an upright log from the ground floor into the cap) and the ladder up its east face
+    wood = sails.get("wood", "spruce"); log = sails.get("shaft", f"stripped_{wood}_log")
+    for y in range(y0 + 1, hub_y): ctx.set(cx, y, cz, "frame", raw=log, axis="y")
+    last_floor = max(f[0] for f in floors)
+    for y in range(y0 + 1, last_floor + 1): ctx.set(lad[0], y, lad[1], "details", raw="ladder", facing="e")
+    # ---- the windshaft and sails, on the back (side sside)
+    sx, sz = DIRS[sside]; tx, tz = -sz, sx                     # across the sail plane
+    arm = sails.get("arm", min(9, hub_y - y0 - 4))
+    reach = [(x - cx) * sx + (z - cz) * sz for (x, y, z) in ctx.cells if y >= hub_y - arm - 1 and abs((x - cx) * tx + (z - cz) * tz) <= arm + 3]
+    out = max(reach + [0]) + 2                                  # one clear block between the sails and anything behind them
+    for t in range(0, out + 1): ctx.set(cx + sx * t, hub_y, cz + sz * t, "frame", raw=log, axis="z" if sz else "x")
+    ctx.set(cx + sx * (out + 1), hub_y, cz + sz * (out + 1), "frame", raw=f"{wood}_log", axis="z" if sz else "x")   # the hub, proud of the sails
+    roles = {"stock": sails.get("stock", f"stripped_{wood}_log"), "lattice": sails.get("lattice", f"{wood}_planks"),
+             "cloth0": (sails.get("cloth") or ["white_wool"])[0], "cloth1": (sails.get("cloth") or ["white_wool", "white_wool"])[-1],
+             "band": sails.get("band", (sails.get("cloth") or ["white_wool"])[0])}
+    px, pz = cx + sx * out, cz + sz * out
+    for (u, v), (role, axis) in _sail_cells(sails.get("count", 4), arm, sails.get("kind", "lattice"), sails.get("sweep", 1)).items():
+        x, y, z = px + tx * u, hub_y + v, pz + tz * u
+        p = {}
+        if role == "stock" and axis: p["axis"] = "y" if axis == "y" else ("x" if tx else "z")
+        elif role == "stock": p["axis"] = "y"
+        ctx.set(x, y, z, "details", raw=roles[role], **p)
+    ctx.info.setdefault("windmills", []).append({"at": [cx, cz], "hub": [px, hub_y, pz], "arm": arm, "floors": [f[0] for f in floors], "top": top})
+    # ---- interior (08): a mill on every floor; the light stage lights it
+    if s.get("interior", True) is False: return
+    names = s.get("rooms") or ["sacks", "stones", "cap"]
+    for i, (f, r, h, si, hi) in enumerate(floors):
+        R1 = int(r - 0.5)
+        kind = names[0] if i == 0 else (names[-1] if i == len(floors) - 1 else names[min(i, len(names) - 2)])
+        ox, oz = DIRS[dside]
+        clear = {(0, 0), (1, 0), (2, 0), (0, 1), (0, -1), (1, 1), (1, -1)}
+        clear |= {(ox * k, oz * k) for k in range(R1 + 1)}
+        for sd in "nesw":                                        # under each window stays clear for its sill inside
+            clear.add((DIRS[sd][0] * (R1 - 1), DIRS[sd][1] * (R1 - 1)))
+        if kind == "sacks":
+            items = ["barrel", "chest", "barrel", "hay_block", "barrel", "chest", "hay_block", "barrel"]
+        elif kind == "stones":
+            items = ["grindstone", "barrel", "composter", "barrel", "grindstone", "chest", "barrel"]
+            ctx.set(cx - 1, f + 1, cz, "interior", raw="smooth_stone_slab", half="bottom")   # the millstones on the shaft's west face
+        else:
+            items = ["barrel", "chest", "barrel"]
+        _ring_items(ctx, cx, cz, R1, f, items, clear)
+
+
+PARTS["windmill"] = windmill
+
+
 def run(ctx, pt):
     k = pt.get("part")
     nm = pt.get("name")
