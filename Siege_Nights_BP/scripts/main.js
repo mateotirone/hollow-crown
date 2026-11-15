@@ -50,6 +50,7 @@ import "./roletrials/index.js";
 import "./landmarks/index.js";
 import "./after/index.js";
 import "./opening/index.js";
+import "./clocks/index.js"; // living clocks: hands follow the game time; the story can stop them, run them back or stick them at 3:17
 import "./unlocks/index.js";
 import "./labels/index.js";
 import "./guardposts/index.js";
@@ -78,6 +79,7 @@ import "./statues/index.js";
 import "./recipebook/index.js"; // the recipe book lists only the regional armour of the region you stand in
 import "./codex/index.js"; // the Codex, the regional arms, mythical finds, the wonders' forges and the caravan market
 import "./arena/index.js"; // the arena at Kingsrest: fight Kings or a mob (/scriptevent siege:arena)
+import "./snapshot/index.js"; // world snapshot roster: names, Regals, story steps saved in the world (/siege:snapshot)
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work

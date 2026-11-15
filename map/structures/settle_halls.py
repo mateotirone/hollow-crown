@@ -934,6 +934,46 @@ def tree_room(bp, level):
     for (x, y, z) in cells: keep.add((x, y + 1, z))
     return keep
 
+# ---------------------------------------------------------------- the hall clock
+# A living clock (Siege_Nights_BP/scripts/clocks) on the inside of the front wall over the door, looking down the hall
+# at the Tree and the hearth, so it reads from the hearth and from the door (the Act 3 "3:17 night": every clock in
+# the Hamlet stops, ticks a minute back, then runs backwards; story thread, 2026-11-15). Its mount goes in the air
+# cell in front of the wall; the wall behind stays as it is and the clock's own dial covers it. 3 across where the
+# wall and the room allow, else 1. Mark "clock" = the mount.
+HALL_CLOCK_STYLE = {"vale": 0, "frostmarch": 1, "saltreach": 2, "emberwaste": 3, "blackfen": 4}
+
+def hall_clock(bp, region, keep=()):
+    """Put the hall clock's mount on the inside of the front wall, over the door, looking down the hall at the Tree and
+    the hearth. Halls differ at the door (porticos, recessed Ember doorways, the Fen deck), so this walks in from the
+    door to the first wall face with a clear room behind it, and takes the lowest spot above the door's head where a
+    3x3 face fits (a 1x1 face where it doesn't). Returns the cells the lighting pass must keep clear."""
+    if "door" not in bp.markers: return set()
+    dx, _, dz = bp.markers["door"]
+    fy = bp.marks["tree"][1] if "tree" in bp.marks else bp.markers.get("entry", bp.markers["door"])[1]
+    keep = set(keep)
+    def nm(c): return _name(bp, c)
+    def wall(x, y, z):
+        n = nm((x, y, z))
+        return _solid(n) and "glass" not in n and not n.endswith(("_door", "_pane", "trapdoor", "_stairs", "_slab"))
+    def free(x, y, z): return nm((x, y, z)) == "air" and (x, y, z) not in keep
+    def fits(y, wz, r):
+        iz = wz - 1
+        cells = [(dx + a, y + b) for a in range(-r, r + 1) for b in range(-r, r + 1)]
+        if not all(wall(x, yy, wz) for x, yy in cells): return False
+        if not all(free(x, yy, iz) for x, yy in cells): return False
+        # the room opens out in front of it: nothing in the way of seeing it from the hall
+        return all(nm((dx, y, iz - k)) == "air" for k in (1, 2)) and nm((dx, y - r - 1, iz)) == "air"
+    for wz in range(dz + 2, dz - 6, -1):
+        for r in (1, 0):
+            for y in range(fy + 2 + r, fy + 11):
+                if fits(y, wz, r):
+                    iz = wz - 1
+                    bp.cells[(dx, y, iz)] = ("siege:clock_anchor", {"facing": "n", "raw": {"siege:size": 3 if r else 1,
+                                             "siege:style": HALL_CLOCK_STYLE.get(region, 0), "siege:habit": 0}})
+                    bp.marks["clock"] = (dx, y, iz)
+                    return {(dx + a, y + b, iz) for a in range(-r - 1, r + 2) for b in range(-r - 1, r + 2)}
+    return set()
+
 def _move_tree(bp, level, t0, s):
     x, y, z = t0
     half = 2 if level >= 3 else 1

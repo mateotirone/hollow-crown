@@ -125,6 +125,9 @@ function factsOf(player) {
   };
 }
 
+// The steps last worked out for a player (titles and all), or undefined. Read by the world snapshot roster.
+export const stepsOf = (playerId) => steps.get(playerId)?.quests;
+
 function work(player) {
   const quests = questsFor(factsOf(player));
   steps.set(player.id, { quests, at: system.currentTick });
