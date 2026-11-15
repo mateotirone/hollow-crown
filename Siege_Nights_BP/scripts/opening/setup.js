@@ -147,6 +147,9 @@ const left = () => TASKS.filter((t) => !store.data.done.includes(t.id));
 // Ready for a newcomer: the hall stands and the plots are on the map (Millbrook can finish while they read)
 // Ready for a newcomer once the hall stands: the rim stones light up one by one as their Plot Stones go down, while
 // the newcomer is still reading the Waystone
+// Every place done (or not the map at all): heavy background work elsewhere (the Hollow's arrival, undertow/) waits
+// for this, so it never slows the welcome hall for the first newcomer
+export const openingDone = () => store.data.state === "plain" || (store.data.state === "map" && !left().length);
 export const openingReady = () => store.data.state === "plain" || (store.data.state === "map" && store.data.done.includes("hall"));
 
 // ---------- Working through it, a few places at a time ----------

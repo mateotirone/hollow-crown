@@ -66,6 +66,7 @@ import "./story.js";
 import "./forge.js";
 import "./finds.js";
 import "./sounds.js";
+import { openingDone } from "../opening/setup.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -84,13 +85,27 @@ const inUndertow = (p) => p.dimension.id === UNDERTOW_ID;
 const isBuilder = (p) => p.getGameMode() === GameMode.Creative;
 const progress = () => load(K_PROGRESS, { oswin: false, choir: false });
 
-on("ready", () => {
-  getSourceSite(); // make the secret pick now if nobody has yet
+// The arrival is built in the background (80 chunks, a few hundred blocks a tick), but only once the map's first-time
+// setup is done: on a fresh world it used to start the moment the world loaded and starved the welcome hall's setup,
+// so the first newcomer stood at Kingsrest waiting (Mateo, playtests 2026-11-14/15). Nobody can reach the Hollow
+// for days anyway; a tester who goes in early (hc:undertow_go) starts it at once.
+let arrivalHeld = false;
+function holdArrival() {
+  if (arrivalHeld) return;
+  arrivalHeld = true;
   // Keep the whole arrival loaded so it is built before anyone arrives (builder.js ARRIVAL_CHUNKS). The area is
   // taken away and added again so a world that has the old, smaller one gets the new size.
   runCmd(undertow(), `tickingarea remove ${ARRIVAL_AREA}`);
   runCmd(undertow(), arrivalAreaCmd());
+}
+const mayBuild = () => {
+  try { return openingDone(); } catch { return true; }
+};
+on("ready", () => {
+  getSourceSite(); // make the secret pick now if nobody has yet
+  if (mayBuild()) holdArrival();
 });
+onTick("undertow:hold arrival", 100, () => { if (!arrivalHeld && mayBuild()) holdArrival(); });
 
 // ---- going in and out ---------------------------------------------------------------------
 const cooldown = new Map();
@@ -279,6 +294,8 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
 // ---- building -----------------------------------------------------------------------------
 onTick("undertow:build", 1, () => {
   const players = world.getAllPlayers().filter(inUndertow);
+  if (!players.length && !waiting.size && !mayBuild()) return; // the map is still setting itself up: wait
+  if ((players.length || waiting.size) && !arrivalHeld) holdArrival();
   buildTick(players, waiting.size > 0);
 });
 // Players waiting to come in: progress on the action bar, across the moment the arrival is ready.
