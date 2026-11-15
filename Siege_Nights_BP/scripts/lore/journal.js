@@ -5,7 +5,7 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { emit, on, addJoinStep, addTests, assertEqual } from "../siege/api.js";
-import { mapMode } from "../plots/api.js";
+import { mapMode, waitsForStart } from "../plots/api.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
 import { REVEAL } from "./data/reveal.js";
 import { progressOf, saveProgress, giveItem, learnClues } from "./player.js";
@@ -80,6 +80,7 @@ on("waystoneRead", ({ player }) => readers.get(player?.id)?.());
 addJoinStep(30, "journal", async (player, { wait }) => {
   const p = progressOf(player);
   if (p.flags.includes("journal_given")) return; // worlds from before the join sequence gave it already
+  if (waitsForStart(player)) return; // on the map it comes once they have chosen a start ("startChosen" below)
   let hall = false;
   try { hall = mapMode(); } catch { /* plots not ready: treat as no hall */ }
   if (hall) {
@@ -95,6 +96,18 @@ addJoinStep(30, "journal", async (player, { wait }) => {
   saveProgress(player);
   giveJournal(player);
 }, { when: "first", timeout: 40 });
+
+// On the map: once a start is chosen (after the teleport, the clothes and the horse)
+on("startChosen", ({ player }) => system.runTimeout(() => {
+  try {
+    if (!player.isValid) return;
+    const p = progressOf(player);
+    if (p.flags.includes("journal_given")) return;
+    p.flags.push("journal_given");
+    saveProgress(player);
+    giveJournal(player);
+  } catch (e) { console.warn(`[Hollow Crown] journal after the start: ${e}`); }
+}, 100));
 
 system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity: player }) => {
   if (id !== "siege:journal" || player?.typeId !== "minecraft:player") return;

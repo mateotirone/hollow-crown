@@ -496,6 +496,7 @@ function pick(player, plan, mode = STORY) {
   // a second play may start in either mode; a Story Mode pick leaves the story where this player had it
   if (mode !== modeOf(player) || mode === SETTLEMENT) setMode(player, mode);
   emit("plotChosen", { player, plot: status.plot, lord: status.state === "lord" ? npcOf(status.plot) : undefined });
+  emit("startChosen", { player });
   if (npcOf(status.plot)) releaseNpc(status.plot.name); // the lord steps down, if whoever runs the lords hasn't done it already
   if (WELCOME.bannerOnArrival) {
     const inv = player.getComponent("minecraft:inventory")?.container;
@@ -535,6 +536,7 @@ function startHomeless(player) {
       arriveAt(player, { name: "Kingsrest" }, { x: k.x + 0.5, y: k.y, z: k.z + 0.5 });
       player.sendMessage("§6Kingsrest. Rails and roads run from here to every region. Click any Plot Stone to see which plots are free.");
       emit("startedHomeless", { player });
+      emit("startChosen", { player });
     }).catch(() => {});
 }
 
@@ -582,6 +584,12 @@ function toHall(player) {
 const SKIP_TAG = "hc_skip_welcome";
 const mustChoose = (player) =>
   hallBuilt() && (mapMode() || setupState() === "map") && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
+
+// The journal, the Almanac and the Codex are handed over once a newcomer has chosen a start (Mateo 2026-11-15), not on
+// the first join. waitsForStart says whether this player is to be given them then (on "startChosen"), rather than
+// at the end of their first join: true on the map for anyone who has not chosen yet and is not a builder skipping it.
+export const waitsForStart = (player) =>
+  (mapMode() || setupState() === "map") && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
 
 /** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
 export function inWelcomeHall(player) {
@@ -802,6 +810,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       player.addTag(SKIP_TAG);
       player.removeTag(ARRIVING);
       player.removeTag(WAITING);
+      emit("startChosen", { player }); // a builder skipping the hall still gets the journal and the books
       const k = store.data.kingsrest ?? WELCOME.kingsrest;
       if (inHall(player.location)) player.teleport({ x: k.x + 0.5, y: k.y, z: k.z + 0.5 }, { dimension: overworld() });
       player.sendMessage("§6You skip the welcome hall on this world.§7 /scriptevent siege:welcome unskip to be a newcomer again.");
