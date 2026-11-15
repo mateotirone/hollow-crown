@@ -229,3 +229,7 @@ All arches follow `reference/shapes.md`. Quick versions:
 - [ ] House windows have leaf boxes with signs; stone sills wider than the glass; heads capped where there is room.
 - [ ] Shutters on at most 30%, planters on about a quarter, in symmetric pairs on formal fronts.
 - [ ] Arches symmetric about the centre block.
+
+## Glass by region (Mateo, 2026-11-15)
+
+Each region has one window palette, and each window takes one colour from it (every pane of a window matches): Vale brown, light grey and clear; Frostmarch white; Saltreach sea glass (light blue, cyan, white); Emberwaste orange, red, white, yellow; Blackfen bog green, brown, lime. The Hollow lights its windows with froglight. `kit.region_glass(bp, region)` applies it; chapels, shrines and lamp rooms keep their own glass.

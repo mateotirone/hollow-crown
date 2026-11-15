@@ -71,7 +71,7 @@ STYLES = {
                            stone={"block": "smooth_quartz", "forms": {"wall": "diorite_wall"}}, frame_kind="stone", sill="stair"),
     "fen_timber": dict(plinth={"ladder": ["mud_bricks", "tuff_bricks"], "axis": "noise", "scale": 3}, frame="mangrove_log",
                        infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="spruce_planks",
-                       roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="brown_stained_glass_pane",
+                       roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="green_stained_glass_pane",
                        leaves="mangrove_leaves", bracket="mud_brick_wall", sign_wood="mangrove", chimney="mud_bricks", quoin="tuff_bricks", stone="mud_bricks",
                        frame_kind="proud", sill="stair"),
     "ember_sandstone": dict(plinth={"block": "sandstone"}, frame="cut_sandstone", infill={"ladder": "EMB-01", "axis": "y"},

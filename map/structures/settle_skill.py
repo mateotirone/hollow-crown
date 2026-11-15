@@ -46,6 +46,8 @@ def build(bid, region="vale"):
             if v[0] != "keep": bp.cells[(x, y + spec.get("after_dy", 0), z)] = v
     # a window box's sign face can stand past the roof's verge; on a narrow plot it goes, the box stays
     for c in [c for c, v in bp.cells.items() if abs(c[0]) > HALF[bid] and v[0].endswith("wall_sign")]: del bp.cells[c]
+    from kit import region_glass
+    region_glass(bp, region)                     # one window palette per region (Mateo 2026-11-15)
     if bid in ("mint", "moneyer"): bar_ground_windows(bp)
     bp.markers["door"] = (0, YW, 0)
     return bp.finish()

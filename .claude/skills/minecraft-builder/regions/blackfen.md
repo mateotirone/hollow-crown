@@ -110,6 +110,7 @@ town and waterline houses.
 
 **Windows:**
 - **Size and place:** few and small, high up.
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: bog green mostly, some brown and lime. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: brown;
   - halls: green;

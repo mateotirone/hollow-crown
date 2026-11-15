@@ -195,6 +195,8 @@ def ember_P(seed=0, civic=False):
 PALETTES = {"frost": frost_P, "salt": salt_P, "fen": fen_P, "ember": ember_P}
 
 def finish(bp, P, region, kind="house", snow=None):
+    from kit import region_glass
+    region_glass(bp, region)
     if region == "frost" and snow is not False: snow_cap(bp)
     if P.get("infill_ladder"): paint_infill(bp, P["infill_ladder"])
     finish_doctrine(bp, P["ladder"], P["family"], planters=region != "ember", wood=P["trim"].replace("_stairs", ""))
@@ -253,6 +255,8 @@ def frost_house(seed, rnd, tier, roof=None):
     bp = Blueprint(f"rimehold_house_{seed}_t{tier}")
     _engine().into_blueprint(bp, {"name": bp.name, "parts": [hs, pile]})
     door_marker(bp, xd, 2, D + 1)
+    from kit import region_glass
+    region_glass(bp, "frostmarch")
     bp.roof_untextured = True                    # plain slate until the town picks its colour; recolour_roof textures it
     if roof: recolour_roof(bp, "frost", roof, seed)
     bp.kind = "house"
@@ -696,6 +700,8 @@ def _skill(fname, name, kind, door, markers=()):
     for (x, y, z), v in raw.cells.items(): bp.cells[(x - dx, y, z - dz)] = v
     door_marker(bp, 0, dy, 1)
     for k, (x, y, z) in markers: bp.markers[k] = (x - dx, y, z - dz)
+    from kit import region_glass
+    region_glass(bp, spec.get("card", {}).get("region", ""))
     bp.kind = kind
     return bp
 

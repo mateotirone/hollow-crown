@@ -166,7 +166,7 @@ def end(bp, stage, post, stalls, join):
     mark(bp, "stalls", *stalls)
     mark(bp, "trade_join", *join)
     bp.markers["door"] = (0, 0, -1)
-    return hung(finish_detail(bp, {"planters": False}))
+    return hung(finish_detail(bp, {"planters": False, "region": bp.name.rsplit("_", 1)[-1]}))
 
 # ---------------------------------------------------------------- back detail
 

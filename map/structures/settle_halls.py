@@ -999,3 +999,13 @@ def _off_the_table(bp, level):
     bp.cells[(x, top, z)] = ("siege:tree_of_oaths", {})
     bp.marks["tree"] = (x, top, z)
     return True
+
+
+# every palette knows its region, so finish_detail can give the windows the region's glass (kit.region_glass)
+def _tag_region(fn, region):
+    def wrapped(*a, **k):
+        P = fn(*a, **k); P["region"] = region; return P
+    wrapped.__doc__ = fn.__doc__; return wrapped
+for _n, _r in (("vale_palette", "vale"), ("timber_palette", "vale"), ("frost_palette", "frostmarch"), ("salt_palette", "saltreach"),
+               ("ember_palette", "emberwaste"), ("fen_palette", "blackfen")):
+    globals()[_n] = _tag_region(globals()[_n], _r)

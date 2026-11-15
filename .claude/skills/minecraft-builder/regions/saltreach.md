@@ -142,6 +142,7 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 ## Windows, doors and details
 
 **Windows:**
+- **Window glass (Mateo 2026-11-15):** every window takes one colour from the region's mix: sea glass: light blue mostly, some cyan and white. `kit.region_glass` does it per window (all panes of one window match) for plot buildings, halls, stations and town buildings; chapels and lamp rooms keep their own glass. The building notes below say which colour leads.
 - **Glass by building:**
   - houses: `light_blue_stained_glass_pane`;
   - stores and shops: clear below, white above;
