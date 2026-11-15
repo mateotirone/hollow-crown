@@ -261,6 +261,23 @@ export function raiseHall(o, then, old) {
   }, 2);
 }
 
+// A world file with the hall built in (the playtest world spawns you on its quay): take it the moment its chunks
+// are loaded, instead of waiting for the map setup to get round to it (Mateo 2026-11-15: on the island, but the
+// Waystone did nothing for a while). Map setup hears "hallAdopted" and counts the hall (and the map check) done.
+onTick("plots_welcome_adopt", 10, () => {
+  if (store.data.hall || raising) return;
+  const o = { ...WELCOME.hall };
+  const dim = overworld();
+  if (!hallBakedAt(dim, o)) return;
+  store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
+  store.save();
+  try { waystoneSigns(dim, o); } catch { /* the signs go up on the next pass */ }
+  try { refreshHall(); } catch { /* stones light up as the plots go down */ }
+  try { world.setDefaultSpawnLocation(arrivalPoint(o)); } catch { /* the world file already spawns here */ }
+  console.warn("[Hollow Crown] welcome: the hall is built into this world; using it");
+  emit("hallAdopted", {});
+});
+
 /** The world file already holds the hall (baked in ahead of time): its Waystone stands on the quay. */
 export function hallBakedAt(dim, o) {
   const w = waystoneSpot();
@@ -564,7 +581,7 @@ function toHall(player) {
 // who wants the world without choosing a start types /scriptevent siege:welcome skip, which tags them.
 const SKIP_TAG = "hc_skip_welcome";
 const mustChoose = (player) =>
-  hallBuilt() && mapMode() && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
+  hallBuilt() && (mapMode() || setupState() === "map") && !player.hasTag(SKIP_TAG) && !store.data.picks[player.id] && !keepOf(player.id);
 
 /** True while a player is still up in the welcome hall (on the quay, not yet set down in the world). */
 export function inWelcomeHall(player) {
