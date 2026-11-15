@@ -18,6 +18,8 @@ import { moduleStore } from "../core/store.js";
 import { addTests, assert, assertEqual } from "../core/tests.js";
 
 const NEIGHBOURS = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+// a gate leaf also holds together across a corner on the same level (one end set a block deeper in a curved wall)
+const LEAF_NEIGHBOURS = [...NEIGHBOURS, [1, 0, 1], [1, 0, -1], [-1, 0, 1], [-1, 0, -1]];
 const key = (p) => `${p.x},${p.y},${p.z}`;
 
 // Things a swinging leaf may brush aside (they are gone when it shuts again)
@@ -30,25 +32,44 @@ export const SWEPT = new Set([
 
 // cells: the closed leaf [{x,y,z}]; facing: the clicked block's minecraft:cardinal_direction;
 // at: the clicked block; opener: where the opener stands (or undefined); isFree(pos) -> true if the leaf may go there.
-// Returns { face, moves: [{ from, to }] } or undefined when the leaf has nowhere to go.
+// Returns { face, closed, moves: [{ from, to }] } or undefined when the leaf has nowhere to go. closed is the facing
+// the leaf should have when it shuts again (one that matches the way the gateway really runs).
+//
+// The way the wall runs is read from the leaf itself, not only from its facing: a gate that is wider one way than the
+// other runs that way. Settlement walls that follow the village's outline set their gate a block deeper at one end
+// than the other, and a gate placed by hand can face the wrong way; going by facing alone, those gates moved one
+// column at a time, sideways along the wall, or said something was in the way until the right column was clicked
+// (Mateo's playtest 2026-11-14: "takes multiple clicks, and then moves ... not on the correct axis").
 export function planSwing(cells, facing, at, opener, isFree) {
-  const u = facing === "north" || facing === "south" ? "x" : "z"; // the wall runs along u
+  if (!cells.length) return undefined;
+  const span = (k) => Math.max(...cells.map((c) => c[k])) - Math.min(...cells.map((c) => c[k]));
+  const byFacing = facing === "north" || facing === "south" ? "x" : "z";
+  const u = span("x") > span("z") ? "x" : span("z") > span("x") ? "z" : byFacing; // the wall runs along u
   const w = u === "x" ? "z" : "x"; // and the leaf swings out along w
-  const plane = cells.filter((c) => c[w] === at[w]); // a leaf is flat; anything joined off its plane stays put
-  if (!plane.length) return undefined;
-  const lo = Math.min(...plane.map((c) => c[u])), hi = Math.max(...plane.map((c) => c[u]));
+  const closed = u === byFacing ? facing : u === "x" ? "north" : "east";
+  // One block per column and height: a gate two blocks thick swings only the layer that was clicked (the one nearest)
+  const pick = new Map();
+  for (const c of cells) {
+    const k = `${c[u]},${c.y}`, old = pick.get(k);
+    if (!old || Math.abs(c[w] - at[w]) < Math.abs(old[w] - at[w])) pick.set(k, c);
+  }
+  const leaf = [...pick.values()];
+  const lo = Math.min(...leaf.map((c) => c[u])), hi = Math.max(...leaf.map((c) => c[u]));
   const away = opener ? Math.sign(at[w] + 0.5 - opener[w]) : 0;
   const first = away === 0 ? 1 : away;
   for (const s of [first, -first]) {
     for (const hinge of [lo, hi]) {
+      // it opens out from its hinge post; where the far end sits deeper, isFree turns it from a spot still taken
+      const post = leaf.filter((c) => c[u] === hinge).map((c) => c[w]);
+      const line = s > 0 ? Math.max(...post) : Math.min(...post);
       const face = u === "x" ? (hinge === lo ? "west" : "east") : (hinge === lo ? "north" : "south");
-      const moves = plane.map((c) => {
+      const moves = leaf.map((c) => {
         const to = { x: 0, y: c.y, z: 0 };
         to[u] = hinge;
-        to[w] = at[w] + s * (Math.abs(c[u] - hinge) + 1);
+        to[w] = line + s * (Math.abs(c[u] - hinge) + 1);
         return { from: { x: c.x, y: c.y, z: c.z }, to };
       });
-      if (moves.every((m) => isFree(m.to))) return { face, moves };
+      if (moves.every((m) => isFree(m.to))) return { face, closed, moves };
     }
   }
   return undefined;
@@ -103,7 +124,7 @@ export function openLeafAt(dim, location) {
 // ---------- moving blocks ----------
 
 // Every touching block of the same kind (and, if given, the same open state), up to the gate size limit
-function joined(block, sameOpen) {
+function joined(block, sameOpen, around = NEIGHBOURS) {
   const dim = block.dimension, type = block.typeId, seen = new Set(), out = [];
   const queue = [block.location];
   while (queue.length && out.length < SETTINGS.gateMaxSize) {
@@ -115,7 +136,7 @@ function joined(block, sameOpen) {
     if (!b || b.typeId !== type) continue;
     if (sameOpen !== undefined && b.permutation.getState("siege:open") !== sameOpen) continue;
     out.push(b);
-    for (const [dx, dy, dz] of NEIGHBOURS) queue.push({ x: loc.x + dx, y: loc.y + dy, z: loc.z + dz });
+    for (const [dx, dy, dz] of around) queue.push({ x: loc.x + dx, y: loc.y + dy, z: loc.z + dz });
   }
   return out;
 }
@@ -149,7 +170,7 @@ function swingOpen(block, opener) {
   // from its gateway (Mateo's playtest 2026-11-13: "now it's like 5 blocks away").
   const type = block.typeId;
   const facing = block.permutation.getState("minecraft:cardinal_direction") ?? "north";
-  const cells = joined(block, false);
+  const cells = joined(block, false, LEAF_NEIGHBOURS);
   const plan = planSwing(cells.map((b) => b.location), facing, block.location, opener, (p) => freeAt(dim, p));
   if (!plan) return "Something is in the way of the gate.";
   // a stale record over these spots (a wall rebuilt round an open gate) is forgotten
@@ -160,7 +181,7 @@ function swingOpen(block, opener) {
     dim.getBlock(m.to).setPermutation(perms[i].withState("siege:open", true).withState("minecraft:cardinal_direction", plan.face));
   });
   moveDamage(plan.moves.map((m) => [m.from, m.to]));
-  const leaf = { dim: dim.id, type, facing, cells: plan.moves.map((m) => [m.from.x, m.from.y, m.from.z, m.to.x, m.to.y, m.to.z]) };
+  const leaf = { dim: dim.id, type, facing: plan.closed, cells: plan.moves.map((m) => [m.from.x, m.from.y, m.from.z, m.to.x, m.to.y, m.to.z]) };
   const id = spot(dim.id, plan.moves[0].from);
   leaves()[id] = leaf;
   indexLeaf(id, leaf);
@@ -247,6 +268,26 @@ addTests("siege", {
     assert(south && south.moves.every((m) => m.to.x < 0), "pushed east but east is blocked, so it opens west");
     assert(["north", "south"].includes(south.face), "lies flat against the north or south side");
     assertEqual(planSwing(cells, "east", cells[0], undefined, () => false), undefined, "nowhere to go");
+  },
+  "a gate swings the way its gateway runs, even facing the wrong way": () => {
+    // a 3 wide gate on an east-west wall whose blocks face east (placed by hand from the side)
+    const cells = [];
+    for (let x = 10; x <= 12; x++) for (let y = 64; y <= 65; y++) cells.push({ x, y, z: 5 });
+    const plan = planSwing(cells, "east", { x: 11, y: 64, z: 5 }, { x: 11.5, y: 64, z: 1 }, () => true);
+    assert(plan, "it opens");
+    assertEqual(plan.moves.length, cells.length, "the whole leaf moves, not one column");
+    assert(plan.moves.every((m) => m.to.z > 5), "out of the wall line, away from the opener");
+    assertEqual(new Set(plan.moves.map((m) => m.to.x)).size, 1, "flat along the hinge column");
+    assertEqual(plan.closed, "north", "and shuts facing along its wall");
+  },
+  "a gate set a block deeper at one end still swings as one leaf": () => {
+    // a curved wall: the east column of the gate sits one block further out (z 6 instead of 5)
+    const cells = [];
+    for (let y = 64; y <= 66; y++) cells.push({ x: 10, y, z: 5 }, { x: 11, y, z: 5 }, { x: 12, y, z: 6 });
+    const plan = planSwing(cells, "south", { x: 11, y: 64, z: 5 }, { x: 11.5, y: 64, z: 1 }, () => true);
+    assertEqual(plan.moves.length, cells.length, "every block moves");
+    assertEqual(Math.min(...plan.moves.map((m) => m.to.z)), 6, "it lies flat out from its hinge post");
+    assertEqual(new Set(plan.moves.map((m) => key(m.to))).size, cells.length, "no two blocks land in one spot");
   },
   "a raised portcullis shows only its top piece": () => {
     const cells = [];
