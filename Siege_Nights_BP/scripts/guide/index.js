@@ -18,6 +18,7 @@
 import { world, system, ItemStack, BlockTypes, ItemTypes, EntityTypes, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { on, onTick, addJoinStep, addKeepMenuButtons } from "../siege/api.js";
+import { waitsForStart } from "../plots/api.js";
 import { sfx } from "../core/sfx.js";
 import { ALMANAC, ENTRIES } from "./data.js";
 import { ENTRY, WORLD_EVENTS, buildIndex, entriesFor, readMarks, writeMarks, visible, isNew, chapterList, chapterPages } from "./rules.js";
@@ -285,12 +286,20 @@ const openSoon = (player) => system.run(() => openAlmanac(player).catch((e) => c
 addKeepMenuButtons(({ player }) => [{ label: "Almanac", icon: "textures/items/siege_almanac", action: () => openSoon(player) }]);
 
 // First join: after the look picker (10), the welcome hall (20) and the journal (30)
-addJoinStep(35, "almanac", async (player, { wait }) => {
+const ALMANAC_GIVEN = "hc:almanac_given";
+function handAlmanac(player) {
+  if (!player.isValid || player.getDynamicProperty(ALMANAC_GIVEN)) return false;
+  player.setDynamicProperty(ALMANAC_GIVEN, true);
   giveAlmanac(player);
   player.sendMessage("§6A clerk has pressed a small book into your hands: the Settler's Almanac.§r §7Use it whenever you are not sure what something does.");
   meet(player, ["almanac", "first_days"], { quiet: true });
-  await wait(40);
+  return true;
+}
+addJoinStep(35, "almanac", async (player, { wait }) => {
+  if (waitsForStart(player)) return; // on the map it comes once they have chosen a start
+  if (handAlmanac(player)) await wait(40);
 }, { when: "first" });
+on("startChosen", ({ player }) => system.runTimeout(() => { try { handAlmanac(player); } catch { /* left */ } }, 160));
 
 // /siege:guide for everyone, cheats or not
 system.beforeEvents.startup.subscribe((e) => {
