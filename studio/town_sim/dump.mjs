@@ -4,6 +4,8 @@
 //
 //   node studio/town_sim/dump.mjs [plot=oakmere] [layout=0] [out=studio/town_sim/out/sim.json]
 //
+// Siege nights are not dumped: the page runs the game's own scripts live (studio/town_sim/siege/).
+//
 // The scripts are loaded in Node with a fake @minecraft/server (tools/mock-minecraft.mjs), so these are the real
 // functions: towns.js (layout, groundwork, slots, seats), founding.js's founding order, blendGround and fixtures
 // (ported below: they read the world), buildings.js / townhall halls (plans and buildOrder), build.js resolveRole
@@ -375,10 +377,13 @@ function ringOps(tier) {
   measureWall();
   const snap = new Map(vox), restore = () => { vox.clear(); for (const [k, v] of snap) vox.set(k, v); };
   // the page raises level L over level L-1 and takes down what L no longer has (old steps, ladders)
-  const ring = { radius: wall.radius, fresh: {} };
+  // rec: the wall record the game keeps for this ring (settle/walls.js), for the siege simulator to hand back to it
+  const ring = { radius: wall.radius, fresh: {}, lifts: {},
+    rec: { x: wall.x, y: wall.y, z: wall.z, shape: wall.shape, radius: wall.radius, style: wall.style, gate: wall.gate, gateDir: wall.gateDir, ground: wall.ground, ...(wall.radii ? { radii: wall.radii, radiiAt: wall.radiiAt } : {}) } };
   for (let L = 1; L < WALL_LEVELS.length; L++) {
     restore(); wall.level = 0; wall.lifts = {};
     ring.fresh[L] = wallOps(L);
+    ring.lifts[L] = { ...wall.lifts };
   }
   restore(); wall.level = 0; wall.lifts = {};
   return ring;
@@ -587,17 +592,43 @@ for (let tier = 0; tier <= 3; tier++) {
 const halls = [null, { level: 1, name: HALL_TIERS[1].name, ops: events.find((e) => e.id === "hall1").ops }];
 for (let l = 2; l <= 5; l++) halls.push({ level: l, name: HALL_TIERS[l].name, settlement: HALL_TIERS[l].settlement, ops: hallOps(l) });
 
-// ---------- siege nights, played by the game's own siege code (siege_night.mjs) ----------
-const { runSieges } = await import(pathToFileURL(path.join(import.meta.dirname, "siege_night.mjs")).href);
-const LANG = fs.readFileSync(path.join(ROOT, "Siege_Nights_RP/texts/en_US.lang"), "utf8");
-const entityName = (id) => new RegExp(`^entity\\.${id.replace(/[.:]/g, (c) => "\\" + c)}\\.name=(.*)$`, "m").exec(LANG)?.[1]?.trim()
-  ?? id.replace(/^\w+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const sieges = await runSieges({
-  imp, mock, CX, CZ, BASE, gateAngle: wall.gate, radii: [0, 1, 2, 3].map((t) => wallRadius(tw, t)),
-  homes: [1, 3, 6, 10], // a villager for each home the tier's charter asks for (planSiege counts villagers)
-  wallLevels: WALLS.tierCap, outline: tw.outline,
-});
-sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatMap((n) => n?.waves.flat().map((e) => e.type) ?? []))].map((t) => [t, entityName(t)]));
+// ---------- blocks a siege night can put down (the siege simulator runs the game itself on this town) ----------
+// The page draws only blocks in its palette, so every block the siege code may set is added here: cracked walls,
+// gates swung open, the Breaching Charge, rubble, fire, the Keep Banner and the wall's watchtowers.
+{
+  const blockStates = {};
+  for (const f of walkFiles(path.join(ROOT, "Siege_Nights_BP", "blocks"), ".json")) {
+    try { const b = JSON.parse(fs.readFileSync(f, "utf8"))["minecraft:block"]; const st = {}; for (const [k, v] of Object.entries(b.description.states ?? {})) st[k] = Array.isArray(v) ? v : []; for (const t of Object.values(b.description.traits ?? {})) for (const n of t.enabled_states ?? []) st[n] = n === "minecraft:cardinal_direction" ? ["north", "south", "east", "west"] : []; blockStates[b.description.identifier] = st; } catch { /* not a block */ }
+  }
+  const SIEGE = await imp("siege/constants.js");
+  const swing = new Set([...(SIEGE.GATES ?? []), ...(SIEGE.PORTCULLISES ?? []), ...(SIEGE.CASTLE_GATES ?? [])]);
+  for (const [id, st] of pal.slice()) {
+    if (st && "open_bit" in st) pid(id, { ...st, open_bit: !st.open_bit }); // a door a raider or a guard walks through
+    if (st && "pillar_axis" in st) for (const ax of ["x", "y", "z"]) pid(id, { ...st, pillar_axis: ax }); // siege camps lay logs every way
+    const has = blockStates[id];
+    if (!has) continue;
+    if (has["siege:cracks"]) for (const c of has["siege:cracks"]) if (c) pid(id, { ...st, "siege:cracks": c });
+    if (swing.has(id)) { // every way a gate or portcullis can hang, open or shut
+      const names = Object.keys(has).filter((k) => has[k].length), combos = names.reduce((a, k) => a.flatMap((c) => has[k].map((v) => ({ ...c, [k]: v }))), [{}]);
+      if (combos.length <= 96) for (const c of combos) pid(id, c);
+    }
+  }
+  for (const [id, st] of [["siege:keep_banner", {}], ["siege:keep_banner", { "siege:color": 14 }], ["siege:breaching_charge", {}], ["minecraft:fire", {}], ["minecraft:cobblestone", {}],
+    ["minecraft:gravel", {}], ["minecraft:stone_bricks", {}], ["siege:barracks", {}]]) { try { BlockPermutation.resolve(id, st); pid(id, st); } catch { /* not in this build */ } }
+  try {
+    const { watchPlan, watchWayPlan } = await imp("settle/wallwatch.js");
+    for (const kind of ["tower", "stand"]) for (const mk of [watchPlan, watchWayPlan]) {
+      let plan; try { plan = mk(STYLE, kind); } catch { continue; }
+      if (!plan) continue;
+      const style = plan.style ?? styleFor(STYLE);
+      for (const fw of [{ x: 0, z: 1 }, { x: 0, z: -1 }, { x: 1, z: 0 }, { x: -1, z: 0 }]) {
+        const frame = frameFor(fw);
+        for (const c of [...plan.columns.values(), ...buildOrder(plan)]) { try { permId(resolveRole(style, frame, c.role, c.o)); } catch { /* a role this style lacks */ } }
+      }
+    }
+  } catch (e) { console.log("watchtowers not added to the palette:", String(e).slice(0, 120)); }
+}
+const { layoutKey } = await imp("settle/founding.js");
 
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
@@ -614,7 +645,7 @@ const out = {
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, store, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
-  designs, trees, rules, sieges, keepHealth: [200, 300, 400, 600], hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
+  designs, trees, rules, layoutKey: layoutKey(layout), hallSpot: hallSpot ? { x: hallSpot.x, y: hallSpot.y, z: hallSpot.z, fx: hallSpot.forward.x, fz: hallSpot.forward.z } : null, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
   // how fast each kind of job runs in the game (blocks a tick), so the page can play at the game's own pace
@@ -628,5 +659,4 @@ console.log(`${tw.name} (${layout.label}) style ${STYLE}, base y ${BASE}, ${slot
 console.log("events:", events.map((e) => `${e.id}:${nOps(e.ops)}`).join(" "));
 console.log("tiers:", tiers.map((t) => `${t.name} r${t.radius} gw${nOps(t.ground)} wall L1 ${nOps(t.ring.fresh[1])} L10 ${nOps(t.ring.fresh[10])}`).join(" | "));
 console.log("halls:", halls.slice(1).map((h) => `${h.name}:${nOps(h.ops)}`).join(" "), "stations:", stationEvents.map((s) => `${s.stage}:${nOps(s.ops)}`).join(" "));
-{ const ks = Object.keys(sieges.nights), w = ks.map((k) => sieges.nights[k]?.waves ?? []); console.log("sieges:", ks.length, "nights, waves", w.map((x) => x.length).join(""), "first", JSON.stringify(sieges.nights["1|0|none"]).slice(0, 300)); }
 console.log("base builds:", baseBuilds.map((b) => `${b.id}@${b.slot}`).join(" "), "size", (fs.statSync(OUT).size / 1e6).toFixed(1), "MB");

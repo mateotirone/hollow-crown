@@ -21,7 +21,8 @@ sys.path.insert(0, os.path.join(ROOT, "map", "trees"))
 import mesher as _mesher  # noqa: E402
 from mesher import Mesher, opaque_cube, cull_group  # noqa: E402
 # a few Bedrock texture names the catalogue's builds never needed
-_mesher.TEX_ALIAS.update({"bricks": "brick", "stonecutter": "stonecutter2_side", "water_cauldron": "cauldron_side"})
+_mesher.TEX_ALIAS.update({"bricks": "brick", "stonecutter": "stonecutter2_side", "water_cauldron": "cauldron_side", "fletching_table": "fletcher_table_side1"})
+_mesher.PLANTS["fire"] = "fire_0@0,0,16,16"  # a siege night's fire: the first frame of the game's flame
 from bp import is_fence, is_wall, is_pane, BEDROCK_ALIAS  # noqa: E402
 
 sim_path, texdir, out_path = sys.argv[1:4]
@@ -42,6 +43,7 @@ def logical(bid, st):
         p = {}
         if "minecraft:cardinal_direction" in st: p["facing"] = CARD[st["minecraft:cardinal_direction"]]
         if "minecraft:vertical_half" in st: p["half"] = st["minecraft:vertical_half"]
+        if bid in ("siege:castle_gate", "siege:portcullis"): p["axis"] = "z" if p.get("facing") in ("e", "w") else "x"
         return (bid, p)
     n = bid[10:] if bid.startswith("minecraft:") else bid
     n = UNALIAS.get(n, n)
@@ -184,16 +186,68 @@ def conn_variants(n, p):
     return out
 
 
+# ---------- the add-on's blocks in the state they are in (cracked stone, armoured gates, a gate swung open) ----------
+# The catalogue's mesher draws a siege block from its base components; the block file's permutations say what a
+# state changes (texture, where the panel sits), so those are laid over it here.
+import glob, re  # noqa: E402
+_TD = json.loads(re.sub(r"(?m)^\s*//.*$", "", open(os.path.join(ROOT, "Siege_Nights_RP/textures/terrain_texture.json")).read()))["texture_data"]
+_BLOCKS = {}
+for _f in glob.glob(os.path.join(ROOT, "Siege_Nights_BP/blocks/**/*.json"), recursive=True):
+    try: _b = json.load(open(_f))["minecraft:block"]; _BLOCKS[_b["description"]["identifier"]] = _b
+    except Exception: pass
+_mesher.siege_tex("siege:castle_stone")  # fills the mesher's own table, which is swapped per state below
+
+
+def _cond(expr, st):
+    py = re.sub(r"q(?:uery)?\.block_state\('([^']+)'\)", lambda m: repr(st.get(m.group(1), 0)), expr)
+    py = py.replace("&&", " and ").replace("||", " or ").replace("!=", "<>").replace("!", " not ").replace("<>", "!=")
+    try: return bool(eval(py, {"true": True, "false": False}))
+    except Exception: return False
+
+
+def _texpath(name):
+    t = _TD.get(name, {}).get("textures")
+    if t is None: return None
+    t = t[0] if isinstance(t, list) else t
+    if isinstance(t, dict): t = t.get("path") or t["variations"][0]["path"]
+    return os.path.join(ROOT, "Siege_Nights_RP", t) + ("" if os.path.splitext(t)[1] else ".png")
+
+
+def state_model(i, cell):
+    """model(cell) with this palette entry's Bedrock states applied (siege blocks only)."""
+    bid, st = sim["palette"][i] if i < len(sim["palette"]) else (None, {})
+    blk = _BLOCKS.get(bid)
+    if not blk or not st: return model(cell)
+    tex, shift = {}, None
+    for perm in blk.get("permutations", []):
+        if not _cond(perm["condition"], st): continue
+        for face, v in perm["components"].get("minecraft:material_instances", {}).items():
+            path = isinstance(v, dict) and _texpath(v.get("texture"))
+            if path: tex[face] = path
+        shift = perm["components"].get("minecraft:transformation", {}).get("translation", shift)
+    old = _mesher._SIEGE.get(bid)
+    if tex: _mesher._SIEGE[bid] = {**(old or {}), **tex}
+    try: quads = model(cell)
+    finally:
+        if tex: _mesher._SIEGE[bid] = old
+    if shift and any(shift):
+        for q in quads:
+            for k in range(4):
+                for a in range(3): q[3][k * 5 + a] += shift[a]
+            q[1] = 0
+    return quads
+
+
 models, joins, full = [], {}, []
 for i, cell in enumerate(palette):
     n, p = cell
     if i == 0: models.append([]); full.append(0); continue
     if n in ("air", "keep"): models.append([]); full.append(0); continue
     try:
-        models.append(model(cell))
+        models.append(state_model(i, cell))
     except Exception as e:
         print("model failed", cell, e); models.append(model(("stone", {})))
-    full.append(1 if opaque_cube(tuple(cell)) else 0)
+    full.append(1 if opaque_cube(tuple(cell)) and n not in ("fire", "siege:castle_gate", "siege:portcullis") else 0)
     if is_fence(n) or is_wall(n) or is_pane(n): joins[i] = {"kind": "wall" if is_wall(n) else "pane" if is_pane(n) else "fence", "m": conn_variants(n, p)}
 groups = [cull_group(c[0]) or "" for c in palette]
 
