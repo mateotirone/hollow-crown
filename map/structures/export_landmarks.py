@@ -91,7 +91,7 @@ def bedrock(n, p):
             if k in STATES["blocks"][n2]: st[k] = v
     else:
         st.update(bs)
-    return "minecraft:" + n2, st
+    return (n2 if ":" in n2 else "minecraft:" + n2), st   # add-on blocks (siege:clock_anchor) keep their own namespace
 
 
 # Lit by the world builds thread itself (Mateo 2026-11-13): left as they are here.

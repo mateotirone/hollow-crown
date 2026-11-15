@@ -11,7 +11,9 @@ import { PLOT_PLAN } from "../plots/config.js";
 const relic = (name) => PLOT_PLAN.find((p) => p.name === name).relic;
 
 const PLOT_SITES = {
-  Harrowford: [{ d: "harrowford_field" }, { d: "harrowford_ferry", turns: true, seek: { kind: "water", bearing: 157, spread: 50, max: 240 } }],
+  // the ruined chapel across the Alder from the ferry, its living clock stopped at 3:17 (on the south bank, flat at 86-87)
+  Harrowford: [{ d: "harrowford_field" }, { d: "harrowford_ferry", turns: true, seek: { kind: "water", bearing: 157, spread: 50, max: 240 } },
+    { d: "harrowford_chapel", dx: 7, dz: 40 }],
   Oakmere: [{ d: "oakmere_cellar" }, { d: "oakmere_oaks" }],
   Thistledown: [{ d: "thistledown_frame" }, { d: "thistledown_pens" }],
   Wrenfield: [{ d: "wrenfield_garden" }, { d: "wrenfield_jetty", turns: true, seek: { kind: "water", bearing: 180, spread: 180, max: 200 } }],
@@ -63,10 +65,13 @@ const STORY_SITES = [
   { id: "vorlunds_muster", region: "Frostmarch", name: "Vorlund's Muster", x: 1030, z: -990, pieces: [{ d: "vorlunds_muster" }] },
 ];
 
+// a plot whose landmark changed is built again over the old one: Harrowford 3 (2026-11-15), the chapel and its clock
+const PLOT_VERSION = { Harrowford: 3 };
+
 export const LANDMARKS = [
   ...Object.entries(PLOT_SITES).map(([plot, pieces]) => {
     const { x, z } = relic(plot);
-    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: 2 };
+    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: PLOT_VERSION[plot] ?? 2 };
   }),
   // version 2 (2026-11-13): every site lit at night (map/structures lighting), so built worlds put the lanterns up too.
   // Crownhold and the Cinder Roost are lit by their own thread and keep their versions.

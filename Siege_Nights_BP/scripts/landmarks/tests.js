@@ -47,7 +47,7 @@ addTests("landmarks", {
   },
   "palettes are Bedrock ids with states, rows point into them": () => {
     for (const [id, d] of Object.entries(DESIGNS)) {
-      assert(d.palette.every(([n, st]) => n.startsWith("minecraft:") && typeof st === "object"), id);
+      assert(d.palette.every(([n, st]) => (n.startsWith("minecraft:") || n.startsWith("siege:")) && typeof st === "object"), id);
       assert(d.rows.every((r) => r.length === 5 && r[4] >= 0 && r[4] < d.palette.length && r[3] > 0), id);
       assert(["rigid", "drape", "carve"].includes(d.mode), `${id} mode`);
     }

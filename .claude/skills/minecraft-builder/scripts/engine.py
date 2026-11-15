@@ -141,6 +141,7 @@ def ruin(blocks, opt, log=None):
       cap:   [[x0, z0, x1, z1, top, jag], ...]  everything in the box above top + up to jag (noise) falls
       holes: share of wall blocks knocked out, in clumps (0.06)
       seed:  noise seed
+      keep:  [[x0, y0, z0, x1, y1, z1], ...]  boxes that stand untouched (a clock face still on its tower)
     Then glass, doors, lanterns, bells and furniture go; timber and cloth mostly rot away; stone ages (AGE);
     what fell lies as rubble round the foot of the walls; and anything left hanging with no path to the ground
     is dropped too, so nothing floats (house rule)."""
@@ -153,8 +154,10 @@ def ruin(blocks, opt, log=None):
         return (h(x // 3, z // 3, k) * 2 + h(x // 2, z // 2, k + 1)) / 3
     ground = min(c[1] for c in blocks)
     fallen = 0
+    boxes = opt.get("keep", [])
+    def kept(c): return any(b[0] <= c[0] <= b[3] and b[1] <= c[1] <= b[4] and b[2] <= c[2] <= b[5] for b in boxes)
     for x0, z0, x1, z1, top, jag in opt.get("cap", []):
-        for c in [c for c in blocks if x0 <= c[0] <= x1 and z0 <= c[2] <= z1]:
+        for c in [c for c in blocks if x0 <= c[0] <= x1 and z0 <= c[2] <= z1 and not kept(c)]:
             if c[1] > top + int(smooth(c[0], c[2], 3) * (jag + 1)): del blocks[c]; fallen += 1
     hole = opt.get("holes", 0.06)
     seeds = [c for c in blocks if c[1] > ground + 3 and rnd.random() < hole / 9]
@@ -162,8 +165,10 @@ def ruin(blocks, opt, log=None):
         for dx in range(-1, 2):
             for dy in range(-1, 1 + (rnd.random() < 0.5)):
                 for dz in range(-1, 2):
-                    if blocks.pop((x + dx, y + dy, z + dz), None): fallen += 1
+                    q = (x + dx, y + dy, z + dz)
+                    if not kept(q) and blocks.pop(q, None): fallen += 1
     for c, (n, p) in list(blocks.items()):
+        if kept(c): continue
         if any(g in n for g in GONE): del blocks[c]; continue
         if any(g in n for g in ROT) and h(*c[::2], c[1]) < 0.55: del blocks[c]; fallen += 1; continue
         if "copper" in n and "oxidized" not in n:

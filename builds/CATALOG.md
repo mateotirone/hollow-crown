@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**174 builds:** 1 not started, 84 designed, 18 in viewer, 71 in game.
+**175 builds:** 1 not started, 85 designed, 18 in viewer, 71 in game.
 
 Statuses:
 
@@ -181,6 +181,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Town Board / story site: the burned hamlet in Saltreach (three burned cottages, a well, a cart on its side, one fire still smoking) | Saltreach | designed |  | Rewrite Town Board jobs by hand | `map/structures/board_sites.py` | Stamped on the job's place when the job is given and taken down after (townhall/board_sites.js, ground saved and put back). |
 | Town Board / story site: the burned hamlet in the Emberwaste (three burned cottages, a well, a cart on its side, one fire still smoking) | Emberwaste | designed |  | Rewrite Town Board jobs by hand | `map/structures/board_sites.py` | Stamped on the job's place when the job is given and taken down after (townhall/board_sites.js, ground saved and put back). |
 | Town Board / story site: the burned hamlet in Blackfen (three burned cottages, a well, a cart on its side, one fire still smoking) | Blackfen | designed |  | Rewrite Town Board jobs by hand | `map/structures/board_sites.py` | Stamped on the job's place when the job is given and taken down after (townhall/board_sites.js, ground saved and put back). |
+| Harrowford's ruined chapel across the Alder, its living clock stopped at 3:17 | Aldmere Vale | designed |  | Finish the remaining world builds | `map/structures/landmarks.py` | Waiting in PR #465. Plot landmark piece (landmarks/sites.js, Harrowford version 3). Norman stone nave, chancel and tower on the skill, ruined by the skill's ruin pass; the tower's river face keeps a living clock (habit harrowford). |
 
 ## Boss sites
 

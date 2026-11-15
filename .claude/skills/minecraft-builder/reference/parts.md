@@ -388,5 +388,7 @@ build into its ruin (`engine.ruin`, run after the blocks are resolved): everythi
 (plus up to `jag` of blocky noise) falls; clumps of wall are knocked out (`holes`); glass, doors, lanterns,
 bells and furniture go; timber and cloth mostly rot away; stone ages to mossy and cracked; copper oxidizes;
 anything left with no path to the ground is dropped (nothing floats); rubble lies at the foot of the walls.
+`"keep": [[x0, y0, z0, x1, y1, z1], ...]` lists boxes the ruin leaves exactly as built (Harrowford's chapel clock,
+still on its broken tower: `map/structures/landmarks.py` `harrowford_chapel`).
 Design the restored building once and make the ruin from the same spec (the air boat station,
 `map/structures/everwake/station.py`).

@@ -71,8 +71,10 @@ class D:
 
     def spec(self):
         place = [[x, y, z, b, p] for (x, y, z), (b, p) in sorted(self.cells.items()) if b != "air"]
-        return {"name": self.name, "edition": "bedrock", "materials": self.materials, "shapes": self.shapes,
-                "quality": 4, "hollow": getattr(self, "hollow", 0), "parts": getattr(self, "parts", []), "place": place}
+        out = {"name": self.name, "edition": "bedrock", "materials": self.materials, "shapes": self.shapes,
+               "quality": 4, "hollow": getattr(self, "hollow", 0), "parts": getattr(self, "parts", []), "place": place}
+        if getattr(self, "ruin", None): out["ruin"] = self.ruin     # the skill's ruin pass (reference/parts.md "Ruins")
+        return out
 
     def airs(self):
         return [c for c, (b, _) in self.cells.items() if b == "air"]
@@ -195,6 +197,50 @@ def harrowford_ferry():
                 if (x, z) != (0, -1) and d.r(x, 2, z) < 0.75: d.put(x, 2, z, "spruce_slab", half="bottom")
     d.put(2, 1, 1, "barrel", bs={"facing_direction": 1})
     d.meta["piles"] = ["stripped_spruce_log", "stripped_dark_oak_log"]
+    return d
+
+
+def harrowford_chapel():
+    """The old chapel across the Alder from the ferry, whose clock "struck three, and a little after it" on the night
+    the Grey Host was taken (the ferryman's letter, lore/data/plots.js). A Norman stone nave with buttresses and
+    lancets, a lower chancel, a square tower at the north end with its door to the river, all on the skill and then
+    ruined by the skill's ruin pass: the roofs are in, the belfry and spire have come down. The clock on the tower's
+    river face still stands: a living clock with the Harrowford habit, stopped at 3:17 every night until six in the
+    evening, when nobody winds it any more and it starts again anyway (scripts/clocks, habit 1)."""
+    d = D("harrowford_chapel", "rigid", seed=31, fill="stone", top="keep", ease=4)
+    stone = {"base": "vale_stone", "glass": "red_stained_glass_pane", "floor": "polished_andesite"}
+    lancet = lambda at: {"at": at, "storey": 0, "w": 1, "h": 4}
+    d.parts = [
+        {"part": "house", "style": stone, "rect": [-4, 0, 4, 14], "y": 0, "plinth": 1, "storeys": [7], "door": None,
+         "windows": {"e": [lancet(-4), lancet(0), lancet(4)], "w": [lancet(-4), lancet(0), lancet(4)], "n": [], "s": []},
+         "roof": {"type": "gable", "ridge": "z", "pitch": 2}, "materials": {"roof": "VAL-06"}, "chimney": False,
+         "vines": 0.12, "bushes": False, "interior": {"use": "chapel", "entry": "n"}},
+        {"part": "buttress", "rect": [-4, 0, 4, 14], "side": "e", "at": [-4, 0, 4], "y": 1, "height": 5, "depth": 1},
+        {"part": "buttress", "rect": [-4, 0, 4, 14], "side": "w", "at": [-4, 0, 4], "y": 1, "height": 5, "depth": 1},
+        {"part": "house", "style": stone, "rect": [-3, 15, 3, 21], "y": 0, "plinth": 1, "storeys": [5], "door": None,
+         "windows": {"e": [{"at": 0, "storey": 0, "w": 1, "h": 3}], "w": [{"at": 0, "storey": 0, "w": 1, "h": 3}], "s": [{"at": 0, "storey": 0, "w": 1, "h": 3}], "n": []},
+         "roof": {"type": "gable", "ridge": "z", "pitch": 2}, "materials": {"roof": "VAL-06"}, "chimney": False,
+         "vines": 0.12, "bushes": False, "interior": {"use": "chapel", "entry": "n"}},
+        {"part": "house", "style": {"base": "vale_stone", "glass": "red_stained_glass_pane"}, "rect": [-2, -5, 2, -1], "y": 0,
+         "plinth": 1, "storeys": [5, 5, 5], "door": {"side": "n", "kind": "grand", "steps": 1},
+         "windows": {"e": [{"at": 0, "storey": 1, "w": 1, "h": 2}], "w": [{"at": 0, "storey": 1, "w": 1, "h": 2}], "n": [], "s": []},
+         "roof": {"type": "flat"}, "chimney": False, "vines": 0.1, "bushes": False, "interior": "tower"},
+        {"part": "belfry", "rect": [-2, -5, 2, -1], "y": "top", "h": 4, "pier": "stone_bricks", "deck": "stone_bricks",
+         "trim": "spruce_planks", "louvres": True, "roof": {"block": "deepslate_tiles"}, "cap": "spire", "rows": 3,
+         "kind": "broach", "overhang": 1, "finial": "spire_block", "cap_trim": "dark_oak_planks"},
+        # the clock on the river face, over the door, looking at the ferry: stopped at 3:17 every night
+        {"part": "clock_face", "rect": [-2, -5, 2, -1], "side": "n", "y": 13, "size": 3, "style": "vale", "habit": "harrowford",
+         "frame": "stairs", "frame_wood": "dark_oak", "hub": "dark_oak_button"},
+    ]
+    # the way from the tower into the nave
+    for y in (1, 2, 3):
+        for z in (-1, 0): d.air(0, y, z)
+    # the altar in the chancel, stone, so it outlasts the roof: a slab of andesite on two blocks
+    for x in (-1, 1): d.put(x, 1, 19, "polished_andesite")
+    for x in (-1, 0, 1): d.put(x, 2, 19, "polished_andesite_slab", half="bottom")
+    # the roofs are in and the belfry is down; the clock stage stands (its top course is y 16), and the clock's face,
+    # frame and the wall behind it are left whole
+    d.ruin = {"seed": 31, "holes": 0.04, "cap": [[-6, 0, 6, 22, 6, 3], [-4, -7, 4, 0, 16, 2]], "keep": [[-3, 10, -7, 3, 16, -4]]}
     return d
 
 
@@ -607,7 +653,7 @@ def dunehold_palms():
 
 
 DESIGNS = {f.__name__: f for f in (
-    harrowford_field, harrowford_ferry, oakmere_cellar, oakmere_oaks, thistledown_frame, thistledown_pens,
+    harrowford_field, harrowford_ferry, harrowford_chapel, oakmere_cellar, oakmere_oaks, thistledown_frame, thistledown_pens,
     wrenfield_garden, wrenfield_jetty, frosthelm_road, wolfcairn_cairn, gullcliff_beacon, tidewatch_posts,
     reedmoor_ring, lanternbog_posts, redmesa_stones, dunehold_hall, dunehold_well, dunehold_palms)}
 
