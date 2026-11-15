@@ -757,7 +757,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 50 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), codex, roletrials, townhall |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 51 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), roletrials (2), codex, townhall |
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 36 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 23 | trade (4), economy (2), townhall (2), unlocks (2), arena, codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 22 | unlocks (4), settle (3), townhall (3), vault (3), economy (2), siege (2), arena, codex, horses, roletrials, trade |
@@ -768,8 +768,8 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 8 | lore (6), bestiary, guide |
 | `ui.toast.challenge_complete` | Something earned (the bell rings three times: Mateo, 2026-11-12) | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.45 after 0.4 s + `block.bell.hit` pitch 0.6 vol 0.4 after 1.4 s + `block.bell.hit` pitch 0.6 vol 0.35 after 2.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
+| `random.explode` | A blast | `random.explode` pitch 0.85 | 7 | siege (3), bestiary, roletrials, undertow, vault |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
-| `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
 | `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown, unlocks |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 5 | bestiary (3), arena, undertow |

@@ -38,6 +38,8 @@ import { marks } from "./marks.js";
 import "./showcase.js";
 import "./stand.js";
 import "./roost.js";
+import "./beats.js";
+import "./lantern.js";
 import "./thirdnight.js";
 import { trialsOf, save, pathOf, resetTrials } from "./saves.js";
 
