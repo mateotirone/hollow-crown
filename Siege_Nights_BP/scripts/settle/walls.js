@@ -23,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, BESIDE_MAX, AROUND, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -211,14 +211,8 @@ function placeColumn(dim, w, job, col) {
   }
   // and how far the land right beside it rises above that, so no stake is left low enough to hop (WALLS.clear)
   if (col.role === "wall" && (job.remeasure || w.beside?.[lk] === undefined)) {
-    const own = base + lift;
-    let high = 0;
-    for (const [dx, dz] of AROUND) {
-      if (job.colKeys?.has(`${x + dx},${z + dz}`)) continue; // the wall itself
-      let h = 0;
-      while (h < BESIDE_MAX && NATURAL.test(dim.getBlock({ x: x + dx, y: own + 1 + h, z: z + dz })?.typeId ?? "")) h++;
-      high = Math.max(high, h);
-    }
+    const idAt = (bx, by, bz) => { try { return dim.getBlock({ x: bx, y: by, z: bz })?.typeId ?? ""; } catch { return ""; } };
+    const high = besideHeight(idAt, x, z, base + lift, job.wallCell);
     if (high > (w.beside?.[lk] ?? 0)) { (w.beside ??= {})[lk] = high; job.liftsChanged = true; } // only ever taller: take-down must reach every block
   }
   const cells = columnKinds(L, besideOf(w, col), wallSeed(w), w.style);
@@ -292,7 +286,7 @@ function step(id, job) {
       if (job.watchDown !== "done") return;
     }
     job.cols = wallColumns({ center: w, radius: w.radius, level: job.level, gateAngle: w.gate, smooth: w.ground });
-    job.colKeys = new Set(job.cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`)); // not "ground beside" (placeColumn)
+    job.wallCell = wallCellOf(job.cols, allWatchSpots(w, w.radius, w.gate, w.ground, job.level)); // what is wall, not "ground beside" (placeColumn)
     clearOldSteps(dim, w, job);
     job.index = Math.min(w.building?.index ?? 0, job.cols.length);
     save();
@@ -384,7 +378,7 @@ export function topUpWall(id) {
   const L = WALL_LEVELS[w.level];
   const cols = wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground });
   const job = { L, palette: palette(w.style, L, w.look), remeasure: true,
-    colKeys: new Set(cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`)) };
+    wallCell: wallCellOf(cols, allWatchSpots(w, w.radius, w.gate, w.ground, w.level)) };
   system.runJob((function* topUp() {
     const dim = world.getDimension(OVERWORLD);
     let n = 0;
