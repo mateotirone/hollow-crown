@@ -96,8 +96,16 @@ A clock is the most-looked-at thing on a tower. Build it like this (`tower-clock
 - **Faces.** One on every face that looks onto a street or square, and all of them show the same time.
 - **Nothing in front of it.** No sill, shutter or lantern crosses the face.
 
-The skill's `clock_face` does all of this with `size: 5` (or 7), `frame: "stairs"`, `marks: true` and
-`stage: true` (the jettied timber stage with corbels).
+The skill's `clock_face` does all of this with `size: 5` (or 7), `frame: "stairs"` and `stage: true` (the
+jettied timber stage with corbels).
+
+**Living clocks (Mateo, 2026-11-15).** The hands, hour marks and hub are no longer blocks. `clock_face` leaves the
+face plain and puts an invisible clock mount (`siege:clock_anchor`) in the air cell in front of the hub; in game a
+3D clock stands on it whose hands follow the game's time, and the story can stop it, run it backwards or hold it at
+3:17 (`Siege_Nights_BP/scripts/clocks`). Keep that cell free: nothing in front of the face, as before. The face
+style follows the region (`style`: vale, frost, salt, ember, fen, hollow, or royal for Kingsrest's civic towers),
+and `habit: "harrowford"` makes a clock stop at 3:17 every night until six in the evening. `living: false` draws
+the old block hands, for a picture of a clock that is not a working clock (a painted sign, a ruin).
 
 ## 5. Themes: towers by region
 

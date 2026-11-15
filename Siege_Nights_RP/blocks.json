@@ -513,6 +513,9 @@
  "siege:stopped_clock": {
   "sound": "wood"
  },
+ "siege:clock_anchor": {
+  "sound": "stone"
+ },
  "siege:well_crank": {
   "sound": "wood"
  },
