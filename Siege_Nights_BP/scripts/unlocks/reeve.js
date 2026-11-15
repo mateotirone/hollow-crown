@@ -91,8 +91,11 @@ function groundAt(dim, x, z) {
     // a square paved in bottom slabs (sunk half a block): its floor block is the one under the slab, so the rim
     // (dy 1) replaces the slab instead of standing on it with a half-block gap (Mateo 2026-11-12: "the town well
     // is one block too high")
-    if (!SOFT.test(b.typeId)) return isBottomSlab(b) ? b.location.y - 1 : b.location.y;
-    b = b.below();
+    // a market awning or canopy hangs over air: it is no floor (the stalls' wool at y 83 put the posts 4 up again)
+    let under;
+    try { under = b.below(); } catch { under = undefined; }
+    if (!SOFT.test(b.typeId) && under && !under.isAir) return isBottomSlab(b) ? b.location.y - 1 : b.location.y;
+    b = under;
   }
   return undefined;
 }

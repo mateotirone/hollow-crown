@@ -1022,6 +1022,7 @@ if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
             if n == "minecraft:gold_block": gold.append(y); continue
             if reeve:
                 if _SOFT_R.search(n): continue
+                if cells.get(y - 1, "minecraft:air") == "minecraft:air": continue   # an awning or canopy over air is no floor
                 half = states.get(y, {}).get("minecraft:vertical_half", "bottom")
                 return (y - 1 if n.endswith("_slab") and "double" not in n and half != "top" else y), None, gold
             if (("water" in n or "ice" in n) and n not in ("minecraft:packed_ice", "minecraft:blue_ice")) or (n == "minecraft:packed_ice" and water is None):
