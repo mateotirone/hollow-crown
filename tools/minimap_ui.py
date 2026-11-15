@@ -235,6 +235,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bossbar_ui
 ui.update(bossbar_ui.entries())
 
+# hearts, armour, hunger and air rows sit on the hotbar now the XP bar is hidden (tools/hud_rows_ui.py says how)
+import hud_rows_ui
+ui.update(hud_rows_ui.entries())
+
 with open(OUT, "w") as f:
     f.write(json.dumps(ui, indent=2) + "\n")
 print("wrote", os.path.relpath(OUT, ROOT))
