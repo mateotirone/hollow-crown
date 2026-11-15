@@ -39,11 +39,7 @@
     },
     {}
    ],
-   "door": {
-    "side": "n",
-    "kind": "house",
-    "steps": 2
-   },
+   "door": null,
    "roof": {
     "type": "gable",
     "ridge": "x",

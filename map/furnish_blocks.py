@@ -5,7 +5,7 @@ the town audit (tools/town_audit.py, 2026-11-14) found most town houses in Millb
 others with nothing inside but a lantern. This pass looks behind every outside door, and a room with no furniture
 at all gets some along its walls, by what the building is (the town plan beside the bake says): a home a bed, a
 chest, a workbench, a barrel, a furnace and a rug; a barn hay, a chest and a barrel; anything else a lectern, a
-chest and a barrel. A one-block walkway from the door is always kept, nothing goes in front of a door, a ladder or a
+chest and a barrel. A rug by the door is not furniture (a Kingsrest cottage had only that, deep dive 2026-11-15). A one-block walkway from the door is always kept, nothing goes in front of a door, a ladder or a
 stair, and a room that already has anything in it is left alone.
 
     python3 map/furnish_blocks.py map/millbrook-blocks.json [more ...]      # in place; prints what it added
@@ -18,7 +18,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 FURNISHED = re.compile(r"(bed$|:chest$|:barrel$|crafting_table$|furnace$|:smoker$|:lectern$|bookshelf$|_table$|:loom$|"
                        r"stonecutter|:grindstone$|:anvil$|brewing_stand$|cauldron$|:composter$|:jukebox$|decorated_pot$|"
-                       r"_carpet$|hay_block$|trapped_chest$|beehive$|chiseled_bookshelf$|_candle$|:candle$|^siege:|^hc:)")
+                       r"hay_block$|trapped_chest$|beehive$|chiseled_bookshelf$|_candle$|:candle$|^siege:|^hc:)")
 OPEN = re.compile(r"(:air$|_carpet$|pressure_plate$|snow_layer$|:short_grass$|:fern$|button$|:vine$|:light_block)")
 STANDABLE_NOT = re.compile(r"(:air$|water|lava|_carpet$|pressure_plate$|snow_layer$|short_grass|:fern$|_button$|:vine$|"
                            r"torch$|lantern$|chain$|_sign$|frame$|ladder$|_door$|flower|sapling|rail$)")

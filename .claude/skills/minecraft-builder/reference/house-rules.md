@@ -131,5 +131,13 @@ under everything" (2026-11-11), which stood buildings on stone towers on slopes.
   square, a windmill in a field) gets one before the land is terraformed; with no street ahead, the walk runs on
   straight down to the ground and a footpath goes round from there. A windmill's door must face open ground.
 - Check: every town bake prints `doors N door problems 0` (`door_report` in `towngen.py`).
+- The walk out of a door stays clear (Kingsrest deep dive, 2026-11-15): no lamp, market stall or tree in the band
+  3 wide and 6 out from any door (`clear_door_fronts` in `towngen.py`), no stall within 2 of a house or civic
+  wall, and the lighting pass never stands a lamp post in the band 3 wide and 8 out (`DOOR_APPROACH` in
+  `lighting.py`). A station gets a 3-wide paved forecourt along its whole front (`station_forecourt`).
+- A building's main door opens onto ground at its own floor. A back door over a drop is removed from the spec, not
+  left as a door to nowhere. A building with no door block (an open arcade) sets `markers["door"]` to its entrance.
+- Lamp posts never stand on crops, farmland, carpet or leaves; on a plant the post's foot replaces it. A rug alone
+  doesn't make a room furnished (`furnish_blocks.py`).
 - In game, the Foundation Stone and raised buildings (and rival lords' outposts) hold the same landing level with
   the floor in their Groundwork stage (`settle/ground.js`; the door is at plan x = 0 facing -z).

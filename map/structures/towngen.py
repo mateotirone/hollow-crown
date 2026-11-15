@@ -636,7 +636,11 @@ class Town:
         cols = {}
         for (x, y, z), (n, p) in bp.cells.items():
             if y < 1: cols.setdefault((x, z), True); continue
-            ok = any(t in n for t in self.OPEN_NAMES) or (n.endswith("_log") and not n.startswith("stripped") and y >= 1)
+            # "air" and "keep" are whole names: as substrings, "air" matched every stairs block ("st-air-s"), so a room
+            # under a stair roof counted as open ground and its floor was dropped a block, leaving the furniture sunk
+            # into pits in the floor (Kingsrest deep dive, 2026-11-15)
+            ok = n in ("air", "cave_air", "keep") or any(t in n for t in self.OPEN_NAMES if t not in ("air", "keep")) or \
+                (n.endswith("_log") and not n.startswith("stripped") and y >= 1)
             cols[(x, z)] = cols.get((x, z), True) and ok
         opn = {c for c, ok in cols.items() if ok}
         # a stamp that is all open ground (a landing proxy, keep_floor) has no building to stand on: leave it whole
@@ -1564,11 +1568,49 @@ class Town:
         self.dress()
         self.roof_colours()
         self.path_blocks(); self.ground_blocks(); self.banks(); self.finish_bridges()
+        self.clear_door_fronts()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])
         c = collections.Counter(p["kind"] for p in self.plan)
         print(self.name, dict(c), "portions", collections.Counter(p["kind"] for p in self.port.values()), "water", getattr(self, "nwater", 0), "dry", getattr(self, "unwatered", 0), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
+
+    # =========================================================================== door fronts
+    DOOR_FRONT = 6       # Mateo 2026-11-15 (Kingsrest deep dive): a stall stood in front of the guildhall, lamp posts in front of
+                         # cottage doors. The walk out of every door, 3 wide and this many out past its own steps, is kept clear.
+    def door_front_cells(self):
+        """{(x, z)} in front of every door in the plan: from the door spot out past the building's own footprint, then
+        DOOR_FRONT cells on, one either side of the line."""
+        out = set()
+        for e in self.plan:
+            if not e.get("door") or e["kind"] in ("tree", "lamp", "stall", "square") or e["stamp"] not in self.designs: continue
+            g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"])
+            foot = {(a + e["x"], b + e["z"]) for a, b in g}
+            f = ROT[e["rotation"]]; x, z = e["door"]; n = 0
+            while (x, z) in foot and n < 40: x, z = x + f[0], z + f[1]; n += 1
+            for t in range(self.DOOR_FRONT):
+                for k in (-1, 0, 1): out.add((x + f[0] * t - f[1] * k, z + f[1] * t + f[0] * k))
+        return out
+
+    def clear_door_fronts(self):
+        """Take out every lamp, stall and tree standing in a door's front (door_front_cells). The light stage that runs
+        over the bake lights what a lamp lit, and keeps off the same walk (lighting.py DOOR_APPROACH)."""
+        front = self.door_front_cells(); keep = []; gone = collections.Counter()
+        hug = set()                       # a stall jammed against a building (the guildhall's open arcade has no one door)
+        for e in self.plan:
+            if e["kind"] in ("civic", "house") and e["stamp"] in self.designs:
+                g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"])
+                hug |= {(a + e["x"] + dx, b + e["z"] + dz) for a, b in g for dx in (-2, -1, 0, 1, 2) for dz in (-2, -1, 0, 1, 2)}
+        for e in self.plan:
+            if e["kind"] in ("lamp", "stall", "tree"):
+                if e["kind"] == "stall" and e["stamp"] in self.designs:
+                    _, full = self.footprint(self.designs[e["stamp"]], e["rotation"])
+                    cells = {(a + e["x"], b + e["z"]) for a, b in full}
+                else: cells = {(e["x"] + a, e["z"] + b) for a in (-1, 0, 1) for b in (-1, 0, 1)} if e["kind"] == "tree" else {(e["x"], e["z"])}
+                if cells & front or (e["kind"] == "stall" and cells & hug): gone[e["kind"]] += 1; continue
+            keep.append(e)
+        self.plan[:] = keep
+        if gone: print("door fronts cleared:", dict(gone))
 
     # =========================================================================== checks
     def door_report(self):
