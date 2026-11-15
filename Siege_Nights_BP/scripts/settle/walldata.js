@@ -380,6 +380,23 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
   const steps = Math.ceil(TAU * (radius + WALLS.wobble.out) * 1.6);
   const deep = L.thick + (L.walk ? 1 : 0); // a thin wall with a walkway has a column of planks behind it
   const gateD = Math.min(L.thick - 1, 1); // the gate hangs one block in from the face where the wall is thick enough
+  // The line is sampled by angle, so where it runs slantwise (a starter village's outline, a step in its radius) two
+  // samples can land two blocks apart, or only corner to corner: a hole you can walk through, or see through (Mateo
+  // 2026-11-15, "still gaps in the walls"). Each layer is joined up as it goes: the cells between two samples that
+  // don't share a side are filled, keeping to the side nearer the line, so every layer is one unbroken run of blocks.
+  const first = [], prev = [];
+  const join = (d, from, to, col, r) => {
+    if (!from || from.gate || col.role === "gap" || col.role === "gate" || col.role === "port") return;
+    let { x, z } = from;
+    for (let n = 0; n < 8 && Math.abs(to.x - x) + Math.abs(to.z - z) > 1; n++) {
+      const sx = Math.sign(to.x - x), sz = Math.sign(to.z - z);
+      const steps2 = [sx ? [x + sx, z] : null, sz ? [x, z + sz] : null].filter(Boolean);
+      const off = ([px, pz]) => Math.abs(Math.hypot(px - center.x, pz - center.z) - (r - d));
+      [x, z] = steps2.sort((p, q) => off(p) - off(q))[0];
+      if (x === to.x && z === to.z) break;
+      put(x, z, { ...col });
+    }
+  };
   for (let s = 0; s < steps; s++) {
     const a = (s / steps) * TAU;
     const g = groundAt(smooth, a);
@@ -388,14 +405,21 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const r = radiusAt(center, radius, a);
     for (let d = 0; d < deep; d++) {
       const x = Math.round(center.x + Math.cos(a) * (r - d)), z = Math.round(center.z + Math.sin(a) * (r - d));
+      let col;
       if (Math.abs(along) <= half) {
         const gg = groundAt(smooth, gateAngle);
-        if (L.gate === "open") put(x, z, { role: "gap", base: gg, top: gg + L.h, d, a });
-        else put(x, z, { role: d === gateD ? "gate" : d === 0 && L.port ? "port" : "gap", base: gg, top: gg + L.h, d, a });
-      } else if (d >= L.thick) put(x, z, { role: "walk", base: g, top: g + L.walk, d, a, along });
-      else put(x, z, { role: "wall", base: g, top: g + L.h, d, a, along });
+        if (L.gate === "open") col = { role: "gap", base: gg, top: gg + L.h, d, a };
+        else col = { role: d === gateD ? "gate" : d === 0 && L.port ? "port" : "gap", base: gg, top: gg + L.h, d, a };
+      } else if (d >= L.thick) col = { role: "walk", base: g, top: g + L.walk, d, a, along };
+      else col = { role: "wall", base: g, top: g + L.h, d, a, along };
+      put(x, z, col);
+      const here = { x, z, gate: col.role === "gap" || col.role === "gate" || col.role === "port", col, r };
+      join(d, prev[d], here, col, r);
+      prev[d] = here;
+      first[d] ??= here;
     }
   }
+  for (let d = 0; d < deep; d++) if (prev[d] && first[d] && !first[d].gate) join(d, prev[d], first[d], prev[d].col, prev[d].r); // round to the start
   // towers, evenly spaced, the first pair either side of the gate
   // each tower stands a little taller or shorter than its neighbours; the gatehouse pair match and stand proud
   const seed = wallSeed(center);

@@ -289,7 +289,8 @@ function fixtureOps(tier) { // founding.js placeFixture
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
 const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {}, beside: {} };
-if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt }); // the starter village's wall line (walls.js raiseWall outline)
+const { HAMLET_WALLS } = await imp("settle/hamlet_walls_data.js");
+if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt, ...(HAMLET_WALLS[PLOT] ? { tight: HAMLET_WALLS[PLOT] } : {}) }); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
