@@ -58,7 +58,7 @@ const imp = (p) => import(pathToFileURL(path.join(SCRIPTS, p)).href);
 await imp("main.js"); // registers everything (the Works machines, block builds) the way the game does
 mock.endEarly();
 
-const { townFor, slotsOf, slotBorder, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, TIER_NAMES } = await imp("settle/towns.js");
+const { townFor, slotsOf, slotBorder, standsOnGround, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, TIER_NAMES } = await imp("settle/towns.js");
 const { BUILDINGS, BUILDING, WORKS, drawBuilding: drawPlotBuilding, styleFor } = await imp("settle/buildings.js");
 // the Barracks is raised from its own block (settle/blockdesigns.js guardhouse), not from a plot design
 const { BLOCK_BUILDS } = await imp("settle/blockdesigns.js");
@@ -215,8 +215,9 @@ function blendOps(tier) { // founding.js blendGround on this world
   for (let t = 0; t <= tier; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
     const k = `${dx},${dz}`; member.add(k);
     if (t !== tier || layout.pal[p]?.[0] === "minecraft:air") continue;
+    const ground = !standsOnGround(layout.pal[p]?.[0]); // founding.js: the edge's height is its ground's
     const c = cols.get(k);
-    if (!c) cols.set(k, { dx, dz, lo: dy, hi: dy }); else { c.lo = Math.min(c.lo, dy); c.hi = Math.max(c.hi, dy); }
+    if (!c) cols.set(k, { dx, dz, lo: dy, hi: ground ? dy : undefined }); else { c.lo = Math.min(c.lo, dy); if (ground) c.hi = Math.max(c.hi ?? dy, dy); }
   }
   for (const c of cols.values()) {
     const x = CX + c.dx, z = CZ + c.dz;
@@ -227,6 +228,7 @@ function blendOps(tier) { // founding.js blendGround on this world
     }
   }
   for (const c of cols.values()) {
+    if (c.hi === undefined) continue; // founding.js: only posts on earlier ground
     const h = BASE + c.hi;
     for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       if (member.has(`${c.dx + ux},${c.dz + uz}`)) continue;
@@ -292,6 +294,32 @@ function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
 function wallCols(level) { return wallColumns({ center: wall, radius: wall.radius, level, gateAngle: wall.gate, smooth: wall.ground }); }
+function besideHigh(x, z, own, colKeys) { // walls.js placeColumn: how far the natural ground beside a column rises
+  let high = 0;
+  for (const [dx, dz] of AROUND) {
+    if (colKeys.has(`${x + dx},${z + dz}`)) continue;
+    let h = 0;
+    while (h < BESIDE_MAX && WALL_NATURAL.test(idOf(get(x + dx, own + 1 + h, z + dz)))) h++;
+    high = Math.max(high, h);
+  }
+  return high;
+}
+// walls.js topUpWall: once the tier's groundwork is laid (it is laid while the wall rises), stakes the new ground
+// beside came up against are topped up. Played as part of the ring so the page shows the wall as it ends up.
+function topUpOps(level, tier, ops) {
+  const L = WALL_LEVELS[level], Pw = wallPalette(STYLE, L, {}), cols = wallCols(level);
+  groundworkOps(tier); blendOps(tier); // on the scratch world only (ringOps restores it)
+  const colKeys = new Set(cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`));
+  for (const col of cols) {
+    if (col.role !== "wall") continue;
+    const lk = `${col.x},${col.z}`, lift = wall.lifts[lk] ?? 0;
+    const high = besideHigh(col.x, col.z, col.base + lift, colKeys);
+    if (high <= (wall.beside[lk] ?? 0)) continue;
+    wall.beside[lk] = high;
+    for (const [y, kind] of columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style)) set(ops, col.x, y + lift, col.z, permId(permFor(Pw, wall, kind, col)));
+  }
+  return ops;
+}
 function wallOps(level) { // raiseWall -> step -> placeColumn
   if (!wall.ground) measureWall();
   const ops = [], L = WALL_LEVELS[level], Pw = wallPalette(STYLE, L, {});
@@ -320,13 +348,7 @@ function wallOps(level) { // raiseWall -> step -> placeColumn
       if (lift) wall.lifts[lk] = lift;
     }
     if (col.role === "wall" && wall.beside[lk] === undefined) { // the ground right beside it (WALLS.clear)
-      let high = 0;
-      for (const [dx, dz] of AROUND) {
-        if (colKeys.has(`${x + dx},${z + dz}`)) continue;
-        let h = 0;
-        while (h < BESIDE_MAX && WALL_NATURAL.test(idOf(get(x + dx, base + lift + 1 + h, z + dz)))) h++;
-        high = Math.max(high, h);
-      }
+      const high = besideHigh(x, z, base + lift, colKeys);
       if (high) wall.beside[lk] = high;
     }
     const cells = columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style);
@@ -392,7 +414,7 @@ function ringOps(tier) {
   const ring = { radius: wall.radius, fresh: {} };
   for (let L = 1; L < WALL_LEVELS.length; L++) {
     restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
-    ring.fresh[L] = wallOps(L);
+    ring.fresh[L] = topUpOps(L, tier, wallOps(L));
   }
   restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
   return ring;

@@ -210,7 +210,7 @@ function placeColumn(dim, w, job, col) {
     if (lift) { (w.lifts ??= {})[lk] = lift; job.liftsChanged = true; }
   }
   // and how far the land right beside it rises above that, so no stake is left low enough to hop (WALLS.clear)
-  if (col.role === "wall" && w.beside?.[lk] === undefined) {
+  if (col.role === "wall" && (job.remeasure || w.beside?.[lk] === undefined)) {
     const own = base + lift;
     let high = 0;
     for (const [dx, dz] of AROUND) {
@@ -219,7 +219,7 @@ function placeColumn(dim, w, job, col) {
       while (h < BESIDE_MAX && NATURAL.test(dim.getBlock({ x: x + dx, y: own + 1 + h, z: z + dz })?.typeId ?? "")) h++;
       high = Math.max(high, h);
     }
-    if (high) { (w.beside ??= {})[lk] = high; job.liftsChanged = true; }
+    if (high > (w.beside?.[lk] ?? 0)) { (w.beside ??= {})[lk] = high; job.liftsChanged = true; } // only ever taller: take-down must reach every block
   }
   const cells = columnKinds(L, besideOf(w, col), wallSeed(w), w.style);
   for (const [y, kind] of cells) {
@@ -372,6 +372,34 @@ onTick("settle_walls", 1, () => {
     }
   }
 });
+
+// The town's groundwork is laid while the wall rises, so the ground beside a stake can come up after the stake was
+// measured (the 2026-11-15 simulator check: Frosthelm, Reedmoor, Lanternbog, Dunehold). Once a tier is laid out the
+// wall looks again at the ground beside every stretch and tops up any stake that is now too low (WALLS.clear).
+// Only blocks that differ are set, so a wall that is already right costs only the looking.
+export function topUpWall(id) {
+  const w = walls()[id];
+  if (!w?.level || !w.ground || !WALL_LEVELS[w.level]) return;
+  if (jobs.has(id) || w.moving) { system.runTimeout(() => topUpWall(id), 100); return; }
+  const L = WALL_LEVELS[w.level];
+  const cols = wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground });
+  const job = { L, palette: palette(w.style, L, w.look), remeasure: true,
+    colKeys: new Set(cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`)) };
+  system.runJob((function* topUp() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (const col of cols) {
+      if (col.role !== "wall") continue;
+      if (walls()[id] !== w || jobs.has(id)) return; // the wall changed meanwhile: whatever rises now measures for itself
+      const before = w.beside?.[`${col.x},${col.z}`] ?? 0;
+      placeColumn(dim, w, job, col); // not loaded: left as it is
+      if ((w.beside?.[`${col.x},${col.z}`] ?? 0) !== before) n++;
+      yield;
+    }
+    if (n) save();
+  })());
+}
+on("townLaidOut", ({ owner }) => system.runTimeout(() => topUpWall(owner), 20));
 
 // Move a wall line out (a town growing a tier): the old ring comes down a stretch at a time, then the same level
 // rises on the new line. down() runs once the old ring is gone. Free: the town paid for the level already.
