@@ -608,6 +608,8 @@ async function knockDown(slotId, why = "knocked down") {
 const tierOps = (t, k) => D.tiers[t][k] ?? [];
 function treeOpsFor(tier) { const out = []; for (const t of D.treeOps) if (t.tier === tier) for (const v of t.ops) out.push(v); return out; }
 
+// the cells at or under a lookout's floor: earth again when the wall comes down (walls.js takeDownWatch), not a pit
+function earthOf(ring, level) { const e = ring.earth?.[level] ?? [], out = new Set(); for (let i = 0; i < e.length; i += 3) out.add(`${e[i]},${e[i + 1]},${e[i + 2]}`); return out; }
 async function wallTo(level) {
   const ring = D.tiers[T.ring].ring;
   const L = D.wallLevelNames[level];
@@ -617,7 +619,8 @@ async function wallTo(level) {
     const want = new Set(), fresh = ring.fresh[level];
     for (let i = 0; i < fresh.length; i += 5) want.add(`${fresh[i + 1]},${fresh[i + 2]},${fresh[i + 3]}`);
     const old = ring.fresh[T.wall];
-    for (let i = 0; i < old.length; i += 5) if (old[i] === 0 && old[i + 4] && !want.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`)) ops.push(0, old[i + 1], old[i + 2], old[i + 3], 0);
+    const earth = earthOf(ring, T.wall);
+    for (let i = 0; i < old.length; i += 5) if (old[i] === 0 && old[i + 4] && !want.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`)) ops.push(0, old[i + 1], old[i + 2], old[i + 3], earth.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`) ? ring.earthPerm : 0);
   }
   for (const v of ring.fresh[level]) ops.push(v);
   log(`Wall level ${level}: ${L} rising`);
@@ -702,7 +705,8 @@ async function growTo(t) {
   // the old ring comes down first (moveWall), then the new ring rises at the same level while the band is laid
   const level = T.wall || 1;
   const old = D.tiers[T.ring].ring.fresh[level], down = [];
-  for (let i = old.length - 5; i >= 0; i -= 5) if (old[i] === 0 && old[i + 4]) down.push(0, old[i + 1], old[i + 2], old[i + 3], 0);
+  const oldRing = D.tiers[T.ring].ring, earth = earthOf(oldRing, level);
+  for (let i = old.length - 5; i >= 0; i -= 5) if (old[i] === 0 && old[i + 4]) down.push(0, old[i + 1], old[i + 2], old[i + 3], earth.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`) ? oldRing.earthPerm : 0);
   await job("Old wall coming down", down, { perSec: PACE.wall * 20 });
   T.tier = t; T.ring = t; T.wall = 0;
   const wall = wallTo(level);

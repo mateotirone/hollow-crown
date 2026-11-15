@@ -407,6 +407,21 @@ const slotOut = slots.map((s) => {
     marker: markerSpot(s), takenAt: takenAt(s) ?? null, offers };
 });
 
+// The wall's lookouts (walls.js raiseWatch: a stand on the Low Palisade, a tower on levels 2-6), which fill the gaps
+// wallColumns leaves for them: the four on the diagonals and the one by the gate. Added to the ring's ops so the page
+// shows the wall whole by day too; returns the cells at or under each one's floor (takeDownWatch fills those with earth).
+const { watchPlan } = await imp("settle/wallwatch.js");
+const { allWatchSpots } = await imp("settle/walldata.js");
+function watchOps(level, ops) {
+  const earth = [];
+  for (const s of allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)) {
+    const plan = watchPlan(STYLE, s.kind), frame = frameFor(s.forward);
+    for (const v of planOps(plan, plan.style ?? styleFor(STYLE), s.origin, s.forward)) ops.push(v);
+    for (const c of plan.cells.values()) if (c.role !== "air" && c.y <= 0) { const at = toWorld(frame, s.origin, c.x, c.y, c.z); earth.push(...rel(at.x, at.z).flatMap((v, i) => (i ? [at.y, v] : [v]))); }
+  }
+  return earth;
+}
+
 // ---------- the wall rings: every level on every ring, measured on the ground as it is when the ring goes up ----------
 function ringOps(tier) {
   wall.radius = wallRadius(tw, tier); wall.ground = undefined; wall.lifts = {}; wall.beside = {}; wall.level = 0;
@@ -414,12 +429,13 @@ function ringOps(tier) {
   const snap = new Map(vox), restore = () => { vox.clear(); for (const [k, v] of snap) vox.set(k, v); };
   // the page raises level L over level L-1 and takes down what L no longer has (old steps, ladders)
   // rec: the wall record the game keeps for this ring (settle/walls.js), for the siege simulator to hand back to it
-  const ring = { radius: wall.radius, fresh: {}, lifts: {},
+  const ring = { radius: wall.radius, fresh: {}, lifts: {}, earth: {}, earthPerm: pid("minecraft:grass_block"),
     rec: { x: wall.x, y: wall.y, z: wall.z, shape: wall.shape, radius: wall.radius, style: wall.style, gate: wall.gate, gateDir: wall.gateDir, ground: wall.ground, ...(wall.radii ? { radii: wall.radii, radiiAt: wall.radiiAt } : {}) } };
   for (let L = 1; L < WALL_LEVELS.length; L++) {
     restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
     ring.fresh[L] = topUpOps(L, tier, wallOps(L));
     ring.lifts[L] = { ...wall.lifts };
+    ring.earth[L] = watchOps(L, ring.fresh[L]);
   }
   restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
   return ring;
