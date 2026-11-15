@@ -13,6 +13,8 @@ import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath, allWatchSpots, gateWatchSpot, GATE_WATCH } from "./walldata.js";
 import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
+import { windmillFixture, windmillPlan, windmillSpot, windmillDesign, SAILS as WINDMILL_SAILS } from "./windmill_rules.js";
+import { WINDMILL_DESIGNS } from "./windmill_data.js";
 import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
 import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { planLaneLamps } from "./lanelamps.js";
@@ -506,6 +508,34 @@ addTests("settle towns", {
       for (const layout of town.variants) {
         const pens = fixturesOf(layout, 0).filter((f) => f.kind === "cow_pen");
         assert(pens.length === 1, `${key} ${layout.label}: ${pens.length} cow pens`);
+      }
+    }
+  },
+  "every layout has one windmill, at Town or City, facing a way, clear of every plot (Mateo 2026-11-15)": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const all = [0, 1, 2, 3].flatMap((t) => fixturesOf(layout, t)).filter((f) => f.kind === "windmill");
+        assert(all.length === 1, `${key} ${layout.label}: ${all.length} windmills`);
+        const f = windmillFixture(layout);
+        assert(f.tier === 1 || f.tier === 2, `${key} ${layout.label}: windmill opens at tier ${f.tier}`);
+        assert("nsew".includes(f.side) && WINDMILL_SAILS.includes(f.sails) && f.walk.length >= 1, `${key} ${layout.label}: windmill ${JSON.stringify(f)}`);
+        const { origin } = windmillSpot({ x: 0, y: 0, z: 0 }, f);
+        for (const s of slotsOf(layout)) {
+          const b = s.box;
+          assert(!(origin.x >= b.x0 && origin.x <= b.x1 && origin.z >= b.z0 && origin.z <= b.z1), `${key} ${layout.label}: windmill step on plot ${s.id}`);
+        }
+      }
+    }
+  },
+  "the windmill has a design in every region with its sails behind and to either side, door step clear": () => {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      for (const sails of WINDMILL_SAILS) {
+        const d = windmillDesign(region, sails);
+        assert(d === WINDMILL_DESIGNS[region][sails], `${region} ${sails}: no design`);
+        const p = windmillPlan(region, sails, [[0, 0], [1, 0], [2, -1]]);
+        for (const y of [1, 2]) assert(!p.get(0, y, 0) || p.get(0, y, 0).role === "air", `${region} ${sails}: something on the door step at y ${y}`);
+        assert(p.get(0, 0, -1)?.role === "path" && p.get(1, -1, -2)?.role === "path", `${region} ${sails}: the walk isn't paved 3 wide at its own height`);
+        assert(d.palette.some(([id]) => id === "minecraft:ladder") && d.palette.some(([id]) => id.endsWith("lantern")), `${region} ${sails}: no ladder or no light inside`);
       }
     }
   },

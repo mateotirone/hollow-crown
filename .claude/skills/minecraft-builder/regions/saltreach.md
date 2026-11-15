@@ -225,6 +225,10 @@ iron block; stacked iron blocks) and a `trade_sign` over the door: a birch hangi
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
 
+## The windmill
+
+- **Windmill (2026-11-15):** a slender whitewashed tower (calcite and white concrete), teal warped shutters at every window, a low sea-green cone (SAL-04, pitch 1), eight triangle sails of white cloth on birch poles, the harbour ships' cyan band across every other one. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
+
 ## Never
 
 - **Walls and colours:** no dark timber frames and no dark walls; Saltreach is pale.

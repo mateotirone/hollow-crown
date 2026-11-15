@@ -1,0 +1,66 @@
+{
+ "name": "windmill_frostmarch",
+ "edition": "bedrock",
+ "materials": {
+  "stone": {
+   "ladder": "FRO-01",
+   "axis": "y"
+  },
+  "plinth": {
+   "ladder": [
+    "cobbled_deepslate",
+    "deepslate_bricks",
+    "cobbled_deepslate"
+   ],
+   "axis": "noise",
+   "scale": 3
+  }
+ },
+ "parts": [
+  {
+   "part": "windmill",
+   "name": "windmill_frostmarch",
+   "at": [
+    0,
+    -4
+   ],
+   "y": 0,
+   "sections": [
+    {
+     "r": 4.5,
+     "storeys": [
+      5,
+      5,
+      4
+     ]
+    }
+   ],
+   "material": "stone",
+   "plinth": "plinth",
+   "trim": "spruce_planks",
+   "floor": "spruce_planks",
+   "door": {
+    "side": "s",
+    "door": "spruce_door"
+   },
+   "glass": "white_stained_glass_pane",
+   "cap": {
+    "type": "cone",
+    "roof": "dark_oak_planks",
+    "pitch": 3,
+    "finial": "rod"
+   },
+   "sails": {
+    "kind": "lattice",
+    "count": 4,
+    "arm": 9,
+    "wood": "dark_oak",
+    "lattice": "spruce_planks",
+    "cloth": [
+     "light_gray_wool",
+     "white_wool"
+    ]
+   }
+  }
+ ]
+}

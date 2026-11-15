@@ -346,6 +346,34 @@ and corridors out of it with `place` air); `skip` leaves boxes out (a royal box,
 `round(hypot)`), every seat a stair facing its nearest axis, and the aisles `aisles` evenly spaced rays from the centre
 instead of `aisle_every`. `chamfer` is ignored.
 
+## `windmill`: a tower windmill with its sails, a mill inside (Mateo 2026-11-15)
+
+```json
+{"part": "windmill", "at": [0, -4], "y": 0, "sections": [{"r": 4.5, "storeys": [5, 5]},
+ {"r": 3.5, "storeys": [5], "material": "spruce_planks", "frame": "stripped_spruce_log"}],
+ "material": "stone", "plinth": "plinth", "trim": "dark_oak_planks", "floor": "spruce_planks",
+ "door": {"side": "s", "door": "spruce_door"}, "glass": "brown_stained_glass_pane", "shutters": null,
+ "gallery": {"depth": 2, "rail": "dark_oak_fence"}, "cap": {"type": "cone", "roof": "slate", "pitch": 2},
+ "sails": {"kind": "lattice", "count": 4, "arm": 9, "wood": "spruce", "cloth": ["white_wool", "white_wool"], "side": "n"}}
+```
+
+- **Body:** round sections (`r` 4.5 = 9 wide, 3.5 = 7) on a plinth with a 3-deep foundation, each the same width as the
+  one under it or narrower; storeys of 4 or 5 (a floor row and the walls). A section with a `frame` is timber: posts on
+  the diagonals, a beam at its floor and wall plate, `infill` between. A course of upside-down trim stairs one out where
+  a section ends; where one steps in, a **stage**: a railed gallery `depth` out on brackets, with a door onto it.
+- **Openings:** the front door (`door.side`), a 1 x 2 window flush on every other side of every storey (none on the
+  sails' side of the cap floor), a sill one out (not on the ground floor), `shutters` (a trapdoor block) open beside them.
+- **Cap:** `cone` (the round tower cone: eave ring on brackets, `pitch` rows per block in, finial) or `dome` (a flat
+  deck on the wall top, a parapet with every other block raised a slab, a low dome of `roof` on it, `r`, `finial`).
+- **Sails** on the `side` (default the back): a windshaft from the main shaft out through the cap, the hub one proud.
+  `lattice` = four arms, stock plus a cloth three wide on the trailing side over a crossbar every third block; `jib` =
+  `count` poles with a triangle of cloth on each, widest near the hub; `band` colours a stripe across every other one.
+  The sails stand one clear block beyond anything behind them; `arm` keeps the lowest tip 4 or more over the floor.
+- **Inside:** the main shaft (an upright log) from the ground floor into the cap, the ladder up its east face through
+  every floor, then the mill by floor: sack floor (barrels, chests, hay), stone floor (millstones on the shaft,
+  grindstones, barrels), cap floor; every other cell round the wall so the round stays walkable. The light stage lights it.
+- Settlement windmills: `map/structures/windmill_skill.py` (regions, sails back / left / right), sited by `windmill_sites.py`.
+
 ## Not automated yet (build with shapes and `place`)
 
 Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses (spans of 15+), hip-roof
