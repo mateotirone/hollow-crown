@@ -578,6 +578,8 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 |---|---|---|
 | Stopped Clock, case (dark spruce boards, brass corners) | `siege_stopped_clock_case.png` | Placeholder |
 | Stopped Clock, face at 3:17 (cream dial in a brass rim, hands at seventeen past three) | `siege_stopped_clock_317.png` | Placeholder |
+| Living clock faces, one atlas per face: dial, moon disc, hands, hub, rim (studio/art/build_clocks.py) | `entity/siege/clock/vale.png`, `frost.png`, `salt.png`, `ember.png`, `fen.png`, `hollow.png`, `royal.png` | **Drawn, awaiting your review** |
+| Clock Mount (invisible; the living clock stands on it) | `blocks/clocks/siege_clock_anchor.png` | Transparent on purpose |
 | Stopped Clock, face at 3:18 after the Reeve is woken (same dial, a little brighter, hands one minute on, a hairline crack in the glass) | `siege_stopped_clock_318.png` | Placeholder |
 | Well Crank, sides (old timber with iron bands) | `siege_well_crank_side.png` | Placeholder |
 | Well Crank, front with an empty keyhole in a brass plate | `siege_well_crank_keyhole.png` | Placeholder |

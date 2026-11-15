@@ -1,0 +1,47 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:clock",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "vale": "textures/entity/siege/clock/vale",
+    "frost": "textures/entity/siege/clock/frost",
+    "salt": "textures/entity/siege/clock/salt",
+    "ember": "textures/entity/siege/clock/ember",
+    "fen": "textures/entity/siege/clock/fen",
+    "hollow": "textures/entity/siege/clock/hollow",
+    "royal": "textures/entity/siege/clock/royal"
+   },
+   "geometry": {
+    "default": "geometry.siege_clock"
+   },
+   "animations": {
+    "hands": "animation.siege_clock.hands"
+   },
+   "scripts": {
+    "pre_animation": [
+     "v.tod = q.time_of_day * 1440.0;",
+     "v.m = q.property('siege:base') + q.property('siege:rate') * math.mod(v.tod - q.property('siege:t0') + 1440.0, 1440.0);",
+     "v.m = q.property('siege:habit') == 2 ? 1440.0 - v.m : v.m;",
+     "v.m = math.mod(math.mod(v.m, 1440.0) + 1440.0, 1440.0);",
+     "v.m = (q.property('siege:habit') == 1 && v.m >= 197.0 && v.m < 1080.0) ? 197.0 : v.m;",
+     "v.mi = math.floor(v.m);",
+     "v.step = v.mi + math.clamp((v.m - v.mi - 0.9) * 10.0, 0.0, 1.0);",
+     "v.strain = (q.property('siege:strain') && math.mod(q.life_time + q.property('siege:t0') * 0.37, 4.3) < 0.16) ? 3.0 : 0.0;",
+     "v.mn = math.mod(v.step, 60.0) * 6.0 + v.strain;",
+     "v.hr = math.mod(v.step, 720.0) * 0.5;",
+     "v.disc = q.property('siege:style') == 3 ? v.tod * 0.25 + 180.0 : q.moon_phase * 22.5;"
+    ],
+    "animate": [
+     "hands"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_clock"
+   ]
+  }
+ }
+}

@@ -1392,6 +1392,9 @@
   },
   "siege_brazier_egg_cracked": {
    "textures": "textures/blocks/dragons/brazier/egg_cracked"
+  },
+  "siege_clock_anchor": {
+   "textures": "textures/blocks/clocks/siege_clock_anchor"
   }
  },
  "siege_stopped_clock_case": {

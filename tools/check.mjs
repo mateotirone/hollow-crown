@@ -942,6 +942,15 @@ if (loaded) {
   if (!bad) console.log(`${cases.length} cases match`);
 }
 
+// ---------- 8. living clocks: every clock mount baked into the map is listed for the game ----------
+{
+  step("Clock mounts in the map are listed (clocks/spots_data.js)");
+  const CS = await import(pathToFileURL(join(TOOLS, "clock_spots.mjs")).href);
+  const spots = CS.bakedSpots();
+  if (readFileSync(join(SCRIPTS, "clocks/spots_data.js"), "utf8") !== CS.spotsFile(spots)) fail("clocks/spots_data.js is out of date with map/*-blocks.json: run node tools/clock_spots.mjs");
+  else console.log(`${spots.length} baked clock mounts listed`);
+}
+
 // ---------- result ----------
 console.log("");
 for (const w of warnings) console.log(`note: ${w}`);

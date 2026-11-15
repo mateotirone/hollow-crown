@@ -887,7 +887,8 @@ def reeve():
                 along = z if x in (X0 - 1, X1 + 1) else x - CX
                 post = corner or abs(along) == 5
                 d.put(x, y, z, "stripped_spruce_log" if post or y in (ST0, ST1) else "calcite", axis="y" if post else "x")
-    # 7x7 clock faces, corners cut, on all four faces; every one shows the same stopped minute
+    # 7x7 clock faces, corners cut, on all four faces. The faces stay plain: each one is a living clock (siege:clock,
+    # scripts/clocks) standing on a clock mount one out from the hub, which the Reeve holds at 3:17 until he falls.
     CY = 28
     def face(sx, sz):                     # (sx, sz): outward normal
         px = (lambda a: (X0 - 1 if sx < 0 else X1 + 1, a)) if sx else (lambda a: (CX + a, Z0 - 1 if sz < 0 else Z1 + 1))
@@ -896,19 +897,16 @@ def reeve():
                 if abs(a) == 3 and abs(b) == 3: continue
                 x, z = px(a)
                 d.put(x, CY + b, z, "smooth_quartz" if max(abs(a), abs(b)) < 3 else "dark_oak_planks")
-        for a, b in ((0, 2), (0, -2), (2, 0), (-2, 0)):                  # hour marks
-            x, z = px(a); d.put(x, CY + b, z, "polished_blackstone")
-        for a, b in ((0, 1), (0, 2), (1, 0), (1, -1)):                   # hands: twelve minutes to midnight, stopped
-            x, z = px(-a if sx > 0 or sz < 0 else a); d.put(x, CY + b, z, "polished_blackstone")
-        x, z = px(0); d.put(x, CY, z, "dark_oak_planks")                  # hub (the west hub is the Tower clock itself)
         ox, oz = (sx, 0) if sx else (0, sz)                               # the frame: trim stairs one out
+        nf = "w" if sx < 0 else "e" if sx > 0 else "n" if sz < 0 else "s"
         for a in range(-3, 4):
             x, z = px(a)
-            nf = "w" if sx < 0 else "e" if sx > 0 else "n" if sz < 0 else "s"
             d.put(x + ox, CY + 4, z + oz, "dark_oak_stairs", facing=nf, half="top") if abs(a) < 3 else None
             d.put(x + ox, CY - 4, z + oz, "dark_oak_stairs", facing=nf) if abs(a) < 3 else None
-    for sx, sz in ((-1, 0), (1, 0), (0, -1), (0, 1)): face(sx, sz)
-    d.air(X0 - 2, CY, 0)                                                   # the Tower clock's face cell stays open
+        x, z = px(0)                                                      # the mount, in the air cell in front of the hub
+        d.put(x + ox, CY, z + oz, "siege:clock_anchor", bs={"minecraft:cardinal_direction": {"w": "west", "e": "east", "n": "north", "s": "south"}[nf],
+                                                            "siege:size": 7, "siege:style": 0, "siege:habit": 0})
+    for sx, sz in ((-1, 0), (1, 0), (0, -1), (0, 1)): face(sx, sz)      # (the west hub is the Tower clock itself, reeve.js)
     for y in range(1, ST0 + 2): d.put(16, y, -3, "ladder", bs={"facing_direction": 3})   # up from the arch to the clock floor
     for x in (9, 10):                                                      # standing room behind the Tower clock
         for y in (27, 28, 29):
