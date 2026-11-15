@@ -215,6 +215,13 @@ function placeColumn(dim, w, job, col) {
   }
   // down to solid ground (the measured ground can sit a little above a dip)
   const footing = col.role === "walk" ? P.kinds.plank : materialAt(L, P, 1, false);
+  // a column on a road's bottom slab stood on half a block of air (the gate posts on the gate road, 2026-11-15
+  // Hamlet audit): give it a full footing block there
+  if (!lift && /_slab$/.test(ground.typeId)) {
+    let half;
+    try { half = ground.permutation.getState("minecraft:vertical_half"); } catch { half = undefined; }
+    if (half === "bottom" && footing) { try { ground.setPermutation(footing); n++; } catch { /* protected block */ } }
+  }
   for (let y = base; y >= base - 8; y--) {
     const block = dim.getBlock({ x, y, z });
     if (!block) return -1;
