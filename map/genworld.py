@@ -635,10 +635,10 @@ rt = w.root_tag.compound if hasattr(w.root_tag, 'compound') else w.root_tag
 def setk(k, v):
     try: rt[k] = v
     except Exception as e: print('level.dat', k, e)
-spawn = (-118, -118)
-sy = int(Y[spawn[0] - X0, spawn[1] - Z0]) + 3 if (0 <= spawn[0] - X0 < SIZE and 0 <= spawn[1] - Z0 < SIZE) else 120
+# world spawn is the welcome hall island (Mateo, 2026-11-15): the quay beside the baked Waystone, radius 0
+spawn = (-754, 26); sy = 283
 setk("LevelName", StringTag("The Hollow Crown map")); setk("GameType", IntTag(1)); setk("commandsEnabled", ByteTag(1))
-setk("Generator", IntTag(2)); setk("SpawnX", IntTag(spawn[0])); setk("SpawnZ", IntTag(spawn[1])); setk("SpawnY", IntTag(sy))
+setk("Generator", IntTag(2)); setk("SpawnX", IntTag(spawn[0])); setk("SpawnZ", IntTag(spawn[1])); setk("SpawnY", IntTag(sy)); setk("spawnradius", IntTag(0))
 setk("spawnMobs", ByteTag(0)); setk("dodaylightcycle", ByteTag(0)); setk("Time", LongTag(6000))
 try: w.root_tag = w.root_tag
 except Exception as e: print('root_tag set', e)
