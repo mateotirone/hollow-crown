@@ -225,20 +225,22 @@ def cottage(seed, width=7, depth=9, storeys=1, shape="front", ground="stone", ro
     return bp
 
 
-def random_cottage(seed, rnd, tier, roof=None):
-    """A cottage for a plot. tier 0 = by the square (taller, richer), 1 = town, 2 = edge (small)."""
+def random_cottage(seed, rnd, tier, roof=None, min_area=0):
+    """A cottage for a plot. tier 0 = by the square (taller, richer), 1 = town, 2 = edge (small). min_area: no smaller
+    footprint (Kingsrest passes 35: a 5 x 5 cottage left a 3 x 2 floor once furnished, deep dive 2026-11-15)."""
+    def sizes(opts): return [o for o in opts if o[0] * o[1] >= min_area] or [(7, 7)]
     if tier == 0:
         shape = _weighted(rnd, [("front", 45), ("side", 25), ("L", 20), ("hip", 10)])
         storeys = 2 if rnd.random() < 0.85 else 1
-        w, d = rnd.choice([(7, 9), (7, 11), (9, 9), (9, 11)])
+        w, d = rnd.choice(sizes([(7, 9), (7, 11), (9, 9), (9, 11)]))
     elif tier == 1:
         shape = _weighted(rnd, [("front", 30), ("side", 35), ("L", 25), ("hip", 10)])
         storeys = 2 if rnd.random() < 0.45 else 1
-        w, d = rnd.choice([(7, 7), (7, 9), (9, 7), (9, 9), (5, 7)])
+        w, d = rnd.choice(sizes([(7, 7), (7, 9), (9, 7), (9, 9), (5, 7)]))
     else:
         shape = _weighted(rnd, [("front", 30), ("side", 45), ("L", 15), ("hip", 10)])
         storeys = 1
-        w, d = rnd.choice([(5, 7), (7, 5), (7, 7), (5, 5), (9, 7)])
+        w, d = rnd.choice(sizes([(5, 7), (7, 5), (7, 7), (5, 5), (9, 7)]))
     if shape == "side" and w < d: w, d = d, w           # eaves to the street: wide and shallow
     if shape == "L": w = max(w, 9); d = min(d, 7)
     weights = dict(ROOF_WEIGHTS)

@@ -224,3 +224,25 @@ def capital(take="medieval", seed=7):
 
 def medieval(seed=7): return capital("medieval", seed)
 def roman(seed=7): return capital("roman", seed)
+
+
+def skill(seed=7):
+    """The capital hall on the building skill (the one engine): review/specs/kingsrest_capital.json for the shell
+    (centre block, entrance pavilion with its grand door and steps, wings, corner towers, the capital interior) and
+    review/capital_parts.py for the drum, dome and walled garden forecourt, exactly as the catalogue shows it.
+    Kingsrest bakes this one (Kingsrest deep dive, 2026-11-15: the town still had medieval() above)."""
+    import json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    for p in (os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts"), os.path.join(here, "review")):
+        if p not in sys.path: sys.path.insert(0, p)
+    import engine, capital_parts
+    spec = json.load(open(os.path.join(here, "review", "specs", "kingsrest_capital.json")))
+    bp = Blueprint("kingsrest_capital"); engine.into_blueprint(bp, spec)
+    tmp = Blueprint("after"); capital_parts.drum_dome(tmp, capital_parts.Building(tmp, capital_parts.P, 3), seed)
+    dy = spec.get("after_dy", 0)
+    for (x, y, z), v in tmp.cells.items():
+        if v[0] != "keep": bp.cells[(x, y + dy, z)] = v
+    door = [k for k, v in bp.cells.items() if v[0].endswith("_door") and not v[1].get("upper") and v[1].get("facing") == "s" and k[0] == 0]
+    dz = max(k[2] for k in door)                     # the pavilion's grand door, facing the square (+z)
+    bp.markers["door"] = (0, 1, dz + 1)
+    return bp.finish()

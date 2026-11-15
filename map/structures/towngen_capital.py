@@ -26,7 +26,7 @@ class Capital(TG.Town):
     streets are down, so floors and paths meet."""
     SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK", "LANDK")
     def makers(self):
-        m = [("capital hall", capital.medieval), ("inn", lambda: vale.coaching_inn(style="tudor"))] + list(self.site["civic"])
+        m = [("capital hall", capital.skill), ("inn", lambda: vale.coaching_inn(style="tudor"))] + list(self.site["civic"])
         return m
     def search(self, bp, k, rmax=40, relief=8):
         for extra in range(1, rmax, 2):
@@ -63,7 +63,11 @@ class Capital(TG.Town):
     def claim(self):
         snap = {k: getattr(self, k).copy() for k in self.SNAP}; works = dict(self.works); n_plan = len(self.plan); n_walks = len(self.walks)
         self.claims = []; self.claim_y = {}
-        for k, (name, mk) in enumerate(self.makers()):
+        mks = list(enumerate(self.makers()))
+        # the chapel claims its ground before the guildhall, each with its own search angle k: the skill guildhall is
+        # bigger than the old one and took the chapel's corner, pushing the chapel off every street (deep dive 2026-11-15)
+        mks.sort(key=lambda t: {"guildhall": 3.5}.get(t[1][0], t[0]))
+        for k, (name, mk) in mks:
             bp = mk(); bp.kind = "civic"
             e = self.capital_spot(bp) if name == "capital hall" else self.search(bp, k, rmax=24, relief=7)
             if e:
@@ -116,6 +120,8 @@ class Capital(TG.Town):
                     if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
         zmin = min(gz for _, gz in g)
         self.station_front = ((x, z + zmin - 1), (0, -1), y)      # the street side faces north, onto the square
+        xs = [gx + x for gx, gz in g]
+        self.station_row = (min(xs), max(xs), z + zmin - 1, y)
 
     def avenue(self, start, f, yf, kind="main"):
         """A street from a door (start, facing f) out of its own grounds to the nearest street or the square."""
@@ -140,6 +146,20 @@ class Capital(TG.Town):
         if getattr(self, "station_front", None):
             (sx, sz), f, y = self.station_front; self.avenue((sx, sz), f, y)
 
+    def station_forecourt(self):
+        """A paved forecourt, 3 deep and level with the floor, the length of the station's street front: its four
+        street doors opened onto grass, only the middle one had the avenue (Kingsrest deep dive, 2026-11-15). Laid
+        after the houses, on ground the station's gap already keeps free, so the town's layout does not move."""
+        if not getattr(self, "station_row", None): return
+        x0, x1, zr, y = self.station_row; k = 2 * y + 1
+        self.lay([(xx, zr - 1) for xx in range(x0, x1 + 1)], "lane", k_start=k, k_end=k)
+        foot = getattr(self, "station_cells", set())
+        for xx in range(x0, x1 + 1):
+            back = [zr + t for t in range(1, 6) if all((xx, zr + u) not in foot for u in range(1, t + 1))]   # into a set-back door's bay
+            for zz in [zr, zr - 1, zr - 2] + back:
+                if self.ok(xx, zz) and not self.at(self.WET, xx, zz):
+                    i, j = self.ij(xx, zz); self.K[i, j] = k; self.KIND[i, j] = max(int(self.KIND[i, j]), TG.PRIO["lane"]); self.FIX[i, j] = True
+
     # ------------------------------------------------------------------ twice as dense
     def pick_building(self, tier, kinds=None):
         """A capital: tall townhouses in rows near the middle, cottages only toward the wall."""
@@ -150,7 +170,7 @@ class Capital(TG.Town):
             b = vale.townhouse(sd, width=w, depth=d, storeys=self.rng.choice([2, 3, 3]), ground="stone", style=st,
                                jetty=self.rng.random() < 0.7, roof=self.rng.choice(["slate", "wood"]), chimney_side=self.rng.choice("ew"))
             b.kind = "house"; return b
-        return TB.random_cottage(sd, self.rng, min(tier, 2), roof="slate")
+        return TB.random_cottage(sd, self.rng, min(tier, 2), roof="slate", min_area=35)
 
     def houses(self):
         def tier(x, z):
@@ -235,15 +255,16 @@ class Capital(TG.Town):
         self.square(); self.station(); self.claim()
         self.streets(); self.avenues(); self.relax(); self.grade_verges()
         self.portions(); self.place_square_buildings()
-        self.houses(); self.relax(); self.windmills(); self.terraform(); self.field_paths(); self.fences(); self.fields()
+        self.houses(); self.relax(); self.windmills(); self.station_forecourt(); self.terraform(); self.field_paths(); self.fences(); self.fields()
         self.dress(); self.roof_colours(); self.path_blocks(); self.ground_blocks(); self.banks(); self.wall()
+        self.clear_door_fronts()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])
 
 site = dict(centre=(-123, -125), radius=82, size="town", square_at=(-123, -96), square_r=9, seed=seed, build_u=2.0, lanes=16,
             roofs={"warm red": 5, "slate": 4, "dark shingle": 1}, accent="copper",
-            civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
+            civic=[("guildhall", vale_civic.guildhall_skill), ("chapel", vale_civic.chapel),
                    ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))])
 T = np.load(a.slice); L = json.load(open(a.lines))
 if a.trees:

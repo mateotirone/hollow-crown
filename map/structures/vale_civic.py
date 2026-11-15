@@ -73,6 +73,17 @@ def guildhall(seed=3):
     return finish_doctrine(bp)
 
 
+def guildhall_skill(seed=3):
+    """The guildhall on the skill (review/specs/kingsrest_guildhall.json, gen_guildhall.py), as the catalogue shows it:
+    an open market arcade level with the ground, open on all four sides, under the guild's hall. Kingsrest bakes this
+    one (Kingsrest deep dive, 2026-11-15: the town still had guildhall() above, whose rooms were left empty). The
+    town walks to the middle arch of the front (+z) arcade."""
+    bp = _skill_spec("kingsrest_guildhall.json", "kingsrest_guildhall")
+    zs = [z for (_x, _y, z) in bp.cells]
+    bp.markers["door"] = (10, 1, max(zs) + 1)
+    return bp.finish()
+
+
 def _skill_spec(fname, name, bells=True):
     """Build a review spec on the skill (the one engine) for a map stamp. bells=False takes every bell down:
     each belfry keeps its beam and a bare chain (Millbrook: "they have taken down every bell", the story)."""

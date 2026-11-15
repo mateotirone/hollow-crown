@@ -91,6 +91,7 @@ TARGETS = {"normal": {"inside": 7, "outside": 4, "door": 8}, "hollow": {"inside"
 DIRS4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
 FACE = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
 MAX_LIGHTS = 400
+DOOR_APPROACH = 8           # cells straight out of a door kept clear of lamp posts and floor lanterns
 
 
 def bare(n): return n[10:] if n.startswith("minecraft:") else n
@@ -346,16 +347,29 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
     g = Grid(blocks); g.light()
     wc = reachable(blocks, walk_cells(blocks))
     need = lit_cells(blocks, wc, laid)
+    for c in [c for c in need if re.search(r"(wheat|carrots|potatoes|beetroot|farmland|_crop|_stem$)", _name(blocks, c) or "")
+              or re.search(r"(wheat|carrots|potatoes|beetroot|farmland|_crop|_stem$)", _name(blocks, (c[0], c[1] - 1, c[2])) or "")]:
+        del need[c]                       # a field is not lit at night, and no post stands in its crops
     added = []
     reserved = set()                      # door steps, the cells right in front of doors and marked spots stay clear
     for (x, y, z) in avoid:
         for yy in (y, y + 1): reserved.add((x, yy, z))
     door_list = doors(blocks)
+    approach = set()                      # the walk straight out of every door: no post or floor lantern on it
     for x, y, z, f in door_list:
         dx, dz = FACE.get(f, (0, 1))
         for s in (1, -1):
             for yy in (y, y + 1):
                 reserved.add((x + s * dx, yy, z + s * dz))
+            # Mateo 2026-11-15 (Kingsrest capital hall): a lamp post stood in the middle of the walk to the door,
+            # four out past a porch. The door's landing, 3 wide, stays clear all the way out (through a porch or
+            # forecourt) until the walk meets a wall, up to DOOR_APPROACH out, at feet height a step up or down too.
+            for t in range(1, DOOR_APPROACH + 1):
+                cx, cz = x + s * dx * t, z + s * dz * t
+                if not any(free(_name(blocks, (cx, yy, cz))) and free(_name(blocks, (cx, yy + 1, cz))) for yy in (y - 1, y, y + 1)): break
+                for k in (-1, 0, 1):
+                    for yy in (y - 1, y, y + 1, y + 2): approach.add((cx + k * abs(dz), yy, cz + k * abs(dx)))
+    reserved_floor = reserved | approach
 
     def setb(c, n, p=None):
         blocks[c] = (n, dict(p or {}))
@@ -400,7 +414,7 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
 
     def stand(x, y, z):
         """A lantern on the floor against a wall (a low room), never on a door step or by a track."""
-        if not posts or (x, y, z) in reserved or not empty((x, y, z)) or by_rail(x, y, z): return False
+        if not posts or (x, y, z) in reserved_floor or not empty((x, y, z)) or by_rail(x, y, z): return False
         if not any(opaque(_name(blocks, (x + dx, y, z + dz)) or "air") and _name(blocks, (x + dx, y, z + dz)) is not None
                    for dx, dz in DIRS4): return False
         setb((x, y, z), st["lantern"])
@@ -409,7 +423,7 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
     def post(x, y, z, grass=False):
         """A lamp post: foot, two posts, a lantern. In an open yard, or on the verge of a way at least 3 wide;
         grass=True: on the land beside a narrow built way (the way itself stays clear)."""
-        if not posts or any(c in reserved for c in ((x, y, z), (x, y + 1, z))) or by_rail(x, y, z): return False
+        if not posts or any(c in reserved_floor for c in ((x, y, z), (x, y + 1, z))) or by_rail(x, y, z): return False
         if not all(empty((x, yy, z)) for yy in range(y, y + 4)): return False
         if grass:
             if (x, y, z) not in wc or (x, y, z) in need: return False
@@ -419,6 +433,13 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
                         for dx, dz in DIRS4)          # on the verge of a way at least three wide: two stay clear
             if open_n < 9 and not verge: return False
         fl = blocks.get((x, y - 1, z))
+        if fl and re.search(r"(wheat|carrots|potatoes|beetroot|farmland|_crop|melon_stem|pumpkin_stem|sweet_berry|carpet|leaves)", bare(fl[0])):
+            return False                      # nothing stands on crops or leaves (house rules; a Kingsrest field, 2026-11-15)
+        if fl and re.search(r"(grass$|fern$|flower|tulip|poppy|dandelion|daisy|allium|bluet|orchid|sapling|bush$|petals$|litter$)", bare(fl[0])):
+            # a plant on the land: the foot takes its place and the post stands on the land under it
+            setb((x, y - 1, z), st["foot"]); setb((x, y, z), st["fence"]); setb((x, y + 1, z), st["fence"])
+            setb((x, y + 2, z), st["lantern"]); wc.pop((x, y, z), None)
+            return True
         if fl and bare(fl[0]).endswith("_slab") and (fl[1] or {}).get("half", "bottom") != "top":
             # nothing stands on a sunk slab (house rules): the foot takes the slab's place
             setb((x, y - 1, z), st["foot"]); setb((x, y, z), st["fence"]); setb((x, y + 1, z), st["fence"])

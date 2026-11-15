@@ -122,7 +122,7 @@ def main():
             add(sec, f"map-{d['key']}-{style}", d["title"], STYLE_NAMES[style], d["use"], (lambda d=d, s=style: d["make"](s)), g,
                 extra={"where": d["where"], "kind": d["kind"]})
     add(sec, "map-kingsrest_capital", "Kingsrest capital hall", "Grand medieval", "The grandest building in the game: Norman stone and dark timber, a two-tier drum under a copper dome that weathers from green at the top to bright copper at the eaves, long wings with corner towers, and a walled garden forecourt.",
-        lambda: capital.medieval(), view=(20, 30, 1.3), extra={"where": "Kingsrest, the heart of the royal town", "kind": "Civic"})
+        lambda: capital.skill(), view=(20, 30, 1.3), extra={"where": "Kingsrest, the heart of the royal town", "kind": "Civic"})
     add(sec, "map-millbrook_clock_tower", "Millbrook clock tower", "Norman stone", "Three storeys and a belfry with clock faces and a stepped spire, in the middle of Millbrook's square.",
         lambda: vale_civic.clock_tower(), extra={"where": "Millbrook, the square", "kind": "Civic"})
     add(sec, "map-millbrook_watermill", "Millbrook watermill", "Stone and timber", "Stone ground floor on the river bank, timber above, with a working-looking wheel in the water.",
