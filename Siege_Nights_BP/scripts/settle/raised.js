@@ -207,6 +207,19 @@ export function yardOf(barracks) {
 }
 addFilter("barracksYard", (yard, { barracks } = {}) => (barracks && yardOf(barracks)) || yard);
 
+// The Barracks bunks in world coordinates, for soldiers going to bed at night (army/idle.js applies "barracksBunks"):
+// every bed block of the design, turned the way this Barracks was raised. The caller checks the world for which are
+// bed heads (and which way they point), so beds a player moved or broke are simply skipped.
+export function bunksOf(barracks) {
+  const b = store.data.built?.[keyOf(barracks)];
+  if (!b || !BLOCK_BUILDS[b.type]) return undefined;
+  const plan = planFor(b.type, b.style), frame = frameFor({ x: b.fx, z: b.fz });
+  const origin = { ...barracks, y: barracks.y + (b.lift ?? 0) };
+  const isBed = (role) => (plan.style.roles[role] ?? []).some((id) => /(^|:)bed$/.test(id));
+  return [...plan.cells.values()].filter((c) => isBed(c.role)).map((c) => toWorld(frame, origin, c.x, c.y, c.z));
+}
+addFilter("barracksBunks", (bunks, { barracks } = {}) => (barracks && bunksOf(barracks)) || bunks);
+
 // Breaking the block takes the building off the charter count (the walls stay, it is only a house then)
 world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation }) => {
   if (!BLOCK_BUILDS[brokenBlockPermutation?.type?.id]) return;

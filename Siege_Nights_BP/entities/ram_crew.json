@@ -23,6 +23,11 @@
           ],
           "default": 0,
           "client_sync": true
+        },
+        "siege:sleeping": {
+          "type": "bool",
+          "default": false,
+          "client_sync": true
         }
       }
     },
