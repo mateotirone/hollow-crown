@@ -1,7 +1,8 @@
 // Forester's Lodge: the settlement's tree farm (Mateo 2026-11-11: "if we need wood, we should probably
 // build a custom tree farm asset for the settlement"). The trees out in the world cannot be chopped; these can.
 //
-// Place the Lodge on your land and a fenced grove goes up behind it, planted with your region's trees
+// Pick the Lodge on your town's woodlot (a Wood plot's Plot Marker; a block placed in an old world still works) and a
+// fenced grove goes up behind it, planted with your region's trees
 // (the same hand-built species as the map, in normal breakable wood). Chop a grown tree at the bottom of
 // its trunk and it comes down: its logs drop at the stump and a sapling takes its place, which grows into a
 // young tree after a day and a full tree two days later. Click the Lodge for its plots, to choose what each
@@ -12,13 +13,16 @@
 
 import { world, system, ItemStack, BlockVolume } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { onTick, isReady, settlementAt, isAlly, keepOf, moduleStore, countItem, takeItems } from "../siege/api.js";
+import { onTick, isReady, settlementAt, isAlly, keepOf, moduleStore, countItem, takeItems, on } from "../siege/api.js";
 import { funds, charge } from "../economy/coins.js";
 import { styleOf, siteProblem } from "../settle/plans.js";
 import { footprint } from "../settle/rules.js";
+import { townOf, layoutOf } from "../settle/founding.js";
+import { slotsOf } from "../settle/towns.js";
+import { slotDims } from "../settle/charters.js";
 import {
   LODGE, FORESTRY, YARD, LODGE_LEVELS, MAX_LEVEL, STAGE_NAMES, NEXT_STAGE, plotsAt, speciesFor, speciesName,
-  designOf, structureId, newPlot, toWorld, plotCentre, fellYield, ticksToNext, costText, daysText,
+  designOf, structureId, newPlot, toWorld, plotCentre, yardOf, gateOf, plotYardFor, fellYield, ticksToNext, costText, daysText,
 } from "./data.js";
 import "./tests.js";
 
@@ -99,11 +103,12 @@ function raiseGrove(key, lodge, firstStage = "mature", withFence = true) {
   system.runJob((function* () {
     const fence = `minecraft:${FENCE[lodge.style] ?? "spruce_fence"}`;
     const ring = [];
-    for (let x = YARD.x0; x <= YARD.x1; x++) {
-      if (x < -1 || x > 1) ring.push([x, YARD.z0]);
-      ring.push([x, YARD.z1]);
+    const Y = yardOf(lodge), gate = gateOf(lodge);
+    for (let x = Y.x0; x <= Y.x1; x++) {
+      if (Math.abs(x) > gate) ring.push([x, Y.z0]);
+      ring.push([x, Y.z1]);
     }
-    for (let z = YARD.z0 + 1; z < YARD.z1; z++) ring.push([YARD.x0, z], [YARD.x1, z]);
+    for (let z = Y.z0 + 1; z < Y.z1; z++) ring.push([Y.x0, z], [Y.x1, z]);
     for (const [x, z] of withFence ? ring : []) {
       const at = toWorld(origin, forward, x, 0, z);
       set(dim, { x: at.x, y: groundAt(dim, at.x, at.z, origin.y) + 1, z: at.z }, fence);
@@ -112,7 +117,7 @@ function raiseGrove(key, lodge, firstStage = "mature", withFence = true) {
     for (let i = 0; i < 6; i++) {
       if (lodge.plots[i]?.base) continue; // already planted (a level up only plants the new plots)
       const open = i < plotsAt(lodge.level);
-      const c = plotCentre(origin, forward, i);
+      const c = plotCentre(origin, forward, i, lodge);
       const y = groundAt(dim, c.x, c.z, origin.y);
       padAt(dim, c, y, open);
       yield;
@@ -317,7 +322,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const box = footprint(block.location, f, YARD);
   const problem = siteProblem(owner, box);
   if (problem) return player.sendMessage(`§7No room for a grove here: ${problem} §8It needs ${YARD.x1 - YARD.x0 + 1} by ${YARD.z1 - YARD.z0 + 1} blocks behind the Lodge.`);
-  const clash = Object.entries(lodges()).find(([k, l]) => boxesTouch(box, footprint(locOf(k), { x: l.fx, z: l.fz }, YARD)));
+  const clash = Object.entries(lodges()).find(([k, l]) => boxesTouch(box, footprint(locOf(k), { x: l.fx, z: l.fz }, yardOf(l))));
   if (clash) return player.sendMessage("§7No room for a grove here: it would run into another grove.");
   const key = keyOf(block.location);
   player.sendMessage("§7The forester walks the ground...");
@@ -341,6 +346,23 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
     raiseGrove(key, lodges()[key]);
     player.sendMessage("§6A grove is going up behind the Lodge. Chop a grown tree at the bottom of its trunk to fell it; a sapling takes its place and is full grown again in three days.");
   })());
+});
+
+// ---------- on a town's woodlot ----------
+
+// The Forester's Lodge picked on a Wood plot from its Plot Marker (Mateo 2026-11-14: "I never want to use blocks to
+// place buildings"): the gate posts stand (settle/blockdesigns.js), the Lodge goes between them and the grove is laid
+// on the ground as it lies, filling the lot (turned end-on if the lot is: data.js PLOT_YARDS).
+on("settleBuilt", ({ owner, building, style, origin, forward, slotId }) => {
+  if (building !== "foresters_lodge" || !owner) return;
+  const slot = slotId && slotsOf(layoutOf(townOf(owner))).find((sl) => sl.id === slotId);
+  try { world.getDimension(OVERWORLD).getBlock(origin)?.setType(LODGE); } catch { return; }
+  const key = keyOf(origin);
+  if (lodges()[key]) return;
+  lodges()[key] = { owner, fx: forward.x, fz: forward.z, style, level: 1, plots: [], yard: plotYardFor(slot && slotDims(slot)) };
+  store.save();
+  raiseGrove(key, lodges()[key]);
+  world.getPlayers().find((p) => p.id === owner)?.sendMessage("§6Your Forester's Lodge stands at the woodlot's gate and the grove is going in.§7 Chop a grown tree at the bottom of its trunk to fell it; a sapling takes its place. Click the Lodge to open more plots.");
 });
 
 // ---------- test command ----------
