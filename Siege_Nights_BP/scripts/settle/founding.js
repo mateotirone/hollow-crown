@@ -37,7 +37,7 @@ import { PLOT_PLAN } from "../plots/config.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { idSpellings } from "../core/blockids.js";
 import { planLaneLamps } from "./lanelamps.js";
-import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
+import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES, standsOnGround } from "./towns.js";
 
 export const PLOT_MARKER = "siege:plot_marker";
 const OVERWORLD = "minecraft:overworld";
@@ -217,9 +217,10 @@ function* blendGround(dim, town, layout, tier) {
     const k = `${dx},${dz}`;
     member.add(k);
     if (t !== tier || layout.pal[p]?.[0] === "minecraft:air") continue;
+    const ground = !standsOnGround(layout.pal[p]?.[0]); // the edge's height is its ground's, not a post's on it
     const c = cols.get(k);
-    if (!c) cols.set(k, { dx, dz, lo: dy, hi: dy });
-    else { c.lo = Math.min(c.lo, dy); c.hi = Math.max(c.hi, dy); }
+    if (!c) cols.set(k, { dx, dz, lo: dy, hi: ground ? dy : undefined });
+    else { c.lo = Math.min(c.lo, dy); if (ground) c.hi = Math.max(c.hi ?? dy, dy); }
   }
   const dirt = perm("minecraft:dirt"), stone = perm("minecraft:stone"), grass = perm("minecraft:grass_block"), air = perm("minecraft:air");
   const get = (x, y, z) => look(dim, x, y, z);
@@ -235,6 +236,7 @@ function* blendGround(dim, town, layout, tier) {
   }
   // 2. shape the land outside the edge
   for (const c of cols.values()) {
+    if (c.hi === undefined) continue; // only things standing on ground laid before: nothing to blend to
     const h = town.y + c.hi; // the top of the edge column
     for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       if (member.has(`${c.dx + ux},${c.dz + uz}`)) continue;

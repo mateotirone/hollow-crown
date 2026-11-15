@@ -12,6 +12,7 @@
 //   seatOnSlot(slot, bounds) -> { origin: {dx, dy, dz}, forward } | undefined   where a design fits on a slot
 //   slotBorder(layout, slot) -> { cells: [[dx, dy, dz], ...], ground: [id, states] }   the flush log border round an
 //     open plot and the plot's own ground block, to take the border up once a building stands there
+//   standsOnGround(id) -> true for a groundwork block that stands on the ground (a fence, a lantern, a crop), not ground
 
 import { TOWNS, TOWN_CHARS } from "./towns_data.js";
 
@@ -67,6 +68,13 @@ export function slotBorder(layout, slot) {
   return { cells, ground: best >= 0 ? pal[best] : ["minecraft:grass_block", {}] };
 }
 export const isBorderLog = (id) => BORDER_LOG.test(id ?? "");
+
+// Things the groundwork stands ON the ground (fence and gate posts, lanterns, pen and well furniture, plants, crops,
+// log posts): not the ground itself. Blending the land into the groundwork's edge (founding.js blendGround) goes by
+// the top of the ground, never these, or the land beside a gate post was heaped to the lantern on top of it and made
+// an earth ramp up and over the wall beside the gate (2026-11-15, siege simulator, Oakmere and six more plots).
+const ON_GROUND = /fence|lantern|barrel|cauldron|composter|hay_block|leaves|azure_bluet|cornflower|dandelion|oxeye_daisy|poppy|short_grass|tall_grass|wheat|carrots|potatoes|beetroot|_stairs$|^minecraft:(oak|spruce|acacia|mangrove|birch|jungle|dark_oak|cherry|pale_oak)_log$/;
+export const standsOnGround = (id) => ON_GROUND.test(id ?? "");
 
 const idx = (c) => TOWN_CHARS.indexOf(c);
 const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 2048;
