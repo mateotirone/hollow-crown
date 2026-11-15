@@ -134,8 +134,9 @@ api.on("offerRole", ({ player, role }) => {
   if (!p) return;
   const hero = heroOf(p);
   if (!ROLES[role]) return api.emit("roleRefused", { player: p, role, why: "unknown role" });
-  if (hero.path !== "none") {
-    if (ROLES[role].region && hero.path !== role) p.sendMessage(`§7The ${ROLES[role].noun} would have taken you. You are sworn as ${ROLES[hero.path]?.name ?? hero.path} already, and a person holds one role.`);
+  const held = ROLES[role].region ? hero.regional : hero.path; // a main path and one regional role, each once
+  if (held !== "none") {
+    if (ROLES[role].region && held !== role) p.sendMessage(`§7The ${ROLES[role].noun} would have taken you. You are a ${ROLES[held]?.name ?? held} already, and a person holds one regional role.`);
     return api.emit("roleRefused", { player: p, role, why: "already has a role" });
   }
   // A regional role's mentor may want their trial finished first (scripts/roletrials). The deed is kept, and

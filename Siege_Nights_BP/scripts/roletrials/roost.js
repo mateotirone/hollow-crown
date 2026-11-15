@@ -92,7 +92,7 @@ onTick("roletrials_wingmen", 40, () => {
   let siege = false;
   try { siege = isSiegeNight(); } catch { return; }
   if (!siege || inTollWindow(world.getTimeOfDay())) return; // they won't fly through the toll either
-  const riders = world.getPlayers().filter((p) => heroOf(p).path === "rider");
+  const riders = world.getPlayers().filter((p) => heroOf(p).regional === "rider");
   if (riders.length !== 1) return; // a stand-in, for when you're the only one
   const [player] = riders;
   if (!onDragonWing(player)) return;

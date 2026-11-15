@@ -102,7 +102,7 @@ places), `board_rules.js` (picking, rounds, pay, tracker words; pure, self-teste
 
 ## Regional roles
 
-Besides Knight and Marked there are four regional roles, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds one role only.
+Besides Knight and Marked there are four regional roles, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds a main path (Knight or Marked, `hero.path`) and, on top of it, at most one regional role (`hero.regional`; Mateo 2026-11-15). Old saves with a regional role in `path` move it to `regional` on load.
 
 | Role | Region | Branch | What it is good at | Ranks |
 |---|---|---|---|---|

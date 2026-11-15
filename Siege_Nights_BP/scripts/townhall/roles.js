@@ -55,7 +55,7 @@ export function rolesTick() {
   try { state = api.getState(); } catch { return; }
   for (const player of world.getPlayers()) {
     const hero = heroOf(player);
-    if (!ROLES[hero.path]?.region) continue;
+    if (!ROLES[hero.regional]?.region) continue;
     const s = hero.skills;
     const mount = mountOf(player), dragon = isDragon(mount), fighting = inCombat(player);
 
@@ -115,7 +115,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
   // a role-holder hit something
   if (attacker?.typeId === "minecraft:player" && target?.isValid !== false && target.id !== attacker.id) {
     const hero = heroOf(attacker), s = hero.skills;
-    if (ROLES[hero.path]?.region && hostile(attacker, target)) {
+    if (ROLES[hero.regional]?.region && hostile(attacker, target)) {
       const shot = !!source.damagingProjectile, melee = !shot;
       const mounted = !!mountOf(attacker), weapon = held(attacker)?.typeId ?? "";
       let extra = 0;
@@ -140,7 +140,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
   // a role-holder was hit
   if (target?.typeId === "minecraft:player") {
     const hero = heroOf(target), s = hero.skills;
-    if (!ROLES[hero.path]?.region) return;
+    if (!ROLES[hero.regional]?.region) return;
     if (s.hex_eye && attacker && attacker.id !== target.id) { fx(attacker, "weakness", 80, 0); if (s.hex_eye >= 2) fx(attacker, "slowness", 80, 0); }
     if (s.hex_slip && Math.random() < (s.hex_slip === 2 ? 0.25 : 0.15)) { fx(target, "invisibility", 60, 0); fx(target, "speed", 60, 1); }
     if (s.helm_tide) {
@@ -160,7 +160,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   const killer = event.damageSource?.damagingEntity, dead = event.deadEntity;
   if (killer?.typeId !== "minecraft:player" || !dead) return;
   const hero = heroOf(killer), s = hero.skills;
-  if (!ROLES[hero.path]?.region) return;
+  if (!ROLES[hero.regional]?.region) return;
   let hostileDead = false, at;
   try { hostileDead = hostile(killer, dead); at = dead.location; } catch { return; }
   if (!hostileDead) return;
@@ -206,7 +206,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   }
   for (const player of dimension.getPlayers({ location: where, maxDistance: DEED_REACH })) {
     const hero = heroOf(player);
-    if (hero.path !== "none" || hero.offers.includes(role)) continue;
+    if (hero.regional !== "none" || hero.offers.includes(role)) continue;
     api.emit("offerRole", { player, role });
   }
 });

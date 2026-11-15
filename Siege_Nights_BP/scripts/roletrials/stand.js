@@ -35,7 +35,7 @@ export const STAGE_EDGES = {
 // Does this player hold the top rank of this role? (Sorcerer for "marked")
 export function atTop(hero, role) {
   const path = hero?.path === "sorcerer" ? "marked" : hero?.path;
-  if (path !== role || !RANKS[role]) return false;
+  if ((path !== role && hero?.regional !== role) || !RANKS[role]) return false;
   return rankOf(role, hero.skills ?? {})?.name === RANKS[role].at(-1).name;
 }
 

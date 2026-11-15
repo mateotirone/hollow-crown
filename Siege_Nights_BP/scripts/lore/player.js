@@ -156,7 +156,7 @@ on("loreSetFlag", ({ player, flag }) => {
 // Context for dialogue conditions
 export function contextOf(player, shelved = 0) {
   const hero = heroOf(player);
-  return { path: hero.path ?? "none", resonance: hero.resonance ?? 0, night: isNight(), shelved };
+  return { path: hero.path ?? "none", regional: hero.regional ?? "none", resonance: hero.resonance ?? 0, night: isNight(), shelved };
 }
 
 export const landOwnerAt = (block) => (isReady() && block.dimension.id === "minecraft:overworld" ? settlementAt(block.location) : undefined);

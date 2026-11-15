@@ -23,7 +23,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_choosing"], "hatchwait"],
       [["flag:trial_span"], "nests"],
       [["flag:kesh_call"], "spanwait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:kesh_met"], "hub"],
       [[], "first"],
     ],
@@ -131,7 +131,7 @@ export const MENTOR_NPCS = [
         opts: [["Back.", "sworn"]],
       },
       other: {
-        text: "You're sworn to something already. I can see it on you.\n\nThe Roost doesn't take halves. One road each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
+        text: "You've another region's road on you already. I can see it.\n\nThe Roost doesn't take halves. Your own oath, Knight's or Ember's, is your business, but one of the regions' roads each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
         opts: [["Tell me about Ysolt.", "ysolt_other"], ["Goodbye.", "end"]],
       },
       ysolt_other: {
@@ -188,7 +188,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_ring"], "huntwait"],
       [["flag:trial_hearth"], "ringwait"],
       [["flag:ulla_call"], "haulwait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:ulla_met"], "hub"],
       [[], "first"],
     ],
@@ -287,7 +287,7 @@ export const MENTOR_NPCS = [
         opts: [["Back.", "sworn"]],
       },
       other: {
-        text: "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
+        text: "You're sworn to another region's road already. I can see it on you. She can too: look, she's gone quiet.\n\nOne of those each. Warm your hands, though. Nobody's turned away from the fire.",
         opts: [["Thank you.", "end"]],
       },
       turn: {
@@ -334,7 +334,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_crew"], "bridewait"],
       [["flag:trial_articles"], "crewwait"],
       [["flag:ottilie_call"], "articleswait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:ottilie_met"], "hub"],
       [[], "first"],
     ],
@@ -488,7 +488,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_graves"], "motherwait"],
       [["flag:nell_cup"], "graveswait"],
       [["flag:nell_call"], "cup"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:nell_met"], "hub"],
       [[], "first"],
     ],

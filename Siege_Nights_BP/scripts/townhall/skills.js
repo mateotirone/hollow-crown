@@ -141,7 +141,8 @@ export const SKILLS = [
 
 export const SKILL = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
 
-// Roles (stored as hero.path). Everyone starts as "none", a plain human. A role is earned in the story
+// Roles. Everyone starts as "none", a plain human. The main path (hero.path) is the Knight or the Marked; on top of
+// it a player may hold ONE regional role (hero.regional; Mateo 2026-11-15, "main path + one regional"). A role is earned in the story
 // and opens one branch of its own. To add a role: an entry here, a branch in BRANCHES (who: "<role id>"),
 // its skills, a rank ladder in RANKS, and an effects file like knight.js or marked.js.
 export const ROLES = {
@@ -208,9 +209,9 @@ export const LEVEL_UNLOCKS = {
 
 // ---------- Pure helpers (tested in Node) ----------
 
-export function canBranch(branch, path) {
+export function canBranch(branch, path, regional = "none") {
   const who = BRANCHES[branch].who;
-  return who === "all" || who === path;
+  return who === "all" || who === path || who === regional;
 }
 
 export function spentIn(skills, branch) {
@@ -238,7 +239,7 @@ export const POWER_ORIGINS = { gated: {}, lines: {} };
 export function blockedReason(skill, hero, hallLevel) {
   const have = hero.skills[skill.id] ?? 0;
   if (have >= skill.max) return "Mastered";
-  if (!canBranch(skill.branch, hero.path)) return `${ROLES[BRANCHES[skill.branch].who]?.noun ?? "Another role"} only`;
+  if (!canBranch(skill.branch, hero.path, hero.regional)) return `${ROLES[BRANCHES[skill.branch].who]?.noun ?? "Another role"} only`;
   const ring = RINGS[skill.ring];
   if (hallLevel < ring.hall) return `Needs a ${HALL_NAMES[ring.hall]}`;
   if (hero.level < ring.level && !(hero.victor && skill.branch === "arcana")) return `Needs Renown ${ring.level}`; // the Hollow's victor skips the Renown climb

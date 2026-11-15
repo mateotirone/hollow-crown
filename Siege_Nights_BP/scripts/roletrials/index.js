@@ -41,7 +41,7 @@ import "./roost.js";
 import "./beats.js";
 import "./lantern.js";
 import "./thirdnight.js";
-import { trialsOf, save, pathOf, resetTrials } from "./saves.js";
+import { trialsOf, save, pathOf, regionalOf, resetTrials } from "./saves.js";
 
 const DAY = 24000;
 const BELL_NAME = "Hroda's Hand-bell";
@@ -369,7 +369,7 @@ world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
 // ---------- the "Role trials" page at the Tree of Oaths ----------
 function trialsMenu(player, back) {
   const t = trialsOf(player);
-  const path = pathOf(player);
+  const path = pathOf(player), regional = regionalOf(player);
   const parts = [];
   if (path === "knight") {
     parts.push(`§6The Eleven§r: ${t.knightWall ? `${t.eleven} of ${ELEVEN.length} knights stand with you.` : t.wallAsked ? "Stand on a besieged wall, as Aldous asked." : "Sir Aldous has something to ask you."}`);
@@ -377,11 +377,11 @@ function trialsMenu(player, back) {
   for (const role of TRIAL_ROLES) {
     const r = t.roles[role];
     const mentor = MENTOR_NPCS.find((n) => n.id === TRIALS[role].mentor)?.name ?? MENTORS[role].name;
-    if (path === role) parts.push(`§a${titleOf(role)}§r: sworn. ${mentor} still teaches you.`);
+    if (regional === role) parts.push(`§a${titleOf(role)}§r: sworn. ${mentor} still teaches you.`);
     else if (r.started) parts.push(`§f${titleOf(role)}§r (${mentor})\n${trialPage(role, r)}`);
-    else if (path === "none") parts.push(`§8${titleOf(role)}§r: not begun. ${mentor}, at ${TRIALS[role].where}.${r.deed ? " §eYou have already done the deed." : ""}`);
+    else if (regional === "none") parts.push(`§8${titleOf(role)}§r: not begun. ${mentor}, at ${TRIALS[role].where}.${r.deed ? " §eYou have already done the deed." : ""}`);
   }
-  if (!parts.length) parts.push("You hold your role. The other roads are closed to you.");
+  if (!parts.length) parts.push("You hold your regional role. The other regional roads are closed to you.");
   new ActionFormData().title("Role trials").body(parts.join("\n\n")).button("Back").show(player).then(() => back?.()).catch(() => {});
 }
 const titleOf = (role) => ({ rider: "Dragon Rider", forgemaster: "Forgemaster", captain: "Captain", witch: "Witch" })[role] ?? role;

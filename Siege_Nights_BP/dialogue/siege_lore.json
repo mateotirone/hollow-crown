@@ -7067,7 +7067,7 @@
       {
         "scene_tag": "siege_lore_kesh_other",
         "npc_name": "Kesh Cinder",
-        "text": "You're sworn to something already. I can see it on you.\n\nThe Roost doesn't take halves. One road each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
+        "text": "You've another region's road on you already. I can see it.\n\nThe Roost doesn't take halves. Your own oath, Knight's or Ember's, is your business, but one of the regions' roads each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
         "buttons": [
           {
             "name": "Tell me about Ysolt.",
@@ -7795,7 +7795,7 @@
       {
         "scene_tag": "siege_lore_ulla_other",
         "npc_name": "Ulla Deepforge",
-        "text": "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
+        "text": "You're sworn to another region's road already. I can see it on you. She can too: look, she's gone quiet.\n\nOne of those each. Warm your hands, though. Nobody's turned away from the fire.",
         "buttons": [
           {
             "name": "Thank you.",

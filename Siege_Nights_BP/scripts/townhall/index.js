@@ -146,6 +146,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   switch (event.id) {
     case "siege:townhall_path":
       if (args[0] !== "none" && !ROLES[args[0]]) return player.sendMessage(`§cUse ${Object.keys(ROLES).join(", ")} or none.`);
+      if (ROLES[args[0]]?.region) { hero.regional = "none"; return void choosePath(player, args[0]); }
       hero.path = "none";
       hero.ember = "none";
       if (args[0] === "none") { saveHero(player); setTreeLook(player.id); return player.sendMessage("§7Path cleared."); }
@@ -206,6 +207,9 @@ api.addTests("townhall", {
     api.assertEqual(blockedReason(SKILL.way_horse, { ...hero, level: 4, skills: { way_fleet: 1 } }, 2), "Needs Renown 5");
     api.assertEqual(blockedReason(SKILL.keep_watchfire, { ...hero, skills: { keep_watchfire: 1 } }, 5), "Mastered");
     api.assert(!canBranch("arcana", "knight") && canBranch("keep", "none"));
+    // main path + one regional role (Mateo 2026-11-15): a Knight who is also a Rider has Blade and Wing, not Arcana or Forge
+    api.assert(canBranch("blade", "knight", "rider") && canBranch("wing", "knight", "rider"));
+    api.assert(!canBranch("arcana", "knight", "rider") && !canBranch("forge", "knight", "rider"));
     api.assertEqual(blockedReason(SKILL.arc_step, { ...hero, path: "marked", level: 2, victor: true, skills: { arc_blink: 1 } }, 3), undefined);
     api.assertEqual(blockedReason(SKILL.arc_step, { ...hero, path: "marked", level: 2, skills: { arc_blink: 1 } }, 3), "Needs Renown 12");
   },

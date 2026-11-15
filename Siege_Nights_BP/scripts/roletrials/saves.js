@@ -38,3 +38,4 @@ export function heroOf(player) {
   return {};
 }
 export const pathOf = (player) => heroOf(player).path ?? "none";
+export const regionalOf = (player) => heroOf(player).regional ?? "none"; // the one regional role on top of the main path
