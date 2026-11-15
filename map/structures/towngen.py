@@ -69,6 +69,18 @@ SITES = {
 }
 
 ROT = {0: (0, 1), 90: (-1, 0), 180: (0, -1), 270: (1, 0)}        # where a stamp's front (south) points after turning
+_WARDS = None
+def station_ward(region):
+    """The ground a town keeps for its Grand Station, in the station's own x, z (north-facing front): the footprint
+    of the station design the towns were planned around, before the stations moved onto the skill (PR #461).
+    A town keeps this ground plus the current design's own, so a new station design never moves the rest of the
+    town (restamp thread, 2026-11-15). Data: station_wards.json, rows [z, x0, x1]."""
+    global _WARDS
+    if _WARDS is None:
+        _WARDS = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "station_wards.json")))
+    return [(x, z) for z, x0, x1 in _WARDS.get(region, []) for x in range(x0, x1 + 1)]
+
+
 def rot_xz(x, z, deg):
     for _ in range((deg // 90) % 4): x, z = -z, x
     return x, z
@@ -1561,6 +1573,7 @@ class Town:
         self.place_square_buildings()
         self.houses(); self.relax()
         self.windmills()
+        self.station_late_ground()
         self.terraform()
         self.field_paths()
         self.fences()
@@ -1784,10 +1797,15 @@ class Town:
         import stations
         x, z = stop; bp = stations.grand(region); bp.kind = "station"
         g, _ = self.footprint(bp, deg); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
-        y = int(max(self.at(self.G, cx, cz) for cx, cz in cells))
+        # the town keeps the ground it was planned around (station_ward) while it lays itself out; the design's own
+        # ground beyond that is levelled and taken after the houses (station_late_ground), so a new station design
+        # never moves the rest of the town (restamp thread, 2026-11-15)
+        ward = {(rx + x, rz + z) for rx, rz in (rot_xz(a, b, deg) for a, b in station_ward(region)) if self.ok(rx + x, rz + z)} or set(cells)
+        y = int(max(self.at(self.G, cx, cz) for cx, cz in ward))
         self.stamp(bp, x, z, y, deg, "station"); e = self.plan[-1]; e["name"] = "station"; e["footprint"] = len(cells)
-        self.foundation(cells, y)
-        for cx, cz in cells:
+        self.station_late = (sorted(set(cells) - ward), y)
+        self.foundation(sorted(ward), y)
+        for cx, cz in ward:
             for dx in (-2, -1, 0, 1, 2):
                 for dz in (-2, -1, 0, 1, 2):
                     if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
@@ -1796,6 +1814,17 @@ class Town:
         self.station_axis = (x, z, deg); self.wall_region = region
         self.add_levels("station", e, [(st.capitalize(), bp if st == "grand" else getattr(stations, st)(region)) for st in stations.STAGES], align="origin")
         return e
+
+    def station_late_ground(self):
+        """Level and take the station design's ground beyond the planned ward (station_site), once the houses stand."""
+        late, y = getattr(self, "station_late", ((), 0))
+        if not late: return
+        self.foundation(late, y)
+        for cx, cz in late:
+            for dx in (-2, -1, 0, 1, 2):
+                for dz in (-2, -1, 0, 1, 2):
+                    if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
+        self.station_late = ((), y)
 
     def claim_first(self):
         """Civic buildings named in site["first"] (Millbrook's chapel: Sister Wren's, on the square) claim their

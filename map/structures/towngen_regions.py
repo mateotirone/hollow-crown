@@ -334,6 +334,7 @@ class RegionTown(Town):
         self.shore()
         self.houses(); self.relax()
         self.windmills()
+        self.station_late_ground()
         self.terraform()
         self.field_paths()
         self.fences()
