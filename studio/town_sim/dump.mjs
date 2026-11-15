@@ -70,7 +70,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, BESIDE_MAX, AROUND, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -297,26 +297,19 @@ function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
 function wallCols(level) { return wallColumns({ center: wall, radius: wall.radius, level, gateAngle: wall.gate, smooth: wall.ground }); }
-function besideHigh(x, z, own, colKeys) { // walls.js placeColumn: how far the natural ground beside a column rises
-  let high = 0;
-  for (const [dx, dz] of AROUND) {
-    if (colKeys.has(`${x + dx},${z + dz}`)) continue;
-    let h = 0;
-    while (h < BESIDE_MAX && WALL_NATURAL.test(idOf(get(x + dx, own + 1 + h, z + dz)))) h++;
-    high = Math.max(high, h);
-  }
-  return high;
+function besideHigh(x, z, own, wallCell) { // walls.js placeColumn: walldata.js besideHeight on this world
+  return besideHeight((bx, by, bz) => idOf(get(bx, by, bz)), x, z, own, wallCell);
 }
 // walls.js topUpWall: once the tier's groundwork is laid (it is laid while the wall rises), stakes the new ground
 // beside came up against are topped up. Played as part of the ring so the page shows the wall as it ends up.
 function topUpOps(level, tier, ops) {
   const L = WALL_LEVELS[level], Pw = wallPalette(STYLE, L, {}), cols = wallCols(level);
   groundworkOps(tier); blendOps(tier); // on the scratch world only (ringOps restores it)
-  const colKeys = new Set(cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`));
+  const wallCell = wallCellOf(cols, allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)); // walls.js job.wallCell
   for (const col of cols) {
     if (col.role !== "wall") continue;
     const lk = `${col.x},${col.z}`, lift = wall.lifts[lk] ?? 0;
-    const high = besideHigh(col.x, col.z, col.base + lift, colKeys);
+    const high = besideHigh(col.x, col.z, col.base + lift, wallCell);
     if (high <= (wall.beside[lk] ?? 0)) continue;
     wall.beside[lk] = high;
     for (const [y, kind] of columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style)) set(ops, col.x, y + lift, col.z, permId(permFor(Pw, wall, kind, col)));
@@ -334,7 +327,7 @@ function wallOps(level) { // raiseWall -> step -> placeColumn
       for (const [y] of columnKinds(WALL_LEVELS[wall.level], col, wallSeed(wall))) set(ops, col.x, y, col.z, 0);
     }
   }
-  const colKeys = new Set(cols.filter((c) => c.role === "wall" || c.role === "tower").map((c) => `${c.x},${c.z}`));
+  const wallCell = wallCellOf(cols, allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)); // walls.js job.wallCell
   for (const col of cols) {
     const { x, z, base } = col;
     if (col.role === "gap" || col.role === "gate" || col.role === "port") {
@@ -351,7 +344,7 @@ function wallOps(level) { // raiseWall -> step -> placeColumn
       if (lift) wall.lifts[lk] = lift;
     }
     if (col.role === "wall" && wall.beside[lk] === undefined) { // the ground right beside it (WALLS.clear)
-      const high = besideHigh(x, z, base + lift, colKeys);
+      const high = besideHigh(x, z, base + lift, wallCell);
       if (high) wall.beside[lk] = high;
     }
     const cells = columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style);
