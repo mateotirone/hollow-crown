@@ -188,7 +188,7 @@ export const TOWNS = [
   { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter", "factor", "moneyer"],
     at: { moneyer: { x: -64, y: 79, z: -453, yaw: -90 } }, signs: [{ x: -61, y: 81, z: -459, text: MONEYER_SIGN }] },
   { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer", "factor", "moneyer"],
-    at: { moneyer: { x: -60, y: 113, z: -1100, yaw: 90 } }, signs: [{ x: -63, y: 115, z: -1094, text: MONEYER_SIGN }] },
+    at: { moneyer: { x: -62, y: 114, z: -1070, yaw: 0 } }, signs: [{ x: -56, y: 116, z: -1067, text: MONEYER_SIGN }] },
   { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter", "factor", "moneyer"],
     at: { moneyer: { x: -856, y: 69, z: 416, yaw: 180 } }, signs: [{ x: -862, y: 71, z: 413, text: MONEYER_SIGN }] },
   { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer", "factor", "moneyer"],
