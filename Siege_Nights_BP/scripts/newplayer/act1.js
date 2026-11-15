@@ -16,7 +16,7 @@
 
 import { world, system, ItemStack, BlockPermutation } from "@minecraft/server";
 import { on, emit, addFilter } from "../core/events.js";
-import { onTick, moduleStore, keepOf, keepCenter, homeOf, nextSiegeDay, getState, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, moduleStore, keepOf, keepCenter, homeOf, nextSiegeDay, getState, addTests, assert, assertEqual, TIERS } from "../siege/api.js";
 import { mapMode } from "../plots/api.js";
 import { plotOf } from "../plots/claims.js";
 import { progressOf } from "../lore/player.js";
@@ -24,7 +24,11 @@ import { addLoreContext } from "../lore/npcs.js";
 import { elspethSpot, aldousAt } from "../lore/places.js";
 import { heroOf, saveHero } from "../townhall/hero.js";
 import { EMBER } from "../townhall/tree.js";
-import { wallRing } from "../settle/walls.js";
+import { wallRing, wallOf } from "../settle/walls.js";
+import { benchOf } from "../settle/mason.js";
+import * as settle from "../settle/index.js"; // founderFurnaceOf comes with the starter village furnace
+import { givePlanBook } from "../settle/planbook.js";
+import { caveSiteOf } from "../plotcaves/index.js";
 import { RAVEN, yawToward } from "../bestiary/ravens.js";
 import { WREN_ALTAR } from "../opening/millbrook.js";
 import { allSites } from "../trains/station_sites.js";
@@ -35,13 +39,22 @@ import { givePurse } from "../starter/index.js";
 import { firstFacts } from "./firstnights.js";
 import { founderChest } from "./founder.js";
 import { yardWorkshop } from "./workshop.js";
+import { gateManned, hasGatePost, gatePostAt } from "../guardposts/index.js";
+import { GATE_POST } from "../guardposts/posts.js";
 import { act1Stage, act1Step, inAct1, F, DUSK, MIDNIGHT, PILLAR } from "./act1_rules.js";
+import { modeOf } from "./mode.js";
+import { SETTLEMENT } from "./mode_rules.js";
 
 const OVERWORLD = "minecraft:overworld";
 const FALLEN_EMBER = "siege:fallen_ember";
 const CHEST_OPENED = "hc:act1_chest", WORKSHOP_OPENED = "hc:act1_workshop", BAKED = "hc:act1_bread", RAVEN_TOLD = "hc:act1_raven_day";
-// raided / lost: settlement owner -> true. ember: owner -> where it lies (the scorch stays when it is picked up)
-const store = moduleStore("hc:act1", () => ({ raided: {}, lost: {}, ember: {} }));
+const MINE_FOUND = "hc:act1_mine", ORE = "hc:act1_ore", SMELTED = "hc:act1_smelt";
+// raided / lost / mended: settlement owner -> true. ember: owner -> where it lies (the scorch stays when it is picked up)
+const store = moduleStore("hc:act1", () => ({ raided: {}, lost: {}, ember: {}, mended: {} }));
+// The mine step's ore: any coal, and iron as it comes out of the rock
+export const COAL = ["minecraft:coal", "minecraft:charcoal"];
+export const IRON = ["minecraft:raw_iron", "minecraft:iron_ore", "minecraft:deepslate_iron_ore"];
+export const INGOT = "minecraft:iron_ingot";
 
 // The night: the Ember only comes down after dark, and never while a siege is on
 const NIGHT_FROM = 13000, NIGHT_TO = 23000;
@@ -81,6 +94,11 @@ function emberState(player) {
   return "none";
 }
 
+const mineOf = (plot) => { try { const c = plot && caveSiteOf(plot.name); return c ? { x: c.x, y: c.y, z: c.z } : undefined; } catch { return undefined; } };
+// The furnace in the founder's house (starter village marks); a cottage with its own furnace has none, and the
+// founder's chest beside the bed is the next best pin
+const furnaceOf = (home) => { try { return settle.founderFurnaceOf?.(home); } catch { return undefined; } };
+
 // Everything act1Stage and act1Step need, and the places the tracker points at
 export function act1Facts(player) {
   const p = progressOf(player);
@@ -92,11 +110,16 @@ export function act1Facts(player) {
     sieges: Math.max(keep?.sieges ?? 0, raided ? 1 : 0), lost: !keep && !!store.data.lost[home],
     chest: player.getDynamicProperty(CHEST_OPENED) === true, workshop: player.getDynamicProperty(WORKSHOP_OPENED) === true,
     bread: player.getDynamicProperty(BAKED) === true, time: world.getTimeOfDay(),
+    mine: player.getDynamicProperty(MINE_FOUND) === true, ore: player.getDynamicProperty(ORE) === true,
+    smelted: player.getDynamicProperty(SMELTED) === true, mended: !!store.data.mended?.[home],
+    mode: modeOf(player),
   };
+  if (f.mode === SETTLEMENT) f.grow = growFacts(home, keep);
   if (!inAct1(f)) return { f };
   const chestAt = founderChest(home);
   if (!chestAt) f.chest = true; // no founder's chest on this settlement: nothing to open
   try { f.first = firstFacts(player); } catch { /* not ready */ }
+  try { f.gateLookout = hasGatePost(home) ? gateManned(home) : undefined; } catch { /* no wall */ }
   let farmer;
   try { farmer = farmerFacts(player); } catch { /* not ready */ }
   f.sold = farmer?.sold ?? 0;
@@ -107,6 +130,9 @@ export function act1Facts(player) {
   f.home = player.dimension.id === OVERWORLD && insideRing(player.location, ring, keepAt);
   try { f.siegeDay = !!keep && f.sieges === 0 && world.getDay() === nextSiegeDay(); } catch { f.siegeDay = false; }
   f.ember = emberState(player);
+  try { f.wall = !!wallOf(home)?.level; } catch { f.wall = false; }
+  f.haveCoal = COAL.some((id) => carries(player, id) > 0);
+  f.haveIron = IRON.some((id) => carries(player, id) > 0);
   const aldous = aldousAt(home);
   f.aldousHere = !!aldous;
   let stone;
@@ -116,8 +142,20 @@ export function act1Facts(player) {
     workshop: yardWorkshop(home), farmer: farmer?.at, farmerTag: farmer?.tag ?? `${FARMER_TAG}_${player.id}`,
     station: f.station, keep: keepAt ?? (ring ? { x: ring.x, z: ring.z } : undefined),
     millbrook: WREN_ALTAR, ember: store.data.ember[home], aldous,
+    mine: mineOf(stone), furnace: furnaceOf(home) ?? chestAt, mason: benchOf(home), gateLookout: gatePostAt(home),
   };
   return { f, places, ring, home };
+}
+
+// Settlement Mode's growing step: the town's tier, the siege nights and warlords the next tier wants (siege/territory.js
+// TIERS), and the charter's buildings not yet standing (settle/charters.js, the same check that holds a town back)
+function growFacts(home, keep) {
+  let tier = 0;
+  try { tier = settle.townOf(home)?.tier ?? Math.max(0, TIERS.findIndex((t) => t.name === keep?.tier)); } catch { /* no town */ }
+  const next = TIERS[Math.min(tier + 1, TIERS.length - 1)];
+  let build = [];
+  try { build = settle.charterOf(home, tier).lines.filter((l) => !l.skipped && l.have < l.need).map((l) => (l.need > 1 ? `${l.need - l.have} more ${l.what}` : l.what)); } catch { /* no town */ }
+  return { tier, wins: keep?.wins ?? 0, winsNeed: next.wins, warlords: keep?.warlordsSlain ?? 0, warlordsNeed: next.warlords ?? 0, build };
 }
 
 // The player's stage and tracker line, worked out at most once every STAGE_EVERY ticks
@@ -137,7 +175,20 @@ export function act1Of(player, fresh = false) {
   return out;
 }
 const forget = (player) => { if (player?.id) cache.delete(player.id); };
-for (const name of ["loreFlag", "keepFounded", "keepFallen", "siegeEnd", "goodsSold", "emberFell"]) on(name, (d) => forget(d?.player));
+for (const name of ["loreFlag", "keepFounded", "keepFallen", "siegeEnd", "goodsSold", "emberFell", "modeSet"]) on(name, (d) => forget(d?.player));
+// A settlement that grows (or whose charter moves) changes Settlement Mode's step at once
+for (const name of ["tierUp", "settleCharter"]) on(name, (d) => { if (d?.owner) forgetOwner(d.owner); });
+
+// Starting a new settlement in Settlement Mode (newplayer/mode.js clears Elspeth's flags): the day-by-day marks go too,
+// so she walks the player through the founder's chest, the bread and the mine again
+on("modeSet", ({ player, mode }) => {
+  if (mode !== SETTLEMENT || !player?.isValid) return;
+  for (const prop of [CHEST_OPENED, WORKSHOP_OPENED, BAKED, RAVEN_TOLD, MINE_FOUND, ORE, SMELTED]) player.setDynamicProperty(prop, undefined);
+  for (const k of ["raided", "lost", "mended"]) delete store.data[k]?.[player.id];
+  store.save();
+  forget(player);
+});
+const forgetOwner = (owner) => { for (const p of world.getAllPlayers()) if (homeId(p) === owner) forget(p); };
 world.afterEvents.playerLeave.subscribe(({ playerId }) => cache.delete(playerId));
 
 // For the quest tracker (quests/index.js): { on, step } — on while Act 1 is this player's story
@@ -147,12 +198,46 @@ export const act1Quest = (player) => { const a = act1Of(player); return { on: !!
 addLoreContext((player) => {
   const a = act1Of(player);
   if (!a.f) return {};
-  return { act1: a.stage, raided: !inAct1(a.f) || (a.f.sieges ?? 0) > 0 || !!a.f.lost };
+  return { act1: a.stage, raided: !inAct1(a.f) || (a.f.sieges ?? 0) > 0 || !!a.f.lost, mode: a.f.mode };
 });
 
 // ---------- what Elspeth hands over, what the player does ----------
 
 on("elspethPurse", ({ player }) => { try { givePurse(player); } catch (e) { console.warn(`[Act 1] purse: ${e}`); } });
+// The Plan Book: Elspeth hands it over with the Barracks step, not the system on day one
+on("elspethPlanBook", ({ player }) => { try { givePlanBook(player, homeId(player), "§6Old Elspeth hands you a Plan Book.§7 It lists the buildings you can raise on your plots."); } catch (e) { console.warn(`[Act 1] plan book: ${e}`); } });
+addFilter("planBookByStory", (story, { player }) => story || (() => { try { return mapMode() && !!act1Of(player, true).on; } catch { return false; } })());
+// The cob: on a map, Elspeth introduces it and the whistle when you meet her, so the arrival says nothing
+addFilter("cobQuiet", (quiet, { player }) => quiet || (() => { try { return mapMode() && !!act1Of(player, true).on; } catch { return false; } })());
+
+// The mine: going down your own plot's shaft finds it
+on("plotCaveEntered", ({ player, plot }) => {
+  try {
+    if (player.getDynamicProperty(MINE_FOUND) === true || plotOf(player.id)?.name !== plot) return;
+    player.setDynamicProperty(MINE_FOUND, true);
+    forget(player);
+  } catch (e) { console.warn(`[Act 1] mine: ${e}`); }
+});
+// Coal and iron in the pack, then an ingot out of the furnace (watched while those are the step)
+function watchOre(player, stage) {
+  if (stage === "mine") {
+    // standing at the pithead counts too: the cave's door only notices you once you are well down the ladder
+    const at = mineOf(plotOf(player.id));
+    if (at && Math.hypot(player.location.x - at.x, player.location.z - at.z) <= 8) { player.setDynamicProperty(MINE_FOUND, true); forget(player); }
+  } else if (stage === "ore") {
+    if (COAL.some((id) => carries(player, id) > 0) && IRON.some((id) => carries(player, id) > 0)) { player.setDynamicProperty(ORE, true); forget(player); }
+  } else if (stage === "smelt") {
+    if (carries(player, INGOT) > 0) { player.setDynamicProperty(SMELTED, true); forget(player); }
+  }
+}
+export const ORE_STAGES = new Set(["mine", "ore", "smelt"]);
+// The wall after the first raid: the Mason mends it, or finds it whole (settle/repair.js "wallRepaired")
+on("wallRepaired", ({ owner }) => {
+  if (!owner || !store.data.raided[owner] || store.data.mended[owner]) return;
+  store.data.mended[owner] = true;
+  store.save();
+  forgetOwner(owner);
+});
 
 // The starting purse: on a map, Elspeth gives it when you first meet her (starter/index.js asks)
 addFilter("joinPurse", (give, { player }) => {
@@ -161,6 +246,8 @@ addFilter("joinPurse", (give, { player }) => {
 });
 // The Ember is the story's, for Act 1 players: it falls at the gate after Wren, not after a siege win
 addFilter("emberByStory", (story, { player }) => story || (() => { try { return !!act1Of(player, true).on; } catch { return false; } })());
+// The guard step: while it is yours, the only post offered is the gate lookout (Mateo 2026-11-14)
+addFilter("guardPostsOnly", (key, { player }) => key ?? (() => { try { return act1Of(player, true).stage === "station" ? GATE_POST : undefined; } catch { return undefined; } })());
 // Sir Aldous comes after Elspeth reads the Ember, not after the first win
 addFilter("aldousByStory", (story, { player }) => story || (() => { try { return !!act1Of(player, true).on || progressOf(player).flags.includes(F.met); } catch { return false; } })());
 
@@ -363,6 +450,7 @@ onTick("act1", 4, () => {
         pillar(player, t);
       }
       if (a.stage === "bread") watchBread(player);
+      if (ORE_STAGES.has(a.stage)) watchOre(player, a.stage);
       const time = world.getTimeOfDay();
       if (a.stage === "ride_home" && a.f.home && time >= NIGHT_FROM && time < NIGHT_TO && !getState().active && tick % 10 === 0) {
         if (dropAtGate(player, a)) forget(player);
@@ -380,7 +468,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   }
   if (!a.on) return player.sendMessage("§7Act 1 is not your story now (you have met Sir Aldous, or this keep held sieges before Act 1).");
   const f = a.f;
-  player.sendMessage(`§6Act 1 stage:§f ${a.stage}\n§7keep ${f.keep} sieges ${f.sieges} lost ${f.lost} chest ${f.chest} workshop ${f.workshop} sold ${f.sold} bread ${f.bread} siegeDay ${f.siegeDay} home ${f.home} ember ${f.ember}`);
+  player.sendMessage(`§6Act 1 stage:§f ${a.stage}\n§7keep ${f.keep} sieges ${f.sieges} lost ${f.lost} chest ${f.chest} workshop ${f.workshop} sold ${f.sold} bread ${f.bread} mine ${f.mine} ore ${f.ore} smelted ${f.smelted} wall ${f.wall} mended ${f.mended} siegeDay ${f.siegeDay} home ${f.home} ember ${f.ember}`);
   if (a.step) player.sendMessage(`§6${a.step.title}§7 ${a.step.hint}`);
 });
 
@@ -400,6 +488,8 @@ addTests("act1", {
     assertEqual(act1Stage(bk), "barracks");
     assertEqual(act1Stage({ ...bk, first: { barracks: true } }), "guards");
     const wh = { ...bk, first: { barracks: true, guards: 2 } };
+    assertEqual(act1Stage({ ...wh, gateLookout: false }), "station", "the first guard goes up the gate lookout");
+    assertEqual(act1Stage({ ...wh, gateLookout: true }), "talk_wheat");
     assertEqual(act1Stage(wh), "talk_wheat");
     const sell = { ...wh, flags: [...wh.flags, F.wheat] };
     assertEqual(act1Stage({ ...sell, sold: 3 }), "sell");
@@ -408,9 +498,15 @@ addTests("act1", {
     assertEqual(act1Stage(st), "talk_station");
     const st2 = { ...st, flags: [...st.flags, F.station] };
     assertEqual(act1Stage({ ...st2, station: { found: false } }), "station");
-    assertEqual(act1Stage({ ...st2, station: { found: true } }), "rest");
-    for (const s of ["meet", "banner", "chest", "talk_workshop", "workshop", "talk_barracks", "talk_wheat", "sell", "bread", "talk_station", "station"]) {
-      const step = act1Step(s, { flags: [] }, { hearth: { x: 1, z: 2 }, stone: { x: 3, z: 4 }, chest: { x: 5, z: 6 }, workshop: { x: 7, z: 8 }, farmer: { x: 9, z: 9 }, station: { x: 1, z: 1 } });
+    const found = { ...st2, station: { found: true } };
+    assertEqual(act1Stage(found), "talk_mine", "day 2 ends at the mine");
+    const mn = { ...found, flags: [...found.flags, F.mine] };
+    assertEqual(act1Stage(mn), "mine");
+    assertEqual(act1Stage({ ...mn, mine: true }), "ore");
+    assertEqual(act1Stage({ ...mn, mine: true, ore: true }), "smelt");
+    assertEqual(act1Stage({ ...mn, mine: true, ore: true, smelted: true }), "rest");
+    for (const s of ["meet", "banner", "chest", "talk_workshop", "workshop", "talk_barracks", "talk_wheat", "sell", "bread", "talk_station", "station", "talk_mine", "mine", "ore", "smelt", "mend"]) {
+      const step = act1Step(s, { flags: [] }, { hearth: { x: 1, z: 2 }, stone: { x: 3, z: 4 }, chest: { x: 5, z: 6 }, workshop: { x: 7, z: 8 }, farmer: { x: 9, z: 9 }, station: { x: 1, z: 1 }, mine: { x: 2, z: 2 }, furnace: { x: 4, z: 4 }, mason: { x: 6, z: 6 }, gateLookout: { x: 8, z: 8 } });
       assert(step?.title && step.hint, `${s} has a line`);
       if (s !== "bread") assert(step.target, `${s} pins a place (the minimap always shows where to go)`);
     }
@@ -433,8 +529,12 @@ addTests("act1", {
     assertEqual(act1Stage({ ...won, keep: false, lost: true }), "talk_raid_lost");
     const told = { ...won, flags: [F.met, F.raid] };
     assertEqual(act1Stage({ ...told, keep: false, lost: true }), "rebanner");
-    assertEqual(act1Stage(told), "wren");
+    assertEqual(act1Stage({ ...told, wall: true }), "mend", "mend the wall before the long ride");
+    assertEqual(act1Stage({ ...told, wall: true, mended: true }), "talk_mine", "a mine skipped on day 2 comes before Wren");
+    const mined = { ...told, flags: [...told.flags, F.mine], mine: true, ore: true, smelted: true };
+    assertEqual(act1Stage(mined), "wren");
     const lead = { ...told, flags: [...told.flags, F.wrenLead] };
+    assertEqual(act1Stage({ ...lead, ember: "none" }), "ride_home", "Wren's lead skips an unfinished mine");
     assertEqual(act1Stage({ ...lead, ember: "none" }), "ride_home");
     assertEqual(act1Stage({ ...lead, ember: "fallen" }), "find_ember");
     assertEqual(act1Stage({ ...lead, ember: "held" }), "ask_ember");
@@ -445,7 +545,7 @@ addTests("act1", {
     assertEqual(act1Stage({ flags: [], keep: true, sieges: 4 }), undefined, "a keep from before Act 1 keeps its old story");
   },
   "Act 1: the tracker never warns of a raid before the ravens": () => {
-    const said = ["meet", "banner", "chest", "talk_workshop", "workshop", "talk_barracks", "barracks", "guards", "talk_wheat", "sell", "bread", "talk_station", "station", "talk_sundown", "home", "raven", "talk_supper"]
+    const said = ["meet", "banner", "chest", "talk_workshop", "workshop", "talk_barracks", "barracks", "guards", "talk_wheat", "sell", "bread", "talk_station", "station", "talk_mine", "mine", "ore", "smelt", "talk_sundown", "home", "raven", "talk_supper"]
       .map((s) => act1Step(s, { flags: [], first: s === "guards" ? { barracks: true, days: 1 } : { days: 1 } }, {})).filter(Boolean).map((s) => `${s.title} ${s.hint} ${s.note ?? ""}`).join(" ");
     assert(!/raid|siege|attack|third night/i.test(said), "no raid foreknowledge");
   },

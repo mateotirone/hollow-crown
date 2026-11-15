@@ -1,13 +1,14 @@
 // The Sorcerer's magic hotbar.
 //
-// Right-click the Bound Ember: your nine hotbar slots are packed into a hidden satchel and one spell icon per
-// power you know takes their place, with the Ember in slot 9. Scroll to a spell, right-click to cast it; each
-// icon shows its cooldown. Right-click the Ember again (or sneak + right-click a spell) to get your hotbar back.
+// Right-click the Bound Ember, or double-tap sneak: your first eight hotbar slots are packed into a hidden satchel
+// and one spell icon per power you know takes their place. The Ember stays where it always is, locked in slot 9
+// (keepsake.js). Scroll to a spell, right-click to cast it; each icon shows its cooldown. Right-click the Ember
+// again, double-tap sneak, or sneak + right-click a spell to get your hotbar back.
 //
 // Safety: the satchel is a model-less entity (siege:spell_satchel) that follows you. Your own items are never
 // copied or deleted, only swapped between your hotbar and it. They come back by themselves on death (dropped
 // where you fell, or kept if keepInventory is on), and when you rejoin after logging off or a restart.
-// Spell icons and the Ember copy are locked to their slot, kept on death, and cleared whenever the bar shuts.
+// Spell icons are locked to their slot, kept on death, and cleared whenever the bar shuts.
 
 import { world, system, ItemStack, ItemLockMode } from "@minecraft/server";
 import * as api from "../siege/api.js";
@@ -18,6 +19,7 @@ import { heroOf, saveHero } from "./hero.js";
 import { BOUND_EMBER } from "./tree.js";
 import { cast, cooldownLeft, isMarkedPlayer } from "./marked.js";
 import { POWER_KEY } from "./marked_fx.js";
+import { KEEP_SLOT, onDoubleSneak, settleKeepsake } from "./keepsake.js";
 
 export const SATCHEL = "siege:spell_satchel";
 const OPEN_PROP = "hc:spellbar"; // on the player: "open" while the bar is up
@@ -48,8 +50,8 @@ function findSatchel(player, range = 96) {
   }
 }
 
-// a slot item that belongs to the bar (a spell icon, or the locked Ember copy) and goes away when it shuts
-const ours = (item) => item && (isSpellItem(item.typeId) || (item.typeId === BOUND_EMBER && item.lockMode === ItemLockMode.slot));
+// a slot item that belongs to the bar (a spell icon) and goes away when it shuts; the sworn Ember is not ours
+const ours = (item) => item && isSpellItem(item.typeId);
 
 function lockedItem(typeId) {
   const item = new ItemStack(typeId, 1);
@@ -65,7 +67,7 @@ function lockedItem(typeId) {
 function clearBar(player) {
   const c = inv(player);
   if (!c) return;
-  for (let i = 0; i < 9; i++) if (ours(c.getItem(i))) c.setItem(i, undefined);
+  for (let i = 0; i < KEEP_SLOT; i++) if (ours(c.getItem(i))) c.setItem(i, undefined);
 }
 
 /** Put items (from the satchel or kept through a death) back into the hotbar; anything in the way goes to the inventory or the ground. */
@@ -74,6 +76,7 @@ function giveBack(player, items) {
   for (let i = 0; i < 9; i++) {
     const item = items[i];
     if (!item) continue;
+    if (i === KEEP_SLOT && item.typeId === BOUND_EMBER) continue; // a satchel from before the Ember was sworn to slot 9
     let left = item;
     if (!c.getItem(i)) {
       c.setItem(i, item);
@@ -99,9 +102,10 @@ export function openBar(player) {
     return player.onScreenDisplay.setActionBar("§7The Ember will not open here.");
   }
   const bag = inv(satchel);
-  for (let i = 0; i < 9; i++) c.swapItems(i, i, bag); // your hotbar, untouched, into the satchel
+  for (let i = 0; i < KEEP_SLOT; i++) c.swapItems(i, i, bag); // your hotbar, untouched, into the satchel
   player.setDynamicProperty(OPEN_PROP, "open");
-  layout.forEach((typeId, i) => typeId && c.setItem(i, lockedItem(typeId)));
+  layout.forEach((typeId, i) => typeId && i < KEEP_SLOT && c.setItem(i, lockedItem(typeId)));
+  settleKeepsake(player); // the Ember is in slot 9, as always
   try {
     player.selectedSlotIndex = 0;
   } catch {
@@ -112,7 +116,7 @@ export function openBar(player) {
     if (left > 0 && POWER_KEY[id]) startCooldown(player, id, left);
   }
   sfx(player, "cast.open");
-  player.onScreenDisplay.setActionBar("§5The Ember wakes.§7 Scroll to a power, use it to cast. Use the Ember to put it away.");
+  player.onScreenDisplay.setActionBar("§5The Ember wakes.§7 Scroll to a power, use it to cast. Use the Ember, or double-tap sneak, to put it away.");
 }
 
 export function closeBar(player, { quiet = false } = {}) {
@@ -163,6 +167,12 @@ world.afterEvents.itemUse.subscribe((event) => {
   hero.spell = skill;
   saveHero(player);
   if (cast(player, skill)) startCooldown(player, skill, cooldownLeft(player, skill));
+});
+
+// double-tap sneak, anywhere: the same as using the Ember
+onDoubleSneak((player) => {
+  if (!isMarkedPlayer(player)) return;
+  return isOpen(player) ? closeBar(player) : openBar(player);
 });
 
 // ---------- deaths, rejoins, and keeping the satchel with you ----------

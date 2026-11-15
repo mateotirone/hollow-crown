@@ -57,9 +57,11 @@ CLEAR = 3                                       # a slot's far corner stays this
 # (placement thread 2026-11-11): S 9x13, M 11x15 (long M 13x15, also the Hamlet's library slot),
 # L 15x15, G 21x21; Large and Great may be 2 longer either way.
 SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)],
-          "W": [(27, 17)]}                    # Works: the resource yards (Ironworks, Gold Sluice, Deep Shaft; material loop thread)
+          "W": [(27, 13)],                    # Works: the second yard (Forester's grove; the Hamlet's 27 x 17 Ironworks yard is the starter's)
+          "D": [(23, 11)],                    # Dragon: the Dragon Stable and its nursery (Emberwaste towns only)
+          "B": [(23, 11)]}                    # Barn: the horse Stables (21 x 9 walls, eaves all round), gable-on to its road (Mateo 2026-11-14: big plots)
 SIZES = {k: v[0][0] for k, v in SHAPES.items()}   # frontage of the plain box
-SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works"}
+SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works", "D": "Dragon", "B": "Barn", "O": "Wood"}
 MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=4, L=1, G=0, field=1),      # agreed with the placement
            dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
 HALL_AT = {"Hamlet": 1, "Town": 2, "City": 3, "Castle": 4}   # hall level per tier (5 = Sovereign, reserved anyway)
@@ -303,7 +305,10 @@ class Settlement(Town):
                 arc = []
         # radial streets
         for theta, r0, r1 in self.tpl["radials"]:
-            end = self.polar(theta, r1); end = (int(round(end[0])), int(round(end[1])))
+            end = self.polar(theta, r1)
+            if getattr(self, "starter", None):   # the outer end follows the outline too, so the street still closes its portions
+                end = self.polar(theta, r1 + float(self.outline(math.atan2(end[1] - self.C[1], end[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
+            end = (int(round(end[0])), int(round(end[1])))
             if r0 <= 12 and getattr(self, "starter", None):   # from the ring lane round the village (the old Hamlet wall line)
                 p = self.polar(theta, WALL_R[0])
                 s = self.polar(theta, WALL_R[0] - 1 + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
@@ -442,6 +447,9 @@ class Settlement(Town):
     # ---- portions: fields are whole outer portions
     def portions(self):
         super().portions()
+        self.choose_fields()
+
+    def choose_fields(self):
         hall_near = self._dilate(self.HALL, 4)
         land = sum(p["area"] for p in self.port.values())
         for p in self.port.values(): p["kind"] = "build"
@@ -451,6 +459,7 @@ class Settlement(Town):
             if p["area"] >= 200 and (m & (self.D <= WALL_R[0] - CLEAR)).sum() <= 0.25 * p["area"]:
                 spare.append((int((m & (self.D <= WALL_R[1] - CLEAR)).sum()) - 4 * int((m & hall_near).sum()), p["area"], L))
             if p["area"] < 220 or (m & hall_near).any(): continue
+            if p["area"] > 2.5 * self.tpl["field_share"] * land: continue   # a field never takes a whole quarter of the Town band
             if (m & (self.D <= WALL_R[0] - CLEAR)).sum() > 0.25 * p["area"]: continue   # Hamlet ground is for building
             g = self.G[m]
             if np.percentile(g, 95) - np.percentile(g, 5) > 10: continue
@@ -464,6 +473,7 @@ class Settlement(Town):
         for town, area, L in cand:
             if got >= self.tpl["field_share"] * land: break
             self.port[L]["kind"] = "field"; got += area
+        spare = [t for t in spare if t[1] <= 2.5 * self.tpl["field_share"] * land]   # never the whole band (town_field finds room then)
         if not got and spare:                                   # every layout gets a field (the Farmhouse needs one)
             L = min(spare, key=lambda t: abs(t[1] - self.tpl["field_share"] * land) - 2 * min(t[0], 120))[2]
             self.port[L]["kind"] = "field"
@@ -580,6 +590,19 @@ class Settlement(Town):
             if e: got.append(e)
         self.in_field = False
         return got
+
+    def big_plots(self, C, sizes="BWD"):
+        """The big plots every town gets (Mateo 2026-11-14, settlement thread): a second Works yard (Forester's Lodge or
+        Ironworks; the first is in the starter village), the Stables' barn by the Town, and in Emberwaste the Dragon
+        Stable. All 13 deep or less, so they fit the Town band (settlement thread 2026-11-14)."""
+        cs = C[:]; self.rng.shuffle(cs)
+        want = [("B", (1, 2, 3)), ("W", (1, 2, 3))] + ([("D", (1, 2, 3))] if self.arch == "ember" else [])
+        if self.arch == "ember": want = [want[2], want[0], want[1]]   # the Dragon Stable first: eggs come early
+        self.in_field = True                           # a yard may take the corner of a field
+        for size, tiers in [w for w in want if w[0] in sizes]:
+            for max_tier in tiers:
+                if any(self.try_slot(size, c, max_tier) for c in cs): break
+        self.in_field = False
 
     def field_by(self, e, reach=None, need=3):
         """True when crop ground (field cells that will be planted) lies within reach of the slot's box,
@@ -715,9 +738,11 @@ class Settlement(Town):
         near_field = (lambda c: float(np.min(np.abs(fc[:, 0] - c[0][0]) + np.abs(fc[:, 1] - c[0][1]))) + 2 * self.rng.random()) if len(fc) else near_sq
         got = self.farmhouse(C, near_sq)               # as one big), the Farmhouse: a plain Medium by its own crops
         if not got: pass_("M", 1, 1, near_sq)
+        if getattr(self, "starter", None): self.big_plots(C, "BD")   # the Stables' barn and the Dragon Stable, by the Town (Mateo 2026-11-14)
         pass_("M", 1, 1, near_sq)
         pass_("S", 1, 3, hamlet)
         if self.WORKS: self.works_yards(C)             # the Works yards (27 x 17): off until the yards are reshaped
+        # the second Works yard (big_plots "W") is held: the Forester's grove may become an unwalled woodlot outside the wall
         pass_("L", 2, 1, near_sq)                      # City: the inn needs a true Large; the barracks, one more work
         pass_("M", 2, 2, near_sq)                      # building and three more homes
         pass_("S", 2, 3, near_sq)
@@ -771,8 +796,8 @@ class Settlement(Town):
         for e in self.slots:
             if e.get("library"): e["opensAt"] = e["geo"]          # the Hamlet's library slot opens with the Hamlet
         for e in self.slots:
-            if e["size"] == "W": e["opensAt"] = e["geo"]            # a Works yard opens as soon as it is inside the wall
-        self.slots.sort(key=lambda e: (e["opensAt"], "WGLMS".index(e["size"])))
+            if e["size"] in ("W", "D", "B"): e["opensAt"] = e["geo"]            # a Works yard opens as soon as it is inside the wall
+        self.slots.sort(key=lambda e: (e["opensAt"], "DWGBLMS".index(e["size"])))
 
     def counts(self):
         out = []
@@ -785,19 +810,16 @@ class Settlement(Town):
             out.append(c)
         return out
 
-    # The charters as the game checks them (settle/config.js CHARTERS + PLOT_SIZE/PLOT_ALSO/PLOT_FALLBACK, PR #168),
-    # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
-    # Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium), L, G.
-    # Homes are cottages (S) or houses (M). A hall4 slot is gone by the Castle, so it is not counted there.
-    # LD: a deep Large (15 wide x 17 deep or more): the only plot the Barracks takes (settle/config.js PLOT_MIN_BOX, PR #276).
-    HOME = ("S", "M", "ML"); ANY = ("S", "M", "ML", "L", "G")
-    # a home may take a long Medium too (the townhouse is ML; settlement placement thread 2026-11-13)
-    CHARTER_NEEDS = [
-        [("library", ("ML", "L"))],
-        [("home", HOME + ("MF",))] * 3 + [("farmhouse", ("MF",)), ("mint", ("M", "MF")), ("market", ("L", "ML"))],
-        [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("LD",)), ("work", ANY + ("MF",))],
-        [("home", HOME + ("MF",))] * 4,
-    ]
+    # The charters as the game checks them: settle/config.js STAGES (Mateo 2026-11-14: to level up you build every
+    # building of your stage, and every building has a plot), exported to stages.json by tools/export_stages.mjs.
+    # Cumulative: each tier's buildings, and its homes in all, must each have a slot of a class they may take, open
+    # by that tier. Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium),
+    # L, LD (a deep Large, 15 x 17: the Barracks'), G, W (Works yard). A hall4 slot is gone by the Castle.
+    # Buildings still waiting for a plot type of their own (stages.json "pending") are not counted yet.
+    _STAGES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "stages.json")))
+    HOME = tuple(_STAGES["homes"]); ANY = ("S", "M", "ML", "L", "G")
+    CHARTER_NEEDS = [[(b["id"], tuple(b["classes"])) for b in st["build"] if not b.get("region")] for st in _STAGES["stages"]]
+    HOMES_BY = [st["homes"] for st in _STAGES["stages"]]   # homes standing in all by the end of each stage
     FARM_EDGE = True                     # the Farmhouse needs a Medium (plain or long, 2026-11-12) tagged field_edge (settlement thread)
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
@@ -810,9 +832,17 @@ class Settlement(Town):
                 c = "ML" if e["size"] == "M" and e.get("long") else "LD" if e["size"] == "L" and min(e["dims"]) >= 15 and e["dims"][1] >= 17 else e["size"]
                 if c in ("M", "ML") and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c += "F"
                 sup[c] += 1
-            if getattr(self, "starter", None):   # the starter village's library plot and its open deep Large (its houses stand already)
-                sup["ML"] += 1; sup["LD"] += 1
+            starter = getattr(self, "starter", None)
+            if starter:   # the starter village's open deep Large (its Library and two houses stand already)
+                sup["LD"] += 1
+                sup["W"] += 1     # and its Works yard (starter.py, PR 399): the Ironworks'
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
+            if not starter: needs.append(("library", ("ML", "L")))
+            if starter:   # the big plots (Mateo 2026-11-14, 11 deep so they fit the Town band): the Stables' barn
+                          # and the Dragon Stable (Emberwaste), both by the Town
+                if t >= 1: needs.append(("stables", ("B",)))
+                if t >= 1 and self.arch == "ember": needs.append(("dragon", ("D",)))
+            needs += [("home", self.HOME)] * max(0, max(self.HOMES_BY[:t + 1]) - (2 if starter else 0))
             needs.sort(key=lambda n: (len(n[1]), n[1] != ("LD",)))   # strictest first (the Barracks' deep Large before the inn's Large), each into its smallest class
             for name, classes in needs:
                 if "ML" in classes or "MF" in classes: classes = classes + ("MLF",)   # a long Medium by crops serves either
@@ -1065,7 +1095,9 @@ class Settlement(Town):
         self.square()
         self.streets(); self.relax(); self.grade_verges()
         self.portions()
-        self.subdivide(); self.back_paths(); self.grade_verges()
+        self.subdivide()
+        if not any(p["kind"] == "field" for p in self.port.values()): self.choose_fields()   # the band was one portion: pick from its pieces
+        self.back_paths(); self.grade_verges()
         self.rid_map(); self.road_tiers()
         self.town_field()
         self.place_slots()

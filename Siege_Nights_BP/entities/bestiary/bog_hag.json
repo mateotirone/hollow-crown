@@ -105,8 +105,8 @@
    },
    "minecraft:behavior.ranged_attack": {
     "priority": 3,
-    "attack_interval_min": 1.5,
-    "attack_interval_max": 2.5,
+    "attack_interval_min": 3,
+    "attack_interval_max": 5,
     "attack_radius": 14,
     "burst_shots": 1
    },

@@ -71,7 +71,7 @@
     "speed_multiplier": 0.8
    },
    "minecraft:attack": {
-    "damage": 7
+    "damage": 5
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,

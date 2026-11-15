@@ -101,6 +101,11 @@ const FROM = "hc:undertow_from";
 // Nobody lands in half-built land (Mateo 2026-11-14, "Fix the loading issue in the hollow"): until the whole
 // arrival is built (builder.js arrivalReady), a player who steps in waits on our side, with the build's progress
 // on the action bar, and is taken across the moment it is done. The builder works on the arrival first meanwhile.
+// Mateo 2026-11-14: that wait is for playtests only; story play behaves normally. The arrival is built in the
+// background from the moment the world loads (about 15 s, once per world), days before the veil lets anyone
+// through, so a story player never meets it. Only testers (creative, e.g. hc:undertow_go on a fresh world) see the
+// lines and the percentage; anyone else would just cross a moment later with nothing said.
+export const showsWait = (creative) => creative;
 const waiting = new Map(); // player id -> tick to give up
 const WAIT_TICKS = 20 * 90;
 export const arrivalBar = (frac) => `§5The way through is taking shape... §d${Math.min(99, Math.floor(frac * 100))}%`;
@@ -109,7 +114,7 @@ function enter(player) {
   if (!arrivalReady()) {
     if (!waiting.has(player.id)) {
       waiting.set(player.id, system.currentTick + WAIT_TICKS);
-      say(player, "§5The Rift shudders. The Hollow is still gathering itself on the other side. Hold still a moment.");
+      if (showsWait(isBuilder(player))) say(player, "§5The Rift shudders. The Hollow is still gathering itself on the other side. Hold still a moment.");
     }
     return;
   }
@@ -286,10 +291,10 @@ onTick("undertow:arrive", 10, () => {
     if (ready) { waiting.delete(id); enter(p); continue; }
     if (system.currentTick > until) {
       waiting.delete(id);
-      say(p, "§5The Rift will not take you yet. Try again in a moment.");
+      if (showsWait(isBuilder(p))) say(p, "§5The Rift will not take you yet. Try again in a moment.");
       continue;
     }
-    try { p.onScreenDisplay.setActionBar(arrivalBar(frac)); } catch { /* gone */ }
+    if (showsWait(isBuilder(p))) { try { p.onScreenDisplay.setActionBar(arrivalBar(frac)); } catch { /* gone */ } }
   }
 });
 onTick("undertow:pieces", 40, () => piecesTick());
@@ -596,6 +601,7 @@ addTests("undertow", {
     const half = arrivalProgress((cx) => cx < 0);
     assert(half > 0.4 && half < 0.6, `${half}`);
     assert(arrivalBar(1).includes("99%") && arrivalBar(0.5).includes("50%"));
+    assert(showsWait(true) && !showsWait(false), "story players must never see the playtest wait");
   },
   "saved data: old worlds get every upgrade step, in order, once": () => {
     const steps = [{ to: 3 }, { to: 2 }, { to: 4 }];

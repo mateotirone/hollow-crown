@@ -56,10 +56,13 @@ R = {
         farm=None, roofs=["dark_oak_planks", "mud_bricks", "mangrove_planks", "dark_oak_planks", "dark_oak_planks"],
         lean="mangrove_planks", kind="gable"),
 }
+# hanging trade signs: the region's sign wood and bracket fence (as map/structures/world_props.py R)
+SIGN = {"vale": ("spruce", "dark_oak_fence"), "frostmarch": ("spruce", "dark_oak_fence"), "saltreach": ("birch", "birch_fence"),
+        "emberwaste": ("acacia", "acacia_fence"), "blackfen": ("mangrove", "mangrove_fence")}
 NAMES = {"vale": "Vale", "frostmarch": "Frostmarch", "saltreach": "Saltreach", "emberwaste": "Emberwaste", "blackfen": "Blackfen"}
 
 def card(region, title, sub, plot, blurb, kind="House"):
-    return {"title": title, "sub": f"{NAMES[region]}, {sub}", "region": region, "where": f"Settlement plot ({plot})", "kind": kind, "blurb": blurb}
+    return {"title": title, "sub": f"{NAMES[region]}, {sub}", "region": region, "where": plot if plot.startswith("Town") else f"Settlement plot ({plot})", "kind": kind, "blurb": blurb}
 
 def roof(region, ridge, pitch=1):
     k = R[region]["kind"]
@@ -118,6 +121,16 @@ def specs(region):
                    "roof": {"type": "flat", "parapet": "slab", "beams": True} if flat else {"type": "hip", "pitch": 1},
                    "interior": "mint", "chimney": chim([[2, -8]]), "shutters": 0}],
     }
+    # the town Moneyer (Mateo 2026-11-14, "a Moneyer in every town"): the Mint's shell on a town square, a grilled
+    # counter with scales, a strongbox and stacked iron inside, and a hanging trade sign off the wall by the door
+    sw, sf = SIGN[region]
+    moneyer = {
+        "card": card(region, "Moneyer", "stone", "Town square, Medium 11 x 15",
+                     "The town's money-changer: the Mint's stone shell, a grilled counter with scales, a strongbox, "
+                     "stacked iron, and a hanging sign by the door. Sell your iron here.", kind="Work"),
+        "parts": [dict(mint["parts"][0], interior="moneyer"),
+                  {"part": "trade_sign", "at": [0, 5, 0], "out": "s", "len": 1, "face": "s", "wood": sw, "fence": sf}],
+    }
     inn = {
         "card": card(region, "Inn", "furnished", "Large 15 x 15",
                      "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above.", kind="Work"),
@@ -127,11 +140,11 @@ def specs(region):
                    "dormers": dorm({"side": "s", "at": -4, "w": 3, "h": 3}, {"side": "s", "at": 4, "w": 3, "h": 3}, {"side": "n", "at": 0, "w": 3, "h": 3}),
                    "chimney": chim([[-6, -6], [6, -6]]), "vines": 0.03 if region in ("vale", "blackfen") else 0}],
     }
-    return {"house": house, "townhouse": town, "farmhouse": farm, "mint": mint, "inn": inn}
+    return {"house": house, "townhouse": town, "farmhouse": farm, "mint": mint, "moneyer": moneyer, "inn": inn}
 
 if __name__ == "__main__":
     for region in R:
         for k, s in specs(region).items():
             s = dict(s, name=f"settle_{k}_{region}")
             open(os.path.join(HERE, f"settle_{k}_{region}.json"), "w").write(json.dumps(s, indent=1))
-    print("wrote", 5 * len(R), "specs")
+    print("wrote", 6 * len(R), "specs")

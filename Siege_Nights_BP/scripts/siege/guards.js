@@ -353,10 +353,11 @@ export function guardTick() {
         const loc = guard.location;
         const fighting = guard.typeId !== "siege:archer" && fightingNear(guard); // a creature near: finish the fight first (guardcare.js)
         const away = post.stand ? Math.hypot(loc.x - post.x, loc.z - post.z) : Math.hypot(loc.x - (post.x + 0.5), loc.z - (post.z + 0.5));
+        const fell = post.stand && post.y - loc.y > 2.5; // off its lookout or wall walk (knocked off, or jumped down to fight)
         if (guard.typeId === "siege:archer") {
-          if (away > 1.5) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
+          if (away > 1.5 || fell) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
         } else if (post.stand) { // a stationed Man-at-Arms keeps to the post, and chases only so far from it in a fight
-          if (away > leashFor(underAttack(owner) ? STATION_LEASH : 2.5, fighting)) guard.teleport({ x: post.x, y: post.y, z: post.z });
+          if (away > leashFor(underAttack(owner) ? STATION_LEASH : 2.5, fighting) || (fell && !fighting)) guard.teleport({ x: post.x, y: post.y, z: post.z });
         } else if (!underAttack(owner) ? away > leashFor(5, fighting) : !keep || settlementAt(loc) !== owner) {
           guard.teleport({ x: post.x + 0.5, y: post.y + 1, z: post.z + 0.5 }); // back to the Barracks
         }

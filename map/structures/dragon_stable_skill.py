@@ -6,12 +6,13 @@ the wide arched way in for a grown dragon, the stalls, the tack corner, the loft
 and the nursery, and the nursery's Hatching Braziers on their warm bed.
 
 Inside (spec frame: front south, front wall z = 0; floors at y 0 and 6, so the ground is walked at y 1, the loft at y 7):
-  hall     x -6..6, z -13..-1. A 5-wide aisle (x -2..2) of sandstone flags; stalls 4 deep either side behind acacia
-           rails with a gate: three on the west, one on the east. On the east the nursery arch, then the ladder to the
-           loft and the feed store by the door. The tack corner is by the door on the west.
-  nursery  x 8..12, z -11..-3, through a 3-wide arch in the shared wall at z -8..-6: three Hatching Braziers along
-           the east wall on a red sandstone kerb, the keeper's lectern and stores.
-  loft     hay, saddles in chests, the keeper's bunk, and a ladder up to a hatch onto the roof terrace.
+  hall     x -6..6, z -7..-1 (15 x 9 outside, 2026-11-14: shallow enough for a town's Dragon plot, 23 x 11). A 5-wide
+           aisle (x -2..2) of sandstone flags; stalls 4 x 3 either side behind acacia rails with a gate: two on the
+           west, one on the east at the back. On the east by the door the way to the nursery arch and the loft
+           ladder against the stall's wall.
+  nursery  x 8..12, z -7..-1 (flush with the hall's front), through a 3-wide arch in the shared wall at z -3..-1:
+           three Hatching Braziers along the east wall on a red sandstone kerb, the keeper's lectern and stores.
+  loft     hay, the tack (saddles and harness in chests), the keeper's bunk, and a ladder up to a hatch onto the roof.
 
 Marks (feet height, spec frame): brazier0..2 (the three Hatching Braziers), aisle, nursery, loft.
 
@@ -29,7 +30,7 @@ SPECS = os.path.join(HERE, "review", "specs")
 P = {}                                   # the catalogue's "after" hook passes Building(bp, P, seed); unused here
 Building = lambda bp, P=None, seed=0: None
 BRAZIER = "siege:hatching_brazier"
-BRAZIERS = [(11, 1, -9), (11, 1, -7), (11, 1, -5)]
+BRAZIERS = [(11, 1, -6), (11, 1, -4), (11, 1, -2)]
 WALL = ("smooth_sandstone", "smooth_sandstone", "sandstone", "smooth_sandstone", "cut_sandstone")
 
 def wall_at(x, y, z):
@@ -68,8 +69,8 @@ def front(bp):
     for x in (-2, -1, 0, 1, 2): bp.set(x, 0, 1, "smooth_red_sandstone_slab", half="top")
     for x in (-4, 4):
         bp.set(x, 4, 1, "stripped_acacia_log", axis="z"); bp.set(x, 3, 1, "lantern", hanging=True)
-    wool_awning(bp, range(-6, -3), 10, 0, "s", ("orange_wool", "white_wool"), depth=2)
-    wool_awning(bp, range(4, 7), 10, 0, "s", ("orange_wool", "white_wool"), depth=2)
+    wool_awning(bp, range(-6, -3), 10, 0, "s", ("orange_wool", "white_wool"), depth=1)
+    wool_awning(bp, range(4, 7), 10, 0, "s", ("orange_wool", "white_wool"), depth=1)
 
 def stall(bp, side, z0, z1):
     """One stall 4 deep (x 3..6 or -6..-3) between z0 and z1: a straw floor, a rail with a gate on the aisle side,
@@ -101,30 +102,25 @@ def divider(bp, side, z):
 
 def hall(bp):
     for x in range(-2, 3):                                                   # the aisle: sandstone flags, a red band down the middle
-        for z in range(-13, 0): bp.set(x, 0, z, "cut_red_sandstone" if x == 0 else ("smooth_sandstone" if (z % 2) else "cut_sandstone"))
-    for z0, z1 in ((-13, -11), (-9, -7), (-5, -3)): stall(bp, -1, z0, z1)   # west: three stalls
-    for z in (-10, -6, -2): divider(bp, -1, z)
-    stall(bp, 1, -13, -11); divider(bp, 1, -10)                              # east: one stall, then the nursery arch
-    for z in (-9, -8, -7, -6, -5):                                           # the way to the nursery, flagged like the aisle
+        for z in range(-7, 0): bp.set(x, 0, z, "cut_red_sandstone" if x == 0 else ("smooth_sandstone" if (z % 2) else "cut_sandstone"))
+    for z0, z1 in ((-7, -5), (-3, -1)): stall(bp, -1, z0, z1)               # west: two stalls
+    divider(bp, -1, -4)
+    stall(bp, 1, -7, -5)                                                     # east: one stall at the back
+    for x in range(4, 7):                                                    # its front wall, full height: the loft ladder hangs on it
+        for y in range(1, 6): bp.set(x, y, -4, wall_at(x, y, -4))
+    bp.set(3, 1, -4, "stripped_acacia_log", axis="y"); bp.set(3, 2, -4, "stripped_acacia_log", axis="y"); bp.set(3, 3, -4, "lantern")
+    for z in (-3, -2, -1):                                                   # the way to the nursery, flagged like the aisle
         for x in range(3, 7): bp.set(x, 0, z, "smooth_sandstone")
-    divider(bp, 1, -4)
-    # the tack corner (west, by the door): saddles and bridles in chests, a grindstone, barrels
-    bp.set(-6, 1, -1, "chest", facing="e"); bp.set(-6, 1, -2, "barrel", facing="up"); bp.set(-6, 2, -2, "barrel", facing="up")
-    bp.set(-5, 1, -1, "grindstone", face="floor", facing="n"); bp.set(-4, 1, -1, "crafting_table")
-    for z in (-1, -2): bp.set(-3, 1, z, "air")
-    # the feed store (east, by the door): barrels of salt meat, a smoker; the ladder to the loft in the corner
-    bp.set(4, 1, -1, "barrel", facing="up"); bp.set(4, 2, -1, "barrel", facing="up"); bp.set(5, 1, -1, "smoker", facing="w")
-    for y in range(1, 7): bp.set(6, y, -1, "ladder", facing="w")
-    bp.set(6, 6, -1, "air"); bp.set(6, 6, -1, "ladder", facing="w")
-    bp.set(4, 1, -3, "barrel", facing="up"); bp.set(5, 1, -3, "barrel", facing="up")
-    for z in (-12, -8, -4): F.lantern_ceiling(bp, 0, 5, z)                  # over the aisle
+    for y in range(1, 7): bp.set(4, y, -3, "ladder", facing="s")            # up to the loft, through a hole in its floor
+    bp.set(3, 1, -1, "barrel", facing="up")
+    for z in (-6, -2): F.lantern_ceiling(bp, 0, 5, z)                       # over the aisle
 
 def nursery(bp):
-    for z in range(-11, -2):                                                 # the shared wall rebuilt, one arch through it
+    for z in range(-7, 0):                                                   # the shared wall rebuilt, one arch through it
         for y in range(1, 6): bp.set(7, y, z, wall_at(7, y, z))
-    arch(bp, -8, -6, 1, 3, x=7)
+    arch(bp, -3, -1, 1, 3, x=7)
     for x in range(8, 13):                                                   # a warm floor: smooth red sandstone, cut red edges
-        for z in range(-11, -2): bp.set(x, 0, z, "cut_red_sandstone" if x in (8, 12) or z in (-11, -3) else "smooth_red_sandstone")
+        for z in range(-7, 0): bp.set(x, 0, z, "cut_red_sandstone" if x in (8, 12) or z in (-7, -1) else "smooth_red_sandstone")
     for (x, y, z) in BRAZIERS:
         bp.set(x, 0, z, "magma")                                             # the coals under each brazier (a block under, never walked)
         bp.set(x, 1, z, BRAZIER)
@@ -132,33 +128,32 @@ def nursery(bp):
             if (x, y, z + dz) not in BRAZIERS and bp.get(x, 1, z + dz)[0] in ("air", "keep"):
                 bp.set(x, 1, z + dz, "smooth_red_sandstone_slab", half="bottom")   # the kerb between them
         bp.set(x + 1, 1, z, "red_sandstone_wall")
-    bp.set(12, 1, -10, "smooth_red_sandstone_slab", half="bottom"); bp.set(12, 1, -4, "smooth_red_sandstone_slab", half="bottom")
-    bp.set(9, 1, -11, "lectern", facing="s"); bp.set(8, 1, -11, "barrel", facing="up"); bp.set(10, 1, -11, "chest", facing="s")
-    bp.set(8, 1, -3, "barrel", facing="up"); bp.set(9, 1, -3, "cauldron", fill_level=6); bp.set(10, 1, -3, "flower_pot")
-    bp.set(10, 2, -3, "air")
-    F.lantern_ceiling(bp, 10, 6, -9); F.lantern_ceiling(bp, 10, 6, -5)
+    bp.set(9, 1, -7, "lectern", facing="s"); bp.set(8, 1, -7, "barrel", facing="up"); bp.set(10, 1, -7, "chest", facing="s")
+    bp.set(9, 1, -1, "cauldron", fill_level=6); bp.set(10, 1, -1, "flower_pot")
+    bp.set(10, 2, -1, "air")
+    F.lantern_ceiling(bp, 9, 6, -6); F.lantern_ceiling(bp, 9, 6, -2)
 
 def loft(bp):
     y = 7
     for x in (-6, -5):                                                      # hay stacked along the west wall
-        for z in range(-13, -4, 2): bp.set(x, y, z, "hay_block", axis="z")
-    for z in range(-13, -6, 2): bp.set(-6, y + 1, z, "hay_block", axis="z")
-    F.bed(bp, 5, y, -13, "n"); bp.set(4, y, -13, "chest", facing="s"); bp.set(6, y, -11, "barrel", facing="up")
-    for x in (-1, 1): bp.set(x, y, -13, "chest", facing="s")                # saddles and harness
-    bp.set(0, y, -13, "barrel", facing="up")
-    bp.set(3, y, -1, "barrel", facing="up"); bp.set(2, y, -1, "barrel", facing="up")
-    for yy in range(y, 11): bp.set(0, yy, -8, "stripped_acacia_log", axis="y"); bp.set(0, yy, -7, "ladder", facing="s")   # up to the roof terrace (a hatch in the deck)
-    bp.set(0, 11, -7, "acacia_trapdoor", facing="s", half="bottom", open=False)
-    bp.set(0, y, -6, "air")
-    for (x, z) in ((-3, -10), (3, -10), (-3, -4), (3, -4)): F.lantern_ceiling(bp, x, 10, z)
+        for z in range(-7, -1, 2): bp.set(x, y, z, "hay_block", axis="z")
+    for z in range(-7, -4, 2): bp.set(-6, y + 1, z, "hay_block", axis="z")
+    F.bed(bp, 5, y, -7, "n"); bp.set(6, y, -5, "barrel", facing="up")
+    for x in (-1, 1, 3): bp.set(x, y, -7, "chest", facing="s")              # the tack: saddles and harness
+    bp.set(0, y, -7, "barrel", facing="up"); bp.set(-6, y, -1, "grindstone", face="floor", facing="e")
+    bp.set(2, y, -1, "barrel", facing="up"); bp.set(1, y, -1, "barrel", facing="up")
+    for yy in range(y, 11): bp.set(0, yy, -5, "stripped_acacia_log", axis="y"); bp.set(0, yy, -4, "ladder", facing="s")   # up to the roof terrace (a hatch in the deck)
+    bp.set(0, 11, -4, "acacia_trapdoor", facing="s", half="bottom", open=False)
+    bp.set(0, y, -3, "air")
+    for (x, z) in ((-3, -6), (3, -6), (-3, -2), (2, -2)): F.lantern_ceiling(bp, x, 10, z)
 
 def terrace(bp):
     """The roof is where a dragon lands: hay heaped in one corner, lantern posts inside the parapet corners, and
     the kasbah's corner horns: each corner of the hall rises two courses above the parapet, capped by a wall post."""
-    for (x, z) in ((-5, -12), (-4, -12), (-5, -11)): bp.set(x, 12, z, "hay_block", axis="y")
-    for (x, z) in ((-5, -13), (5, -13), (-5, -1), (5, -1)):
+    for (x, z) in ((-5, -6), (-4, -6), (-5, -5)): bp.set(x, 12, z, "hay_block", axis="y")
+    for (x, z) in ((-5, -7), (5, -7), (-5, -1), (5, -1)):
         bp.set(x, 12, z, "sandstone_wall"); bp.set(x, 13, z, "lantern")
-    for (x, z) in ((-7, -14), (7, -14), (-7, 0), (7, 0)):
+    for (x, z) in ((-7, -8), (7, -8), (-7, 0), (7, 0)):
         for y in (12, 13): bp.set(x, y, z, "cut_sandstone")
         bp.set(x, 14, z, "sandstone_wall")
 
@@ -171,8 +166,8 @@ def build(region="emberwaste"):
     bp = Blueprint(spec["name"]); bp.marks = {}
     engine.into_blueprint(bp, spec)
     inside(bp)
-    bp.marks.update({f"brazier{i}": b for i, b in enumerate(BRAZIERS)}); bp.marks.update({"aisle": (0, 1, -7), "nursery": (9, 1, -7), "loft": (0, 7, -9)})
-    bp.markers["door"] = (0, 1, 1)
+    bp.marks.update({f"brazier{i}": b for i, b in enumerate(BRAZIERS)}); bp.marks.update({"aisle": (0, 1, -4), "nursery": (9, 1, -4), "loft": (0, 7, -5)})
+    bp.markers["door"] = (0, 1, 0)   # the Dragon Roost on the sill in the archway, so the whole build is 11 deep from it (a Dragon plot)
     return finish_detail(bp, None)
 
 if __name__ == "__main__":

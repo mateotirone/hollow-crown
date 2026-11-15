@@ -213,7 +213,7 @@ export const ENTRIES = [
     tip: "Your town hall comes with your Hamlet, on the hall ground behind the Plot Stone, and grows with your settlement.",
     page: "Your town hall comes with your Hamlet: when your town is laid out, its §fHall Cornerstone§r is set on the hall ground behind the Plot Stone and the first hall rises by itself. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
-      + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
+      + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fTown Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
   },
   {
@@ -341,7 +341,7 @@ export const ENTRIES = [
   {
     id: "forester", ch: "keep", title: "The Forester's Lodge",
     tip: "Chop a grown Lodge tree at the bottom of its trunk and the whole tree comes down. A sapling takes its place.",
-    page: "The old trees out in the world can't be felled. For timber, place a §fForester's Lodge§r on your land: a fenced grove of your region's trees goes up behind it.\n\n"
+    page: "The old trees out in the world can't be felled. For timber, build the §fForester's Lodge§r on your town's woodlot, the big lot outside the wall: click its Plot Marker and pick it. A fenced grove of your region's trees fills the lot behind the Lodge.\n\n"
       + "Chop a grown tree at the bottom of its trunk and it comes down, dropping its logs at the stump. A sapling takes its place and is full grown again in three days. Click the Lodge to choose what each plot grows and to open more plots.",
     when: ["carry:siege:foresters_lodge", "click:siege:foresters_lodge"],
     needs: "siege:foresters_lodge",
@@ -349,7 +349,7 @@ export const ENTRIES = [
   {
     id: "old_trees", ch: "keep", title: "The old trees",
     tip: "The old trees of Aldmere can't be felled. Plant your own, or build a Forester's Lodge.",
-    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Your founder's chest holds logs and saplings to start with; Woodcutters in the towns sell more saplings and planks. Plant saplings of your own for wood, or build a Forester's Lodge on your land for a grove that regrows by itself.",
+    page: "The great trees that were standing when you arrived can't be mined, burned or blown up. Your founder's chest holds logs and saplings to start with; Woodcutters in the towns sell more saplings and planks. Plant saplings of your own for wood, or build a Forester's Lodge on your town's woodlot for a grove that regrows by itself.",
     when: ["hit:siege:old_*"],
     needs: "siege:old_oak_log",
   },
@@ -359,7 +359,7 @@ export const ENTRIES = [
     id: "regals", ch: "coin", title: "Regals",
     tip: "This is a Regal, the one coin of Aldmere. Picked up, coins are counted straight into your Regals.",
     page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64.\n\n"
-      + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Rumor Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
+      + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Town Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
       + "All your Regals are one sum. Coins you find are counted in the moment you pick them up, every shop takes from the sum and every reward adds to it, wherever you are. The §fRegals§r button on the Keep menu shows it.\n\n"
       + "The sum is kept in the §fRegal Safe§r in your vault, once you have one. A thief who breaks into your vault can rob it.",
     when: ["carry:siege:coin", "carry:siege:gold_coin"],
@@ -409,7 +409,7 @@ export const ENTRIES = [
   {
     id: "stables", ch: "travel", title: "Stables and breeding",
     tip: "Click the Stables to train your horses, pick perks, breed and stable them.",
-    page: "Place a §fStables§r on your land and click it: train Speed, Jump, Health and Stamina from 1 to 5, pick perks, breed two horses, stable horses you are not riding, and (at higher levels) revive a fallen horse.\n\n"
+    page: "Build the §fStables§r on your town's Barn plot (click its Plot Marker and pick it), then click the Stables block at its door: train Speed, Jump, Health and Stamina from 1 to 5, pick perks, breed two horses, stable horses you are not riding, and (at higher levels) revive a fallen horse.\n\n"
       + "Without Stables you can keep one horse. The Stables' three levels let you keep 3, 5 and then 8.",
     when: ["carry:siege:stables", "click:siege:stables"],
   },
@@ -468,7 +468,7 @@ export const ENTRIES = [
     id: "skill_points", ch: "growth", title: "Renown and skill points",
     tip: "You earned a skill point. Spend it at the Tree of Oaths in your town hall.",
     page: "§fRenown§r (levels 1 to 50) comes from almost everything you do: fighting, holding sieges, growing your settlement.\n\n"
-      + "§fSkill points§r come from the first time you kill each kind of creature, every siege you hold, each time your settlement grows, warlords, bosses, finished book collections and every third Rumor Board job.\n\n"
+      + "§fSkill points§r come from the first time you kill each kind of creature, every siege you hold, each time your settlement grows, warlords, bosses, finished book collections and every third Town Board job.\n\n"
       + "Spend them at the §fTree of Oaths§r in your town hall (or from the Keep menu once you have a hall). Deeper rings of the tree open as your hall grows and your Renown rises.",
     when: ["event:siegeReward", "event:tierUp"],
   },
@@ -532,10 +532,10 @@ export const ENTRIES = [
     hidden: true,
   },
   {
-    id: "rumors", ch: "growth", title: "The Rumor Board",
-    tip: "Your hall has a Rumor Board: three jobs a day for Renown and coins.",
-    page: "Open the §fRumor Board§r from your town hall menu. Three rumors come in each day and you take one job at a time. Jobs pay Renown and coins, and every third job pays a skill point.\n\n"
-      + "Every job can be done alone, and the board never gives you the same thing twice in a row.",
+    id: "rumors", ch: "growth", title: "The Town Board",
+    tip: "Your hall has a Town Board: three notices a day from the people round about.",
+    page: "Open the §fTown Board§r from your town hall menu. Three notices go up each day, each pinned there by someone you can go and find: a carter robbed on the road, a shepherd short of sheep, a boy who hasn't come home. Take one, go and talk to them, and the tracker shows you the way. Jobs pay Renown and coins, and every third job pays a skill point.\n\n"
+      + "Every job can be done alone. The everyday ones come round again once you have done the rest of your region, and then the neighbouring regions send their notices too.",
     when: ["event:hallBuilt"],
   },
   {
@@ -651,7 +651,6 @@ export const ENTRIES = [
     page: "Your town has a §fWorks plot§r: a big plot kept for a works. Use its marker and pick the §fIronworks§r (160 Regals). The whole plot is fenced, an §fOre Pit§r is dug, and its worker digs about 16 raw iron a day into the storeroom. Click the §fIronworks block§r in the yard to take it. You choose the plot; the works builds itself.\n\n"
       + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals) from the block: it rises on the same plot and smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
       + "Once you are a §fCity§r, with water by the plot, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
-      + "§8An older town with no Works plot: craft the Ironworks at the Siege Workshop and place it on your land instead.§r\n\n"
       + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",
@@ -729,7 +728,7 @@ export const ENTRIES = [
     id: "dragons", ch: "wild", title: "Dragons",
     tip: "Set a Dragon Egg in a Hatching Brazier in your Dragon Stable's nursery. It hatches in two days.",
     page: "Dragons live only in the Emberwaste, and only people who settle there can raise one.\n\n"
-      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in and take an egg from the clutch. Place a §fDragon Roost§r on your land and a §fDragon Stable§r rises behind it, with a nursery of §fHatching Braziers§r: set the egg in one. It hatches in two days, and you see it crack before it does.\n"
+      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in and take an egg from the clutch. Build the §fDragon Stable§r on your town's Dragon plot (click its Plot Marker and pick it): the §fDragon Roost§r stands at its arch and the nursery holds §fHatching Braziers§r. Set the egg in one. It hatches in two days, and you see it crack before it does.\n"
       + "§fRaising it:§r feed it raw meat or fish and spend time with it to build its bond. A fledgling can carry you on foot with a Dragon Saddle; a grown dragon flies.\n"
       + "§fHandling:§r an empty hand always pets it. Click a saddled dragon holding any item to climb on. Sneak + click with an empty hand for its sheet. Spend its training points at the Roost.\n\n"
       + "Flights are short bursts. Ballistas and archers of settlements that aren't yours can shoot a dragon down, and a dragon that dies is gone for good. On a siege night no dragon will fly from three until half past three in the morning: she lands and waits it out.",

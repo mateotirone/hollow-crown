@@ -5,11 +5,12 @@
 //   dragon stable  the Dragon Roost: the Emberwaste's kasbah stable, stalls and a loft, with the nursery of Hatching
 //                Braziers joined on the east (map/structures/dragon_stable_skill.py). Dragons are the Emberwaste's, so it
 //                is built in the Emberwaste's way wherever it stands (an ally elsewhere raising one gets the same).
-// The Stables barn and the Breeder's yard live with the horses (horses/barndesign.js).
+// The Stables barn and the Breeder's yard live with the horses (horses/barndesign.js); the Stables plot building borrows it.
 
 import { Plan } from "../townhall/halls.js";
 import { styleFor, pieces, drawDesigned, useBlockDesign } from "./buildings.js";
 import { BARN_DESIGNS } from "./barn_data.js";
+import { drawBarn } from "../horses/barndesign.js";
 
 const { floor, walls, hollow, roof, hang, stair } = pieces;
 
@@ -30,6 +31,17 @@ export const drawDragonStable = (styleId) => {
   const d = BARN_DESIGNS.emberwaste?.dragon_stable;
   return d ? drawDesigned(new Plan(styleFor(styleId)), d, "bn:emberwaste:dragon_stable") : plainArmoury(styleId);
 };
+useBlockDesign("dragon_roost", drawDragonStable); // the Dragon Stable on a Dragon plot, the Roost at its arch
+useBlockDesign("stables", (styleId) => drawBarn(1, styleId)); // the level 1 barn on a Barn plot (horses/barn.js grows it)
+// The Forester's Lodge on a Wood plot: only its gate, two posts with lanterns either side of the Lodge (which goes in the
+// middle, raised.js). The grove itself, the fence round the lot and the trees, is laid on the ground as it lies by
+// forestry/index.js (plotGrove), the way a placed Lodge always laid it.
+export function drawLodgeGate(styleId) {
+  const p = new Plan(styleFor(styleId));
+  for (const x of [-2, 2]) { p.fill(x, 1, 0, x, 2, 0, "pillar", { axis: "y" }); p.set(x, 3, 0, "light"); }
+  return p;
+}
+useBlockDesign("foresters_lodge", drawLodgeGate);
 
 export function plainGuardhouse(styleId) {
   const p = new Plan(styleFor(styleId));

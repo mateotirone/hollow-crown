@@ -39,6 +39,7 @@ export const MUSIC = {
   regionSettle: 8,           // seconds you must stay in a new region before its music takes over (no flicker at borders)
   switchGap: [2, 4],         // the beat of quiet between leaving one region's piece and starting the next region's
   afterDimension: [2, 4],    // changing dimension cuts every sound, so the music starts again this soon after
+  overrideGrace: 12,         // seconds a fight or siege piece keeps playing after you drop out of it, so it never restarts from the top
 };
 
 export const soundId = (track) => `siege.music.${track}`;
@@ -71,5 +72,8 @@ export function pickTrack(pool, last, installed, roll) {
   const fresh = have.length > 1 ? have.filter((t) => t !== last) : have;
   return fresh[Math.floor(roll * fresh.length) % fresh.length];
 }
+
+/** A boss or siege piece keeps going while you were in it less than `grace` ticks ago. */
+export const keepLoop = (sinceTicks, graceTicks) => sinceTicks < graceTicks;
 
 export const between = ([lo, hi], roll) => lo + (hi - lo) * roll;

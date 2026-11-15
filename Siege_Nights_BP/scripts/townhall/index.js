@@ -30,7 +30,7 @@ import { CORNERSTONE, TREE, BOARD, hallMenu, hallOf, halls, saveHalls, resumeBui
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
-import { markedTick } from "./marked.js";
+import { markedTick, markedFastTick } from "./marked.js";
 import "./spellbar.js";
 import "./messenger.js";
 import "./showcase.js";
@@ -42,7 +42,9 @@ import { MESSENGER, route, cooling, bucket, heading, wayHome, newsText, keepNews
 import { wallMenu } from "./flyby.js";
 import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
-import { rumorMenu, rumorTick, rumorsFor, bountiesFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
+import { boardMenu, boardTick } from "./board.js";
+import "./board_tests.js";
+import "./oath_tree.js";
 
 export { grantPoints, grantRenown, heroOf } from "./hero.js";
 export { hallOf } from "./townhall.js";
@@ -97,16 +99,17 @@ hallMenuExtras.push({ label: "Hall map\n§8settlements and places you have found
 setHallCheck((owner, at) => { const h = hallOf(owner); if (!h?.level || h.lost) return false; const c = h.cs ?? h; return Math.abs(at.x - c.x) <= 48 && Math.abs(at.z - c.z) <= 48 && Math.abs(at.y - c.y) <= 40; });
 hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
 hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
-hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and coins", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
+hallMenuExtras.push({ label: "Town Board\n§8notices from the people round about", icon: "textures/items/paper", action: (player) => boardMenu(player) });
 
 // ---------- loops ----------
-api.onTick("townhall_rumors", 40, rumorTick);
+api.onTick("townhall_board", 20, boardTick);
 api.onTick("townhall_roles", 20, rolesTick);
 api.onTick("townhall_build", 1, buildTick);
 api.onTick("townhall_passives", 20, passiveTick);
 api.onTick("townhall_knight", 20, knightTick);
 api.onTick("townhall_charge", 5, chargeTick);
 api.onTick("townhall_marked", 20, markedTick);
+api.onTick("townhall_marked_fast", 1, markedFastTick);
 api.onTick("townhall_watchfire", 20, watchfireTick);
 
 api.on("ready", () => resumeBuilds());
@@ -251,19 +254,6 @@ api.addTests("townhall", {
     api.assertEqual(styleFromGround({ "minecraft:sand": 30, "minecraft:grass_block": 10 }), "emberwaste");
     api.assertEqual(styleFromGround({}), "vale");
   },
-  "the rumor board deals three steady jobs a day": () => {
-    const a = rumorsFor(12, "p1", 1), b = rumorsFor(12, "p1", 1), c = rumorsFor(13, "p1", 1);
-    api.assertEqual(a, b);
-    api.assertEqual(a.length, 3);
-    api.assert(JSON.stringify(a) !== JSON.stringify(c), "a new day brings new rumors");
-    for (let day = 0; day < 40; day++) for (const job of rumorsFor(day, "someone", day * 2)) {
-      api.assert(job.need >= 2 && job.renown > 0 && job.emeralds > 0, JSON.stringify(job));
-      const d = describe(job);
-      api.assert(d.title && d.text && !/undefined/.test(d.title + d.text), d.text);
-    }
-    api.assertEqual(jobTier(0), 0);
-    api.assertEqual(jobTier(50), 4);
-  },
   "settlement tier decides the biggest hall": () => {
     api.assertEqual(allowedLevel(undefined), 0);
     api.assertEqual(allowedLevel({ wins: 0 }), 1);
@@ -296,7 +286,8 @@ api.addTests("tree screen", {
   },
 });
 
-// Debts from the Rumor Board: people you worked for unpaid stand with your walls. +1 guard each, up to 3.
+// Debts from the old Rumor Board (saved on heroes from before the Town Board): people you worked for unpaid stand
+// with your walls. +1 guard each, up to 3.
 api.addGuardLimitHook((owner, limit) => {
   const p = world.getAllPlayers().find((x) => x.id === owner);
   return limit + (p ? Math.min(3, heroOf(p).rumorDebts ?? 0) : 0);
@@ -344,41 +335,6 @@ api.addTests("clue sense", {
   },
 });
 
-api.addTests("rumor board variety", {
-  "bounties hunt our own creatures, the region's own where you live": () => {
-    for (const region of [undefined, "Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", "Kingsrest"]) {
-      const list = bountiesFor(region);
-      api.assert(list.length >= 2, `${region}: at least two kinds to hunt`);
-      for (const [type, , , home] of list) api.assert(type.startsWith("siege:") && (!home || !region || home === region), `${region}: ${type}`);
-    }
-    for (let day = 0; day < 30; day++) for (const job of rumorsFor(day, "hunter", 6, { types: ["bounty", "camp", "supply"], region: "Frostmarch" })) {
-      if (job.type === "bounty") api.assert(["siege:rimewolf", "siege:hollow_footman", "siege:torchbearer"].includes(job.mob), job.mob);
-    }
-  },
-  "the Storyteller's choice of jobs is what the board shows": () => {
-    const jobs = rumorsFor(5, "tester", 10, { types: ["supply", "rescue", "bounty"] });
-    api.assertEqual(jobs.map((j) => j.type).join(), "supply,rescue,bounty");
-    api.assert(Object.keys(JOB_KIND).length >= 3 && new Set(Object.values(JOB_KIND)).size >= 2, "the rumors deck needs 3 options of 2 kinds");
-  },
-  "the board never repeats itself": () => {
-    // play 120 days, always taking the first job offered
-    const hero = {}, seen = new Map();
-    let last;
-    for (let day = 0; day < 120; day++) {
-      const jobs = rumorsFor(day, "tester", Math.floor(day / 3), { lastType: hero.lastJobType, recent: hero.rumorRecent });
-      api.assertEqual(jobs.length, 3);
-      api.assert(!jobs.some((j) => j.type === last), `day ${day} offers the kind of job just done`);
-      api.assertEqual(new Set(jobs.map((j) => j.giver)).size, 3, "three different people ask");
-      const job = jobs[0];
-      const key = `${job.type}|${job.giver}|${job.place}|${job.reason}`;
-      seen.set(key, (seen.get(key) ?? 0) + 1);
-      api.assert(seen.get(key) <= 4, `the same job came up ${seen.get(key)} times: ${key}`);
-      remember(hero, job);
-      last = job.type;
-    }
-    api.assert(KEEPSAKES.length >= 10 && new Set(KEEPSAKES.map((k) => k[1])).size === KEEPSAKES.length, "keepsakes are all different");
-  },
-});
 
 api.addTests("roles", {
   "every role has a branch, a ladder and enough skills to reach its top rank": () => {

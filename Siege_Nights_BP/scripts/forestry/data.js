@@ -18,6 +18,21 @@ export const FORESTRY = {
 // Yard size in the lodge's frame: the block at (0, 1, 0), +z runs into the yard. Odd: 41 x 29.
 export const YARD = { x0: -20, x1: 20, z0: 1, z1: 29 };
 
+// A Lodge raised on a town's woodlot (a 41 x 29 Wood plot, settle/plotmarker.js; 2026-11-14) stands in the gate, on the
+// lot's front fence line, between two lantern posts (settle/blockdesigns.js drawLodgeGate), so the grove fills the lot
+// exactly. Most lots face the road on a long side ("wide"); a few are turned end-on to keep clear of a road or a
+// marsh ("long": 29 across, 41 deep, the plots two across and three deep). gate: half the gap left in the front fence.
+// A Lodge set down as a block (old worlds) keeps YARD and GROVE_PLOTS.
+export const PLOT_YARDS = {
+  wide: { yard: { x0: -20, x1: 20, z0: 0, z1: 28 }, plots: GROVE_PLOTS.map(([x, z]) => [x, z - 1]), gate: 2 },
+  long: { yard: { x0: -14, x1: 14, z0: 0, z1: 40 }, plots: [[-7, 7], [7, 7], [-7, 20], [7, 20], [-7, 33], [7, 33]], gate: 2 },
+};
+const layoutOf = (lodge) => PLOT_YARDS[lodge?.yard] ?? { yard: YARD, plots: GROVE_PLOTS, gate: 1 };
+export const yardOf = (lodge) => layoutOf(lodge).yard;
+export const gateOf = (lodge) => layoutOf(lodge).gate;
+// Which plot layout a woodlot takes: [width along its door side, depth] -> "wide" or "long"
+export const plotYardFor = (dims) => (dims && dims[0] < PLOT_YARDS.wide.yard.x1 - PLOT_YARDS.wide.yard.x0 + 1 ? "long" : "wide");
+
 export const LODGE_LEVELS = [
   null,
   { level: 1, plots: 2, cost: null },
@@ -48,7 +63,7 @@ export function toWorld(origin, forward, x, y, z) {
   const R = { x: -F.z, z: F.x };
   return { x: origin.x + x * R.x + z * F.x, y: origin.y + y, z: origin.z + x * R.z + z * F.z };
 }
-export const plotCentre = (origin, forward, i) => toWorld(origin, forward, GROVE_PLOTS[i][0], 0, GROVE_PLOTS[i][1]);
+export const plotCentre = (origin, forward, i, lodge) => { const [x, z] = layoutOf(lodge).plots[i]; return toWorld(origin, forward, x, 0, z); };
 
 // Logs a felled tree gives back: { item: count }, from the wood cells still standing
 export function fellYield(design, standing, stage) {

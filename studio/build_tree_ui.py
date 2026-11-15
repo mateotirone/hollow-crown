@@ -11,6 +11,9 @@ Node frames (node_*.png), panel.png and slot.png are the textures thread's (stud
 The Plan Book screen (scripts/settle/planbook.js): forms whose title carries PLAN_FLAG show a grid of building cards,
 one form button per card; the cards are studio/build_plans.py's.
 
+The Ember choice (scripts/newplayer/act2.js): forms whose title carries CHOICE_FLAG show three tall panels over a
+dimmed screen, one form button each (picture, then the road's text), from the mock-up Mateo approved 2026-11-14.
+
 It also draws the Hall Map (scripts/townhall/hallmap.js): forms whose title carries MAP_FLAG show the painted realm
 with a 16 x 16 grid of cells over it, one form button per cell. Its art comes from studio/build_hallmap.py.
 """
@@ -25,6 +28,8 @@ MAP_FLAG = "§h§m"                  # hallmap.js MAP_FLAG
 MAP_GRID, MAP_CELL = 16, 12        # hallmap.js GRID; UI pixels per cell
 MAP_W = MAP_GRID * MAP_CELL
 PLAN_FLAG = "§h§p"                 # settle/planbook.js PLAN_FLAG
+CHOICE_FLAG = "§h§e"               # newplayer/act2_rules.js CHOICE_FLAG
+CH_W, CH_H, CH_PIC = 116, 188, 62  # one road panel and its picture's height, in UI pixels (3 across)
 PLAN_COLS = 5                      # planbook.js PLAN_COLS; one card per pre-designed building, then the "copy" card
 PLAN_N = 1 + int(subprocess.check_output(["node", "-e", 'import("./Siege_Nights_BP/scripts/settle/buildings.js").then((m) => console.log(m.BUILDINGS.length))'], cwd=ROOT))
 PLAN_ROWS = -(-PLAN_N // PLAN_COLS)
@@ -77,11 +82,53 @@ ui = {
                 "$title_text_binding_type": "none",
                 "$child_control": "server_form.long_form_panel",
                 "layer": 2,
-                "bindings": title_bindings(f"(((#title_text - '{FLAG}') = #title_text) and ((#title_text - '{MAP_FLAG}') = #title_text) and ((#title_text - '{PLAN_FLAG}') = #title_text))"),
+                "bindings": title_bindings(f"(((#title_text - '{FLAG}') = #title_text) and ((#title_text - '{MAP_FLAG}') = #title_text) and ((#title_text - '{PLAN_FLAG}') = #title_text) and ((#title_text - '{CHOICE_FLAG}') = #title_text))"),
             }},
             {"hc_tree@server_form.hc_tree": {"layer": 2, "bindings": title_bindings(has(FLAG))}},
             {"hc_map@server_form.hc_map": {"layer": 2, "bindings": title_bindings(has(MAP_FLAG))}},
             {"hc_plans@server_form.hc_plans": {"layer": 2, "bindings": title_bindings(has(PLAN_FLAG))}},
+            {"hc_choice@server_form.hc_choice": {"layer": 2, "bindings": title_bindings(has(CHOICE_FLAG))}},
+        ],
+    },
+    # The Ember choice: the world dimmed behind, the title and one line, three tall panels side by side, no close
+    # button (Escape walks away, and the step stays)
+    "hc_choice": {
+        "type": "panel",
+        "size": ["100%", "100%"],
+        "controls": [
+            {"hc_dim": {"type": "image", "texture": "textures/ui/hc/choice/dim", "size": ["100%", "100%"], "layer": 1}},
+            {"hc_title": {"type": "label", "text": "#title_text", "color": [0.93, 0.89, 0.83], "shadow": True, "font_scale_factor": 1.3, "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 6], "layer": 3,
+                          "bindings": [{"binding_name": "#title_text"}]}},
+            {"hc_body": {"type": "label", "text": "#form_text", "font_scale_factor": 0.75, "color": [0.73, 0.68, 0.62], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 21], "size": [3 * (CH_W + 8), 10], "text_alignment": "center", "layer": 3,
+                         "bindings": [{"binding_name": "#form_text"}]}},
+            {"hc_roads": {"type": "grid", "size": [3 * (CH_W + 8), CH_H], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 33], "layer": 4,
+                          "grid_dimensions": [3, 1], "grid_item_template": "server_form.hc_road", "grid_fill_direction": "horizontal", "grid_rescaling_type": "none",
+                          "collection_name": "form_buttons",
+                          "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}},
+        ],
+    },
+    # One road: a dark panel, its picture, its text; dimmed until hovered, then a bright edge
+    "hc_road": {
+        "type": "panel",
+        "size": [CH_W + 8, CH_H],
+        "controls": [
+            {"hc_rbg": {"type": "image", "texture": "textures/ui/hc/choice/panel", "nineslice_size": 3, "size": [CH_W, CH_H], "layer": 1}},
+            {"hc_rpic": {"type": "image", "size": [CH_W - 4, CH_PIC], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 2], "layer": 2,
+                         "bindings": [{**cell, "binding_name": "#form_button_texture", "binding_name_override": "#texture"},
+                                      {**cell, "binding_name": "#form_button_texture_file_system", "binding_name_override": "#texture_file_system"}]}},
+            {"hc_rtext": {"type": "label", "text": "#form_button_text", "font_scale_factor": 0.62, "color": [0.92, 0.89, 0.83], "size": [CH_W - 10, CH_H - CH_PIC - 8],
+                          "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, CH_PIC + 5], "layer": 3,
+                          "bindings": [{**cell, "binding_name": "#form_button_text"}]}},
+            {"form_button@common.button": {
+                "$pressed_button_name": "button.form_button_click",
+                "size": [CH_W, CH_H], "layer": 6,
+                "controls": [
+                    {"default": {"type": "image", "texture": "textures/ui/hc/choice/shade", "size": ["100%", "100%"]}},
+                    {"hover": {"type": "image", "texture": "textures/ui/hc/choice/hover", "nineslice_size": 3, "size": ["100%", "100%"]}},
+                    {"pressed": {"type": "image", "texture": "textures/ui/hc/choice/hover", "nineslice_size": 3, "size": ["100%", "100%"]}},
+                ],
+                "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
+            }},
         ],
     },
     "hc_tree": {
@@ -218,6 +265,30 @@ with open(os.path.join(RP, "ui/server_form.json"), "w") as f:
 # the card hover frame: a gold edge, clear inside
 hv = Image.new("RGBA", (12, 12), (0, 0, 0, 0)); ImageDraw.Draw(hv).rectangle([0, 0, 11, 11], outline=(232, 190, 90, 255), width=2)
 os.makedirs(os.path.join(RP, "textures/ui/hc/plans"), exist_ok=True); hv.save(os.path.join(RP, "textures/ui/hc/plans/hover.png"))
+# the Ember choice: three pictures (the mock-up's pixel scenes, 64 x 48, drawn at 2x), a dark panel, the shade
+# over a panel that isn't hovered, the bright edge when it is, and the dimmed world behind
+CH = os.path.join(RP, "textures/ui/hc/choice"); os.makedirs(CH, exist_ok=True)
+def scene(rects):
+    im = Image.new("RGBA", (64, 48)); d = ImageDraw.Draw(im)
+    for x, y, w, h, c in rects: d.rectangle([x, y, x + w - 1, y + h - 1], fill=c)
+    return im.resize((128, 96), Image.NEAREST)
+knight = [(0, 0, 64, 48, "#1c1820"), (0, 36, 64, 12, "#2a2228"), *[(x, 36, 7, 1, "#3a3036") for x in range(0, 64, 8)],
+          (30, 6, 2, 34, "#6b5235"), (29, 5, 4, 2, "#d9a441"), (32, 8, 18, 20, "#6e6a72"), (32, 28, 6, 4, "#6e6a72"), (44, 28, 6, 4, "#6e6a72"),
+          (38, 12, 6, 12, "#d9a441"), (36, 15, 10, 3, "#d9a441"), (39, 18, 4, 6, "#1c1820"),
+          (12, 26, 10, 12, "#8a8f98"), (13, 27, 8, 10, "#a9aeb6"), (16, 27, 2, 10, "#d9a441")]
+marked = [(0, 0, 64, 48, "#120f1a"), *[((i * 23) % 64, (i * 17) % 30, 1, 1, "#4b4370") for i in range(18)],
+          (20, 22, 24, 18, "#c9a07e"), (20, 18, 5, 8, "#c9a07e"), (26, 16, 5, 8, "#c9a07e"), (32, 16, 5, 8, "#c9a07e"), (38, 18, 5, 8, "#c9a07e"), (44, 26, 5, 6, "#c9a07e"),
+          (20, 38, 24, 10, "#4a3a55"), (29, 25, 6, 6, "#e7e1ff"), (30, 24, 4, 8, "#e7e1ff"), (28, 26, 8, 4, "#e7e1ff"), (31, 27, 2, 2, "#9b8cff"),
+          *[(x, y, 1, 3, "#9b8cff") for x, y in [(24, 12), (40, 10), (18, 20), (48, 18), (32, 8)]]]
+wait = [(0, 0, 64, 48, "#17140f"), (0, 34, 64, 14, "#2b241b"), (18, 22, 28, 14, "#8f8a7e"), (16, 26, 32, 8, "#8f8a7e"),
+        (30, 20, 4, 3, "#6d685e"), (22, 28, 20, 1, "#6d685e"), (26, 24, 1, 10, "#6d685e"), (36, 26, 4, 3, "#f0c27a"), (37, 27, 2, 1, "#fff1cf"),
+        (50, 20, 3, 16, "#5c4630"), (49, 17, 5, 4, "#f0a040"), (50, 15, 3, 2, "#ffd27a")]
+for name, rects in (("knight", knight), ("marked", marked), ("wait", wait)): scene(rects).save(os.path.join(CH, f"{name}.png"))
+pn = Image.new("RGBA", (12, 12), (26, 21, 25, 240)); ImageDraw.Draw(pn).rectangle([0, 0, 11, 11], outline=(70, 58, 64, 255), width=1); pn.save(os.path.join(CH, "panel.png"))
+Image.new("RGBA", (4, 4), (0, 0, 0, 90)).save(os.path.join(CH, "shade.png"))
+hc = Image.new("RGBA", (12, 12), (0, 0, 0, 0)); ImageDraw.Draw(hc).rectangle([0, 0, 11, 11], outline=(236, 227, 211, 255), width=1); hc.save(os.path.join(CH, "hover.png"))
+Image.new("RGBA", (4, 4), (6, 5, 8, 150)).save(os.path.join(CH, "dim.png"))
+print("ember choice:", 3 * (CH_W + 8), "x", CH_H + 33, "ui pixels, 3 roads")
 print("plan book:", PLAN_W + 16, "x", PLAN_H + 50, "ui pixels,", PLAN_COLS, "x", PLAN_ROWS, "cards")
 print("hall map:", MAP_W + 16, "x", MAP_W + 40, "ui pixels")
 print("tree screen:", W + 16, "x", H + 44, "ui pixels;", ", ".join(f"tree_{b}.png" for b in BRANCH))

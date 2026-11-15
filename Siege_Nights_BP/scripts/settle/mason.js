@@ -25,6 +25,8 @@ const OVERWORLD = "minecraft:overworld";
 // benches: [{ x, y, z, owner }]
 const store = moduleStore("siege:settle_masons", () => ({ benches: [] }));
 const benches = () => store.data.benches;
+// The settlement's first Mason's Bench (the mason stands by it): where the Act 1 "Mend the wall" step points
+export const benchOf = (owner) => { const b = benches().find((x) => x.owner === owner); return b ? { x: b.x, y: b.y, z: b.z } : undefined; };
 const benchTag = (b) => `siege_mason_at_${b.x}_${b.y}_${b.z}`;
 const same = (a, b) => a.x === b.x && a.y === b.y && a.z === b.z;
 
