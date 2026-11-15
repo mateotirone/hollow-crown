@@ -89,10 +89,12 @@ export function useWrit(player) {
     keep.allies = keep.allies.filter((id) => id !== target.id);
     player.sendMessage(`§7${target.name} is no longer allied with your settlement.`);
     target.sendMessage(`§7${player.name} has ended your alliance. You can no longer build on their land.`);
+    emit("allianceChanged", { owner: player.id, ally: target, allied: false });
   } else {
     keep.allies.push(target.id);
     player.sendMessage(`§6${target.name} is now your ally and can build on your land.`);
     target.sendMessage(`§6${player.name} has made you an ally. You can build on their land.`);
+    emit("allianceChanged", { owner: player.id, ally: target, allied: true });
     sfx(player, "random.levelup");
   }
   saveState();

@@ -2,5 +2,6 @@
 import "./claims.js";
 import "./travel.js";
 import "./welcome.js";
+import "./homespawn.js";
 import "./api.js";
 import "./tests.js";
