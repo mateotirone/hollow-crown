@@ -190,6 +190,10 @@ iron block; stacked iron blocks) and a `trade_sign` over the door: a mangrove ha
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
 
+## The windmill
+
+- **Windmill (2026-11-15):** a mud brick tower (BLK-01) on a tuff footing, its cap storey framed in mangrove with packed mud between, a low dark oak cone (pitch 1), four lattice sails of patched grey and brown cloth. No white cloth. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
+
 ## Never
 
 - **Ground:** no houses sitting on the wet ground.

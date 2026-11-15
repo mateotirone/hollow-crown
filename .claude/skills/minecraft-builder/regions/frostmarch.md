@@ -202,6 +202,10 @@ iron block; stacked iron blocks) and a `trade_sign` over the door: a spruce hang
 in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
 with a shutter or the light stage's wall lantern.
 
+## The windmill
+
+- **Windmill (2026-11-15):** a squat three-storey tower of dark stone (FRO-01), a very steep dark oak cone (pitch 3) with a rod finial, four lattice sails of grey and white cloth on dark oak stocks. No bright cloth. Spec: `map/structures/review/specs/gen_windmill.py`; every settlement raises one by its Town field (regions/README "Windmills").
+
 ## Never
 
 - **Roofs:** no shallow pitch 1 roofs on houses (they cannot shed snow) and no flat roofs.

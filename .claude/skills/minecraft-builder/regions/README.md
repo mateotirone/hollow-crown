@@ -110,8 +110,20 @@ given here.
 
 ## Windmills and the Breeder's Yard in towns (2026-11-13)
 
-- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot):
-  `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
+- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot).
+  Since 2026-11-15 ("rebuild each region's windmill") each region has its own mill on the skill's `windmill` part
+  (`map/structures/review/specs/gen_windmill.py`, `windmill_skill.py`): Vale stage mill (grey stone, a railed stage,
+  timber cap storey, slate cone, white lattice sails); Frostmarch squat deepslate tower, very steep dark oak cone, grey
+  sails; Saltreach slender whitewashed tower, low sea-green cone, teal shutters, eight white triangle sails with a cyan
+  band; Emberwaste broad sandstone tower, flat deck behind a parapet with a low red dome, six orange-and-white striped
+  triangle sails; Blackfen mud brick tower, mangrove-framed cap storey, low dark oak cone, patched grey and brown sails.
+  Every one: door on the front, sails on the back (or beside it where only that fits), a ladder up the main shaft, a
+  mill inside (sack floor, stone floor, cap floor), lit.
+- **Every settlement has one** (Mateo 2026-11-15: "fix the windmill system"): the site is beside the Town field
+  (`map/structures/windmill_sites.py`, run by `tools/export_towns.py`), on open ground, never a path, plot or fence
+  line, door facing a path with the walk paved 3 wide, sails clear of every plot and inside the Town wall. The game
+  raises it when the Town is laid out (`settle/windmill.js`). Where the field has no room, the nearest open ground in
+  the Town band.
 - Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
   in the region's style; the post sells the foal of the region it stands in.
 

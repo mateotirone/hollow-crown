@@ -1,0 +1,78 @@
+{
+ "name": "windmill_saltreach",
+ "edition": "bedrock",
+ "materials": {
+  "wash": {
+   "ladder": [
+    "calcite",
+    "white_concrete",
+    "calcite"
+   ],
+   "axis": "noise",
+   "scale": 4
+  },
+  "plinth": {
+   "ladder": [
+    "cobblestone",
+    "andesite",
+    "stone_bricks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "sea": {
+   "ladder": "SAL-04",
+   "axis": "y",
+   "jitter": 0.05
+  }
+ },
+ "parts": [
+  {
+   "part": "windmill",
+   "name": "windmill_saltreach",
+   "at": [
+    0,
+    -3
+   ],
+   "y": 0,
+   "sections": [
+    {
+     "r": 3.5,
+     "storeys": [
+      5,
+      5,
+      5
+     ]
+    }
+   ],
+   "material": "wash",
+   "plinth": "plinth",
+   "trim": "birch_planks",
+   "floor": "birch_planks",
+   "door": {
+    "side": "s",
+    "door": "birch_door"
+   },
+   "glass": "light_blue_stained_glass_pane",
+   "shutters": "warped_trapdoor",
+   "cap": {
+    "type": "cone",
+    "roof": "sea",
+    "pitch": 1,
+    "finial": "spire_block"
+   },
+   "sails": {
+    "kind": "jib",
+    "count": 8,
+    "arm": 10,
+    "wood": "birch",
+    "stock": "stripped_birch_log",
+    "cloth": [
+     "white_wool",
+     "white_wool"
+    ],
+    "band": "cyan_wool"
+   }
+  }
+ ]
+}

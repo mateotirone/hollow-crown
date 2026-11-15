@@ -1,0 +1,75 @@
+{
+ "name": "windmill_emberwaste",
+ "edition": "bedrock",
+ "materials": {
+  "sand": {
+   "ladder": "EMB-01",
+   "axis": "y"
+  },
+  "plinth": {
+   "ladder": [
+    "sandstone",
+    "cut_sandstone",
+    "sandstone"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "red": {
+   "ladder": [
+    "smooth_red_sandstone",
+    "red_sandstone",
+    "smooth_red_sandstone"
+   ],
+   "axis": "y"
+  }
+ },
+ "parts": [
+  {
+   "part": "windmill",
+   "name": "windmill_emberwaste",
+   "at": [
+    0,
+    -4
+   ],
+   "y": 0,
+   "sections": [
+    {
+     "r": 4.5,
+     "storeys": [
+      5,
+      5
+     ]
+    }
+   ],
+   "material": "sand",
+   "plinth": "plinth",
+   "trim": "smooth_sandstone",
+   "floor": "acacia_planks",
+   "door": {
+    "side": "s",
+    "door": "acacia_door"
+   },
+   "glass": "orange_stained_glass_pane",
+   "cap": {
+    "type": "dome",
+    "roof": "red",
+    "r": 3.5,
+    "parapet": "cut_sandstone",
+    "finial": "gold"
+   },
+   "sails": {
+    "kind": "jib",
+    "count": 6,
+    "arm": 8,
+    "wood": "acacia",
+    "stock": "stripped_acacia_log",
+    "cloth": [
+     "orange_wool",
+     "white_wool"
+    ],
+    "band": "red_wool"
+   }
+  }
+ ]
+}

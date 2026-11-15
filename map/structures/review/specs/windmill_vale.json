@@ -1,0 +1,85 @@
+{
+ "name": "windmill_vale",
+ "edition": "bedrock",
+ "materials": {
+  "stone": {
+   "ladder": "VAL-01",
+   "axis": "y"
+  },
+  "slate": {
+   "ladder": "VAL-06",
+   "axis": "y",
+   "reverse": true,
+   "jitter": 0.04
+  },
+  "plinth": {
+   "ladder": [
+    "mossy_cobblestone",
+    "cobblestone",
+    "andesite"
+   ],
+   "axis": "noise",
+   "scale": 3
+  }
+ },
+ "parts": [
+  {
+   "part": "windmill",
+   "name": "windmill_vale",
+   "at": [
+    0,
+    -4
+   ],
+   "y": 0,
+   "sections": [
+    {
+     "r": 4.5,
+     "storeys": [
+      5,
+      5
+     ]
+    },
+    {
+     "r": 3.5,
+     "storeys": [
+      5
+     ],
+     "material": "spruce_planks",
+     "frame": "stripped_spruce_log",
+     "infill": "spruce_planks"
+    }
+   ],
+   "material": "stone",
+   "plinth": "plinth",
+   "trim": "dark_oak_planks",
+   "floor": "spruce_planks",
+   "door": {
+    "side": "s",
+    "door": "spruce_door"
+   },
+   "glass": "brown_stained_glass_pane",
+   "gallery": {
+    "depth": 2,
+    "rail": "dark_oak_fence",
+    "deck": "spruce_planks"
+   },
+   "cap": {
+    "type": "cone",
+    "roof": "slate",
+    "pitch": 2,
+    "finial": "spire_block"
+   },
+   "sails": {
+    "kind": "lattice",
+    "count": 4,
+    "arm": 9,
+    "wood": "spruce",
+    "lattice": "spruce_planks",
+    "cloth": [
+     "white_wool",
+     "white_wool"
+    ]
+   }
+  }
+ ]
+}

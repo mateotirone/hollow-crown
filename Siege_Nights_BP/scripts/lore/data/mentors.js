@@ -356,7 +356,7 @@ export const MENTOR_NPCS = [
         opts: [["Back.", "hub"]],
       },
       captains: {
-        text: "Always. The sea takes them faster than the town makes them.\n\nThree things. You sign the articles and pay your first share of the debt. You raise a crew, three hands at least, sworn to your keep. And you do one thing that tells the sea who you are.\n\nThere's a woman in a wedding dress at the sunken chapel. She's been waiting at that altar since before the book was opened. Somebody needs to lay her to rest.",
+        text: "Always. The sea takes them faster than the town makes them.\n\nThree things. You sign the articles and pay your first share of the debt. You raise a crew, three hands at least, sworn to your keep. And you do one thing that tells the sea who you are.\n\nThere's a woman in a wedding dress at the sunken chapel. She's been waiting at that altar since before the book was opened. Somebody needs to lay her to rest.\n\nAnd once you've a crew, you'll hear about a ship. Everyone in Saltreach does, sooner or later.",
         opts: [
           ["Give me the articles.", "articles", ["flag:ottilie_call"]],
           ["Why does the sea need telling?", "sea"],
@@ -399,7 +399,7 @@ export const MENTOR_NPCS = [
         opts: [["What do I tell her?", "bride"], ["We'll go.", "end"]],
       },
       bride: {
-        text: "Nothing she'll want to hear. She's been waiting for a groom who isn't coming, and part of her knows.\n\nBe quick and be kind. Those aren't always different things.",
+        text: "Nothing she'll want to hear. She's been waiting for a groom who isn't coming, and part of her knows.\n\nThe old women say the Sallow Lantern took her off the chapel steps on her wedding day, and brought her back after, dressed the same, and sat her down. That ship has been circling her ever since. I think if she lies down, it does too.\n\nBe quick and be kind. Those aren't always different things.",
         opts: [["We'll go.", "end"]],
       },
       ready: {
@@ -511,7 +511,7 @@ export const MENTOR_NPCS = [
         opts: [["What does the fen lend?", "witch"], ["Back.", "hub"]],
       },
       witch: {
-        text: "Keeps children alive through a wet summer, mostly. Finds lost things. Tells you which of your neighbours is standing a little wrong. Puts down what needs putting down.\n\nIt isn't a gift. The fen doesn't give. It lends. And when it wants paying, it wants it all at once.\n\nWould you like to learn? I'm not asking lightly.",
+        text: "Keeps children alive through a wet summer, mostly. Finds lost things. Tells you which of your neighbours is standing a little wrong. Puts down what needs putting down.\n\nIt isn't a gift. The fen doesn't give. It lends. And when it wants paying, it wants it all at once.\n\nI take one, every generation. I don't take volunteers, so don't look so pleased: I've watched you since you first came into the fen, and I'm still not sure. The last one I chose went into the reeds and came back wrong.\n\nWould you like to learn? I'm not asking lightly.",
         opts: [
           ["I'd like to learn.", "learn", ["flag:nell_call"]],
           ["What does it cost?", "cost"],

@@ -44,6 +44,7 @@ import "./hallmove.js";
 import "./planbook.js";
 import "./basebuilds.js";
 import "./storehouse.js";
+import "./windmill.js"; // every settlement's regional windmill, raised with its Town field
 import "./storecrates.js";
 import "./arrival.js";
 import "./showcase.js";
