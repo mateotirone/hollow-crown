@@ -1,0 +1,406 @@
+{
+ "name": "rimehold_chapel",
+ "card": {
+  "title": "Rimehold stave chapel",
+  "sub": "Norse stave",
+  "region": "frostmarch",
+  "where": "Rimehold",
+  "kind": "Civic",
+  "blurb": "A tall stave nave and a lower apse under steep shingle with dragon heads on every gable, a gallery skirt all round, and a stave tower climbing out of the roof in stages to a louvred belfry and a steep slate spire. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "glass": "cyan_stained_glass_pane",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    0,
+    4,
+    8,
+    14
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    8
+   ],
+   "storey_style": [
+    {
+     "infill": "spruce_planks"
+    }
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "windows": {
+    "e": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "w": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "n": [],
+    "s": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "y": 5
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "wings": [
+    {
+     "rect": [
+      2,
+      0,
+      6,
+      3
+     ],
+     "storeys": [
+      6
+     ],
+     "roof": {
+      "type": "gable",
+      "ridge": "z",
+      "pitch": 2,
+      "gable_horns": true,
+      "snow": true
+     }
+    }
+   ],
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": {
+    "use": "chapel",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "glass": "white_stained_glass_pane",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    2,
+    7,
+    6,
+    11
+   ],
+   "y": 10,
+   "plinth": 1,
+   "storeys": [
+    14
+   ],
+   "door": null,
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "y": 20
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "y": 20
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "y": 20
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "y": 20
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0,
+   "bushes": false,
+   "interior": false
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    2,
+    7,
+    6,
+    11
+   ],
+   "y": "top",
+   "h": 4,
+   "pier": "dark_oak_log",
+   "deck": "dark_oak_planks",
+   "trim": "dark_oak_planks",
+   "louvres": false,
+   "bell": true,
+   "roof": {
+    "ladder": [
+     "deepslate_tiles",
+     "cobbled_deepslate"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "cap": "spire",
+   "rows": 3,
+   "overhang": 1,
+   "finial": "spire_block",
+   "cap_trim": "dark_oak_planks"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -2,
+    15,
+    10,
+    16
+   ],
+   "against": "n",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    9,
+    4,
+    10,
+    14
+   ],
+   "against": "w",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -2,
+    4,
+    -1,
+    14
+   ],
+   "against": "e",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    1,
+    6,
+    7,
+    6
+   ],
+   "against": "s",
+   "top": 19,
+   "pitch": 1,
+   "y": 17,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    1,
+    12,
+    7,
+    12
+   ],
+   "against": "n",
+   "top": 19,
+   "pitch": 1,
+   "y": 17,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    7,
+    7,
+    7,
+    11
+   ],
+   "against": "w",
+   "top": 19,
+   "pitch": 1,
+   "y": 17,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    1,
+    7,
+    1,
+    11
+   ],
+   "against": "e",
+   "top": 19,
+   "pitch": 1,
+   "y": 17,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  }
+ ]
+}

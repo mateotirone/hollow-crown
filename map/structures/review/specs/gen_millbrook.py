@@ -60,7 +60,20 @@ for x in (-2, -1, 0): pl.append([x, cy, cz, "dark_oak_log", {"axis": "x"}])
 for z in (cz - 4, cz + 4):
     for y in (0, 1): pl.append([-1, y, z, "stone_bricks"])
 pl += [[-1, 2, cz - 4, "stone_brick_wall"], [-1, 2, cz + 4, "stone_brick_wall"]]
+# the mill race (Mateo 2026-11-12, "will they always be in water?"): the wheel turns in its own stone-lined
+# channel, two blocks of water under the wheel, open to the brook on the outside, so the bottom of the wheel is
+# always in water whatever the brook does; the town stamp also sets the mill's floor one above the brook's water
+wheel = {(c[0], c[1], c[2]) for c in pl}
+for z in range(cz - 4, cz + 5):
+    for x in (-3, -2, -1): pl.append([x, -2, z, "stone_bricks"])                # the race floor
+    if z in (cz - 4, cz + 4):
+        for x in (-3, -2, -1):
+            for y in (-1, 0, 1): pl.append([x, y, z, "stone_bricks"])           # its side walls
+        continue
+    for x in (-3, -2, -1):
+        for y in (-1, 0):
+            if (x, y, z) not in wheel: pl.append([x, y, z, "water"])
 mill["place"] = pl
-mill["stamp"] = {"wet_ok": [[-2, z] for z in range(cz - 3, cz + 4)], "wet_soft": [[-1, z] for z in range(-1, 10)] + [[-2, z] for z in (-1, 0, 8, 9)]}
+mill["stamp"] = {"wet_ok": [[-2, z] for z in range(cz - 3, cz + 4)], "wet_soft": [[x, z] for x in (-1, -3) for z in range(-1, 10)] + [[-2, z] for z in (-1, 0, 8, 9)]}
 json.dump(mill, open(os.path.join(HERE, "millbrook_watermill.json"), "w"), indent=1)
 print("tower top", top)

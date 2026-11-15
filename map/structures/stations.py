@@ -495,10 +495,34 @@ def engine_shed(region):
     side_windows(B, L, rect, 2, sides="ns")
     base = top + (1 if L["roof"] != "flat" else 0)
     roofs(bp, P, L, region, [(rect, "x", 1)], base)
+    # Mateo 2026-11-12 ("needs a ton of work", "the blocks on top are floating"): a smoke ventilator runs along the
+    # ridge (slatted sides, its own little roof), the two stacks rise from the roof itself, and the open ends get
+    # arched heads with plank doors folded back against the walls.
+    soft = lambda n: n in ("keep", "air") or "carpet" in n
+    def roof_top(x, z):
+        ys = [y for (cx, y, cz), v in bp.cells.items() if cx == x and cz == z and not soft(v[0])
+              and not any(w in v[0] for w in ("fence", "_wall", "rod", "chain", "lantern", "spike"))]
+        return max(ys) if ys else base
+    if L["roof"] == "gable":                     # the vent sits on a ridge (hips and flat roofs have none)
+        ridge = roof_top(0, 0)
+        trap = P["trim"].replace("_stairs", "_trapdoor")
+        if "stone" in trap or "brick" in trap or "sandstone" in trap: trap = "spruce_trapdoor"
+        slab = P["trim"].replace("_stairs", "_slab")
+        for x in range(-6, 7):
+            if x in (-4, 4): continue
+            for lz in (-1, 1):                                                  # slats standing on the slopes either side
+                for y in range(roof_top(x, -lz) + 1, ridge + 2): S(bp, x, y, lz, trap, open=True, facing="n" if lz > 0 else "s")
+            S(bp, x, ridge + 1, 0, "air")
+            for lz in (-1, 0, 1): S(bp, x, ridge + 2, lz, slab, half="bottom")  # its own low roof
     for x in (-4, 4):
-        for y in range(base + 1, base + 6):   # from the roof up: no gap under a stack on a flat roof
-            if bp.get(x, y, 0)[0] in ("keep", "air") or "carpet" in bp.get(x, y, 0)[0]: S(bp, x, y, 0, k("bricks"))   # a stack stands on the roof, not on a moss carpet
-        S(bp, x, base + 6, 0, "stone_brick_wall")
+        t = roof_top(x, 0)
+        for y in range(t + 1, t + 4): S(bp, x, y, 0, k("bricks"))             # a stack on the roof, never in the air
+        S(bp, x, t + 4, 0, "stone_brick_wall")
+    for x in (-8, 8):                                                             # arched heads over the open ends
+        out = 1 if x > 0 else -1
+        S(bp, x, 5, -2, P["sill"], facing="n", half="top"); S(bp, x, 5, 2, P["sill"], facing="s", half="top")
+        for lz in (-2, 2):                                                        # plank doors folded back on the walls
+            for y in range(1, 5): S(bp, x + out, y, lz + (1 if lz > 0 else -1), P["trim"].replace("_stairs", "_trapdoor") if "stone" not in P["trim"] else "spruce_trapdoor", open=True, facing="e" if out > 0 else "w")
     for x in (-8, 8):
         for lz in (-3, 3): S(bp, x, 6, lz, k("stone"))
     hang(bp, [(-4, 5, 0), (4, 5, 0)])

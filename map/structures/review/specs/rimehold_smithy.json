@@ -1,0 +1,149 @@
+{
+ "name": "rimehold_smithy",
+ "card": {
+  "title": "Rimehold smithy",
+  "sub": "Norse timber and stone",
+  "region": "frostmarch",
+  "where": "Rimehold",
+  "kind": "Civic",
+  "blurb": "A stone forge house with a big deepslate chimney and an open workshop under a lean-to on posts, where the anvil and quench barrel stand. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    0,
+    0,
+    8,
+    8
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    }
+   ],
+   "door": {
+    "side": "s",
+    "at": 0,
+    "kind": "house",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -2,
+      "storey": 0
+     },
+     {
+      "at": 2,
+      "storey": 0
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 0
+     }
+    ],
+    "n": [],
+    "e": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": [
+    [
+     6,
+     4
+    ]
+   ],
+   "vines": 0,
+   "interior": "smithy"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    9,
+    1,
+    12,
+    7
+   ],
+   "against": "w",
+   "top": 6,
+   "pitch": "half",
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  }
+ ],
+ "place": [
+  [
+   10,
+   1,
+   3,
+   "anvil",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   11,
+   1,
+   6,
+   "cauldron"
+  ],
+  [
+   10,
+   1,
+   6,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   9,
+   1,
+   2,
+   "grindstone",
+   {
+    "facing": "n"
+   }
+  ]
+ ]
+}

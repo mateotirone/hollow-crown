@@ -1,0 +1,150 @@
+{
+ "name": "rimehold_inn",
+ "card": {
+  "title": "Rimehold inn",
+  "sub": "Norse timber and stone",
+  "region": "frostmarch",
+  "where": "Rimehold",
+  "kind": "Civic",
+  "blurb": "A long two-storey inn: dark stone tap room below, plank rooms above, a steep shingle roof with dragon heads at both gables and a woodpile by the door. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "dark_oak_planks",
+      "spruce_planks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    0,
+    0,
+    14,
+    8
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "at": 0,
+    "kind": "house",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -5,
+      "storey": 0
+     },
+     {
+      "at": -2,
+      "storey": 0
+     },
+     {
+      "at": 2,
+      "storey": 0
+     },
+     {
+      "at": 5,
+      "storey": 0
+     },
+     {
+      "at": -5,
+      "storey": 1
+     },
+     {
+      "at": -2,
+      "storey": 1
+     },
+     {
+      "at": 2,
+      "storey": 1
+     },
+     {
+      "at": 5,
+      "storey": 1
+     }
+    ],
+    "n": [
+     {
+      "at": -5,
+      "storey": 1
+     },
+     {
+      "at": 0,
+      "storey": 1
+     },
+     {
+      "at": 5,
+      "storey": 1
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": [
+    [
+     2,
+     4
+    ],
+    [
+     12,
+     4
+    ]
+   ],
+   "vines": 0,
+   "interior": "inn"
+  },
+  {
+   "part": "woodpile",
+   "at": [
+    15,
+    1,
+    2
+   ],
+   "len": 3,
+   "h": 2,
+   "facing": "e",
+   "wood": "spruce"
+  }
+ ]
+}

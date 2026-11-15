@@ -1,0 +1,245 @@
+{
+ "name": "rimehold_hall",
+ "card": {
+  "title": "Rimehold longhouse hall",
+  "sub": "Norse stave and stone",
+  "region": "frostmarch",
+  "where": "Rimehold, the square",
+  "kind": "Civic",
+  "blurb": "A longhouse on a dark stone course, plank rows in a dark oak frame, a steep weathered copper roof with dragon heads on both gables, a shingle gallery skirt all round on posts and a lantern on the ridge. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "glass": "light_blue_stained_glass_pane",
+    "roof": {
+     "ladder": [
+      "waxed_weathered_cut_copper",
+      "waxed_oxidized_cut_copper"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "trim": "dark_oak_planks"
+   },
+   "rect": [
+    0,
+    0,
+    8,
+    12
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    4,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": "FRO-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "windows": {
+    "e": [
+     {
+      "at": -3,
+      "storey": 1
+     },
+     {
+      "at": 0,
+      "storey": 1
+     },
+     {
+      "at": 3,
+      "storey": 1
+     }
+    ],
+    "w": [
+     {
+      "at": -3,
+      "storey": 1
+     },
+     {
+      "at": 0,
+      "storey": 1
+     },
+     {
+      "at": 3,
+      "storey": 1
+     }
+    ],
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "h": 3
+     }
+    ],
+    "s": [
+     {
+      "at": -2,
+      "storey": 1
+     },
+     {
+      "at": 2,
+      "storey": 1
+     }
+    ]
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": [
+    [
+     7,
+     3
+    ]
+   ],
+   "vines": 0,
+   "interior": {
+    "use": "hall",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    3,
+    6,
+    5,
+    8
+   ],
+   "y": "roof",
+   "h": 3,
+   "pier": "dark_oak_log",
+   "deck": "dark_oak_planks",
+   "trim": "dark_oak_planks",
+   "roof": {
+    "ladder": [
+     "waxed_weathered_cut_copper",
+     "waxed_oxidized_cut_copper"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "cap": "spire",
+   "rows": 2,
+   "finial": "rod",
+   "bell": false
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -2,
+    -2,
+    10,
+    -1
+   ],
+   "against": "s",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -2,
+    13,
+    10,
+    14
+   ],
+   "against": "n",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    9,
+    0,
+    10,
+    12
+   ],
+   "against": "w",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -2,
+    0,
+    -1,
+    12
+   ],
+   "against": "e",
+   "top": 6,
+   "pitch": 1,
+   "y": 0,
+   "roof": {
+    "ladder": [
+     "dark_oak_planks",
+     "spruce_planks"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "post": "dark_oak_log",
+   "trim": "dark_oak_planks",
+   "floor": "cobbled_deepslate"
+  }
+ ]
+}

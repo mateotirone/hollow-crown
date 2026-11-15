@@ -22,12 +22,12 @@ CITADEL = {"stone": "siege:castle_stone", "smooth": "siege:castle_smooth", "band
            "battlement": "siege:battlement", "slit": "siege:arrow_slit", "spire": "siege:spire_roof", "brazier": "siege:brazier", "port": "siege:portcullis",
            "throne": "gold_block", "wool": "red_wool", "carpet": "red_carpet", "ladder": "ladder"}
 
-TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall and a stave chapel under weathered copper."),
+TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall under weathered copper and a stave chapel with a tower climbing out of its roof."),
          ("gulls_rest", "Gull's Rest", "saltreach", "salt", "The Saltreach harbour, Atlantean: pale stone and quartz columns on sea-worn prismarine, sea-glass windows, roofs that never repeat (low hips, mansards, bell roofs, domes, temple fronts, terraces and towers) in sea green, teal, white and copper, a quay, a lighthouse and a boathouse."),
          ("sunscar", "Sunscar", "emberwaste", "ember", "The Emberwaste town: thick sandstone walls, flat roofs behind parapets, lattice windows, striped awnings and a domed market hall."),
          ("mirelight", "Mirelight", "blackfen", "fen", "The Blackfen town: mud brick between mangrove posts, houses up on stilts over the black water, mossy roofs and froglights by the doors."))
-HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a spruce frame, a steep roof that sheds snow.",
-                         "A small cottage: low walls, a roof nearly to the ground, snow on the ridge.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
+HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a dark oak frame, a steep roof that sheds snow, dragon heads on both gables, a woodpile under the eaves.",
+                         "A small cottage: one storey of plank rows, a steep roof with snow on the ridge, dragon heads and a woodpile.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
                "salt": ["Pale stone and quartz columns on a prismarine plinth, sea-glass windows, a roof from the town's seven forms.", "A pale stone street house with sea-glass windows under a hip, mansard, bell, temple or dome roof.",
                         "A one-storey pale stone cottage under a low hip, a bell roof or a small dome.", "A net store: pale stone on a prismarine plinth, a low gable, a big plank door."],
                "ember": ["Two storeys of painted sandstone, a roof terrace behind the parapet, lattice windows, roof beams.", "A sandstone house with a striped awning over the door; some carry a red roof or dome.",
@@ -41,7 +41,7 @@ TOWN_BLURB = {("gulls_rest", "quay"): "The quay wall with bollards, a jetty on p
               ("gulls_rest", "boathouse"): "A stone shed straddling the shore, open at the back over a water slip, a net loft above.",
               ("mirelight", "stilt_house"): "Tall stilts down into the mire, the back half over the water, a mooring platform behind.",
               ("mirelight", "stilt_house_big"): "Two storeys on tall stilts over the water.",
-              ("rimehold", "inn"): "Two storeys of dark stone and plank rows, a tap room with a bar and hearth, bedrooms upstairs. The only furnished building.",
+              ("rimehold", "inn"): "Two storeys of dark stone and plank rows, a tap room with a bar and hearth, bedrooms upstairs, a steep shingle roof with dragon heads. Built on the skill.",
               ("gulls_rest", "inn"): "A stone and whitewash inn under an orange hipped roof, a tap room and bedrooms upstairs. The only furnished building.",
               ("mirelight", "inn"): "Mud brick and mangrove under a mossy roof, a tap room and bedrooms upstairs. The only furnished building.",
               ("sunscar", "inn"): "A caravanserai round a courtyard with a palm and a well, a corner tower and a striped gate awning."}
@@ -154,6 +154,8 @@ def main():
         spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec)
         if spec.get("after"):          # a furnished build: the review module's interior stage runs on the skill's shell
             import importlib; mod, fn = spec["after"].split(":"); m = importlib.import_module(mod)
+            if not hasattr(m, "Building") and hasattr(m, "build"):    # a module with its own build(region) entry
+                return m.build(k.rsplit("_", 1)[1]) if "_" in k else m.build()
             tmp = Blueprint("after"); getattr(m, fn)(tmp, m.Building(tmp, m.P, 3)); dy = spec.get("after_dy", 0)
             for (x, y, z), v in tmp.cells.items():
                 if v[0] not in ("keep",): b.cells[(x, y + dy, z)] = v
@@ -186,10 +188,10 @@ def main():
                         (lambda s=seed, t=t, c=col, f=form: atlantean.house(s, random.Random(s), t, c, f)), g,
                         extra={"group": "Atlantean houses: every roof form", "kind": "House"})
         for name, mk in RT.CIVIC[tid]:
-            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE.get(name, name.capitalize()), tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
                 mk, g, extra={"group": "On the square", "kind": "Civic"})
         for name, mk in RT.SHORE.get(tid, []):
-            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, TOWN_BLURB.get((tid, name), ""), mk, g,
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE.get(name, name.capitalize()), tname, TOWN_BLURB.get((tid, name), ""), mk, g,
                 view=(150, 30, 1.5), extra={"group": "On the water", "kind": "Harbour"})
 
     # ---- 2. Settlements: what grows on a player's plot ----
