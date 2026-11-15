@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", ".claude", "skills", "minecraf
 import lighting  # every build is lit at night (Mateo 2026-11-13): the engine's light stage
 
 ARCH = {"vale": "vale", "frostmarch": "frost", "saltreach": "salt", "emberwaste": "ember", "blackfen": "fen"}
-KEEP = ("facing", "axis", "half", "upper", "hinge", "open", "hanging", "conn", "post", "head")
+KEEP = ("facing", "axis", "half", "upper", "hinge", "open", "hanging", "conn", "post", "head", "raw")
 # limits from the plot: the level-5 hall must stay within 15 blocks each side and 42 deep (settle/rules.js)
 SIDE, DEEP, FRONT = 15, 42, -2
 
@@ -109,11 +109,12 @@ def main():
         for level in range(1, 6):
             bp = H.REGION_HALLS[region](level)
             keep = H.tree_room(bp, level)   # the Tree of Oaths model needs its room (townhall/oath_tree.js)
+            keep |= H.hall_clock(bp, region, keep)   # the living clock over the door (scripts/clocks)
             d = export(bp, avoid=keep); out[arch][level] = d
             b = d["box"]
             if max(-b["x0"], b["x1"]) > SIDE or b["z1"] > DEEP or b["z0"] < FRONT:
                 problems.append(f"{region} {level}: {b}")
-            need = {"tree", "hearth", "ledger"} | ({"cartography", "sage"} if level >= 2 else set()) | ({"throne"} if level >= 4 else set()) | ({"vault"} if level == 5 else set())
+            need = {"tree", "hearth", "ledger", "clock"} | ({"cartography", "sage"} if level >= 2 else set()) | ({"throne"} if level >= 4 else set()) | ({"vault"} if level == 5 else set())
             missing = need - set(d["marks"])
             if missing: problems.append(f"{region} {level}: missing marks {sorted(missing)}")
             print(region, level, "cells", sum(r[3] for r in d["rows"]), "rows", len(d["rows"]), "box", b)
