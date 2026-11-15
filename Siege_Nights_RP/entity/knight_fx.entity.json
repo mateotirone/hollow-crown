@@ -1,0 +1,56 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:knight_fx",
+   "materials": {
+    "banner": "entity_alphatest",
+    "sword": "entity_alphablend"
+   },
+   "textures": {
+    "banner_white": "textures/entity/siege_knight_banner_white",
+    "banner_orange": "textures/entity/siege_knight_banner_orange",
+    "banner_magenta": "textures/entity/siege_knight_banner_magenta",
+    "banner_light_blue": "textures/entity/siege_knight_banner_light_blue",
+    "banner_yellow": "textures/entity/siege_knight_banner_yellow",
+    "banner_lime": "textures/entity/siege_knight_banner_lime",
+    "banner_pink": "textures/entity/siege_knight_banner_pink",
+    "banner_gray": "textures/entity/siege_knight_banner_gray",
+    "banner_light_gray": "textures/entity/siege_knight_banner_light_gray",
+    "banner_cyan": "textures/entity/siege_knight_banner_cyan",
+    "banner_purple": "textures/entity/siege_knight_banner_purple",
+    "banner_blue": "textures/entity/siege_knight_banner_blue",
+    "banner_brown": "textures/entity/siege_knight_banner_brown",
+    "banner_green": "textures/entity/siege_knight_banner_green",
+    "banner_red": "textures/entity/siege_knight_banner_red",
+    "banner_black": "textures/entity/siege_knight_banner_black",
+    "sword": "textures/entity/siege_knight_sword"
+   },
+   "geometry": {
+    "banner": "geometry.siege.knight_banner",
+    "sword": "geometry.siege.knight_sword"
+   },
+   "animations": {
+    "drop": "animation.siege.knight_fx.banner_drop",
+    "wave": "animation.siege.knight_fx.banner_wave",
+    "fall": "animation.siege.knight_fx.sword_fall"
+   },
+   "scripts": {
+    "animate": [
+     {
+      "drop": "query.property('siege:form') == 0"
+     },
+     {
+      "wave": "query.property('siege:form') == 0"
+     },
+     {
+      "fall": "query.property('siege:form') == 1"
+     }
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_knight_fx"
+   ]
+  }
+ }
+}

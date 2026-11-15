@@ -192,6 +192,15 @@ full block, so snow on every row striped the roofs white; the skill now finds th
 **Worked examples:** `review/specs/gen_rimehold.py` (longhouse hall, stave chapel, inn, smithy, store, byre) and
 `regions_towns.frost_house` (the town houses, built per seed on the skill).
 
+## The Moneyer (Mateo, 2026-11-14)
+
+Every town has a Moneyer on its square (`settle_skill.town_moneyer("frostmarch")`, spec `review/specs/settle_moneyer_frostmarch.json`):
+the region's Mint shell with barred ground-floor windows, the skill's `moneyer` interior (a counter with an iron grille
+three high and the scales, an iron and a gold weighted plate, in the pass window under it; a strongbox, a chest on an
+iron block; stacked iron blocks) and a `trade_sign` over the door: a spruce hanging sign under a one-block dark oak fence arm,
+in front of the fanlight, facing the square. The game writes the words on the sign. Trade signs never share a cell
+with a shutter or the light stage's wall lantern.
+
 ## Never
 
 - **Roofs:** no shallow pitch 1 roofs on houses (they cannot shed snow) and no flat roofs.

@@ -141,14 +141,16 @@ function start(key, job) {
   if (gaps.cols.size) b.columns = b.columns.filter((c) => !gaps.cols.has(`${c.x},${c.z}`));
 }
 
-// A Barracks or Quartermaster's Armoury raised on a plot from its Plot Marker (or a Foundation Stone): the working
+// A Barracks, Quartermaster's Armoury or Dragon Stable raised on a plot from its Plot Marker (or a Foundation Stone): the working
 // block goes at its front, where a placed block would have stood, and the building is remembered like a block-raised
 // one (the Barracks yard for the off-duty soldiers, guard posts) without counting twice for the charter (plot: the
 // plot counts it).
 const PLOT_BLOCKS = {
   barracks: { type: "siege:barracks", said: "§6Your Barracks stands.§7 Click the Barracks block at its front and choose §fTrain soldiers§7: 40 Regals each, and a Hamlet keeps 4." },
   quartermaster_desk: { type: "siege:quartermaster_desk", said: "§6Your Quartermaster's Armoury stands.§7 A quartermaster soon takes the post at the desk by its front: click them to buy siege gear." },
+  dragon_roost: { type: "siege:dragon_roost", said: "§6Your Dragon Stable stands.§7 The Dragon Roost at its arch is your dragon's home: set an egg in a Hatching Brazier in the nursery, and click the Roost to look after it." },
 };
+// (The Stables and the Forester's Lodge set their own block at the front: horses/barn.js and forestry/index.js.)
 on("settleBuilt", ({ owner, building, style, origin, forward, box }) => {
   const made = PLOT_BLOCKS[building];
   if (!made) return;

@@ -372,6 +372,46 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   });
 });
 
+// ---------- Looking at a slot names its book ----------
+// Mateo 2026-11-14: "when you hover over a library slot it shows you what book is on the shelf". Every few ticks,
+// a player looking at a shelf's front from close by sees the slot's tome on the action bar (or that it is empty).
+const LOOK_REACH = 5;
+const looking = new Map(); // player id -> { what, at } (what was last shown, and when)
+export function slotLine(id, read = []) {
+  if (!id) return "§8An empty slot";
+  const tome = TOME[id];
+  if (!tome) return "§7A tome";
+  const col = COLLECTION[tome.col];
+  return `§f${tome.title}§7  ${col ? `${col.name}, no. ${tome.n}` : ""}${read.includes(id) ? "" : "  §e(unread)"}`;
+}
+onTick("lore shelf look", 4, () => {
+  const now = system.currentTick;
+  for (const player of world.getAllPlayers()) {
+    try {
+      if (player.dimension.id !== "minecraft:overworld") continue;
+      const hit = player.getBlockFromViewDirection({ maxDistance: LOOK_REACH });
+      const block = hit?.block;
+      if (block?.typeId !== SHELF) { looking.delete(player.id); continue; }
+      if (now - (lastClick.get(player.id) ?? -100) < 40) continue; // let a click's own message ("Took ...") show first
+      let at = hit.faceLocation;
+      if (at && [at.x, at.y, at.z].some((v) => v < -0.01 || v > 1.01)) at = { x: at.x - block.location.x, y: at.y - block.location.y, z: at.z - block.location.z };
+      const slot = slotAt(block.permutation.getState("minecraft:cardinal_direction"), hit.face, at);
+      if (slot === undefined) { looking.delete(player.id); continue; }
+      const owner = landOwnerAt(block);
+      if (!owner) continue;
+      const id = libOf(owner)[keyOf(block.location)]?.[slot] ?? null;
+      const what = `${keyOf(block.location)}#${slot}#${id}`;
+      const was = looking.get(player.id);
+      if (was?.what === what && now - was.at < 40) continue; // the action bar lasts a few seconds: refresh it
+      looking.set(player.id, { what, at: now });
+      player.onScreenDisplay.setActionBar(slotLine(id, progressOf(player).read ?? []));
+    } catch {
+      // the player is mid-teleport or the block unloaded
+    }
+  }
+});
+world.afterEvents.playerLeave.subscribe(({ playerId }) => looking.delete(playerId));
+
 // ---------- The catalog ----------
 const libraryName = (owner) => `Library of ${keepOf(owner)?.name ?? "the Keep"}`;
 

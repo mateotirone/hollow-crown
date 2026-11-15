@@ -73,7 +73,7 @@
     "speed_multiplier": 0.8
    },
    "minecraft:attack": {
-    "damage": 6
+    "damage": 4
    },
    "minecraft:despawn": {
     "despawn_from_distance": {}

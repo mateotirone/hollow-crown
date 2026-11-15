@@ -260,7 +260,7 @@ export function drawHall(level, style) {
 
 // The Town Board: a big notice board inside every hall that opens the Town Hall menu (Mateo, 2026-11-12:
 // "a big bulletin board-style thing that's inside the Town Hall"). It stands on the floor just inside the
-// front door, off the centre aisle, under the roof. Its face turns to the aisle (Mateo's playtest 2026-11-13: facing
+// front door, off the centre aisle, with its back to the side wall where it can, under the roof. Its face turns to the aisle (Mateo's playtest 2026-11-13: facing
 // the door it stood edge-on to everyone in the room), so you read it as you walk in and from the hall itself.
 export function boardSpot(p) {
   const tree = p.marks.tree;
@@ -277,16 +277,32 @@ export function boardSpot(p) {
     for (let y = tree.y - 2; y <= tree.y + 1; y++) if (!free(x, y - 1, z) && free(x, y, z) && free(x, y + 1, z)) return y;
     return undefined;
   };
+  // indoors: walls on every side within reach and a roof overhead (Mateo 2026-11-14: in the small halls the first
+  // free spot was outside the side wall, under the eaves)
+  const indoors = (x, y, z) => {
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      let hit = false;
+      for (let k = 1; k <= 16 && !hit; k++) hit = !free(x + dx * k, y, z + dz * k) || !free(x + dx * k, y + 1, z + dz * k);
+      if (!hit) return false;
+    }
+    for (let ry = y + 2; ry <= top; ry++) if (!free(x, ry, z)) return true;
+    return false;
+  };
+  // best: its back against the side wall, the aisle side open, nearest the door; else standing free inside
+  let best, bestScore = -Infinity;
   for (let z = doorZ + 1; z <= tree.z + 2; z++)
-    for (const side of [2, 3, 4, 5, 6])
+    for (let side = 2; side <= 14; side++)
       for (const x of [side, -side]) {
         const y = standAt(x, z);
-        if (y === undefined || !free(x, y, z - 1)) continue; // its face needs room to be read
-        let roofed = false;
-        for (let ry = y + 2; ry <= top && !roofed; ry++) roofed = !free(x, ry, z);
-        if (roofed) return { x, y, z };
+        const out = x > 0 ? 1 : -1; // its back is toward the wall, its face toward the aisle
+        if (y === undefined || !free(x - out, y, z) || !free(x - out, y + 1, z) || !indoors(x, y, z)) continue;
+        if (isDoor(at(x, y, z - 1)) || isDoor(at(x, y, z + 1)) || isDoor(at(x + out, y, z))) continue; // never in a doorway
+        const backed = !free(x + out, y, z) && !free(x + out, y + 1, z);
+        const roomy = free(x, y, z - 1) && free(x, y, z + 1); // it is wider than a block
+        const score = (backed ? 1000 : 0) + (roomy ? 100 : 0) - 4 * (z - doorZ) - Math.abs(x);
+        if (score > bestScore) { bestScore = score; best = { x, y, z }; }
       }
-  return undefined;
+  return best;
 }
 
 // The Town Board faces the centre aisle: toward -x on the right of it, +x on the left

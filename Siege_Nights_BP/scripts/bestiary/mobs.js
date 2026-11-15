@@ -3,7 +3,7 @@
 //
 // Every 10 ticks we look at each "scripted" mob near a player and run its trick.
 
-import { world } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import { onTick, addTests, assert } from "../siege/api.js";
 import { MOBS } from "./data.js";
 import { activeDimensions, addToPlayerList, alive, announce, effect, flat, heal, heroOf, hurt, isLookingAt, particle, pickOne, ring, shove, sound, watchedBy } from "./util.js";
@@ -13,6 +13,10 @@ let clock = 0;
 const every = (ticks, entity) => (clock + (entity.id.charCodeAt(entity.id.length - 1) % 4) * STEP) % ticks < STEP; // staggered per mob
 const FLAMMABLE = /planks|log|wood|wool|fence|hay|bookshelf|leaves|carpet|door|trapdoor|timber/;
 const LOUD = 70; // a Marked player's Resonance at or above this is "loud" (town hall thread's number)
+
+// The Lost Villager's unseen strike (Mateo 2026-11-14: "the shit ton of damage they do")
+export const LOST_VILLAGER = { damage: 4, cooldown: 60 }; // ticks between strikes
+const lostStruck = new Map(); // entity id -> tick of its last strike
 
 const TRICKS = {
   // Rings its bell: raiders nearby march faster and hit harder. It runs from you (that part is data).
@@ -57,7 +61,11 @@ const TRICKS = {
     const prey = near.reduce((a, b) => (flat(a.location, e.location) < flat(b.location, e.location) ? a : b));
     const d = flat(prey.location, e.location);
     if (d < 1.8) {
-      hurt(prey, 6, "entityAttack", e); effect(prey, "darkness", 60, 0);
+      // One strike, then it has to wait (it used to strike every half second while close: 12 a second)
+      if (system.currentTick < (lostStruck.get(e.id) ?? -1e9) + LOST_VILLAGER.cooldown) return;
+      lostStruck.set(e.id, system.currentTick);
+      if (lostStruck.size > 200) lostStruck.clear();
+      hurt(prey, LOST_VILLAGER.damage, "entityAttack", e); effect(prey, "darkness", 60, 0);
       sound(dim, "mob.villager.no", e.location, 0.5);
       return;
     }
@@ -174,11 +182,11 @@ const TRICKS = {
 const RULER_TAG = "siege_hollow_ruler"; // set on whoever rules the Hollow (that feature is not built yet)
 const HOLLOW_TRICKS = ["siege:lost_villager", "siege:changeling", "siege:wrongling", "siege:stone_vigil", "siege:echo_hound", "siege:tolling_shade"];
 const wyrmStrikes = [];
-// The Dune Wyrm's eruption. Its bite is data (roster.py: dmg 7, a 1.5 s swing); these are the scripted parts.
+// The Dune Wyrm's eruption. Its bite is data (roster.py: dmg 6, a 1.5 s swing); these are the scripted parts.
 export const WYRM = {
   windup: 40, // ticks of rumble and closing ring before it comes up (was 30)
   radius: 3.2, // how close to the marked spot you get hit
-  damage: 5, // the eruption itself (was 8, and its bite landed in the same moment: 8 + 15 on Hard killed from full)
+  damage: 4, // the eruption itself (was 8, then 5; Mateo 2026-11-14: wild creatures hit far too hard)
   dazed: 40, // ticks it lies stunned beside the hole: no bite, barely moving
   aside: 2.5, // blocks from the marked spot it surfaces, so it isn't standing in you
 };
@@ -190,7 +198,7 @@ export function wyrmSurface(at, from, aside = WYRM.aside) {
 }
 // The worst a full-health player can take from one eruption plus the bite after it, on Hard (melee x1.5).
 // The daze outlasts the bite's swing, so the two never land together; this checks even if they did.
-export const wyrmWorstBurst = (bite = 7) => WYRM.damage + bite * 1.5;
+export const wyrmWorstBurst = (bite = 6) => WYRM.damage + bite * 1.5;
 
 function canSee(player) {
   try {
@@ -296,13 +304,13 @@ world.afterEvents.entityHurt.subscribe((event) => {
   try {
     switch (by?.typeId) {
       case "siege:torchbearer": victim.setOnFire(4, true); break;
-      case "siege:ash_scarab": if (!victim.matches({ families: ["siege_guard"] })) victim.setOnFire(2, true); break; // burns players, not guards (siege/guardcare.js)
+      case "siege:ash_scarab": if (!victim.matches({ families: ["siege_guard"] })) victim.setOnFire(1, true); break; // burns players, not guards (siege/guardcare.js)
       case "siege:barrow_wight": heal(by, 3); particle(by.dimension, "minecraft:villager_happy", by.getHeadLocation()); break; // every hit feeds it
       case "siege:stone_vigil": // its touch puts you somewhere else, in the dark
         if (victim.typeId === "minecraft:player") castAway(victim, by);
         break;
       case "siege:brine_lurker":
-        effect(victim, "slowness", 60, 1);
+        effect(victim, "slowness", 60, 0);
         if (victim.isInWater) victim.applyImpulse?.({ x: 0, y: -0.6, z: 0 }); // drags you under
         break;
     }
@@ -377,6 +385,10 @@ addTests("bestiary", {
     assert(far >= 9 && far <= 21, "10 to 20 blocks away");
     assert(castAwaySpot({ x: 0, y: 64, z: 0 }, () => false, [0.1, 0.9, 0.6, 0.2]) === undefined, "open void: stay put");
     assert(castAwaySpot({ x: 0, y: 64, z: 0 }, () => true, [0.1, 0.9]) === undefined, "solid rock: stay put");
+  },
+  "a Lost Villager strikes once and then waits": () => {
+    assert(LOST_VILLAGER.damage * 1.5 < 10, "half a full-health player at most on Hard");
+    assert(LOST_VILLAGER.cooldown >= 40, "two seconds at least between strikes");
   },
   "a Dune Wyrm can't kill a full-health player in one go": () => {
     assert(wyrmWorstBurst() < 20, `eruption + Hard bite = ${wyrmWorstBurst()}, must stay under 20`);

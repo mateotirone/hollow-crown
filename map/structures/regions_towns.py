@@ -1172,6 +1172,10 @@ def _breeder(region):
     import settle_buildings                # the Breeder's Yard with its post (settlement design, regional style)
     return settle_buildings.town_breeder_yard(region)
 
+def _moneyer(region):
+    import settle_skill                     # the town money-changer on the square (Mateo 2026-11-14): the Mint's shell, grilled counter
+    return settle_skill.town_moneyer(region)
+
 def _story(name):
     import story_builds                    # the story places, built on the skill (story_specs/)
     return story_builds.build(name)
@@ -1181,17 +1185,24 @@ CIVIC = {
                  ("inn", lambda: _skill("rimehold_inn.json", "rimehold_inn", "inn", None, [("innkeeper", (3, 2, 2))])),
                  ("smithy", lambda: _skill("rimehold_smithy.json", "rimehold_smithy", "smithy", None, [("smith", (10, 1, 4))])),
                  ("store", lambda: _skill("rimehold_store.json", "rimehold_store", "store", None, [("shopkeeper", (4, 2, 2))])),
-                 ("net sheds", lambda: _story("net_sheds")), ("breeder's post", lambda: _breeder("frostmarch"))],
+                 ("net sheds", lambda: _story("net_sheds")), ("breeder's post", lambda: _breeder("frostmarch")),
+                 ("moneyer", lambda: _moneyer("frostmarch"))],
     "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt")),
                    ("chapel", lambda: _story("gulls_chapel")), ("fishmonger's loft", lambda: _story("fishmonger_loft")),
-                   ("breeder's post", lambda: _breeder("saltreach"))],
+                   ("breeder's post", lambda: _breeder("saltreach")),
+                   ("moneyer", lambda: _moneyer("saltreach"))],
     "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store),
                 ("warden's office", lambda: _story("warden_office")), ("library", lambda: _story("sunscar_library")),
                 ("old cistern", lambda: _story("sunscar_cistern")), ("caravan water", lambda: _story("caravan_water")),
-                ("breeder's post", lambda: _breeder("emberwaste"))],
+                ("breeder's post", lambda: _breeder("emberwaste")),
+                ("moneyer", lambda: _moneyer("emberwaste"))],
     "mirelight": [("inn", lambda: inn("fen")), ("smithy", lambda: smithy("fen")), ("store", lambda: store("fen")),
-                  ("breeder's post", lambda: _breeder("blackfen"))],
+                  ("breeder's post", lambda: _breeder("blackfen")),
+                  ("moneyer", lambda: _moneyer("blackfen"))],
 }
+# the civic buildings that are story places (story_specs/): the story and its pins name them, so nothing added later
+# may push one off its ground
+STORY_PLACES = {"net sheds", "chapel", "fishmonger's loft", "warden's office", "library", "old cistern", "caravan water"}
 SHORE = {
     "gulls_rest": [("quay", gulls_rest_quay), ("lighthouse", gulls_rest_lighthouse), ("boathouse", gulls_rest_boathouse)],
     "mirelight": [("stilt_house", lambda seed=51: mirelight_stilt_house(seed, 1)), ("stilt_house_big", lambda seed=52: mirelight_stilt_house(seed, 0))],

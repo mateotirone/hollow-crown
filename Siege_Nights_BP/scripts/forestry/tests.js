@@ -2,7 +2,7 @@
 
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { GROVE, GROVE_PLOTS, GROVE_STAGES, GROVE_VARIANTS, GROVE_DESIGNS } from "./grove_data.js";
-import { FORESTRY, YARD, LODGE_LEVELS, MAX_LEVEL, plotsAt, designOf, newPlot, toWorld, fellYield, ticksToNext } from "./data.js";
+import { FORESTRY, YARD, PLOT_YARDS, yardOf, plotYardFor, LODGE_LEVELS, MAX_LEVEL, plotsAt, designOf, newPlot, toWorld, fellYield, ticksToNext } from "./data.js";
 
 const STYLES = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
 
@@ -37,6 +37,17 @@ addTests("forestry", {
     assert((YARD.x1 - YARD.x0 + 1) % 2 === 1 && (YARD.z1 - YARD.z0 + 1) % 2 === 1, "odd yard");
     for (const [x, z] of GROVE_PLOTS) assert(x - 2 > YARD.x0 && x + 2 < YARD.x1 && z - 2 > YARD.z0 && z + 2 < YARD.z1, `plot ${x},${z} inside the fence`);
     for (let l = 2; l <= MAX_LEVEL; l++) assert(plotsAt(l) > plotsAt(l - 1), `level ${l} opens plots`);
+  },
+  "a woodlot's grove fills its 41 x 29 plot either way round, the Lodge in the front fence": () => {
+    for (const [name, L] of Object.entries(PLOT_YARDS)) {
+      const Y = L.yard, w = Y.x1 - Y.x0 + 1, d = Y.z1 - Y.z0 + 1;
+      assertEqual([w, d].sort((a, b) => a - b).join("x"), "29x41", `${name}: the Wood plot's size`);
+      assertEqual(Y.z0, 0, `${name}: the front fence on the Lodge's row`);
+      assertEqual(L.plots.length, LODGE_LEVELS[MAX_LEVEL].plots, `${name}: one spot per plot`);
+      for (const [x, z] of L.plots) assert(x - 2 > Y.x0 && x + 2 < Y.x1 && z - 2 > Y.z0 && z + 2 < Y.z1, `${name}: plot ${x},${z} inside the fence`);
+    }
+    assertEqual(plotYardFor([41, 29]), "wide"); assertEqual(plotYardFor([29, 41]), "long");
+    assertEqual(yardOf({}), YARD, "a placed Lodge keeps its old yard");
   },
   "the lodge frame turns with the player": () => {
     const o = { x: 100, y: 64, z: 100 };
