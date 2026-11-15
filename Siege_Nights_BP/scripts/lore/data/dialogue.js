@@ -15,7 +15,7 @@
 // "next node" may also be a list like start, to send the player different ways: [[conditions, node], ...]
 // Every effect only ever happens once per player.
 
-import { MENTOR_NPCS } from "./mentors.js"; // the four regional role mentors
+import { MENTOR_NPCS } from "./mentors.js"; // the five regional role mentors
 
 export const NPCS = [
   // ------------------------------------------------------------------ Old Elspeth, at every hall's hearth
@@ -1497,7 +1497,7 @@ export const NPCS = [
       },
     },
   },
-  // ------------------------------------------------------------------ the four regional mentors (mentors.js)
+  // ------------------------------------------------------------------ the five regional mentors (mentors.js)
   ...MENTOR_NPCS,
   // ------------------------------------------------------------------ The Carter, the Hollow
   // The middle stretch's guide (Mateo approved 2026-11-11). Placed by script (undertow/story.js): at

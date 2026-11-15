@@ -102,7 +102,7 @@ places), `board_rules.js` (picking, rounds, pay, tracker words; pure, self-teste
 
 ## Regional roles
 
-Besides Knight and Marked there are four regional roles, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds a main path (Knight or Marked, `hero.path`) and, on top of it, at most one regional role (`hero.regional`; Mateo 2026-11-15). Old saves with a regional role in `path` move it to `regional` on load.
+Besides Knight and Marked there are five regional roles, one for each region, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds a main path (Knight or Marked, `hero.path`) and, on top of it, at most one regional role (`hero.regional`; Mateo 2026-11-15). Old saves with a regional role in `path` move it to `regional` on load.
 
 | Role | Region | Branch | What it is good at | Ranks |
 |---|---|---|---|---|
@@ -110,8 +110,9 @@ Besides Knight and Marked there are four regional roles, each with a branch of n
 | Forgemaster (`forgemaster`) | Frostmarch | Forge | Faster with tools, sharper weapons, self-mending gear, better-armed guards | Apprentice, Journeyman, Smith, Master Smith, Forgemaster |
 | Captain (`captain`) | Saltreach | Helm | Commands guards, stronger arrows, more siege pay, fights best in rain | Deckhand, Bosun, Mate, Captain, Admiral |
 | Witch (`witch`) | Blackfen | Hex | Immune to poison, poisons and rots enemies, heals from kills, curses attackers | Bog-Touched, Herbwife, Witch, Crone, Fen Mother |
+| Reeve (`reeve`) | Aldmere Vale | Land | Bigger harvests, faster on roads, better sale prices and a daily tithe, guards who come running and heal, a siege-wide charter, and the Held Minute | Tithingman, Hayward, Bailiff, Reeve, Reeve of the Vale |
 
-Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`); effects are in `townhall/roles.js`. A role is earned by a deed in its region (`ROLE_DEEDS` in `roles.js`; Mateo's ruling of 2026-11-10): Forgemaster for felling the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings (offered to every player without a role within 64 blocks when the boss dies), and Dragon Rider when the dragons feature reports a first hatching. Hall level no longer offers a role. The story can also offer one with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.
+Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`, `land_*`); effects are in `townhall/roles.js`. A role is earned by a deed in its region (`ROLE_DEEDS` in `roles.js`; Mateo's ruling of 2026-11-10): Forgemaster for felling the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, Reeve for the Clockwork Reeve (offered to every player without a role within 64 blocks when the boss dies), and Dragon Rider when the dragons feature reports a first hatching. Hall level no longer offers a role. The story can also offer one with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, reeve, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.
 
 
 ## Town Board

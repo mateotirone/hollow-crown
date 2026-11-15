@@ -1,4 +1,4 @@
-// The role storylines: trials for the four regional roles, mentor lines at every rank, and the Knight's
+// The role storylines: trials for the five regional roles, mentor lines at every rank, and the Knight's
 // middle (Stand the Wall, the Eleven). Thread "Finish the six role storylines", 2026-11-11.
 // Plan: https://claude.ai/artifact/Ra52mNyxfnaP71DpzU3mQH . Words: data.js here, and lore/data/mentors.js.
 //
@@ -149,6 +149,13 @@ on("loreTalk", ({ player, npc, choice }) => {
     give(player, bell);
     sfx(player, "random.anvil_use", { pitch: 0.8 });
     return complete(player, "hearth");
+  }
+  if (npc === "lammas" && roles.reeve.started && !roles.reeve.done.includes("tithe")) {
+    const short = Object.entries(R.harvest).filter(([id, n]) => countItem(player, id) < n);
+    if (short.length) return player.sendMessage(`§7Edith wants ${Object.entries(R.harvest).map(([id, n]) => `${n} ${id === "minecraft:bread" ? "bread" : "wheat"}`).join(" and ")} for the Reeve's barn.`);
+    for (const [id, n] of Object.entries(R.harvest)) takeItems(player, id, n);
+    sfx(player, "dig.grass", { pitch: 0.8 });
+    return complete(player, "tithe");
   }
   if (npc === "ottilie" && roles.captain.started) {
     if (!roles.captain.done.includes("articles")) {
@@ -306,7 +313,7 @@ on("rankUp", ({ player, path, rank }) => {
   system.runTimeout(() => {
     try {
       player.sendMessage(`§e${line}`);
-      sfx(player, path === "marked" ? "mob.allay.idle" : path === "rider" ? "mob.enderdragon.flap" : path === "forgemaster" ? "random.anvil_land" : path === "captain" ? "bucket.fill_water" : path === "witch" ? "mob.witch.ambient" : "note.bell", { volume: 0.5, pitch: 0.9 });
+      sfx(player, path === "marked" ? "mob.allay.idle" : path === "rider" ? "mob.enderdragon.flap" : path === "forgemaster" ? "random.anvil_land" : path === "captain" ? "bucket.fill_water" : path === "witch" ? "mob.witch.ambient" : path === "reeve" ? "block.bell.hit" : "note.bell", { volume: 0.5, pitch: 0.9 });
     } catch { /* gone */ }
   }, 60);
 });
@@ -384,7 +391,7 @@ function trialsMenu(player, back) {
   if (!parts.length) parts.push("You hold your regional role. The other regional roads are closed to you.");
   new ActionFormData().title("Role trials").body(parts.join("\n\n")).button("Back").show(player).then(() => back?.()).catch(() => {});
 }
-const titleOf = (role) => ({ rider: "Dragon Rider", forgemaster: "Forgemaster", captain: "Captain", witch: "Witch" })[role] ?? role;
+const titleOf = (role) => ({ rider: "Dragon Rider", forgemaster: "Forgemaster", captain: "Captain", witch: "Witch", reeve: "Reeve" })[role] ?? role;
 
 addFilter("treeButtons", (list, { player }) => [...list, { label: "Role trials\n§8mentors and steps", icon: "textures/items/book_writable", open: trialsMenu }]);
 
@@ -493,9 +500,10 @@ addTests("roletrials", {
       knight: ["Man-at-Arms", "Knight", "Banneret", "Knight-Commander"], marked: ["Listener", "Adept", "Veilwalker", "Sorcerer"],
       rider: ["Rider", "Wing-Sworn", "Drake-Captain", "Dragonlord"], forgemaster: ["Journeyman", "Smith", "Master Smith", "Forgemaster"],
       captain: ["Bosun", "Mate", "Captain", "Admiral"], witch: ["Herbwife", "Witch", "Crone", "Fen Mother"],
+      reeve: ["Hayward", "Bailiff", "Reeve", "Reeve of the Vale"],
     };
     for (const [path, ranks] of Object.entries(RANK_NAMES)) for (const rank of ranks) assert(rankLine(path, rank), `${path} ${rank}`);
-    assertEqual(Object.keys(RANK_LINES).length, 6);
+    assertEqual(Object.keys(RANK_LINES).length, 7);
     assertEqual(rankFlag("marked", "Listener"), "rank_marked_listener");
     assertEqual(rankFlag("knight", "Man-at-Arms"), "rank_knight_man_at_arms");
     const loaded = loadTrials({ roles: { witch: { started: true, done: ["cup"] } }, eleven: 99 });

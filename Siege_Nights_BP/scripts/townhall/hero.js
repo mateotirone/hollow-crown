@@ -12,7 +12,7 @@ const cache = new Map(); // player id -> hero object (live; saved on change)
 export function blankHero() {
   return {
     path: "none", // the main path: "none" | "knight" | "marked"
-    regional: "none", // the one regional role on top (Mateo 2026-11-15): "none" | "rider" | "forgemaster" | "captain" | "witch"
+    regional: "none", // the one regional role on top (Mateo 2026-11-15): "none" | "rider" | "forgemaster" | "captain" | "witch" | "reeve"
     renown: 0,
     level: 1,
     points: 0, // unspent skill points

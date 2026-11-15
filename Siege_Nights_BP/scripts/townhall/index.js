@@ -358,11 +358,13 @@ api.addTests("roles", {
     }
     api.assertEqual(roleForStyle("blackfen"), "witch");
     api.assertEqual(roleForStyle("emberwaste"), "rider");
-    api.assertEqual(roleForStyle("vale"), undefined);
+    api.assertEqual(roleForStyle("vale"), "reeve");
+    api.assertEqual(roleForStyle("kingsrest"), undefined);
     for (const id of Object.keys(ROLES)) if (ROLES[id].region) api.assert(ROLE_DEEDS[id]?.deed && (ROLE_DEEDS[id].boss || ROLE_DEEDS[id].event), `${id} is earned by a deed`);
     api.assertEqual(roleForBoss("siege:pale_huntsman"), "forgemaster");
     api.assertEqual(roleForBoss("siege:drowned_bride"), "captain");
     api.assertEqual(roleForBoss("siege:mother_of_changelings"), "witch");
+    api.assertEqual(roleForBoss("siege:clockwork_reeve"), "reeve");
     api.assertEqual(roleForBoss("minecraft:zombie"), undefined);
     api.assertEqual(new Set(Object.values(ROLES).map((r) => r.branch)).size, Object.keys(ROLES).length);
   },

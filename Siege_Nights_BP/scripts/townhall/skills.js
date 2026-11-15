@@ -31,6 +31,7 @@ export const BRANCHES = {
   forge: { name: "Forge", who: "forgemaster", regional: true, icon: "textures/items/iron_ingot", blurb: "Steel made right, and the arm to use it." },
   helm: { name: "Helm", who: "captain", regional: true, icon: "textures/items/spyglass", blurb: "A crew that obeys, and weather that favours you." },
   hex: { name: "Hex", who: "witch", regional: true, icon: "textures/items/fermented_spider_eye", blurb: "What the fen takes, you learn to take too." },
+  land: { name: "Land", who: "reeve", regional: true, icon: "textures/items/wheat", blurb: "Full barns, open roads, and a levy that comes when it's called." },
 };
 
 const S = (id, branch, ring, name, max, cost, desc, extra = {}) => ({ id, branch, ring, name, max, cost, desc, ...extra });
@@ -137,6 +138,17 @@ export const SKILLS = [
   S("hex_slip", "hex", 3, "Slip Away", 2, 3, ["When you are hit there is a 15% / 25% chance you vanish for 3 seconds and run."], { needs: "hex_eyes" }),
   S("hex_contagion", "hex", 4, "Contagion", 1, 6, ["The poison you deal spreads to enemies within 4 blocks of your target."], { needs: "hex_rot" }),
   S("hex_bane", "hex", 5, "Baneful", 1, 8, ["What you kill bursts: 6 damage to enemies within 4 blocks."], { needs: "hex_contagion" }),
+
+  // ---------------- LAND (Reeve, Aldmere Vale) ----------------
+  S("land_furrow", "land", 1, "Good Furrow", 3, 1, ["Ripe crops you harvest have a 25% / 50% / 75% chance to give one more."]),
+  S("land_highway", "land", 1, "Right of Way", 2, 1, ["On a path, gravel or paved road: Speed I / II, and the horse you ride gets it too."]),
+  S("land_measure", "land", 1, "Fair Measure", 3, 1, ["Goods you sell to a Farmer, Moneyer or trader pay 10% / 20% / 30% more."]),
+  S("land_plenty", "land", 2, "Plenty", 2, 2, ["In your own land, a moment of Saturation every 20 / 10 seconds."], { needs: "land_furrow" }),
+  S("land_hue", "land", 2, "Hue and Cry", 2, 2, ["When you are hit, guards within 16 / 24 blocks come running: Speed II and Strength I for 6 seconds."], { needs: "land_highway" }),
+  S("land_tithe", "land", 3, "The Tithe", 2, 3, ["Every dawn your land pays its tithe: 8 / 16 Regals."], { needs: "land_measure" }),
+  S("land_levy", "land", 3, "The Levy", 2, 3, ["Guards within 16 blocks of you get Regeneration I. Rank 2: Resistance I too."], { needs: "land_hue" }),
+  S("land_charter", "land", 4, "Charter of the Vale", 1, 6, ["During a siege, you, your friends and your guards within 32 blocks get Regeneration I and Resistance I."], { needs: "land_levy" }),
+  S("land_minute", "land", 5, "The Held Minute", 1, 8, ["Once every 5 minutes, when you drop below 3 hearts, the minute holds: enemies within 12 blocks freeze for 4 seconds and you mend 6 hearts."], { needs: "land_charter" }),
 ];
 
 export const SKILL = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
@@ -153,6 +165,7 @@ export const ROLES = {
   forgemaster: { name: "Forgemaster", noun: "Forgemasters", branch: "forge", region: "frostmarch", oath: "The Deepforge of the Frostmarch has not gone cold in four hundred years. You take the hammer, and the cold stops mattering.", color: "§b" },
   captain: { name: "Captain", noun: "Captains", branch: "helm", region: "saltreach", oath: "Saltreach gives its captains a crew and a debt. You sign the articles, and people start doing what you say.", color: "§3" },
   witch: { name: "Witch", noun: "Witches", branch: "hex", region: "blackfen", oath: "The Blackfen teaches by taking. You drink what the old woman hands you and do not ask what was in it.", color: "§2" },
+  reeve: { name: "Reeve", noun: "Reeves", branch: "land", region: "vale", oath: "Millbrook's office has stood empty for three hundred years, its seal in a drawer. You take the seal, and the Vale starts bringing you its quarrels.", color: "§a" },
 };
 
 // Path ranks, earned by points spent in your path's branch.
@@ -175,6 +188,7 @@ export const RANKS = {
   forgemaster: [{ at: 0, name: "Apprentice" }, { at: 3, name: "Journeyman" }, { at: 8, name: "Smith" }, { at: 15, name: "Master Smith" }, { at: 26, name: "Forgemaster" }],
   captain: [{ at: 0, name: "Deckhand" }, { at: 3, name: "Bosun" }, { at: 8, name: "Mate" }, { at: 15, name: "Captain" }, { at: 26, name: "Admiral" }],
   witch: [{ at: 0, name: "Bog-Touched" }, { at: 3, name: "Herbwife" }, { at: 8, name: "Witch" }, { at: 15, name: "Crone" }, { at: 26, name: "Fen Mother" }],
+  reeve: [{ at: 0, name: "Tithingman" }, { at: 3, name: "Hayward" }, { at: 8, name: "Bailiff" }, { at: 15, name: "Reeve" }, { at: 26, name: "Reeve of the Vale" }],
 };
 
 // ---------- Renown: the player's level ----------
@@ -193,7 +207,7 @@ export function levelFromRenown(renown) {
 }
 
 export const LEVEL_TITLES = [
-  [1, "Settler"], [5, "Freeholder"], [10, "Reeve"], [15, "Warden"], [20, "Lord"],
+  [1, "Settler"], [5, "Freeholder"], [10, "Yeoman"], [15, "Warden"], [20, "Lord"],
   [30, "High Lord"], [40, "Paragon"], [50, "Legend of the Realm"],
 ];
 export const levelTitle = (level) => [...LEVEL_TITLES].reverse().find(([at]) => level >= at)[1];

@@ -1,4 +1,4 @@
-// Story spines for the Captain and the Witch, told in short beats like the Rider's cadets (roost.js).
+// Story spines for the Captain, the Witch and the Reeve, told in short beats like the Rider's cadets (roost.js).
 //   Captain, loosely after Master and Commander: one long chase. The Sallow Lantern, last hull of the grey army's
 //     second fleet, still sails off Saltreach on third nights. Holt sends word of every sighting while your trial
 //     runs, your three hands get names, and the chase ends over the sunken chapel: the Lantern took the Bride on
@@ -6,6 +6,10 @@
 //   Witch, loosely after Uprooted: Nell takes one apprentice a generation and doesn't take volunteers. The one
 //     before you, Hester Wick, went into the reeds and came back wrong. End the Mother of Changelings and Hester
 //     walks home right.
+//   Reeve (the Vale, Mateo's pick 2026-11-15): Millbrook's office has stood empty since Anselm Tock stopped the clocks.
+//     Edith Lammas, whose family have kept the seal in a drawer, fills the Reeve's barn with your first tithe and sets
+//     you a quarrel to judge. End Tock's minute and the office is yours. Later (rank Reeve) she shows you his last
+//     page: an order to hold the minute, under a seal somebody scraped off. He didn't choose it.
 // Own names only. Words in lore/data/mentors.js for the scenes; these are the beats between them.
 
 import { world, system } from "@minecraft/server";
@@ -18,6 +22,9 @@ export const ROLE_BEATS = {
   trial_captain_deed: "§8As the Bride lies down, the water over the sunken chapel heaves. Out past the tower a ship with no lights leans over and goes under, slowly, like someone sitting down after a long day. Wat Pellow is sick over the side. Agnes says nothing for an hour.",
   trial_cup: "§8On your way out, a girl on the Mirelight jetty is facing the wall of the smithy, very still. §2Nell, behind you:§8 \"Hester Wick. She was mine, before you. She went into the reeds after a lamb and came back a week later, and the lamb didn't. Don't stare. She knows.\"",
   trial_graves: "§2Nell:§8 \"I'll tell you why I didn't ask. Nobody chooses this. I watched you a whole season before I let you on the plank. I watched Hester too, and I was wrong about her, and the fen kept the difference.\"",
+  trial_tithe: "§8Edith Lammas unlocks the Reeve's barn with a key the size of a trowel. Mice, cobwebs, and on the wall a painted tally of every harvest up to three hundred years ago, when it stops mid-stroke. She chalks yours in under it.",
+  trial_moot: "§8Word of your judgement goes round Millbrook before you've left the square. A woman you've never met nods at you as if you'd always been there. In the dark, somebody has set the boundary stone straight.",
+  trial_reeve_deed: "§8In Millbrook the six clocks are ticking. People stand in the square with their faces up, watching the hands move, and a child asks what the noise is. §aEdith Lammas,§8 at her window, holding a seal on a ribbon: \"Well. It's loose. Come and take it.\"",
   trial_witch_deed: "§8Next morning Hester Wick walks up the Mirelight jetty with the lamb under her arm, soaked to the waist, crying, and turns to face the right way. §2Nell, very quietly:§8 \"Oh. Oh, there you are.\"",
 };
 
@@ -51,8 +58,8 @@ on("siegeEnd", () => {
 });
 
 addTests("roletrials", {
-  "Captain and Witch beats follow their trials, and the chase narrows": () => {
-    for (const flag of ["trial_articles", "trial_crew", "trial_captain_deed", "trial_cup", "trial_graves", "trial_witch_deed"]) assert(ROLE_BEATS[flag], flag);
+  "Captain, Witch and Reeve beats follow their trials, and the chase narrows": () => {
+    for (const flag of ["trial_articles", "trial_crew", "trial_captain_deed", "trial_cup", "trial_graves", "trial_witch_deed", "trial_tithe", "trial_moot", "trial_reeve_deed"]) assert(ROLE_BEATS[flag], flag);
     assert(sightingFor(0).includes("Saltglass"));
     assertEqual(sightingFor(99), SIGHTINGS.at(-1), "the last sighting repeats once the trail closes in");
   },

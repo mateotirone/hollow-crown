@@ -1,6 +1,6 @@
 // Why each region keeps its role (town hall thread's regional roles on the Tree of Oaths; Mateo, 2026-11-10:
 // roles come from the world and from choices, and lore goes wherever it can).
-// None of these four is the Hollow's. They are what each region already knew how to do before the bells, and kept.
+// None of these five is the Hollow's. They are what each region already knew how to do before the bells, and kept.
 //   before  who held the role first (builder and other writers; may be shown)
 //   why     why the region still keeps it
 //   saying  what people of the region say about it (player-facing, one line)
@@ -32,6 +32,12 @@ export const ROLE_LORE = {
     why: "The Order burned books in the Blackfen and found there were none to burn. What a witch knows is handed over in a cup, by someone who had it handed to her. The fen keeps its witches because nothing else has ever kept its children alive through a wet summer, and because the Order's men do not like the walk.",
     saying: "It isn't a gift. The fen doesn't give. It lends, at interest.",
   },
+  reeve: {
+    region: "vale",
+    before: "Hob Lammas, a ploughman the tenants chose under the Millbrook oak at the first hallmoot. He could not read, so he kept the roll in knots on a cord, and in forty years nobody caught it lying.",
+    why: "The Vale had no castle worth the name when the Grey Host came. It held because somebody kept the granaries full, the roads open and the levy counted, and that somebody was the Reeve. The office stopped when Anselm Tock stopped the clocks: nobody can be Reeve while the last one still holds the minute. Millbrook's clerks have kept his seal in a drawer for three hundred years, waiting.",
+    saying: "A lord owns the land. A Reeve answers for it.",
+  },
 };
 
 export const ROLE_LINES = {
@@ -51,4 +57,8 @@ export const ROLE_LINES = {
   hex_slip: "There is always a place to stand in a marsh where you are not. Goody Sedge is buried in three of them.",
   hex_contagion: "The fen never takes one of anything.",
   hex_bane: "What the fen is owed, it collects all at once.",
+  land_tithe: "Hob Lammas took his tithe in whatever the year gave. One wet summer it was eels, and he took those too.",
+  land_levy: "The levy isn't soldiers. It's the people whose hedges you mended, coming up the lane with whatever was by the door.",
+  land_charter: "The Vale's charter is four lines long and the last one says: and the Reeve shall stand where the land is thinnest.",
+  land_minute: "Tock held one minute for three hundred years. You only need it for a breath.",
 };

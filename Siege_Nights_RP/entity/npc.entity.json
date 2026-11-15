@@ -118,7 +118,8 @@
         "lore_marta__frostmarch": "textures/entity/siege/npc_skins/lore_marta__frostmarch",
         "lore_marta__saltreach": "textures/entity/siege/npc_skins/lore_marta__saltreach",
         "lore_marta__emberwaste": "textures/entity/siege/npc_skins/lore_marta__emberwaste",
-        "lore_marta__blackfen": "textures/entity/siege/npc_skins/lore_marta__blackfen"
+        "lore_marta__blackfen": "textures/entity/siege/npc_skins/lore_marta__blackfen",
+        "lore_lammas": "textures/entity/siege/npc_skins/lore_lammas"
       },
       "geometry": {
         "default": "geometry.humanoid.custom"

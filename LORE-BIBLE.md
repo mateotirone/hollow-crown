@@ -286,6 +286,7 @@ A player shelves the six notes, reads them, visits the sites, and uses **Name th
 | `ulla` | Ulla Deepforge, keeper of Hroda's fire | The Deepforge above Rimehold | The Forgemaster trial: the side-hearth, Hroda's Hand-bell rung on the ice, the Huntsman. Knows the Order took the bell moulds |
 | `ottilie` | Harbourmistress Ottilie Holt, Merrin Holt's descendant, keeper of the Debt Book | Harbour office, Gull's Rest | The Captain trial: the articles, a crew, the Drowned Bride. The back of the Debt Book waits for Captain rank |
 | `nell` | Nell Sedge, of Goody Sedge's line; hasn't spoken to Old Mag in sixty years | Raft-house past Mirelight | The Witch trial: the cup, three graves, the Mother of Changelings |
+| `lammas` | Edith Lammas, of Hob Lammas's line; her family have kept the Reeve's seal in a drawer for three hundred years | The Reeve's Office off Millbrook square | The Reeve trial: the first tithe, the hallmoot over a boundary stone that moved towards the well, then Tock's minute. At rank Reeve she shows Tock's last page: "Hold the minute. Wait." under a scraped-off seal, so he was ordered to. Her grandson Cob brings the levy in the last fight. |
 
 What a character says depends on what you've read, solved and done, and whether you are a Sorcerer.
 

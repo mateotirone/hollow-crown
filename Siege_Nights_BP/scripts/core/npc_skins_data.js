@@ -54,4 +54,6 @@ export const NPC_SKINS = [
   // the family at the gate (Act 2, newplayer/family.js): Tobin and Marta, dressed for the region they fled from
   "lore_tobin", "lore_tobin__frostmarch", "lore_tobin__saltreach", "lore_tobin__emberwaste", "lore_tobin__blackfen",
   "lore_marta", "lore_marta__frostmarch", "lore_marta__saltreach", "lore_marta__emberwaste", "lore_marta__blackfen",
+  // Edith Lammas, the Reeve's mentor at the Reeve's Office in Millbrook (lore/data/mentors.js)
+  "lore_lammas",
 ];
