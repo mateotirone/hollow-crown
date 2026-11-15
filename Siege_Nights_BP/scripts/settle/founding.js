@@ -151,6 +151,7 @@ function* layOutJob(owner, tier, done) {
   const dim = world.getDimension(OVERWORLD);
   const pal = layout.pal.map(([id, st]) => perm(id, st));
   const rests = layout.pal.map(([id, st]) => restsOn(id, st));
+  const bottomSlab = layout.pal.map(([id, st]) => /_slab$/.test(id) && st?.["minecraft:vertical_half"] === "bottom");
   let rows = groundwork(layout, tier);
   for (let pass = 0; pass < 60 && rows.length; pass++) { // unloaded chunks: try again a little later
     const later = [];
@@ -164,6 +165,14 @@ function* layOutJob(owner, tier, done) {
       if (!block) { later.push([dx, dy, dz, p]); continue; }
       try { if (pal[p] && block.permutation !== pal[p]) block.setPermutation(pal[p]); } catch { /* protected block */ }
       if (pal[p] && rests[p]) fullUnder(dim, at);
+      // a road slab laid under something already standing there (the wall's gate posts go up while the road is
+      // laid, 2026-11-15 Hamlet audit) is made a full block, so nothing stands on half a block of air
+      if (bottomSlab[p]) {
+        const up = { x: at.x, y: at.y + 1, z: at.z };
+        let b;
+        try { b = dim.getBlock(up); } catch { b = undefined; }
+        if (b && !b.isAir && !SOFT.test(b.typeId) && !NATURAL.test(b.typeId)) fullUnder(dim, up);
+      }
     }
     rows = later;
     if (rows.length) for (let i = 0; i < 40; i++) yield; // ~2 s
@@ -267,12 +276,18 @@ function* blendGround(dim, town, layout, tier) {
     for (let y = town.y + c.dy + 1, k = 0; k < 4; y++, k++) {
       if (tired()) yield;
       const b = get(x, y, z);
-      if (!b || !LOOSE.test(b.typeId)) continue;
+      if (!b) continue;
+      // genworld's plot pad (a stone disc of r3 round the Plot Stone, at the median ground): where the square is
+      // planned a block lower, its stones stood loose on the square's slabs (Gullcliff, 2026-11-15 Hamlet audit)
+      if (c.dx * c.dx + c.dz * c.dz <= 10 && (c.dx || c.dz) && PAD.test(b.typeId)) { try { b.setPermutation(air); } catch { /* protected */ } continue; }
+      if (!LOOSE.test(b.typeId)) continue;
       const under = get(x, y - 1, z);
-      if (under && /air$|water|lava|snow_layer|short_grass|tall_grass|fern|flower/.test(under.typeId)) try { b.setPermutation(air); } catch { /* protected */ }
+      if (under && (/air$|water|lava|snow_layer|short_grass|tall_grass|fern|flower|carrots|potatoes|wheat|beetroot/.test(under.typeId) || LOOSE.test(under.typeId))) try { b.setPermutation(air); } catch { /* protected */ }
     }
   }
 }
+const PAD = /^minecraft:(stone_bricks|mossy_cobblestone|gold_block)$/;
+// (snow left on the field's crops or on a daisy too: the same audit, Wolfcairn and Frosthelm)
 const LOOSE = /snow_layer|short_grass|tall_grass|fern$|flower|dandelion|poppy|tulip|daisy|cornflower|bluet|orchid|allium|lily_of_the_valley|deadbush|dead_bush/;
 
 // ---------- joining the gate road to the map's roads (Mateo's playtests 2026-11-12 and 2026-11-13) ----------

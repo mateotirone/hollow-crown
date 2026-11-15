@@ -95,6 +95,19 @@ WOOD_OF = lambda b: next((w for w in ("dark_oak", "pale_oak", "spruce", "birch",
                                       "crimson", "warped", "oak") if b.startswith(w) or b.startswith("stripped_" + w)), "spruce")
 
 
+def pick_mix(table, x, y, z):
+    """A raw block given as a list ([[name, weight], ...] or [name, ...]) is picked per cell, the same pick for the
+    same cell every time: stained glass in a chapel ("glass": [["red_stained_glass_pane", 1], ...])."""
+    rows = [(r, 1) if isinstance(r, str) else (r[0], r[1]) for r in table]
+    n = (x * 374761393 + y * 668265263 + z * 2147483647 + 19 * 1274126177) & 0xFFFFFFFF
+    n = ((n ^ (n >> 13)) * 1274126177) & 0xFFFFFFFF
+    r = ((n ^ (n >> 16)) & 0xFFFFFF) / 0x1000000 * sum(w for _, w in rows)
+    for name, w in rows:
+        r -= w
+        if r < 0: return name
+    return rows[-1][0]
+
+
 class Context:
     def __init__(self, cells, stage_of, log, spec):
         self.cells, self.stage_of, self.log, self.spec = cells, stage_of, log, spec
@@ -105,6 +118,7 @@ class Context:
 
     # ---- cells
     def set(self, x, y, z, stage, kind=None, mat=None, raw=None, **p):
+        if isinstance(raw, (list, tuple)): raw = pick_mix(raw, x, y, z)
         if raw: self.cells[(x, y, z)] = {"kind": "raw", "name": raw, "props": p}
         else: self.cells[(x, y, z)] = {"kind": kind, "mat": mat, "props": p}
         self.stage_of[(x, y, z)] = stage

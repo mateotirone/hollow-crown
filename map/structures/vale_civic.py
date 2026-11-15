@@ -13,6 +13,7 @@ P_STONE = {**VALE, **STYLES["stone"]}
 P_STONE["stone"] = mix([("stone_bricks", 82), ("cracked_stone_bricks", 10), ("mossy_stone_bricks", 8)], 77)
 P_STONE["infill"] = P_STONE["stone"]
 P_STONE.update(DOCTRINE, pane="gray_stained_glass_pane", spikes=3, finial="stone_brick_wall", finial_top="lightning_rod", spike="lightning_rod")      # build-instructions: doctrine texturing, tinted glass
+CHAPEL_PANES = [["red_stained_glass_pane", 34], ["blue_stained_glass_pane", 33], ["yellow_stained_glass_pane", 33]]
 CHAPEL_GLASS = mix([("red_stained_glass_pane", 34), ("blue_stained_glass_pane", 33), ("yellow_stained_glass_pane", 33)], 19)
 
 def _belfry(bp, P, x, y, z, w=1):
@@ -84,7 +85,7 @@ def guildhall_skill(seed=3):
     return bp.finish()
 
 
-def _skill_spec(fname, name, bells=True):
+def _skill_spec(fname, name, bells=True, glass=None):
     """Build a review spec on the skill (the one engine) for a map stamp. bells=False takes every bell down:
     each belfry keeps its beam and a bare chain (Millbrook: "they have taken down every bell", the story)."""
     import json, os, sys
@@ -96,15 +97,21 @@ def _skill_spec(fname, name, bells=True):
     if not bells:
         for part in spec.get("parts", []):
             if part.get("part") == "belfry" and part.get("bell", True): part["bell"] = "empty"
+    if glass:      # every window of the spec in this glass (a block, or a [[block, weight], ...] mix picked per pane)
+        for part in spec.get("parts", []):
+            if "glass" in (part.get("style") or {}): part["style"]["glass"] = glass
     bp = Blueprint(name); engine.into_blueprint(bp, spec)
     return bp
 
 
-def chapel(seed=5, name="kingsrest_chapel", bells=True, healer=False):
+def chapel(seed=5, name="kingsrest_chapel", bells=True, healer=False, stained=None):
     """Stone chapel on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py): a buttressed nave with
     lancets, a front tower in three stages with the door at its foot, a louvred belfry and a broach spire
-    (build-instructions/towers/README.md), a lower chancel at the back. bells=False: the belfry stands empty."""
-    bp = _skill_spec("kingsrest_chapel.json", name, bells)
+    (build-instructions/towers/README.md), a lower chancel at the back. bells=False: the belfry stands empty.
+    stained: the windows in red, blue and yellow stained glass (Kingsrest; Mateo 2026-11-15). Default: on for the
+    Kingsrest chapel, off for a renamed copy (Millbrook keeps its pale glass)."""
+    if stained is None: stained = name == "kingsrest_chapel"
+    bp = _skill_spec("kingsrest_chapel.json", name, bells, glass=CHAPEL_PANES if stained else None)
     bp.markers["door"] = (5, 2, 24); bp.markers["priest"] = (5, 2, 3)
     if healer: _healers_corner(bp)
     return bp.finish()
