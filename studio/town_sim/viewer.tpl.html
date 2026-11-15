@@ -536,6 +536,11 @@ async function raise(slotId, id, { free = false } = {}) {
   st.building = id; st.rising = true; st.offer = offer;
   refreshPlots();
   const { ops, cells } = designOps(id, offer);
+  if (s.border) { // the plot's log border is taken up first (plotmarker.js takeUpBorder): only cells still a log
+    const [p, ...b] = s.border, pre = [];
+    for (let i = 0; i < b.length; i += 3) if (/stripped_\w+_(log|stem)$/.test(D.palette[get(b[i], b[i + 1], b[i + 2])]?.[0] ?? "")) pre.push(0, b[i], b[i + 1], b[i + 2], p);
+    ops.unshift(...pre);
+  }
   log(`${nameOf(id)} rising on plot ${slotId}${free ? " (free)" : ""}`);
   await job(`${nameOf(id)} (${slotId})`, ops, { perSec: perSecPlan(cells, PACE.riseTicks), focus: [offer.o[0], offer.o[1] - D.base, offer.o[2]] });
   st.rising = false;

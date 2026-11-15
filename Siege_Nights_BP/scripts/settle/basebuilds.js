@@ -21,7 +21,7 @@ import { drawBuilding } from "./buildings.js";
 import { raiseOnSlot, risingAt } from "./plans.js";
 import { townOf, allTowns, layoutOf, clearMarker, placeMarker, slotState, saveTowns } from "./founding.js";
 import { slotsOf, fixturesOf } from "./towns.js";
-import { seatInWorld } from "./plotmarker.js";
+import { seatInWorld, takeUpBorder } from "./plotmarker.js";
 import { pickBaseSlot, bedSpots, hasFurnace, furnaceSpots } from "./basedata.js";
 import { HOMES } from "./config.js";
 
@@ -47,6 +47,7 @@ export function raiseBase(owner, id, slot, extra = {}) {
   clearMarker(owner, slot);
   const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, id, town.style, slot.id, { quiet: true });
   if (!built) { placeMarker(owner, slot); return false; }
+  takeUpBorder(owner, slot);
   Object.assign(slotState(owner, slot.id), { building: id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box,
     top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0, base: true, ...extra });
   saveTowns();
