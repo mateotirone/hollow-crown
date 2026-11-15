@@ -1,0 +1,29 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:sallow_lantern",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/roletrials/sallow_lantern"
+   },
+   "geometry": {
+    "default": "geometry.siege_sallow_lantern"
+   },
+   "animations": {
+    "bob": "animation.siege_sallow_lantern.bob",
+    "sink": "animation.siege_sallow_lantern.sink"
+   },
+   "scripts": {
+    "animate": [
+     "bob"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.default"
+   ]
+  }
+ }
+}
