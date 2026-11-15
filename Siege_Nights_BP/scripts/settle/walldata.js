@@ -14,6 +14,9 @@ export const WALLS = {
   wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at the Castle ring, less on smaller rings) and in
   // (in stays under the town layouts' 3-block clearance, so it never cuts a plot)
   stations: 48, // how many points round the ring the ground is measured at
+  clear: 2, // every stretch of wall stands at least this high above the highest ground right beside it (a raider can't
+  // hop it): the palisade's uneven stakes keep their look, but none is left a step-up where the land rises next to it
+  // or where a short stake falls (Mateo 2026-11-15, "random holes in the wall"). Ground beside = besideOf below.
   maxStep: 6, // the ground may differ this much between neighbouring points before the wall refuses to span it
   perTick: 90, // blocks placed per tick while a wall rises
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
@@ -172,6 +175,9 @@ export function columnKinds(L, col, seed = 0, style) {
     if (every(along, VARIATION.postEvery, 0)) top += 1; // a taller post now and then
     else if (hash3(x, 0, z, seed) < 0.1) top -= 1; // and the odd short stake
   }
+  // never low enough to hop: at least WALLS.clear above its own ground and the ground beside it (col.beside, measured
+  // where the wall is raised and kept on the wall record, see besideOf)
+  if (!tower && !walk) top = Math.max(top, base + Math.max(0, col.beside ?? 0) + WALLS.clear);
   for (let y = base + 1; y <= top; y++) {
     if (walk) { out.push([y, "plank"]); continue; }
     const rel = Math.max(1, y - base);
@@ -202,6 +208,17 @@ export function columnKinds(L, col, seed = 0, style) {
   else if (col.d === 0 && L.body !== "log" && every(along, L.body === "fence" ? VARIATION.lightEvery + 2 : VARIATION.lightEvery, 7) && (L.h >= 4 || L.body === "fence")) out.push([top + 1, "light"]); // a lantern on the wall top
   return out;
 }
+
+// How far the ground right beside a wall column rises above the column's own ground, as measured when the wall was
+// raised (walls.js placeColumn keeps it on the wall record as w.beside, next to w.lifts). Raising, repairing and taking
+// the wall down all read the column through this, so they agree on its height.
+export const BESIDE_MAX = 4; // looked this far up; a steeper bank than that is a cliff, not a step
+export function besideOf(w, col) {
+  const b = w?.beside?.[`${col.x},${col.z}`];
+  return b ? { ...col, beside: b } : col;
+}
+// The eight neighbours of a column (where a raider could jump from)
+export const AROUND = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
 
 // What a wall or tower column is made of at a height above its ground: "log", "fence" or a Castle Stone kind
 export function materialKind(L, rel, top) {
