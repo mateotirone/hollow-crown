@@ -337,7 +337,8 @@
    "time": "3:00",
    "frame": "stairs",
    "frame_wood": "dark_oak",
-   "hub": "dark_oak_button"
+   "hub": "dark_oak_button",
+   "style": "royal"
   },
   {
    "part": "clock_face",
@@ -353,7 +354,8 @@
    "time": "3:00",
    "frame": "stairs",
    "frame_wood": "dark_oak",
-   "hub": "dark_oak_button"
+   "hub": "dark_oak_button",
+   "style": "royal"
   },
   {
    "part": "clock_face",
@@ -369,7 +371,8 @@
    "time": "3:00",
    "frame": "stairs",
    "frame_wood": "dark_oak",
-   "hub": "dark_oak_button"
+   "hub": "dark_oak_button",
+   "style": "royal"
   },
   {
    "part": "clock_face",
@@ -385,7 +388,8 @@
    "time": "3:00",
    "frame": "stairs",
    "frame_wood": "dark_oak",
-   "hub": "dark_oak_button"
+   "hub": "dark_oak_button",
+   "style": "royal"
   },
   {
    "part": "door",

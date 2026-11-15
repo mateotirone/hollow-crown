@@ -108,6 +108,8 @@ class Capital(TG.Town):
         """The Grand Station on the town's south edge, north of the line, its street doors north onto the square;
         its ground is levelled to the platform and an avenue runs from the street front to the square."""
         bp = stations.grand("vale"); bp.kind = "station"
+        for c, (n, pr) in list(bp.cells.items()):          # the capital's clocks wear the royal face (scripts/clocks)
+            if n == "siege:clock_anchor": bp.cells[c] = (n, {**pr, "raw": {**pr.get("raw", {}), "siege:style": 6}})
         x, y, z = self.STOP
         g, _ = self.footprint(bp, 0); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
         self.station_cells = set(cells)

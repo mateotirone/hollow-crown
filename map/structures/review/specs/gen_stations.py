@@ -242,5 +242,8 @@ if __name__ == "__main__":
             json.dump(stage_spec(stage, region), open(os.path.join(HERE, f"station_{stage}_{region}.json"), "w"), indent=1)
     print("wrote station_<stage>_<region>.json")
 
-    s = kingsrest(); json.dump(s, open(os.path.join(HERE, "kingsrest_station.json"), "w"), indent=1)
+    s = kingsrest()
+    for part in s["parts"]:                       # the capital's clocks wear the royal face (scripts/clocks)
+        if part.get("part") == "clock_face": part["style"] = "royal"
+    json.dump(s, open(os.path.join(HERE, "kingsrest_station.json"), "w"), indent=1)
     print("wrote kingsrest_station.json")
