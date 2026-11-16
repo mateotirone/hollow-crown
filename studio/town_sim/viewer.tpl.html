@@ -667,7 +667,7 @@ async function found() {
   T.founded = true; T.tier = 0; T.ring = 0; refresh();
   log(`${D.plot} claimed: the Hamlet is laid out`);
   const ev = Object.fromEntries(D.events.map((e) => [e.id, e]));
-  const wall = wallTo(1);
+  let grounded; const wall = new Promise((r) => { grounded = r; }).then(() => wallTo(1)); // the wall rises after the layout is laid (founding.js)
   const station = stationTo(0);
   const ground = (async () => {
     await laySet("Groundwork", ev.gw0.ops, [0, 0, 0]);
@@ -675,6 +675,7 @@ async function found() {
     await laySet("Gate road", ev.road0.ops);
     await laySet("Lamps and the well", [...ev.fix0.ops, ...treeOpsFor(0)]);
     await laySet("Plot Markers", ev.markers0.ops);
+    grounded();
   })();
   await ground;
   const hall = hallTo(1);
@@ -709,12 +710,15 @@ async function growTo(t) {
   for (let i = old.length - 5; i >= 0; i -= 5) if (old[i] === 0 && old[i + 4]) down.push(0, old[i + 1], old[i + 2], old[i + 3], earth.has(`${old[i + 1]},${old[i + 2]},${old[i + 3]}`) ? oldRing.earthPerm : 0);
   await job("Old wall coming down", down, { perSec: PACE.wall * 20 });
   T.tier = t; T.ring = t; T.wall = 0;
-  const wall = wallTo(level);
+  // the band is laid first and the new ring rises on it: the ring's ops are the wall as it ends up on the laid ground
+  // (dump.mjs topUpOps), so ground laid after them would wipe stakes the game keeps (checked against growTown)
+  let grounded; const wall = new Promise((r) => { grounded = r; }).then(() => wallTo(level));
   const ground = (async () => {
     await laySet(`${name} groundwork`, tierOps(t, "ground"), [0, 0, 0]);
     await laySet("Blending the land", tierOps(t, "blend"));
     await laySet("Lamps and trees", [...tierOps(t, "fixtures"), ...treeOpsFor(t)]);
     await laySet("Plot Markers", tierOps(t, "markers"));
+    grounded();
   })();
   const stage = D.stages.indexOf(D.tiers[t].stage);
   const station = stage > T.station ? stationTo(stage) : null;
