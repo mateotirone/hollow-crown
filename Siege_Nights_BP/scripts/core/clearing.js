@@ -12,7 +12,12 @@ import { BlockVolume, BlockTypes } from "@minecraft/server";
 
 const WOODS = ["oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "pale_oak"];
 export const TREE_TYPES = [
-  ...WOODS.flatMap((w) => [`minecraft:${w}_log`, `minecraft:${w}_wood`, `minecraft:stripped_${w}_log`, `minecraft:stripped_${w}_wood`, `minecraft:${w}_leaves`]),
+  // No stripped logs: no tree grows them, but every log wall's stakes are stripped logs (settle/walldata.js WALL_LOG) and so
+  // are the starter village's plot borders, and a landmark built beside a town took them with its trees (the 2026-11-16
+  // simulator check: Reedmoor's relic opened the Town wall). The one grove that has them (jungle, forestry/grove_data.js)
+  // keeps them.
+  ...WOODS.flatMap((w) => [`minecraft:${w}_log`, `minecraft:${w}_wood`, `minecraft:${w}_leaves`]),
+  "minecraft:stripped_jungle_log", "minecraft:stripped_jungle_wood",
   "minecraft:azalea_leaves", "minecraft:azalea_leaves_flowered", "minecraft:vine", "minecraft:hanging_roots", "minecraft:pale_hanging_moss",
   "minecraft:mangrove_roots", "minecraft:mangrove_propagule", "minecraft:bee_nest", "minecraft:cocoa",
   ...WOODS.flatMap((w) => [`siege:old_${w}_log`, `siege:old_${w}_wood`, `siege:old_stripped_${w}_log`, `siege:old_stripped_${w}_wood`, `siege:old_${w}_leaves`]),

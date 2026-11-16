@@ -18,6 +18,7 @@ import { WINDMILL_DESIGNS } from "./windmill_data.js";
 import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
 import { planLaneLamps } from "./lanelamps.js";
 import { slotsOf as layoutSlots } from "./towns.js";
+import { TREE_TYPES } from "../core/clearing.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -157,6 +158,11 @@ addTests("settle walls", {
   },
   "log walls are stripped logs in every timber": () => {
     for (const t of WALL_TIMBER) assert(/^minecraft:stripped_\w+_log$/.test(WALL_LOG[t] ?? ""), `${t} log wall is ${WALL_LOG[t]}`);
+  },
+  "clearing a build's trees never takes a wall's stakes or a plot's border (a landmark beside a town opened its wall)": () => {
+    for (const t of WALL_TIMBER) assert(!TREE_TYPES.includes(WALL_LOG[t]), `tree clearing takes ${WALL_LOG[t]}, the ${t} wall's stakes`);
+    const stripped = TREE_TYPES.filter((id) => /^minecraft:stripped_(?!jungle_)/.test(id)); // plot borders are stripped logs too (towns.js slotBorder)
+    assert(!stripped.length, `tree clearing takes ${stripped.join(", ")}`);
   },
   "a wall is paid for in any stone, and the stone rows are added together": () => {
     for (let level = 1; level <= MAX_WALL; level++) {
