@@ -68,7 +68,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -289,7 +289,7 @@ function fixtureOps(tier) { // founding.js placeFixture
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
 const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {}, beside: {} };
-if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt, ...(tw.outline.tight ? { tight: tw.outline.tight } : {}) }); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
+Object.assign(wall, lineFields(tw.outline)); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }

@@ -22,6 +22,7 @@ import argparse, collections, glob, json, math, os, re, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
+TIERS = list(TIER)
 SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G", "Works": "W", "Dragon": "D", "Barn": "B", "Wood": "O"}
 STAIR = {"e": 0, "w": 1, "s": 2, "n": 3}       # Bedrock weirdo_direction
 GATE = {"s": 0, "w": 1, "n": 2, "e": 3}        # Bedrock direction
@@ -119,6 +120,180 @@ def gate_trim(st, line):
         al, ac = ax(x, z)
         if ROADY.search(n) and 1.5 < abs(ac) <= 2.5 and L - 4 <= al <= L + 1: out.add((x, z))
     return out
+
+
+# ---------- the Town, City and Castle wall lines, drawn round what each tier laid ----------
+# The same order for every tier (Mateo 2026-11-16: "lay the plots, lay the paths, wall goes around, paths are correctly
+# connected"). A tier's wall needs DEPTH blocks inside its line for the wall, the walk, the stairs and the towers of the
+# levels it can reach (walldata.js tierCap: Town 5, City 8, Castle 10). For each tier:
+#   1. the line: the ring (the starter's outline moved out) or, where that tier's plots reach
+#      further, DEPTH past them, smoothed, one flat chord across the gate, never past the land (LAND)
+#   2. what else that tier laid inside the wall band (paths running on to the wall, a field's last rows, a lamp, a tree) is
+#      laid one tier later instead, when the wall has moved past it (or not at all past the Castle's), and the gate
+#      road narrows to the gate where the wall crosses it
+# so no wall, walk, stair or tower ever stands on a plot, a field, a path or a fixture, and nothing is laid under a wall.
+DEPTH = [5, 4, 6.5, 7]   # blocks inside the line kept free of paths, fields and fixtures, per tier (the Hamlet's is KEEP above)
+PLOT_DEPTH = [5, 4, 6, 6]   # and of plots: the wall, the walk and the towers (no ladder or step is put on a plot: outline.keep)
+LAND = 72                # walldata.js WALLS.radius + landBeyond - 2: the furthest a wall line may stand (the land reaches 2 further)
+BARE_IDS = BARE | {"coarse_dirt", "podzol", "snow_layer"}
+
+
+def interp(line, a):
+    N = len(line); f = (a % (2 * math.pi)) / (2 * math.pi) * N; i = int(f) % N; t = f - int(f)
+    return line[i] * (1 - t) + line[(i + 1) % N] * t
+
+
+def ring_lines(d, st):
+    """Draw the Town, City and Castle lines from what each tier laid (all layouts together: the wall belongs to the
+    plot) and move what each tier laid in its wall band to a later tier. Changes d["variants"] in place.
+    Returns {radius: [line at even angles]} for walldata.js radiusAt (outline.lines)."""
+    radii, at = st["wall"]["radii"], st["wall"]["radiiAt"]; N = len(radii)
+    ax = gate_axes(st)
+    gi = round((st["wall"]["gateAngle"] % (2 * math.pi)) / (2 * math.pi) * N) % N
+    chord = range(gi - GATE_KEEP, gi + GATE_KEEP + 1)
+    road = lambda x, z: (lambda al, ac: al >= 20 and abs(ac) <= 2.5)(*ax(x, z))
+    lines = {}
+    for t in (1, 2, 3):
+        R, D, DP = d["wall_radius"][t], DEPTH[t], PLOT_DEPTH[t]
+        base = [min(LAND, radii[i] + R - at) for i in range(N)]
+        # 1. what this tier's plots reach (paths, fields' outer rows, lamps and trees give way instead)
+        pts = set()
+        for v in d["variants"]:
+            pal = v["groundwork"]["palette"]
+            for s in v["slots"]:
+                b = s["box"]
+                if TIER[s["opensAt"]] > t or max(abs(c) for c in b) > LAND: continue
+                for x in range(b[0], b[2] + 1):
+                    for z in range(b[1], b[3] + 1): pts.add((x, z))
+        # the woodlot stands outside every wall (Mateo 2026-11-14): the line stops 3 short of it (a tower stands 2 proud)
+        wood = [(math.atan2(z, x), math.hypot(x, z)) for v in d["variants"] for sl in v["slots"] if sl["size"] == "Wood"
+                for x in range(sl["box"][0], sl["box"][2] + 1) for z in range(sl["box"][1], sl["box"][3] + 1)]
+        def woodcap(i):
+            a = i / N * 2 * math.pi; near = LAND
+            for b, dd in wood:
+                if dd * math.cos(b - a) > 0 and abs(dd * math.sin(b - a)) <= 3.5: near = min(near, dd * math.cos(b - a) - 3)
+            return near
+        cap = [woodcap(i) for i in range(N)]
+        def draw(pts):
+            P = [(math.atan2(z, x), math.hypot(x, z), DP if (x, z) in plotcells else D) for x, z in pts]
+            def offset(i):
+                a = i / N * 2 * math.pi; far = 0
+                for b, dd, k in P:
+                    along, perp = dd * math.cos(b - a), abs(dd * math.sin(b - a))
+                    if along > 0 and perp <= k: far = max(far, along + math.sqrt(k * k - perp * perp))
+                return far
+            need = [offset(i) for i in range(N)]
+            r = [max(base[i], need[i], max(need[(i + k) % N] for k in range(-SPAN, SPAN + 1)) - NOTCH) for i in range(N)]
+            for _ in range(2):
+                r = [max((r[i - 1] + 2 * r[i] + r[(i + 1) % N]) / 4, need[i], base[i]) for i in range(N)]
+            flat = max(r[i % N] for i in chord)
+            for i in chord: r[i % N] = flat
+            return need, [round(min(LAND, cap[i], v), 1) for i, v in enumerate(r)]
+        def inband(line, x, z):
+            return interp(line, math.atan2(z, x)) - D < math.hypot(x, z) <= LAND + 4
+        # paths in the band that join two parts of the town are kept, and the line goes round them instead: only the
+        # ends of streets that run on to the wall give way (paths are correctly connected, Mateo 2026-11-16)
+        def bridges(line):
+            keep = set()
+            for v in d["variants"]:
+                pal = v["groundwork"]["palette"]
+                G = {(x, z) for x, y, z, q, tt in v["groundwork"]["blocks"] if tt <= t and ROADY.search(pal[q][0]) and math.hypot(x, z) <= LAND + 4}
+                B = {c for c in G if inband(line, *c) and not road(*c)}
+                rest, comps, seen = G - B, [], set()
+                for c in rest:
+                    if c in seen: continue
+                    seen.add(c); todo, cells = [c], [c]
+                    while todo:
+                        x, z = todo.pop()
+                        for i in (-1, 0, 1):
+                            for j in (-1, 0, 1):
+                                n = (x + i, z + j)
+                                if n in rest and n not in seen: seen.add(n); todo.append(n); cells.append(n)
+                    comps.append(cells)
+                if len(comps) < 2: continue
+                comps.sort(key=len, reverse=True)
+                main = set(comps[0])
+                for cells in comps[1:]:   # the way back to the main network through the band, if there is one
+                    par = {c: None for c in cells}; todo = collections.deque(cells); hit = None
+                    while todo and not hit:
+                        x, z = todo.popleft()
+                        for i in (-1, 0, 1):
+                            for j in (-1, 0, 1):
+                                n = (x + i, z + j)
+                                if n in G and n not in par:
+                                    par[n] = (x, z)
+                                    if n in main: hit = n; break
+                                    todo.append(n)
+                            if hit: break
+                    while hit:
+                        if hit in B: keep.add(hit)
+                        hit = par[hit]
+            return keep
+        plotcells = set(pts)
+        held = set()
+        for _ in range(4):
+            need, line = draw(pts | held)
+            more = bridges(line) - held
+            if not more: break
+            held |= more
+        lines[str(R)] = line
+        short = [i for i in range(N) if need[i] > LAND + 0.05]
+        if short: print(f"  warning: {d['plot']['name']} {TIERS[t]}: plots reach the land's edge at {len(short)} of {N} angles", file=sys.stderr)
+        # 2. what this tier laid in the wall band is laid a tier later (past the Castle: not at all)
+        L = line[gi]
+        for v in d["variants"]:
+            pal = v["groundwork"]["palette"]
+            boxes = [s["box"] for s in v["slots"] if TIER[s["opensAt"]] <= t]
+            in_slot = lambda x, z: any(b[0] <= x <= b[2] and b[1] <= z <= b[3] for b in boxes)
+            idx = {}
+            def pid(n):
+                if n not in idx:
+                    k = next((i for i, (nn, pp) in enumerate(pal) if nn == n and not pp), None)
+                    if k is None: pal.append([n, {}]); k = len(pal) - 1
+                    idx[n] = k
+                return idx[n]
+            later = {(x, y, z) for x, y, z, q, tt in v["groundwork"]["blocks"] if tt > t}
+            tops = collections.Counter(pal[q][0] for x, y, z, q, tt in v["groundwork"]["blocks"] if pal[q][0] in ("grass_block", "sand", "red_sand", "snow", "mud"))
+            top = tops.most_common(1)[0][0] if tops else "grass_block"
+            rows, moved = [], 0
+            for row in v["groundwork"]["blocks"]:
+                x, y, z, q, tt = row
+                n = pal[q][0]
+                if tt > t or n in BARE_IDS or in_slot(x, z) or (x, z) in held:
+                    rows.append(row); continue
+                al, ac = ax(x, z)
+                dist = math.hypot(x, z); lr = interp(line, math.atan2(z, x))
+                if road(x, z):   # the gate road runs on out; only its edges give way, where the wall crosses it
+                    band = 1.5 < abs(ac) and L - D <= al <= L + 1.5
+                else:
+                    band = lr - D < dist <= LAND + 4
+                if not band:
+                    rows.append(row); continue
+                moved += 1
+                solid = not (n in ("lantern", "wheat", "carrots", "potatoes", "beetroot", "air") or "fence" in n or "torch" in n)
+                rows.append([x, y, z, pid(top if solid and (ROADY.search(n) or n in ("farmland", "water")) else "air"), tt])
+                if t < 3 and (x, y, z) not in later: rows.append([x, y, z, q, t + 1])
+            v["groundwork"]["blocks"] = rows
+            fx = []
+            for f in v["fixtures"]:
+                ft = TIER[f["tier"]]
+                if ft <= t and f["name"] in ("lamp", "tree"):
+                    x, z = f["at"][0], f["at"][1]
+                    if interp(line, math.atan2(z, x)) - D < math.hypot(x, z) <= LAND + 2:
+                        if t == 3: continue
+                        f = {**f, "tier": TIERS[t + 1]}
+                fx.append(f)
+            v["fixtures"] = fx
+    # the plots that come near a wall line: no tower ladder or flight of steps is ever put on one (walldata.js wallColumns)
+    keep = set()
+    for v in d["variants"]:
+        for sl in v["slots"]:
+            b = sl["box"]
+            if sl["size"] == "Wood" or TIER[sl["opensAt"]] == 0: continue
+            for rad, line in lines.items():
+                if any(math.hypot(x, z) > interp(line, math.atan2(z, x)) - 8 for x, z in ((b[0], b[1]), (b[2], b[1]), (b[0], b[3]), (b[2], b[3]))):
+                    keep.add(tuple(b)); break
+    return lines, sorted(keep)
 
 
 def bedrock(name, states):
@@ -239,7 +414,11 @@ def starter_hamlet(v, st, trim=frozenset()):
     for x, y, z, n, p in st["blocks"]:
         if n in STARTER_SKIP or (x, z) == (0, 0):
             continue
-        if (x, z) in trim and ROADY.search(n):   # the gate road narrowed to the gate where the wall crosses it
+        if (x, z) in trim and ROADY.search(n):   # the gate road narrowed to the gate where the wall crosses it, and
+            k = (n, json.dumps(p, sort_keys=True))   # widened again once the Town wall has moved past (laid a tier later)
+            if k not in index:
+                index[k] = len(pal); pal.append([n, p])
+            rows.append([x, y, z, index[k], 1])
             n, p = top, {}
         if ybox and ybox[0] <= x <= ybox[2] and ybox[1] <= z <= ybox[3] and y > yard["y"]:
             continue
@@ -318,10 +497,11 @@ def main(src, starters=None):
             trim = gate_trim(st, line)
             for v in d["variants"]:
                 starter_hamlet(v, st, trim)
+            lines, keep = ring_lines(d, st)   # the Town, City and Castle lines, from what each tier laid
         towns[key] = {"name": d["plot"]["name"], "gate": d["plot"]["gate"], "walls": d["wall_radius"], "clear": d["clear"],
                       "minimum": d["minimum"], "variants": [variant(v) for v in d["variants"]]}
         if st:   # the wall outline follows the land (walldata.js radiusAt): radii at even angles for a ring of radiiAt
-            towns[key]["outline"] = {"radii": [round(r, 1) for r in st["wall"]["radii"]], "radiiAt": st["wall"]["radiiAt"], "tight": line}
+            towns[key]["outline"] = {"radii": [round(r, 1) for r in st["wall"]["radii"]], "radiiAt": st["wall"]["radiiAt"], "tight": line, "lines": lines, "keep": [list(b) for b in keep]}
         windmills(towns[key], d["plot"].get("region"))
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Siege_Nights_BP", "scripts", "settle", "towns_data.js")
     body = json.dumps(towns, separators=(",", ":"))

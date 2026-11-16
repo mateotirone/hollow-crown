@@ -11,13 +11,15 @@ The order, and the only place each thing comes from:
   1. sizes      the starter buildings' footprints, from the game's own designs (studio/starter_preview/sizes.mjs)
   2. village    every plot's starter village on its real ground: plots, paths to every door, yards, fields, pens,
                 ground and the starter's wall outline (map/structures/starter.py -> SDIR/<plot>.json)
-  3. town       the Town, City and Castle bands grown round the village, and the wall lines drawn round what was
-                laid: the Hamlet's tight line from the same village (tools/export_towns.py -> settle/towns_data.js)
+  3. town       the Town, City and Castle bands grown round the village, and every tier's wall line drawn round what
+                that tier laid, with room inside for the wall, its towers and stairs; what else lay in a tier's wall
+                band (street ends, a field's last rows, lamps, trees) is laid a tier later, once the wall has moved
+                past (tools/export_towns.py -> settle/towns_data.js outline.tight, outline.lines, outline.keep)
+  3b. road      the road from the gate out to the map's road, straight through every gate before it turns
+                (tools/export_road_joins.mjs -> settle/roadjoin_data.js)
   4. game       founding.js lays it in the same order: groundwork (plots and paths), blend, fixtures, then the wall is
                 raised (and topped up) on that line, then townReady fires for the last stage (planting). A wall
                 standing on an older line in a saved world comes down and rises again on the new one.
-The road from the gate out to the map's road (settle/roadjoin_data.js, node tools/export_road_joins.mjs) starts at the
-Hamlet's gate road end; the check fails if a village change moves that end, and then that export is run again too.
 
 Never patch towns_data.js (or a village .json) by hand or with a one-off script: change the step that makes it and run
 this again. The whole-town self-tests in settle/tests.js (run by tools/check.mjs) fail when a wall stands on a plot,
@@ -59,6 +61,8 @@ def main():
     if missing: sys.exit(f"no starter village for {', '.join(missing)}")
     # 3. town and wall lines, all twelve together (towns_data.js holds every plot)
     export_towns.main(a.settlements, sdir)
+    # 3b. the road from each gate out to the map's road, straight through every wall's gate (settle/roadjoin_data.js)
+    subprocess.run(["node", os.path.join(ROOT, "tools", "export_road_joins.mjs")], check=True, stdout=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":

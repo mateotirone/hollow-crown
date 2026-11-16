@@ -10,7 +10,7 @@ import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, P
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate, gateGuardStep } from "./walls.js";
-import { wallShape, radiusAt } from "./walldata.js";
+import { wallShape, radiusAt, lineFields } from "./walldata.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG, WATCH, WATCH_KINDS, hasWatch, watchKind, watchSpots, inWatch, onWatchPath, allWatchSpots, gateWatchSpot, GATE_WATCH, besideHeight } from "./walldata.js";
 import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
 import { windmillFixture, windmillPlan, windmillSpot, windmillDesign, SAILS as WINDMILL_SAILS } from "./windmill_rules.js";
@@ -49,8 +49,7 @@ addTests("settle", {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     for (const [key, t] of Object.entries(TOWNS)) {
       if (!t.outline?.radii?.length) continue;
-      const tight = t.outline?.tight;
-      const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) };
+      const center = { x: 0, z: 0, ...lineFields(t.outline) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       const radius = t.walls[0];
       for (const level of [1, 2, 6]) {
@@ -402,7 +401,7 @@ addTests("settle walls", {
     const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
     for (const [key, t] of Object.entries(TOWNS)) {
       const tight = t.outline?.tight;
-      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...(t.outline?.radii?.length ? { radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) } : {}) };
+      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...lineFields(t.outline) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       for (let tier = 0; tier < 4; tier++) {
         const radius = t.walls[tier];
@@ -1183,7 +1182,9 @@ addTests("settle base", {
         const tops = new Map();
         for (const [dx, dy, dz, p] of groundwork(v, 0)) { const id = v.pal[p]?.[0] ?? "", k = `${dx},${dz}`; if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id }); }
         const end = roadEnd([...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), dir);
-        assertEqual(`${end.x},${end.z}`, join.from.join(), `${plot.name} ${v.label}: the route starts at the gate road's end`);
+        // on the gate's middle line, beside the gate road's end (joinRoute lays the step across from the end first)
+        const side = { x: -dir.z, z: dir.x }, off = end.x * side.x + end.z * side.z;
+        assertEqual(`${end.x - side.x * off},${end.z - side.z * off}`, join.from.join(), `${plot.name} ${v.label}: the route starts beside the gate road's end, on the gate line`);
       }
       const cells = joinRoute(join);
       const far = cells[cells.length - 1];
@@ -1368,14 +1369,14 @@ addTests("settle towns", {
 
 // The town build order, checked whole (Mateo 2026-11-16: "lay the plots, lay the paths, wall goes around, paths are
 // correctly connected"). tools/build_towns.py makes the data in that order; this fails if any step disagrees with the
-// one before it. The Hamlet on every map plot and layout, at every Hamlet wall level.
+// one before it. Every map plot and layout, at every tier and every wall level that tier can reach.
 const ORDER_PATH = /_slab$|cobblestone|stone_bricks|andesite|tuff_bricks|mud_bricks|grass_path|dirt_path|sandstone/;
 const ORDER_BARE = /^minecraft:(air|grass_block|dirt|coarse_dirt|podzol|sand|red_sand|snow|snow_layer|stone|gravel|mud|short_grass|tall_grass|fern|dandelion|poppy|azure_bluet|cornflower|oxeye_daisy)$/;
 addTests("settle towns", {
-  "the Hamlet is laid in order on every map plot: one path network to every door and out of the gate to the road join, and the wall round it standing on nothing laid": () => {
+  "every town is laid in order on every map plot: the Hamlet's paths one network to every door and out of the gate to the road join, and every tier's wall round what was laid, standing on nothing": () => {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     for (const [key, t] of Object.entries(TOWNS)) {
-      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), radii: t.outline.radii, radiiAt: t.outline.radiiAt, tight: t.outline.tight };
+      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...lineFields(t.outline) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       t.variants.forEach((lay, li) => {
         const at = `${key} layout ${li}`;
@@ -1406,17 +1407,38 @@ addTests("settle towns", {
         const end = roadEnd([...top.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), gateDir(t.gate));
         const join = ROAD_JOINS[key];
         assert(join && Math.max(Math.abs(join.from[0] - end.x), Math.abs(join.from[1] - end.z)) <= 1, `${at}: the gate road ends at ${end.x},${end.z} but the road join starts at ${join?.from} (node tools/export_road_joins.mjs)`);
-        // 4. the wall goes round: no wall, walk, stair or tower on a plot or on anything laid, and the gate on the road
-        for (let level = 1; level <= WALLS.tierCap[0]; level++) {
-          const cols = wallColumns({ center, radius: t.walls[0], level, gateAngle: gate, smooth });
-          for (const c of cols) {
-            if (c.role === "gap" || c.role === "gate" || c.role === "port") continue;
-            const s = slots.find((q) => c.x >= q.box.x0 && c.x <= q.box.x1 && c.z >= q.box.z0 && c.z <= q.box.z1);
-            assert(!s, `${at} level ${level}: ${c.role} at ${c.x},${c.z} stands on plot ${s?.id}`);
-            const g = top.get(`${c.x},${c.z}`);
-            assert(!g || ORDER_BARE.test(g.id), `${at} level ${level}: ${c.role} at ${c.x},${c.z} stands on ${g?.id}`);
+        // 4. the wall goes round, at every tier and level it can reach: no wall, walk, stair, tower or ladder on a plot, on
+        // anything laid or on a lamp, tree or windmill, and the gate road through the gate
+        const vox = new Map();
+        for (let tier = 0; tier < 4; tier++) {
+          for (const [dx, dy, dz, p] of groundwork(lay, tier)) vox.set(`${dx},${dy},${dz}`, lay.pal[p][0]);
+          const ground = new Map();
+          for (const [k, id] of vox) {
+            if (id === "minecraft:air") continue;
+            const [x, y, z] = k.split(",").map(Number), kk = `${x},${z}`;
+            if (!ground.has(kk) || ground.get(kk).y < y) ground.set(kk, { y, id });
           }
-          assert(cols.some((c) => (c.role === "gate" || c.role === "gap") && path.has(`${c.x},${c.z}`)), `${at} level ${level}: the gate road goes through the gate`);
+          const plots = slotsOf(lay).filter((q) => q.tier <= tier && q.size !== "O");
+          const fixed = new Set();
+          for (let tt = 0; tt <= tier; tt++) for (const f of fixturesOf(lay, tt)) if (["lamp", "tree", "windmill", "well"].includes(f.kind)) fixed.add(`${f.x},${f.z}`);
+          const roads = new Set([...ground].filter(([, g]) => ORDER_PATH.test(g.id)).map(([k]) => k));
+          // past the Hamlet's gate road the way out is the road join (founding.js joinRoad), laid when the town is founded
+          const joined = new Set();
+          for (const q of joinRoute(join, { x: end.x, z: end.z })) for (const [a, b] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) joined.add(`${q.x + a},${q.z + b}`);
+          for (const k of joined) roads.add(k);
+          for (let level = 1; level <= WALLS.tierCap[tier]; level++) {
+            const cols = wallColumns({ center, radius: t.walls[tier], level, gateAngle: gate, smooth });
+            for (const c of cols) {
+              if (c.role === "gap" || c.role === "gate" || c.role === "port") continue;
+              const s = plots.find((q) => c.x >= q.box.x0 && c.x <= q.box.x1 && c.z >= q.box.z0 && c.z <= q.box.z1);
+              assert(!s, `${at} tier ${tier} level ${level}: ${c.role} at ${c.x},${c.z} stands on plot ${s?.id}`);
+              const g = ground.get(`${c.x},${c.z}`);
+              assert(!g || ORDER_BARE.test(g.id), `${at} tier ${tier} level ${level}: ${c.role} at ${c.x},${c.z} stands on ${g?.id}`);
+              assert(!fixed.has(`${c.x},${c.z}`), `${at} tier ${tier} level ${level}: ${c.role} at ${c.x},${c.z} stands on a lamp, tree or windmill`);
+              assert(!joined.has(`${c.x},${c.z}`), `${at} tier ${tier} level ${level}: ${c.role} at ${c.x},${c.z} stands on the road out of the gate`);
+            }
+            assert(cols.some((c) => (c.role === "gate" || c.role === "gap") && roads.has(`${c.x},${c.z}`)), `${at} tier ${tier} level ${level}: the gate road goes through the gate`);
+          }
         }
       });
     }

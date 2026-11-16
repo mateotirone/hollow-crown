@@ -23,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots, lineFields } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -342,7 +342,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape, ou
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
-    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt, ...(outline.tight ? { tight: outline.tight } : {}) }); // walldata.js radiusAt reads them
+    Object.assign(w, lineFields(outline)); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -409,8 +409,8 @@ export function moveWall(id, radius, down = () => {}, outline) {
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
   if (outline?.radii?.length) { // the new line (walldata.js radiusAt reads these)
-    Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt });
-    if (outline.tight) w.tight = outline.tight; else delete w.tight;
+    delete w.tight; delete w.lines;
+    Object.assign(w, lineFields(outline));
   }
   w.ground = undefined;
   w.lifts = undefined; // a new line measures its own ground
@@ -447,7 +447,8 @@ export function wallLineDiffers(id, outline) {
   const w = walls()[id];
   if (!w || !outline?.radii?.length || !w.radii?.length || !(w.level > 0) || !w.ground) return false;
   const hamlet = w.radius <= (outline.radiiAt ?? w.radius); // only the Hamlet ring follows the tight line
-  return JSON.stringify([w.radii, w.radiiAt, hamlet ? w.tight ?? null : null]) !== JSON.stringify([outline.radii, outline.radiiAt, hamlet ? outline.tight ?? null : null]);
+  const line = (o) => JSON.stringify([o.radii, o.radiiAt, hamlet ? o.tight ?? null : null, o.lines?.[w.radius] ?? null]);
+  return line(w) !== line(outline);
 }
 
 // The wall is up on this radius: raised, measured, nothing rising or moving

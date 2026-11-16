@@ -8,7 +8,8 @@
 
 export const WALLS = {
   radius: 66, // the Castle ring: blocks from the Plot Stone to the outer face (Mateo 2026-11-12: rings 36, 46, 56, 66 by tier). Land ends at radius + landBeyond.
-  landBeyond: 6, // your land reaches this far past the wall from the day it is raised (66 + 6 = 72, the map's land edge)
+  landBeyond: 8, // your land reaches this far past the wall from the day it is raised (66 + 8 = 74, the edge of the map's flat
+  // ground; was 6 until 2026-11-16, when the Castle wall was drawn round its outermost plots and may stand out to 72)
   spawnBeyond: 5, // raiders appear this far outside the wall
   reserve: 4, // nothing may be built this close to the line of the wall (either side)
   wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at the Castle ring, less on smaller rings) and in
@@ -287,12 +288,25 @@ export function wallShape(seedText) {
   return raw.map((v) => Math.round((v / top) * 100) / 100);
 }
 
+// The wall line fields a town's outline carries (towns_data.js outline), for a wall record or a test's center
+export const lineFields = (o) => (o?.radii?.length ? { radii: o.radii, radiiAt: o.radiiAt, ...(o.tight ? { tight: o.tight } : {}), ...(o.lines ? { lines: o.lines } : {}), ...(o.keep ? { keep: o.keep } : {}) } : {});
+// center.keep: plot boxes [x0, z0, x1, z1] (from the Plot Stone) near the wall line: no ladder or step goes on one
+const inKeep = (center, x, z) => !!center?.keep?.some((b) => x - center.x >= b[0] && x - center.x <= b[2] && z - center.z >= b[1] && z - center.z <= b[3]);
+
 // How far out the wall stands at angle a (radians): its ring radius, wandered by center.shape (if it has one)
 export function radiusAt(center, radius, a) {
   // A starter village wall (map/structures/starter.py) carries its whole outline: radii = blocks out at even angles,
   // worked out from the land and what the wall holds, for a ring of radiiAt. A bigger ring keeps the same outline, moved out.
   // The Hamlet ring (radius at or inside radiiAt) follows center.tight instead when it has one: the line drawn tight round
   // the starter village (towns_data.js outline.tight, drawn by tools/build_towns.py from the village it goes round, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
+  // Town, City and Castle rings follow center.lines[radius] when there is one: the line drawn round what that tier laid
+  // (towns_data.js outline.lines, tools/export_towns.py ring_lines), with room inside for the wall, its stairs and towers.
+  const ln = center?.lines?.[radius];
+  if (ln?.length) {
+    const f = (turn(a) / TAU) * ln.length;
+    const i = Math.floor(f) % ln.length, t = f - Math.floor(f);
+    return Math.min(ln[i] * (1 - t) + ln[(i + 1) % ln.length] * t, WALLS.radius + WALLS.landBeyond - 2);
+  }
   if (center?.tight?.length && radius <= (center.radiiAt ?? radius)) {
     const tt = center.tight, f = (turn(a) / TAU) * tt.length;
     const i = Math.floor(f) % tt.length, t = f - Math.floor(f);
@@ -404,6 +418,9 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     if (!old || rank[col.role] > rank[old.role] || (col.role === old.role && col.d < old.d)) cols.set(k, { x, z, ...col });
   };
   const half = WALLS.gateWidth / 2;
+  // the way in through the gate (the road out to the map's road runs here): no step or ladder is put on it
+  const gux = Math.cos(gateAngle), guz = Math.sin(gateAngle);
+  const inGateWay = (x, z) => { const dx = x - center.x, dz = z - center.z; return dx * gux + dz * guz > 0 && Math.abs(-dx * guz + dz * gux) <= half + 1.5; };
   const steps = Math.ceil(TAU * (radius + WALLS.wobble.out) * 1.6);
   const deep = L.thick + (L.walk ? 1 : 0); // a thin wall with a walkway has a column of planks behind it
   const gateD = Math.min(L.thick - 1, 1); // the gate hangs one block in from the face where the wall is thick enough
@@ -470,10 +487,10 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const cx = Math.round(center.x + Math.cos(a) * (r - 1)), cz = Math.round(center.z + Math.sin(a) * (r - 1));
     const x = cx + step.x * (L.r + 1), z = cz + step.z * (L.r + 1);
     const g = groundAt(smooth, a);
-    if (!cols.has(key(x, z))) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
+    if (!cols.has(key(x, z)) && !inKeep(center, x, z) && !inGateWay(x, z)) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
   }
   // the top step must sit beside the walk: the flight hugs the wall, never through it, a tower or a ladder
-  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) || (watch.length > 0 && (inWatch(watch, x, z, 1) || onWatchPath(watch, x, z))) });
+  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) || inKeep(center, x, z) || inGateWay(x, z) || (watch.length > 0 && (inWatch(watch, x, z, 1) || onWatchPath(watch, x, z))) });
   for (const c of flights) cols.set(key(c.x, c.z), { ...c, d: 9 });
   // where a flight's top step doesn't quite touch the walk, a short solid landing carries on out to it
   const standOn = (x, z) => { const n = cols.get(key(x, z)); return n && (n.role === "walk" || (n.role === "wall" && !L.walk)); };

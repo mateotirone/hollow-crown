@@ -25,6 +25,7 @@ import { fileURLToPath } from "url";
 import { TOWNS } from "../Siege_Nights_BP/scripts/settle/towns_data.js";
 import { groundwork, wallRadius } from "../Siege_Nights_BP/scripts/settle/towns.js";
 import { gateDir, roadEnd, roadLine, ROAD_JOIN_PATHY } from "../Siege_Nights_BP/scripts/settle/basedata.js";
+import { radiusAt, lineFields, bearingToAngle } from "../Siege_Nights_BP/scripts/settle/walldata.js";
 import { PLOT_PLAN, SETTLEMENT } from "../Siege_Nights_BP/scripts/plots/config.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -112,21 +113,27 @@ function route(plot, tw, layout) {
     const id = layout.pal[p]?.[0] ?? "", k = `${dx},${dz}`;
     if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id });
   }
-  const end = roadEnd([...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), dir);
+  const last = roadEnd([...tops.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), dir);
+  // the run starts on the gate's middle line, so the road goes through every wall's gate square, never beside it
+  const off = last.x * side.x + last.z * side.z;
+  const end = { ...last, x: last.x - side.x * off, z: last.z - side.z * off };
   const land = Math.max(SETTLEMENT.landRadius, wallRadius(tw, 3) + 6);
   // the straight run out along the gate line, to the edge of the settlement land
   const straight = [];
   for (let k = 0; ; k++) {
     const x = end.x + dir.x * k, z = end.z + dir.z * k;
     straight.push([x, z]);
-    if (Math.hypot(x, z) >= land) break;
+    if (Math.hypot(x, z) >= land && Math.hypot(x, z) >= radiusAt({ x: 0, z: 0, ...lineFields(tw.outline) }, wallRadius(tw, 3), bearingToAngle(tw.gate)) + 4) break;
   }
   const cx = plot.x, cz = plot.z;
   const roads = roadCells(cx, cz);
   const idx = (dx, dz) => (dx + WIN) * N + (dz + WIN);
   const g = new Float64Array(N * N).fill(Infinity), from = new Int32Array(N * N).fill(-1);
   const heap = new Heap();
-  straight.forEach(([x, z], k) => { const i = idx(x, z); g[i] = k; heap.push(k, i); });
+  // the route only turns off the gate line once it is clear of the Castle wall and its gatehouse towers (2026-11-16: it
+  // bent along the outside of the wall where the Castle line stands out at the gate)
+  const castle = radiusAt({ x: 0, z: 0, ...lineFields(tw.outline) }, wallRadius(tw, 3), bearingToAngle(tw.gate)) + 4;
+  straight.forEach(([x, z], k) => { if (Math.hypot(x, z) < castle && k < straight.length - 1) return; const i = idx(x, z); g[i] = k; heap.push(k, i); });
   const onAxis = (dx, dz) => Math.abs(dx * side.x + dz * side.z) <= 2 && (dx - end.x) * dir.x + (dz - end.z) * dir.z >= 0;
   let goal = -1, goalKind;
   const STEPS = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]];
