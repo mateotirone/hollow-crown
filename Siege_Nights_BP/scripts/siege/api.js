@@ -14,7 +14,7 @@ export const keepOf = (owner) => getState().keeps[owner];
 
 // ----- sieges -----
 export { isNight, startSiege, endSiege, spawnRaider, raidersLeft, nextSiegeDay } from "./siege.js";
-export { FACTIONS, MODIFIERS, planSiege } from "./warplan.js";
+export { FACTIONS, MODIFIERS, planSiege, assaultSpot, sidesFor } from "./warplan.js";
 
 // ----- walls -----
 export { hitWall, blastDamage, wallHp, armorOf, lightCharge, offlineSafe, damageMap, saveDamage, blockKey, WALL_HP, registerDamageable } from "./walls.js";

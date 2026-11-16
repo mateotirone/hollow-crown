@@ -668,6 +668,14 @@ addFilter("spawnDistance", (distance, { owner }) => {
   return w && w.level > 0 ? Math.max(distance, w.radius + WALLS.wobble.out + WALLS.spawnBeyond) : distance;
 });
 
+// The gate an army marches on (siege/warplan.js sidesFor, assaultSpot): the middle of the gateway and the way out of it
+addFilter("siegeGate", (gate, { owner }) => {
+  const w = walls()[owner];
+  if (!w || !(w.level > 0) || !Number.isFinite(w.gate)) return gate;
+  const g = gateSpot(w, w.gate, w.ground, w.radius);
+  return { angle: w.gate, x: g.x, z: g.z, ox: Math.round(Math.cos(w.gate)), oz: Math.round(Math.sin(w.gate)) };
+});
+
 // A settlement wall is as strong as its level: the whole Castle Stone family on the line of a
 // level 6+ wall takes hits like reinforced Castle Stone (iron, then diamond at 9, netherite at 10)
 addFilter("wallHp", (hp, { block }) => {

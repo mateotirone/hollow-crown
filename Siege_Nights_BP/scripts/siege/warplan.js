@@ -7,6 +7,7 @@ import { BALLISTA_HIT, KING_TAG, RAIDER_TAG, WARLORD_TAG } from "./constants.js"
 import { guardCount, guardTag, isGuard } from "./guards.js";
 import { keepCenter } from "./keep.js";
 import { ballistasOf } from "./machines.js";
+import { SETTINGS } from "./settings.js";
 import { spawnRaider } from "./siege.js";
 import { state } from "./state.js";
 import { tierOf } from "./territory.js";
@@ -19,7 +20,8 @@ import { sfx } from "../core/sfx.js";
 // When a siege starts, each settlement gets its own war plan:
 //   threat budget  = how rich, how well defended and how famous the settlement is
 //   faction        = who's coming (each has its own units)
-//   direction      = they probe your weakest side
+//   direction      = the main force comes up the road to the gate; a pincer, and armies that have met you
+//                    before, also send a part round to your weakest side (no wall yet: the weakest side)
 //   modifiers      = a random twist, plus counters to how you won last time
 //   warlord        = sometimes a named boss leads the final assault
 // Each assault then "buys" raiders from the faction's list with its share of the budget.
@@ -86,7 +88,7 @@ export const WARLORD_TITLES = ["the Ashen", "Wallbreaker", "the Red", "of the Lo
 
 
 // Defense in each quarter around the keep (east, south, west, north): ballistas and archers count
-export function weakestSides(owner, keep, count) {
+export function weakestSides(owner, keep, count, skip) {
   const score = [0, 0, 0, 0];
   const quarter = (loc) => {
     const a = Math.atan2(loc.z - keep.z, loc.x - keep.x);
@@ -94,8 +96,38 @@ export function weakestSides(owner, keep, count) {
   };
   for (const b of ballistasOf(owner)) score[quarter(b.location)] += 3;
   for (const archer of overworld().getEntities({ type: "siege:archer", tags: [guardTag(owner)] })) score[quarter(archer.location)] += 2;
-  const order = [0, 1, 2, 3].sort((a, b) => score[a] - score[b] || Math.random() - 0.5);
+  const order = [0, 1, 2, 3].filter((q) => q !== skip).sort((a, b) => score[a] - score[b] || Math.random() - 0.5);
   return order.slice(0, count).map((q) => q * (Math.PI / 2));
+}
+
+// Where an army comes from (Mateo 2026-11-16: "why dont they come from the gate side?", gate first, then weak sides).
+// A walled settlement is attacked up the road at its gate. A pincer splits the army between the gate and the least
+// defended other side; from the fourth siege on a third of every army goes round to that side as well.
+// "siegeGate" (settle/walls.js) gives the gate of a standing wall: { angle, x, z, ox, oz } (ox, oz: the way out).
+export const FLANK_FROM_SIEGE = 4;
+const TAU = Math.PI * 2;
+export function sidesFor(gate, weakest, { pincer = false, sieges = 1 } = {}) {
+  if (!gate) return weakest(pincer ? 2 : 1);
+  const g = ((gate.angle % TAU) + TAU) % TAU;
+  const skip = ((Math.round(g / (Math.PI / 2)) % 4) + 4) % 4;
+  if (pincer) return [g, ...weakest(1, skip)];
+  if (sieges >= FLANK_FROM_SIEGE) return [g, g, ...weakest(1, skip)];
+  return [g];
+}
+const sameAngle = (a, b) => Math.abs(((a - b) % TAU + TAU + Math.PI) % TAU - Math.PI) < 1e-6;
+// Where one raider of a side starts: { x, z, gate }. The gate's force forms up on the road outside the gate (gate: true,
+// they are tagged GATE_TAG and march through the gateway, keep.js marchPoint); any other side spreads out along its arc.
+export function assaultSpot(owner, keep, plan, angle, { spread = 0.6, extra = 0, jitter = 6 } = {}) {
+  const center = keepCenter(keep);
+  const d = applyFilter("spawnDistance", SETTINGS.spawnDistance, { owner, keep }) + extra + Math.random() * jitter; // a walled settlement is attacked from outside its wall
+  const g = plan?.gate;
+  if (g && sameAngle(angle, g.angle)) {
+    const out = Math.max(10, d - Math.hypot(g.x - center.x, g.z - center.z));
+    const across = (Math.random() - 0.5) * 8;
+    return { x: Math.floor(g.x + g.ox * out - g.oz * across), z: Math.floor(g.z + g.oz * out + g.ox * across), gate: true };
+  }
+  const a = angle + (Math.random() - 0.5) * spread;
+  return { x: Math.floor(center.x + Math.cos(a) * d), z: Math.floor(center.z + Math.sin(a) * d), gate: false };
 }
 
 export function planSiege(owner, provoked) {
@@ -128,9 +160,11 @@ export function planSiege(owner, provoked) {
     : keep.sieges >= 3 && (keep.sieges % 5 === 0 || Math.random() < 0.3) ? `${pick(WARLORD_NAMES)} ${pick(WARLORD_TITLES)}` : undefined;
   if (grand && !modifiers.includes("pincer")) modifiers.push("pincer");
 
+  const gate = applyFilter("siegeGate", undefined, { owner, keep }); // the gate of its wall, if it has one standing
   state.plans[owner] = {
     faction: factionId, budget: grand ? budget * 2 : budget, modifiers, warlord, grand,
-    sides: weakestSides(owner, keep, modifiers.includes("pincer") ? 2 : 1),
+    gate,
+    sides: sidesFor(gate, (count, skip) => weakestSides(owner, keep, count, skip), { pincer: modifiers.includes("pincer"), sieges: keep.sieges }),
     counterNote: counter && keep.sieges > 1 ? counter.note : undefined,
   };
   state.kills[owner] = { ballista: 0, archery: 0, guards: 0, melee: 0 };

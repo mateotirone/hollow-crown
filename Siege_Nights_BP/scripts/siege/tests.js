@@ -8,7 +8,7 @@ import * as ids from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { withTestState } from "./state.js";
 import { TIERS, tierOf, settlementAt, isAlly, canManage, homeOf, homeAt, colorTaken, freeColor, foreignSettlement } from "./territory.js";
-import { FACTIONS, MODIFIERS, COUNTERS, buyArmy } from "./warplan.js";
+import { FACTIONS, MODIFIERS, COUNTERS, buyArmy, sidesFor, FLANK_FROM_SIEGE } from "./warplan.js";
 import { GUARD_LIMIT, GUARD_ARMOR } from "./guards.js";
 import { toughness, wallHp, WALL_HP, REINFORCE_ITEMS, TIER_NAMES } from "./walls.js";
 import { isBuilt } from "./breachers.js";
@@ -71,6 +71,20 @@ addTests("siege", {
         }
       }
     }
+  },
+  "an army comes at the gate first: all of it early on, a flank added by a pincer and from the fourth siege, never the gate twice as a flank": () => {
+    const weakest = (count, skip) => [0, 1, 2, 3].filter((q) => q !== skip).slice(0, count).map((q) => q * (Math.PI / 2));
+    for (const q of [0, 1, 2, 3]) for (const angle of [q * (Math.PI / 2), q * (Math.PI / 2) - Math.PI * 2]) {
+      const gate = { angle }, g = q * (Math.PI / 2);
+      assertEqual(JSON.stringify(sidesFor(gate, weakest, { sieges: 1 })), JSON.stringify([g]), "first siege");
+      const pincer = sidesFor(gate, weakest, { pincer: true, sieges: 2 });
+      assert(pincer.length === 2 && pincer[0] === g && pincer[1] !== g, `pincer ${pincer}`);
+      const later = sidesFor(gate, weakest, { sieges: FLANK_FROM_SIEGE });
+      assert(later.length === 3 && later[0] === g && later[1] === g && later[2] !== g, `later ${later}`);
+      for (const a of [...pincer, ...later]) assert(a >= 0 && a < Math.PI * 2, `angle ${a}`); // the compass lines read these
+    }
+    assertEqual(sidesFor(undefined, weakest, { pincer: true }).length, 2, "no wall: two weak sides");
+    assertEqual(sidesFor(undefined, weakest).length, 1, "no wall: the weakest side");
   },
   "the Grand Army has every unit once": () => {
     const types = FACTIONS.grand.units.map((u) => u.type);

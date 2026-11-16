@@ -3,7 +3,7 @@
 
 import { world } from "@minecraft/server";
 import { emit, applyFilter } from "../core/events.js";
-import { KEEP_BANNER, KEEP_HEART } from "./constants.js";
+import { KEEP_BANNER, KEEP_HEART, GATE_TAG } from "./constants.js";
 import { saveState, state } from "./state.js";
 import { tierOf } from "./territory.js";
 import { overworld, ownerOf, ownerTag, title } from "./util.js";
@@ -17,6 +17,17 @@ import { sfx } from "../core/sfx.js";
 
 export function keepCenter(keep) {
   return { x: keep.x + 0.5, y: keep.y, z: keep.z + 0.5 };
+}
+
+// Where a raider is marching to: the keep, but the force that came up the road (GATE_TAG, warplan.js assaultSpot)
+// goes for the gateway first, until it is through it. Rams and sappers of that force breach what bars the gateway.
+export function marchPoint(raider, keep) {
+  const center = keepCenter(keep);
+  let g;
+  try { g = raider.hasTag(GATE_TAG) ? state.plans?.[ownerOf(raider)]?.gate : undefined; } catch { g = undefined; }
+  if (!g) return center;
+  const out = (raider.location.x - (g.x + 0.5)) * g.ox + (raider.location.z - (g.z + 0.5)) * g.oz; // blocks still outside the gateway
+  return out > 1 ? { x: g.x + 0.5, y: center.y, z: g.z + 0.5, via: true } : center; // via: a point on the way, not where they stop
 }
 
 // Keep heart health: the tier's number, unless a feature changes it (addKeepHealthHook)
