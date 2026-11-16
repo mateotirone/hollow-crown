@@ -159,3 +159,49 @@ export function groundFor(region, x, z) {
   const P = PLANTING[region] ?? PLANTING.vale;
   return hash(x >> 1, z >> 1, 3) * P.patch[1] < 1 ? P.patch[0] : P.top;
 }
+
+// ---------- the open ground between plots ----------
+// Mateo: "same with empty space around buildings". The town's open ground inside the wall (verges, the middles of its
+// blocks) gets low cover and a rare bush. Only ground no tier of the layout ever claims: no plot (of any tier), no path,
+// field, fence or anything else its groundwork lays, no fixture and no hall reserve, so a later tier never paves over
+// a plant or leaves one standing on a path. Trees there are the town generator's own (towngen trees step).
+//   openGroundPlan({ layout, region, seed, inside(dx, dz), nearWall(dx, dz) }) -> [[dx, dz, id, tall]]
+//     layout   a towns_data layout (slots, gw groundwork, fix fixtures, hall boxes)
+//     inside   true inside the town's wall line now (planting.js: radiusAt, the wall standing)
+//     nearWall true where nothing at all is planted (the wall, its steps and lookouts: every ring)
+const FIXTURE_REACH = { mason_yard: 9, storehouse: 9, windmill: 9, well: 3 }; // how far round a fixture stays clear
+const OPEN_COVER = 3; // low cover on 1 in this many open cells (thinner than a plot's)
+const OPEN_BUSH = 45; // a bush on 1 in this many cells well clear of everything
+export const OPEN_REACH = 78; // blocks from the Plot Stone looked at (land reaches 74)
+
+export function openGroundPlan({ layout, region = "vale", seed = "", inside = () => true, nearWall = () => false, groundworkOf, slots, fixtures }) {
+  const P = PLANTING[region] ?? PLANTING.vale;
+  const s = seedOf(`${seed}|open`);
+  const claimed = new Set(); // cells something else owns
+  const claim = (x0, z0, x1, z1) => { for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) claimed.add(`${x},${z}`); };
+  for (const sl of slots) claim(sl.box.x0 - 1, sl.box.z0 - 1, sl.box.x1 + 1, sl.box.z1 + 1);
+  for (const b of layout?.hall ?? []) claim(b[0] - 1, b[1] - 1, b[2] + 1, b[3] + 1);
+  for (const f of fixtures) { const r = FIXTURE_REACH[f.kind] ?? 2; claim(f.x - r, f.z - r, f.x + r, f.z + r); }
+  const built = new Set(); // groundwork that isn't plain ground (a path, a field, a fence, water, a lamp)
+  for (let t = 0; t <= 3; t++) for (const [dx, , dz, p] of groundworkOf(t)) {
+    const id = layout.pal[p]?.[0] ?? "minecraft:air";
+    if (id === "minecraft:air" || id === "minecraft:grass_block" || id === "minecraft:dirt" || id === "minecraft:stone") continue;
+    built.add(`${dx},${dz}`);
+  }
+  const near = (x, z, r) => { for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++) if (built.has(`${x + a},${z + b}`) || claimed.has(`${x + a},${z + b}`)) return true; return false; };
+  const out = [];
+  for (let x = -OPEN_REACH; x <= OPEN_REACH; x++) for (let z = -OPEN_REACH; z <= OPEN_REACH; z++) {
+    const k = `${x},${z}`;
+    if (claimed.has(k) || built.has(k) || !inside(x, z) || nearWall(x, z)) continue;
+    if (near(x, z, 1)) continue; // a block of verge stays plain beside every path and plot
+    if (P.bushEvery && P.bush.length && hash(x, z, s + 5) * OPEN_BUSH < 1 && !near(x, z, 3)) {
+      out.push([x, z, P.bush[Math.floor(hash(x, z, s + 6) * P.bush.length)], true]);
+      continue;
+    }
+    if (hash(x, z, s + 7) * OPEN_COVER * P.coverEvery < 1) {
+      const id = pick(P.cover, hash(x, z, s + 8));
+      if (id) out.push([x, z, id, TALL.test(id)]);
+    }
+  }
+  return out;
+}

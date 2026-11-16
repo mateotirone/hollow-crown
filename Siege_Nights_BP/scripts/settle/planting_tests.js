@@ -1,9 +1,9 @@
 // Self-tests for planting the plots (planting_rules.js), on every map plot's layouts with every building that fits.
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { townFor, townNames, slotsOf, seatOnSlot, seatedBox } from "./towns.js";
+import { townFor, townNames, slotsOf, seatOnSlot, seatedBox, groundwork, fixturesOf } from "./towns.js";
 import { BUILDINGS, drawBuilding } from "./buildings.js";
 import { plotFit } from "./charters.js";
-import { plantPlan, doorLane, PLANTING, TALL } from "./planting_rules.js";
+import { plantPlan, openGroundPlan, doorLane, PLANTING, TALL } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
 const REGIONS = Object.keys(PLANTING);
@@ -78,6 +78,25 @@ addTests("settle planting", {
         for (let a = d.lo[0]; a <= d.hi[0]; a++) for (let c = d.lo[2]; c <= d.hi[2]; c++) assert(!band(t.dx + a, t.dz + c), `${name} ${slot.id}: a tree in the wall band`);
       }
     }
+  },
+  "the open ground between plots: never on a plot, the hall's ground, a fixture or anything any tier lays, and the same every time": () => {
+    let total = 0;
+    for (const name of townNames()) for (const layout of townFor(name).variants) {
+      const args = { layout, region: "vale", seed: "t", groundworkOf: (t) => groundwork(layout, t), slots: slotsOf(layout), fixtures: [0, 1, 2, 3].flatMap((t) => fixturesOf(layout, t)), inside: (x, z) => Math.hypot(x, z) < 60 };
+      const plan = openGroundPlan(args);
+      assertEqual(JSON.stringify(plan), JSON.stringify(openGroundPlan(args)), `${name}: not the same twice`);
+      const laid = new Set();
+      for (let t = 0; t <= 3; t++) for (const [dx, , dz, p] of groundwork(layout, t)) if (!/^minecraft:(air|grass_block|dirt|stone)$/.test(layout.pal[p]?.[0] ?? "")) laid.add(`${dx},${dz}`);
+      for (const [x, z, id] of plan) {
+        const where = `${name} ${layout.label ?? ""}: ${id} at ${x},${z}`;
+        assert(Math.hypot(x, z) < 60, `${where} outside the wall`);
+        assert(!laid.has(`${x},${z}`), `${where} on something the town lays`);
+        for (const s of args.slots) assert(!(x >= s.box.x0 - 1 && x <= s.box.x1 + 1 && z >= s.box.z0 - 1 && z <= s.box.z1 + 1), `${where} on plot ${s.id}`);
+        for (const b of layout.hall ?? []) assert(!(x >= b[0] && x <= b[2] && z >= b[1] && z <= b[3]), `${where} on the hall's ground`);
+      }
+      total += plan.length;
+    }
+    assert(total > 0, "no open ground planted anywhere");
   },
   "planting is the same every time, and every region plants": () => {
     let planted = 0;
