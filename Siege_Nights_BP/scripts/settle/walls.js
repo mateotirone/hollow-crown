@@ -35,6 +35,7 @@ const walls = () => store.data.walls;
 const save = () => store.save();
 
 export const wallOf = (id) => walls()[id];
+export const allWalls = () => Object.values(walls() ?? {}); // every wall record (landmarks/index.js keeps clear of standing ones)
 // Put back (or forget, with no record) a settlement's wall record as it was (the battle test, battletest/). Blocks stay.
 export function setWallRecord(id, record) {
   if (jobs.has(id)) return false;
