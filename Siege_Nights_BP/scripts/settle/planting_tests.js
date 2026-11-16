@@ -3,7 +3,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { townFor, townNames, slotsOf, seatOnSlot, seatedBox, groundwork, fixturesOf } from "./towns.js";
 import { BUILDINGS, drawBuilding } from "./buildings.js";
 import { plotFit } from "./charters.js";
-import { plantPlan, openGroundPlan, doorLane, PLANTING, TALL } from "./planting_rules.js";
+import { plantPlan, openGroundPlan, openGroundTrees, doorLane, PLANTING, TALL } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
 const REGIONS = Object.keys(PLANTING);
@@ -24,13 +24,19 @@ addTests("settle planting", {
     assertEqual(p.plants.length + p.trees.length, 0);
     assertEqual(p.surface.length, (slot.box.x1 - slot.box.x0 + 1) * (slot.box.z1 - slot.box.z0 + 1));
   },
-  "every plot with a building: nothing planted on the building, a block round it, or the walk to the door; trees inside the plot": () => {
+  "every plot with a building: nothing planted on the building or the walk to the door, nothing tall against it; trees inside the plot": () => {
     for (const region of ["vale", "emberwaste"]) for (const { name, slot, id, building } of seated(region)) {
       const p = plantPlan({ slot, region, building, seed: "t" });
       const b = building.box, lane = doorLane(slot, building), where = `${name} ${slot.id} ${id} ${region}`;
       const inPlot = (x, z) => x >= slot.box.x0 && x <= slot.box.x1 && z >= slot.box.z0 && z <= slot.box.z1;
       for (const [x, z] of p.surface) assert(!(x >= b.x0 && x <= b.x1 && z >= b.z0 && z <= b.z1), `${where}: ground laid under the building at ${x},${z}`);
-      const cells = [...p.plants.map(([x, z]) => [x, z])];
+      for (const [x, z, id, tall] of p.plants) {
+        assert(inPlot(x, z), `${where}: ${id} outside the plot at ${x},${z}`);
+        assert(!(x >= b.x0 && x <= b.x1 && z >= b.z0 && z <= b.z1), `${where}: ${id} on the building at ${x},${z}`);
+        assert(!lane.has(`${x},${z}`), `${where}: ${id} on the walk to the door at ${x},${z}`);
+        if (tall) assert(!(x >= b.x0 - 1 && x <= b.x1 + 1 && z >= b.z0 - 1 && z <= b.z1 + 1), `${where}: ${id} against the building at ${x},${z}`);
+      }
+      const cells = [];
       for (const t of p.trees) {
         const d = GROVE_DESIGNS[`${t.sid}_${t.stage}_${t.v}`];
         assert(d, `${where}: no grove design ${t.sid} ${t.v}`);
@@ -52,7 +58,7 @@ addTests("settle planting", {
       assert(flush || lane.has(`${edge.x},${edge.z}`), `${name} ${slot.id}: the walk stops short of the plot's edge`);
     }
   },
-  "nothing climbable near the wall, on wall or gate plots, or on a plot's outer ring": () => {
+  "nothing climbable near the wall, on wall or gate plots, or on a plot's street edge": () => {
     for (const { name, slot, building } of seated("vale")) {
       const near = (x, z) => (x + z) % 3 === 0; // any pattern: the rule must hold whatever the wall says
       const p = plantPlan({ slot, region: "vale", building, nearWall: near });
@@ -62,7 +68,8 @@ addTests("settle planting", {
         if (!tall) continue;
         assert(!flat, `${name} ${slot.id}: a bush on a ${slot.tags} plot`);
         assert(!near(x, z), `${name} ${slot.id}: a bush within reach of the wall at ${x},${z}`);
-        assert(!(x === slot.box.x0 || x === slot.box.x1 || z === slot.box.z0 || z === slot.box.z1), `${name} ${slot.id}: a bush on the plot's edge`);
+        const D = slot.door, front = D.z ? z === (D.z < 0 ? slot.box.z0 : slot.box.z1) : x === (D.x < 0 ? slot.box.x0 : slot.box.x1);
+        assert(!front, `${name} ${slot.id}: a bush on the plot's street edge`);
       }
       if (flat) assertEqual(p.trees.length, 0, `${name} ${slot.id}: a tree on a wall or gate plot`);
       for (const t of p.trees) assert(!near(t.dx, t.dz), `${name} ${slot.id}: a tree trunk within reach of the wall`);
@@ -80,7 +87,7 @@ addTests("settle planting", {
     }
   },
   "the open ground between plots: never on a plot, the hall's ground, a fixture or anything any tier lays, and the same every time": () => {
-    let total = 0;
+    let total = 0, trees = 0;
     for (const name of townNames()) for (const layout of townFor(name).variants) {
       const args = { layout, region: "vale", seed: "t", groundworkOf: (t) => groundwork(layout, t), slots: slotsOf(layout), fixtures: [0, 1, 2, 3].flatMap((t) => fixturesOf(layout, t)), inside: (x, z) => Math.hypot(x, z) < 60 };
       const plan = openGroundPlan(args);
@@ -94,9 +101,19 @@ addTests("settle planting", {
         for (const s of args.slots) assert(!(x >= s.box.x0 - 1 && x <= s.box.x1 + 1 && z >= s.box.z0 - 1 && z <= s.box.z1 + 1), `${where} on plot ${s.id}`);
         for (const b of layout.hall ?? []) assert(!(x >= b[0] && x <= b[2] && z >= b[1] && z <= b[3]), `${where} on the hall's ground`);
       }
+      for (const t of openGroundTrees(args)) {
+        const d = GROVE_DESIGNS[`${t.sid}_${t.stage}_${t.v}`];
+        for (let a = d.lo[0]; a <= d.hi[0]; a++) for (let c = d.lo[2]; c <= d.hi[2]; c++) {
+          const x = t.dx + a, z = t.dz + c, where = `${name}: a ${t.sid} crown at ${x},${z}`;
+          assert(Math.hypot(x, z) < 60 && !laid.has(`${x},${z}`), `${where} outside the wall or on something laid`);
+          for (const s of args.slots) assert(!(x >= s.box.x0 - 1 && x <= s.box.x1 + 1 && z >= s.box.z0 - 1 && z <= s.box.z1 + 1), `${where} over plot ${s.id}`);
+        }
+        trees++;
+      }
       total += plan.length;
     }
     assert(total > 0, "no open ground planted anywhere");
+    assert(trees > 0, "no tree on any town's open ground");
   },
   "planting is the same every time, and every region plants": () => {
     let planted = 0;
