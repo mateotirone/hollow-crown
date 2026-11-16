@@ -18,7 +18,7 @@ groundwork is packed into a short string so twelve towns stay small:
   gw = four tier sections joined by "|", each a string of column runs (see pack_groundwork); a block char is an
        index into the layout's palette (CHARS).
 """
-import argparse, collections, glob, json, math, os, re, sys
+import argparse, collections, glob, heapq, json, math, os, re, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
@@ -296,6 +296,128 @@ def ring_lines(d, st):
     return lines, sorted(keep)
 
 
+# ---------- paths correctly connected, at every tier ----------
+# (Mateo 2026-11-16: "paths are correctly connected".) After the wall lines: at each tier, every street piece inside the
+# wall joins the town's one network and every plot open by then has a street within 2 of its door step. A missing link is
+# laid with that tier, 3 wide, on the plot's real ground (the ground slice the village was baked on, or the ground the
+# layout already graded), never on a plot, the hall's ground, a field, a fixture, water or the wall band, and never
+# stepping more than a block at a time.
+PATH_IDS = re.compile(r"_slab$|cobblestone|stone_bricks|andesite|tuff_bricks|mud_bricks|grass_path|dirt_path|sandstone")
+LINK = ["cobblestone", "mossy_cobblestone", "andesite", "cobblestone", "stone_bricks"]   # what a link is paved with
+
+
+def join_paths(d, st, lines, ground):
+    """Lay the links each tier's street network is missing (changes d["variants"] in place). ground: the plot slice
+    (Y, water, X0, Z0) the starter village was baked on."""
+    Y, W = ground["Y"], ground["water"]
+    ox, oz = int(ground["X0"]) - d["plot"]["x"], int(ground["Z0"]) - d["plot"]["z"]
+    def natural(x, z):
+        i, j = x - ox, z - oz
+        if not (0 <= i < Y.shape[0] and 0 <= j < Y.shape[1]) or W[i, j] != -999: return None
+        return int(Y[i, j])
+    tight = lines["tight"]
+    report = []
+    for li, v in enumerate(d["variants"]):
+        pal = v["groundwork"]["palette"]
+        idx = {}
+        def pid(n):
+            if n not in idx:
+                k = next((i for i, (nn, pp) in enumerate(pal) if nn == n and not pp), None)
+                if k is None: pal.append([n, {}]); k = len(pal) - 1
+                idx[n] = k
+            return idx[n]
+        halls = [h["box"] for h in v["hall"]]
+        for t in (1, 2, 3):
+            line, D = lines[str(d["wall_radius"][t])], DEPTH[t]
+            inside = lambda x, z, m=0: math.hypot(x, z) <= interp(line, math.atan2(z, x)) - m
+            vox = {}
+            for x, y, z, q, tt in sorted(v["groundwork"]["blocks"], key=lambda r: r[4]):
+                if tt <= t: vox[(x, y, z)] = pal[q][0]
+            top = {}
+            for (x, y, z), n in vox.items():
+                if n != "air" and ((x, z) not in top or top[(x, z)][0] < y): top[(x, z)] = (y, n)
+            slots = [s for s in v["slots"] if s["size"] != "Wood"]
+            boxes = [s["box"] for s in slots]
+            def blocked(x, z):
+                if any(b[0] <= x <= b[2] and b[1] <= z <= b[3] for b in boxes): return True
+                if any(b[0] <= x <= b[2] and b[1] <= z <= b[3] for b in halls): return True
+                tp = top.get((x, z))
+                if tp and tp[1] not in BARE_IDS and not PATH_IDS.search(tp[1]): return True   # a field, a fence, a well
+                return not inside(x, z, D)
+            def h(x, z):
+                tp = top.get((x, z))
+                return tp[0] if tp else natural(x, z)
+            fixed = {(f["at"][0], f["at"][1]) for f in v["fixtures"] if TIER[f["tier"]] <= t}
+            inslot = lambda x, z: any(b[0] <= x <= b[2] and b[1] <= z <= b[3] for b in (s["box"] for s in slots if TIER[s["opensAt"]] <= t))
+            path = {c for c, (y, n) in top.items() if PATH_IDS.search(n) and inside(*c) and not inslot(*c)}   # a plot is built over
+            def comps_of(cells):
+                seen, out = set(), []
+                for c in cells:
+                    if c in seen: continue
+                    seen.add(c); todo, got = [c], [c]
+                    while todo:
+                        x, z = todo.pop()
+                        for i in (-1, 0, 1):
+                            for j in (-1, 0, 1):
+                                n = (x + i, z + j)
+                                if n in cells and n not in seen: seen.add(n); todo.append(n); got.append(n)
+                    out.append(got)
+                return sorted(out, key=len, reverse=True)
+            cs = comps_of(path)
+            if not cs: continue
+            main = set(cs[0])
+            targets = [("street", c) for c in cs[1:]]
+            for s in slots:
+                if TIER[s["opensAt"]] > t: continue
+                sx, sz = s["door"]["step"]
+                if not any((sx + i, sz + j) in main for i in range(-2, 3) for j in range(-2, 3)): targets.append((s["id"], [(sx, sz)]))
+            for what, cells in targets:
+                if what == "street" and any(c in main for c in cells): continue
+                if what != "street" and any((cells[0][0] + i, cells[0][1] + j) in main for i in range(-2, 3) for j in range(-2, 3)): continue
+                # cheapest way over free ground to the network (straight, level ways cost least)
+                start = [c for c in cells if h(*c) is not None]
+                dist, par, heap, hit = {}, {}, [], None
+                for c in start: dist[c] = 0; par[c] = None; heapq.heappush(heap, (0, c))
+                while heap:
+                    g, c = heapq.heappop(heap)
+                    if g > dist[c]: continue
+                    if c in main and c not in cells: hit = c; break
+                    if g > 160: break
+                    hc = h(*c)
+                    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        n = (c[0] + dx, c[1] + dz)
+                        if n not in main and (blocked(*n) or n in fixed): continue
+                        hn = h(*n)
+                        if hn is None or hc is None or abs(hn - hc) > 1: continue
+                        ng = g + 1 + abs(hn - hc) * 2
+                        if ng < dist.get(n, 1e9): dist[n] = ng; par[n] = c; heapq.heappush(heap, (ng, n))
+                if not hit:
+                    report.append(f"{d['plot']['name']} layout {li} {TIERS[t]}: no way to join {what} at {cells[0]}"); continue
+                way = []
+                c = par[hit]
+                while c is not None:
+                    way.append(c); c = par[c]
+                laid = set()
+                for k, (x, z) in enumerate(way):
+                    # 3 wide: the cell and its neighbours across the way, where they are free and level with it
+                    nx, nz = (way[k + 1] if k + 1 < len(way) else way[k - 1] if k else (x + 1, z))
+                    ax_, az_ = (0, 1) if nx != x else (1, 0)
+                    for w in (0, -1, 1):
+                        cx, cz = x + ax_ * w, z + az_ * w
+                        if (cx, cz) in laid or (cx, cz) in main and w: continue
+                        if w and (blocked(cx, cz) or (cx, cz) in fixed or h(cx, cz) is None or abs(h(cx, cz) - h(x, z)) > 0): continue
+                        y = h(cx, cz)
+                        laid.add((cx, cz))
+                        if (cx, cz) in path: continue
+                        v["groundwork"]["blocks"].append([cx, y, cz, pid(LINK[(cx * 7 + cz * 13) % len(LINK)]), t])
+                        for up in (1, 2): v["groundwork"]["blocks"].append([cx, y + up, cz, pid("air"), t])   # open to the sky
+                        top[(cx, cz)] = (y, "cobblestone")
+                main |= laid | set(cells)
+                path |= laid
+                if what == "street": main |= set(cells)
+    for r in report: print("  warning: " + r, file=sys.stderr)
+
+
 def bedrock(name, states):
     """[id, states] for the game (Java-style names and states from the generator)"""
     out = {}
@@ -498,6 +620,8 @@ def main(src, starters=None):
             for v in d["variants"]:
                 starter_hamlet(v, st, trim)
             lines, keep = ring_lines(d, st)   # the Town, City and Castle lines, from what each tier laid
+            import numpy as np
+            join_paths(d, st, {**lines, "tight": line}, np.load(os.path.join(starters, f"{key}.npz")))   # every street joined, every door reached
         towns[key] = {"name": d["plot"]["name"], "gate": d["plot"]["gate"], "walls": d["wall_radius"], "clear": d["clear"],
                       "minimum": d["minimum"], "variants": [variant(v) for v in d["variants"]]}
         if st:   # the wall outline follows the land (walldata.js radiusAt): radii at even angles for a ring of radiiAt

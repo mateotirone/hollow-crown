@@ -1373,7 +1373,7 @@ addTests("settle towns", {
 const ORDER_PATH = /_slab$|cobblestone|stone_bricks|andesite|tuff_bricks|mud_bricks|grass_path|dirt_path|sandstone/;
 const ORDER_BARE = /^minecraft:(air|grass_block|dirt|coarse_dirt|podzol|sand|red_sand|snow|snow_layer|stone|gravel|mud|short_grass|tall_grass|fern|dandelion|poppy|azure_bluet|cornflower|oxeye_daisy)$/;
 addTests("settle towns", {
-  "every town is laid in order on every map plot: the Hamlet's paths one network to every door and out of the gate to the road join, and every tier's wall round what was laid, standing on nothing": () => {
+  "every town is laid in order on every map plot: at every tier the streets are one network reaching every door and out of the gate to the road join, and the wall goes round what was laid, standing on nothing": () => {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     for (const [key, t] of Object.entries(TOWNS)) {
       const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...lineFields(t.outline) };
@@ -1423,6 +1423,33 @@ addTests("settle towns", {
           for (let tt = 0; tt <= tier; tt++) for (const f of fixturesOf(lay, tt)) if (["lamp", "tree", "windmill", "well"].includes(f.kind)) fixed.add(`${f.x},${f.z}`);
           const roads = new Set([...ground].filter(([, g]) => ORDER_PATH.test(g.id)).map(([k]) => k));
           // past the Hamlet's gate road the way out is the road join (founding.js joinRoad), laid when the town is founded
+          // the streets inside this tier's wall are one network (corner to corner counts; a plot is built over, so
+          // what lies on one doesn't count), and every plot open by now has a street within 2 of its door step
+          if (tier > 0) {
+            const inLine = (x, z) => Math.hypot(x, z) <= radiusAt(center, t.walls[tier], Math.atan2(z, x));
+            const onPlot = (x, z) => plots.some((q) => x >= q.box.x0 && x <= q.box.x1 && z >= q.box.z0 && z <= q.box.z1);
+            const net = new Set([...ground].filter(([k, g]) => { const [x, z] = k.split(",").map(Number); return ORDER_PATH.test(g.id) && inLine(x, z) && !onPlot(x, z); }).map(([k]) => k));
+            const pieces = [];
+            const met = new Set();
+            for (const k of net) {
+              if (met.has(k)) continue;
+              met.add(k); const todo2 = [k]; let n = 0;
+              while (todo2.length) {
+                const [x, z] = todo2.pop().split(",").map(Number); n++;
+                for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const kk = `${x + a},${z + b}`; if (net.has(kk) && !met.has(kk)) { met.add(kk); todo2.push(kk); } }
+              }
+              pieces.push([k, n]);
+            }
+            pieces.sort((p, q) => q[1] - p[1]);
+            assert(pieces.length === 1, `${at} tier ${tier}: the streets are in ${pieces.length} pieces (one of ${pieces[1]?.[1]} blocks at ${pieces[1]?.[0]})`);
+            for (const q of plots) {
+              const st = q.step;
+              if (!st) continue;
+              let near = false;
+              for (let a = -2; a <= 2 && !near; a++) for (let b = -2; b <= 2; b++) if (net.has(`${st.x + a},${st.z + b}`)) { near = true; break; }
+              assert(near, `${at} tier ${tier}: no street to ${q.id}'s door at ${st.x},${st.z}`);
+            }
+          }
           const joined = new Set();
           for (const q of joinRoute(join, { x: end.x, z: end.z })) for (const [a, b] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) joined.add(`${q.x + a},${q.z + b}`);
           for (const k of joined) roads.add(k);
