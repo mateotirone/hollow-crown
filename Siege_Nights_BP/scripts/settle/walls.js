@@ -673,7 +673,7 @@ addFilter("siegeGate", (gate, { owner }) => {
   const w = walls()[owner];
   if (!w || !(w.level > 0) || !Number.isFinite(w.gate)) return gate;
   const g = gateSpot(w, w.gate, w.ground, w.radius);
-  return { angle: w.gate, x: g.x, z: g.z, ox: Math.round(Math.cos(w.gate)), oz: Math.round(Math.sin(w.gate)) };
+  return { angle: w.gate, x: g.x, y: g.y, z: g.z, ox: Math.round(Math.cos(w.gate)), oz: Math.round(Math.sin(w.gate)) };
 });
 
 // A settlement wall is as strong as its level: the whole Castle Stone family on the line of a

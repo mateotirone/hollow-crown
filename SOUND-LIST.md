@@ -804,6 +804,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `note.bass` | 3 | townhall (2), dragons |
 | `note.bell` | 3 | rails, roletrials, townhall |
 | `note.flute` | 3 | bestiary, horses, unlocks |
+| `random.door_close` | 3 | newplayer, siege, vault |
 | `random.eat` | 3 | dragons (2), bestiary |
 | `armor.equip_iron` | 2 | guardposts, horses |
 | `block.scaffolding.break` | 2 | siege (2) |
@@ -819,7 +820,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `random.bow` | 2 | bestiary (2) |
-| `random.door_close` | 2 | newplayer, vault |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_diamond` | 1 | codex |

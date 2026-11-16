@@ -10,6 +10,8 @@ import { withTestState } from "./state.js";
 import { TIERS, tierOf, settlementAt, isAlly, canManage, homeOf, homeAt, colorTaken, freeColor, foreignSettlement } from "./territory.js";
 import { FACTIONS, MODIFIERS, COUNTERS, buyArmy, sidesFor, FLANK_FROM_SIEGE } from "./warplan.js";
 import { GUARD_LIMIT, GUARD_ARMOR } from "./guards.js";
+import { DRILL, drillRole, rankSlot, drillStage, drillPoint, stormPoint } from "./drill.js";
+import { RAM_TAG, SAPPER_TAG, WARLORD_TAG } from "./constants.js";
 import { toughness, wallHp, WALL_HP, REINFORCE_ITEMS, TIER_NAMES } from "./walls.js";
 import { isBuilt } from "./breachers.js";
 import { DYES } from "./block_clicks.js";
@@ -85,6 +87,42 @@ addTests("siege", {
     }
     assertEqual(sidesFor(undefined, weakest, { pincer: true }).length, 2, "no wall: two weak sides");
     assertEqual(sidesFor(undefined, weakest).length, 1, "no wall: the weakest side");
+  },
+  "the siege drill: ranks without two raiders in one place, the line in front of the shooters, breachers to the gate, a storm when it opens": () => {
+    const seen = new Set();
+    for (let n = 0; n < 30; n++) { const s = rankSlot(n); const k = `${s.back},${s.across}`; assert(!seen.has(k), `two in ${k}`); seen.add(k); assert(Math.abs(s.across) <= DRILL.rankGap * 2); }
+    assertEqual(drillRole("siege:grey_bowman", []), "shooter");
+    assertEqual(drillRole("siege:grey_spearman", []), "line");
+    assertEqual(drillRole("minecraft:ravager", [RAM_TAG]), "breacher");
+    assertEqual(drillRole("minecraft:zombie", [SAPPER_TAG]), "breacher");
+    assertEqual(drillRole("siege:hollow_warlord", [WARLORD_TAG]), "lord");
+    assertEqual(drillStage({ open: false, age: 0 }), "form");
+    assertEqual(drillStage({ open: false, age: DRILL.formTicks }), "breach");
+    assertEqual(drillStage({ open: true, age: 0 }), "form");
+    assertEqual(drillStage({ open: true, age: DRILL.formTicks }), "storm");
+    for (const stage of ["form", "breach"]) {
+      const line = [0, 1, 2, 3, 4, 5, 6].map((n) => drillPoint("line", stage, n, { lineRanks: 2 }));
+      const shooters = [0, 1, 2].map((n) => drillPoint("shooter", stage, n, { lineRanks: 2 }));
+      const lord = drillPoint("lord", stage, 0, { lineRanks: 2 });
+      const far = Math.max(...line.map((p) => p.out));
+      for (const p of shooters) assert(p.out > far, `${stage}: a shooter in the line`);
+      assert(lord.out > Math.max(...shooters.map((p) => p.out)), `${stage}: the warlord leads from the back`);
+      for (const p of [...line, ...shooters, lord]) assert(p.out >= DRILL.coverOut, `${stage}: clear of the gateway`);
+    }
+    assertEqual(drillPoint("breacher", "breach", 0), "gate");
+    assert(drillPoint("breacher", "form", 0).out < drillPoint("line", "form", 0).out, "breachers form up in front");
+    // no ram or sapper: the front of the line goes at the gate, the rest hold
+    assertEqual(drillPoint("line", "breach", 0, { breachers: false }), "gate");
+    assert(drillPoint("line", "breach", DRILL.batterers, { breachers: false }) !== "gate");
+    for (const role of ["line", "shooter", "breacher", "lord"]) assertEqual(drillPoint(role, "storm", 0), undefined);
+    // the storm: onto the road before the wall, then in along it, and loose near the keep
+    const side = stormPoint(3, 6, -30);
+    assert(side.across === 0 && side.out >= 2.5, "off the road it comes onto the road short of the wall");
+    assert(stormPoint(8, 0, -30).out < 8 && stormPoint(-5, 0.5, -30).out < -5, "on the road it goes in");
+    assertEqual(stormPoint(-30, 0, -30), undefined);
+    let out = 14, across = 5, steps = 0;
+    for (; steps < 40; steps++) { const to = stormPoint(out, across, -24); if (!to) break; out = to.out; across = to.across; }
+    assert(steps < 40 && out <= -24, "the column always arrives");
   },
   "the Grand Army has every unit once": () => {
     const types = FACTIONS.grand.units.map((u) => u.type);

@@ -13,6 +13,7 @@ import { pay } from "../economy/coins.js";
 import { fromEmeralds, coins } from "../economy/rules.js";
 import { FACTIONS, announcePlan, assaultSpot, buff, buyArmy, planSiege, rememberSiege, spawnWarlord } from "./warplan.js";
 import { sfx } from "../core/sfx.js";
+import { drillHolds } from "./drill.js";
 
 // ---------- Siege waves ----------
 
@@ -155,6 +156,7 @@ export function endSiege(outcome) {
 export function marchOnKeep(raiders) {
   for (const raider of raiders) {
     try {
+      if (drillHolds(raider)) continue; // in its place in the ranks at the gate (drill.js)
       const keep = state.keeps[ownerOf(raider)];
       if (!keep) continue;
       const center = marchPoint(raider, keep);
