@@ -70,7 +70,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -291,8 +291,7 @@ function fixtureOps(tier) { // founding.js placeFixture
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
 const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {}, beside: {} };
-const { HAMLET_WALLS } = await imp("settle/hamlet_walls_data.js");
-if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt, ...(HAMLET_WALLS[PLOT] ? { tight: HAMLET_WALLS[PLOT] } : {}) }); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
+Object.assign(wall, lineFields(tw.outline)); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
@@ -478,11 +477,13 @@ for (const [x, y, z, kind, dir] of track) {
 }
 for (const op of trackOps) initial.push(op);
 
-function roadOps() { // founding.js joinRoad, to the station's platform end instead of a map road
+function roadOps(upTo = 0) { // founding.js joinRoad, to the station's platform end instead of a map road
   if (!station) return [];
   const dir = gateDir(tw.gate);
+  // founding.js townPaths(layout, upTo): only the tiers laid so far are left alone, so at the Hamlet the road runs on
+  // over ground the later streets will take (skipping it left the gate road in two pieces with grass between)
   const tops = new Map(), member = new Set();
-  for (let t = 0; t <= 3; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+  for (let t = 0; t <= upTo; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
     member.add(`${dx},${dz}`);
     if (t !== 0) continue;
     const id = layout.pal[p]?.[0] ?? "", k = `${dx},${dz}`;
@@ -532,7 +533,7 @@ function roadOps() { // founding.js joinRoad, to the station's platform end inst
   }
   return ops;
 }
-ev("road0", "The gate road out to the railway", "ground", roadOps());
+ev("road0", "The gate road out to the railway", "ground", roadOps(0));
 
 // the hall (townhall.js foundHall -> beginBuild(1)); later levels clear the old hall first (clearBoxFor pad 1)
 let hallLevel = 0;
