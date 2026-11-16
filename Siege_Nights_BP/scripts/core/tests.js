@@ -14,6 +14,11 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle planting: nothing at all is planted in the wall band",
+  "settle planting: every plot with a building: nothing planted on the building, a block round it, or the walk to the door; trees inside the plot",
+  "settle planting: the walk to the door runs from the building's front to the plot's edge, 3 wide",
+  "settle planting: nothing climbable near the wall, on wall or gate plots, or on a plot's outer ring",
+  "settle planting: planting is the same every time, and every region plants",
   "settle towns: every town is laid in order on every map plot: at every tier the streets are one network reaching every door and out of the gate to the road join, and the wall goes round what was laid, standing on nothing",
   "settle walls: every map plot's wall is sealed all round apart from the gate, on every ring and at every level",
   "settle walls: no stretch of wall is low enough to hop, even where the land beside it rises or a short stake falls",
