@@ -18,7 +18,7 @@ import { isReady, on, onTick, moduleStore } from "../siege/api.js";
 import { townOf, allTowns, layoutOf, slotClosed } from "./founding.js";
 import { slotsOf, townFor } from "./towns.js";
 import { wallOf } from "./walls.js";
-import { WALLS, onWallLine, radiusAt } from "./walldata.js";
+import { WALLS, onWallLine } from "./walldata.js";
 import { plantPlan, groundFor, BARE, PLANT_VERSION } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
@@ -48,18 +48,10 @@ function nearWallFor(owner, town) {
   const rings = new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter(Number.isFinite));
   return (dx, dz) => [...rings].some((r) => onWallLine(w, { x: town.x + dx, z: town.z + dz }, r, WALLS.reserve));
 }
-// The wall band, where nothing is planted at all: from 6 inside each ring's line out past it (the town build order
-// thread, 2026-11-16: the Town to Castle walls still overlap some plots and fields until the town generator keeps a
-// clear band). With no wall yet, nothing is planted.
-const BAND_IN = 6;
-function inBandFor(owner, town) {
-  const w = wallOf(owner);
-  if (!w) return () => true;
-  const rings = [...new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter(Number.isFinite))];
-  return (dx, dz) => {
-    const x = town.x + dx - (w.x + 0.5), z = town.z + dz - (w.z + 0.5), d = Math.hypot(x, z), a = Math.atan2(z, x);
-    return rings.some((r) => { const line = radiusAt(w, r, a); return d >= line - BAND_IN && d <= line + WALLS.reserve; });
-  };
+// Until a town has its wall, nothing is planted (the wall goes round what each tier laid, town build order PR #474,
+// so once it stands the plots inside are free ground; nearWallFor keeps anything climbable off its line)
+function inBandFor(owner) {
+  return wallOf(owner) ? () => false : () => true;
 }
 
 // What a plot is dressed for now: its building once it stands, else nothing (bare ground)
@@ -75,7 +67,7 @@ function dressFor(town, slot) {
 }
 
 const planOf = (owner, town, slot, rec) => plantPlan({
-  slot, region: town.style, seed: owner, nearWall: nearWallFor(owner, town), inBand: inBandFor(owner, town),
+  slot, region: town.style, seed: owner, nearWall: nearWallFor(owner, town), inBand: inBandFor(owner),
   building: rec.b ? { box: rec.box, origin: rec.origin, forward: rec.forward } : undefined,
   noTrees: (slot.tags ?? []).some((t) => NO_TREES.test(t)),
 });

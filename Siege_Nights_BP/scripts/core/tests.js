@@ -19,6 +19,7 @@ export const OFFLINE_ONLY = new Set([
   "settle planting: the walk to the door runs from the building's front to the plot's edge, 3 wide",
   "settle planting: nothing climbable near the wall, on wall or gate plots, or on a plot's outer ring",
   "settle planting: planting is the same every time, and every region plants",
+  "settle towns: every town is laid in order on every map plot: at every tier the streets are one network reaching every door and out of the gate to the road join, and the wall goes round what was laid, standing on nothing",
   "settle walls: every map plot's wall is sealed all round apart from the gate, on every ring and at every level",
   "settle walls: no stretch of wall is low enough to hop, even where the land beside it rises or a short stake falls",
   "settle towns: the starter village's plot borders are found, with the ground to lay back once a building stands",

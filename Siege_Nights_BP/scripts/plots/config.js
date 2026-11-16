@@ -111,7 +111,7 @@ export const SETTLEMENT = {
   flatRadius: 74, // level ground (Mateo 2026-11-12: bigger wall rings, Castle wall r66 wobbling to ~r70)
   easeRadius: 125, // back to natural ground by here (further where the land is steep)
   wallRadius: 66, // the Castle wall ring (it wobbles out to about 70; towers on it reach a little further)
-  landRadius: 72, // settlement land ends here; raiders gather from 73 out
+  landRadius: 74, // settlement land ends here (settle/walldata.js WALLS.radius + landBeyond); raiders gather from 75 out
   hallPad: { halfWidth: 22, depth: 50 }, // biggest town hall in any style, behind the stone, away from the gate
   clearHeight: 25, // nothing taller than this within 45 blocks of the hall, so the fly-by camera can see
 };
