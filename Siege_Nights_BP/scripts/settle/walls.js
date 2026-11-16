@@ -23,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots, lineFields } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -342,7 +342,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape, ou
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
-    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt, ...(outline.tight ? { tight: outline.tight } : {}) }); // walldata.js radiusAt reads them
+    Object.assign(w, lineFields(outline)); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -396,17 +396,22 @@ export function topUpWall(id) {
 on("townLaidOut", ({ owner }) => system.runTimeout(() => topUpWall(owner), 20));
 
 // Move a wall line out (a town growing a tier): the old ring comes down a stretch at a time, then the same level
-// rises on the new line. down() runs once the old ring is gone. Free: the town paid for the level already.
-export function moveWall(id, radius, down = () => {}) {
+// rises on the new line. down(cols) runs once the old ring is gone (cols: the old ring's columns). Free: the town paid for the level already.
+// outline (towns_data.js): the line to stand on; a wall on an older line moves even at the same radius.
+export function moveWall(id, radius, down = () => {}, outline) {
   const w = walls()[id];
   if (!w) { down(); return "There is no wall to move."; }
-  if (w.radius === radius) { down(); return "already"; }
-  if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down), 100); return "waiting"; }
+  if (w.radius === radius && !wallLineDiffers(id, outline)) { down(); return "already"; }
+  if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down, outline), 100); return "waiting"; }
   const level = Math.max(1, w.level || w.building?.level || 1);
   if (w.level > 0 && w.ground) setWallGate(id, w, false); // shut the gate before its wall comes down
   const old = { ...w };
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
+  if (outline?.radii?.length) { // the new line (walldata.js radiusAt reads these)
+    delete w.tight; delete w.lines;
+    Object.assign(w, lineFields(outline));
+  }
   w.ground = undefined;
   w.lifts = undefined; // a new line measures its own ground
   w.beside = undefined;
@@ -430,11 +435,26 @@ export function moveWall(id, radius, down = () => {}) {
         if (++n % 300 === 0) yield;
       }
     }
-    down();
+    down(cols);
     delete walls()[id]?.moving;
     raiseWall(id, level);
   })());
   return true;
+}
+
+// Does this wall stand on another line than outline (towns_data.js { radii, radiiAt, tight })?
+export function wallLineDiffers(id, outline) {
+  const w = walls()[id];
+  if (!w || !outline?.radii?.length || !w.radii?.length || !(w.level > 0) || !w.ground) return false;
+  const hamlet = w.radius <= (outline.radiiAt ?? w.radius); // only the Hamlet ring follows the tight line
+  const line = (o) => JSON.stringify([o.radii, o.radiiAt, hamlet ? o.tight ?? null : null, o.lines?.[w.radius] ?? null]);
+  return line(w) !== line(outline);
+}
+
+// The wall is up on this radius: raised, measured, nothing rising or moving
+export function wallStanding(id, radius) {
+  const w = walls()[id];
+  return !!w && w.level > 0 && !!w.ground && w.radius === radius && !w.moving && !jobs.has(id);
 }
 
 // Walls raised before they had steps (2026-11-12) get their flights, tower ladders and (Palisade and Fieldstone Wall)
