@@ -701,19 +701,20 @@ const ringMasks = [0, 1, 2, 3].map((t) => {
 const maskAt = (t, dx, dz) => (Math.abs(dx) > PLANT_R || Math.abs(dz) > PLANT_R ? 0 : Number(ringMasks[t][(dx + PLANT_R) * PLANT_N + dz + PLANT_R]));
 const plantPerm = (id) => pid(id, /leaves$/.test(id) ? { persistent_bit: true } : undefined); // planting.js perm
 const PLANT_SEED = tw.name; // the game seeds a town's planting with its owner; here every visitor sees the same town
-const openPlants = [];
+const openPlants = [], openTrees = []; // what each tier adds: plants [dx, dz, palette id], trees [dx, dz, grove design]
 {
-  const seen = new Set();
+  const seen = new Set(), seenTree = new Set();
   for (let t = 0; t <= 3; t++) {
-    const plan = plantRules.openGroundPlan({
+    const plan = plantRules.openGround({
       layout, region: STYLE, seed: PLANT_SEED, groundworkOf: (k) => groundwork(layout, k), slots,
       fixtures: [0, 1, 2, 3].flatMap((k) => fixturesOf(layout, k)),
       inside: (dx, dz) => (maskAt(t, dx, dz) & 1) === 1,
       nearWall: (dx, dz) => { for (let k = t; k <= 3; k++) if (maskAt(k, dx, dz) & 2) return true; return false; },
     });
-    const fresh = [];
-    for (const [dx, dz, id] of plan) { const k = `${dx},${dz}`; if (seen.has(k)) continue; seen.add(k); fresh.push(dx, dz, plantPerm(id)); }
-    openPlants.push(fresh);
+    const fresh = [], trees = [];
+    for (const [dx, dz, id] of plan.plants) { const k = `${dx},${dz}`; if (seen.has(k)) continue; seen.add(k); fresh.push(dx, dz, plantPerm(id)); }
+    for (const tr of plan.trees) { const k = `${tr.dx},${tr.dz}`; if (seenTree.has(k)) continue; seenTree.add(k); trees.push([tr.dx, tr.dz, `${tr.sid}_${tr.stage}_${tr.v}`]); }
+    openPlants.push(fresh); openTrees.push(trees);
   }
 }
 const PLANT_P = plantRules.PLANTING[STYLE] ?? plantRules.PLANTING.vale;
@@ -722,8 +723,7 @@ const groveDesigns = Object.fromEntries(Object.entries(grove.GROVE_DESIGNS).filt
 const plantSrc = `const { GROVE, GROVE_DESIGNS, GROVE_VARIANTS } = ${JSON.stringify({ GROVE: { [STYLE]: grove.GROVE[STYLE] ?? [] }, GROVE_DESIGNS: groveDesigns, GROVE_VARIANTS: grove.GROVE_VARIANTS })};\n`
   + fs.readFileSync(path.join(SCRIPTS, "settle/planting_rules.js"), "utf8").replace(/^import .*$/gm, "").replace(/^export /gm, "");
 const planting = {
-  src: plantSrc, region: STYLE, seed: PLANT_SEED, r: PLANT_R, masks: ringMasks, open: openPlants, ids: plantIds,
-  soil: [PLANT_P.top, PLANT_P.patch[0]], // planting.js dressOpen: open ground is planted only on these
+  src: plantSrc, region: STYLE, seed: PLANT_SEED, r: PLANT_R, masks: ringMasks, open: openPlants, openTrees, ids: plantIds,
   airy: /const AIRY = \/(.*)\/;/.exec(plantingJs)[1], noTrees: /const NO_TREES = \/(.*)\/;/.exec(plantingJs)[1], // planting.js's own
   grove: Object.keys(groveDesigns), // mesh.py grows these (map/trees/build_grove.py tree) for the page
 };

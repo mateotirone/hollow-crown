@@ -612,7 +612,7 @@ async function knockDown(slotId, why = "knocked down") {
 // its source); the open ground between plots is the game's openGroundPlan, worked out by dump.mjs. A plot is dressed when
 // its building is finished and when a tier is ready (ground laid, wall standing); a knocked-down plot gets its bare ground.
 const PLT = D.planting;
-const PR = PLT && new Function(`${PLT.src}; return { plantPlan, groundFor, BARE };`)();
+const PR = PLT && new Function(`${PLT.src}; return { plantPlan, groundFor, localGround, canGrow, BARE, GROUND };`)();
 const AIRY = PLT && new RegExp(PLT.airy), NO_TREES = PLT && new RegExp(PLT.noTrees);
 const planted = {}; // slot id -> { b: the building it was dressed for ("" = bare ground), cells: [x, y, z, p] what was planted }
 const openDone = new Set(); // tiers whose open ground has been planted
@@ -620,6 +620,8 @@ const ringBit = (t, dx, dz, bit) => (Math.abs(dx) > PLT.r || Math.abs(dz) > PLT.
 // nothing climbable within the wall's reserve, at this ring and every bigger one the town will have (planting.js nearWallFor)
 const nearWall = (dx, dz) => { for (let t = Math.max(0, T.ring); t <= 3; t++) if (ringBit(t, dx, dz, 4)) return true; return false; };
 const gameId = (p) => D.bpalette[p]?.[0] ?? "minecraft:air";
+const pidCache = {};
+const plantPid = (id) => PLT.ids[id] ?? (pidCache[id] ??= D.bpalette.findIndex((b) => b[0] === id)); // a ground block of the land (sand on Redmesa) by its id
 function groundTop(x, z, top, depth) { // planting.js groundAt: the top block that isn't air or a low plant
   for (let y = top; y >= top - depth; y--) { const p = get(x, y, z); if (!p || AIRY.test(gameId(p))) continue; return { y, id: gameId(p) }; }
   return null;
@@ -637,15 +639,23 @@ function dressOps(s) { // planting.js dress: what was planted for the old buildi
   if (old) for (let i = 0; i < old.cells.length; i += 4) if (get(old.cells[i], old.cells[i + 1], old.cells[i + 2]) === old.cells[i + 3]) setBlock(old.cells[i], old.cells[i + 1], old.cells[i + 2], 0);
   const plan = PR.plantPlan({ slot: s, region: PLT.region, seed: PLT.seed, building, nearWall, inBand: () => false, noTrees: (s.tags ?? []).some((t) => NO_TREES.test(t)) });
   const bare = (dx, dz) => { const g = groundTop(dx, dz, floor + 1, 4); return g && g.y <= floor && PR.BARE.test(g.id) ? g : null; };
+  // the land round the plot decides its ground (the ring 2 to 3 blocks outside it), planting.js dress
+  const counts = {}, bx = s.box;
+  for (let r = 2; r <= 3; r++) for (let dx = bx.x0 - r; dx <= bx.x1 + r; dx++) for (let dz = bx.z0 - r; dz <= bx.z1 + r; dz++) {
+    if (dx > bx.x0 - r && dx < bx.x1 + r && dz > bx.z0 - r && dz < bx.z1 + r) continue;
+    const g = groundTop(dx, dz, floor + 1, 4);
+    if (g) counts[g.id] = (counts[g.id] ?? 0) + 1;
+  }
+  const top = PR.localGround(counts, PLT.region), laid = new Map();
   for (const [dx, dz] of plan.surface) {
     const g = bare(dx, dz);
     if (!g) continue; // a floor, a path, a border log: not ours
-    const want = PR.groundFor(PLT.region, D.center[0] + dx, D.center[1] + dz);
-    if (g.id !== want) ops.push(0, dx, g.y, dz, PLT.ids[want]);
+    const want = PR.groundFor(PLT.region, D.center[0] + dx, D.center[1] + dz, top);
+    if (g.id !== want && plantPid(want) > 0) { ops.push(0, dx, g.y, dz, plantPid(want)); laid.set(`${dx},${dz}`, want); }
   }
   for (const [dx, dz, id] of plan.plants) {
     const g = bare(dx, dz);
-    if (!g || get(dx, g.y + 1, dz)) continue;
+    if (!g || get(dx, g.y + 1, dz) || !PR.canGrow(id, laid.get(`${dx},${dz}`) ?? g.id)) continue;
     ops.push(0, dx, g.y + 1, dz, PLT.ids[id]); cells.push(dx, g.y + 1, dz, PLT.ids[id]);
   }
   for (const t of plan.trees) {
@@ -657,15 +667,20 @@ function dressOps(s) { // planting.js dress: what was planted for the old buildi
   return ops;
 }
 async function dress(s) { if (PLT && s && plotStale(s)) await laySet(`Planting plot ${s.id}`, dressOps(s)); }
-function openOps() { // planting.js dressOpen: low cover between the plots, only on the region's own soil with air above
-  const ops = [], soil = new Set(PLT.soil);
+function openOps() { // planting.js dressOpen: small trees and low cover between the plots, on plain ground with air above
+  const ops = [], plain = (g) => g && PR.GROUND.test(g.id) && !/dirt$|gravel/.test(g.id);
   for (let t = 0; t <= T.tier; t++) {
     if (openDone.has(t)) continue;
     openDone.add(t);
+    for (const [dx, dz, name] of PLT.openTrees?.[t] ?? []) {
+      const g = groundTop(dx, dz, D.base + 16, 32), tree = D.grove?.[name];
+      if (!tree || !plain(g) || !PR.canGrow("tree", g.id)) continue;
+      for (let i = 0; i < tree.length; i += 4) ops.push(0, dx + tree[i], g.y + tree[i + 1], dz + tree[i + 2], tree[i + 3]);
+    }
     const list = PLT.open[t];
     for (let i = 0; i < list.length; i += 3) {
       const g = groundTop(list[i], list[i + 1], D.base + 16, 32);
-      if (g && soil.has(g.id) && !get(list[i], g.y + 1, list[i + 1])) ops.push(0, list[i], g.y + 1, list[i + 1], list[i + 2]);
+      if (plain(g) && PR.canGrow(D.bpalette[list[i + 2]][0], g.id) && !get(list[i], g.y + 1, list[i + 1])) ops.push(0, list[i], g.y + 1, list[i + 1], list[i + 2]);
     }
   }
   return ops;
