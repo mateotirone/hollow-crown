@@ -16,15 +16,16 @@
 import { world, system, BlockPermutation, BlockVolume } from "@minecraft/server";
 import { isReady, on, onTick, moduleStore } from "../siege/api.js";
 import { townOf, allTowns, layoutOf, slotClosed } from "./founding.js";
-import { slotsOf, townFor } from "./towns.js";
+import { slotsOf, townFor, groundwork, fixturesOf } from "./towns.js";
 import { wallOf } from "./walls.js";
-import { WALLS, onWallLine } from "./walldata.js";
-import { plantPlan, groundFor, BARE, PLANT_VERSION } from "./planting_rules.js";
+import { WALLS, onWallLine, radiusAt } from "./walldata.js";
+import { plantPlan, openGroundPlan, groundFor, BARE, PLANTING, PLANT_VERSION } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
 const OVERWORLD = "minecraft:overworld";
 // plots: { "owner|slot": { v, b: building id or "", box, origin, forward } } what each plot was dressed for
-const store = moduleStore("siege:settle_planting", () => ({ plots: {} }));
+// open: { owner: { v, ready } } the tier whose open ground between plots was last planted
+const store = moduleStore("siege:settle_planting", () => ({ plots: {}, open: {} }));
 const plots = () => store.data.plots;
 const keyOf = (owner, slotId) => `${owner}|${slotId}`;
 const NO_TREES = /^hall[45]$/; // ground the hall takes later
@@ -40,12 +41,12 @@ function perm(id) {
   return permCache.get(id);
 }
 
-// Where nothing climbable may stand: within WALLS.reserve of the wall line, at every ring the town will have, so a
-// bush planted now is never beside a wall that comes later
+// Where nothing climbable may stand: within WALLS.reserve of the wall line, at this ring and every bigger one the town
+// will have, so a bush planted now is never beside a wall that comes later (an old line inside becomes a ring road)
 function nearWallFor(owner, town) {
   const w = wallOf(owner);
   if (!w) return () => false;
-  const rings = new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter(Number.isFinite));
+  const rings = new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter((r) => Number.isFinite(r) && r >= w.radius));
   return (dx, dz) => [...rings].some((r) => onWallLine(w, { x: town.x + dx, z: town.z + dz }, r, WALLS.reserve));
 }
 // Until a town has its wall, nothing is planted (the wall goes round what each tier laid, town build order PR #474,
@@ -210,5 +211,70 @@ onTick("settle_planting", 100, () => {
       tried.set(key, now);
       if (dress(owner, s)) return;
     }
+  }
+});
+
+// ---------- the open ground between plots ----------
+// Planted when a tier is ready (its plots, paths, ground, fixtures and wall all down), inside the wall that stands,
+// on ground no tier of the layout ever claims (openGroundPlan). Nothing within OPEN_WALL of this ring's line or a bigger
+// one's, so the wall's steps, lookouts and the ground a later wall stands on stay bare.
+const OPEN_WALL = WALLS.reserve + 2;
+const openBusy = new Set();
+function dressOpen(owner) {
+  const town = townOf(owner), w = wallOf(owner), layout = town && layoutOf(town);
+  if (!town || !w || !layout || town.ready === undefined || openBusy.has(owner)) return false;
+  const rings = [...new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter((r) => Number.isFinite(r) && r >= w.radius))];
+  const rel = (dx, dz) => { const x = town.x + dx - (w.x + 0.5), z = town.z + dz - (w.z + 0.5); return { d: Math.hypot(x, z), a: Math.atan2(z, x) }; };
+  const plan = openGroundPlan({
+    layout, region: town.style, seed: owner,
+    groundworkOf: (t) => groundwork(layout, t), slots: slotsOf(layout),
+    fixtures: [0, 1, 2, 3].flatMap((t) => fixturesOf(layout, t)),
+    inside: (dx, dz) => { const { d, a } = rel(dx, dz); return d < radiusAt(w, w.radius, a) - 1; },
+    nearWall: (dx, dz) => rings.some((r) => onWallLine(w, { x: town.x + dx, z: town.z + dz }, r, OPEN_WALL)),
+  });
+  const P = PLANTING[town.style] ?? PLANTING.vale;
+  const soil = new Set([P.top, P.patch[0]]);
+  const ready = town.ready;
+  openBusy.add(owner);
+  system.runJob((function* () {
+    const dim = world.getDimension(OVERWORLD);
+    try {
+      let n = 0;
+      for (const [dx, dz, id] of plan) {
+        if (++n % 40 === 0) yield;
+        const x = town.x + dx, z = town.z + dz;
+        let ground;
+        for (let y = town.y + 16; y >= town.y - 16; y--) {
+          let b;
+          try { b = dim.getBlock({ x, y, z }); } catch { return; }
+          if (!b) return; // not loaded: tried again later
+          if (b.isAir || AIRY.test(b.typeId)) continue;
+          ground = b;
+          break;
+        }
+        if (!ground || !soil.has(ground.typeId)) continue; // a path, a field, a wall, a tree: not open ground
+        const above = ground.above();
+        if (!above?.isAir) continue;
+        const p = perm(id);
+        if (p) try { above.setPermutation(p); } catch { /* a plant this ground won't hold */ }
+      }
+      store.data.open[owner] = { v: PLANT_VERSION, ready };
+      store.save();
+    } finally {
+      openBusy.delete(owner);
+    }
+  })());
+  return true;
+}
+const openStale = (owner, town) => town.ready !== undefined && (store.data.open?.[owner]?.v !== PLANT_VERSION || store.data.open[owner].ready !== town.ready);
+on("townReady", ({ owner }) => system.runTimeout(() => { const town = townOf(owner); if (town && openStale(owner, town)) dressOpen(owner); }, 60));
+const openTried = new Map();
+onTick("settle_planting_open", 400, () => {
+  if (!isReady() || openBusy.size) return;
+  const now = system.currentTick;
+  for (const [owner, town] of Object.entries(allTowns())) {
+    if (now - (openTried.get(owner) ?? -1e9) < 2400 || !openStale(owner, town)) continue;
+    openTried.set(owner, now);
+    if (dressOpen(owner)) return;
   }
 });
