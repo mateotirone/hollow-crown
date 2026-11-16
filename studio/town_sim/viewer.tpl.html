@@ -586,6 +586,7 @@ async function raise(slotId, id, { free = false } = {}) {
   st.rising = false;
   log(`${nameOf(id)} built`);
   refreshPlots(); refresh();
+  if (T.planted && slotById[slotId]) await dress(slotById[slotId]); // settleBuilt: the ground the building leaves free is planted
 }
 
 async function knockDown(slotId, why = "knocked down") {
@@ -603,6 +604,79 @@ async function knockDown(slotId, why = "knocked down") {
   st.building = null; st.rising = false; st.offer = null;
   if (!st.closed) { const s = slotById[slotId]; setBlock(s.marker[0], s.marker[1], s.marker[2], D.palette.findIndex((p) => p[0] === "siege:plot_marker")); }
   refreshPlots(); refresh();
+  if (T.planted && slotById[slotId]) await dress(slotById[slotId]); // settleCleared: its planting comes up, the plot is bare ground again
+}
+
+// ---------------- planting: the last stage of the build order ----------------
+// settle/planting.js on this page's blocks. What goes where is the game's own plantPlan (planting_rules.js, shipped as
+// its source); the open ground between plots is the game's openGroundPlan, worked out by dump.mjs. A plot is dressed when
+// its building is finished and when a tier is ready (ground laid, wall standing); a knocked-down plot gets its bare ground.
+const PLT = D.planting;
+const PR = PLT && new Function(`${PLT.src}; return { plantPlan, groundFor, BARE };`)();
+const AIRY = PLT && new RegExp(PLT.airy), NO_TREES = PLT && new RegExp(PLT.noTrees);
+const planted = {}; // slot id -> { b: the building it was dressed for ("" = bare ground), cells: [x, y, z, p] what was planted }
+const openDone = new Set(); // tiers whose open ground has been planted
+const ringBit = (t, dx, dz, bit) => (Math.abs(dx) > PLT.r || Math.abs(dz) > PLT.r ? 0 : (PLT.masks[t].charCodeAt((dx + PLT.r) * (PLT.r * 2 + 1) + dz + PLT.r) - 48) & bit);
+// nothing climbable within the wall's reserve, at this ring and every bigger one the town will have (planting.js nearWallFor)
+const nearWall = (dx, dz) => { for (let t = Math.max(0, T.ring); t <= 3; t++) if (ringBit(t, dx, dz, 4)) return true; return false; };
+const gameId = (p) => D.bpalette[p]?.[0] ?? "minecraft:air";
+function groundTop(x, z, top, depth) { // planting.js groundAt: the top block that isn't air or a low plant
+  for (let y = top; y >= top - depth; y--) { const p = get(x, y, z); if (!p || AIRY.test(gameId(p))) continue; return { y, id: gameId(p) }; }
+  return null;
+}
+function dressedFor(s) { // planting.js dressFor
+  const st = T.slots[s.id];
+  if (!st?.building || st.rising || !st.offer?.box) return { b: "" };
+  const [x0, z0, x1, z1] = st.offer.box;
+  return { b: st.building, building: { box: { x0, z0, x1, z1 }, origin: { dx: st.offer.o[0], dz: st.offer.o[2] }, forward: { x: st.offer.f[0], z: st.offer.f[1] } } };
+}
+const plotStale = (s) => !T.slots[s.id].closed && !T.slots[s.id].rising && planted[s.id]?.b !== dressedFor(s).b;
+function dressOps(s) { // planting.js dress: what was planted for the old building comes up, then the ground, plants and trees
+  const { b, building } = dressedFor(s), floor = D.base + s.dy, ops = [], cells = [];
+  const old = planted[s.id];
+  if (old) for (let i = 0; i < old.cells.length; i += 4) if (get(old.cells[i], old.cells[i + 1], old.cells[i + 2]) === old.cells[i + 3]) setBlock(old.cells[i], old.cells[i + 1], old.cells[i + 2], 0);
+  const plan = PR.plantPlan({ slot: s, region: PLT.region, seed: PLT.seed, building, nearWall, inBand: () => false, noTrees: (s.tags ?? []).some((t) => NO_TREES.test(t)) });
+  const bare = (dx, dz) => { const g = groundTop(dx, dz, floor + 1, 4); return g && g.y <= floor && PR.BARE.test(g.id) ? g : null; };
+  for (const [dx, dz] of plan.surface) {
+    const g = bare(dx, dz);
+    if (!g) continue; // a floor, a path, a border log: not ours
+    const want = PR.groundFor(PLT.region, D.center[0] + dx, D.center[1] + dz);
+    if (g.id !== want) ops.push(0, dx, g.y, dz, PLT.ids[want]);
+  }
+  for (const [dx, dz, id] of plan.plants) {
+    const g = bare(dx, dz);
+    if (!g || get(dx, g.y + 1, dz)) continue;
+    ops.push(0, dx, g.y + 1, dz, PLT.ids[id]); cells.push(dx, g.y + 1, dz, PLT.ids[id]);
+  }
+  for (const t of plan.trees) {
+    const g = groundTop(t.dx, t.dz, floor + 1, 4), tree = D.grove?.[`${t.sid}_${t.stage}_${t.v}`];
+    if (!g || g.y > floor || !tree) continue;
+    for (let i = 0; i < tree.length; i += 4) { ops.push(0, t.dx + tree[i], g.y + tree[i + 1], t.dz + tree[i + 2], tree[i + 3]); cells.push(t.dx + tree[i], g.y + tree[i + 1], t.dz + tree[i + 2], tree[i + 3]); }
+  }
+  planted[s.id] = { b, cells };
+  return ops;
+}
+async function dress(s) { if (PLT && s && plotStale(s)) await laySet(`Planting plot ${s.id}`, dressOps(s)); }
+function openOps() { // planting.js dressOpen: low cover between the plots, only on the region's own soil with air above
+  const ops = [], soil = new Set(PLT.soil);
+  for (let t = 0; t <= T.tier; t++) {
+    if (openDone.has(t)) continue;
+    openDone.add(t);
+    const list = PLT.open[t];
+    for (let i = 0; i < list.length; i += 3) {
+      const g = groundTop(list[i], list[i + 1], D.base + 16, 32);
+      if (g && soil.has(g.id) && !get(list[i], g.y + 1, list[i + 1])) ops.push(0, list[i], g.y + 1, list[i + 1], list[i + 2]);
+    }
+  }
+  return ops;
+}
+// townReady (founding.js): a tier's plots, paths, ground and fixtures are laid and its wall stands, so planting goes in
+async function plantTown() {
+  if (!PLT) return;
+  const ops = [];
+  for (const s of D.slots) if (s.tier <= T.tier && plotStale(s)) for (const v of dressOps(s)) ops.push(v);
+  for (const v of openOps()) ops.push(v);
+  if (ops.length) { log("Planting: every plot gets its ground, the open ground its grass and flowers"); await laySet("Planting", ops); }
 }
 
 const tierOps = (t, k) => D.tiers[t][k] ?? [];
@@ -681,6 +755,7 @@ async function found() {
   const hall = hallTo(1);
   const base = Promise.all(D.baseBuilds.map((b, k) => new Promise((r) => setTimeout(r, k * 150)).then(() => raise(b.slot, b.id, { free: true }))));
   await Promise.all([wall, station, hall, base]);
+  T.planted = true; await plantTown();
 }
 
 // storehouse.js: when the town grows a tier the Storehouse comes down and rises again on the same ground, a level up
@@ -723,6 +798,7 @@ async function growTo(t) {
   const stage = D.stages.indexOf(D.tiers[t].stage);
   const station = stage > T.station ? stationTo(stage) : null;
   await Promise.all([wall, ground, station, rebuildStore(t)]);
+  await plantTown();
   T.growing = null;
   log(`${D.plot} is a ${name}`);
   refresh(); refreshPlots();
@@ -1156,5 +1232,5 @@ function frame(now) {
 function dist(c) { const x = X0 + c.cx * CS + 8 - controls.target.x, z = Z0 + c.cz * CS + 8 - controls.target.z; return x * x + z * z; }
 requestAnimationFrame(frame);
 window.__base = D.base;
-window.__sim = { T, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, openSiege, startNight, endNight, sg, get night() { return sg.night; }, get, setBlock, BP, NP, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
+window.__sim = { T, planted, openPlot, camera, controls, setFollow: (v) => { follow = v; }, found, growTo, hallTo, wallTo, raise, playStory, fillPlots, openSiege, startNight, endNight, sg, get night() { return sg.night; }, get, setBlock, BP, NP, get speed() { return speed; }, set speed(v) { speed = v; }, jobs };
 </script>

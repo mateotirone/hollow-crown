@@ -113,6 +113,15 @@ for t in sim["trees"]:
     ops = [[0, t["x"] + x, gy + y, t["z"] + z, p] for x, y, z, p in tree_cells(t["species"], t["size"], hash((t["x"], t["z"])) & 0xffff)]
     tree_ops.append({"tier": t["tier"], "at": [t["x"], t["z"]], "species": t["species"], "size": t["size"], "ops": ops})
 
+# The grove trees planting puts on plots (settle/planting.js places the structures map/trees/build_grove.py wrote:
+# the same grower, card and seed, so these are the same trees), cells from the trunk's ground cell
+GROVE_STAGES = ["sapling", "young", "mature"]
+grove_ops = {}
+for name in (sim.get("planting") or {}).get("grove", []):
+    sid, stage, v = name.rsplit("_", 2)
+    seed = 7000 + sum(map(ord, sid)) * 10 + GROVE_STAGES.index(stage) * 3 + int(v)
+    grove_ops[name] = [n for x, y, z, p in tree_cells(sid, stage, seed) if y > 0 for n in (x, y, z, p)]
+
 # The forest outside the plot's land (radius 74 is the map's flat ward), thinned by the map's forest density
 forest = []
 try:
@@ -275,6 +284,6 @@ for k in range(n):
 json.dump({
     "palette": palette, "names": names, "soft": soft, "models": models, "joins": joins, "full": full, "groups": groups,
     "atlas": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode(), "atlasSize": [cols * TS, rows * TS], "rects": rects, "avg": avg,
-    "treeOps": tree_ops, "forest": forest,
+    "treeOps": tree_ops, "forest": forest, "grove": grove_ops,
 }, open(out_path, "w"), separators=(",", ":"))
 print(len(palette), "blocks,", n, "textures, atlas", cols * TS, "x", rows * TS, ",", round(os.path.getsize(out_path) / 1e6, 1), "MB")

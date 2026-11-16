@@ -35,6 +35,7 @@ def pack(sim, lib):
             f["cols"] = flat(f["cols"]); f["cells"] = flat(f["cells"])
     sim["treeOps"] = [{**t, "ops": flat(t["ops"])} for t in lib["treeOps"]]
     sim["forest"] = [flat(t) for t in lib["forest"]]
+    sim["grove"] = lib.get("grove", {})  # the grove trees planting puts on plots, cells from the trunk's ground cell
     # the same palette as the game spells it (id + states), for the siege night's block world; the trees' blocks
     # (added by mesh.py) by their names
     sim["bpalette"] = sim["palette"] + [[n if ":" in n else "minecraft:" + n, {}] for n, _ in lib["palette"][len(sim["palette"]):]]

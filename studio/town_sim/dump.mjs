@@ -70,7 +70,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields, onWallLine, radiusAt } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -381,7 +381,8 @@ function seatFor(slot, id) {
   const origin = { x: CX + seat.origin.dx, y: BASE + seat.origin.dy, z: CZ + seat.origin.dz };
   const cb = clearBoxFor(plan, origin, seat.forward, 0);
   designFor(id, seat.forward);
-  return { o: [seat.origin.dx, BASE + seat.origin.dy, seat.origin.dz], f: [seat.forward.x, seat.forward.z],
+  const sb = seatedBox(seat, plan.bounds()); // the ground the building takes (plotmarker.js keeps it on the plot: planting goes round it)
+  return { o: [seat.origin.dx, BASE + seat.origin.dy, seat.origin.dz], f: [seat.forward.x, seat.forward.z], box: [sb.x0, sb.z0, sb.x1, sb.z1],
     clear: [cb.min.x - CX, cb.min.y, cb.min.z - CZ, cb.max.x - CX, cb.max.y, cb.max.z - CZ] };
 }
 const slotOut = slots.map((s) => {
@@ -396,7 +397,7 @@ const slotOut = slots.map((s) => {
   }
   const bd = slotBorder(layout, s); // the starter village's log border, taken up when a building rises (plotmarker.js takeUpBorder)
   const border = bd.cells.length ? [pid(bd.ground[0], bd.ground[1]), ...bd.cells.flatMap(([dx, dy, dz]) => [dx, BASE + dy, dz])] : null;
-  return { id: s.id, size: s.size, cls: slotClass(s), border, long: s.long, box: s.box, dy: s.dy, side: s.side, tier: s.tier, tags: s.tags, step: s.step,
+  return { id: s.id, size: s.size, cls: slotClass(s), border, long: s.long, box: s.box, dy: s.dy, side: s.side, door: s.door, tier: s.tier, tags: s.tags, step: s.step,
     marker: markerSpot(s), takenAt: takenAt(s) ?? null, offers };
 });
 
@@ -676,6 +677,58 @@ for (let l = 2; l <= 5; l++) halls.push({ level: l, name: HALL_TIERS[l].name, se
 }
 const { layoutKey } = await imp("settle/founding.js");
 
+// ---------- planting: the last stage of the build order (settle/planting.js, planting_rules.js) ----------
+// The page plants a plot itself, with the game's own plantPlan (shipped as source, like the charters): what stands on a
+// plot is the visitor's choice. From here it gets what plantPlan asks of the world: where each wall ring's line runs
+// (walldata.js onWallLine, radiusAt) and the grove trees. The open ground between plots doesn't depend on a choice, so
+// it is worked out here with openGroundPlan, one list for each tier (what that tier adds).
+const plantRules = await imp("settle/planting_rules.js");
+const grove = await imp("forestry/grove_data.js");
+const plantingJs = fs.readFileSync(path.join(SCRIPTS, "settle/planting.js"), "utf8");
+const PLANT_R = plantRules.OPEN_REACH + 2, PLANT_N = PLANT_R * 2 + 1;
+const OPEN_WALL = WALLS.reserve + Number(/const OPEN_WALL = WALLS\.reserve \+ (\d+)/.exec(plantingJs)[1]);
+// one character a cell for each ring: 1 inside the line, 2 within OPEN_WALL of it, 4 within WALLS.reserve of it
+const ringMasks = [0, 1, 2, 3].map((t) => {
+  const r = wallRadius(tw, t);
+  let out = "";
+  for (let dx = -PLANT_R; dx <= PLANT_R; dx++) for (let dz = -PLANT_R; dz <= PLANT_R; dz++) {
+    const loc = { x: CX + dx, z: CZ + dz }, x = loc.x - (wall.x + 0.5), z = loc.z - (wall.z + 0.5);
+    const inside = Math.hypot(x, z) < radiusAt(wall, r, Math.atan2(z, x)) - 1;
+    out += (inside ? 1 : 0) + (onWallLine(wall, loc, r, OPEN_WALL) ? 2 : 0) + (onWallLine(wall, loc, r, WALLS.reserve) ? 4 : 0);
+  }
+  return out;
+});
+const maskAt = (t, dx, dz) => (Math.abs(dx) > PLANT_R || Math.abs(dz) > PLANT_R ? 0 : Number(ringMasks[t][(dx + PLANT_R) * PLANT_N + dz + PLANT_R]));
+const plantPerm = (id) => pid(id, /leaves$/.test(id) ? { persistent_bit: true } : undefined); // planting.js perm
+const PLANT_SEED = tw.name; // the game seeds a town's planting with its owner; here every visitor sees the same town
+const openPlants = [];
+{
+  const seen = new Set();
+  for (let t = 0; t <= 3; t++) {
+    const plan = plantRules.openGroundPlan({
+      layout, region: STYLE, seed: PLANT_SEED, groundworkOf: (k) => groundwork(layout, k), slots,
+      fixtures: [0, 1, 2, 3].flatMap((k) => fixturesOf(layout, k)),
+      inside: (dx, dz) => (maskAt(t, dx, dz) & 1) === 1,
+      nearWall: (dx, dz) => { for (let k = t; k <= 3; k++) if (maskAt(k, dx, dz) & 2) return true; return false; },
+    });
+    const fresh = [];
+    for (const [dx, dz, id] of plan) { const k = `${dx},${dz}`; if (seen.has(k)) continue; seen.add(k); fresh.push(dx, dz, plantPerm(id)); }
+    openPlants.push(fresh);
+  }
+}
+const PLANT_P = plantRules.PLANTING[STYLE] ?? plantRules.PLANTING.vale;
+const plantIds = Object.fromEntries([PLANT_P.top, PLANT_P.patch[0], ...PLANT_P.cover.map((c) => c[0]), ...PLANT_P.bush].map((id) => [id, plantPerm(id)]));
+const groveDesigns = Object.fromEntries(Object.entries(grove.GROVE_DESIGNS).filter(([k]) => (grove.GROVE[STYLE] ?? []).some((sid) => k.startsWith(`${sid}_`)) && !/_mature_/.test(k)).map(([k, d]) => [k, { lo: d.lo, hi: d.hi }]));
+const plantSrc = `const { GROVE, GROVE_DESIGNS, GROVE_VARIANTS } = ${JSON.stringify({ GROVE: { [STYLE]: grove.GROVE[STYLE] ?? [] }, GROVE_DESIGNS: groveDesigns, GROVE_VARIANTS: grove.GROVE_VARIANTS })};\n`
+  + fs.readFileSync(path.join(SCRIPTS, "settle/planting_rules.js"), "utf8").replace(/^import .*$/gm, "").replace(/^export /gm, "");
+const planting = {
+  src: plantSrc, region: STYLE, seed: PLANT_SEED, r: PLANT_R, masks: ringMasks, open: openPlants, ids: plantIds,
+  soil: [PLANT_P.top, PLANT_P.patch[0]], // planting.js dressOpen: open ground is planted only on these
+  airy: /const AIRY = \/(.*)\/;/.exec(plantingJs)[1], noTrees: /const NO_TREES = \/(.*)\/;/.exec(plantingJs)[1], // planting.js's own
+  grove: Object.keys(groveDesigns), // mesh.py grows these (map/trees/build_grove.py tree) for the page
+};
+
+
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
 const chartersRaw = fs.readFileSync(path.join(SCRIPTS, "settle/charters.js"), "utf8");
@@ -684,14 +737,15 @@ const cfgNames = /^import\s*\{([^}]*)\}\s*from\s*["']\.\/config\.js["']/m.exec(c
 const chartersSrc = chartersRaw.replace(/^import .*$/gm, "").replace(/^export /gm, "");
 const rules = `const { ${cfgNames.join(", ")} } = ${JSON.stringify(Object.fromEntries(cfgNames.map((n) => [n, cfg[n]])))};\n${chartersSrc}`;
 
-const soft = pal.map(([id]) => (SOFT.test(id) || id === "siege:plot_marker" ? 1 : 0));
+const lowPlant = new Set([...PLANT_P.cover.map((c) => c[0])].filter((id) => !plantRules.TALL.test(id)));
+const soft = pal.map(([id]) => (SOFT.test(id) || lowPlant.has(id) || id === "siege:plot_marker" ? 1 : 0));
 const out = {
   plot: tw.name, region: plotCfg?.region, style: STYLE, layout: layout.label, layoutIndex: Number(LAYOUT), center: [CX, CZ], base: BASE, half: HALF,
   gate: gateDirName, tierNames: TIER_NAMES, walls: tw.walls, wallLevelNames: WALL_LEVELS.map((l) => l?.name ?? null), tierCap: WALLS.tierCap,
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, store, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
-  designs, trees, rules, layoutKey: layoutKey(layout), hallSpot: hallSpot ? { x: hallSpot.x, y: hallSpot.y, z: hallSpot.z, fx: hallSpot.forward.x, fz: hallSpot.forward.z } : null, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
+  designs, trees, rules, planting, layoutKey: layoutKey(layout), hallSpot: hallSpot ? { x: hallSpot.x, y: hallSpot.y, z: hallSpot.z, fx: hallSpot.forward.x, fz: hallSpot.forward.z } : null, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
   // how fast each kind of job runs in the game (blocks a tick), so the page can play at the game's own pace
