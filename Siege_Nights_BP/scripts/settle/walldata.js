@@ -292,7 +292,7 @@ export function radiusAt(center, radius, a) {
   // A starter village wall (map/structures/starter.py) carries its whole outline: radii = blocks out at even angles,
   // worked out from the land and what the wall holds, for a ring of radiiAt. A bigger ring keeps the same outline, moved out.
   // The Hamlet ring (radius at or inside radiiAt) follows center.tight instead when it has one: the line drawn tight round
-  // the starter village (settle/hamlet_walls_data.js, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
+  // the starter village (towns_data.js outline.tight, drawn by tools/build_towns.py from the village it goes round, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
   if (center?.tight?.length && radius <= (center.radiiAt ?? radius)) {
     const tt = center.tight, f = (turn(a) / TAU) * tt.length;
     const i = Math.floor(f) % tt.length, t = f - Math.floor(f);

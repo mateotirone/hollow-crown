@@ -18,7 +18,7 @@ groundwork is packed into a short string so twelve towns stay small:
   gw = four tier sections joined by "|", each a string of column runs (see pack_groundwork); a block char is an
        index into the layout's palette (CHARS).
 """
-import argparse, glob, json, os, sys
+import argparse, collections, glob, json, math, os, re, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
@@ -27,6 +27,98 @@ STAIR = {"e": 0, "w": 1, "s": 2, "n": 3}       # Bedrock weirdo_direction
 GATE = {"s": 0, "w": 1, "n": 2, "e": 3}        # Bedrock direction
 RENAME = {"dirt_path": "grass_path"}
 STARTER_SKIP = {"plot_marker", "mason_bench"}   # placed by the game (Plot Markers, the bench fixture)
+
+
+# ---------- the Hamlet wall line, drawn round what the starter village laid ----------
+# (Mateo, 2026-11-14: no "dead space" inside the Low Palisade.) It is worked out here, in the same run and from the
+# same starter village as the plots, paths and ground it goes round, and goes into towns_data.js as outline.tight,
+# so the wall can never follow an older village than the one laid (2026-11-16: a separate hamlet_walls_data.js made
+# on Nov 14 outlived the village rebuild that day and cut through the gardens and wood yards on all 12 plots).
+# The line is drawn from everything the village LAID (Mateo 2026-11-16: "lay the plots, lay the paths, wall goes
+# around"): every planned cell (paths, plots, yards, the hall's ground), every area's whole box (the wood yard, the cow
+# pen, the common field, the Works yard, the empty plot), every block the village set that isn't bare ground or a
+# wild plant (fences, log piles, farmland, lamps, the hay and barrels), and every fixture. Only the gate road beyond
+# the square is left out (it runs on out through the gate to the map road). At each of the outline's angles the line
+# stands KEEP blocks past the furthest of those on that side, never less than LEAST, smoothed; across the gate it is
+# one flat chord GATE_CLEAR past what flanks the gate road (the gate lamps), and the gate road is narrowed to the
+# gate's width where the wall crosses it (gate_trim), so no wall column ever stands on a path.
+KEEP = 5        # the wall stays this far outside anything laid (room for the walk, the steps and a lane inside)
+GATE_CLEAR = 3  # across the gate: this far past the lamps and posts flanking the gate road (the stair is never there)
+LEAST = 22      # never closer than this to the square
+SPAN, NOTCH = 3, 3   # outline points either side a dip is measured over, and how deep it may go (no sharp notches)
+GATE_KEEP = 6   # outline points either side of the gate that make one flat chord
+TOWN_DEPTH = 6  # and never further out than this inside the Town ring (its wall must still go round the Hamlet's)
+BARE = {"air", "dirt", "grass_block", "sand", "red_sand", "snow", "stone", "gravel", "mud", "short_grass", "tall_grass", "fern",
+        "dandelion", "poppy", "azure_bluet", "cornflower", "oxeye_daisy", "azalea_leaves"}
+ROADY = re.compile(r"cobble|andesite|stone_brick|tuff_brick|mud_brick|gravel|_slab|path|planks")
+
+
+def gate_axes(st):
+    ga = st["wall"]["gateAngle"]; ca, sa = math.cos(ga), math.sin(ga)
+    return lambda x, z: (x * ca + z * sa, -x * sa + z * ca)   # (along the gate line, across it)
+
+
+def laid_cells(st):
+    """(dx, dz, gate_side) of everything the starter village laid, without the gate road past the square. gate_side is
+    True for what flanks the gate road (within 4 of its middle line), which the gate chord measures from."""
+    ax = gate_axes(st)
+    R, A = st["frame"]["right"], st["frame"]["ahead"]
+    out = set()
+    road = lambda x, z: (lambda al, ac: al >= 20 and abs(ac) <= 2.5)(*ax(x, z))
+    for dx, dz, kind, _ in st["used"]:
+        if not (kind == 3 and road(dx, dz)): out.add((dx, dz))
+    for ar in st["areas"]:
+        b = ar["box"]; pts = [(r * R[0] + a * A[0], r * R[1] + a * A[1]) for r, a in ((b[0], b[2]), (b[1], b[3]))]
+        for x in range(min(p[0] for p in pts), max(p[0] for p in pts) + 1):
+            for z in range(min(p[1] for p in pts), max(p[1] for p in pts) + 1): out.add((x, z))
+    for x, y, z, n, p in st["blocks"]:
+        if n in BARE or (ROADY.search(n) and road(x, z)): continue
+        out.add((x, z))
+    for f in st["fixtures"]: out.add((f["at"][0], f["at"][2]))
+    return [(x, z, abs(ax(x, z)[1]) <= 4.5) for x, z in out]
+
+
+def tight(st, town_ring):
+    radii = st["wall"]["radii"]; N = len(radii)
+    cells = laid_cells(st)
+    pts = [(math.atan2(dz, dx), math.hypot(dx, dz), g) for dx, dz, g in cells]
+    # the line KEEP blocks out from everything laid: along each ray, the furthest point of a KEEP-wide disc round any
+    # laid cell (an exact offset of the village, so the wall hugs the corners of plots instead of bulging past them)
+    def offset(i, keep, only=None):
+        a = i / N * 2 * math.pi; far = 0
+        for b, d, g in pts:
+            if only is not None and g != only: continue
+            along, perp = d * math.cos(b - a), abs(d * math.sin(b - a))
+            if along > 0 and perp <= keep: far = max(far, along + math.sqrt(keep * keep - perp * perp))
+        return far
+    need = [offset(i, KEEP) for i in range(N)]
+    gi = round((st["wall"]["gateAngle"] % (2 * math.pi)) / (2 * math.pi) * N) % N
+    chord = range(gi - GATE_KEEP, gi + GATE_KEEP + 1)
+    # across the gate: off the gate road, KEEP as everywhere; beside it, GATE_CLEAR past the gate lamps
+    flat = max(max(offset(i % N, KEEP, False) for i in chord), max(offset(i % N, GATE_CLEAR, True) for i in chord))
+    for i in chord: need[i % N] = flat
+    # no sharp notches between two plots: a dip narrower than about 20 degrees is filled to within NOTCH of its sides
+    r = [max(LEAST, n, max(need[(i + d) % N] for d in range(-SPAN, SPAN + 1)) - NOTCH) for i, n in enumerate(need)]
+    for _ in range(2):
+        r = [max((r[i - 1] + 2 * r[i] + r[(i + 1) % N]) / 4, need[i]) for i in range(N)]
+    for i in chord: r[i % N] = max(r[j % N] for j in chord)   # the gate chord stays flat after smoothing
+    cap = [radii[i] + town_ring - st["wall"]["radiiAt"] - TOWN_DEPTH for i in range(N)]
+    over = [i for i in range(N) if r[i] > cap[i] + 0.05]
+    if over: print(f"  warning: {st['plot']} Hamlet line pushed against the Town ring at {len(over)} of {N} angles", file=sys.stderr)
+    return [round(min(v, cap[i]), 1) for i, v in enumerate(r)]
+
+
+def gate_trim(st, line):
+    """The gate road's cells the Hamlet wall would stand on (beside the 3-wide gate, where the wall crosses the road):
+    {(dx, dz)}. The road is narrowed to the gate there, so it goes through the gate and nothing stands on a path."""
+    ax = gate_axes(st); N = len(line)
+    gi = round((st["wall"]["gateAngle"] % (2 * math.pi)) / (2 * math.pi) * N) % N
+    L = line[gi]
+    out = set()
+    for x, y, z, n, p in st["blocks"]:
+        al, ac = ax(x, z)
+        if ROADY.search(n) and 1.5 < abs(ac) <= 2.5 and L - 4 <= al <= L + 1: out.add((x, z))
+    return out
 
 
 def bedrock(name, states):
@@ -119,7 +211,7 @@ def boxes_meet(a, b, pad=0):
     return a[0] - pad <= b[2] and b[0] - pad <= a[2] and a[1] - pad <= b[3] and b[1] - pad <= a[3]
 
 
-def starter_hamlet(v, st):
+def starter_hamlet(v, st, trim=frozenset()):
     """Put the starter village in as this layout's Hamlet band. v is a hollow-crown-settlement/1 variant
     (changed in place), st the plot's hollow-crown-starter/1 data."""
     base = v["square"]["y"]
@@ -142,9 +234,13 @@ def starter_hamlet(v, st):
         pts = [(r * R[0] + a * A[0], r * R[1] + a * A[1]) for r, a in ((b[0], b[2]), (b[1], b[3]))]
         return [min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts)]
     ybox = world_box(yard["box"]) if yard else None
+    tops = collections.Counter(n for x, y, z, n, p in st["blocks"] if n in ("grass_block", "sand", "red_sand", "snow", "mud"))
+    top = tops.most_common(1)[0][0] if tops else "grass_block"
     for x, y, z, n, p in st["blocks"]:
         if n in STARTER_SKIP or (x, z) == (0, 0):
             continue
+        if (x, z) in trim and ROADY.search(n):   # the gate road narrowed to the gate where the wall crosses it
+            n, p = top, {}
         if ybox and ybox[0] <= x <= ybox[2] and ybox[1] <= z <= ybox[3] and y > yard["y"]:
             continue
         k = (n, json.dumps(p, sort_keys=True))
@@ -218,17 +314,19 @@ def main(src, starters=None):
             with open(os.path.join(starters, f"{key}.json"), encoding="utf8") as f:
                 st = json.load(f)
             assert st["format"] == "hollow-crown-starter/1" and st["gate"] == d["plot"]["gate"], key
+            line = tight(st, d["wall_radius"][1])   # the Hamlet wall line, from what the village laid
+            trim = gate_trim(st, line)
             for v in d["variants"]:
-                starter_hamlet(v, st)
+                starter_hamlet(v, st, trim)
         towns[key] = {"name": d["plot"]["name"], "gate": d["plot"]["gate"], "walls": d["wall_radius"], "clear": d["clear"],
                       "minimum": d["minimum"], "variants": [variant(v) for v in d["variants"]]}
         if st:   # the wall outline follows the land (walldata.js radiusAt): radii at even angles for a ring of radiiAt
-            towns[key]["outline"] = {"radii": [round(r, 1) for r in st["wall"]["radii"]], "radiiAt": st["wall"]["radiiAt"]}
+            towns[key]["outline"] = {"radii": [round(r, 1) for r in st["wall"]["radii"]], "radiiAt": st["wall"]["radiiAt"], "tight": line}
         windmills(towns[key], d["plot"].get("region"))
     out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Siege_Nights_BP", "scripts", "settle", "towns_data.js")
     body = json.dumps(towns, separators=(",", ":"))
     with open(out, "w", encoding="utf8") as f:
-        f.write("// Generated by tools/export_towns.py from the town generator's settlement layouts. Do not edit by hand.\n")
+        f.write("// Generated by tools/build_towns.py (export_towns.py) from the town generator's layouts and the starter villages. Do not edit by hand: run python3 tools/build_towns.py.\n")
         f.write(f"// {len(towns)} towns: {', '.join(t['name'] for t in towns.values())}\n")
         f.write(f"export const TOWN_CHARS = {json.dumps(CHARS)};\n")
         f.write(f"export const TOWNS = {body};\n")

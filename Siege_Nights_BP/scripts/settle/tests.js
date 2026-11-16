@@ -16,7 +16,6 @@ import { watchPlan, watchCells, shaftOf } from "./wallwatch.js";
 import { windmillFixture, windmillPlan, windmillSpot, windmillDesign, SAILS as WINDMILL_SAILS } from "./windmill_rules.js";
 import { WINDMILL_DESIGNS } from "./windmill_data.js";
 import { WALLWATCH_DESIGNS, WALLSTAND_DESIGNS } from "./wallwatch_data.js";
-import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { planLaneLamps } from "./lanelamps.js";
 import { slotsOf as layoutSlots } from "./towns.js";
 
@@ -50,7 +49,7 @@ addTests("settle", {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     for (const [key, t] of Object.entries(TOWNS)) {
       if (!t.outline?.radii?.length) continue;
-      const tight = HAMLET_WALLS[key] ?? HAMLET_WALLS[t.name?.toLowerCase()];
+      const tight = t.outline?.tight;
       const center = { x: 0, z: 0, radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       const radius = t.walls[0];
@@ -287,20 +286,18 @@ addTests("settle walls", {
       assert(cells.length > (kind === "stand" ? 40 : 200) && cells[0].y >= cells[cells.length - 1].y, `${region} ${kind}: taken down top first`);
     }
   },
-  "the Hamlet wall is drawn tight round its village, never outside the starter's line, and the later rings keep the full outline": () => {
+  "the Hamlet wall is drawn round its village, inside the Town ring, and the later rings keep the full outline": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
-      const tight = HAMLET_WALLS[key];
-      assert(tight?.length === town.outline.radii.length, `${key} has a tight Hamlet line`);
+      const tight = town.outline?.tight;
+      assert(tight?.length === town.outline.radii.length, `${key} has a Hamlet line`);
       const c = { x: 0, z: 0, radii: town.outline.radii, radiiAt: town.outline.radiiAt, tight };
-      let cut = 0;
       for (let i = 0; i < tight.length; i++) {
         const a = (i / tight.length) * Math.PI * 2;
-        const h = radiusAt(c, 36, a), full = radiusAt({ ...c, tight: undefined }, 36, a);
-        assert(h <= full + 1e-6 && h >= 22, `${key}: Hamlet line ${h.toFixed(1)} at ${i}`);
-        cut = Math.max(cut, full - h);
+        const h = radiusAt(c, 36, a);
+        // tools/export_towns.py TOWN_DEPTH: the Town wall (and its towers and stairs) still goes round the Hamlet's
+        assert(h >= 22 && h <= radiusAt(c, town.walls[1], a) - 6 + 0.06, `${key}: Hamlet line ${h.toFixed(1)} at ${i}`);
         assert(Math.abs(radiusAt(c, 54, a) - radiusAt({ ...c, tight: undefined }, 54, a)) < 1e-9, `${key}: the Town ring keeps the outline`);
       }
-      assert(cut >= 2, `${key}: the Hamlet line pulls in somewhere (${cut.toFixed(1)})`);
     }
   },
   "steep ground is refused, the wall line is reserved": () => {
@@ -404,7 +401,7 @@ addTests("settle walls", {
     const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
     const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
     for (const [key, t] of Object.entries(TOWNS)) {
-      const tight = HAMLET_WALLS[key];
+      const tight = t.outline?.tight;
       const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), ...(t.outline?.radii?.length ? { radii: t.outline.radii, radiiAt: t.outline.radiiAt, ...(tight ? { tight } : {}) } : {}) };
       const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
       for (let tier = 0; tier < 4; tier++) {
@@ -1366,5 +1363,62 @@ addTests("settle towns", {
     }
     assertEqual(slotBorder(lay, slots.find((q) => q.id === "st2")).cells.length, 0, "a house plot has no border");
     assertEqual(slotBorder(townFor("dunehold").variants[0], slotsOf(townFor("dunehold").variants[0]).find((q) => q.id === "st6")).ground[0], "minecraft:sand");
+  },
+});
+
+// The town build order, checked whole (Mateo 2026-11-16: "lay the plots, lay the paths, wall goes around, paths are
+// correctly connected"). tools/build_towns.py makes the data in that order; this fails if any step disagrees with the
+// one before it. The Hamlet on every map plot and layout, at every Hamlet wall level.
+const ORDER_PATH = /_slab$|cobblestone|stone_bricks|andesite|tuff_bricks|mud_bricks|grass_path|dirt_path|sandstone/;
+const ORDER_BARE = /^minecraft:(air|grass_block|dirt|coarse_dirt|podzol|sand|red_sand|snow|snow_layer|stone|gravel|mud|short_grass|tall_grass|fern|dandelion|poppy|azure_bluet|cornflower|oxeye_daisy)$/;
+addTests("settle towns", {
+  "the Hamlet is laid in order on every map plot: one path network to every door and out of the gate to the road join, and the wall round it standing on nothing laid": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, () => 64));
+    for (const [key, t] of Object.entries(TOWNS)) {
+      const center = { x: 0, y: 64, z: 0, shape: wallShape(t.name), radii: t.outline.radii, radiiAt: t.outline.radiiAt, tight: t.outline.tight };
+      const gate = bearingToAngle([0, 90, 180, 270].reduce((b, c) => (Math.abs(((t.gate ?? 180) - c + 540) % 360 - 180) < Math.abs(((t.gate ?? 180) - b + 540) % 360 - 180) ? c : b)));
+      t.variants.forEach((lay, li) => {
+        const at = `${key} layout ${li}`;
+        // 1. plots and paths: what the Hamlet lays (the top block of each column)
+        const top = new Map();
+        for (const [dx, dy, dz, p] of groundwork(lay, 0)) {
+          const id = lay.pal[p][0], k = `${dx},${dz}`;
+          if (id !== "minecraft:air" && (!top.has(k) || top.get(k).dy <= dy)) top.set(k, { x: dx, z: dz, dy, id });
+        }
+        const slots = slotsOf(lay).filter((s) => s.tier === 0);
+        // 2. the paths are one network (corner to corner counts), every door step is on it or beside it
+        const path = new Set([...top.values()].filter((c) => ORDER_PATH.test(c.id)).map((c) => `${c.x},${c.z}`));
+        const first = path.values().next().value, seen = new Set([first]), todo = [first];
+        while (todo.length) {
+          const [x, z] = todo.pop().split(",").map(Number);
+          for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const k = `${x + a},${z + b}`; if (path.has(k) && !seen.has(k)) { seen.add(k); todo.push(k); } }
+        }
+        const loose = [...path].filter((k) => !seen.has(k));
+        assert(!loose.length, `${at}: ${loose.length} path blocks not joined to the rest (one at ${loose[0]})`);
+        for (const s of slots) {
+          const st = s.step ?? s.door?.step;
+          if (!st) continue;
+          let near = false;
+          for (let a = -2; a <= 2 && !near; a++) for (let b = -2; b <= 2; b++) if (path.has(`${st.x + a},${st.z + b}`)) { near = true; break; }
+          assert(near, `${at}: no path to ${s.id}'s door at ${st.x},${st.z}`);
+        }
+        // 3. the gate road ends where the road out to the map's road starts (settle/roadjoin_data.js)
+        const end = roadEnd([...top.values()].filter((c) => ROAD_JOIN_PATHY.test(c.id)), gateDir(t.gate));
+        const join = ROAD_JOINS[key];
+        assert(join && Math.max(Math.abs(join.from[0] - end.x), Math.abs(join.from[1] - end.z)) <= 1, `${at}: the gate road ends at ${end.x},${end.z} but the road join starts at ${join?.from} (node tools/export_road_joins.mjs)`);
+        // 4. the wall goes round: no wall, walk, stair or tower on a plot or on anything laid, and the gate on the road
+        for (let level = 1; level <= WALLS.tierCap[0]; level++) {
+          const cols = wallColumns({ center, radius: t.walls[0], level, gateAngle: gate, smooth });
+          for (const c of cols) {
+            if (c.role === "gap" || c.role === "gate" || c.role === "port") continue;
+            const s = slots.find((q) => c.x >= q.box.x0 && c.x <= q.box.x1 && c.z >= q.box.z0 && c.z <= q.box.z1);
+            assert(!s, `${at} level ${level}: ${c.role} at ${c.x},${c.z} stands on plot ${s?.id}`);
+            const g = top.get(`${c.x},${c.z}`);
+            assert(!g || ORDER_BARE.test(g.id), `${at} level ${level}: ${c.role} at ${c.x},${c.z} stands on ${g?.id}`);
+          }
+          assert(cols.some((c) => (c.role === "gate" || c.role === "gap") && path.has(`${c.x},${c.z}`)), `${at} level ${level}: the gate road goes through the gate`);
+        }
+      });
+    }
   },
 });

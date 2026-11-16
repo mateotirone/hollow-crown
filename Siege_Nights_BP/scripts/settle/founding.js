@@ -10,6 +10,7 @@
 //   on("settleFixture", ({ owner, kind, species, size, rotation, at, tier }))   trees and windmills, for the tree
 //     and windmill builders (a tree is not planted here; world trees come from the tree thread)
 //   on("townLaidOut", ({ owner, tier }))   a tier's groundwork is down
+//   on("townReady", ({ owner, tier }))     a tier is laid out AND its wall stands round it: the last stage (planting)
 //   lordTownAt(x, z), adoptTown(from, to)   Rival Lords build on the same layouts; a player can take one over
 //   on("townAdopted", ({ from, owner }))
 //   charterOf(owner) -> charterCheck result for the tier the town is at (charters.js)
@@ -17,7 +18,6 @@
 // (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
 // Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter) | road (lay the road out again)]
 
-import { HAMLET_WALLS } from "./hamlet_walls_data.js";
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { applyFilter } from "../core/events.js";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState, onTick } from "../siege/api.js";
@@ -25,7 +25,7 @@ import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.
 import { buildFor } from "../townhall/build.js";
 import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
-import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
+import { wallOf, raiseWall, moveWall, adoptWall, wallStanding, wallLineDiffers } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
 import { charterCheck, charterText, charterKeeps, plotFit, oneEachTaken } from "./charters.js";
 import { BUILDINGS, WORKS } from "./buildings.js";
@@ -691,13 +691,75 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
     style: style ?? REGION_TO_STYLE[plot.region] ?? styleOf(owner, dim.getBlock(at)),
   };
   save();
-  const town = townOf(owner);
-  if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) {
-    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: { ...tw.outline, tight: HAMLET_WALLS[plot.name.toLowerCase()] } });
-  }
-  layOutTier(owner, 0);
+  // In order (Mateo 2026-11-16: "lay the plots, lay the paths, wall goes around"): the Hamlet's plots, paths, ground and
+  // fixtures go down first, then the wall rises round them on the line drawn from what was laid (towns_data.js outline).
+  if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) { town_(owner).wallAfter = true; save(); }
+  layOutTier(owner, 0, () => raiseAfter(owner));
   return true;
 }
+const town_ = (owner) => store.data.towns[owner];
+
+// The Hamlet wall, once its tier is laid out (and on the next load if the world closed in between)
+function raiseAfter(owner) {
+  const town = townOf(owner), tw = town && townFor(town.plot);
+  if (!town?.wallAfter || !tw) return;
+  const w = wallOf(owner);
+  if (!w || w.x !== town.x || w.z !== town.z) {
+    const r = raiseWall(owner, 1, { center: { x: town.x, y: town.y, z: town.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: tw.outline });
+    if (r !== true) return; // a wall job is still running: the tick below tries again
+  }
+  delete town.wallAfter;
+  save();
+}
+
+// The ground under a wall line that came down, laid again as the town laid it: only the holes the old stakes left are
+// filled (air), so nothing standing there since (a stake of the new line) is touched
+function relayUnder(owner, cols) {
+  const town = townOf(owner), layout = town && layoutOf(town);
+  if (!layout || !cols?.length) return;
+  const under = new Set(cols.map((c) => `${c.x - town.x},${c.z - town.z}`));
+  system.runJob((function* relay() {
+    const dim = world.getDimension(OVERWORLD);
+    const pal = layout.pal.map(([id, st]) => (id === "minecraft:air" ? undefined : perm(id, st)));
+    let n = 0;
+    for (let t = 0; t < 4; t++) {
+      if (!town.laid[t]) continue;
+      for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+        if (++n % PER_TICK === 0) yield;
+        if (!pal[p] || !under.has(`${dx},${dz}`)) continue;
+        try { const b = dim.getBlock({ x: town.x + dx, y: town.y + dy, z: town.z + dz }); if (b?.isAir) b.setPermutation(pal[p]); } catch { /* not loaded */ }
+      }
+    }
+  })());
+}
+
+// townReady: the last stage of the order. A tier's plots, paths, ground and fixtures are laid AND its wall stands on that
+// tier's line, so what comes after (planting the leftover ground: grass, flowers, trees) can never land on a plot, a
+// path or the wall line. Sent once per tier; towns that were already standing get theirs on the next load.
+//   on("townReady", ({ owner, tier }))
+function checkReady(owner) {
+  const town = townOf(owner), tw = town && townFor(town.plot);
+  if (!tw || town.wallAfter) return;
+  const tier = town.laid.lastIndexOf(true);
+  if (tier < 0 || (town.ready ?? -1) >= tier || running.get(owner)) return;
+  if (!wallStanding(owner, wallRadius(tw, tier))) return;
+  town.ready = tier;
+  save();
+  emit("townReady", { owner, tier });
+}
+on("townLaidOut", ({ owner }) => system.runTimeout(() => checkReady(owner), 40));
+on("wallBuilt", ({ id }) => system.runTimeout(() => checkReady(id), 40));
+onTick("settle_order", 200, () => {
+  if (!isReady()) return;
+  for (const owner of Object.keys(store.data.towns)) {
+    const town = store.data.towns[owner], tw = townFor(town.plot);
+    if (town.wallAfter && town.laid?.[0] && !running.get(owner)) raiseAfter(owner);
+    // a wall raised on an older line (the Hamlet line drawn before 2026-11-16 cut through the village's gardens and
+    // wood yards): it comes down and rises again on the line drawn from what this village laid, one town at a time
+    else if (tw?.outline && !getState().active && wallLineDiffers(owner, tw.outline)) { moveWall(owner, wallOf(owner).radius, (cols) => relayUnder(owner, cols), tw.outline); return; }
+    else checkReady(owner);
+  }
+});
 
 // ---------- a lord's town changes hands ----------
 
@@ -818,7 +880,7 @@ export function growTown(owner, tier, { force = false } = {}) {
   town.tier = tier;
   save();
   // the old ring comes down first, so the ring road laid where it stood isn't knocked out again
-  moveWall(owner, wallRadius(tw, tier), () => { for (let t = 1; t <= tier; t++) layOutTier(owner, t); });
+  moveWall(owner, wallRadius(tw, tier), (cols) => { relayUnder(owner, cols); for (let t = 1; t <= tier; t++) layOutTier(owner, t); }, tw.outline);
   return true;
 }
 
