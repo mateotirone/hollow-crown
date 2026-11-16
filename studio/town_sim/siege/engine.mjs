@@ -1054,6 +1054,9 @@ export function createEngine({ blocks, data, log = () => {}, hud = {} }) {
       const p = new Player(dim, playerAt, name);
       p.api = loose(p, "Player"); p.__e = p; p.mode = gameMode;
       player0 = p; players.push(p); allEntities.set(p.id, p);
+      // a settled player, not a newcomer: a siege night comes to someone who arrived long ago, so the first-join sequence
+      // (core/firstjoin.js: the map setup wait, the look picker, the welcome) is behind them
+      p.setDynamicProperty("siege:joined", 1);
       worldAfter.playerJoin.fire({ playerId: p.id, playerName: p.name });
       worldAfter.playerSpawn.fire({ player: p.api, initialSpawn: true });
       flush();
