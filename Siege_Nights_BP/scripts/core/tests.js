@@ -16,9 +16,9 @@ const tests = [];
 export const OFFLINE_ONLY = new Set([
   "settle planting: the open ground between plots: never on a plot, the hall's ground, a fixture or anything any tier lays, and the same every time",
   "settle planting: nothing at all is planted in the wall band",
-  "settle planting: every plot with a building: nothing planted on the building, a block round it, or the walk to the door; trees inside the plot",
+  "settle planting: every plot with a building: nothing planted on the building or the walk to the door, nothing tall against it; trees inside the plot",
   "settle planting: the walk to the door runs from the building's front to the plot's edge, 3 wide",
-  "settle planting: nothing climbable near the wall, on wall or gate plots, or on a plot's outer ring",
+  "settle planting: nothing climbable near the wall, on wall or gate plots, or on a plot's street edge",
   "settle planting: planting is the same every time, and every region plants",
   "settle towns: every town is laid in order on every map plot: at every tier the streets are one network reaching every door and out of the gate to the road join, and the wall goes round what was laid, standing on nothing",
   "settle walls: every map plot's wall is sealed all round apart from the gate, on every ring and at every level",

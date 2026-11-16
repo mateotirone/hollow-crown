@@ -28,27 +28,27 @@ export const PLANTING = {
   vale: {
     top: "minecraft:grass_block", patch: ["minecraft:coarse_dirt", 13],
     cover: [["minecraft:short_grass", 40], ["minecraft:fern", 4], ["minecraft:dandelion", 2], ["minecraft:poppy", 1], ["minecraft:oxeye_daisy", 1], ["minecraft:cornflower", 1], ["minecraft:azure_bluet", 1]],
-    bush: ["minecraft:azalea", "minecraft:flowering_azalea", "minecraft:oak_leaves"], coverEvery: 2, bushEvery: 11,
+    bush: ["minecraft:azalea", "minecraft:flowering_azalea", "minecraft:oak_leaves"], coverEvery: 1.5, bushEvery: 6,
   },
   frostmarch: {
     top: "minecraft:grass_block", patch: ["minecraft:podzol", 5],
     cover: [["minecraft:short_grass", 14], ["minecraft:fern", 14], ["minecraft:lily_of_the_valley", 2]],
-    bush: ["minecraft:spruce_leaves"], coverEvery: 3, bushEvery: 12,
+    bush: ["minecraft:spruce_leaves"], coverEvery: 2, bushEvery: 6,
   },
   saltreach: {
     top: "minecraft:grass_block", patch: ["minecraft:gravel", 9],
     cover: [["minecraft:short_grass", 36], ["minecraft:oxeye_daisy", 2], ["minecraft:allium", 1], ["minecraft:azure_bluet", 2]],
-    bush: ["minecraft:azalea", "minecraft:oak_leaves"], coverEvery: 2, bushEvery: 13,
+    bush: ["minecraft:azalea", "minecraft:oak_leaves"], coverEvery: 1.5, bushEvery: 7,
   },
   emberwaste: {
     top: "minecraft:red_sand", patch: ["minecraft:coarse_dirt", 6],
     cover: [["minecraft:deadbush", 5], ["minecraft:short_dry_grass", 4]],
-    bush: [], coverEvery: 6, bushEvery: 0,
+    bush: [], coverEvery: 3, bushEvery: 0,
   },
   blackfen: {
     top: "minecraft:grass_block", patch: ["minecraft:moss_block", 4],
     cover: [["minecraft:short_grass", 16], ["minecraft:fern", 8], ["minecraft:blue_orchid", 3], ["minecraft:moss_carpet", 5], ["minecraft:brown_mushroom", 1]],
-    bush: ["minecraft:azalea", "minecraft:mangrove_leaves"], coverEvery: 2, bushEvery: 10,
+    bush: ["minecraft:azalea", "minecraft:mangrove_leaves"], coverEvery: 1.5, bushEvery: 6,
   },
 };
 // Blocks that stand on the ground and that a raider can stand on (leaves, azaleas). The rest are walked through.
@@ -57,8 +57,8 @@ export const TALL = /leaves|azalea$/;
 // (the cut groundwork leaves dirt), never a path, a log border or something the player built.
 export const BARE = /^minecraft:(dirt|coarse_dirt|grass_block|podzol|gravel|stone|red_sand|sand|red_sandstone|sandstone|mud|moss_block|rooted_dirt|andesite|diorite|granite|tuff)$/;
 
-export const PLANT_VERSION = 1; // raise to dress every plot again (planting.js)
-const TREE_EVERY = { S: 1, M: 1, L: 2, G: 3 }; // trees a plot of this size may take, at most
+export const PLANT_VERSION = 2; // raise to dress every plot again (planting.js). 2: fuller planting, ground matched to the land
+const TREE_EVERY = { S: 1, M: 2, L: 2, G: 3 }; // trees a plot of this size may take, at most
 // What each plot size gets round its building. The big plots grow or work their own ground: the Stables barn is
 // rebuilt bigger by its upgrades (flat cover only, so nothing is cut in half), the Works dig their pit and race, the
 // Forester's Lodge plants its grove and the Dragon Stable its nursery (their ground only, nothing planted)
@@ -108,41 +108,53 @@ export function plantPlan({ slot, region = "vale", building, seed = "", nearWall
   const dressing = DRESS[slot.size] ?? "ground";
   if (!building || dressing === "ground") return { surface, plants, trees };
 
-  const open = (x, z) => x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1 && !inBuilding(x, z, 1) && !lane.has(`${x},${z}`) && !inBand(x, z);
+  const inPlot = (x, z) => x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1;
+  // low cover may grow right up to the walls (it is walked through); nothing on the walk to the door
+  const coverOk = (x, z) => inPlot(x, z) && !inBuilding(x, z) && !lane.has(`${x},${z}`) && !inBand(x, z);
+  // anything you could stand on keeps a block off the building and the walk, and off the plot's front edge (the street
+  // side, where the door and the plot marker are); the other three edges may hold a bush or a tree's crown
+  const D = slot.door;
+  const front = (x, z) => (D.z ? z === (D.z < 0 ? box.z0 : box.z1) : x === (D.x < 0 ? box.x0 : box.x1));
+  const besideLane = (x, z) => lane.has(`${x + 1},${z}`) || lane.has(`${x - 1},${z}`) || lane.has(`${x},${z + 1}`) || lane.has(`${x},${z - 1}`);
   const flatOnly = dressing === "flat" || (slot.tags ?? []).some((t) => t === "wall" || t === "gate");
-  const tallOk = (x, z) => open(x, z) && !edge(x, z) && !flatOnly && !nearWall(x, z);
+  const tallOk = (x, z) => coverOk(x, z) && !inBuilding(x, z, 1) && !besideLane(x, z) && !front(x, z) && !flatOnly && !nearWall(x, z);
   const taken = new Set();
 
-  // trees first: a young tree of the region's grove, where its whole crown fits on open ground that may hold tall things
+  // trees first: the biggest of the region's grove trees (young, then sapling, every species and shape) whose whole
+  // crown fits on ground that may hold tall things. The trunk stands 2 off the building, so the crown never presses on it.
   const species = GROVE[region] ?? [];
   let room = noTrees || flatOnly ? 0 : TREE_EVERY[slot.size] ?? 0;
   if (room && species.length) {
     const spots = [];
-    for (let x = box.x0 + 1; x < box.x1; x++) for (let z = box.z0 + 1; z < box.z1; z++) if (tallOk(x, z)) spots.push([x, z, hash(x, z, s)]);
+    for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) if (tallOk(x, z) && !inBuilding(x, z, 2)) spots.push([x, z, hash(x, z, s)]);
     spots.sort((a, b) => a[2] - b[2]);
-    for (const [x, z, r] of spots) {
-      if (!room) break;
-      const sid = species[Math.floor(r * 997) % species.length], v = Math.floor(r * 7919) % GROVE_VARIANTS;
-      // a young tree where it fits, else a sapling-sized one (still a small tree, 5 to 8 high)
-      const fitsHere = (d) => {
-        for (let a = d.lo[0]; a <= d.hi[0]; a++) for (let b = d.lo[2]; b <= d.hi[2]; b++) if (!tallOk(x + a, z + b) || taken.has(`${x + a},${z + b}`)) return false;
-        return true;
-      };
-      const stage = ["young", "sapling"].find((st) => GROVE_DESIGNS[`${sid}_${st}_${v}`] && fitsHere(GROVE_DESIGNS[`${sid}_${st}_${v}`]));
-      if (!stage) continue;
-      const d = GROVE_DESIGNS[`${sid}_${stage}_${v}`];
-      trees.push({ dx: x, dz: z, sid, v, stage });
-      // its crown and a block round it are taken, so trees and bushes don't grow into each other
-      for (let a = d.lo[0] - 1; a <= d.hi[0] + 1; a++) for (let b = d.lo[2] - 1; b <= d.hi[2] + 1; b++) taken.add(`${x + a},${z + b}`);
-      room--;
+    const fits = (x, z, d) => {
+      for (let a = d.lo[0]; a <= d.hi[0]; a++) for (let b = d.lo[2]; b <= d.hi[2]; b++) if (!tallOk(x + a, z + b) || taken.has(`${x + a},${z + b}`)) return false;
+      return true;
+    };
+    for (const stage of ["young", "sapling"]) {
+      for (const [x, z, r] of spots) {
+        if (!room) break;
+        const first = Math.floor(r * 997) % species.length;
+        let got;
+        for (let k = 0; k < species.length * GROVE_VARIANTS && !got; k++) {
+          const sid = species[(first + Math.floor(k / GROVE_VARIANTS)) % species.length], v = (Math.floor(r * 7919) + k) % GROVE_VARIANTS;
+          const d = GROVE_DESIGNS[`${sid}_${stage}_${v}`];
+          if (d && fits(x, z, d)) got = { sid, v, d };
+        }
+        if (!got) continue;
+        trees.push({ dx: x, dz: z, sid: got.sid, v: got.v, stage });
+        // its crown and a block round it are taken, so trees and bushes don't grow into each other
+        for (let a = got.d.lo[0] - 1; a <= got.d.hi[0] + 1; a++) for (let b = got.d.lo[2] - 1; b <= got.d.hi[2] + 1; b++) taken.add(`${x + a},${z + b}`);
+        room--;
+      }
     }
   }
 
   // then bushes and low plants on what's left
   for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) {
-    if (!open(x, z) || taken.has(`${x},${z}`)) continue;
-    const r = hash(x, z, s + 1);
-    if (P.bushEvery && P.bush.length && r * P.bushEvery < 1 && tallOk(x, z)) {
+    if (!coverOk(x, z) || taken.has(`${x},${z}`)) continue;
+    if (P.bushEvery && P.bush.length && hash(x, z, s + 1) * P.bushEvery < 1 && tallOk(x, z)) {
       plants.push([x, z, P.bush[Math.floor(hash(x, z, s + 2) * P.bush.length)], true]);
       continue;
     }
@@ -154,17 +166,33 @@ export function plantPlan({ slot, region = "vale", building, seed = "", nearWall
   return { surface, plants, trees };
 }
 
-// The ground block for one plot cell: the region's top, with its patches
-export function groundFor(region, x, z) {
+// The ground block for one plot cell: the ground of the land round the plot (top, from localGround), with the
+// region's patches only where that ground is the region's own top
+export function groundFor(region, x, z, top) {
   const P = PLANTING[region] ?? PLANTING.vale;
-  return hash(x >> 1, z >> 1, 3) * P.patch[1] < 1 ? P.patch[0] : P.top;
+  const base = top ?? P.top;
+  return base === P.top && hash(x >> 1, z >> 1, 3) * P.patch[1] < 1 ? P.patch[0] : base;
+}
+
+// Which ground block the land round a plot is: counts { id: how many of the cells just outside it have it on top }.
+// Only plain ground counts (not paths, fields or walls); the commonest wins, the region's top on a tie or when none
+// was seen. Redmesa's town ground is pale sand, not the Emberwaste's red sand (Town Builder, 2026-11-16).
+export const GROUND = /^minecraft:(grass_block|podzol|sand|red_sand|moss_block|mud|snow|mycelium|coarse_dirt|dirt|gravel|rooted_dirt)$/;
+export function localGround(counts, region) {
+  const P = PLANTING[region] ?? PLANTING.vale;
+  let best = P.top, most = 0;
+  for (const [id, n] of Object.entries(counts ?? {})) {
+    if (!GROUND.test(id) || /dirt$|gravel/.test(id) && id !== P.top) continue; // bare dirt is what we are covering up
+    if (n > most || (n === most && id === P.top)) { best = id; most = n; }
+  }
+  return best;
 }
 
 // ---------- the open ground between plots ----------
 // Mateo: "same with empty space around buildings". The town's open ground inside the wall (verges, the middles of its
 // blocks) gets low cover and a rare bush. Only ground no tier of the layout ever claims: no plot (of any tier), no path,
 // field, fence or anything else its groundwork lays, no fixture and no hall reserve, so a later tier never paves over
-// a plant or leaves one standing on a path. Trees there are the town generator's own (towngen trees step).
+// a plant or leaves one standing on a path. Small grove trees too (openGroundTrees), besides the town generator's own.
 //   openGroundPlan({ layout, region, seed, inside(dx, dz), nearWall(dx, dz) }) -> [[dx, dz, id, tall]]
 //     layout   a towns_data layout (slots, gw groundwork, fix fixtures, hall boxes)
 //     inside   true inside the town's wall line now (planting.js: radiusAt, the wall standing)
@@ -174,7 +202,16 @@ const OPEN_COVER = 3; // low cover on 1 in this many open cells (thinner than a 
 const OPEN_BUSH = 45; // a bush on 1 in this many cells well clear of everything
 export const OPEN_REACH = 78; // blocks from the Plot Stone looked at (land reaches 74)
 
-export function openGroundPlan({ layout, region = "vale", seed = "", inside = () => true, nearWall = () => false, groundworkOf, slots, fixtures }) {
+export function openGroundPlan(args) {
+  return openGround(args).plants;
+}
+// Small grove trees on the open ground (young where the crown fits, else sapling-sized), spaced out: the trunk 2 from any
+// path, plot or fixture, the crown and a block round it never over one (paths stay open to the sky): [{ dx, dz, sid, v, stage }]
+export function openGroundTrees(args) {
+  return openGround(args).trees;
+}
+const OPEN_TREE = 20; // a tree tried on 1 in this many open cells
+export function openGround({ layout, region = "vale", seed = "", inside = () => true, nearWall = () => false, groundworkOf, slots, fixtures }) {
   const P = PLANTING[region] ?? PLANTING.vale;
   const s = seedOf(`${seed}|open`);
   const claimed = new Set(); // cells something else owns
@@ -189,10 +226,30 @@ export function openGroundPlan({ layout, region = "vale", seed = "", inside = ()
     built.add(`${dx},${dz}`);
   }
   const near = (x, z, r) => { for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++) if (built.has(`${x + a},${z + b}`) || claimed.has(`${x + a},${z + b}`)) return true; return false; };
-  const out = [];
+  const out = [], trees = [], under = new Set();
+  const free = (x, z, r) => !claimed.has(`${x},${z}`) && !built.has(`${x},${z}`) && inside(x, z) && !nearWall(x, z) && !near(x, z, r);
+  const species = GROVE[region] ?? [];
+  for (let x = -OPEN_REACH; x <= OPEN_REACH && species.length; x++) for (let z = -OPEN_REACH; z <= OPEN_REACH; z++) {
+    const r = hash(x, z, s + 9);
+    if (r * OPEN_TREE >= 1 || !free(x, z, 2)) continue;
+    let got;
+    for (const stage of ["young", "sapling"]) for (let k = 0; k < species.length * GROVE_VARIANTS && !got; k++) {
+      const sid = species[(Math.floor(r * 99991) + Math.floor(k / GROVE_VARIANTS)) % species.length], v = k % GROVE_VARIANTS;
+      const d = GROVE_DESIGNS[`${sid}_${stage}_${v}`];
+      if (!d) continue;
+      let ok = true;
+      for (let a = d.lo[0] - 1; a <= d.hi[0] + 1 && ok; a++) for (let b = d.lo[2] - 1; b <= d.hi[2] + 1; b++) {
+        if (under.has(`${x + a},${z + b}`) || !free(x + a, z + b, 0)) { ok = false; break; }
+      }
+      if (ok) got = { sid, v, stage, d };
+    }
+    if (!got) continue;
+    trees.push({ dx: x, dz: z, sid: got.sid, v: got.v, stage: got.stage });
+    for (let a = got.d.lo[0] - 2; a <= got.d.hi[0] + 2; a++) for (let b = got.d.lo[2] - 2; b <= got.d.hi[2] + 2; b++) under.add(`${x + a},${z + b}`);
+  }
   for (let x = -OPEN_REACH; x <= OPEN_REACH; x++) for (let z = -OPEN_REACH; z <= OPEN_REACH; z++) {
     const k = `${x},${z}`;
-    if (claimed.has(k) || built.has(k) || !inside(x, z) || nearWall(x, z)) continue;
+    if (claimed.has(k) || built.has(k) || under.has(k) || !inside(x, z) || nearWall(x, z)) continue;
     if (near(x, z, 1)) continue; // a block of verge stays plain beside every path and plot
     if (P.bushEvery && P.bush.length && hash(x, z, s + 5) * OPEN_BUSH < 1 && !near(x, z, 3)) {
       out.push([x, z, P.bush[Math.floor(hash(x, z, s + 6) * P.bush.length)], true]);
@@ -203,5 +260,14 @@ export function openGroundPlan({ layout, region = "vale", seed = "", inside = ()
       if (id) out.push([x, z, id, TALL.test(id)]);
     }
   }
-  return out;
+  return { plants: out, trees };
+}
+
+// Whether a plant takes on a ground block. Grass, ferns, flowers and bushes want soil; dry plants (dead bush, dry grass)
+// take sand as well; a tree wants soil or sand (the grove's desert trees stand on sand)
+const SOIL = /^minecraft:(grass_block|podzol|moss_block|mud|dirt|coarse_dirt|rooted_dirt|mycelium)$/;
+const SANDY = /^minecraft:(sand|red_sand|.*terracotta)$/;
+export function canGrow(id, ground) {
+  if (id === "tree" || /deadbush|dry_grass/.test(id)) return SOIL.test(ground) || SANDY.test(ground);
+  return SOIL.test(ground);
 }

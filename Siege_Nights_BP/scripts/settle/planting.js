@@ -19,7 +19,7 @@ import { townOf, allTowns, layoutOf, slotClosed } from "./founding.js";
 import { slotsOf, townFor, groundwork, fixturesOf } from "./towns.js";
 import { wallOf } from "./walls.js";
 import { WALLS, onWallLine, radiusAt } from "./walldata.js";
-import { plantPlan, openGroundPlan, groundFor, BARE, PLANTING, PLANT_VERSION } from "./planting_rules.js";
+import { plantPlan, openGround, groundFor, localGround, canGrow, BARE, GROUND, PLANT_VERSION } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -102,14 +102,24 @@ function dress(owner, slot) {
       if (old && (old.b !== rec.b || old.v !== rec.v)) { // what was planted for the old building comes up first
         if (!(yield* undress(dim, owner, town, slot, old))) return;
       }
+      // the land round the plot decides its ground (Redmesa's town ground is pale sand, not the region's red sand)
+      const counts = {};
       let n = 0;
+      for (let r = 2; r <= 3; r++) for (let dx = slot.box.x0 - r; dx <= slot.box.x1 + r; dx++) for (let dz = slot.box.z0 - r; dz <= slot.box.z1 + r; dz++) {
+        if (dx > slot.box.x0 - r && dx < slot.box.x1 + r && dz > slot.box.z0 - r && dz < slot.box.z1 + r) continue; // the ring only
+        if (++n % 48 === 0) yield;
+        const g = groundAt(dim, town.x + dx, town.z + dz, floor);
+        if (g === undefined) return;
+        if (g) counts[g.block.typeId] = (counts[g.block.typeId] ?? 0) + 1;
+      }
+      const top = localGround(counts, town.style);
       for (const [dx, dz] of plan.surface) {
         if (++n % 48 === 0) yield;
         const x = town.x + dx, z = town.z + dz;
         const g = groundAt(dim, x, z, floor);
         if (g === undefined) return; // not loaded: tried again later
         if (!g || g.y > floor || !BARE.test(g.block.typeId)) continue; // a floor, a path, a border log: not ours
-        const want = groundFor(town.style, x, z);
+        const want = groundFor(town.style, x, z, top);
         if (g.block.typeId !== want) { const p = perm(want); if (p) g.block.setPermutation(p); }
       }
       for (const [dx, dz, id] of plan.plants) {
@@ -117,7 +127,7 @@ function dress(owner, slot) {
         const x = town.x + dx, z = town.z + dz;
         const g = groundAt(dim, x, z, floor);
         if (g === undefined) return;
-        if (!g || g.y > floor || !BARE.test(g.block.typeId)) continue;
+        if (!g || g.y > floor || !BARE.test(g.block.typeId) || !canGrow(id, g.block.typeId)) continue;
         const above = g.block.above();
         if (!above?.isAir) continue;
         const p = perm(id);
@@ -225,35 +235,47 @@ function dressOpen(owner) {
   if (!town || !w || !layout || town.ready === undefined || openBusy.has(owner)) return false;
   const rings = [...new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter((r) => Number.isFinite(r) && r >= w.radius))];
   const rel = (dx, dz) => { const x = town.x + dx - (w.x + 0.5), z = town.z + dz - (w.z + 0.5); return { d: Math.hypot(x, z), a: Math.atan2(z, x) }; };
-  const plan = openGroundPlan({
+  const { plants: plan, trees } = openGround({
     layout, region: town.style, seed: owner,
     groundworkOf: (t) => groundwork(layout, t), slots: slotsOf(layout),
     fixtures: [0, 1, 2, 3].flatMap((t) => fixturesOf(layout, t)),
     inside: (dx, dz) => { const { d, a } = rel(dx, dz); return d < radiusAt(w, w.radius, a) - 1; },
     nearWall: (dx, dz) => rings.some((r) => onWallLine(w, { x: town.x + dx, z: town.z + dz }, r, OPEN_WALL)),
   });
-  const P = PLANTING[town.style] ?? PLANTING.vale;
-  const soil = new Set([P.top, P.patch[0]]);
   const ready = town.ready;
   openBusy.add(owner);
   system.runJob((function* () {
     const dim = world.getDimension(OVERWORLD);
     try {
-      let n = 0;
-      for (const [dx, dz, id] of plan) {
-        if (++n % 40 === 0) yield;
-        const x = town.x + dx, z = town.z + dz;
-        let ground;
+      // the top of a column near the town's height: a block, null when nothing is there, undefined when not loaded
+      const topAt = (x, z) => {
         for (let y = town.y + 16; y >= town.y - 16; y--) {
           let b;
-          try { b = dim.getBlock({ x, y, z }); } catch { return; }
-          if (!b) return; // not loaded: tried again later
+          try { b = dim.getBlock({ x, y, z }); } catch { return undefined; }
+          if (!b) return undefined;
           if (b.isAir || AIRY.test(b.typeId)) continue;
-          ground = b;
-          break;
+          return b;
         }
-        if (!ground || !soil.has(ground.typeId)) continue; // a path, a field, a wall, a tree: not open ground
-        const above = ground.above();
+        return null;
+      };
+      // plain ground only: a path, a field, a wall or a tree is not open ground
+      const plain = (b) => b && GROUND.test(b.typeId) && !/dirt$|gravel/.test(b.typeId);
+      let n = 0;
+      for (const t of trees) {
+        yield;
+        const x = town.x + t.dx, z = town.z + t.dz, g = topAt(x, z);
+        if (g === undefined) return;
+        if (!plain(g) || !canGrow("tree", g.typeId)) continue;
+        const d = GROVE_DESIGNS[`${t.sid}_${t.stage}_${t.v}`];
+        try { world.structureManager.place(`siege_grove:${t.sid}_${t.stage}_${t.v}`, dim, { x: x + d.lo[0], y: g.location.y + d.lo[1], z: z + d.lo[2] }); }
+        catch (e) { console.warn(`[Hollow Crown] planting: no tree on the open ground: ${e}`); }
+      }
+      for (const [dx, dz, id] of plan) {
+        if (++n % 40 === 0) yield;
+        const x = town.x + dx, z = town.z + dz, g = topAt(x, z);
+        if (g === undefined) return;
+        if (!plain(g) || !canGrow(id, g.typeId)) continue;
+        const above = g.above();
         if (!above?.isAir) continue;
         const p = perm(id);
         if (p) try { above.setPermutation(p); } catch { /* a plant this ground won't hold */ }
