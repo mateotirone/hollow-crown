@@ -4,11 +4,12 @@
 // The last stage of the town's build order: plots, paths, wall, blending, then planting. Pure code, runs in Node
 // (planting.js does the world part). Coordinates are blocks from the Plot Stone, like a layout's slots (towns.js).
 //
-//   plantPlan({ slot, region, building?, seed?, nearWall?(dx, dz), noTrees? }) -> { surface, plants, trees }
+//   plantPlan({ slot, region, building?, seed?, nearWall?(dx, dz), inBand?(dx, dz), noTrees? }) -> { surface, plants, trees }
 //     slot      a slot from towns.js slotsOf
 //     building  { box: {x0, z0, x1, z1}, origin: {dx, dz}, forward: {x, z} } where the building stands (seatOnSlot +
 //               seatedBox), or undefined for an empty plot: then the plot only gets its ground back, nothing planted
 //     nearWall  true where nothing climbable may stand (walldata.js onWallLine, WALLS.reserve)
+//     inBand    true where nothing is planted at all: the wall band (Town to Castle walls still overlap some plots)
 //     noTrees   no trees on this plot (ground the hall takes later: a tree half cut by its clear box would hang in the air)
 //   -> surface: [[dx, dz]]                      every open plot cell, given the region's ground block
 //      plants:  [[dx, dz, id, tall]]            one block standing on the ground (tall: a raider could stand on it)
@@ -94,7 +95,7 @@ export function doorLane(slot, building) {
   return out;
 }
 
-export function plantPlan({ slot, region = "vale", building, seed = "", nearWall = () => false, noTrees = false }) {
+export function plantPlan({ slot, region = "vale", building, seed = "", nearWall = () => false, inBand = () => false, noTrees = false }) {
   const P = PLANTING[region] ?? PLANTING.vale;
   const s = seedOf(`${seed}|${slot.id}`);
   const { box } = slot;
@@ -107,7 +108,7 @@ export function plantPlan({ slot, region = "vale", building, seed = "", nearWall
   const dressing = DRESS[slot.size] ?? "ground";
   if (!building || dressing === "ground") return { surface, plants, trees };
 
-  const open = (x, z) => x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1 && !inBuilding(x, z, 1) && !lane.has(`${x},${z}`);
+  const open = (x, z) => x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1 && !inBuilding(x, z, 1) && !lane.has(`${x},${z}`) && !inBand(x, z);
   const flatOnly = dressing === "flat" || (slot.tags ?? []).some((t) => t === "wall" || t === "gate");
   const tallOk = (x, z) => open(x, z) && !edge(x, z) && !flatOnly && !nearWall(x, z);
   const taken = new Set();

@@ -68,6 +68,17 @@ addTests("settle planting", {
       for (const t of p.trees) assert(!near(t.dx, t.dz), `${name} ${slot.id}: a tree trunk within reach of the wall`);
     }
   },
+  "nothing at all is planted in the wall band": () => {
+    for (const { name, slot, building } of seated("vale")) {
+      const band = (x, z) => (x * 7 + z * 3) % 4 === 0; // any pattern: the rule must hold whatever the wall says
+      const p = plantPlan({ slot, region: "vale", building, inBand: band });
+      for (const [x, z] of p.plants) assert(!band(x, z), `${name} ${slot.id}: a plant in the wall band at ${x},${z}`);
+      for (const t of p.trees) {
+        const d = GROVE_DESIGNS[`${t.sid}_${t.stage}_${t.v}`];
+        for (let a = d.lo[0]; a <= d.hi[0]; a++) for (let c = d.lo[2]; c <= d.hi[2]; c++) assert(!band(t.dx + a, t.dz + c), `${name} ${slot.id}: a tree in the wall band`);
+      }
+    }
+  },
   "planting is the same every time, and every region plants": () => {
     let planted = 0;
     for (const region of REGIONS) {

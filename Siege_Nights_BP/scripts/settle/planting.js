@@ -7,8 +7,8 @@
 // free is planted: grass and flowers, a bush or two, and a young tree of the region's grove where there is room
 // (breakable wood, the Forester's Lodge's trees, never the map's unbreakable ones). What and where: planting_rules.js.
 //
-// When it happens: when a building on a plot is finished (settleBuilt), when a tier's plots are laid out (townReady,
-// and townLaidOut before that event exists), and a slow catch-up for plots that weren't loaded then or were dressed
+// When it happens: when a building on a plot is finished (settleBuilt), when a tier is ready (townReady: its plots,
+// paths, ground and fixtures are laid and its wall stands on its line), and a slow catch-up for plots that weren't loaded then or were dressed
 // by an older version (PLANT_VERSION). When a building is knocked down (settleCleared) its planting is taken up
 // first, so the next building's clear box never leaves half a tree, then the plot gets its bare ground back.
 // A few blocks a tick (runJob); nothing is set in a chunk that isn't loaded (that plot is tried again later).
@@ -18,7 +18,7 @@ import { isReady, on, onTick, moduleStore } from "../siege/api.js";
 import { townOf, allTowns, layoutOf, slotClosed } from "./founding.js";
 import { slotsOf, townFor } from "./towns.js";
 import { wallOf } from "./walls.js";
-import { WALLS, onWallLine } from "./walldata.js";
+import { WALLS, onWallLine, radiusAt } from "./walldata.js";
 import { plantPlan, groundFor, BARE, PLANT_VERSION } from "./planting_rules.js";
 import { GROVE_DESIGNS } from "../forestry/grove_data.js";
 
@@ -48,6 +48,19 @@ function nearWallFor(owner, town) {
   const rings = new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter(Number.isFinite));
   return (dx, dz) => [...rings].some((r) => onWallLine(w, { x: town.x + dx, z: town.z + dz }, r, WALLS.reserve));
 }
+// The wall band, where nothing is planted at all: from 6 inside each ring's line out past it (the town build order
+// thread, 2026-11-16: the Town to Castle walls still overlap some plots and fields until the town generator keeps a
+// clear band). With no wall yet, nothing is planted.
+const BAND_IN = 6;
+function inBandFor(owner, town) {
+  const w = wallOf(owner);
+  if (!w) return () => true;
+  const rings = [...new Set([w.radius, ...(townFor(town.plot)?.walls ?? [])].filter(Number.isFinite))];
+  return (dx, dz) => {
+    const x = town.x + dx - (w.x + 0.5), z = town.z + dz - (w.z + 0.5), d = Math.hypot(x, z), a = Math.atan2(z, x);
+    return rings.some((r) => { const line = radiusAt(w, r, a); return d >= line - BAND_IN && d <= line + WALLS.reserve; });
+  };
+}
 
 // What a plot is dressed for now: its building once it stands, else nothing (bare ground)
 function dressFor(town, slot) {
@@ -62,7 +75,7 @@ function dressFor(town, slot) {
 }
 
 const planOf = (owner, town, slot, rec) => plantPlan({
-  slot, region: town.style, seed: owner, nearWall: nearWallFor(owner, town),
+  slot, region: town.style, seed: owner, nearWall: nearWallFor(owner, town), inBand: inBandFor(owner, town),
   building: rec.b ? { box: rec.box, origin: rec.origin, forward: rec.forward } : undefined,
   noTrees: (slot.tags ?? []).some((t) => NO_TREES.test(t)),
 });
@@ -164,9 +177,11 @@ function* undress(dim, owner, town, slot, rec) {
   return true;
 }
 
-// Plots of a town that are open, laid out and not taken by the hall
+// Plots of a town that are open, laid out and not taken by the hall. With the town build order (town.ready: the last
+// tier whose plots, paths, ground, fixtures and wall are all down), only plots of a ready tier; before it, laid ones.
 function openSlots(owner, town, upTo = town.tier ?? 0) {
-  return slotsOf(layoutOf(town)).filter((s) => s.tier <= upTo && town.laid?.[s.tier] !== false && !slotClosed(owner, s));
+  const done = (t) => (town.ready !== undefined ? t <= town.ready : town.laid?.[t] !== false);
+  return slotsOf(layoutOf(town)).filter((s) => s.tier <= upTo && done(s.tier) && !slotClosed(owner, s));
 }
 // Does this plot need dressing (never dressed, an older version, or a different building since)?
 function stale(owner, town, slot) {
@@ -185,13 +200,11 @@ on("settleCleared", ({ owner, slotId }) => {
   const s = town && slotsOf(layoutOf(town)).find((x) => x.id === slotId);
   if (s) dress(owner, s); // the record says what stood: it comes up, then the plot gets its bare ground
 });
-// townReady: the town build order's last stage before planting (plots, paths, wall, blending); townLaidOut until then
-for (const ev of ["townReady", "townLaidOut"]) {
-  on(ev, ({ owner, tier }) => system.runTimeout(() => {
-    const town = townOf(owner);
-    if (town) for (const s of openSlots(owner, town, tier)) if (stale(owner, town, s)) dress(owner, s);
-  }, 60));
-}
+// townReady: the town build order's last stage before planting (plots, paths, ground, fixtures, then the wall on its line)
+on("townReady", ({ owner, tier }) => system.runTimeout(() => {
+  const town = townOf(owner);
+  if (town) for (const s of openSlots(owner, town, tier)) if (stale(owner, town, s)) dress(owner, s);
+}, 20));
 // Catch-up: one plot at a time, for plots not loaded before and worlds dressed by an older version. A plot tried in
 // the last minute waits its turn, so one that isn't loaded never holds up the rest.
 const tried = new Map(); // key -> tick
