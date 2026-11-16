@@ -422,7 +422,7 @@ function ringOps(tier) {
   // the page raises level L over level L-1 and takes down what L no longer has (old steps, ladders)
   // rec: the wall record the game keeps for this ring (settle/walls.js), for the siege simulator to hand back to it
   const ring = { radius: wall.radius, fresh: {}, lifts: {}, earth: {}, earthPerm: pid("minecraft:grass_block"),
-    rec: { x: wall.x, y: wall.y, z: wall.z, shape: wall.shape, radius: wall.radius, style: wall.style, gate: wall.gate, gateDir: wall.gateDir, ground: wall.ground, ...(wall.radii ? { radii: wall.radii, radiiAt: wall.radiiAt } : {}), ...(wall.tight ? { tight: wall.tight } : {}) } };
+    rec: { x: wall.x, y: wall.y, z: wall.z, shape: wall.shape, radius: wall.radius, style: wall.style, gate: wall.gate, gateDir: wall.gateDir, ground: wall.ground, ...lineFields(tw.outline) } }; // the wall line fields the game keeps on the record (walldata.js lineFields)
   for (let L = 1; L < WALL_LEVELS.length; L++) {
     restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
     ring.fresh[L] = topUpOps(L, tier, wallOps(L));
