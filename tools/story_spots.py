@@ -45,6 +45,7 @@ PEOPLE = [
     # Millbrook: the bakery
     ("nessa", "Millbrook", "in:bakery"),
     ("harl", "Millbrook", "near:nessa"),          # her husband, at the ovens
+    ("lammas", "Millbrook", "in:@-63,-486"),      # Edith Lammas, the Reeve's Office: the narrow house off the square
     # Mirelight: the last house before the lanterns stop
     ("hesper", "Mirelight", "in:@-4,892"),        # the house nearest this spot, by the Fen Line's east gate
     ("odo", "Mirelight", "near:hesper"),          # her husband, cutting reeds out back

@@ -270,7 +270,7 @@ addTests("lore", {
     assertEqual(fallenCount(["fell_reeve", "fell_bride", "fell_morvane", "wren_met"]), 2);
   },
   "regional roles: each has a past, a reason and a saying, and every origin line names a real skill of that role": () => {
-    const branch = { rider: "wing", forgemaster: "forge", captain: "helm", witch: "hex" };
+    const branch = { rider: "wing", forgemaster: "forge", captain: "helm", witch: "hex", reeve: "land" };
     for (const [role, lore] of Object.entries(ROLE_LORE)) {
       for (const key of ["before", "why", "saying"]) assert(lore[key]?.length > 20, `${role}.${key}`);
       assertEqual(ROLES[role].region, lore.region, role);

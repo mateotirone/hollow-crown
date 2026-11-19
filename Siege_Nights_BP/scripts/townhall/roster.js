@@ -72,10 +72,11 @@ api.on("levelsQuery", (q) => {
 
 function facts(player, notes) {
   const hero = heroOf(player);
-  const role = ROLES[hero.path];
+  const role = ROLES[hero.path], extra = ROLES[hero.regional];
   return {
     id: player.id, name: player.name, level: hero.level ?? 1,
-    role: role?.name, rank: role ? rankOf(hero.path, hero.skills ?? {})?.name : undefined,
+    role: [role?.name, extra?.name].filter(Boolean).join(" & ") || undefined,
+    rank: [role && rankOf(hero.path, hero.skills ?? {})?.name, extra && rankOf(hero.regional, hero.skills ?? {})?.name].filter(Boolean).join(" & ") || undefined,
     place: PLACES[player.dimension.id] ?? "somewhere strange",
     ...townOf(player.id),
     notes: notes.get(player.id),

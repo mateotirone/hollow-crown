@@ -757,7 +757,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 51 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), roletrials (2), codex, townhall |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 54 | bestiary (15), undertow (15), after (7), lore (4), roletrials (4), unlocks (4), crown (2), townhall (2), codex |
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 36 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 23 | trade (4), economy (2), townhall (2), unlocks (2), arena, codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 22 | unlocks (4), settle (3), townhall (3), vault (3), economy (2), siege (2), arena, codex, horses, roletrials, trade |
@@ -798,6 +798,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.horse.gallop` | 5 | letters (2), horses, roletrials, townhall |
 | `random.door_open` | 4 | warwrit (2), siege, vault |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
+| `dig.grass` | 3 | roletrials (2), unlocks |
 | `item.shield.block` | 3 | bestiary (3) |
 | `mob.blaze.shoot` | 3 | roletrials (2), dragons |
 | `mob.horse.idle` | 3 | horses (2), newplayer |
@@ -810,7 +811,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `bucket.empty_water` | 2 | unlocks (2) |
 | `bucket.fill_water` | 2 | roletrials, unlocks |
 | `crossbow.shoot` | 2 | dragons, siege |
-| `dig.grass` | 2 | roletrials, unlocks |
 | `dig.sand` | 2 | bestiary, dragons |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
 | `mob.enderdragon.flap` | 2 | codex, roletrials |

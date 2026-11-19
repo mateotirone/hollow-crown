@@ -1,9 +1,10 @@
-// The four regional mentors (thread "Finish the six role storylines", 2026-11-11). Same format as dialogue.js,
+// The five regional mentors (thread "Finish the six role storylines", 2026-11-11). Same format as dialogue.js,
 // which adds these to NPCS. Plan: https://claude.ai/artifact/Ra52mNyxfnaP71DpzU3mQH
 //
 // Each mentor's trial lives in scripts/roletrials. Flags they read, set by that feature:
 //   trial_<step>          a step is done (trial_span, trial_choosing, trial_hearth, trial_ring, trial_articles,
-//                         trial_crew, trial_graves; the cup is the dialogue's own flag nell_cup)
+//                         trial_crew, trial_graves, trial_tithe; the cup and the moot are the dialogue's own flags
+//                         nell_cup and lammas_moot)
 //   trial_<role>_deed     the old deed is done (a boss fell near you, or your dragon hatched)
 //   trial_<role>_ready    every step and the deed are done: go and swear at the Tree
 // Flags they set: <mentor>_met, and <mentor>_call, which starts the trial.
@@ -23,7 +24,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_choosing"], "hatchwait"],
       [["flag:trial_span"], "nests"],
       [["flag:kesh_call"], "spanwait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:kesh_met"], "hub"],
       [[], "first"],
     ],
@@ -131,7 +132,7 @@ export const MENTOR_NPCS = [
         opts: [["Back.", "sworn"]],
       },
       other: {
-        text: "You're sworn to something already. I can see it on you.\n\nThe Roost doesn't take halves. One road each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
+        text: "You've another region's road on you already. I can see it.\n\nThe Roost doesn't take halves. Your own oath, Knight's or Ember's, is your business, but one of the regions' roads each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
         opts: [["Tell me about Ysolt.", "ysolt_other"], ["Goodbye.", "end"]],
       },
       ysolt_other: {
@@ -188,7 +189,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_ring"], "huntwait"],
       [["flag:trial_hearth"], "ringwait"],
       [["flag:ulla_call"], "haulwait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:ulla_met"], "hub"],
       [[], "first"],
     ],
@@ -287,7 +288,7 @@ export const MENTOR_NPCS = [
         opts: [["Back.", "sworn"]],
       },
       other: {
-        text: "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
+        text: "You're sworn to another region's road already. I can see it on you. She can too: look, she's gone quiet.\n\nOne of those each. Warm your hands, though. Nobody's turned away from the fire.",
         opts: [["Thank you.", "end"]],
       },
       turn: {
@@ -334,7 +335,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_crew"], "bridewait"],
       [["flag:trial_articles"], "crewwait"],
       [["flag:ottilie_call"], "articleswait"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:ottilie_met"], "hub"],
       [[], "first"],
     ],
@@ -488,7 +489,7 @@ export const MENTOR_NPCS = [
       [["flag:trial_graves"], "motherwait"],
       [["flag:nell_cup"], "graveswait"],
       [["flag:nell_call"], "cup"],
-      [["!path:none"], "other"],
+      [["!regional:none"], "other"],
       [["flag:nell_met"], "hub"],
       [[], "first"],
     ],
@@ -630,6 +631,180 @@ export const MENTOR_NPCS = [
           ["What is this place?", "raft"],
           ["Do you know Old Mag?", "mag"],
           ["What does a witch do?", "witch"],
+          ["Goodbye.", "end"],
+        ],
+      },
+    },
+  },
+
+  // ------------------------------------------------------------------ Edith Lammas, the Reeve's Office in Millbrook
+  // The Reeve (Mateo picked it for the Vale, 2026-11-15). Millbrook's office has stood empty since Anselm Tock stopped
+  // the clocks; the Lammases, Hob Lammas's line, have kept the seal in a drawer ever since.
+  {
+    id: "lammas", name: "Edith Lammas", where: "The Reeve's Office, the narrow house off Millbrook square. Seventy if she's a day, spectacles on a string, flour on her apron from helping at the bakery. Keeps the Court Roll and a seal nobody has used in three hundred years.",
+    start: [
+      [["path:reeve", "flag:morvane_fallen", "!flag:lammas_after"], "after"],
+      [["path:reeve", "flag:rank_reeve_reeve_of_the_vale", "!flag:lammas_stand"], "stand"],
+      [["path:reeve", "flag:rank_reeve_reeve", "!flag:lammas_turn"], "turn"],
+      [["path:reeve"], "sworn"],
+      [["flag:trial_reeve_ready"], "ready"],
+      [["flag:lammas_moot"], "deedwait"],
+      [["flag:trial_tithe"], "moot"],
+      [["flag:lammas_call"], "tithewait"],
+      [["!regional:none"], "other"],
+      [["flag:lammas_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "Shut the door, dear, the dark gets in. It's always dark in Millbrook. You get used to it, or you move to Wrenfield.\n\nEdith Lammas. This is the Reeve's Office. There hasn't been a Reeve in it for three hundred years, but somebody has to dust.",
+        opts: [
+          ["What does a Reeve do?", "reeve", ["flag:lammas_met"]],
+          ["Why has nobody had the job?", "empty", ["flag:lammas_met"]],
+          ["Sorry, wrong door.", "end", ["flag:lammas_met"]],
+        ],
+      },
+      reeve: {
+        text: "Answers for the land. A lord owns it, if there is one. A Reeve sees the barns are full, the roads are passable, the quarrels get judged before they become feuds, and the levy turns out when the bell goes.\n\nNobody writes songs about it. Nobody starves either, while there's a good one.",
+        opts: [["Why has nobody had the job?", "empty"], ["Back.", "hub"]],
+      },
+      empty: {
+        text: "Because the last one never left it. Anselm Tock, Reeve of Millbrook. He stopped every clock in the town at seventeen minutes past three, and the night stopped with them, and he's down there under the well still holding it.\n\nThe office goes to the next Reeve when the last one's done. He isn't done. So my family keep the seal in that drawer, and the roll up to date, and wait.",
+        opts: [["Could I take it?", "could"], ["Back.", "hub"]],
+      },
+      could: {
+        text: "Could you? Let me look at you.\n\nHm. Good boots. You looked at the barn on your way in. Most people look at the clocks.\n\nThree things, then, same as Hob Lammas was asked, under the oak, before there was a Millbrook. Fill the Reeve's barn with a first tithe. Judge one quarrel, fairly, in front of people. And then the hard one: end Tock's minute, so the office comes loose.",
+        opts: [
+          ["Where do I start?", "tithe", ["flag:lammas_call"]],
+          ["End his minute? He's a Reeve.", "tock"],
+          ["Not yet.", "end"],
+        ],
+      },
+      tock: {
+        text: "He was. He was a good one, by the roll. Thirty years of fair harvests and not one hanging.\n\nThen the bell rang under the well, the night after the war, and he did something about it the only way he could think of. I don't hate him. I'd like him to be able to stop.",
+        opts: [["Where do I start?", "tithe", ["flag:lammas_call"]], ["Not yet.", "end"]],
+      },
+      tithe: {
+        text: "With the barn. Thirty-two sheaves of wheat and eight good loaves, the old first tithe. Bring them here when you have them on you.\n\nIt isn't the bread. It's the town seeing someone carry a tithe up that street again.",
+        opts: [["I'll bring it.", "end"]],
+      },
+      tithewait: {
+        greets: [
+          "Thirty-two sheaves and eight loaves. The barn door's unlocked.",
+          "Bread's only wheat that's been talked to nicely. Bake it yourself if you're short.",
+          "The barn's waiting. It's very patient. It's had practice.",
+        ],
+        text: "Thirty-two wheat and eight bread for the Reeve's barn, dear. Bring them when you have them on you.",
+        opts: [["Soon.", "end"]],
+      },
+      moot: {
+        text: "Good, you're here. There's a moot waiting. That's a quarrel with an audience.\n\nJoan Ansty and Gil Carrow. The stone between their strips moved a yard into Joan's barley in the night. Joan says Gil shifted it. Gil says stones walk in Millbrook, and the awful thing is, he isn't entirely wrong.\n\nThey're outside. Half the street came to watch. Judge it.",
+        opts: [
+          ["Gil moved it. Put it back, and he owes her a sack.", "moot_joan", ["flag:lammas_moot", "flag:moot_joan"]],
+          ["Nobody can prove it. Split the yard between them.", "moot_split", ["flag:lammas_moot", "flag:moot_split"]],
+          ["Before I judge anything, I want to see the stone.", "moot_look"],
+        ],
+      },
+      moot_look: {
+        text: "You walk out to the strips with half of Millbrook behind you.\n\nThe stone's base is dry, and the grass under where it stood is pale and flattened, but there's no drag mark. It came up out of the ground and settled again, a yard over. A yard nearer the square. Nearer the well.\n\nGil's face says he knew. Joan's says she knew too, and hoped you wouldn't.",
+        opts: [
+          ["Leave it, stake the old line, and both of you keep watch on third nights.", "moot_looked", ["flag:lammas_moot", "flag:moot_look"]],
+          ["Gil still should have said. He owes her a sack.", "moot_joan", ["flag:lammas_moot", "flag:moot_joan"]],
+        ],
+      },
+      moot_joan: {
+        text: "Gil goes red and then goes to fetch the sack. Joan says nothing, which in Joan is a speech.\n\n\"Firm,\" says Edith, writing. \"He'll sulk a week and forget. She won't forget, which is rather the point of a moot.\"",
+        opts: [["Is that it?", "mootdone"]],
+      },
+      moot_split: {
+        text: "Neither of them likes it. That's how you can tell.\n\n\"The Lammas answer,\" says Edith, writing. \"Hob used to say a moot that leaves both sides a little cross was done right. I've never liked that saying. It keeps being true.\"",
+        opts: [["Is that it?", "mootdone"]],
+      },
+      moot_looked: {
+        text: "The crowd mutters, then nods, then goes home to look at its own stones.\n\n\"You went and looked,\" says Edith, writing. \"Tock never did that, at the end. He stopped looking at anything but the clocks.\"",
+        opts: [["Is that it?", "mootdone"]],
+      },
+      mootdone: {
+        text: "That's a moot. It's in the roll, under your name, the first new hand in three hundred years.\n\nWhich leaves the hard one. The well, and what's under it. Read Tock's statement in the clock tower if you haven't. He left the answer for whoever came. He wanted someone to.",
+        opts: [["I'll go down.", "end"]],
+      },
+      deedwait: {
+        greets: [
+          "The clocks still say seventeen past three. So do I, most days.",
+          "The keepers in the square will tell you which clock he stopped first. One of them lies. Listen for it.",
+          "He's waiting under the well. I think he's been waiting for you specifically, if that helps. It doesn't help me.",
+        ],
+        text: "Tithe in, moot judged. Now Tock's minute. Wake him at the well and finish it, and the office comes loose.",
+        opts: [["I know.", "end"]],
+      },
+      ready: {
+        text: "You did it. I heard the clocks from here. Seventy years, and I never knew clocks made a noise.\n\nShe opens the drawer, and takes out a seal on a faded ribbon, and puts it in your hand.\n\n\"Take that to a Tree of Oaths and swear. Then it's yours, and the Vale will start bringing you its arguments. Don't say I didn't warn you.\"",
+        opts: [["Thank you, Edith.", "end", ["sp:1"]]],
+      },
+      sworn: {
+        greets: [
+          "Reeve. The Carrows want you about a pig. Of course they do.",
+          "Your tithe came in. I counted it twice. It's short a loaf. I ate it.",
+          "Sit, Reeve. The roll's open. It's always open now.",
+        ],
+        text: "What can I do for you, Reeve?",
+        opts: [
+          ["Tell me about Hob Lammas.", "hob"],
+          ["What was Tock like?", "tockwas"],
+          ["Teach me something.", "teach"],
+          ["Goodbye.", "end"],
+        ],
+      },
+      hob: {
+        text: "Ploughman. Couldn't read. Kept the whole roll in knots on a cord, and when the first scribe came and wrote it down properly, they checked forty years of knots against it and found he'd never once been wrong.\n\nHe's my however-many-greats grandfather. I've got his cord. I can't read it either.",
+        opts: [["Back.", "sworn"]],
+      },
+      tockwas: {
+        text: "Careful, by the roll. Every page in a small square hand. Thirty years and he never missed a harvest count.\n\nThe last month, the hand gets bigger, and faster, and then it's just times. Three seventeen, three seventeen, down the page.",
+        opts: [["Back.", "sworn"]],
+      },
+      teach: {
+        text: "Go and look. Before you judge, before you tax, before you call the levy. Go and look at the stone, the barn, the road, the face.\n\nAnd keep the roads open. A village with an open road is never quite alone, and a village that's alone will believe anything.",
+        opts: [["Back.", "sworn"]],
+      },
+      other: {
+        text: "You're sworn to something already, I can see it on you. The office wouldn't have you twice, and the Vale can't afford to share.\n\nYou can still help me move this chest, if you like.",
+        opts: [["What does a Reeve do?", "reeve_other"], ["Goodbye.", "end"]],
+      },
+      reeve_other: {
+        text: "Answers for the land. Full barns, open roads, fair moots, and a levy that comes when it's called. Millbrook hasn't had one in three hundred years. You can tell by looking.",
+        opts: [["Goodbye.", "end"]],
+      },
+      turn: {
+        text: "Reeve in rank. Then come here, and close the shutter.\n\nShe takes the Court Roll down and turns to the last page in Tock's hand. Under the column of times, pasted in, is a scrap of better paper than anything Millbrook ever owned. Four words, in a hand that isn't his: Hold the minute. Wait.\n\nAnd under them, a seal, scraped off with a knife, the way you scrape off a seal you don't want found.",
+        opts: [["Somebody told him to.", "turn2"]],
+      },
+      turn2: {
+        text: "Somebody told him to. Somebody who knew the bell was going to ring under the well before it rang, and knew what Tock would do if he was frightened enough, and gave him something to do with his fear.\n\nWho gives a Reeve orders? Only whoever he answered to. And whoever that was, they wanted Millbrook dark, and its office empty, and they wanted it for a long time.",
+        opts: [["Who?", "turn3"]],
+      },
+      turn3: {
+        text: "I don't know, dear. I've had seventy years to wonder and I don't know.\n\nBut I know this: Tock was a good Reeve who was handed a terrible order, and he kept it, because keeping things was what he was good at. If anyone ever hands you something like this, kind and reasonable, with a seal on it, come and show me first.",
+        opts: [["I will.", "sworn", ["flag:lammas_turn", "sp:1"]]],
+      },
+      stand: {
+        text: "Reeve of the Vale. Nobody's had those words since the war.\n\nI want to ask you something. When the bad night comes, and you'll know it when it does, call the levy. Ring for them. The Vale owes its Reeve the muster, it's in the charter, four lines long. They'll come, with whatever was by the door.\n\nAnd my grandson Cob will be first up the stair. I've told him not to. He's a Lammas.",
+        opts: [["I'll ring for them.", "sworn", ["flag:lammas_stand", "sp:2"]]],
+      },
+      after: {
+        text: "She's at the window, watching the square in daylight.\n\n\"Do you know, I'd never seen the colour of the chapel roof. It's green. All my life.\"\n\nShe opens the roll to a new page, writes the date in a careful square hand, and under it, a harvest count. Just an ordinary harvest. Then she sits back and looks at it for a long time.",
+        opts: [["It's a good page.", "sworn", ["flag:lammas_after", "sp:1"]]],
+      },
+      hub: {
+        greets: [
+          "Back. Shut the door, the dark gets in.",
+          "Mind the chest, it's Hob's. He was shorter than you.",
+          "You again. Sit down, you're making the room look untidy.",
+        ],
+        text: "What can I do for you?",
+        opts: [
+          ["What does a Reeve do?", "reeve"],
+          ["Why has nobody had the job?", "empty"],
           ["Goodbye.", "end"],
         ],
       },

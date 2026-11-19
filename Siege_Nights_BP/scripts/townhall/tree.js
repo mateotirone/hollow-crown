@@ -36,7 +36,9 @@ export function treeMenu(player, hallLevel) {
   const { into, need } = levelFromRenown(hero.renown);
   const rank = rankOf(hero.path, hero.skills);
   const nextUnlock = Object.entries(LEVEL_UNLOCKS).find(([lvl]) => Number(lvl) > hero.level);
-  const pathLine = hero.path === "knight" ? `§6Oathsworn§r, ${rank.name}` : hero.path === "marked" ? `§5Marked§r, ${rank.name}` : ROLES[hero.path] ? `${ROLES[hero.path].color ?? "§6"}${ROLES[hero.path].name}§r, ${rank.name}` : "§7No path yet";
+  const regionalRank = rankOf(hero.regional, hero.skills);
+  const pathLine = (hero.path === "knight" ? `§6Oathsworn§r, ${rank.name}` : hero.path === "marked" ? `§5Marked§r, ${rank.name}` : "§7No path yet")
+    + (ROLES[hero.regional] ? `  ·  ${ROLES[hero.regional].color ?? "§6"}${ROLES[hero.regional].name}§r, ${regionalRank?.name}` : "");
   const lines = [
     `§lRenown ${hero.level}§r  ${levelTitle(hero.level)}`,
     need ? `${bar(into / need)} ${into}/${need}` : "§6Renown is at its height.",
@@ -49,7 +51,7 @@ export function treeMenu(player, hallLevel) {
   const form = new ActionFormData().title("Tree of Oaths").body(lines.filter(Boolean).join("\n"));
   const actions = [];
   for (const [id, branch] of Object.entries(BRANCHES)) {
-    const open = canBranch(id, hero.path);
+    const open = canBranch(id, hero.path, hero.regional);
     if (branch.regional && !open) continue;
     const spent = spentIn(hero.skills, id);
     form.button(`${open ? "" : "§8"}${branch.name}${open ? `\n§8${spent} point${spent === 1 ? "" : "s"} sworn` : `\n§8${ROLES[branch.who]?.noun ?? "Others"} only`}`, branch.icon);
@@ -61,10 +63,11 @@ export function treeMenu(player, hallLevel) {
     form.button("§5The Hollow's offer\n§8the Sorcerer's path, with a head start", "textures/items/siege_bound_ember");
     actions.push(() => victorMenu(player, hallLevel));
   }
-  if (hero.path === "none") {
-    form.button("§6Choose your path", "textures/items/siege_hollow_ember");
+  if (hero.path === "none" || (hero.regional === "none" && hero.offers.some((r) => ROLES[r]?.region))) {
+    form.button(hero.path === "none" ? "§6Choose your path" : "§6A regional role is offered", "textures/items/siege_hollow_ember");
     actions.push(() => pathMenu(player, hallLevel));
-  } else if (hero.path === "knight" || hero.path === "marked") {
+  }
+  if (hero.path === "knight" || hero.path === "marked") {
     const item = hero.path === "knight" ? OATH_BANNER : BOUND_EMBER;
     if (!has(player, item)) {
       form.button(hero.path === "knight" ? "Take a new Oath Banner" : "Call the Ember back to your hand");
@@ -195,7 +198,8 @@ function buyMenu(player, hallLevel, skill, body, why) {
 export function learn(player, skill, hallLevel, paid = false) {
   const hero = heroOf(player);
   if (paid ? coinBlocked(skill, hero, hallLevel) : blockedReason(skill, hero, hallLevel)) return false;
-  const before = rankOf(hero.path, hero.skills)?.name;
+  const role = BRANCHES[skill.branch].who === hero.regional ? hero.regional : hero.path; // whose ladder this skill climbs
+  const before = rankOf(role, hero.skills)?.name;
   if (paid) hero.bought = { ...(hero.bought ?? {}), [skill.id]: (hero.bought?.[skill.id] ?? 0) + 1 };
   else hero.points -= skill.cost;
   hero.skills[skill.id] = (hero.skills[skill.id] ?? 0) + 1;
@@ -207,11 +211,11 @@ export function learn(player, skill, hallLevel, paid = false) {
     api.title(player, "§5The Last Art", "§7It is waiting for you to claim it");
     api.emit("hollowClaimReady", { player });
   }
-  const after = rankOf(hero.path, hero.skills)?.name;
+  const after = rankOf(role, hero.skills)?.name;
   if (after && after !== before) {
-    api.title(player, `§6${after}`, hero.path === "knight" ? "§7The Order raises your rank" : "§7The Ember sinks deeper");
+    api.title(player, `§6${after}`, role === "knight" ? "§7The Order raises your rank" : role === "marked" ? "§7The Ember sinks deeper" : `§7${ROLES[role]?.name ?? ""}`);
     world.sendMessage(`§6${player.name} is now ${withArticle(after)}.`);
-    api.emit("rankUp", { player, path: hero.path, rank: after });
+    api.emit("rankUp", { player, path: role, rank: after });
   }
   return true;
 }
@@ -244,7 +248,7 @@ function pathMenu(player, hallLevel) {
   // with the Ember, the choosing scene (newplayer/act2.js) plays instead of this list
   if (holding && applyFilter("treeScene", false, { player })) return;
   const body = [
-    "Two roads lead from here, and you can only walk one. §cThe choice is permanent.",
+    hero.path === "none" ? "Two roads lead from here, and you can only walk one. §cThe choice is permanent." : "§7Your main road is chosen. One regional road can still be added to it.",
     "",
     "§6The Oathsworn (Knight).§r Give the Ember up and swear the Squire's Oath to the Order of the Ashen Gate. Power from steel, shield, horse and command: techniques, more health, guards that fight harder beside you. Ranks: " + RANKS.knight.map((r) => r.name).join(", ") + ".",
     "",
@@ -252,21 +256,21 @@ function pathMenu(player, hallLevel) {
     "",
     holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. Something will come down near your keep, early on; keep it until you are ready.",
     "",
-    "§fOther roads, earned later in the regions.§7 Choosing the Ember's road closes these, because a person holds one role. There is no hurry: keep the Ember and come back to the Tree whenever you like.",
+    "§fRegional roads, earned in the regions.§7 You can hold one of these as well as your main road, whichever you take first. There is no hurry: keep the Ember and come back to the Tree whenever you like.",
     ...Object.keys(ROLES).filter((id) => ROLES[id].region).map((id) => `${ROLES[id].color}${ROLES[id].name}§7: ${ROLE_DEEDS[id]?.deed ?? "a deed in " + STYLES[ROLES[id].region].name}.`),
   ].join("\n");
   const form = new ActionFormData().title("Choose your path").body(body);
   const choices = [];
-  if (holding || hero.offers.includes("knight")) {
+  if (hero.path === "none" && (holding || hero.offers.includes("knight"))) {
     form.button(holding ? "§6Swear the Squire's Oath\n§8give up the Ember" : "§6Swear the Squire's Oath\n§8the Order has offered it");
     choices.push("knight");
   }
-  if (holding) {
+  if (hero.path === "none" && holding) {
     form.button("§5Take the Ember\n§8become Marked");
     choices.push("marked");
   }
   for (const role of hero.offers) {
-    if (role === "knight" || !ROLES[role]?.region) continue;
+    if (role === "knight" || !ROLES[role]?.region || hero.regional !== "none") continue;
     form.button(`${ROLES[role].color}Become a ${ROLES[role].name}\n§8offered to you in ${STYLES[ROLES[role].region].name}`);
     choices.push(role);
   }
@@ -288,7 +292,7 @@ function roleHistory(path) {
 export function confirmPath(player, path, back) {
   if (ROLES[path]?.region) {
     return void new MessageFormData().title(ROLES[path].name)
-      .body(`${ROLES[path].oath}${roleHistory(path)}\n\nYou become a ${ROLES[path].name} and the ${BRANCHES[ROLES[path].branch].name} branch of the Tree opens to you. You can hold only one role. §cThis cannot be undone.`)
+      .body(`${ROLES[path].oath}${roleHistory(path)}\n\nYou become a ${ROLES[path].name} and the ${BRANCHES[ROLES[path].branch].name} branch of the Tree opens to you, beside your main road. You can hold only one regional role. §cThis cannot be undone.`)
       .button1("I will").button2("Not yet")
       .show(player).then((r) => {
         if (r.canceled || r.selection !== 0) return back?.();
@@ -297,8 +301,8 @@ export function confirmPath(player, path, back) {
   }
   new MessageFormData().title(path === "knight" ? "The Squire's Oath" : "The Ember")
     .body(path === "knight"
-      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate, and the regional roles close to you. §cThis cannot be undone."
-      : "It is not warm. It is not cold. It fits the hollow of your palm as if it had been cut from it.\n\nThe Ember fuses to your hand and you become Marked, and the regional roles close to you. §cThis cannot be undone.")
+      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate. One regional role can still be added later. §cThis cannot be undone."
+      : "It is not warm. It is not cold. It fits the hollow of your palm as if it had been cut from it.\n\nThe Ember fuses to your hand and you become Marked. One regional role can still be added later. §cThis cannot be undone.")
     .button1(path === "knight" ? "I swear it" : "Close your hand").button2("Not yet")
     .show(player).then((r) => {
       if (r.canceled || r.selection !== 0) return back?.();
@@ -308,9 +312,13 @@ export function confirmPath(player, path, back) {
 
 export function choosePath(player, path) {
   const hero = heroOf(player);
-  if (path !== "none" && (hero.path !== "none" || !ROLES[path])) return false;
-  api.takeItems(player, EMBER, api.countItem(player, EMBER));
-  hero.ember = path === "marked" ? "taken" : path === "knight" ? "refused" : "none";
+  if (path !== "none" && !ROLES[path]) return false;
+  const regional = !!ROLES[path]?.region;
+  if (regional ? hero.regional !== "none" : path !== "none" && hero.path !== "none") return false;
+  if (!regional) {
+    api.takeItems(player, EMBER, api.countItem(player, EMBER));
+    hero.ember = path === "marked" ? "taken" : path === "knight" ? "refused" : "none";
+  }
   setPath(player, path);
   setTreeLook(player.id);
   if (path === "knight") {
@@ -330,7 +338,7 @@ export function choosePath(player, path) {
     sfx(player, "random.levelup");
     player.sendMessage(`${ROLES[path].color}You are a ${ROLES[path].name} now.§7 The ${BRANCHES[ROLES[path].branch].name} branch of the Tree of Oaths is open to you.`);
   }
-  hero.offers = [];
+  hero.offers = regional ? hero.offers.filter((r) => !ROLES[r]?.region) : hero.offers.filter((r) => ROLES[r]?.region);
   saveHero(player);
   api.emit("pathChosen", { player, path });
   if (path !== "none") api.emit("roleChosen", { player, role: path });

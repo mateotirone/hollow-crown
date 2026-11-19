@@ -48,14 +48,16 @@ G = {
 'ship':   [".....#......", ".....#a.....", ".....#aa....", ".....#aaa...", ".....#aaaa..", ".....#aaaaa.", ".....#......", "############", ".#++++++++#-", "..#######--.", "...-----....", "............"],
 'cauldron':["...a..a.....", "..a..a..a...", "...a..a.....", ".##########.", "#++++++++##-", ".#+######-..", ".#+#######-.", ".#+#######-.", ".#+#######-.", "..#######-..", "..#-...#-...", ".##....##..."],
 'letter': ["............", "............", "############", "#+#++++++#+-", "#++#++++#++-", "#+++#aa#+++-", "#++++aAa+++-", "#+++++a++++-", "#+++++++++#-", "###########-", ".----------.", "............"],
+'wheat':  [".....a......", "....a#a.....", "....#+#.....", "...a#+#a....", "....#+#.....", "...a#+#a....", "....#+#.....", ".....#......", ".....#-.....", ".....#-.....", ".....#-.....", "....##-....."],
 'fist':   ["............", "..########..", ".#+#+#+#+#-.", ".#+#+#+#+#-.", ".#+#+#+#+#-.", ".#########-.", "##++++++##-.", "#+#######-..", "#+#######-..", ".########-..", "..#aaaa#-...", "..#aaaa#-..."],
 }
 BR = {'keep': fixed('#2a2a34', '#4a4c5c', '#70748a', '#9a9eb4', '#c4c8d8', '#eceef6'), 'wayfarer': fixed('#14301c', '#245234', '#3a7a4e', '#5aa06c', '#8cc698', '#c8ecd0'),
       'blade': fixed('#3a0c0c', '#6c1a18', '#a02c24', '#cc4a38', '#ec7c60', '#ffc0a8'), 'arcana': fixed('#2a1250', '#4a1e88', '#7234c4', '#a05cf0', '#c896ff', '#ecd8ff'),
       'wing': fixed('#4a1c04', '#84380a', '#c05c14', '#ec8a2c', '#fcb85c', '#ffe4a8'), 'forge': fixed('#14283c', '#24486a', '#3c6c98', '#6094c0', '#94bce0', '#d0e6f8'),
-      'helm': fixed('#06302e', '#0e5450', '#1a7c74', '#34a69a', '#70ccc0', '#baf0e8'), 'hex': fixed('#1c2a08', '#34480e', '#506a16', '#749226', '#a2bc4a', '#d6e690')}
+      'helm': fixed('#06302e', '#0e5450', '#1a7c74', '#34a69a', '#70ccc0', '#baf0e8'), 'hex': fixed('#1c2a08', '#34480e', '#506a16', '#749226', '#a2bc4a', '#d6e690'),
+      'land': fixed('#3a2a0c', '#6a4c16', '#9a7424', '#c49a3a', '#e2c264', '#f8e8b0')}
 ACC = {'keep': (214, 170, 60), 'wayfarer': (236, 226, 190), 'blade': (224, 226, 236), 'arcana': (240, 120, 212), 'wing': (255, 244, 200), 'forge': (250, 150, 60),
-       'helm': (244, 240, 224), 'hex': (200, 110, 220)}
+       'helm': (244, 240, 224), 'hex': (200, 110, 220), 'land': (120, 190, 90)}
 PICK = dict(
  arc_ashen='scale', arc_bind='chain', arc_blink='tracks', arc_bolt='bolt', arc_choir='bell', arc_crownless='crown', arc_echo='eye', arc_hollowborn='heart', arc_hollowstep='spiral',
  arc_quiet='moon', arc_resonant='ring', arc_step='boot', arc_ward='shield', arc_warden='star',
@@ -64,6 +66,8 @@ PICK = dict(
  forge_arm='fist', forge_cold='drop', forge_deep='flame', forge_edge='sword', forge_guardsteel='shield', forge_master='star', forge_mend='hammer', forge_stance='anvil', forge_temper='scale',
  helm_boarding='sword', helm_crew='chain', helm_fleet='ship', helm_legs='boot', helm_purse='coin', helm_storm='bolt', helm_tide='wave', helm_voice='horn', helm_volley='bow',
  hex_bane='skull', hex_blood='drop', hex_contagion='spiral', hex_eye='eye', hex_eyes='cat', hex_leech='heart', hex_rot='leaf', hex_slip='tracks', hex_touch='hand',
+ land_charter='letter', land_furrow='wheat', land_highway='tracks', land_hue='horn', land_levy='banner', land_measure='scale', land_minute='compass',
+ land_plenty='leaf', land_tithe='coin',
  keep_court='crown', keep_hearth='flame', keep_masterbuilder='hammer', keep_messenger='letter', keep_muster='banner', keep_plunder='key', keep_rally='horn', keep_spoils='coin', keep_stonewright='wall',
  keep_unbreakable='tower', keep_wards='shield', keep_watchfire='eye',
  way_clue='key', way_fleet='boot', way_forager='leaf', way_homeward='tower', way_horse='horse', way_mapwright='map', way_nighteyes='moon', way_pathfinder='compass',
@@ -90,7 +94,7 @@ for sid, br in skills:
     if not g: miss.append(sid); g = 'star'
     im = icon(g, BR[br], ACC[br]); im.save(OUT + sid + '.png'); done.append((br, sid, im))
 done.sort(key=lambda t: (list(BR).index(t[0]), t[1]))
-sh = Image.new('RGBA', (15 * 56 + 8, 8 * 56 + 8), (38, 34, 46, 255)); row = {b: 0 for b in BR}
+sh = Image.new('RGBA', (15 * 56 + 8, len(BR) * 56 + 8), (38, 34, 46, 255)); row = {b: 0 for b in BR}
 for br, sid, im in done:
     sh.alpha_composite(im.resize((48, 48), Image.NEAREST), (8 + row[br] * 56, 8 + list(BR).index(br) * 56)); row[br] += 1
 sh.save(ROOT + 'art/skill-icons.png'); print('ok', len(done), 'no glyph:', miss)

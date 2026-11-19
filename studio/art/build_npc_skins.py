@@ -156,6 +156,7 @@ LOOKS = {
     # coloured cap, beard); Marta the beekeeper (shawl, headscarf, long skirt)
     'lore_tobin': S('#8a7a5a', '#5a4a34', '#4a3e30', '#c8b070', 'vest', 'cap', sk=1, hair=1, beard=True),
     'lore_marta': S('#6a5a6a', '#a89a6a', '#3e3630', '#cdc2a6', 'shawl', 'kerchief', 'skirt', sk=1, hair=2),
+    'lore_lammas': S('#4a6a3a', '#ece4d0', '#3e3630', '#c8a84a', 'apron', 'wimple', 'skirt', sk=0, hair=WHITE_HAIR, trim='#c8a84a'),  # Edith Lammas, the Reeve's Office, Millbrook (Vale role mentor)
 }
 
 # Regional looks (Mateo 2026-11-14): the same person dressed for each region, signature kept (Elspeth's shawl,

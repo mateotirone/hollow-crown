@@ -4,7 +4,8 @@
 // being won without these roles: each just makes its stage easier.
 //
 // Alone (one player in the fight), a role nobody there holds is filled by the mentor's student, who turns up and
-// fights beside you (Mateo's rule: a stand-in for every player role, fighting like players): Hrafn with his
+// fights beside you (Mateo's rule: a stand-in for every player role, fighting like players): Cob Lammas and the
+// Vale's levy at the Seat's doors, Hrafn with his
 // hammer at the Standing Ranks, Dame Orla and the knights at the Night, Jory Holt with a crossbow at the River,
 // Senna Vey on her dragon over the Rift (flown by dragons/wingmen.js). Rue lends the fall at stage 6 from the
 // fen, unseen, since the Fall is a memory. Not for the Sorcerer: no one stands in for the only person who can
@@ -24,6 +25,7 @@ const REACH = 64; // players this close to the stage's centre are in the fight
 // stage number (1-7) -> the role that matters there, and the student who stands in when you are alone
 // (fighter: the soldier they fight as; dragon: they fly in on one instead)
 export const STAGE_EDGES = {
+  1: { role: "reeve", student: "Edith's grandson, Cob Lammas", fighter: { type: "siege:man_at_arms", name: "Cob Lammas" }, what: "calls the Vale's levy, and the folk of the land come up the stair to hold the doors" },
   2: { role: "forgemaster", student: "Ulla's apprentice, Hrafn", fighter: { type: "siege:man_at_arms", name: "Hrafn" }, what: "rings a new bell-tongue, and the Standing Ranks break step" },
   3: { role: "knight", student: "Dame Orla Penhallow", what: "and the knights of the Gate hold the wall with you" },
   4: { role: "captain", student: "Ottilie's bosun, Jory Holt", fighter: { type: "siege:crossbowman", name: "Jory Holt" }, what: "and the forty row you down the river" },
@@ -35,7 +37,7 @@ export const STAGE_EDGES = {
 // Does this player hold the top rank of this role? (Sorcerer for "marked")
 export function atTop(hero, role) {
   const path = hero?.path === "sorcerer" ? "marked" : hero?.path;
-  if (path !== role || !RANKS[role]) return false;
+  if ((path !== role && hero?.regional !== role) || !RANKS[role]) return false;
   return rankOf(role, hero.skills ?? {})?.name === RANKS[role].at(-1).name;
 }
 
@@ -97,7 +99,13 @@ function onStage(stage, at, dimId) {
   if (answer.by === "student" && edge.dragon) {
     emit("npcDragonFly", { key: SENNA, name: edge.dragon.name, species: edge.dragon.species, dimension: dimId, center: at, radius: 14, height: 9, every: 160, damage: 8, targetType: MORVANE, ttl: 3600 });
   }
-  if (stage === 2) {
+  if (stage === 1) {
+    // the levy: three men of the Vale for a Reeve, two beside Cob when he stands in
+    const owner = answer.by === "player" ? current.heroes.find((h) => h.name === answer.name)?.id : players[0]?.id;
+    const count = answer.by === "player" ? 3 : 2;
+    for (let i = 0; i < count; i++) spawnAlly(dim, "siege:man_at_arms", near, "Vale levy", owner, i + 1, count + 1);
+    sfx(dim, "block.bell.hit", at, { pitch: 0.6 });
+  } else if (stage === 2) {
     system.runTimeout(() => {
       sfx(dim, "sig.bell_tongue", at);
       try {
@@ -177,14 +185,15 @@ world.afterEvents.entityHurt.subscribe(({ hurtEntity, damageSource, damage }) =>
 });
 
 addTests("roletrials", {
-  "the Stand: every role but one has a stage, and alone a student answers": () => {
+  "the Stand: every role has a stage, and alone a student answers": () => {
     const roles = Object.values(STAGE_EDGES).map((e) => e.role).sort();
-    assertEqual(roles, ["captain", "forgemaster", "knight", "marked", "rider", "witch"]);
+    assertEqual(roles, ["captain", "forgemaster", "knight", "marked", "reeve", "rider", "witch"]);
     const plain = [{ name: "Ada", hero: { path: "none", skills: {} } }];
     assertEqual(answerFor(2, plain).by, "student");
     assertEqual(answerFor(7, plain), undefined, "nobody stands in for the Sorcerer");
     assertEqual(answerFor(2, [...plain, { name: "Bo", hero: { path: "none", skills: {} } }]), undefined, "with friends, no students");
-    assertEqual(answerFor(1, plain), undefined);
+    assertEqual(answerFor(1, plain).name, "Edith's grandson, Cob Lammas", "alone at the Seat, Cob brings the levy");
+    assertEqual(answerFor(8, plain), undefined);
     assert(!atTop({ path: "forgemaster", skills: {} }, "forgemaster"), "an apprentice is not at the top");
   },
 });

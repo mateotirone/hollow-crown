@@ -2,7 +2,7 @@
 // Saved on the player as dynamic property "siege:townhall_hero" so other features can read it.
 
 import { world, system } from "@minecraft/server";
-import { levelFromRenown, pointsForLevel, levelTitle, rankOf, LEVEL_UNLOCKS, MAX_LEVEL } from "./skills.js";
+import { levelFromRenown, pointsForLevel, levelTitle, rankOf, LEVEL_UNLOCKS, MAX_LEVEL, ROLES } from "./skills.js";
 import { sfx } from "../core/sfx.js";
 
 export const HERO_PROP = "siege:townhall_hero";
@@ -11,7 +11,8 @@ const cache = new Map(); // player id -> hero object (live; saved on change)
 
 export function blankHero() {
   return {
-    path: "none", // "none" | "knight" | "marked"
+    path: "none", // the main path: "none" | "knight" | "marked"
+    regional: "none", // the one regional role on top (Mateo 2026-11-15): "none" | "rider" | "forgemaster" | "captain" | "witch" | "reeve"
     renown: 0,
     level: 1,
     points: 0, // unspent skill points
@@ -39,6 +40,9 @@ export function heroOf(player) {
   } catch (e) {
     console.warn(`[Town Hall] bad hero data for ${player.name}: ${e}`);
   }
+  // Saves from when a regional role was the only role: it moves to its own slot, and the main path opens again
+  if (ROLES[hero.path]?.region) { hero.regional = hero.path; hero.path = "none"; }
+  hero.regional ??= "none";
   cache.set(player.id, hero);
   return hero;
 }
@@ -46,6 +50,7 @@ export function heroOf(player) {
 export function saveHero(player) {
   const hero = heroOf(player);
   hero.rank = rankOf(hero.path, hero.skills)?.name ?? null; // handy for other features reading the property
+  hero.regionalRank = rankOf(hero.regional, hero.skills)?.name ?? null;
   player.setDynamicProperty(HERO_PROP, JSON.stringify(hero));
 }
 
@@ -102,7 +107,8 @@ export function grantRenown(player, amount, reason = "", quiet = false) {
 
 export function setPath(player, path) {
   const hero = heroOf(player);
-  hero.path = path;
+  if (ROLES[path]?.region) hero.regional = path;
+  else hero.path = path;
   saveHero(player);
 }
 

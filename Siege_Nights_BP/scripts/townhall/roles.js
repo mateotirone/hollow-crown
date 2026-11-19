@@ -1,17 +1,18 @@
-// The four regional roles: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach), Witch (Blackfen).
-// Their skills are in skills.js (branches wing, forge, helm, hex). This file makes the skills do things.
+// The five regional roles: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach), Witch (Blackfen),
+// Reeve (Aldmere Vale). Their skills are in skills.js (branches wing, forge, helm, hex, land). This file makes the skills do things.
 //
 // How a player gets one: by a deed in the role's region (ROLE_DEEDS at the bottom), after which it is
 // offered at the Tree of Oaths. Any feature can also offer or grant one from the story:
-//   emit("offerRole", { player, role: "rider" | "forgemaster" | "captain" | "witch" })
+//   emit("offerRole", { player, role: "rider" | "forgemaster" | "captain" | "witch" | "reeve" })
 //   emit("grantRole", { player, role })
 
-import { world, system, EntityDamageCause, EquipmentSlot } from "@minecraft/server";
+import { world, system, EntityDamageCause, EquipmentSlot, ItemStack } from "@minecraft/server";
 import * as api from "../siege/api.js";
 import { heroOf, playerById } from "./hero.js";
 import { ROLES } from "./skills.js";
 import { guardsNear, inCombat } from "./progress.js";
 import { sfx } from "../core/sfx.js";
+import { pay } from "../economy/coins.js";
 
 const fx = (entity, effect, ticks, amplifier = 0) => {
   try { entity.addEffect(effect, ticks, { amplifier, showParticles: false }); } catch { /* gone this tick */ }
@@ -55,7 +56,7 @@ export function rolesTick() {
   try { state = api.getState(); } catch { return; }
   for (const player of world.getPlayers()) {
     const hero = heroOf(player);
-    if (!ROLES[hero.path]?.region) continue;
+    if (!ROLES[hero.regional]?.region) continue;
     const s = hero.skills;
     const mount = mountOf(player), dragon = isDragon(mount), fighting = inCombat(player);
 
@@ -90,8 +91,65 @@ export function rolesTick() {
     // Hex
     if (s.hex_blood) { unfx(player, "poison"); if (s.hex_blood >= 2) unfx(player, "wither"); }
     if (s.hex_eyes) fx(player, "night_vision", 300);
+
+    // Land
+    if (s.land_highway && onRoad(player)) { fx(player, "speed", 60, s.land_highway - 1); if (mount) fx(mount, "speed", 60, s.land_highway - 1); }
+    if (s.land_plenty && second % (s.land_plenty >= 2 ? 10 : 20) === 0 && inOwnLand(player)) fx(player, "saturation", 1, 0);
+    if (s.land_levy) for (const g of guardsNear(player, 16)) { fx(g, "regeneration", 60, 0); if (s.land_levy >= 2) fx(g, "resistance", 60, 0); }
+    if (s.land_charter && state.active) {
+      for (const g of guardsNear(player, 32)) { fx(g, "regeneration", 60, 0); fx(g, "resistance", 60, 0); }
+      try { for (const p of player.dimension.getPlayers({ location: player.location, maxDistance: 32 })) { fx(p, "regeneration", 60, 0); fx(p, "resistance", 60, 0); } } catch { /* unloaded */ }
+    }
+    if (s.land_tithe && second % 5 === 0) tithe(player, s.land_tithe);
   }
 }
+
+// ---------- the Reeve's land ----------
+const ROAD = /path|gravel|cobblestone|brick|polished_|packed_mud|cut_|smooth_(red_)?sandstone/;
+export const isRoad = (typeId = "") => ROAD.test(typeId.replace(/^minecraft:/, ""));
+function onRoad(player) {
+  try {
+    const at = player.location;
+    return isRoad(player.dimension.getBlock({ x: Math.floor(at.x), y: Math.floor(at.y - 0.2), z: Math.floor(at.z) })?.typeId);
+  } catch { return false; }
+}
+function inOwnLand(player) {
+  try { return player.dimension.id === "minecraft:overworld" && !!api.canManage(api.settlementAt(player.location), player.id); } catch { return false; }
+}
+// The tithe comes in once each morning (saved on the player, so leaving and coming back does not pay it twice)
+export const titheDue = (lastDay, day, timeOfDay) => day > (lastDay ?? -1) && timeOfDay < 12000;
+function tithe(player, rank) {
+  try {
+    const day = Math.floor(world.getAbsoluteTime() / 24000);
+    const last = player.getDynamicProperty("hc:tithe_day");
+    if (!titheDue(typeof last === "number" ? last : undefined, day, world.getTimeOfDay())) return;
+    player.setDynamicProperty("hc:tithe_day", day);
+    pay(player, rank * 8, "tithe");
+    player.sendMessage(`§aThe tithe comes in from your land: ${rank * 8} Regals.`);
+  } catch { /* gone */ }
+}
+
+// Good Furrow: a ripe crop gives one more
+const CROPS = { "minecraft:wheat": "minecraft:wheat", "minecraft:carrots": "minecraft:carrot", "minecraft:potatoes": "minecraft:potato", "minecraft:beetroot": "minecraft:beetroot" };
+world.afterEvents.playerBreakBlock.subscribe(({ player, block, brokenBlockPermutation: was }) => {
+  try {
+    const rank = heroOf(player).skills.land_furrow ?? 0;
+    const crop = CROPS[was.type.id];
+    if (!rank || !crop || heroOf(player).regional !== "reeve") return;
+    if ((was.getState("growth") ?? 0) < 7 || Math.random() >= rank * 0.25) return;
+    block.dimension.spawnItem(new ItemStack(crop, 1), { x: block.location.x + 0.5, y: block.location.y + 0.3, z: block.location.z + 0.5 });
+  } catch { /* fine */ }
+});
+
+// Fair Measure: goods sold pay more
+api.on("goodsSold", ({ player, coins }) => {
+  try {
+    const rank = heroOf(player).skills.land_measure ?? 0;
+    if (!rank || heroOf(player).regional !== "reeve") return;
+    const extra = Math.floor((coins ?? 0) * rank * 0.1);
+    if (extra > 0) pay(player, extra, "fair measure");
+  } catch { /* gone */ }
+});
 
 function mendHeld(player) {
   try {
@@ -115,7 +173,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
   // a role-holder hit something
   if (attacker?.typeId === "minecraft:player" && target?.isValid !== false && target.id !== attacker.id) {
     const hero = heroOf(attacker), s = hero.skills;
-    if (ROLES[hero.path]?.region && hostile(attacker, target)) {
+    if (ROLES[hero.regional]?.region && hostile(attacker, target)) {
       const shot = !!source.damagingProjectile, melee = !shot;
       const mounted = !!mountOf(attacker), weapon = held(attacker)?.typeId ?? "";
       let extra = 0;
@@ -140,9 +198,19 @@ world.afterEvents.entityHurt.subscribe((event) => {
   // a role-holder was hit
   if (target?.typeId === "minecraft:player") {
     const hero = heroOf(target), s = hero.skills;
-    if (!ROLES[hero.path]?.region) return;
+    if (!ROLES[hero.regional]?.region) return;
     if (s.hex_eye && attacker && attacker.id !== target.id) { fx(attacker, "weakness", 80, 0); if (s.hex_eye >= 2) fx(attacker, "slowness", 80, 0); }
     if (s.hex_slip && Math.random() < (s.hex_slip === 2 ? 0.25 : 0.15)) { fx(target, "invisibility", 60, 0); fx(target, "speed", 60, 1); }
+    if (s.land_hue && attacker && attacker.id !== target.id && ready(target, "hue", 120)) for (const g of guardsNear(target, [0, 16, 24][s.land_hue])) { fx(g, "speed", 120, 1); fx(g, "strength", 120, 0); }
+    if (s.land_minute) {
+      let hp = 20; try { hp = target.getComponent("minecraft:health").currentValue; } catch { /* fine */ }
+      if (hp > 0 && hp < 6 && ready(target, "minute", 6000)) {
+        for (const e of near(target, target.location, 12)) { fx(e, "slowness", 80, 6); fx(e, "weakness", 80, 4); }
+        heal(target, 12);
+        target.sendMessage("§aThe minute holds.§7 Everything around you stops, for a breath, and waits for you.");
+        try { sfx(target, "block.bell.hit", { pitch: 0.5, volume: 0.7 }); } catch { /* fine */ }
+      }
+    }
     if (s.helm_tide) {
       let hp = 20; try { hp = target.getComponent("minecraft:health").currentValue; } catch { /* fine */ }
       if (hp > 0 && hp < 6 && ready(target, "tide", 6000)) {
@@ -160,7 +228,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   const killer = event.damageSource?.damagingEntity, dead = event.deadEntity;
   if (killer?.typeId !== "minecraft:player" || !dead) return;
   const hero = heroOf(killer), s = hero.skills;
-  if (!ROLES[hero.path]?.region) return;
+  if (!ROLES[hero.regional]?.region) return;
   let hostileDead = false, at;
   try { hostileDead = hostile(killer, dead); at = dead.location; } catch { return; }
   if (!hostileDead) return;
@@ -189,6 +257,7 @@ export const ROLE_DEEDS = {
   forgemaster: { boss: "siege:pale_huntsman", deed: "Bring down the Pale Huntsman in the Frostmarch" },
   captain: { boss: "siege:drowned_bride", deed: "Lay the Drowned Bride to rest in Saltreach" },
   witch: { boss: "siege:mother_of_changelings", deed: "End the Mother of Changelings in the Blackfen" },
+  reeve: { boss: "siege:clockwork_reeve", deed: "End the Clockwork Reeve under Millbrook" },
 };
 export const roleForStyle = (style) => Object.keys(ROLES).find((id) => ROLES[id].region === style);
 export const roleForBoss = (type) => Object.keys(ROLE_DEEDS).find((id) => ROLE_DEEDS[id].boss === type);
@@ -206,7 +275,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   }
   for (const player of dimension.getPlayers({ location: where, maxDistance: DEED_REACH })) {
     const hero = heroOf(player);
-    if (hero.path !== "none" || hero.offers.includes(role)) continue;
+    if (hero.regional !== "none" || hero.offers.includes(role)) continue;
     api.emit("offerRole", { player, role });
   }
 });

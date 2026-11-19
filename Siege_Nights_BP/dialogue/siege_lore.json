@@ -7067,7 +7067,7 @@
       {
         "scene_tag": "siege_lore_kesh_other",
         "npc_name": "Kesh Cinder",
-        "text": "You're sworn to something already. I can see it on you.\n\nThe Roost doesn't take halves. One road each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
+        "text": "You've another region's road on you already. I can see it.\n\nThe Roost doesn't take halves. Your own oath, Knight's or Ember's, is your business, but one of the regions' roads each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
         "buttons": [
           {
             "name": "Tell me about Ysolt.",
@@ -7795,7 +7795,7 @@
       {
         "scene_tag": "siege_lore_ulla_other",
         "npc_name": "Ulla Deepforge",
-        "text": "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
+        "text": "You're sworn to another region's road already. I can see it on you. She can too: look, she's gone quiet.\n\nOne of those each. Warm your hands, though. Nobody's turned away from the fire.",
         "buttons": [
           {
             "name": "Thank you.",
@@ -9404,6 +9404,699 @@
             "name": "Goodbye.",
             "commands": [
               "/scriptevent siege:lore_say nell hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_first",
+        "npc_name": "Edith Lammas",
+        "text": "Shut the door, dear, the dark gets in. It's always dark in Millbrook. You get used to it, or you move to Wrenfield.\n\nEdith Lammas. This is the Reeve's Office. There hasn't been a Reeve in it for three hundred years, but somebody has to dust.",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas first 0"
+            ]
+          },
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas first 1"
+            ]
+          },
+          {
+            "name": "Sorry, wrong door.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_reeve",
+        "npc_name": "Edith Lammas",
+        "text": "Answers for the land. A lord owns it, if there is one. A Reeve sees the barns are full, the roads are passable, the quarrels get judged before they become feuds, and the levy turns out when the bell goes.\n\nNobody writes songs about it. Nobody starves either, while there's a good one.",
+        "buttons": [
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas reeve 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas reeve 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_empty",
+        "npc_name": "Edith Lammas",
+        "text": "Because the last one never left it. Anselm Tock, Reeve of Millbrook. He stopped every clock in the town at seventeen minutes past three, and the night stopped with them, and he's down there under the well still holding it.\n\nThe office goes to the next Reeve when the last one's done. He isn't done. So my family keep the seal in that drawer, and the roll up to date, and wait.",
+        "buttons": [
+          {
+            "name": "Could I take it?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas empty 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas empty 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_could",
+        "npc_name": "Edith Lammas",
+        "text": "Could you? Let me look at you.\n\nHm. Good boots. You looked at the barn on your way in. Most people look at the clocks.\n\nThree things, then, same as Hob Lammas was asked, under the oak, before there was a Millbrook. Fill the Reeve's barn with a first tithe. Judge one quarrel, fairly, in front of people. And then the hard one: end Tock's minute, so the office comes loose.",
+        "buttons": [
+          {
+            "name": "Where do I start?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas could 0"
+            ]
+          },
+          {
+            "name": "End his minute? He's a Reeve.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas could 1"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas could 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tock",
+        "npc_name": "Edith Lammas",
+        "text": "He was. He was a good one, by the roll. Thirty years of fair harvests and not one hanging.\n\nThen the bell rang under the well, the night after the war, and he did something about it the only way he could think of. I don't hate him. I'd like him to be able to stop.",
+        "buttons": [
+          {
+            "name": "Where do I start?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tock 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tock 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tithe",
+        "npc_name": "Edith Lammas",
+        "text": "With the barn. Thirty-two sheaves of wheat and eight good loaves, the old first tithe. Bring them here when you have them on you.\n\nIt isn't the bread. It's the town seeing someone carry a tithe up that street again.",
+        "buttons": [
+          {
+            "name": "I'll bring it.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tithe 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tithewait",
+        "npc_name": "Edith Lammas",
+        "text": "Thirty-two wheat and eight bread for the Reeve's barn, dear. Bring them when you have them on you.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tithewait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tithewait__1",
+        "npc_name": "Edith Lammas",
+        "text": "Thirty-two sheaves and eight loaves. The barn door's unlocked.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tithewait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tithewait__2",
+        "npc_name": "Edith Lammas",
+        "text": "Bread's only wheat that's been talked to nicely. Bake it yourself if you're short.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tithewait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tithewait__3",
+        "npc_name": "Edith Lammas",
+        "text": "The barn's waiting. It's very patient. It's had practice.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tithewait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_moot",
+        "npc_name": "Edith Lammas",
+        "text": "Good, you're here. There's a moot waiting. That's a quarrel with an audience.\n\nJoan Ansty and Gil Carrow. The stone between their strips moved a yard into Joan's barley in the night. Joan says Gil shifted it. Gil says stones walk in Millbrook, and the awful thing is, he isn't entirely wrong.\n\nThey're outside. Half the street came to watch. Judge it.",
+        "buttons": [
+          {
+            "name": "Gil moved it. Put it back, and he owes her a sack.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot 0"
+            ]
+          },
+          {
+            "name": "Nobody can prove it. Split the yard between them.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot 1"
+            ]
+          },
+          {
+            "name": "Before I judge anything, I want to see the stone.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_moot_look",
+        "npc_name": "Edith Lammas",
+        "text": "You walk out to the strips with half of Millbrook behind you.\n\nThe stone's base is dry, and the grass under where it stood is pale and flattened, but there's no drag mark. It came up out of the ground and settled again, a yard over. A yard nearer the square. Nearer the well.\n\nGil's face says he knew. Joan's says she knew too, and hoped you wouldn't.",
+        "buttons": [
+          {
+            "name": "Leave it, stake the old line, and both of you keep watch on third nights.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot_look 0"
+            ]
+          },
+          {
+            "name": "Gil still should have said. He owes her a sack.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot_look 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_moot_joan",
+        "npc_name": "Edith Lammas",
+        "text": "Gil goes red and then goes to fetch the sack. Joan says nothing, which in Joan is a speech.\n\n\"Firm,\" says Edith, writing. \"He'll sulk a week and forget. She won't forget, which is rather the point of a moot.\"",
+        "buttons": [
+          {
+            "name": "Is that it?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot_joan 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_moot_split",
+        "npc_name": "Edith Lammas",
+        "text": "Neither of them likes it. That's how you can tell.\n\n\"The Lammas answer,\" says Edith, writing. \"Hob used to say a moot that leaves both sides a little cross was done right. I've never liked that saying. It keeps being true.\"",
+        "buttons": [
+          {
+            "name": "Is that it?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot_split 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_moot_looked",
+        "npc_name": "Edith Lammas",
+        "text": "The crowd mutters, then nods, then goes home to look at its own stones.\n\n\"You went and looked,\" says Edith, writing. \"Tock never did that, at the end. He stopped looking at anything but the clocks.\"",
+        "buttons": [
+          {
+            "name": "Is that it?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas moot_looked 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_mootdone",
+        "npc_name": "Edith Lammas",
+        "text": "That's a moot. It's in the roll, under your name, the first new hand in three hundred years.\n\nWhich leaves the hard one. The well, and what's under it. Read Tock's statement in the clock tower if you haven't. He left the answer for whoever came. He wanted someone to.",
+        "buttons": [
+          {
+            "name": "I'll go down.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas mootdone 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_deedwait",
+        "npc_name": "Edith Lammas",
+        "text": "Tithe in, moot judged. Now Tock's minute. Wake him at the well and finish it, and the office comes loose.",
+        "buttons": [
+          {
+            "name": "I know.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas deedwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_deedwait__1",
+        "npc_name": "Edith Lammas",
+        "text": "The clocks still say seventeen past three. So do I, most days.",
+        "buttons": [
+          {
+            "name": "I know.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas deedwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_deedwait__2",
+        "npc_name": "Edith Lammas",
+        "text": "The keepers in the square will tell you which clock he stopped first. One of them lies. Listen for it.",
+        "buttons": [
+          {
+            "name": "I know.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas deedwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_deedwait__3",
+        "npc_name": "Edith Lammas",
+        "text": "He's waiting under the well. I think he's been waiting for you specifically, if that helps. It doesn't help me.",
+        "buttons": [
+          {
+            "name": "I know.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas deedwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_ready",
+        "npc_name": "Edith Lammas",
+        "text": "You did it. I heard the clocks from here. Seventy years, and I never knew clocks made a noise.\n\nShe opens the drawer, and takes out a seal on a faded ribbon, and puts it in your hand.\n\n\"Take that to a Tree of Oaths and swear. Then it's yours, and the Vale will start bringing you its arguments. Don't say I didn't warn you.\"",
+        "buttons": [
+          {
+            "name": "Thank you, Edith.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas ready 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_sworn",
+        "npc_name": "Edith Lammas",
+        "text": "What can I do for you, Reeve?",
+        "buttons": [
+          {
+            "name": "Tell me about Hob Lammas.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 0"
+            ]
+          },
+          {
+            "name": "What was Tock like?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_sworn__1",
+        "npc_name": "Edith Lammas",
+        "text": "Reeve. The Carrows want you about a pig. Of course they do.",
+        "buttons": [
+          {
+            "name": "Tell me about Hob Lammas.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 0"
+            ]
+          },
+          {
+            "name": "What was Tock like?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_sworn__2",
+        "npc_name": "Edith Lammas",
+        "text": "Your tithe came in. I counted it twice. It's short a loaf. I ate it.",
+        "buttons": [
+          {
+            "name": "Tell me about Hob Lammas.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 0"
+            ]
+          },
+          {
+            "name": "What was Tock like?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_sworn__3",
+        "npc_name": "Edith Lammas",
+        "text": "Sit, Reeve. The roll's open. It's always open now.",
+        "buttons": [
+          {
+            "name": "Tell me about Hob Lammas.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 0"
+            ]
+          },
+          {
+            "name": "What was Tock like?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_hob",
+        "npc_name": "Edith Lammas",
+        "text": "Ploughman. Couldn't read. Kept the whole roll in knots on a cord, and when the first scribe came and wrote it down properly, they checked forty years of knots against it and found he'd never once been wrong.\n\nHe's my however-many-greats grandfather. I've got his cord. I can't read it either.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hob 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_tockwas",
+        "npc_name": "Edith Lammas",
+        "text": "Careful, by the roll. Every page in a small square hand. Thirty years and he never missed a harvest count.\n\nThe last month, the hand gets bigger, and faster, and then it's just times. Three seventeen, three seventeen, down the page.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas tockwas 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_teach",
+        "npc_name": "Edith Lammas",
+        "text": "Go and look. Before you judge, before you tax, before you call the levy. Go and look at the stone, the barn, the road, the face.\n\nAnd keep the roads open. A village with an open road is never quite alone, and a village that's alone will believe anything.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas teach 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_other",
+        "npc_name": "Edith Lammas",
+        "text": "You're sworn to something already, I can see it on you. The office wouldn't have you twice, and the Vale can't afford to share.\n\nYou can still help me move this chest, if you like.",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas other 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas other 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_reeve_other",
+        "npc_name": "Edith Lammas",
+        "text": "Answers for the land. Full barns, open roads, fair moots, and a levy that comes when it's called. Millbrook hasn't had one in three hundred years. You can tell by looking.",
+        "buttons": [
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas reeve_other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_turn",
+        "npc_name": "Edith Lammas",
+        "text": "Reeve in rank. Then come here, and close the shutter.\n\nShe takes the Court Roll down and turns to the last page in Tock's hand. Under the column of times, pasted in, is a scrap of better paper than anything Millbrook ever owned. Four words, in a hand that isn't his: Hold the minute. Wait.\n\nAnd under them, a seal, scraped off with a knife, the way you scrape off a seal you don't want found.",
+        "buttons": [
+          {
+            "name": "Somebody told him to.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas turn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_turn2",
+        "npc_name": "Edith Lammas",
+        "text": "Somebody told him to. Somebody who knew the bell was going to ring under the well before it rang, and knew what Tock would do if he was frightened enough, and gave him something to do with his fear.\n\nWho gives a Reeve orders? Only whoever he answered to. And whoever that was, they wanted Millbrook dark, and its office empty, and they wanted it for a long time.",
+        "buttons": [
+          {
+            "name": "Who?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas turn2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_turn3",
+        "npc_name": "Edith Lammas",
+        "text": "I don't know, dear. I've had seventy years to wonder and I don't know.\n\nBut I know this: Tock was a good Reeve who was handed a terrible order, and he kept it, because keeping things was what he was good at. If anyone ever hands you something like this, kind and reasonable, with a seal on it, come and show me first.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas turn3 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_stand",
+        "npc_name": "Edith Lammas",
+        "text": "Reeve of the Vale. Nobody's had those words since the war.\n\nI want to ask you something. When the bad night comes, and you'll know it when it does, call the levy. Ring for them. The Vale owes its Reeve the muster, it's in the charter, four lines long. They'll come, with whatever was by the door.\n\nAnd my grandson Cob will be first up the stair. I've told him not to. He's a Lammas.",
+        "buttons": [
+          {
+            "name": "I'll ring for them.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas stand 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_after",
+        "npc_name": "Edith Lammas",
+        "text": "She's at the window, watching the square in daylight.\n\n\"Do you know, I'd never seen the colour of the chapel roof. It's green. All my life.\"\n\nShe opens the roll to a new page, writes the date in a careful square hand, and under it, a harvest count. Just an ordinary harvest. Then she sits back and looks at it for a long time.",
+        "buttons": [
+          {
+            "name": "It's a good page.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas after 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_hub",
+        "npc_name": "Edith Lammas",
+        "text": "What can I do for you?",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 0"
+            ]
+          },
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_hub__1",
+        "npc_name": "Edith Lammas",
+        "text": "Back. Shut the door, the dark gets in.",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 0"
+            ]
+          },
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_hub__2",
+        "npc_name": "Edith Lammas",
+        "text": "Mind the chest, it's Hob's. He was shorter than you.",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 0"
+            ]
+          },
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_lammas_hub__3",
+        "npc_name": "Edith Lammas",
+        "text": "You again. Sit down, you're making the room look untidy.",
+        "buttons": [
+          {
+            "name": "What does a Reeve do?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 0"
+            ]
+          },
+          {
+            "name": "Why has nobody had the job?",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say lammas hub 2"
             ]
           }
         ]

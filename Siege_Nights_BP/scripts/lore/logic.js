@@ -83,7 +83,8 @@ export function holds(cond, p, ctx = {}) {
     case "clue": return p.clues.includes(value);
     case "solved": return p.solved.includes(value);
     case "col": return hasReadAll(p, value);
-    case "path": return ctx.path === value || (value === "marked" && ctx.path === "sorcerer"); // the magic role, either name
+    case "path": return ctx.path === value || ctx.regional === value || (value === "marked" && ctx.path === "sorcerer"); // main path or regional role; the magic role, either name
+    case "regional": return (ctx.regional ?? "none") === value; // the regional role held, or "none"
     case "resonance": return (ctx.resonance ?? 0) >= Number(value);
     case "shelved": return (ctx.shelved ?? 0) >= Number(value);
     case "act1": return ctx.act1 === value; // newplayer/act1_rules.js act1Stage

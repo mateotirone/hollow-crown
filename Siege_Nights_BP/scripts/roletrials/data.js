@@ -2,7 +2,7 @@
 // said the Dragon Rider path should loosely follow Fourth Wing, with our own names and people).
 // Plan: https://claude.ai/artifact/Ra52mNyxfnaP71DpzU3mQH . Pure data, no Minecraft imports.
 //
-//   TRIALS       the four regional roles: mentor, the lore flag that starts the trial, and its steps.
+//   TRIALS       the five regional roles: mentor, the lore flag that starts the trial, and its steps.
 //                The last step of each is the deed the town hall already knew (a boss or a hatching).
 //                The role is offered once every step before it is done; a deed done early waits.
 //   MENTORS      who speaks for each of the six roles (their words live in lore/data/dialogue.js)
@@ -21,6 +21,7 @@ export const TRIAL_RULES = {
   graveReach: 3, // blocks from a grave marker
   spanReach: 2.5, // blocks from either end of the Span
   spanFall: 4, // blocks below the Span's line that count as falling off
+  harvest: { "minecraft:wheat": 32, "minecraft:bread": 8 }, // the first tithe Edith Lammas takes into the Reeve's barn
 };
 
 export const MENTORS = {
@@ -30,6 +31,7 @@ export const MENTORS = {
   forgemaster: { npc: "ulla", name: "Ulla Deepforge" },
   captain: { npc: "ottilie", name: "Harbourmistress Holt" },
   witch: { npc: "nell", name: "Nell Sedge" },
+  reeve: { npc: "lammas", name: "Edith Lammas" },
 };
 
 // how: "talk"  checked whenever you speak to the mentor (items handed over, coins paid, guards counted)
@@ -78,6 +80,18 @@ export const TRIALS = {
       { id: "mother", how: "deed", title: "End the Mother of Changelings", hint: "The fen has been owed this one a long time." },
     ],
   },
+  // The Reeve (Mateo picked it for the Vale, 2026-11-15): keeper of the land. Millbrook's office has stood empty since
+  // Anselm Tock stopped the clocks; nobody can hold it while he still holds the minute.
+  reeve: {
+    mentor: "lammas",
+    call: "lammas_call",
+    where: "the Reeve's Office, the narrow house off Millbrook square",
+    steps: [
+      { id: "tithe", how: "talk", title: "Bring in the tithe", hint: "Bring Edith Lammas 32 wheat and 8 loaves of bread. The Reeve's barn has been empty for three hundred years." },
+      { id: "moot", how: "flag", flag: "lammas_moot", title: "Hold the hallmoot", hint: "Edith has a quarrel waiting for you: a boundary stone that moved in the night. Hear it and judge it." },
+      { id: "reeve", how: "deed", title: "End the Clockwork Reeve", hint: "Tock still holds his minute, and the office with it. Wake him at the well and finish it." },
+    ],
+  },
 };
 
 export const TRIAL_ROLES = Object.keys(TRIALS);
@@ -88,6 +102,7 @@ export const DEED_WAITS = {
   forgemaster: "§b\"So he's down. Hroda would have wanted to see the hand that did it. Come to the forge.\"§7 (Ulla Deepforge, the Deepforge above Rimehold)",
   captain: "§3\"You laid her down without signing anything. Brave, or ignorant. Come and sign.\"§7 (Harbourmistress Holt, Gull's Rest)",
   witch: "§2\"The fen noticed what you did to her. It wants to meet you properly. Come for tea.\"§7 (Nell Sedge, past Mirelight)",
+  reeve: "§a\"So the minute's over, and the office came loose with it. Come to Millbrook before someone less suitable picks it up.\"§7 (Edith Lammas, the Reeve's Office, Millbrook)",
 };
 
 // What the mentor says as each step lands (chat, from the mentor).
@@ -100,6 +115,8 @@ export const STEP_LINES = {
   crew: "§3\"Three hands. It's a crew if you say it loudly enough. The Bride is at the sunken chapel.\"§7 (Ottilie)",
   cup: "§2\"There. That's the first payment. The fen will tell you when it wants the next.\"§7 (Nell)",
   graves: "§2\"Three graves, and one of them gave you something back. She likes you. That's rare, and worse.\"§7 (Nell)",
+  tithe: "§a\"Thirty-two sheaves and eight loaves. First tithe in that barn since my great-grandmother's great-grandmother. I may cry. Don't watch.\"§7 (Edith)",
+  moot: "§a\"Judged, and nobody threw anything. That's a good moot. The roll has your hand in it now.\"§7 (Edith)",
 };
 
 // Spoken when a rank is reached. Rank 0 is the oath itself, so only ranks 1 to 4.
@@ -139,6 +156,12 @@ export const RANK_LINES = {
     Witch: "\"Witch. Now the fen's eye opens for you. You'll see who in the village is standing a little wrong. Be kind about it.\" (Nell)",
     Crone: "\"Crone. You're not old, I know. It's about what you've been lent, not how long you've had it. Come to the old water.\" (Nell)",
     "Fen Mother": "\"Fen Mother. Goody Sedge has a fourth grave now, and it's got your name on it, kept warm. That's a compliment.\" (Nell)",
+  },
+  reeve: {
+    Hayward: "\"Hayward. You mind the hedges and the strays now. It sounds small. Ask anyone whose cow has eaten their neighbour's barley.\" (Edith)",
+    Bailiff: "\"Bailiff. People will start lying to you, politely, about their harvest. Write it down anyway. The roll remembers better than they do.\" (Edith)",
+    Reeve: "\"Reeve. In rank as well as seal. Then come and read Tock's last page. I've never shown it to anyone, and I think it's time.\" (Edith)",
+    "Reeve of the Vale": "\"Reeve of the Vale. Hob Lammas never had that. Nobody's had it since the war. I'll have it painted over the door.\" (Edith)",
   },
 };
 
