@@ -12,6 +12,7 @@ import { worth, fromEmeralds, coins } from "../economy/rules.js";
 import { moduleStore } from "../core/store.js";
 import { sfx } from "../core/sfx.js";
 import { fightingNear, leashFor, mendGuard } from "./guardcare.js";
+import { FOLK, PLAIN_TAG } from "../folk/index.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
 // Bring an unemployed villager to your Barracks and click it with coins in hand (40 Regals) to recruit a
@@ -85,7 +86,7 @@ export function recruitGuard(block, player, item, chosenType) {
   }
   const dim = block.dimension;
   const center = { x: block.location.x + 0.5, y: block.location.y + 1, z: block.location.z + 0.5 };
-  const recruit = dim.getEntities({ type: "minecraft:villager_v2", families: ["unskilled"], location: center, maxDistance: 4 })[0];
+  const recruit = dim.getEntities({ type: FOLK, tags: [PLAIN_TAG], location: center, maxDistance: 4 })[0];
   if (!recruit) return player.onScreenDisplay.setActionBar("§7There's no unemployed villager next to the Barracks.");
 
   if (!chargeE(player, GUARD_COST, "guard")) return;

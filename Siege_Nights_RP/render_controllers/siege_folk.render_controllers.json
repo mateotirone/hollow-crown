@@ -1,0 +1,82 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_folk": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.vale_0",
+            "Texture.vale_1",
+            "Texture.vale_2",
+            "Texture.vale_3",
+            "Texture.vale_4",
+            "Texture.vale_5",
+            "Texture.frostmarch_0",
+            "Texture.frostmarch_1",
+            "Texture.frostmarch_2",
+            "Texture.frostmarch_3",
+            "Texture.frostmarch_4",
+            "Texture.frostmarch_5",
+            "Texture.saltreach_0",
+            "Texture.saltreach_1",
+            "Texture.saltreach_2",
+            "Texture.saltreach_3",
+            "Texture.saltreach_4",
+            "Texture.saltreach_5",
+            "Texture.emberwaste_0",
+            "Texture.emberwaste_1",
+            "Texture.emberwaste_2",
+            "Texture.emberwaste_3",
+            "Texture.emberwaste_4",
+            "Texture.emberwaste_5",
+            "Texture.blackfen_0",
+            "Texture.blackfen_1",
+            "Texture.blackfen_2",
+            "Texture.blackfen_3",
+            "Texture.blackfen_4",
+            "Texture.blackfen_5",
+            "Texture.tell_vale_0",
+            "Texture.tell_vale_1",
+            "Texture.tell_vale_2",
+            "Texture.tell_vale_3",
+            "Texture.tell_vale_4",
+            "Texture.tell_vale_5",
+            "Texture.tell_frostmarch_0",
+            "Texture.tell_frostmarch_1",
+            "Texture.tell_frostmarch_2",
+            "Texture.tell_frostmarch_3",
+            "Texture.tell_frostmarch_4",
+            "Texture.tell_frostmarch_5",
+            "Texture.tell_saltreach_0",
+            "Texture.tell_saltreach_1",
+            "Texture.tell_saltreach_2",
+            "Texture.tell_saltreach_3",
+            "Texture.tell_saltreach_4",
+            "Texture.tell_saltreach_5",
+            "Texture.tell_emberwaste_0",
+            "Texture.tell_emberwaste_1",
+            "Texture.tell_emberwaste_2",
+            "Texture.tell_emberwaste_3",
+            "Texture.tell_emberwaste_4",
+            "Texture.tell_emberwaste_5",
+            "Texture.tell_blackfen_0",
+            "Texture.tell_blackfen_1",
+            "Texture.tell_blackfen_2",
+            "Texture.tell_blackfen_3",
+            "Texture.tell_blackfen_4",
+            "Texture.tell_blackfen_5"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.skins[query.property('siege:skin') + (query.property('siege:tell') ? 30 : 0)]"
+      ]
+    }
+  }
+}

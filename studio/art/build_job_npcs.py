@@ -105,15 +105,34 @@ REGION_DRESS = {   # region -> (shirt, robe, legs, hat override or None)
     'emberwaste': ((224, 200, 144), (168, 72, 42), (106, 74, 58), ((224, 200, 144), 'cloth')),  # sand, rust, headcloth
     'blackfen': ((96, 96, 66), (58, 58, 42), (36, 34, 30), ((58, 58, 42), 'cloth')),            # oilskin
 }
-REGIONAL_JOBS = ['moneyer', 'farmer']
+# Every tradesman dresses for the region (Mateo 2026-11-15: "every single thing needs a skin"), keeping what makes
+# him himself (KEEP), on top of the emblem, trim and beard every one keeps. Order must match build_economy.py JOB_SKINS.
+REGIONAL_JOBS = ['moneyer', 'farmer', 'woodcutter', 'quarryman', 'smith', 'fisher', 'hunter', 'herbalist', 'factor']
+KEEP = {   # job -> the parts that stay: shirt, robe, hat
+    'moneyer': {'robe'},           # the dark purple robe with its gold trim
+    'farmer': {'hat'},             # the straw hat
+    'woodcutter': {'shirt'},       # the red shirt
+    'quarryman': set(),            # the dusty apron (always kept, it is painted over the robe)
+    'smith': {'hat'},              # the leather apron and the dark cap
+    'fisher': {'hat'},             # the brimmed sou'wester
+    'hunter': {'hat'},             # the green hood
+    'herbalist': {'robe'},         # the mauve shawl
+    'factor': {'robe'},            # the burgundy coat
+}
 ims = []
 for (name, skin, shirt, robe, legs, hat, hair, trim, emb, kw) in JOBS: ims.append(npc(name, skin, shirt, robe, legs, hat, hair, trim, emb, **kw))
 for job in REGIONAL_JOBS:
     (name, skin, shirt, robe, legs, hat, hair, trim, emb, kw) = next(j for j in JOBS if j[0] == job)
     for region, (sh_, ro, le, ha) in REGION_DRESS.items():
-        if job == 'farmer': ha = None   # the straw hat is the Farmer
-        if job == 'moneyer': ro = robe   # the dark purple robe with its gold trim is the Moneyer
+        keep = KEEP[job]
+        if 'shirt' in keep: sh_ = shirt
+        if 'robe' in keep: ro = robe
+        if 'hat' in keep: ha = None
         ims.append(npc(f'{name}__{region}', skin, sh_, ro, le, ha or hat, hair, trim, emb, **kw))
+# The caravan trader (codex/forge.js, Bedrock's wandering trader in our own coat: Siege_Nights_RP/entity/wandering_trader.entity.json):
+# a sun-faded indigo travelling robe, a sand headwrap and a brass trader's token. Mateo 2026-11-15: "every single thing needs a skin".
+ims.append(npc('caravan', SKIN[3], (200, 176, 130), (48, 58, 112), (92, 74, 56), ((214, 190, 140), 'cloth'), (40, 30, 26), (196, 150, 70),
+               [(3, 9, G), (4, 9, G), (3, 10, Bz), (4, 10, G), (2, 12, (176, 72, 40)), (5, 12, (176, 72, 40))], hat_rows=3, beard=True))
 sh = Image.new('RGBA', (4 * 264 + 8, ((len(ims) + 3) // 4) * 264 + 8), (38, 34, 46, 255))
 for i, im in enumerate(ims): sh.alpha_composite(im.resize((256, 256), Image.NEAREST), (8 + (i % 4) * 264, 8 + (i // 4) * 264))
 sh.save(ROOT + 'art/job-npcs.png'); print('ok')

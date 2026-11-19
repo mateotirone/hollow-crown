@@ -32,7 +32,9 @@ const JOB_PROP = "siege:job"; // which skin: the job's place in JOB_LOOKS
 // The skins, in the order of studio/build_economy.py JOB_SKINS: the jobs, then regional looks "<job>__<region>"
 // (Mateo 2026-11-14: the Moneyer and the Farmer dress for their region and keep their signature). The Vale wears the plain one.
 const REGION_SLUG = { "Frostmarch": "frostmarch", "Saltreach": "saltreach", "Emberwaste": "emberwaste", "Blackfen": "blackfen" };
-export const JOB_LOOKS = [...JOB_IDS, ...["moneyer", "farmer"].flatMap((j) => Object.values(REGION_SLUG).map((r) => `${j}__${r}`))];
+// every tradesman has them (2026-11-15); the Moneyer and the Farmer came first, so they are listed first
+const REGIONAL_ORDER = ["moneyer", "farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "factor"];
+export const JOB_LOOKS = [...JOB_IDS, ...REGIONAL_ORDER.flatMap((j) => Object.values(REGION_SLUG).map((r) => `${j}__${r}`))];
 export function jobLook(jobId, region) {
   const own = JOB_LOOKS.indexOf(`${jobId}__${REGION_SLUG[region]}`);
   return own >= 0 ? own : JOB_LOOKS.indexOf(jobId);
@@ -448,8 +450,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 addTests("job npc looks", {
-  "the Moneyer and the Farmer dress for their region, the rest keep one skin, the Vale wears the plain one": () => {
-    assertEqual(jobLook("smith", "Frostmarch"), JOB_IDS.indexOf("smith"));
+  "every tradesman dresses for his region, the Vale wears the plain one": () => {
+    assertEqual(JOB_LOOKS[jobLook("smith", "Frostmarch")], "smith__frostmarch");
+    assertEqual(jobLook("smith", "Aldmere Vale"), JOB_IDS.indexOf("smith"));
     assertEqual(jobLook("moneyer", "Aldmere Vale"), JOB_IDS.indexOf("moneyer"));
     assertEqual(JOB_LOOKS[jobLook("moneyer", "Blackfen")], "moneyer__blackfen");
     assertEqual(JOB_LOOKS[jobLook("farmer", "Saltreach")], "farmer__saltreach");
