@@ -5,6 +5,7 @@ import { world } from "@minecraft/server";
 import { DESK, QUARTERMASTER } from "./constants.js";
 import { forEachMachine } from "./placement.js";
 import { sfx } from "../core/sfx.js";
+import { FOLK, PLAIN_TAG, spawnFolk } from "../folk/index.js";
 
 // ---------- Quartermaster: a villager who takes the desk as their job ----------
 
@@ -16,7 +17,7 @@ export function quartermasterTick() {
     if (dim.getEntities({ type: QUARTERMASTER, location: center, maxDistance: 8 }).length > 0) return;
     // An unemployed villager nearby takes the job; on the map, where no villagers live, one turns up by himself
     // (new-player audit, Mateo 2026-11-13: the desk was a dead end without villagers)
-    const recruit = dim.getEntities({ type: "minecraft:villager_v2", families: ["unskilled"], location: center, maxDistance: 3 })[0];
+    const recruit = dim.getEntities({ type: FOLK, tags: [PLAIN_TAG], location: center, maxDistance: 3 })[0];
     let at, name;
     if (recruit) {
       at = { ...recruit.location };
@@ -48,9 +49,8 @@ export function quartermasterTick() {
       if (!desk) continue;
       const block = dim.getBlock(desk);
       if (!block || block.typeId === DESK) continue;
-      // vanilla villager on purpose: without a desk the Quartermaster is a plain villager again, who can be hired as a guard
-      const villager = dim.spawnEntity("minecraft:villager_v2", qm.location);
-      if (qm.nameTag) villager.nameTag = qm.nameTag;
+      // without a desk the Quartermaster is a plain villager again (one of our folk), who can be hired as a guard
+      spawnFolk(dim, qm.location, { name: qm.nameTag || undefined, seed: Math.floor(qm.location.x * 7 + qm.location.z), tags: [PLAIN_TAG] });
       qm.remove();
     } catch {
       // desk chunk not loaded; check again later

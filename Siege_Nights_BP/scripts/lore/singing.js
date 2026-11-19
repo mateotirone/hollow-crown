@@ -13,7 +13,7 @@ import { world, system } from "@minecraft/server";
 import { onTick, isNight, SETTINGS, addTests, assert, assertEqual } from "../siege/api.js";
 import { getSites, getRift } from "../undertow/source.js";
 import { isSlipping } from "../undertow/slips.js";
-import { isReturned } from "../bestiary/returned.js";
+import { isReturned, RETURNED } from "../bestiary/returned.js";
 import { heroOf } from "./player.js";
 import { tonightKind, reachStage, LONG, AFTER } from "../reach/api.js";
 import { sfx } from "../core/sfx.js";
@@ -81,7 +81,7 @@ function thinDistance(loc) {
 function returnedDistance(player) {
   let best = Infinity;
   try {
-    for (const v of player.dimension.getEntities({ type: "minecraft:villager_v2", location: player.location, maxDistance: HUM.returnedRange })) {
+    for (const v of player.dimension.getEntities({ type: RETURNED.type, location: player.location, maxDistance: HUM.returnedRange })) {
       if (isReturned(v)) best = Math.min(best, Math.hypot(v.location.x - player.location.x, v.location.z - player.location.z));
     }
   } catch {}

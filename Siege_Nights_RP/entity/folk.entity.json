@@ -1,0 +1,98 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:folk",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "vale_0": "textures/entity/siege/folk/vale_0",
+        "vale_1": "textures/entity/siege/folk/vale_1",
+        "vale_2": "textures/entity/siege/folk/vale_2",
+        "vale_3": "textures/entity/siege/folk/vale_3",
+        "vale_4": "textures/entity/siege/folk/vale_4",
+        "vale_5": "textures/entity/siege/folk/vale_5",
+        "frostmarch_0": "textures/entity/siege/folk/frostmarch_0",
+        "frostmarch_1": "textures/entity/siege/folk/frostmarch_1",
+        "frostmarch_2": "textures/entity/siege/folk/frostmarch_2",
+        "frostmarch_3": "textures/entity/siege/folk/frostmarch_3",
+        "frostmarch_4": "textures/entity/siege/folk/frostmarch_4",
+        "frostmarch_5": "textures/entity/siege/folk/frostmarch_5",
+        "saltreach_0": "textures/entity/siege/folk/saltreach_0",
+        "saltreach_1": "textures/entity/siege/folk/saltreach_1",
+        "saltreach_2": "textures/entity/siege/folk/saltreach_2",
+        "saltreach_3": "textures/entity/siege/folk/saltreach_3",
+        "saltreach_4": "textures/entity/siege/folk/saltreach_4",
+        "saltreach_5": "textures/entity/siege/folk/saltreach_5",
+        "emberwaste_0": "textures/entity/siege/folk/emberwaste_0",
+        "emberwaste_1": "textures/entity/siege/folk/emberwaste_1",
+        "emberwaste_2": "textures/entity/siege/folk/emberwaste_2",
+        "emberwaste_3": "textures/entity/siege/folk/emberwaste_3",
+        "emberwaste_4": "textures/entity/siege/folk/emberwaste_4",
+        "emberwaste_5": "textures/entity/siege/folk/emberwaste_5",
+        "blackfen_0": "textures/entity/siege/folk/blackfen_0",
+        "blackfen_1": "textures/entity/siege/folk/blackfen_1",
+        "blackfen_2": "textures/entity/siege/folk/blackfen_2",
+        "blackfen_3": "textures/entity/siege/folk/blackfen_3",
+        "blackfen_4": "textures/entity/siege/folk/blackfen_4",
+        "blackfen_5": "textures/entity/siege/folk/blackfen_5",
+        "tell_vale_0": "textures/entity/siege/folk/tell_vale_0",
+        "tell_vale_1": "textures/entity/siege/folk/tell_vale_1",
+        "tell_vale_2": "textures/entity/siege/folk/tell_vale_2",
+        "tell_vale_3": "textures/entity/siege/folk/tell_vale_3",
+        "tell_vale_4": "textures/entity/siege/folk/tell_vale_4",
+        "tell_vale_5": "textures/entity/siege/folk/tell_vale_5",
+        "tell_frostmarch_0": "textures/entity/siege/folk/tell_frostmarch_0",
+        "tell_frostmarch_1": "textures/entity/siege/folk/tell_frostmarch_1",
+        "tell_frostmarch_2": "textures/entity/siege/folk/tell_frostmarch_2",
+        "tell_frostmarch_3": "textures/entity/siege/folk/tell_frostmarch_3",
+        "tell_frostmarch_4": "textures/entity/siege/folk/tell_frostmarch_4",
+        "tell_frostmarch_5": "textures/entity/siege/folk/tell_frostmarch_5",
+        "tell_saltreach_0": "textures/entity/siege/folk/tell_saltreach_0",
+        "tell_saltreach_1": "textures/entity/siege/folk/tell_saltreach_1",
+        "tell_saltreach_2": "textures/entity/siege/folk/tell_saltreach_2",
+        "tell_saltreach_3": "textures/entity/siege/folk/tell_saltreach_3",
+        "tell_saltreach_4": "textures/entity/siege/folk/tell_saltreach_4",
+        "tell_saltreach_5": "textures/entity/siege/folk/tell_saltreach_5",
+        "tell_emberwaste_0": "textures/entity/siege/folk/tell_emberwaste_0",
+        "tell_emberwaste_1": "textures/entity/siege/folk/tell_emberwaste_1",
+        "tell_emberwaste_2": "textures/entity/siege/folk/tell_emberwaste_2",
+        "tell_emberwaste_3": "textures/entity/siege/folk/tell_emberwaste_3",
+        "tell_emberwaste_4": "textures/entity/siege/folk/tell_emberwaste_4",
+        "tell_emberwaste_5": "textures/entity/siege/folk/tell_emberwaste_5",
+        "tell_blackfen_0": "textures/entity/siege/folk/tell_blackfen_0",
+        "tell_blackfen_1": "textures/entity/siege/folk/tell_blackfen_1",
+        "tell_blackfen_2": "textures/entity/siege/folk/tell_blackfen_2",
+        "tell_blackfen_3": "textures/entity/siege/folk/tell_blackfen_3",
+        "tell_blackfen_4": "textures/entity/siege/folk/tell_blackfen_4",
+        "tell_blackfen_5": "textures/entity/siege/folk/tell_blackfen_5"
+      },
+      "geometry": {
+        "default": "geometry.humanoid.custom"
+      },
+      "scripts": {
+        "pre_animation": [
+          "variable.tcos0 = (Math.cos(query.modified_distance_moved * 38.17) * query.modified_move_speed / 1.0) * 57.3;"
+        ],
+        "animate": [
+          "humanoid_base_pose",
+          "look_at_target_default",
+          "move"
+        ]
+      },
+      "animations": {
+        "humanoid_base_pose": "animation.humanoid.base_pose",
+        "look_at_target_default": "animation.humanoid.look_at_target.default",
+        "move": "animation.humanoid.move"
+      },
+      "render_controllers": [
+        "controller.render.siege_folk"
+      ],
+      "spawn_egg": {
+        "base_color": "#7a5a3a",
+        "overlay_color": "#cdc2a6"
+      }
+    }
+  }
+}

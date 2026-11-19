@@ -553,7 +553,19 @@ step("Every NPC has a skin");
   // What each spawnEntity() / summon in our scripts makes. A type can be a literal, a const in the file, a const
   // exported from any other script, or an object field (RETURNED.type -> type: "...").
   const PEOPLE_VANILLA = ["minecraft:villager_v2", "minecraft:villager", "minecraft:wandering_trader"];
-  const ON_PURPOSE = /vanilla villager on purpose:/;
+  const trader = read(join(RP, "entity/wandering_trader.entity.json"))?.["minecraft:client_entity"]?.description;
+  const ownTrader = trader?.identifier === "minecraft:wandering_trader" && Object.values(trader.textures ?? {}).length > 0 &&
+    Object.values(trader.textures).every((t) => t.startsWith("textures/entity/siege/") && existsSync(join(RP, `${t}.png`)));
+  if (!ownTrader) no(null, "Siege_Nights_RP/entity/wandering_trader.entity.json must paint Bedrock's wandering trader with our own skin (textures/entity/siege/...)");
+  // our folk: one picture (and one tell) per skin, and the property never points past them
+  try {
+    const { FOLK_SKINS } = await import(pathToFileURL(join(SCRIPTS, "folk/skins_data.js")).href);
+    const fbp = read(join(BP, "entities/folk.json"))?.["minecraft:entity"]?.description?.properties ?? {};
+    if (!same(fbp["siege:skin"]?.range, [0, FOLK_SKINS.length - 1]) || fbp["siege:tell"]?.type !== "bool") no(null, "Siege_Nights_BP/entities/folk.json skin properties do not match folk/skins_data.js: run python3 studio/art/build_folk.py");
+    for (const k of FOLK_SKINS) for (const f of [k, `tell_${k}`]) if (!existsSync(join(RP, `textures/entity/siege/folk/${f}.png`))) no(null, `folk skin ${f} has no picture: run python3 studio/art/build_folk.py`);
+    const frc = read(join(RP, "render_controllers/siege_folk.render_controllers.json"))?.render_controllers?.["controller.render.siege_folk"];
+    if ((frc?.arrays?.textures?.["Array.skins"] ?? []).length !== FOLK_SKINS.length * 2) no(null, "the siege_folk render controller does not list every folk skin and its tell: run python3 studio/art/build_folk.py");
+  } catch (e) { no(null, `could not read the folk skins: ${e}`); }
   const srcOf = new Map(scripts.map((f) => [f, readFileSync(f, "utf8")]));
   const exported = {};
   for (const src of srcOf.values()) for (const m of src.matchAll(/export\s+const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)) exported[m[1]] = m[2];
@@ -581,12 +593,13 @@ step("Every NPC has a skin");
       if (m[2] !== undefined && !keys.some((k) => k.startsWith(m[2]))) no(file, `${r}: dressNpc(..., \`${m[2]}...\`) but no NPC skin starts with "${m[2]}"`);
     }
     if (made.some((x) => x.type === "minecraft:npc") && !/\bdressNpc\(/.test(src)) no(file, `${r}: spawns minecraft:npc but never calls dressNpc(), so it would wear no skin of ours`);
-    // A person in a vanilla villager's coat is the default look too: talking people are minecraft:npc (dressNpc) or one
-    // of our own entities. Only villagers that must pass for any vanilla villager (the Returned) may stay, marked so.
+    // A person in a vanilla villager's coat is the default look too (Mateo 2026-11-15: "every single thing needs a skin"):
+    // villagers are our folk (folk/index.js spawnFolk), never minecraft:villager(_v2). Bedrock's wandering trader may
+    // stay only because our pack paints it (Siege_Nights_RP/entity/wandering_trader.entity.json, checked below).
     for (const x of made) {
       if (!PEOPLE_VANILLA.includes(x.type)) continue;
-      if (ON_PURPOSE.test(lines[x.line]) || ON_PURPOSE.test(lines[x.line - 1] ?? "")) continue;
-      no(file, `${r}:${x.line + 1}: spawns ${x.type}, which wears Bedrock's own villager look. Spawn minecraft:npc and dressNpc() it, or mark the line "// vanilla villager on purpose: <why>"`);
+      if (x.type === "minecraft:wandering_trader" && ownTrader) continue;
+      no(file, `${r}:${x.line + 1}: spawns ${x.type}, which wears Bedrock's own look. Spawn siege:folk (folk/index.js spawnFolk) or a minecraft:npc you dressNpc()`);
     }
   }
   // no .mcfunction summons an NPC or a villager: nothing there can dress it

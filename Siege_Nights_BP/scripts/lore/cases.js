@@ -10,6 +10,7 @@ import { world, system } from "@minecraft/server";
 import { markReturned } from "../bestiary/returned.js";
 import { CASES } from "./data/returned.js";
 import { setFlag, awardPoints } from "./player.js";
+import { spawnFolk } from "../folk/index.js";
 
 const CASE = Object.fromEntries(CASES.map((c) => [c.id, c]));
 const HESPER_TAG = "siege_lore_npc_hesper";
@@ -18,9 +19,7 @@ const BELL_RANGE = 16;
 function placeSuspect(player, id) {
   const c = CASE[id];
   if (!c) return player.sendMessage(`§7Cases: ${CASES.map((x) => `${x.id} (${x.suspect}, ${x.village})`).join(", ")}`);
-  // vanilla villager on purpose: the suspects may be Returned, and a Returned must pass for any villager
-  const villager = player.dimension.spawnEntity("minecraft:villager_v2", player.location);
-  villager.nameTag = c.suspect;
+  const villager = spawnFolk(player.dimension, player.location, { name: c.suspect, seed: c.id.length * 7 + c.suspect.length });
   if (c.returned) markReturned(villager, { name: c.suspect, quest: c.id });
   player.sendMessage(`§a${c.suspect} placed.§r §7${c.returned ? "This one did not come back the same." : "This one is exactly who they say they are."} Put ${c.asker} nearby with /scriptevent siege:lore_npc ${c.asker}`);
 }
