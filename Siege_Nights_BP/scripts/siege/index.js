@@ -31,6 +31,8 @@ import { guardTick } from "./guards.js";
 import { ballistaTick, machineGuardTick } from "./machines.js";
 import { borderTick } from "./protection.js";
 import { ramTick, sapperTick } from "./breachers.js";
+import { system } from "@minecraft/server";
+import { DRILL, drillTick } from "./drill.js";
 
 // Same schedule as the original main loop
 onTick("siege hud", 20, siegeHud);
@@ -42,6 +44,7 @@ onTick("guards", 40, guardTick);
 onTick("ballista", SETTINGS.ballistaReloadTicks, ballistaTick);
 onTick("machine protection", 40, machineGuardTick);
 onTick("borders", 20, borderTick);
+onTick("siege drill", DRILL.every, () => drillTick(system.currentTick));
 onTick("breachers", 20, () => {
   if (!state.active) return;
   ramTick();

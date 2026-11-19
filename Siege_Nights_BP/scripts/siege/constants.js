@@ -5,6 +5,7 @@ import { EquipmentSlot } from "@minecraft/server";
 
 export const RAIDER_TAG = "siege_raider";
 export const RAM_TAG = "siege_ram";
+export const GATE_TAG = "siege_gate_side"; // a raider of the force that comes up the road to the gate (warplan.js)
 export const SAPPER_TAG = "siege_sapper";
 export const WARLORD_TAG = "siege_warlord";
 export const KING_TAG = "siege_warlord_king";

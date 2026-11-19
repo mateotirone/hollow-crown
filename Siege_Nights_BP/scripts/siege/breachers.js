@@ -4,7 +4,7 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { CHARGE, RAM_ENGINE, RAM_TAG, SAPPER_TAG, UNBREAKABLE } from "./constants.js";
 import { markWanted } from "./guards.js";
-import { keepCenter } from "./keep.js";
+import { marchPoint } from "./keep.js";
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { settlementAt } from "./territory.js";
@@ -17,7 +17,7 @@ import { sfx } from "../core/sfx.js";
 export function breachDirection(entity) {
   const keep = state.keeps[ownerOf(entity)];
   if (keep) {
-    const center = keepCenter(keep);
+    const center = marchPoint(entity, keep);
     const dx = center.x - entity.location.x;
     const dz = center.z - entity.location.z;
     const d = Math.hypot(dx, dz) || 1;

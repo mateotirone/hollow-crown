@@ -1,16 +1,19 @@
 """Packs dump.mjs + mesh.py output into the Town Upgrade Simulator page.
 
-    python3 studio/town_sim/mkpage.py SIM_JSON LIB_JSON OUT_HTML [PLOTS_DIR]
+    python3 studio/town_sim/mkpage.py SIM_JSON LIB_JSON OUT_HTML [PLOTS_DIR] [SIEGE_DIR]
 
 SIM_JSON/LIB_JSON is the plot the page opens on, packed into the page itself. With PLOTS_DIR (one folder per plot,
 each holding dump.mjs's sim.json and mesh.py's lib.json), every plot there is also packed to plots/<id>.txt next to
 the page, and the page gets a picker for them: publish those files alongside it.
+With SIEGE_DIR (siege/build.mjs's output), the siege night's files are copied to siege/ next to the page: the game's
+scripts, the pack's data and the resource pack's models and textures. Publish those alongside it too.
 """
-import base64, gzip, json, os, sys
+import base64, gzip, json, os, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sim_path, lib_path, out_path = sys.argv[1:4]
-plots_dir = sys.argv[4] if len(sys.argv) > 4 else None
+plots_dir = sys.argv[4] if len(sys.argv) > 4 and sys.argv[4] != "-" else None
+siege_dir = sys.argv[5] if len(sys.argv) > 5 else None
 
 
 def pack(sim, lib):
@@ -32,6 +35,10 @@ def pack(sim, lib):
             f["cols"] = flat(f["cols"]); f["cells"] = flat(f["cells"])
     sim["treeOps"] = [{**t, "ops": flat(t["ops"])} for t in lib["treeOps"]]
     sim["forest"] = [flat(t) for t in lib["forest"]]
+    sim["grove"] = lib.get("grove", {})  # the grove trees planting puts on plots, cells from the trunk's ground cell
+    # the same palette as the game spells it (id + states), for the siege night's block world; the trees' blocks
+    # (added by mesh.py) by their names
+    sim["bpalette"] = sim["palette"] + [[n if ":" in n else "minecraft:" + n, {}] for n, _ in lib["palette"][len(sim["palette"]):]]
     for k in ("palette", "names", "soft", "models", "joins", "full", "groups", "atlas", "atlasSize", "rects", "avg"):
         sim[k] = lib[k]
     del sim["ground"]["h"][:0]
@@ -51,10 +58,15 @@ if plots_dir:
         _, pdata = pack(psim, plib)
         open(os.path.join(os.path.dirname(out_path) or ".", "plots", pid + ".txt"), "w").write(pdata)
     print(f"{len(plots)} plots packed to plots/")
+if siege_dir:
+    out = os.path.join(os.path.dirname(out_path) or ".", "siege")
+    os.makedirs(out, exist_ok=True)
+    for f in ("engine.js", "game.txt", "pack.json", "look.json"): shutil.copyfile(os.path.join(siege_dir, f), os.path.join(out, f))
+    print("siege night files copied to siege/")
 sim = json.load(open(sim_path))
 raw, data = pack(sim, json.load(open(lib_path)))
 tpl = open(os.path.join(HERE, "viewer.tpl.html")).read()
 page = (tpl.replace("__TITLE__", "Town Builder" if plots else f"{sim['plot']} Town Builder").replace("__DATA__", data)
-        .replace("__PLOTS__", json.dumps(plots)).replace("__HOME__", json.dumps(sim["plot"].lower())))
+        .replace("__PLOTS__", json.dumps(plots)).replace("__SIEGE__", json.dumps(bool(siege_dir))).replace("__HOME__", json.dumps(sim["plot"].lower())))
 open(out_path, "w").write(page)
 print(f"{len(raw) / 1e6:.1f} MB data, page {len(page) / 1e6:.1f} MB")

@@ -4,6 +4,8 @@
 //
 //   node studio/town_sim/dump.mjs [plot=oakmere] [layout=0] [out=studio/town_sim/out/sim.json]
 //
+// Siege nights are not dumped: the page runs the game's own scripts live (studio/town_sim/siege/).
+//
 // The scripts are loaded in Node with a fake @minecraft/server (tools/mock-minecraft.mjs), so these are the real
 // functions: towns.js (layout, groundwork, slots, seats), founding.js's founding order, blendGround and fixtures
 // (ported below: they read the world), buildings.js / townhall halls (plans and buildOrder), build.js resolveRole
@@ -68,7 +70,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields, onWallLine, radiusAt } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -379,7 +381,8 @@ function seatFor(slot, id) {
   const origin = { x: CX + seat.origin.dx, y: BASE + seat.origin.dy, z: CZ + seat.origin.dz };
   const cb = clearBoxFor(plan, origin, seat.forward, 0);
   designFor(id, seat.forward);
-  return { o: [seat.origin.dx, BASE + seat.origin.dy, seat.origin.dz], f: [seat.forward.x, seat.forward.z],
+  const sb = seatedBox(seat, plan.bounds()); // the ground the building takes (plotmarker.js keeps it on the plot: planting goes round it)
+  return { o: [seat.origin.dx, BASE + seat.origin.dy, seat.origin.dz], f: [seat.forward.x, seat.forward.z], box: [sb.x0, sb.z0, sb.x1, sb.z1],
     clear: [cb.min.x - CX, cb.min.y, cb.min.z - CZ, cb.max.x - CX, cb.max.y, cb.max.z - CZ] };
 }
 const slotOut = slots.map((s) => {
@@ -394,9 +397,23 @@ const slotOut = slots.map((s) => {
   }
   const bd = slotBorder(layout, s); // the starter village's log border, taken up when a building rises (plotmarker.js takeUpBorder)
   const border = bd.cells.length ? [pid(bd.ground[0], bd.ground[1]), ...bd.cells.flatMap(([dx, dy, dz]) => [dx, BASE + dy, dz])] : null;
-  return { id: s.id, size: s.size, cls: slotClass(s), border, long: s.long, box: s.box, dy: s.dy, side: s.side, tier: s.tier, tags: s.tags, step: s.step,
+  return { id: s.id, size: s.size, cls: slotClass(s), border, long: s.long, box: s.box, dy: s.dy, side: s.side, door: s.door, tier: s.tier, tags: s.tags, step: s.step,
     marker: markerSpot(s), takenAt: takenAt(s) ?? null, offers };
 });
+
+// The wall's lookouts (walls.js raiseWatch: a stand on the Low Palisade, a tower on levels 2-6), which fill the gaps
+// wallColumns leaves for them: the four on the diagonals and the one by the gate. Added to the ring's ops so the page
+// shows the wall whole by day too; returns the cells at or under each one's floor (takeDownWatch fills those with earth).
+const { watchPlan } = await imp("settle/wallwatch.js");
+function watchOps(level, ops) {
+  const earth = [];
+  for (const s of allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)) {
+    const plan = watchPlan(STYLE, s.kind), frame = frameFor(s.forward);
+    for (const v of planOps(plan, plan.style ?? styleFor(STYLE), s.origin, s.forward)) ops.push(v);
+    for (const c of plan.cells.values()) if (c.role !== "air" && c.y <= 0) { const at = toWorld(frame, s.origin, c.x, c.y, c.z); earth.push(...rel(at.x, at.z).flatMap((v, i) => (i ? [at.y, v] : [v]))); }
+  }
+  return earth;
+}
 
 // ---------- the wall rings: every level on every ring, measured on the ground as it is when the ring goes up ----------
 function ringOps(tier) {
@@ -404,10 +421,14 @@ function ringOps(tier) {
   measureWall();
   const snap = new Map(vox), restore = () => { vox.clear(); for (const [k, v] of snap) vox.set(k, v); };
   // the page raises level L over level L-1 and takes down what L no longer has (old steps, ladders)
-  const ring = { radius: wall.radius, fresh: {} };
+  // rec: the wall record the game keeps for this ring (settle/walls.js), for the siege simulator to hand back to it
+  const ring = { radius: wall.radius, fresh: {}, lifts: {}, earth: {}, earthPerm: pid("minecraft:grass_block"),
+    rec: { x: wall.x, y: wall.y, z: wall.z, shape: wall.shape, radius: wall.radius, style: wall.style, gate: wall.gate, gateDir: wall.gateDir, ground: wall.ground, ...lineFields(tw.outline) } }; // the wall line fields the game keeps on the record (walldata.js lineFields)
   for (let L = 1; L < WALL_LEVELS.length; L++) {
     restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
     ring.fresh[L] = topUpOps(L, tier, wallOps(L));
+    ring.lifts[L] = { ...wall.lifts };
+    ring.earth[L] = watchOps(L, ring.fresh[L]);
   }
   restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
   return ring;
@@ -618,17 +639,95 @@ for (let tier = 0; tier <= 3; tier++) {
 const halls = [null, { level: 1, name: HALL_TIERS[1].name, ops: events.find((e) => e.id === "hall1").ops }];
 for (let l = 2; l <= 5; l++) halls.push({ level: l, name: HALL_TIERS[l].name, settlement: HALL_TIERS[l].settlement, ops: hallOps(l) });
 
-// ---------- siege nights, played by the game's own siege code (siege_night.mjs) ----------
-const { runSieges } = await import(pathToFileURL(path.join(import.meta.dirname, "siege_night.mjs")).href);
-const LANG = fs.readFileSync(path.join(ROOT, "Siege_Nights_RP/texts/en_US.lang"), "utf8");
-const entityName = (id) => new RegExp(`^entity\\.${id.replace(/[.:]/g, (c) => "\\" + c)}\\.name=(.*)$`, "m").exec(LANG)?.[1]?.trim()
-  ?? id.replace(/^\w+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const sieges = await runSieges({
-  imp, mock, CX, CZ, BASE, gateAngle: wall.gate, radii: [0, 1, 2, 3].map((t) => wallRadius(tw, t)),
-  homes: [1, 3, 6, 10], // a villager for each home the tier's charter asks for (planSiege counts villagers)
-  wallLevels: WALLS.tierCap, outline: tw.outline,
+// ---------- blocks a siege night can put down (the siege simulator runs the game itself on this town) ----------
+// The page draws only blocks in its palette, so every block the siege code may set is added here: cracked walls,
+// gates swung open, the Breaching Charge, rubble, fire, the Keep Banner and the wall's watchtowers.
+{
+  const blockStates = {};
+  for (const f of walkFiles(path.join(ROOT, "Siege_Nights_BP", "blocks"), ".json")) {
+    try { const b = JSON.parse(fs.readFileSync(f, "utf8"))["minecraft:block"]; const st = {}; for (const [k, v] of Object.entries(b.description.states ?? {})) st[k] = Array.isArray(v) ? v : []; for (const t of Object.values(b.description.traits ?? {})) for (const n of t.enabled_states ?? []) st[n] = n === "minecraft:cardinal_direction" ? ["north", "south", "east", "west"] : []; blockStates[b.description.identifier] = st; } catch { /* not a block */ }
+  }
+  const SIEGE = await imp("siege/constants.js");
+  const swing = new Set([...(SIEGE.GATES ?? []), ...(SIEGE.PORTCULLISES ?? []), ...(SIEGE.CASTLE_GATES ?? [])]);
+  for (const [id, st] of pal.slice()) {
+    if (st && "open_bit" in st) pid(id, { ...st, open_bit: !st.open_bit }); // a door a raider or a guard walks through
+    if (st && "pillar_axis" in st) for (const ax of ["x", "y", "z"]) pid(id, { ...st, pillar_axis: ax }); // siege camps lay logs every way
+    const has = blockStates[id];
+    if (!has) continue;
+    if (has["siege:cracks"]) for (const c of has["siege:cracks"]) if (c) pid(id, { ...st, "siege:cracks": c });
+    if (swing.has(id)) { // every way a gate or portcullis can hang, open or shut
+      const names = Object.keys(has).filter((k) => has[k].length), combos = names.reduce((a, k) => a.flatMap((c) => has[k].map((v) => ({ ...c, [k]: v }))), [{}]);
+      if (combos.length <= 96) for (const c of combos) pid(id, c);
+    }
+  }
+  for (const [id, st] of [["siege:keep_banner", {}], ["siege:keep_banner", { "siege:color": 14 }], ["siege:breaching_charge", {}], ["minecraft:fire", {}], ["minecraft:cobblestone", {}],
+    ["minecraft:gravel", {}], ["minecraft:stone_bricks", {}], ["siege:barracks", {}]]) { try { BlockPermutation.resolve(id, st); pid(id, st); } catch { /* not in this build */ } }
+  try {
+    const { watchPlan, watchWayPlan } = await imp("settle/wallwatch.js");
+    for (const kind of ["tower", "stand"]) for (const mk of [watchPlan, watchWayPlan]) {
+      let plan; try { plan = mk(STYLE, kind); } catch { continue; }
+      if (!plan) continue;
+      const style = plan.style ?? styleFor(STYLE);
+      for (const fw of [{ x: 0, z: 1 }, { x: 0, z: -1 }, { x: 1, z: 0 }, { x: -1, z: 0 }]) {
+        const frame = frameFor(fw);
+        for (const c of [...plan.columns.values(), ...buildOrder(plan)]) { try { permId(resolveRole(style, frame, c.role, c.o)); } catch { /* a role this style lacks */ } }
+      }
+    }
+  } catch (e) { console.log("watchtowers not added to the palette:", String(e).slice(0, 120)); }
+}
+const { layoutKey } = await imp("settle/founding.js");
+
+// ---------- planting: the last stage of the build order (settle/planting.js, planting_rules.js) ----------
+// The page plants a plot itself, with the game's own plantPlan (shipped as source, like the charters): what stands on a
+// plot is the visitor's choice. From here it gets what plantPlan asks of the world: where each wall ring's line runs
+// (walldata.js onWallLine, radiusAt) and the grove trees. The open ground between plots doesn't depend on a choice, so
+// it is worked out here with openGroundPlan, one list for each tier (what that tier adds).
+const plantRules = await imp("settle/planting_rules.js");
+const grove = await imp("forestry/grove_data.js");
+const plantingJs = fs.readFileSync(path.join(SCRIPTS, "settle/planting.js"), "utf8");
+const PLANT_R = plantRules.OPEN_REACH + 2, PLANT_N = PLANT_R * 2 + 1;
+const OPEN_WALL = WALLS.reserve + Number(/const OPEN_WALL = WALLS\.reserve \+ (\d+)/.exec(plantingJs)[1]);
+// one character a cell for each ring: 1 inside the line, 2 within OPEN_WALL of it, 4 within WALLS.reserve of it
+const ringMasks = [0, 1, 2, 3].map((t) => {
+  const r = wallRadius(tw, t);
+  let out = "";
+  for (let dx = -PLANT_R; dx <= PLANT_R; dx++) for (let dz = -PLANT_R; dz <= PLANT_R; dz++) {
+    const loc = { x: CX + dx, z: CZ + dz }, x = loc.x - (wall.x + 0.5), z = loc.z - (wall.z + 0.5);
+    const inside = Math.hypot(x, z) < radiusAt(wall, r, Math.atan2(z, x)) - 1;
+    out += (inside ? 1 : 0) + (onWallLine(wall, loc, r, OPEN_WALL) ? 2 : 0) + (onWallLine(wall, loc, r, WALLS.reserve) ? 4 : 0);
+  }
+  return out;
 });
-sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatMap((n) => n?.waves.flat().map((e) => e.type) ?? []))].map((t) => [t, entityName(t)]));
+const maskAt = (t, dx, dz) => (Math.abs(dx) > PLANT_R || Math.abs(dz) > PLANT_R ? 0 : Number(ringMasks[t][(dx + PLANT_R) * PLANT_N + dz + PLANT_R]));
+const plantPerm = (id) => pid(id, /leaves$/.test(id) ? { persistent_bit: true } : undefined); // planting.js perm
+const PLANT_SEED = tw.name; // the game seeds a town's planting with its owner; here every visitor sees the same town
+const openPlants = [], openTrees = []; // what each tier adds: plants [dx, dz, palette id], trees [dx, dz, grove design]
+{
+  const seen = new Set(), seenTree = new Set();
+  for (let t = 0; t <= 3; t++) {
+    const plan = plantRules.openGround({
+      layout, region: STYLE, seed: PLANT_SEED, groundworkOf: (k) => groundwork(layout, k), slots,
+      fixtures: [0, 1, 2, 3].flatMap((k) => fixturesOf(layout, k)),
+      inside: (dx, dz) => (maskAt(t, dx, dz) & 1) === 1,
+      nearWall: (dx, dz) => { for (let k = t; k <= 3; k++) if (maskAt(k, dx, dz) & 2) return true; return false; },
+    });
+    const fresh = [], trees = [];
+    for (const [dx, dz, id] of plan.plants) { const k = `${dx},${dz}`; if (seen.has(k)) continue; seen.add(k); fresh.push(dx, dz, plantPerm(id)); }
+    for (const tr of plan.trees) { const k = `${tr.dx},${tr.dz}`; if (seenTree.has(k)) continue; seenTree.add(k); trees.push([tr.dx, tr.dz, `${tr.sid}_${tr.stage}_${tr.v}`]); }
+    openPlants.push(fresh); openTrees.push(trees);
+  }
+}
+const PLANT_P = plantRules.PLANTING[STYLE] ?? plantRules.PLANTING.vale;
+const plantIds = Object.fromEntries([PLANT_P.top, PLANT_P.patch[0], ...PLANT_P.cover.map((c) => c[0]), ...PLANT_P.bush].map((id) => [id, plantPerm(id)]));
+const groveDesigns = Object.fromEntries(Object.entries(grove.GROVE_DESIGNS).filter(([k]) => (grove.GROVE[STYLE] ?? []).some((sid) => k.startsWith(`${sid}_`)) && !/_mature_/.test(k)).map(([k, d]) => [k, { lo: d.lo, hi: d.hi }]));
+const plantSrc = `const { GROVE, GROVE_DESIGNS, GROVE_VARIANTS } = ${JSON.stringify({ GROVE: { [STYLE]: grove.GROVE[STYLE] ?? [] }, GROVE_DESIGNS: groveDesigns, GROVE_VARIANTS: grove.GROVE_VARIANTS })};\n`
+  + fs.readFileSync(path.join(SCRIPTS, "settle/planting_rules.js"), "utf8").replace(/^import .*$/gm, "").replace(/^export /gm, "");
+const planting = {
+  src: plantSrc, region: STYLE, seed: PLANT_SEED, r: PLANT_R, masks: ringMasks, open: openPlants, openTrees, ids: plantIds,
+  airy: /const AIRY = \/(.*)\/;/.exec(plantingJs)[1], noTrees: /const NO_TREES = \/(.*)\/;/.exec(plantingJs)[1], // planting.js's own
+  grove: Object.keys(groveDesigns), // mesh.py grows these (map/trees/build_grove.py tree) for the page
+};
+
 
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
@@ -638,14 +737,15 @@ const cfgNames = /^import\s*\{([^}]*)\}\s*from\s*["']\.\/config\.js["']/m.exec(c
 const chartersSrc = chartersRaw.replace(/^import .*$/gm, "").replace(/^export /gm, "");
 const rules = `const { ${cfgNames.join(", ")} } = ${JSON.stringify(Object.fromEntries(cfgNames.map((n) => [n, cfg[n]])))};\n${chartersSrc}`;
 
-const soft = pal.map(([id]) => (SOFT.test(id) || id === "siege:plot_marker" ? 1 : 0));
+const lowPlant = new Set([...PLANT_P.cover.map((c) => c[0])].filter((id) => !plantRules.TALL.test(id)));
+const soft = pal.map(([id]) => (SOFT.test(id) || lowPlant.has(id) || id === "siege:plot_marker" ? 1 : 0));
 const out = {
   plot: tw.name, region: plotCfg?.region, style: STYLE, layout: layout.label, layoutIndex: Number(LAYOUT), center: [CX, CZ], base: BASE, half: HALF,
   gate: gateDirName, tierNames: TIER_NAMES, walls: tw.walls, wallLevelNames: WALL_LEVELS.map((l) => l?.name ?? null), tierCap: WALLS.tierCap,
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, store, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
-  designs, trees, rules, sieges, keepHealth: [200, 300, 400, 600], hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
+  designs, trees, rules, planting, layoutKey: layoutKey(layout), hallSpot: hallSpot ? { x: hallSpot.x, y: hallSpot.y, z: hallSpot.z, fx: hallSpot.forward.x, fz: hallSpot.forward.z } : null, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
   // how fast each kind of job runs in the game (blocks a tick), so the page can play at the game's own pace
@@ -659,5 +759,4 @@ console.log(`${tw.name} (${layout.label}) style ${STYLE}, base y ${BASE}, ${slot
 console.log("events:", events.map((e) => `${e.id}:${nOps(e.ops)}`).join(" "));
 console.log("tiers:", tiers.map((t) => `${t.name} r${t.radius} gw${nOps(t.ground)} wall L1 ${nOps(t.ring.fresh[1])} L10 ${nOps(t.ring.fresh[10])}`).join(" | "));
 console.log("halls:", halls.slice(1).map((h) => `${h.name}:${nOps(h.ops)}`).join(" "), "stations:", stationEvents.map((s) => `${s.stage}:${nOps(s.ops)}`).join(" "));
-{ const ks = Object.keys(sieges.nights), w = ks.map((k) => sieges.nights[k]?.waves ?? []); console.log("sieges:", ks.length, "nights, waves", w.map((x) => x.length).join(""), "first", JSON.stringify(sieges.nights["1|0|none"]).slice(0, 300)); }
 console.log("base builds:", baseBuilds.map((b) => `${b.id}@${b.slot}`).join(" "), "size", (fs.statSync(OUT).size / 1e6).toFixed(1), "MB");

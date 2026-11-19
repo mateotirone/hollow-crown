@@ -28,7 +28,7 @@ import { applyFilter } from "../core/events.js";
 import {
   isReady, getState, saveState, keepOf, keepCenter, settlementAt, isNight, startSiege, endSiege, spawnRaider, raidersLeft,
   MODIFIERS, FACTIONS, SETTINGS, title, overworld, ownerTag, pick, on, emit, addFilter,
-  addPlanHook, addSiegeSkipHook, addKeepMenuButtons, onTick, moduleStore,
+  addPlanHook, addSiegeSkipHook, addKeepMenuButtons, onTick, moduleStore, assaultSpot, GATE_TAG,
   provideFact, registerDeck, storyPick, note,
 } from "../siege/api.js";
 import { bestiaryStore } from "../bestiary/bossCore.js";
@@ -452,11 +452,10 @@ on("assaultIncoming", ({ assault }) => {
   }, 30);
 });
 
+// (the war plan's own spot: up the road to the gate when that is the side, warplan.js assaultSpot)
 const sideSpot = (owner, keep, angle, extra = 0) => {
-  const c = keepCenter(keep);
-  const d = applyFilter("spawnDistance", SETTINGS.spawnDistance, { owner, keep }) + extra + Math.random() * 4;
-  const a = angle + (Math.random() - 0.5) * 0.4;
-  return [Math.floor(c.x + Math.cos(a) * d), Math.floor(c.z + Math.sin(a) * d), c.y];
+  const at = assaultSpot(owner, keep, getState().plans?.[owner], angle, { spread: 0.4, extra, jitter: 4 });
+  return [at.x, at.z, keepCenter(keep).y, at.gate];
 };
 
 // Hollow soldiers the Reach adds on top of the ordinary army. The "hollowSoldier" filter can change the type.
@@ -485,8 +484,8 @@ function sendSoldiers(count, role, glimpse, owners) {
     const keep = keepOf(owner), plan = st.plans[owner];
     if (!keep || !plan) continue;
     for (let i = 0; i < count; i++) {
-      const [x, z, y] = sideSpot(owner, keep, plan.sides[i % plan.sides.length], glimpse ? 6 : 0);
-      if (spawnRaider(overworld(), soldierType(role, glimpse), x, z, y, [ownerTag(owner), HARD_TAG])) sent++;
+      const [x, z, y, gate] = sideSpot(owner, keep, plan.sides[i % plan.sides.length], glimpse ? 6 : 0);
+      if (spawnRaider(overworld(), soldierType(role, glimpse), x, z, y, gate ? [ownerTag(owner), HARD_TAG, GATE_TAG] : [ownerTag(owner), HARD_TAG])) sent++;
     }
   }
   return sent;

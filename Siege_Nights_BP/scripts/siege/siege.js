@@ -3,16 +3,17 @@
 
 import { world, system, DisplaySlotId } from "@minecraft/server";
 import { emit, applyFilter } from "../core/events.js";
-import { KEEP_HEART, RAIDER_TAG, RAM_TAG, SAPPER_TAG } from "./constants.js";
-import { checkKeeps, keepBlock, keepCenter, raiseKeepHeart } from "./keep.js";
+import { GATE_TAG, KEEP_HEART, RAIDER_TAG, RAM_TAG, SAPPER_TAG } from "./constants.js";
+import { checkKeeps, keepBlock, keepCenter, marchPoint, raiseKeepHeart } from "./keep.js";
 import { SETTINGS } from "./settings.js";
 import { saveState, state } from "./state.js";
 import { recordWin } from "./territory.js";
 import { isOnline, overworld, ownerOf, ownerTag, title } from "./util.js";
 import { pay } from "../economy/coins.js";
 import { fromEmeralds, coins } from "../economy/rules.js";
-import { FACTIONS, announcePlan, buff, buyArmy, planSiege, rememberSiege, spawnWarlord } from "./warplan.js";
+import { FACTIONS, announcePlan, assaultSpot, buff, buyArmy, planSiege, rememberSiege, spawnWarlord } from "./warplan.js";
 import { sfx } from "../core/sfx.js";
+import { drillHolds } from "./drill.js";
 
 // ---------- Siege waves ----------
 
@@ -84,22 +85,23 @@ export function spawnAssault() {
     const faction = FACTIONS[plan.faction];
     const center = keepCenter(keep);
     const tags = [ownerTag(owner)];
-    // Raiders come from the planned side(s), spread a little like a real attack
-    const spot = (i) => {
-      const a = plan.sides[i % plan.sides.length] + (Math.random() - 0.5) * 0.6;
-      const d = applyFilter("spawnDistance", SETTINGS.spawnDistance, { owner, keep }) + Math.random() * 6; // a walled settlement is attacked from outside its wall
-      return [Math.floor(center.x + Math.cos(a) * d), Math.floor(center.z + Math.sin(a) * d)];
+    // Raiders come from the planned side(s): up the road to the gate first, a flank spread out along its side
+    const send = (type, i, more = [], name) => {
+      const at = assaultSpot(owner, keep, plan, plan.sides[i % plan.sides.length]);
+      return spawnRaider(dim, type, at.x, at.z, center.y, at.gate ? [...tags, ...more, GATE_TAG] : [...tags, ...more], name);
     };
-    buyArmy(plan, keep.sieges, Math.round(plan.budget * share))
-      .forEach((type, i) => buff(spawnRaider(dim, type, ...spot(i), center.y, tags), plan));
+    buyArmy(plan, keep.sieges, Math.round(plan.budget * share)).forEach((type, i) => buff(send(type, i), plan));
 
     if (keep.sieges >= SETTINGS.breachersFromSiege) {
       const rams = faction.ram && (assaultNumber >= 2 || plan.modifiers.includes("siegeTrain")) ? 1 : 0;
       const sappers = (faction.ram ? 1 : 2) * (plan.modifiers.includes("sappers") ? 2 : 1);
-      for (let i = 0; i < rams; i++) spawnRaider(dim, faction.ram, ...spot(i), center.y, [...tags, RAM_TAG], "§cBattering Ram");
-      for (let i = 0; i < sappers; i++) buff(spawnRaider(dim, faction.sapper, ...spot(i), center.y, [...tags, SAPPER_TAG], "§cSapper"), plan);
+      for (let i = 0; i < rams; i++) send(faction.ram, i, [RAM_TAG], "§cBattering Ram");
+      for (let i = 0; i < sappers; i++) buff(send(faction.sapper, i, [SAPPER_TAG], "§cSapper"), plan);
     }
-    if (plan.warlord && assaultNumber === total) spawnWarlord(dim, plan, spot(0), center.y, tags);
+    if (plan.warlord && assaultNumber === total) {
+      const at = assaultSpot(owner, keep, plan, plan.sides[0]);
+      spawnWarlord(dim, plan, [at.x, at.z], center.y, at.gate ? [...tags, GATE_TAG] : tags);
+    }
   }
 
   for (const player of world.getPlayers()) {
@@ -154,13 +156,14 @@ export function endSiege(outcome) {
 export function marchOnKeep(raiders) {
   for (const raider of raiders) {
     try {
+      if (drillHolds(raider)) continue; // in its place in the ranks at the gate (drill.js)
       const keep = state.keeps[ownerOf(raider)];
       if (!keep) continue;
-      const center = keepCenter(keep);
+      const center = marchPoint(raider, keep);
       const dx = center.x - raider.location.x;
       const dz = center.z - raider.location.z;
       const dist = Math.hypot(dx, dz);
-      if (dist < SETTINGS.marchRange) continue;
+      if (dist < (center.via ? 1 : SETTINGS.marchRange)) continue;
       const fighting = raider.dimension.getPlayers({ location: raider.location, maxDistance: 8 }).length > 0;
       if (!fighting) raider.applyImpulse({ x: (dx / dist) * 0.3, y: 0, z: (dz / dist) * 0.3 });
     } catch {
