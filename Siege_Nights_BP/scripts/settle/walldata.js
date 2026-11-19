@@ -8,12 +8,16 @@
 
 export const WALLS = {
   radius: 66, // the Castle ring: blocks from the Plot Stone to the outer face (Mateo 2026-11-12: rings 36, 46, 56, 66 by tier). Land ends at radius + landBeyond.
-  landBeyond: 6, // your land reaches this far past the wall from the day it is raised (66 + 6 = 72, the map's land edge)
+  landBeyond: 8, // your land reaches this far past the wall from the day it is raised (66 + 8 = 74, the edge of the map's flat
+  // ground; was 6 until 2026-11-16, when the Castle wall was drawn round its outermost plots and may stand out to 72)
   spawnBeyond: 5, // raiders appear this far outside the wall
   reserve: 4, // nothing may be built this close to the line of the wall (either side)
   wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at the Castle ring, less on smaller rings) and in
   // (in stays under the town layouts' 3-block clearance, so it never cuts a plot)
   stations: 48, // how many points round the ring the ground is measured at
+  clear: 2, // every stretch of wall stands at least this high above the highest ground right beside it (a raider can't
+  // hop it): the palisade's uneven stakes keep their look, but none is left a step-up where the land rises next to it
+  // or where a short stake falls (Mateo 2026-11-15, "random holes in the wall"). Ground beside = besideOf below.
   maxStep: 6, // the ground may differ this much between neighbouring points before the wall refuses to span it
   perTick: 90, // blocks placed per tick while a wall rises
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
@@ -172,6 +176,9 @@ export function columnKinds(L, col, seed = 0, style) {
     if (every(along, VARIATION.postEvery, 0)) top += 1; // a taller post now and then
     else if (hash3(x, 0, z, seed) < 0.1) top -= 1; // and the odd short stake
   }
+  // never low enough to hop: at least WALLS.clear above its own ground and the ground beside it (col.beside, measured
+  // where the wall is raised and kept on the wall record, see besideOf)
+  if (!tower && !walk) top = Math.max(top, base + Math.max(0, col.beside ?? 0) + WALLS.clear);
   for (let y = base + 1; y <= top; y++) {
     if (walk) { out.push([y, "plank"]); continue; }
     const rel = Math.max(1, y - base);
@@ -201,6 +208,44 @@ export function columnKinds(L, col, seed = 0, style) {
   if (tooth) out.push([top + 1, "tooth"]);
   else if (col.d === 0 && L.body !== "log" && every(along, L.body === "fence" ? VARIATION.lightEvery + 2 : VARIATION.lightEvery, 7) && (L.h >= 4 || L.body === "fence")) out.push([top + 1, "light"]); // a lantern on the wall top
   return out;
+}
+
+// How far the ground right beside a wall column rises above the column's own ground, as measured when the wall was
+// raised (walls.js placeColumn keeps it on the wall record as w.beside, next to w.lifts). Raising, repairing and taking
+// the wall down all read the column through this, so they agree on its height.
+export const BESIDE_MAX = 4; // looked this far up; a steeper bank than that is a cliff, not a step
+export function besideOf(w, col) {
+  const b = w?.beside?.[`${col.x},${col.z}`];
+  return b ? { ...col, beside: b } : col;
+}
+// The eight neighbours of a column (where a raider could jump from)
+export const AROUND = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+// Natural ground (never wall or building blocks)
+export const WALL_GROUND = /^minecraft:(dirt|coarse_dirt|rooted_dirt|grass_block|podzol|mycelium|mud|clay|gravel|sand|red_sand|sandstone|red_sandstone|stone|granite|diorite|andesite|deepslate|tuff|calcite|dripstone_block|moss_block|snow|packed_ice|ice|terracotta|\w+_terracotta|grass_path|dirt_path|farmland)$/;
+// What a raider can't stand on (or step up onto): air, liquids, plants, lights, flat things
+const NO_FOOTHOLD = /air$|water|lava|grass(?!_block|_path)|fern|flower|snow_layer|vine|sapling|seagrass|kelp|dandelion|poppy|tulip|daisy|cornflower|bluet|orchid|allium|lily|mushroom|deadbush|dead_bush|bush$|torch|lantern|rail$|_rail|carpet|button|pressure_plate|sign|banner|wheat|carrots|potatoes|beetroot|tripwire|string|cobweb|chain$|ladder|vine/;
+// How far the land right beside a wall column rises above the column's own ground (`own`), as a raider sees it:
+// any block they could step up onto counts (a log pile in the village's wood yard, a fence, a crate: the 2026-11-15
+// simulator walked up the Oakmere yard's log piles and over the stakes), except on the wall's own cells, where only
+// natural ground counts (its walkway, steps and gateway are behind or in the wall, not a way over it).
+//   idAt(x, y, z) -> block id ("" when unknown).  wallCell(x, z) -> "wall" for the wall's own stretch and towers
+//   (skipped), "plan" for the rest of the wall's plan and watchtower shafts (natural ground only), or false.
+export function besideHeight(idAt, x, z, own, wallCell = () => false) {
+  let high = 0;
+  for (const [dx, dz] of AROUND) {
+    const nx = x + dx, nz = z + dz, cell = wallCell(nx, nz);
+    if (cell === "wall") continue;
+    const counts = cell ? (id) => WALL_GROUND.test(id) : (id) => !!id && !NO_FOOTHOLD.test(id);
+    let h = 0;
+    while (h < BESIDE_MAX && counts(idAt(nx, own + 1 + h, nz) ?? "")) h++;
+    high = Math.max(high, h);
+  }
+  return high;
+}
+// wallCell for besideHeight, from a level's columns and its watchtower spots
+export function wallCellOf(cols, watch = []) {
+  const role = new Map(cols.map((c) => [`${c.x},${c.z}`, c.role === "wall" || c.role === "tower" ? "wall" : "plan"]));
+  return (x, z) => role.get(`${x},${z}`) ?? (watch.length && inWatch(watch, x, z, 0) ? "plan" : false);
 }
 
 // What a wall or tower column is made of at a height above its ground: "log", "fence" or a Castle Stone kind
@@ -243,12 +288,25 @@ export function wallShape(seedText) {
   return raw.map((v) => Math.round((v / top) * 100) / 100);
 }
 
+// The wall line fields a town's outline carries (towns_data.js outline), for a wall record or a test's center
+export const lineFields = (o) => (o?.radii?.length ? { radii: o.radii, radiiAt: o.radiiAt, ...(o.tight ? { tight: o.tight } : {}), ...(o.lines ? { lines: o.lines } : {}), ...(o.keep ? { keep: o.keep } : {}) } : {});
+// center.keep: plot boxes [x0, z0, x1, z1] (from the Plot Stone) near the wall line: no ladder or step goes on one
+const inKeep = (center, x, z) => !!center?.keep?.some((b) => x - center.x >= b[0] && x - center.x <= b[2] && z - center.z >= b[1] && z - center.z <= b[3]);
+
 // How far out the wall stands at angle a (radians): its ring radius, wandered by center.shape (if it has one)
 export function radiusAt(center, radius, a) {
   // A starter village wall (map/structures/starter.py) carries its whole outline: radii = blocks out at even angles,
   // worked out from the land and what the wall holds, for a ring of radiiAt. A bigger ring keeps the same outline, moved out.
   // The Hamlet ring (radius at or inside radiiAt) follows center.tight instead when it has one: the line drawn tight round
-  // the starter village (settle/hamlet_walls_data.js, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
+  // the starter village (towns_data.js outline.tight, drawn by tools/build_towns.py from the village it goes round, Mateo 2026-11-14: no "dead space" inside the Low Palisade).
+  // Town, City and Castle rings follow center.lines[radius] when there is one: the line drawn round what that tier laid
+  // (towns_data.js outline.lines, tools/export_towns.py ring_lines), with room inside for the wall, its stairs and towers.
+  const ln = center?.lines?.[radius];
+  if (ln?.length) {
+    const f = (turn(a) / TAU) * ln.length;
+    const i = Math.floor(f) % ln.length, t = f - Math.floor(f);
+    return Math.min(ln[i] * (1 - t) + ln[(i + 1) % ln.length] * t, WALLS.radius + WALLS.landBeyond - 2);
+  }
   if (center?.tight?.length && radius <= (center.radiiAt ?? radius)) {
     const tt = center.tight, f = (turn(a) / TAU) * tt.length;
     const i = Math.floor(f) % tt.length, t = f - Math.floor(f);
@@ -360,9 +418,29 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     if (!old || rank[col.role] > rank[old.role] || (col.role === old.role && col.d < old.d)) cols.set(k, { x, z, ...col });
   };
   const half = WALLS.gateWidth / 2;
+  // the way in through the gate (the road out to the map's road runs here): no step or ladder is put on it
+  const gux = Math.cos(gateAngle), guz = Math.sin(gateAngle);
+  const inGateWay = (x, z) => { const dx = x - center.x, dz = z - center.z; return dx * gux + dz * guz > 0 && Math.abs(-dx * guz + dz * gux) <= half + 1.5; };
   const steps = Math.ceil(TAU * (radius + WALLS.wobble.out) * 1.6);
   const deep = L.thick + (L.walk ? 1 : 0); // a thin wall with a walkway has a column of planks behind it
   const gateD = Math.min(L.thick - 1, 1); // the gate hangs one block in from the face where the wall is thick enough
+  // The line is sampled by angle, so where it runs slantwise (a starter village's outline, a step in its radius) two
+  // samples can land two blocks apart, or only corner to corner: a hole you can walk through, or see through (Mateo
+  // 2026-11-15, "still gaps in the walls"). Each layer is joined up as it goes: the cells between two samples that
+  // don't share a side are filled, keeping to the side nearer the line, so every layer is one unbroken run of blocks.
+  const first = [], prev = [];
+  const join = (d, from, to, col, r) => {
+    if (!from || from.gate || col.role === "gap" || col.role === "gate" || col.role === "port") return;
+    let { x, z } = from;
+    for (let n = 0; n < 8 && Math.abs(to.x - x) + Math.abs(to.z - z) > 1; n++) {
+      const sx = Math.sign(to.x - x), sz = Math.sign(to.z - z);
+      const steps2 = [sx ? [x + sx, z] : null, sz ? [x, z + sz] : null].filter(Boolean);
+      const off = ([px, pz]) => Math.abs(Math.hypot(px - center.x, pz - center.z) - (r - d));
+      [x, z] = steps2.sort((p, q) => off(p) - off(q))[0];
+      if (x === to.x && z === to.z) break;
+      put(x, z, { ...col });
+    }
+  };
   for (let s = 0; s < steps; s++) {
     const a = (s / steps) * TAU;
     const g = groundAt(smooth, a);
@@ -371,14 +449,21 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const r = radiusAt(center, radius, a);
     for (let d = 0; d < deep; d++) {
       const x = Math.round(center.x + Math.cos(a) * (r - d)), z = Math.round(center.z + Math.sin(a) * (r - d));
+      let col;
       if (Math.abs(along) <= half) {
         const gg = groundAt(smooth, gateAngle);
-        if (L.gate === "open") put(x, z, { role: "gap", base: gg, top: gg + L.h, d, a });
-        else put(x, z, { role: d === gateD ? "gate" : d === 0 && L.port ? "port" : "gap", base: gg, top: gg + L.h, d, a });
-      } else if (d >= L.thick) put(x, z, { role: "walk", base: g, top: g + L.walk, d, a, along });
-      else put(x, z, { role: "wall", base: g, top: g + L.h, d, a, along });
+        if (L.gate === "open") col = { role: "gap", base: gg, top: gg + L.h, d, a };
+        else col = { role: d === gateD ? "gate" : d === 0 && L.port ? "port" : "gap", base: gg, top: gg + L.h, d, a };
+      } else if (d >= L.thick) col = { role: "walk", base: g, top: g + L.walk, d, a, along };
+      else col = { role: "wall", base: g, top: g + L.h, d, a, along };
+      put(x, z, col);
+      const here = { x, z, gate: col.role === "gap" || col.role === "gate" || col.role === "port", col, r };
+      join(d, prev[d], here, col, r);
+      prev[d] = here;
+      first[d] ??= here;
     }
   }
+  for (let d = 0; d < deep; d++) if (prev[d] && first[d] && !first[d].gate) join(d, prev[d], first[d], prev[d].col, prev[d].r); // round to the start
   // towers, evenly spaced, the first pair either side of the gate
   // each tower stands a little taller or shorter than its neighbours; the gatehouse pair match and stand proud
   const seed = wallSeed(center);
@@ -402,10 +487,10 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const cx = Math.round(center.x + Math.cos(a) * (r - 1)), cz = Math.round(center.z + Math.sin(a) * (r - 1));
     const x = cx + step.x * (L.r + 1), z = cz + step.z * (L.r + 1);
     const g = groundAt(smooth, a);
-    if (!cols.has(key(x, z))) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
+    if (!cols.has(key(x, z)) && !inKeep(center, x, z) && !inGateWay(x, z)) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
   }
   // the top step must sit beside the walk: the flight hugs the wall, never through it, a tower or a ladder
-  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) || (watch.length > 0 && (inWatch(watch, x, z, 1) || onWatchPath(watch, x, z))) });
+  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) || inKeep(center, x, z) || inGateWay(x, z) || (watch.length > 0 && (inWatch(watch, x, z, 1) || onWatchPath(watch, x, z))) });
   for (const c of flights) cols.set(key(c.x, c.z), { ...c, d: 9 });
   // where a flight's top step doesn't quite touch the walk, a short solid landing carries on out to it
   const standOn = (x, z) => { const n = cols.get(key(x, z)); return n && (n.role === "walk" || (n.role === "wall" && !L.walk)); };

@@ -58,7 +58,7 @@ const imp = (p) => import(pathToFileURL(path.join(SCRIPTS, p)).href);
 await imp("main.js"); // registers everything (the Works machines, block builds) the way the game does
 mock.endEarly();
 
-const { townFor, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, TIER_NAMES } = await imp("settle/towns.js");
+const { townFor, slotsOf, slotBorder, standsOnGround, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox, TIER_NAMES } = await imp("settle/towns.js");
 const { BUILDINGS, BUILDING, WORKS, drawBuilding: drawPlotBuilding, styleFor } = await imp("settle/buildings.js");
 // the Barracks is raised from its own block (settle/blockdesigns.js guardhouse), not from a plot design
 const { BLOCK_BUILDS } = await imp("settle/blockdesigns.js");
@@ -68,7 +68,7 @@ const { buildOrder, frameFor, toWorld, drawHall, HALL_TIERS } = await imp("townh
 const { STYLES } = await imp("townhall/styles.js");
 const { resolveRole, clearBoxFor } = await imp("townhall/build.js");
 const { foundationColumns } = await imp("settle/ground.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind } = await imp("settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, besideHeight, wallCellOf, allWatchSpots, wallSeed, wallShape, bearingToAngle, stationSpots, smoothGround, materialKind, lineFields } = await imp("settle/walldata.js");
 const { palette: wallPalette, permFor } = await imp("settle/walls.js");
 const { REGION_TO_STYLE, SETTLE } = await imp("settle/config.js");
 const { plotFit, opensAt, slotClass, CLASS_NAMES } = await imp("settle/charters.js");
@@ -215,8 +215,9 @@ function blendOps(tier) { // founding.js blendGround on this world
   for (let t = 0; t <= tier; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
     const k = `${dx},${dz}`; member.add(k);
     if (t !== tier || layout.pal[p]?.[0] === "minecraft:air") continue;
+    const ground = !standsOnGround(layout.pal[p]?.[0]); // founding.js: the edge's height is its ground's
     const c = cols.get(k);
-    if (!c) cols.set(k, { dx, dz, lo: dy, hi: dy }); else { c.lo = Math.min(c.lo, dy); c.hi = Math.max(c.hi, dy); }
+    if (!c) cols.set(k, { dx, dz, lo: dy, hi: ground ? dy : undefined }); else { c.lo = Math.min(c.lo, dy); if (ground) c.hi = Math.max(c.hi ?? dy, dy); }
   }
   for (const c of cols.values()) {
     const x = CX + c.dx, z = CZ + c.dz;
@@ -227,6 +228,7 @@ function blendOps(tier) { // founding.js blendGround on this world
     }
   }
   for (const c of cols.values()) {
+    if (c.hi === undefined) continue; // founding.js: only posts on earlier ground
     const h = BASE + c.hi;
     for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       if (member.has(`${c.dx + ux},${c.dz + uz}`)) continue;
@@ -286,12 +288,31 @@ function fixtureOps(tier) { // founding.js placeFixture
 // --- the wall (walls.js raiseWall / moveWall), on this world's ground
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
-const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {} };
-if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt }); // the starter village's wall line (walls.js raiseWall outline)
+const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {}, beside: {} };
+Object.assign(wall, lineFields(tw.outline)); // the starter village's wall line and the Hamlet's tight line (founding.js foundTown -> walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
 function wallCols(level) { return wallColumns({ center: wall, radius: wall.radius, level, gateAngle: wall.gate, smooth: wall.ground }); }
+function besideHigh(x, z, own, wallCell) { // walls.js placeColumn: walldata.js besideHeight on this world
+  return besideHeight((bx, by, bz) => idOf(get(bx, by, bz)), x, z, own, wallCell);
+}
+// walls.js topUpWall: once the tier's groundwork is laid (it is laid while the wall rises), stakes the new ground
+// beside came up against are topped up. Played as part of the ring so the page shows the wall as it ends up.
+function topUpOps(level, tier, ops) {
+  const L = WALL_LEVELS[level], Pw = wallPalette(STYLE, L, {}), cols = wallCols(level);
+  groundworkOps(tier); blendOps(tier); // on the scratch world only (ringOps restores it)
+  const wallCell = wallCellOf(cols, allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)); // walls.js job.wallCell
+  for (const col of cols) {
+    if (col.role !== "wall") continue;
+    const lk = `${col.x},${col.z}`, lift = wall.lifts[lk] ?? 0;
+    const high = besideHigh(col.x, col.z, col.base + lift, wallCell);
+    if (high <= (wall.beside[lk] ?? 0)) continue;
+    wall.beside[lk] = high;
+    for (const [y, kind] of columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style)) set(ops, col.x, y + lift, col.z, permId(permFor(Pw, wall, kind, col)));
+  }
+  return ops;
+}
 function wallOps(level) { // raiseWall -> step -> placeColumn
   if (!wall.ground) measureWall();
   const ops = [], L = WALL_LEVELS[level], Pw = wallPalette(STYLE, L, {});
@@ -303,10 +324,11 @@ function wallOps(level) { // raiseWall -> step -> placeColumn
       for (const [y] of columnKinds(WALL_LEVELS[wall.level], col, wallSeed(wall))) set(ops, col.x, y, col.z, 0);
     }
   }
+  const wallCell = wallCellOf(cols, allWatchSpots(wall, wall.radius, wall.gate, wall.ground, level)); // walls.js job.wallCell
   for (const col of cols) {
     const { x, z, base } = col;
-    const cells = new Map(columnKinds(L, col, wallSeed(wall), wall.style));
     if (col.role === "gap" || col.role === "gate" || col.role === "port") {
+      const cells = new Map(columnKinds(L, col, wallSeed(wall), wall.style));
       if (get(x, base, z) === 0) set(ops, x, base, z, permId(Pw.kinds.cobbled));
       for (let y = base + 1; y <= col.top + (L.gate === "open" ? 2 : 0); y++) set(ops, x, y, z, cells.has(y) ? permId(permFor(Pw, wall, cells.get(y), col)) : 0);
       continue;
@@ -318,6 +340,11 @@ function wallOps(level) { // raiseWall -> step -> placeColumn
       while (lift < 4 && WALL_NATURAL.test(idOf(get(x, base + 1 + lift, z)))) lift++;
       if (lift) wall.lifts[lk] = lift;
     }
+    if (col.role === "wall" && wall.beside[lk] === undefined) { // the ground right beside it (WALLS.clear)
+      const high = besideHigh(x, z, base + lift, wallCell);
+      if (high) wall.beside[lk] = high;
+    }
+    const cells = columnKinds(L, besideOf(wall, col), wallSeed(wall), wall.style);
     for (const [y, kind] of cells) set(ops, x, y + lift, z, permId(permFor(Pw, wall, kind, col)));
     const footing = col.role === "walk" ? Pw.kinds.plank : Pw.kinds[materialKind(L, 1, false)];
     fill(ops, x, base, z, permId(footing), WALL_SOFT);
@@ -329,7 +356,7 @@ function wallDownOps() { // moveWall's takeDown of the old ring
   const ops = [], L = WALL_LEVELS[wall.level];
   for (const col of wallCols(wall.level)) {
     const lift = wall.lifts[`${col.x},${col.z}`] ?? 0;
-    for (const [y] of columnKinds(L, col, wallSeed(wall))) set(ops, col.x, y + lift, col.z, 0);
+    for (const [y] of columnKinds(L, besideOf(wall, col), wallSeed(wall))) set(ops, col.x, y + lift, col.z, 0);
   }
   return ops;
 }
@@ -365,22 +392,24 @@ const slotOut = slots.map((s) => {
     if (!seat) continue;
     offers.push({ id, ok: rule.ok, tagged: rule.tagged, why: rule.why, opens: opensAt(id), price: plotPrice(id), ...seat });
   }
-  return { id: s.id, size: s.size, cls: slotClass(s), long: s.long, box: s.box, dy: s.dy, side: s.side, tier: s.tier, tags: s.tags, step: s.step,
+  const bd = slotBorder(layout, s); // the starter village's log border, taken up when a building rises (plotmarker.js takeUpBorder)
+  const border = bd.cells.length ? [pid(bd.ground[0], bd.ground[1]), ...bd.cells.flatMap(([dx, dy, dz]) => [dx, BASE + dy, dz])] : null;
+  return { id: s.id, size: s.size, cls: slotClass(s), border, long: s.long, box: s.box, dy: s.dy, side: s.side, tier: s.tier, tags: s.tags, step: s.step,
     marker: markerSpot(s), takenAt: takenAt(s) ?? null, offers };
 });
 
 // ---------- the wall rings: every level on every ring, measured on the ground as it is when the ring goes up ----------
 function ringOps(tier) {
-  wall.radius = wallRadius(tw, tier); wall.ground = undefined; wall.lifts = {}; wall.level = 0;
+  wall.radius = wallRadius(tw, tier); wall.ground = undefined; wall.lifts = {}; wall.beside = {}; wall.level = 0;
   measureWall();
   const snap = new Map(vox), restore = () => { vox.clear(); for (const [k, v] of snap) vox.set(k, v); };
   // the page raises level L over level L-1 and takes down what L no longer has (old steps, ladders)
   const ring = { radius: wall.radius, fresh: {} };
   for (let L = 1; L < WALL_LEVELS.length; L++) {
-    restore(); wall.level = 0; wall.lifts = {};
-    ring.fresh[L] = wallOps(L);
+    restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
+    ring.fresh[L] = topUpOps(L, tier, wallOps(L));
   }
-  restore(); wall.level = 0; wall.lifts = {};
+  restore(); wall.level = 0; wall.lifts = {}; wall.beside = {};
   return ring;
 }
 const rings = [ringOps(0)];
@@ -428,11 +457,13 @@ for (const [x, y, z, kind, dir] of track) {
 }
 for (const op of trackOps) initial.push(op);
 
-function roadOps() { // founding.js joinRoad, to the station's platform end instead of a map road
+function roadOps(upTo = 0) { // founding.js joinRoad, to the station's platform end instead of a map road
   if (!station) return [];
   const dir = gateDir(tw.gate);
+  // founding.js townPaths(layout, upTo): only the tiers laid so far are left alone, so at the Hamlet the road runs on
+  // over ground the later streets will take (skipping it left the gate road in two pieces with grass between)
   const tops = new Map(), member = new Set();
-  for (let t = 0; t <= 3; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+  for (let t = 0; t <= upTo; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
     member.add(`${dx},${dz}`);
     if (t !== 0) continue;
     const id = layout.pal[p]?.[0] ?? "", k = `${dx},${dz}`;
@@ -482,7 +513,7 @@ function roadOps() { // founding.js joinRoad, to the station's platform end inst
   }
   return ops;
 }
-ev("road0", "The gate road out to the railway", "ground", roadOps());
+ev("road0", "The gate road out to the railway", "ground", roadOps(0));
 
 // the hall (townhall.js foundHall -> beginBuild(1)); later levels clear the old hall first (clearBoxFor pad 1)
 let hallLevel = 0;

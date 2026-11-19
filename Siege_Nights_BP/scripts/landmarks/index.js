@@ -33,6 +33,8 @@ import { SPOTS } from "./spots_data.js";
 import { LANDMARKS, BUILD_NEAR } from "./sites.js";
 import { planPiece, seekSpot, reachOf, settleOps, AIR, KEEP_TOP, BUILT_TOP } from "./plan.js";
 import { clearTrees, clearLooseBranches, treeClearBoxes } from "../core/clearing.js";
+import { allWalls } from "../settle/walls.js";
+import { WALLS, onWallLine } from "../settle/walldata.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -154,9 +156,14 @@ export function buildSite(site, by) {
         ? { x0: p.x + p.d.box.x0, z0: p.z + p.d.box.z0, x1: p.x + p.d.box.x1, z1: p.z + p.d.box.z1, y0: G + Math.min(0, p.d.box.y0), y1: G + Math.max(p.d.box.y1, p.d.clearTo ?? 0) }
         : undefined;
       if (clearBox) yield* clearTrees(dim, clearBox);
+      // a town's wall that already stands here is left as it is: a plot's old landmark sits just outside its land, and
+      // a piece reaching in must not cut a stake, a walk or a stair (town build order: the wall stands round the town)
+      const walls = allWalls().filter((w) => w.level > 0 && w.ground && Math.hypot(w.x - p.x, w.z - p.z) < WALLS.radius + WALLS.landBeyond + 64);
+      const onWall = (x, z) => walls.some((w) => onWallLine(w, { x, z }, w.radius, WALLS.reserve));
       let n = 0;
       for (const [x, y, z, i] of ops) {
         total++;
+        if (walls.length && onWall(x, z)) continue;
         try {
           const at = { x, y, z };
           if (i === AIR) {

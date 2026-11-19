@@ -146,16 +146,29 @@
         ],
         "animate": [
           "humanoid_base_pose",
-          "look_at_target_default",
-          "hc_march",
-          "hc_idle",
-          "carry",
-          "stance",
           {
-            "thrust": "variable.attack_time > 0.0"
+            "look_at_target_default": "!query.property('siege:sleeping')"
           },
           {
-            "hc_hurt": "query.hurt_time > 0"
+            "hc_march": "!query.property('siege:sleeping')"
+          },
+          {
+            "hc_idle": "!query.property('siege:sleeping')"
+          },
+          {
+            "carry": "!query.property('siege:sleeping')"
+          },
+          {
+            "stance": "!query.property('siege:sleeping')"
+          },
+          {
+            "thrust": "(variable.attack_time > 0.0) && !query.property('siege:sleeping')"
+          },
+          {
+            "hc_hurt": "(query.hurt_time > 0) && !query.property('siege:sleeping')"
+          },
+          {
+            "hc_sleep": "query.property('siege:sleeping')"
           }
         ]
       },
@@ -167,6 +180,7 @@
         "hc_idle": "animation.hc.guard.idle",
         "hc_hurt": "animation.hc.guard.hurt",
         "hc_salute": "animation.hc.guard.salute",
+        "hc_sleep": "animation.hc.soldier.sleep",
         "carry": "animation.hc.pikeman.carry",
         "stance": "animation.hc.pikeman.stance",
         "thrust": "animation.hc.pikeman.thrust",

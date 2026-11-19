@@ -10,6 +10,9 @@
 //     start = the design already standing on the slot when the town is founded (the starter village's houses)
 //   groundwork(layout, tier) -> [[dx, dy, dz, paletteIndex], ...] for that tier only
 //   seatOnSlot(slot, bounds) -> { origin: {dx, dy, dz}, forward } | undefined   where a design fits on a slot
+//   slotBorder(layout, slot) -> { cells: [[dx, dy, dz], ...], ground: [id, states] }   the flush log border round an
+//     open plot and the plot's own ground block, to take the border up once a building stands there
+//   standsOnGround(id) -> true for a groundwork block that stands on the ground (a fence, a lantern, a crop), not ground
 
 import { TOWNS, TOWN_CHARS } from "./towns_data.js";
 
@@ -40,6 +43,38 @@ export function slotsOf(layout) {
     walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long, start: start ?? undefined,
   }));
 }
+
+// The starter village lays a flush stripped-log border round its open plots so you can see them (map/structures/
+// starter.py). Once a building rises on the plot the border has done its job: plotmarker.js lays the plot's own
+// ground block back over it (Mateo 2026-11-15: "the plot lines stay"). The ground block is the one the groundwork
+// lays most inside the plot at the border's height.
+const BORDER_LOG = /^minecraft:stripped_\w+_(log|stem)$/;
+export function slotBorder(layout, slot) {
+  const pal = layout?.pal ?? [], { x0, z0, x1, z1 } = slot.box;
+  const at = new Map();
+  for (let t = 0; t <= 3; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+    if (dx >= x0 && dx <= x1 && dz >= z0 && dz <= z1 && dy === slot.dy) at.set(`${dx},${dz}`, p);
+  }
+  const cells = [], count = new Map();
+  for (const [k, p] of at) {
+    const [dx, dz] = k.split(",").map(Number);
+    const edge = dx === x0 || dx === x1 || dz === z0 || dz === z1;
+    const id = pal[p]?.[0] ?? "";
+    if (edge && BORDER_LOG.test(id)) cells.push([dx, slot.dy, dz]);
+    else if (!edge && id !== "minecraft:air" && !BORDER_LOG.test(id)) count.set(p, (count.get(p) ?? 0) + 1);
+  }
+  let best = -1, most = 0;
+  for (const [p, n] of count) if (n > most) { best = p; most = n; }
+  return { cells, ground: best >= 0 ? pal[best] : ["minecraft:grass_block", {}] };
+}
+export const isBorderLog = (id) => BORDER_LOG.test(id ?? "");
+
+// Things the groundwork stands ON the ground (fence and gate posts, lanterns, pen and well furniture, plants, crops,
+// log posts): not the ground itself. Blending the land into the groundwork's edge (founding.js blendGround) goes by
+// the top of the ground, never these, or the land beside a gate post was heaped to the lantern on top of it and made
+// an earth ramp up and over the wall beside the gate (2026-11-15, siege simulator, Oakmere and six more plots).
+const ON_GROUND = /fence|lantern|barrel|cauldron|composter|hay_block|leaves|azure_bluet|cornflower|dandelion|oxeye_daisy|poppy|short_grass|tall_grass|wheat|carrots|potatoes|beetroot|_stairs$|^minecraft:(oak|spruce|acacia|mangrove|birch|jungle|dark_oak|cherry|pale_oak)_log$/;
+export const standsOnGround = (id) => ON_GROUND.test(id ?? "");
 
 const idx = (c) => TOWN_CHARS.indexOf(c);
 const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 2048;

@@ -12,7 +12,7 @@
 import { world, system } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, onTick, on, emit, damageMap, saveDamage, hitWall } from "../siege/api.js";
-import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost, wallSeed, onWallLine } from "./walldata.js";
+import { WALLS, WALL_LEVELS, wallColumns, columnKinds, besideOf, repairCost, wallSeed, onWallLine } from "./walldata.js";
 import { wallOf, wallRising, palette, permFor } from "./walls.js";
 import { purse, charge, coins, lot } from "./wallet.js";
 import { sfx } from "../core/sfx.js";
@@ -37,7 +37,7 @@ export function repairWall(owner, { fix = false, onDone } = {}) {
   const cells = [];
   for (const col of wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground })) {
     const lift = w.lifts?.[`${col.x},${col.z}`] ?? 0; // where the column stands on higher ground (walls.js)
-    for (const [y, kind] of columnKinds(L, col, wallSeed(w), w.style)) cells.push([col.x, y + lift, col.z, kind, col.a]);
+    for (const [y, kind] of columnKinds(L, besideOf(w, col), wallSeed(w), w.style)) cells.push([col.x, y + lift, col.z, kind, col.a]);
   }
   jobs.set(owner, { cells, index: 0, fix, missing: 0, cracked: 0, P: palette(w.style, L, w.look), onDone, waited: 0 });
   return true;

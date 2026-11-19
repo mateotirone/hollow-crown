@@ -48,7 +48,9 @@ import "./windmill.js"; // every settlement's regional windmill, raised with its
 import "./storecrates.js";
 import "./arrival.js";
 import "./showcase.js";
+import "./planting.js"; // the last stage of the build order: plots get their ground back and are planted round their buildings
 import "./tests.js";
+import "./planting_tests.js";
 
 export { zoneAt, reservesOf, reserveAt, placeProblem, wildsClosed } from "./zones.js";
 export { BUILDINGS, BUILDING, WORKS, addWorks, drawBuilding, styleFor } from "./buildings.js";
