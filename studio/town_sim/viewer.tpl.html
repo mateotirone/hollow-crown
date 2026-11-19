@@ -201,7 +201,7 @@ async function loadData() {
   return JSON.parse(await new Response(stream).text());
 }
 const D = await loadData();
-const R = new Function(`${D.rules}; return { charterCheck, lordPick, plotFit, opensAt, slotClass, charterKeeps, CLASS_NAMES, TAG_WORDS, CHARTERS };`)();
+const R = new Function(`${D.rules}; return { charterCheck, lordPick, plotFit, opensAt, slotClass, charterKeeps, CLASS_NAMES, TAG_WORDS, CHARTERS, oneEachTaken: typeof oneEachTaken === "function" ? oneEachTaken : () => undefined };`)();
 
 const NP = D.palette.length;
 const FULL = Uint8Array.from(D.full), SOFT = Uint8Array.from(D.soft);
@@ -693,8 +693,9 @@ function keptFor(s, id) {
   return k && `Kept for the ${k.what} (${D.tierNames[k.tier]} charter)`;
 }
 function offersFor(s) {
-  const free = new Set(openEmpty().filter((x) => x.id !== s.id).map(R.slotClass));
-  return s.offers.map((o) => {
+  const free = new Set(openEmpty().filter((x) => x.id !== s.id).map(R.slotClass)), have = counts();
+  // plotmarker.js: a one-of-a-kind building the settlement already has (config.js ONE_EACH) isn't offered at all
+  return s.offers.filter((o) => !R.oneEachTaken(o.id, have)).map((o) => {
     const rule = R.plotFit(o.id, s, free);
     const open = R.opensAt(o.id) <= T.tier;
     const kept = rule.ok && open ? keptFor(s, o.id) : undefined;
