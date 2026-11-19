@@ -95,7 +95,7 @@ export const ACTS = {
   gate_creak(player, { wall }) { sound(player, "creak", wall); },
   ticking(player, { wall }) { for (let beat = 0; beat < 8; beat++) later(beat * 20, () => sound(player, "tick", wall)); },
   voices(player) {
-    const folk = near(player, ["minecraft:villager_v2", "minecraft:villager", "minecraft:npc"]).slice(0, 3);
+    const folk = near(player, ["siege:folk", "siege:townsfolk", "minecraft:villager_v2", "minecraft:npc"]).slice(0, 3);
     for (let i = 0; i < 3; i++) later(i * 3, () => sound(player, "voice", folk[i]?.location));
   },
   water_trembles(player) {

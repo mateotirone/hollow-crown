@@ -26,8 +26,9 @@ import { sfx } from "../core/sfx.js";
 import { ENDING, KEEPSAKE } from "./data/homecomings.js";
 import { AFTER, makeStranger, strangerStory, askOf, fill, freshLine, nextHomecoming } from "./rules.js";
 import { morvaneFallen } from "./chairs.js";
+import { FOLK, spawnFolk } from "../folk/index.js";
 
-const TYPE = "minecraft:villager_v2";
+const TYPE = FOLK; // one of our folk (folk/index.js), dressed for the region they come up in
 const TAG = "siege_after_stranger";
 
 export const homes = moduleStore("siege:after_home", () => ({ nextDay: undefined, current: undefined, names: [], last: undefined, count: 0, said: {} }));
@@ -55,8 +56,7 @@ function arrive(player, seed) {
   const s = makeStranger(seed ?? Math.floor(Math.random() * 2 ** 31), { names: d.names, last: d.last });
   const v = player.getViewDirection(), l = player.location;
   const at = { x: l.x + v.x * 6, y: l.y, z: l.z + v.z * 6 };
-  // vanilla villager on purpose: one in four strangers is a Returned copy, and must look like any villager (bestiary/returned.js)
-  const e = player.dimension.spawnEntity(TYPE, at);
+  const e = spawnFolk(player.dimension, at, { seed: s.name.length * 13 + d.count });
   e.addTag(TAG);
   e.nameTag = s.name;
   if (s.twist === "copy") markReturned(e, { name: s.name, quest: "homecoming" });

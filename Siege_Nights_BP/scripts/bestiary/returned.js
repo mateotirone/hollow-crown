@@ -1,6 +1,7 @@
 // The hidden Returned (Mateo, 2026-11-10): an ordinary villager in an ordinary village that is secretly one of
-// the Returned. It looks, trades and wanders exactly like any other villager: it IS a vanilla villager, marked
-// only in data the player cannot see. You catch it by its tells (from the lore):
+// the Returned. It is one of our folk (folk/index.js, siege:folk; Mateo 2026-11-15: no vanilla villagers, every one
+// has a skin), marked in data the player cannot see, and it wears its clothes slightly wrong (setTell): the pouch and
+// rolled sleeve on the wrong side, eyes that look a little past you, a hem still dark with water. You catch it by its tells (from the lore):
 //
 //   It faces the Hollow   When it thinks nobody is looking, it stops and stands facing the wall, toward the Rift.
 //                         Look at it and it goes back to being a villager. Watch from the corner of your eye.
@@ -8,8 +9,7 @@
 //   It can't stand bells  Ring a bell near one and it flinches, drops the act and starts walking back to the Hollow.
 //                         Sometimes it takes people with it: nearby villagers fall in behind.
 //
-// (The lore's fourth tell, "uses the wrong hand", cannot be shown on a vanilla villager. If the lore thread wants
-// it, it needs a custom villager model.)
+// The lore's fourth tell, "uses the wrong hand", is now in the skin: everyone else wears pouch and sleeve on the right.
 //
 // Once it is walking you can cut it down (it leaves Veil Ash, and the people it took wake and go home), or let it go.
 // If it walks far enough it is gone, and so is everyone following it.
@@ -28,9 +28,10 @@ import { onTick, addTests, assert, assertEqual, isNight } from "../siege/api.js"
 import { getRift } from "../undertow/source.js";
 import { bestiaryStore } from "./bossCore.js";
 import { announce, effect, flat, makeItem, particle, sound, watchedBy } from "./util.js";
+import { FOLK, spawnFolk, setTell } from "../folk/index.js";
 
 export const RETURNED = {
-  type: "minecraft:villager_v2",
+  type: FOLK,
   watchRange: 48, // a player this close and looking at it keeps it acting normal
   bellRange: 16,
   wolfRange: 8,
@@ -83,6 +84,7 @@ export const isReturned = (e) => !!dataOf(e);
 export function markReturned(villager, { name, quest } = {}) {
   try {
     villager.setDynamicProperty(PROP, JSON.stringify({ name, quest }));
+    setTell(villager, true);
     return true;
   } catch {
     return false;
@@ -244,10 +246,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const dim = src.dimension;
   if (event.id === "siege:returned_mark") {
     const v = villagersNear(dim, src.location, 16).sort((a, b) => flat(a.location, src.location) - flat(b.location, src.location))[0];
-    if (v && markReturned(v, { name: v.nameTag || undefined })) src.sendMessage?.("§7The nearest villager is now one of the Returned. It will not look any different.");
+    if (v && markReturned(v, { name: v.nameTag || undefined })) src.sendMessage?.("§7The nearest villager is now one of the Returned. It looks almost the same.");
   } else if (event.id === "siege:returned_spawn") {
-    // vanilla villager on purpose: a Returned IS a vanilla villager, so nothing but its tells gives it away
-    try { markReturned(dim.spawnEntity(RETURNED.type, src.location)); src.sendMessage?.("§7A villager has come back. It will not look any different."); } catch { /* no room */ }
+    try { markReturned(spawnFolk(dim, src.location)); src.sendMessage?.("§7A villager has come back. It looks almost the same."); } catch { /* no room */ }
   } else if (event.id === "siege:returned_reveal") {
     for (const v of villagersNear(dim, src.location, 48)) {
       if (!isReturned(v)) continue;

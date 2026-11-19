@@ -49,6 +49,7 @@ import { UNDERTOW_ID } from "../undertow/layout.js";
 import { STORY_PEOPLE, TOWN_TOME_SPOTS } from "./story_spots_data.js";
 import { DESIGNS } from "../landmarks/designs_data.js";
 import { STORY_TOMES } from "../undertow/thinplaces.js";
+import { spawnFolk } from "../folk/index.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NEAR = 48; // someone must be this close before a spot is filled (so its ground is loaded and built)
@@ -131,10 +132,7 @@ function stand(dim, id, spot, extraTag) {
   const loc = { x: at.x + 0.5, y: at.y, z: at.z + 0.5 };
   if (SUSPECTS[id]) {
     const s = SUSPECTS[id];
-    // vanilla villager on purpose: the suspects may be Returned, and a Returned must pass for any villager
-    const villager = dim.spawnEntity("minecraft:villager_v2", loc);
-    villager.nameTag = s.name;
-    villager.addTag(`hc_story_${id}`);
+    const villager = spawnFolk(dim, loc, { name: s.name, seed: s.name.length * 31 + id.length, tags: [`hc_story_${id}`] });
     if (s.returned) markReturned(villager, { name: s.name, quest: s.quest });
     return villager;
   }
