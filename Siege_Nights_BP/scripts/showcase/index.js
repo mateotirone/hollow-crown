@@ -19,6 +19,7 @@ import { startSiege } from "../siege/siege.js";
 import { enlist, equipGuard, GUARD_ARMOR } from "../siege/guards.js";
 import { freeColor } from "../siege/territory.js";
 import { BALLISTA, BARRACKS, DESK, KEEP_BANNER, QUARTERMASTER, RAM_ENGINE, TREBUCHET } from "../siege/constants.js";
+import { PLAIN_TAG, spawnFolk } from "../folk/index.js";
 
 const SUPPLIES = [
   ["siege:gold_coin", 8], ["minecraft:iron_ingot", 64], ["minecraft:diamond", 32], ["minecraft:netherite_scrap", 16],
@@ -177,8 +178,7 @@ function buildShowcase(player) {
   if (barracks) {
     const soldier = spawn(dim, "siege:man_at_arms", { x: barracks.x, y: barracks.y + 1, z: barracks.z });
     if (soldier) enlist(soldier, player.id, barracks);
-    spawn(dim, "minecraft:villager_v2", { x: barracks.x, y: barracks.y, z: barracks.z + 1 });
-    spawn(dim, "minecraft:villager_v2", { x: barracks.x + 1, y: barracks.y, z: barracks.z + 1 });
+    for (const dx of [0, 1]) { try { spawnFolk(dim, { x: barracks.x + dx + 0.5, y: barracks.y, z: barracks.z + 1.5 }, { seed: dx, tags: [PLAIN_TAG] }); } catch { /* unloaded */ } }
   }
   const desk = tracked[DESK].find((t) => Math.abs(t.x - o.x) < 40 && Math.abs(t.z - o.z) < 40);
   if (desk) {

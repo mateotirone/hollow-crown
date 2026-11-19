@@ -14,6 +14,7 @@ import { overworld, ownerOf, pick, title } from "./util.js";
 import { dropCoins } from "../economy/coins.js";
 import { fromEmeralds } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
+import { FOLK } from "../folk/index.js";
 
 // ---------- Procedural raiders: every siege army is planned from what you've done ----------
 // When a siege starts, each settlement gets its own war plan:
@@ -105,7 +106,7 @@ export function planSiege(owner, provoked) {
   const dim = overworld();
 
   // Threat budget
-  const villagers = dim.getEntities({ type: "minecraft:villager_v2", location: center, maxDistance: tierOf(keep).radius }).length;
+  const villagers = dim.getEntities({ type: FOLK, location: center, maxDistance: tierOf(keep).radius }).length;
   const ballistas = ballistasOf(owner).length;
   const prosperity = villagers + (keep.wins ?? 0) * 3;
   const defenses = ballistas * 3 + guardCount(owner) * 2;
