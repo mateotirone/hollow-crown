@@ -14,6 +14,16 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle planting: the open ground between plots: never on a plot, the hall's ground, a fixture or anything any tier lays, and the same every time",
+  "settle planting: nothing at all is planted in the wall band",
+  "settle planting: every plot with a building: nothing planted on the building or the walk to the door, nothing tall against it; trees inside the plot",
+  "settle planting: the walk to the door runs from the building's front to the plot's edge, 3 wide",
+  "settle planting: nothing climbable near the wall, on wall or gate plots, or on a plot's street edge",
+  "settle planting: planting is the same every time, and every region plants",
+  "settle towns: every town is laid in order on every map plot: at every tier the streets are one network reaching every door and out of the gate to the road join, and the wall goes round what was laid, standing on nothing",
+  "settle walls: every map plot's wall is sealed all round apart from the gate, on every ring and at every level",
+  "settle walls: no stretch of wall is low enough to hop, even where the land beside it rises or a short stake falls",
+  "settle towns: the starter village's plot borders are found, with the ground to lay back once a building stands",
   "trains: routes: the bed is graded, never a trench, and trees on the line come down whole",
   "settle: every hanging lantern in a hall or plot building hangs from something (a chain up to the roof)",
   "settle: watchtowers on every map plot's wall line: nothing of the wall on the way in to a door", "settle: lane lamps: every Hamlet's lanes get posts on the verge, never on a plot, the same every time",

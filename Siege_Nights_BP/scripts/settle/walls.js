@@ -23,7 +23,7 @@ import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, besideOf, besideHeight, wallCellOf, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG, hasWatch, watchSpots, allWatchSpots, lineFields } from "./walldata.js"; // watchSpots(.., level) gives the stand at level 1, the tower above
 import { watchPlan, watchCells, watchWayPlan } from "./wallwatch.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { styleOf } from "./plans.js";
@@ -35,6 +35,7 @@ const walls = () => store.data.walls;
 const save = () => store.save();
 
 export const wallOf = (id) => walls()[id];
+export const allWalls = () => Object.values(walls() ?? {}); // every wall record (landmarks/index.js keeps clear of standing ones)
 // Put back (or forget, with no record) a settlement's wall record as it was (the battle test, battletest/). Blocks stay.
 export function setWallRecord(id, record) {
   if (jobs.has(id)) return false;
@@ -188,9 +189,9 @@ function placeColumn(dim, w, job, col) {
   const { x, z, base } = col;
   const ground = dim.getBlock({ x, y: base, z });
   if (!ground) return -1;
-  const cells = new Map(columnKinds(L, col, wallSeed(w), w.style));
   let n = 0;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
+    const cells = new Map(columnKinds(L, col, wallSeed(w), w.style));
     if (ground.isAir) setBlock(dim, x, base, z, P.kinds.cobbled); // something to walk on
     for (let y = base + 1; y <= col.top + (L.gate === "open" ? 2 : 0); y++) {
       setBlock(dim, x, y, z, cells.has(y) ? permFor(P, w, cells.get(y), col) : P.air); // the gateway is cleared
@@ -209,6 +210,13 @@ function placeColumn(dim, w, job, col) {
     while (lift < 4 && NATURAL.test(dim.getBlock({ x, y: base + 1 + lift, z })?.typeId ?? "")) lift++;
     if (lift) { (w.lifts ??= {})[lk] = lift; job.liftsChanged = true; }
   }
+  // and how far the land right beside it rises above that, so no stake is left low enough to hop (WALLS.clear)
+  if (col.role === "wall" && (job.remeasure || w.beside?.[lk] === undefined)) {
+    const idAt = (bx, by, bz) => { try { return dim.getBlock({ x: bx, y: by, z: bz })?.typeId ?? ""; } catch { return ""; } };
+    const high = besideHeight(idAt, x, z, base + lift, job.wallCell);
+    if (high > (w.beside?.[lk] ?? 0)) { (w.beside ??= {})[lk] = high; job.liftsChanged = true; } // only ever taller: take-down must reach every block
+  }
+  const cells = columnKinds(L, besideOf(w, col), wallSeed(w), w.style);
   for (const [y, kind] of cells) {
     if (!setBlock(dim, x, y + lift, z, permFor(P, w, kind, col))) return -1;
     n++;
@@ -279,6 +287,7 @@ function step(id, job) {
       if (job.watchDown !== "done") return;
     }
     job.cols = wallColumns({ center: w, radius: w.radius, level: job.level, gateAngle: w.gate, smooth: w.ground });
+    job.wallCell = wallCellOf(job.cols, allWatchSpots(w, w.radius, w.gate, w.ground, job.level)); // what is wall, not "ground beside" (placeColumn)
     clearOldSteps(dim, w, job);
     job.index = Math.min(w.building?.index ?? 0, job.cols.length);
     save();
@@ -334,7 +343,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape, ou
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
-    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt, ...(outline.tight ? { tight: outline.tight } : {}) }); // walldata.js radiusAt reads them
+    Object.assign(w, lineFields(outline)); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -359,20 +368,54 @@ onTick("settle_walls", 1, () => {
   }
 });
 
+// The town's groundwork is laid while the wall rises, so the ground beside a stake can come up after the stake was
+// measured (the 2026-11-15 simulator check: Frosthelm, Reedmoor, Lanternbog, Dunehold). Once a tier is laid out the
+// wall looks again at the ground beside every stretch and tops up any stake that is now too low (WALLS.clear).
+// Only blocks that differ are set, so a wall that is already right costs only the looking.
+export function topUpWall(id) {
+  const w = walls()[id];
+  if (!w?.level || !w.ground || !WALL_LEVELS[w.level]) return;
+  if (jobs.has(id) || w.moving) { system.runTimeout(() => topUpWall(id), 100); return; }
+  const L = WALL_LEVELS[w.level];
+  const cols = wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground });
+  const job = { L, palette: palette(w.style, L, w.look), remeasure: true,
+    wallCell: wallCellOf(cols, allWatchSpots(w, w.radius, w.gate, w.ground, w.level)) };
+  system.runJob((function* topUp() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (const col of cols) {
+      if (col.role !== "wall") continue;
+      if (walls()[id] !== w || jobs.has(id)) return; // the wall changed meanwhile: whatever rises now measures for itself
+      const before = w.beside?.[`${col.x},${col.z}`] ?? 0;
+      placeColumn(dim, w, job, col); // not loaded: left as it is
+      if ((w.beside?.[`${col.x},${col.z}`] ?? 0) !== before) n++;
+      yield;
+    }
+    if (n) save();
+  })());
+}
+on("townLaidOut", ({ owner }) => system.runTimeout(() => topUpWall(owner), 20));
+
 // Move a wall line out (a town growing a tier): the old ring comes down a stretch at a time, then the same level
-// rises on the new line. down() runs once the old ring is gone. Free: the town paid for the level already.
-export function moveWall(id, radius, down = () => {}) {
+// rises on the new line. down(cols) runs once the old ring is gone (cols: the old ring's columns). Free: the town paid for the level already.
+// outline (towns_data.js): the line to stand on; a wall on an older line moves even at the same radius.
+export function moveWall(id, radius, down = () => {}, outline) {
   const w = walls()[id];
   if (!w) { down(); return "There is no wall to move."; }
-  if (w.radius === radius) { down(); return "already"; }
-  if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down), 100); return "waiting"; }
+  if (w.radius === radius && !wallLineDiffers(id, outline)) { down(); return "already"; }
+  if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down, outline), 100); return "waiting"; }
   const level = Math.max(1, w.level || w.building?.level || 1);
   if (w.level > 0 && w.ground) setWallGate(id, w, false); // shut the gate before its wall comes down
   const old = { ...w };
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
+  if (outline?.radii?.length) { // the new line (walldata.js radiusAt reads these)
+    delete w.tight; delete w.lines;
+    Object.assign(w, lineFields(outline));
+  }
   w.ground = undefined;
   w.lifts = undefined; // a new line measures its own ground
+  w.beside = undefined;
   w.building = undefined;
   w.moving = true; // if the world closes before the new ring starts, it starts on the next load (the old one may stay)
   save();
@@ -388,16 +431,31 @@ export function moveWall(id, radius, down = () => {}) {
         for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
       }
       const lift = old.lifts?.[`${col.x},${col.z}`] ?? 0;
-      for (const [y] of columnKinds(L, col, wallSeed(old))) {
+      for (const [y] of columnKinds(L, besideOf(old, col), wallSeed(old))) {
         try { setBlock(dim, col.x, y + lift, col.z, air); } catch { /* not loaded */ }
         if (++n % 300 === 0) yield;
       }
     }
-    down();
+    down(cols);
     delete walls()[id]?.moving;
     raiseWall(id, level);
   })());
   return true;
+}
+
+// Does this wall stand on another line than outline (towns_data.js { radii, radiiAt, tight })?
+export function wallLineDiffers(id, outline) {
+  const w = walls()[id];
+  if (!w || !outline?.radii?.length || !w.radii?.length || !(w.level > 0) || !w.ground) return false;
+  const hamlet = w.radius <= (outline.radiiAt ?? w.radius); // only the Hamlet ring follows the tight line
+  const line = (o) => JSON.stringify([o.radii, o.radiiAt, hamlet ? o.tight ?? null : null, o.lines?.[w.radius] ?? null]);
+  return line(w) !== line(outline);
+}
+
+// The wall is up on this radius: raised, measured, nothing rising or moving
+export function wallStanding(id, radius) {
+  const w = walls()[id];
+  return !!w && w.level > 0 && !!w.ground && w.radius === radius && !w.moving && !jobs.has(id);
 }
 
 // Walls raised before they had steps (2026-11-12) get their flights, tower ladders and (Palisade and Fieldstone Wall)

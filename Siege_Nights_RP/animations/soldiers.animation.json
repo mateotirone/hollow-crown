@@ -999,6 +999,23 @@
     }
    }
   },
+  "animation.hc.soldier.sleep": {
+   "loop": true,
+   "bones": {
+    "root": {
+     "rotation": [
+      -90.0,
+      0.0,
+      0.0
+     ],
+     "position": [
+      0.0,
+      2.5,
+      0.0
+     ]
+    }
+   }
+  },
   "animation.hc.knight.ride": {
    "loop": true,
    "bones": {
